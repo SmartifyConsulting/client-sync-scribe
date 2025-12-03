@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar, MapPin, Video, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar, MapPin, Video, Play, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -125,6 +125,17 @@ export default function CalendarView() {
   const handleCancelEdit = () => {
     setEditedEvent(selectedEvent ? { ...selectedEvent } : null);
     setIsEditMode(false);
+  };
+
+  const handleDeleteEvent = () => {
+    if (!selectedEvent) return;
+    setEvents(prev => prev.filter(e => e.id !== selectedEvent.id));
+    setIsEventDetailOpen(false);
+    setSelectedEvent(null);
+    toast({
+      title: "Event Deleted",
+      description: "The appointment has been removed from your calendar.",
+    });
   };
 
   const handleStartSession = () => {
@@ -496,6 +507,9 @@ export default function CalendarView() {
                   <div className="flex gap-2 pt-2">
                     <Button variant="outline" className="flex-1" onClick={() => setIsEditMode(true)}>
                       Edit
+                    </Button>
+                    <Button variant="destructive" size="icon" onClick={handleDeleteEvent}>
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                     {selectedEvent.type !== "internal" && selectedEvent.patientId && (
                       <>
