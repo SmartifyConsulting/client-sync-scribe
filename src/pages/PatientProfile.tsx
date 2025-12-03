@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
-const mockClient = {
+const mockPatient = {
   id: "1",
   name: "Sarah Johnson",
   email: "sarah.j@email.com",
@@ -62,18 +62,18 @@ const mockDocuments = [
   { id: "3", name: "Meeting Notes Oct.pdf", type: "Notes", date: "Oct 28, 2024" },
 ];
 
-export default function ClientProfile() {
+export default function PatientProfile() {
   const { id } = useParams();
 
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Back Button */}
       <Link
-        to="/clients"
+        to="/patients"
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to Clients
+        Back to Patients
       </Link>
 
       {/* Header */}
@@ -83,15 +83,15 @@ export default function ClientProfile() {
             SJ
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{mockClient.name}</h1>
+            <h1 className="text-2xl font-bold text-foreground">{mockPatient.name}</h1>
             <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <Mail className="h-4 w-4" />
-                {mockClient.email}
+                {mockPatient.email}
               </span>
               <span className="flex items-center gap-1.5">
                 <Phone className="h-4 w-4" />
-                {mockClient.phone}
+                {mockPatient.phone}
               </span>
             </div>
           </div>
@@ -113,19 +113,19 @@ export default function ClientProfile() {
         <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-sm text-muted-foreground">Total Sessions</p>
           <p className="mt-1 text-2xl font-semibold text-foreground">
-            {mockClient.totalSessions}
+            {mockPatient.totalSessions}
           </p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-sm text-muted-foreground">Last Session</p>
           <p className="mt-1 text-2xl font-semibold text-foreground">
-            {mockClient.lastSession}
+            {mockPatient.lastSession}
           </p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Client Since</p>
+          <p className="text-sm text-muted-foreground">Patient Since</p>
           <p className="mt-1 text-2xl font-semibold text-foreground">
-            {mockClient.joinedDate}
+            {mockPatient.joinedDate}
           </p>
         </div>
       </div>
@@ -219,16 +219,16 @@ export default function ClientProfile() {
             <div className="grid gap-6 sm:grid-cols-2">
               <div>
                 <p className="text-sm text-muted-foreground">Date of Birth</p>
-                <p className="mt-1 text-foreground">{mockClient.dob}</p>
+                <p className="mt-1 text-foreground">{mockPatient.dob}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Address</p>
-                <p className="mt-1 text-foreground">{mockClient.address}</p>
+                <p className="mt-1 text-foreground">{mockPatient.address}</p>
               </div>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Notes</p>
-              <p className="mt-1 text-foreground">{mockClient.notes}</p>
+              <p className="mt-1 text-foreground">{mockPatient.notes}</p>
             </div>
           </div>
         </TabsContent>

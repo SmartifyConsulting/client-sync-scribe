@@ -1,9 +1,11 @@
+import { Link } from "react-router-dom";
 import { Clock, User, Video, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Appointment {
   id: string;
-  clientName: string;
+  patientId: string;
+  patientName: string;
   time: string;
   type: "in-person" | "video";
   status: "upcoming" | "in-progress" | "completed";
@@ -12,28 +14,32 @@ interface Appointment {
 const mockAppointments: Appointment[] = [
   {
     id: "1",
-    clientName: "Sarah Johnson",
+    patientId: "1",
+    patientName: "Sarah Johnson",
     time: "9:00 AM",
     type: "video",
     status: "upcoming",
   },
   {
     id: "2",
-    clientName: "Michael Chen",
+    patientId: "2",
+    patientName: "Michael Chen",
     time: "10:30 AM",
     type: "in-person",
     status: "upcoming",
   },
   {
     id: "3",
-    clientName: "Emma Williams",
+    patientId: "3",
+    patientName: "Emma Williams",
     time: "2:00 PM",
     type: "video",
     status: "upcoming",
   },
   {
     id: "4",
-    clientName: "David Brown",
+    patientId: "4",
+    patientName: "David Brown",
     time: "4:00 PM",
     type: "in-person",
     status: "upcoming",
@@ -60,7 +66,12 @@ export function UpcomingAppointments() {
               <User className="h-5 w-5 text-accent-foreground" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-foreground">{appointment.clientName}</p>
+              <Link
+                to={`/patients/${appointment.patientId}`}
+                className="font-medium text-foreground hover:text-primary transition-colors"
+              >
+                {appointment.patientName}
+              </Link>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5" />

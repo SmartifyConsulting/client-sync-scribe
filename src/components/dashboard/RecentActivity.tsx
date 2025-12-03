@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { FileText, CheckCircle, MessageSquare, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -7,6 +8,8 @@ interface Activity {
   title: string;
   description: string;
   time: string;
+  patientId?: string;
+  patientName?: string;
 }
 
 const mockActivities: Activity[] = [
@@ -14,14 +17,18 @@ const mockActivities: Activity[] = [
     id: "1",
     type: "session",
     title: "Session completed",
-    description: "Consultation with Sarah Johnson",
+    description: "Consultation with",
+    patientId: "1",
+    patientName: "Sarah Johnson",
     time: "2 hours ago",
   },
   {
     id: "2",
     type: "document",
     title: "Document generated",
-    description: "Action Plan for Michael Chen",
+    description: "Action Plan for",
+    patientId: "2",
+    patientName: "Michael Chen",
     time: "3 hours ago",
   },
   {
@@ -35,7 +42,9 @@ const mockActivities: Activity[] = [
     id: "4",
     type: "message",
     title: "Follow-up sent",
-    description: "Email to Emma Williams",
+    description: "Email to",
+    patientId: "3",
+    patientName: "Emma Williams",
     time: "Yesterday",
   },
 ];
@@ -81,8 +90,19 @@ export function RecentActivity() {
                 <p className="font-medium text-foreground text-sm">
                   {activity.title}
                 </p>
-                <p className="text-sm text-muted-foreground truncate">
+                <p className="text-sm text-muted-foreground">
                   {activity.description}
+                  {activity.patientId && activity.patientName && (
+                    <>
+                      {" "}
+                      <Link
+                        to={`/patients/${activity.patientId}`}
+                        className="text-primary hover:underline"
+                      >
+                        {activity.patientName}
+                      </Link>
+                    </>
+                  )}
                 </p>
               </div>
               <span className="text-xs text-muted-foreground whitespace-nowrap">

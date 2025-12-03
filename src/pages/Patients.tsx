@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-interface Client {
+interface Patient {
   id: string;
   name: string;
   email: string;
@@ -16,7 +16,7 @@ interface Client {
   avatar?: string;
 }
 
-const mockClients: Client[] = [
+const mockPatients: Patient[] = [
   {
     id: "1",
     name: "Sarah Johnson",
@@ -64,11 +64,11 @@ const mockClients: Client[] = [
   },
 ];
 
-export default function Clients() {
+export default function Patients() {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredClients = mockClients.filter((client) =>
-    client.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredPatients = mockPatients.filter((patient) =>
+    patient.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -76,14 +76,14 @@ export default function Clients() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Clients</h1>
+          <h1 className="text-3xl font-bold text-foreground">Patients</h1>
           <p className="mt-1 text-muted-foreground">
-            Manage your client profiles and history
+            Manage your patient profiles and history
           </p>
         </div>
         <Button className="gap-2">
           <Plus className="h-4 w-4" />
-          Add Client
+          Add Patient
         </Button>
       </div>
 
@@ -92,7 +92,7 @@ export default function Clients() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search clients..."
+            placeholder="Search patients..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -104,14 +104,14 @@ export default function Clients() {
         </Button>
       </div>
 
-      {/* Client List */}
+      {/* Patient List */}
       <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-muted/30">
                 <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">
-                  Client
+                  Patient
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">
                   Contact
@@ -131,22 +131,22 @@ export default function Clients() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filteredClients.map((client, index) => (
+              {filteredPatients.map((patient, index) => (
                 <tr
-                  key={client.id}
+                  key={patient.id}
                   className="group transition-colors hover:bg-muted/30"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <td className="px-6 py-4">
                     <Link
-                      to={`/clients/${client.id}`}
+                      to={`/patients/${patient.id}`}
                       className="flex items-center gap-3"
                     >
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-accent-foreground font-medium">
-                        {client.name.split(" ").map((n) => n[0]).join("")}
+                        {patient.name.split(" ").map((n) => n[0]).join("")}
                       </div>
                       <span className="font-medium text-foreground group-hover:text-primary transition-colors">
-                        {client.name}
+                        {patient.name}
                       </span>
                     </Link>
                   </td>
@@ -154,30 +154,30 @@ export default function Clients() {
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Mail className="h-3.5 w-3.5" />
-                        {client.email}
+                        {patient.email}
                       </div>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Phone className="h-3.5 w-3.5" />
-                        {client.phone}
+                        {patient.phone}
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-muted-foreground">
-                    {client.lastSession}
+                    {patient.lastSession}
                   </td>
                   <td className="px-6 py-4 text-sm text-foreground">
-                    {client.totalSessions}
+                    {patient.totalSessions}
                   </td>
                   <td className="px-6 py-4">
                     <span
                       className={cn(
                         "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
-                        client.status === "active"
+                        patient.status === "active"
                           ? "bg-success/10 text-success"
                           : "bg-muted text-muted-foreground"
                       )}
                     >
-                      {client.status === "active" ? "Active" : "Inactive"}
+                      {patient.status === "active" ? "Active" : "Inactive"}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">

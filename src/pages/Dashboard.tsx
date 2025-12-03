@@ -17,7 +17,7 @@ export default function Dashboard() {
       {/* Stats Grid */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatsCard
-          title="Total Clients"
+          title="Total Patients"
           value={128}
           change="+12 this month"
           trend="up"
