@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Plus, Clock, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar, MapPin, Video, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -24,13 +25,24 @@ import { usePatients } from "@/hooks/usePatients";
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const currentDate = new Date();
 
-const mockEvents = [
-  { id: "1", title: "Sarah Johnson", time: "9:00 AM", day: 3, type: "session" },
-  { id: "2", title: "Michael Chen", time: "10:30 AM", day: 3, type: "session" },
-  { id: "3", title: "Team Meeting", time: "2:00 PM", day: 3, type: "internal" },
-  { id: "4", title: "Emma Williams", time: "4:00 PM", day: 4, type: "session" },
-  { id: "5", title: "Follow-up: David Brown", time: "11:00 AM", day: 5, type: "followup" },
-  { id: "6", title: "Lisa Anderson", time: "9:30 AM", day: 6, type: "session" },
+interface CalendarEvent {
+  id: string;
+  title: string;
+  time: string;
+  day: number;
+  type: "session" | "internal" | "followup";
+  patientId?: string;
+  notes?: string;
+  location?: string;
+}
+
+const mockEvents: CalendarEvent[] = [
+  { id: "1", title: "Sarah Johnson", time: "9:00 AM", day: 3, type: "session", patientId: "1", location: "Video Call" },
+  { id: "2", title: "Michael Chen", time: "10:30 AM", day: 3, type: "session", patientId: "2", location: "In Person" },
+  { id: "3", title: "Team Meeting", time: "2:00 PM", day: 3, type: "internal", notes: "Weekly team sync" },
+  { id: "4", title: "Emma Williams", time: "4:00 PM", day: 4, type: "session", patientId: "3", location: "Video Call" },
+  { id: "5", title: "Follow-up: David Brown", time: "11:00 AM", day: 5, type: "followup", patientId: "4", notes: "Review progress" },
+  { id: "6", title: "Lisa Anderson", time: "9:30 AM", day: 6, type: "session", patientId: "5", location: "In Person" },
 ];
 
 function getDaysInMonth(date: Date) {
@@ -43,9 +55,12 @@ function getDaysInMonth(date: Date) {
 
 export default function CalendarView() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { patients } = usePatients();
   const [selectedDate, setSelectedDate] = useState(currentDate);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [isEventDetailOpen, setIsEventDetailOpen] = useState(false);
   const [newAppointment, setNewAppointment] = useState({
     patientId: "",
     date: "",
@@ -84,6 +99,36 @@ export default function CalendarView() {
     });
     setIsDialogOpen(false);
     setNewAppointment({ patientId: "", date: "", time: "", type: "session", notes: "" });
+  };
+
+  const handleEventClick = (event: CalendarEvent) => {
+    setSelectedEvent(event);
+    setIsEventDetailOpen(true);
+  };
+
+  const handleStartSession = () => {
+    if (selectedEvent?.patientId) {
+      setIsEventDetailOpen(false);
+      navigate(`/sessions?patient=${selectedEvent.patientId}`);
+    }
+  };
+
+  const getEventTypeLabel = (type: string) => {
+    switch (type) {
+      case "session": return "Patient Session";
+      case "followup": return "Follow-up";
+      case "internal": return "Internal Meeting";
+      default: return type;
+    }
+  };
+
+  const getEventTypeColor = (type: string) => {
+    switch (type) {
+      case "session": return "bg-primary/10 text-primary";
+      case "followup": return "bg-warning/10 text-warning";
+      case "internal": return "bg-muted text-muted-foreground";
+      default: return "bg-muted text-muted-foreground";
+    }
   };
 
   return (
@@ -221,7 +266,7 @@ export default function CalendarView() {
                 <div
                   key={day}
                   className={cn(
-                    "aspect-square p-1 rounded-lg transition-colors cursor-pointer hover:bg-muted/50",
+                    "aspect-square p-1 rounded-lg transition-colors",
                     isToday && "bg-primary/10"
                   )}
                 >
@@ -238,8 +283,9 @@ export default function CalendarView() {
                       {dayEvents.slice(0, 2).map((event) => (
                         <div
                           key={event.id}
+                          onClick={() => handleEventClick(event)}
                           className={cn(
-                            "truncate rounded px-1 py-0.5 text-xs",
+                            "truncate rounded px-1 py-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity",
                             event.type === "session" && "bg-primary/20 text-primary",
                             event.type === "internal" && "bg-muted text-muted-foreground",
                             event.type === "followup" && "bg-warning/20 text-warning"
@@ -274,7 +320,8 @@ export default function CalendarView() {
               todayEvents.map((event) => (
                 <div
                   key={event.id}
-                  className="flex items-center gap-3 p-4 hover:bg-muted/30 transition-colors"
+                  onClick={() => handleEventClick(event)}
+                  className="flex items-center gap-3 p-4 hover:bg-muted/30 transition-colors cursor-pointer"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
                     {event.type === "session" ? (
@@ -283,10 +330,16 @@ export default function CalendarView() {
                       <Clock className="h-5 w-5 text-accent-foreground" />
                     )}
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium text-foreground">{event.title}</p>
                     <p className="text-sm text-muted-foreground">{event.time}</p>
                   </div>
+                  <span className={cn(
+                    "rounded-full px-2 py-0.5 text-xs font-medium",
+                    getEventTypeColor(event.type)
+                  )}>
+                    {event.type}
+                  </span>
                 </div>
               ))
             ) : (
@@ -297,6 +350,76 @@ export default function CalendarView() {
           </div>
         </div>
       </div>
+
+      {/* Event Detail Dialog */}
+      <Dialog open={isEventDetailOpen} onOpenChange={setIsEventDetailOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedEvent?.title}</DialogTitle>
+            <DialogDescription>{getEventTypeLabel(selectedEvent?.type || "")}</DialogDescription>
+          </DialogHeader>
+          {selectedEvent && (
+            <div className="space-y-4 pt-4">
+              <div className="flex items-center gap-3 text-sm">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <span className="text-foreground">{selectedEvent.time}</span>
+              </div>
+              
+              <div className="flex items-center gap-3 text-sm">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <span className="text-foreground">
+                  {selectedDate.toLocaleDateString("en-US", { month: "long" })} {selectedEvent.day}, {selectedDate.getFullYear()}
+                </span>
+              </div>
+
+              {selectedEvent.location && (
+                <div className="flex items-center gap-3 text-sm">
+                  {selectedEvent.location === "Video Call" ? (
+                    <Video className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  <span className="text-foreground">{selectedEvent.location}</span>
+                </div>
+              )}
+
+              {selectedEvent.notes && (
+                <div className="rounded-lg bg-muted/30 p-3">
+                  <p className="text-xs font-medium text-muted-foreground uppercase mb-1">Notes</p>
+                  <p className="text-sm text-foreground">{selectedEvent.notes}</p>
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-2">
+                {selectedEvent.type !== "internal" && selectedEvent.patientId && (
+                  <>
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => {
+                        setIsEventDetailOpen(false);
+                        navigate(`/patients/${selectedEvent.patientId}`);
+                      }}
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      View Patient
+                    </Button>
+                    <Button className="flex-1" onClick={handleStartSession}>
+                      <Play className="h-4 w-4 mr-2" />
+                      Start Session
+                    </Button>
+                  </>
+                )}
+                {selectedEvent.type === "internal" && (
+                  <Button variant="outline" className="w-full" onClick={() => setIsEventDetailOpen(false)}>
+                    Close
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
