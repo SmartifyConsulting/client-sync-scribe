@@ -20,10 +20,23 @@ export type Database = {
           created_at: string
           dob: string | null
           email: string | null
+          employer: string | null
+          general_practitioner: string | null
           id: string
+          medical_aid: string | null
+          medical_aid_number: string | null
           name: string
+          next_of_kin_email: string | null
+          next_of_kin_name: string | null
+          next_of_kin_phone: string | null
           notes: string | null
+          occupation: string | null
           phone: string | null
+          physical_address: string | null
+          postal_address: string | null
+          primary_member: string | null
+          referred_by: string | null
+          same_as_physical: boolean | null
           status: string
           updated_at: string
           user_id: string
@@ -33,10 +46,23 @@ export type Database = {
           created_at?: string
           dob?: string | null
           email?: string | null
+          employer?: string | null
+          general_practitioner?: string | null
           id?: string
+          medical_aid?: string | null
+          medical_aid_number?: string | null
           name: string
+          next_of_kin_email?: string | null
+          next_of_kin_name?: string | null
+          next_of_kin_phone?: string | null
           notes?: string | null
+          occupation?: string | null
           phone?: string | null
+          physical_address?: string | null
+          postal_address?: string | null
+          primary_member?: string | null
+          referred_by?: string | null
+          same_as_physical?: boolean | null
           status?: string
           updated_at?: string
           user_id: string
@@ -46,10 +72,23 @@ export type Database = {
           created_at?: string
           dob?: string | null
           email?: string | null
+          employer?: string | null
+          general_practitioner?: string | null
           id?: string
+          medical_aid?: string | null
+          medical_aid_number?: string | null
           name?: string
+          next_of_kin_email?: string | null
+          next_of_kin_name?: string | null
+          next_of_kin_phone?: string | null
           notes?: string | null
+          occupation?: string | null
           phone?: string | null
+          physical_address?: string | null
+          postal_address?: string | null
+          primary_member?: string | null
+          referred_by?: string | null
+          same_as_physical?: boolean | null
           status?: string
           updated_at?: string
           user_id?: string

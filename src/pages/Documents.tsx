@@ -10,9 +10,18 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface Template {
   id: string;
@@ -173,6 +182,13 @@ export default function Documents() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const [isNewTemplateOpen, setIsNewTemplateOpen] = useState(false);
+  const [newTemplate, setNewTemplate] = useState({
+    name: "",
+    description: "",
+    category: "",
+    content: "",
+  });
 
   const filteredTemplates = mockTemplates.filter((template) =>
     template.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -195,6 +211,24 @@ export default function Documents() {
     });
   };
 
+  const handleCreateTemplate = () => {
+    if (!newTemplate.name.trim() || !newTemplate.content.trim()) {
+      toast({
+        title: "Error",
+        description: "Template name and content are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Template Created",
+      description: `"${newTemplate.name}" has been created successfully`,
+    });
+    setIsNewTemplateOpen(false);
+    setNewTemplate({ name: "", description: "", category: "", content: "" });
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
@@ -205,10 +239,64 @@ export default function Documents() {
             Create and manage document templates
           </p>
         </div>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          New Template
-        </Button>
+        <Dialog open={isNewTemplateOpen} onOpenChange={setIsNewTemplateOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              New Template
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Create New Template</DialogTitle>
+              <DialogDescription>Create a reusable document template</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-foreground">Template Name *</label>
+                  <Input
+                    placeholder="e.g., Progress Report"
+                    value={newTemplate.name}
+                    onChange={(e) => setNewTemplate({ ...newTemplate, name: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground">Category</label>
+                  <Input
+                    placeholder="e.g., Report, Letter, Plan"
+                    value={newTemplate.category}
+                    onChange={(e) => setNewTemplate({ ...newTemplate, category: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground">Description</label>
+                <Input
+                  placeholder="Brief description of the template"
+                  value={newTemplate.description}
+                  onChange={(e) => setNewTemplate({ ...newTemplate, description: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground">Content *</label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Use [PlaceholderName] for dynamic fields like [ClientName], [SessionDate]
+                </p>
+                <Textarea
+                  placeholder="Enter template content with placeholders..."
+                  value={newTemplate.content}
+                  onChange={(e) => setNewTemplate({ ...newTemplate, content: e.target.value })}
+                  rows={10}
+                  className="font-mono text-sm"
+                />
+              </div>
+              <Button onClick={handleCreateTemplate} className="w-full">
+                Create Template
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Search */}
@@ -230,10 +318,10 @@ export default function Documents() {
         </p>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {filteredTemplates.map((template, index) => (
-            <button
+            <div
               key={template.id}
               onClick={() => handleSelectTemplate(template)}
-              className="group rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30 text-left"
+              className="group rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30 text-left cursor-pointer"
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <div className="flex items-start justify-between mb-3">
@@ -261,11 +349,14 @@ export default function Documents() {
                   {template.category}
                 </span>
               </div>
-            </button>
+            </div>
           ))}
 
           {/* Add New Template Card */}
-          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/50 p-5 text-center transition-colors hover:bg-muted/30 cursor-pointer">
+          <div 
+            onClick={() => setIsNewTemplateOpen(true)}
+            className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/50 p-5 text-center transition-colors hover:bg-muted/30 cursor-pointer"
+          >
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted mb-3">
               <Plus className="h-5 w-5 text-muted-foreground" />
             </div>

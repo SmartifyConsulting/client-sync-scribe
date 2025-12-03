@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Mail,
@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePatient } from "@/hooks/usePatients";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock sessions and documents for now - these will be separate tables later
 const mockSessions = [
@@ -44,7 +45,21 @@ const mockDocuments = [
 
 export default function PatientProfile() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const { patient, loading } = usePatient(id || "");
+
+  const handleStartSession = () => {
+    navigate(`/sessions?patient=${id}`);
+    toast({
+      title: "Starting Session",
+      description: `Session started for ${patient?.name}`,
+    });
+  };
+
+  const handleScheduleAppointment = () => {
+    navigate(`/calendar?patient=${id}`);
+  };
 
   if (loading) {
     return (
@@ -109,11 +124,11 @@ export default function PatientProfile() {
           </div>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2" onClick={handleScheduleAppointment}>
             <Calendar className="h-4 w-4" />
             Schedule
           </Button>
-          <Button className="gap-2">
+          <Button className="gap-2" onClick={handleStartSession}>
             <Clock className="h-4 w-4" />
             Start Session
           </Button>
