@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { FileText, CheckCircle, MessageSquare, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Activity {
   id: string;
@@ -11,43 +13,6 @@ interface Activity {
   patientId?: string;
   patientName?: string;
 }
-
-const mockActivities: Activity[] = [
-  {
-    id: "1",
-    type: "session",
-    title: "Session completed",
-    description: "Consultation with",
-    patientId: "1",
-    patientName: "Sarah Johnson",
-    time: "2 hours ago",
-  },
-  {
-    id: "2",
-    type: "document",
-    title: "Document generated",
-    description: "Action Plan for",
-    patientId: "2",
-    patientName: "Michael Chen",
-    time: "3 hours ago",
-  },
-  {
-    id: "3",
-    type: "task",
-    title: "Task completed",
-    description: "Review financial documents",
-    time: "5 hours ago",
-  },
-  {
-    id: "4",
-    type: "message",
-    title: "Follow-up sent",
-    description: "Email to",
-    patientId: "3",
-    patientName: "Emma Williams",
-    time: "Yesterday",
-  },
-];
 
 const activityIcons = {
   document: FileText,
@@ -64,6 +29,80 @@ const activityColors = {
 };
 
 export function RecentActivity() {
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRecentPatients = async () => {
+      try {
+        const { data: patients } = await supabase
+          .from('patients')
+          .select('id, name, created_at')
+          .order('created_at', { ascending: false })
+          .limit(4);
+
+        if (patients && patients.length > 0) {
+          // Create mock activities from real patients
+          const activityTypes: ("session" | "document" | "task" | "message")[] = ["session", "document", "task", "message"];
+          const titles = ["Session completed", "Document generated", "Task completed", "Follow-up sent"];
+          const descriptions = ["Consultation with", "Action Plan for", "Review notes for", "Email to"];
+          const times = ["2 hours ago", "3 hours ago", "5 hours ago", "Yesterday"];
+
+          const mockActivities: Activity[] = patients.map((patient, index) => ({
+            id: `act-${index}`,
+            type: activityTypes[index % activityTypes.length],
+            title: titles[index % titles.length],
+            description: descriptions[index % descriptions.length],
+            time: times[index % times.length],
+            patientId: patient.id,
+            patientName: patient.name,
+          }));
+
+          // Add a task activity without patient
+          if (mockActivities.length >= 3) {
+            mockActivities[2] = {
+              id: 'act-task',
+              type: 'task',
+              title: 'Task completed',
+              description: 'Review financial documents',
+              time: '5 hours ago',
+            };
+          }
+
+          setActivities(mockActivities);
+        } else {
+          // Show default activities when no patients exist
+          setActivities([
+            {
+              id: "1",
+              type: "task",
+              title: "Getting started",
+              description: "Add your first patient to get started",
+              time: "Just now",
+            },
+          ]);
+        }
+      } catch (error) {
+        console.error('Error fetching activities:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecentPatients();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="rounded-xl border border-border bg-card shadow-sm p-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-6 bg-muted rounded w-1/2" />
+          <div className="h-4 bg-muted rounded w-1/3" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm">
       <div className="border-b border-border p-5">
@@ -71,7 +110,7 @@ export function RecentActivity() {
         <p className="text-sm text-muted-foreground">Your latest actions</p>
       </div>
       <div className="p-4 space-y-4">
-        {mockActivities.map((activity) => {
+        {activities.map((activity) => {
           const Icon = activityIcons[activity.type];
           return (
             <div
