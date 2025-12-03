@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TodoItem {
   id: string;
@@ -121,27 +122,49 @@ export default function TodoList() {
   const processAudio = async () => {
     setIsProcessing(true);
 
-    // Simulate AI transcription
-    // In production, this would call an edge function with Whisper API
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+      
+      // Convert to base64
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => {
+          const base64 = (reader.result as string).split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+      });
+      reader.readAsDataURL(audioBlob);
+      const base64Audio = await base64Promise;
 
-    const simulatedTranscripts = [
-      "Call the accountant regarding Q4 tax preparation",
-      "Prepare consultation notes for tomorrow's meeting",
-      "Review client intake forms from this week",
-      "Send follow-up email to new referrals",
-    ];
+      // Call the Whisper transcription edge function
+      const { data, error } = await supabase.functions.invoke('transcribe-audio', {
+        body: { audio: base64Audio }
+      });
 
-    const randomTranscript =
-      simulatedTranscripts[Math.floor(Math.random() * simulatedTranscripts.length)];
+      if (error) {
+        throw new Error(error.message || 'Transcription failed');
+      }
 
-    setNewTaskText(randomTranscript);
-    setIsProcessing(false);
-
-    toast({
-      title: "Transcription complete",
-      description: "Your voice has been converted to text",
-    });
+      if (data?.text) {
+        setNewTaskText(data.text);
+        toast({
+          title: "Transcription complete",
+          description: "Your voice has been converted to text",
+        });
+      } else {
+        throw new Error('No transcription returned');
+      }
+    } catch (error) {
+      console.error('Transcription error:', error);
+      toast({
+        title: "Transcription failed",
+        description: error instanceof Error ? error.message : "Please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const addTask = () => {
