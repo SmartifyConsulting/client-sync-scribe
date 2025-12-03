@@ -62,7 +62,14 @@ export function Sidebar() {
             <Settings className="h-5 w-5" />
             Settings
           </NavLink>
-          <button className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive">
+          <button 
+            onClick={async () => {
+              const { supabase } = await import('@/integrations/supabase/client');
+              await supabase.auth.signOut();
+              window.location.href = '/auth';
+            }}
+            className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
+          >
             <LogOut className="h-5 w-5" />
             Sign Out
           </button>
