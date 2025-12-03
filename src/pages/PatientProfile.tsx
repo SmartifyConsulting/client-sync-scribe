@@ -9,34 +9,14 @@ import {
   Upload,
   MoreVertical,
   Loader2,
+  CheckCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePatient } from "@/hooks/usePatients";
+import { useSessions } from "@/hooks/useSessions";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-
-// Mock sessions and documents for now - these will be separate tables later
-const mockSessions = [
-  {
-    id: "1",
-    date: "Dec 3, 2024",
-    time: "9:00 AM",
-    duration: "45 min",
-    summary:
-      "Discussed Q4 financial review and identified three key areas for improvement in cash flow management.",
-    actionPoints: ["Review budget allocations", "Schedule follow-up with accountant"],
-  },
-  {
-    id: "2",
-    date: "Nov 26, 2024",
-    time: "10:30 AM",
-    duration: "60 min",
-    summary:
-      "Strategic planning session for 2025. Outlined expansion goals and resource requirements.",
-    actionPoints: ["Draft expansion proposal", "Research market trends"],
-  },
-];
 
 const mockDocuments = [
   { id: "1", name: "Financial Statement Q3.pdf", type: "Report", date: "Nov 15, 2024" },
@@ -47,7 +27,8 @@ export default function PatientProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { patient, loading } = usePatient(id || "");
+  const { patient, loading: patientLoading } = usePatient(id || "");
+  const { sessions, loading: sessionsLoading } = useSessions(id);
 
   const handleStartSession = () => {
     navigate(`/sessions?patient=${id}`);
@@ -61,7 +42,7 @@ export default function PatientProfile() {
     navigate(`/calendar?patient=${id}`);
   };
 
-  if (loading) {
+  if (patientLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -87,6 +68,7 @@ export default function PatientProfile() {
   }
 
   const initials = patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2);
+  const completedSessions = sessions.filter(s => s.status === 'completed');
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -140,7 +122,7 @@ export default function PatientProfile() {
         <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-sm text-muted-foreground">Total Sessions</p>
           <p className="mt-1 text-2xl font-semibold text-foreground">
-            {mockSessions.length}
+            {completedSessions.length}
           </p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
@@ -166,12 +148,16 @@ export default function PatientProfile() {
         </TabsList>
 
         <TabsContent value="sessions" className="space-y-4">
-          {mockSessions.length === 0 ? (
+          {sessionsLoading ? (
+            <div className="flex h-32 items-center justify-center">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : completedSessions.length === 0 ? (
             <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
-              No sessions yet
+              No sessions yet. Start your first session with this patient!
             </div>
           ) : (
-            mockSessions.map((session, index) => (
+            completedSessions.map((session, index) => (
               <div
                 key={session.id}
                 className="rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-md"
@@ -183,9 +169,12 @@ export default function PatientProfile() {
                       <Clock className="h-5 w-5 text-accent-foreground" />
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">{session.date}</p>
+                      <p className="font-medium text-foreground">
+                        {format(new Date(session.started_at), "MMM d, yyyy")}
+                      </p>
                       <p className="text-sm text-muted-foreground">
-                        {session.time} · {session.duration}
+                        {format(new Date(session.started_at), "h:mm a")}
+                        {session.duration_minutes && ` · ${session.duration_minutes} min`}
                       </p>
                     </div>
                   </div>
@@ -193,19 +182,23 @@ export default function PatientProfile() {
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </div>
-                <p className="mt-4 text-sm text-muted-foreground">{session.summary}</p>
-                {session.actionPoints.length > 0 && (
+                
+                {session.summary && (
+                  <p className="mt-4 text-sm text-muted-foreground">{session.summary}</p>
+                )}
+                
+                {session.action_points && session.action_points.length > 0 && (
                   <div className="mt-4">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                       Action Points
                     </p>
                     <ul className="mt-2 space-y-1">
-                      {session.actionPoints.map((point, i) => (
+                      {session.action_points.map((point, i) => (
                         <li
                           key={i}
                           className="flex items-center gap-2 text-sm text-foreground"
                         >
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                          <CheckCircle className="h-4 w-4 text-success shrink-0" />
                           {point}
                         </li>
                       ))}
