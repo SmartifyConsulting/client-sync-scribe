@@ -14,6 +14,19 @@ export interface Patient {
   status: string;
   created_at: string;
   updated_at: string;
+  physical_address: string | null;
+  postal_address: string | null;
+  same_as_physical: boolean | null;
+  referred_by: string | null;
+  employer: string | null;
+  occupation: string | null;
+  medical_aid: string | null;
+  medical_aid_number: string | null;
+  primary_member: string | null;
+  next_of_kin_name: string | null;
+  next_of_kin_phone: string | null;
+  next_of_kin_email: string | null;
+  general_practitioner: string | null;
 }
 
 export function usePatients() {

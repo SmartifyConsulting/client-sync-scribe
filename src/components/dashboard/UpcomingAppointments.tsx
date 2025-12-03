@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Clock, User, Video, MapPin } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,8 +18,13 @@ interface Appointment {
 }
 
 export function UpcomingAppointments() {
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const handleStartSession = (patientId: string) => {
+    navigate(`/sessions?patient=${patientId}`);
+  };
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -115,14 +120,12 @@ export function UpcomingAppointments() {
                   </span>
                 </div>
               </div>
-              <button
-                className={cn(
-                  "rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200",
-                  "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-glow"
-                )}
+              <Button
+                size="sm"
+                onClick={() => handleStartSession(appointment.patientId)}
               >
                 Start Session
-              </button>
+              </Button>
             </div>
           ))}
         </div>

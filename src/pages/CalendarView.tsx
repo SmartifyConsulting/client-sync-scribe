@@ -1,7 +1,25 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Plus, Clock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { usePatients } from "@/hooks/usePatients";
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const currentDate = new Date();
@@ -24,7 +42,17 @@ function getDaysInMonth(date: Date) {
 }
 
 export default function CalendarView() {
+  const { toast } = useToast();
+  const { patients } = usePatients();
   const [selectedDate, setSelectedDate] = useState(currentDate);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newAppointment, setNewAppointment] = useState({
+    patientId: "",
+    date: "",
+    time: "",
+    type: "session",
+    notes: "",
+  });
   const { firstDay, daysInMonth } = getDaysInMonth(selectedDate);
 
   const monthName = selectedDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
@@ -39,6 +67,25 @@ export default function CalendarView() {
 
   const todayEvents = mockEvents.filter((e) => e.day === currentDate.getDate());
 
+  const handleCreateAppointment = () => {
+    if (!newAppointment.patientId || !newAppointment.date || !newAppointment.time) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const selectedPatient = patients.find(p => p.id === newAppointment.patientId);
+    toast({
+      title: "Appointment Created",
+      description: `Appointment scheduled for ${selectedPatient?.name} on ${newAppointment.date} at ${newAppointment.time}`,
+    });
+    setIsDialogOpen(false);
+    setNewAppointment({ patientId: "", date: "", time: "", type: "session", notes: "" });
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -49,10 +96,85 @@ export default function CalendarView() {
             Manage your appointments and schedule
           </p>
         </div>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          New Appointment
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              New Appointment
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Schedule New Appointment</DialogTitle>
+              <DialogDescription>Create a new appointment for a patient</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div>
+                <label className="text-sm font-medium text-foreground">Patient *</label>
+                <Select
+                  value={newAppointment.patientId}
+                  onValueChange={(value) => setNewAppointment({ ...newAppointment, patientId: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a patient" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {patients.map((patient) => (
+                      <SelectItem key={patient.id} value={patient.id}>
+                        {patient.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-foreground">Date *</label>
+                  <Input
+                    type="date"
+                    value={newAppointment.date}
+                    onChange={(e) => setNewAppointment({ ...newAppointment, date: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground">Time *</label>
+                  <Input
+                    type="time"
+                    value={newAppointment.time}
+                    onChange={(e) => setNewAppointment({ ...newAppointment, time: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground">Type</label>
+                <Select
+                  value={newAppointment.type}
+                  onValueChange={(value) => setNewAppointment({ ...newAppointment, type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="session">Session</SelectItem>
+                    <SelectItem value="followup">Follow-up</SelectItem>
+                    <SelectItem value="internal">Internal Meeting</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground">Notes</label>
+                <Input
+                  placeholder="Optional notes..."
+                  value={newAppointment.notes}
+                  onChange={(e) => setNewAppointment({ ...newAppointment, notes: e.target.value })}
+                />
+              </div>
+              <Button onClick={handleCreateAppointment} className="w-full">
+                Create Appointment
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
