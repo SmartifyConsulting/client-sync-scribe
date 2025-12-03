@@ -1,11 +1,53 @@
-import { User, Calendar, Bell, Shield, Palette, Database } from "lucide-react";
+import { useState } from "react";
+import { User, Calendar, Bell, Shield, Database, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Settings() {
+  const { toast } = useToast();
+  const [googleConnected, setGoogleConnected] = useState(false);
+  const [outlookConnected, setOutlookConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState<string | null>(null);
+
+  const handleConnect = async (provider: "google" | "outlook") => {
+    setIsConnecting(provider);
+    
+    // Simulate OAuth connection flow
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    if (provider === "google") {
+      setGoogleConnected(true);
+      toast({
+        title: "Google Calendar Connected",
+        description: "Your appointments will now sync with Google Calendar",
+      });
+    } else {
+      setOutlookConnected(true);
+      toast({
+        title: "Outlook Calendar Connected", 
+        description: "Your appointments will now sync with Outlook",
+      });
+    }
+    
+    setIsConnecting(null);
+  };
+
+  const handleDisconnect = (provider: "google" | "outlook") => {
+    if (provider === "google") {
+      setGoogleConnected(false);
+    } else {
+      setOutlookConnected(false);
+    }
+    toast({
+      title: "Calendar Disconnected",
+      description: `${provider === "google" ? "Google" : "Outlook"} Calendar has been disconnected`,
+    });
+  };
+
   return (
     <div className="space-y-8 animate-fade-in max-w-3xl">
       {/* Header */}
@@ -51,19 +93,69 @@ export default function Settings() {
         </div>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-foreground">Google Calendar</p>
-              <p className="text-sm text-muted-foreground">Sync appointments with Google Calendar</p>
+            <div className="flex items-center gap-3">
+              {googleConnected && (
+                <CheckCircle className="h-5 w-5 text-success" />
+              )}
+              <div>
+                <p className="font-medium text-foreground">Google Calendar</p>
+                <p className="text-sm text-muted-foreground">
+                  {googleConnected 
+                    ? "Connected - Appointments syncing" 
+                    : "Sync appointments with Google Calendar"}
+                </p>
+              </div>
             </div>
-            <Button variant="outline">Connect</Button>
+            {googleConnected ? (
+              <Button 
+                variant="outline" 
+                onClick={() => handleDisconnect("google")}
+                className="text-destructive hover:text-destructive"
+              >
+                Disconnect
+              </Button>
+            ) : (
+              <Button 
+                variant="outline" 
+                onClick={() => handleConnect("google")}
+                disabled={isConnecting === "google"}
+              >
+                {isConnecting === "google" ? "Connecting..." : "Connect"}
+              </Button>
+            )}
           </div>
           <Separator />
           <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-foreground">Outlook Calendar</p>
-              <p className="text-sm text-muted-foreground">Sync appointments with Outlook</p>
+            <div className="flex items-center gap-3">
+              {outlookConnected && (
+                <CheckCircle className="h-5 w-5 text-success" />
+              )}
+              <div>
+                <p className="font-medium text-foreground">Outlook Calendar</p>
+                <p className="text-sm text-muted-foreground">
+                  {outlookConnected 
+                    ? "Connected - Appointments syncing" 
+                    : "Sync appointments with Outlook"}
+                </p>
+              </div>
             </div>
-            <Button variant="outline">Connect</Button>
+            {outlookConnected ? (
+              <Button 
+                variant="outline" 
+                onClick={() => handleDisconnect("outlook")}
+                className="text-destructive hover:text-destructive"
+              >
+                Disconnect
+              </Button>
+            ) : (
+              <Button 
+                variant="outline" 
+                onClick={() => handleConnect("outlook")}
+                disabled={isConnecting === "outlook"}
+              >
+                {isConnecting === "outlook" ? "Connecting..." : "Connect"}
+              </Button>
+            )}
           </div>
         </div>
       </div>
