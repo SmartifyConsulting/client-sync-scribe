@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar, MapPin, Video, Play, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar, MapPin, Video, Play, Trash2, Link, Unlink, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { usePatients } from "@/hooks/usePatients";
+import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const currentDate = new Date();
@@ -57,6 +58,7 @@ export default function CalendarView() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { patients } = usePatients();
+  const { isConnected, isConnecting, connect, disconnect, loading: calendarLoading } = useGoogleCalendar();
   const [selectedDate, setSelectedDate] = useState(currentDate);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -173,11 +175,34 @@ export default function CalendarView() {
             Manage your appointments and schedule
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              New Appointment
+        <div className="flex gap-2">
+          {!calendarLoading && (
+            isConnected ? (
+              <Button variant="outline" onClick={disconnect} className="gap-2">
+                <Unlink className="h-4 w-4" />
+                Disconnect Google
+              </Button>
+            ) : (
+              <Button 
+                variant="outline" 
+                onClick={connect} 
+                disabled={isConnecting}
+                className="gap-2"
+              >
+                {isConnecting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Link className="h-4 w-4" />
+                )}
+                {isConnecting ? "Connecting..." : "Connect Google Calendar"}
+              </Button>
+            )
+          )}
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                New Appointment
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -252,6 +277,7 @@ export default function CalendarView() {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
