@@ -8,12 +8,14 @@ import {
   Settings,
   Mic,
   LogOut,
+  CheckSquare,
 } from "lucide-react";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/" },
   { icon: Users, label: "Clients", to: "/clients" },
   { icon: Calendar, label: "Calendar", to: "/calendar" },
+  { icon: CheckSquare, label: "To-Do List", to: "/todos" },
   { icon: FileText, label: "Documents", to: "/documents" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
 ];

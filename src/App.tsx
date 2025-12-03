@@ -11,6 +11,7 @@ import CalendarView from "./pages/CalendarView";
 import Sessions from "./pages/Sessions";
 import Documents from "./pages/Documents";
 import Settings from "./pages/Settings";
+import TodoList from "./pages/TodoList";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/clients" element={<Clients />} />
             <Route path="/clients/:id" element={<ClientProfile />} />
             <Route path="/calendar" element={<CalendarView />} />
+            <Route path="/todos" element={<TodoList />} />
             <Route path="/sessions" element={<Sessions />} />
             <Route path="/documents" element={<Documents />} />
             <Route path="/settings" element={<Settings />} />
