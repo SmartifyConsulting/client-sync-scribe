@@ -133,11 +133,16 @@ export function useSessions(patientId?: string) {
     }
   };
 
-  const completeSession = async (id: string, notes: string) => {
+const completeSession = async (id: string, content: string, additionalNotes?: string) => {
     try {
-      // First, generate AI summary
+      // Combine transcript and notes for AI analysis
+      const fullContent = additionalNotes 
+        ? `${content}\n\nAdditional Notes:\n${additionalNotes}`
+        : content;
+
+      // Generate AI summary from transcript/notes
       const { data: summaryData, error: summaryError } = await supabase.functions.invoke('summarize-session', {
-        body: { notes },
+        body: { notes: fullContent, transcript: content },
       });
 
       if (summaryError) {
@@ -151,7 +156,8 @@ export function useSessions(patientId?: string) {
         : null;
 
       const updates: any = {
-        notes,
+        transcript: content,
+        notes: additionalNotes || null,
         status: 'completed',
         ended_at: new Date().toISOString(),
         duration_minutes: durationMinutes,
