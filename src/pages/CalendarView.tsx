@@ -61,6 +61,9 @@ export default function CalendarView() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isEventDetailOpen, setIsEventDetailOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editedEvent, setEditedEvent] = useState<CalendarEvent | null>(null);
+  const [events, setEvents] = useState<CalendarEvent[]>(mockEvents);
   const [newAppointment, setNewAppointment] = useState({
     patientId: "",
     date: "",
@@ -80,7 +83,7 @@ export default function CalendarView() {
     setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1));
   };
 
-  const todayEvents = mockEvents.filter((e) => e.day === currentDate.getDate());
+  const todayEvents = events.filter((e) => e.day === currentDate.getDate());
 
   const handleCreateAppointment = () => {
     if (!newAppointment.patientId || !newAppointment.date || !newAppointment.time) {
@@ -103,7 +106,25 @@ export default function CalendarView() {
 
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
+    setEditedEvent({ ...event });
+    setIsEditMode(false);
     setIsEventDetailOpen(true);
+  };
+
+  const handleSaveEvent = () => {
+    if (!editedEvent) return;
+    setEvents(prev => prev.map(e => e.id === editedEvent.id ? editedEvent : e));
+    setSelectedEvent(editedEvent);
+    setIsEditMode(false);
+    toast({
+      title: "Event Updated",
+      description: "The appointment has been updated successfully.",
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditedEvent(selectedEvent ? { ...selectedEvent } : null);
+    setIsEditMode(false);
   };
 
   const handleStartSession = () => {
@@ -260,7 +281,7 @@ export default function CalendarView() {
               const isToday = day === currentDate.getDate() && 
                 selectedDate.getMonth() === currentDate.getMonth() &&
                 selectedDate.getFullYear() === currentDate.getFullYear();
-              const dayEvents = mockEvents.filter((e) => e.day === day);
+              const dayEvents = events.filter((e) => e.day === day);
 
               return (
                 <div
@@ -352,70 +373,152 @@ export default function CalendarView() {
       </div>
 
       {/* Event Detail Dialog */}
-      <Dialog open={isEventDetailOpen} onOpenChange={setIsEventDetailOpen}>
+      <Dialog open={isEventDetailOpen} onOpenChange={(open) => {
+        setIsEventDetailOpen(open);
+        if (!open) setIsEditMode(false);
+      }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{selectedEvent?.title}</DialogTitle>
-            <DialogDescription>{getEventTypeLabel(selectedEvent?.type || "")}</DialogDescription>
+            <DialogTitle>{isEditMode ? "Edit Appointment" : selectedEvent?.title}</DialogTitle>
+            <DialogDescription>{isEditMode ? "Modify the appointment details" : getEventTypeLabel(selectedEvent?.type || "")}</DialogDescription>
           </DialogHeader>
-          {selectedEvent && (
+          {selectedEvent && editedEvent && (
             <div className="space-y-4 pt-4">
-              <div className="flex items-center gap-3 text-sm">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-foreground">{selectedEvent.time}</span>
-              </div>
-              
-              <div className="flex items-center gap-3 text-sm">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className="text-foreground">
-                  {selectedDate.toLocaleDateString("en-US", { month: "long" })} {selectedEvent.day}, {selectedDate.getFullYear()}
-                </span>
-              </div>
-
-              {selectedEvent.location && (
-                <div className="flex items-center gap-3 text-sm">
-                  {selectedEvent.location === "Video Call" ? (
-                    <Video className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                  )}
-                  <span className="text-foreground">{selectedEvent.location}</span>
-                </div>
-              )}
-
-              {selectedEvent.notes && (
-                <div className="rounded-lg bg-muted/30 p-3">
-                  <p className="text-xs font-medium text-muted-foreground uppercase mb-1">Notes</p>
-                  <p className="text-sm text-foreground">{selectedEvent.notes}</p>
-                </div>
-              )}
-
-              <div className="flex gap-2 pt-2">
-                {selectedEvent.type !== "internal" && selectedEvent.patientId && (
-                  <>
-                    <Button 
-                      variant="outline" 
-                      className="flex-1"
-                      onClick={() => {
-                        setIsEventDetailOpen(false);
-                        navigate(`/patients/${selectedEvent.patientId}`);
-                      }}
+              {isEditMode ? (
+                <>
+                  <div>
+                    <label className="text-sm font-medium text-foreground">Title</label>
+                    <Input
+                      value={editedEvent.title}
+                      onChange={(e) => setEditedEvent({ ...editedEvent, title: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-foreground">Time</label>
+                      <Input
+                        value={editedEvent.time}
+                        onChange={(e) => setEditedEvent({ ...editedEvent, time: e.target.value })}
+                        placeholder="e.g., 9:00 AM"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-foreground">Day</label>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={31}
+                        value={editedEvent.day}
+                        onChange={(e) => setEditedEvent({ ...editedEvent, day: parseInt(e.target.value) || 1 })}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground">Type</label>
+                    <Select
+                      value={editedEvent.type}
+                      onValueChange={(value: "session" | "internal" | "followup") => setEditedEvent({ ...editedEvent, type: value })}
                     >
-                      <User className="h-4 w-4 mr-2" />
-                      View Patient
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="session">Session</SelectItem>
+                        <SelectItem value="followup">Follow-up</SelectItem>
+                        <SelectItem value="internal">Internal Meeting</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground">Location</label>
+                    <Select
+                      value={editedEvent.location || ""}
+                      onValueChange={(value) => setEditedEvent({ ...editedEvent, location: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select location" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Video Call">Video Call</SelectItem>
+                        <SelectItem value="In Person">In Person</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground">Notes</label>
+                    <Input
+                      value={editedEvent.notes || ""}
+                      onChange={(e) => setEditedEvent({ ...editedEvent, notes: e.target.value })}
+                      placeholder="Optional notes..."
+                    />
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <Button variant="outline" className="flex-1" onClick={handleCancelEdit}>
+                      Cancel
                     </Button>
-                    <Button className="flex-1" onClick={handleStartSession}>
-                      <Play className="h-4 w-4 mr-2" />
-                      Start Session
+                    <Button className="flex-1" onClick={handleSaveEvent}>
+                      Save Changes
                     </Button>
-                  </>
-                )}
-                {selectedEvent.type === "internal" && (
-                  <Button variant="outline" className="w-full" onClick={() => setIsEventDetailOpen(false)}>
-                    Close
-                  </Button>
-                )}
-              </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-3 text-sm">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-foreground">{selectedEvent.time}</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-3 text-sm">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-foreground">
+                      {selectedDate.toLocaleDateString("en-US", { month: "long" })} {selectedEvent.day}, {selectedDate.getFullYear()}
+                    </span>
+                  </div>
+
+                  {selectedEvent.location && (
+                    <div className="flex items-center gap-3 text-sm">
+                      {selectedEvent.location === "Video Call" ? (
+                        <Video className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                      )}
+                      <span className="text-foreground">{selectedEvent.location}</span>
+                    </div>
+                  )}
+
+                  {selectedEvent.notes && (
+                    <div className="rounded-lg bg-muted/30 p-3">
+                      <p className="text-xs font-medium text-muted-foreground uppercase mb-1">Notes</p>
+                      <p className="text-sm text-foreground">{selectedEvent.notes}</p>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 pt-2">
+                    <Button variant="outline" className="flex-1" onClick={() => setIsEditMode(true)}>
+                      Edit
+                    </Button>
+                    {selectedEvent.type !== "internal" && selectedEvent.patientId && (
+                      <>
+                        <Button 
+                          variant="outline" 
+                          className="flex-1"
+                          onClick={() => {
+                            setIsEventDetailOpen(false);
+                            navigate(`/patients/${selectedEvent.patientId}`);
+                          }}
+                        >
+                          <User className="h-4 w-4 mr-2" />
+                          View Patient
+                        </Button>
+                        <Button className="flex-1" onClick={handleStartSession}>
+                          <Play className="h-4 w-4 mr-2" />
+                          Start Session
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           )}
         </DialogContent>
