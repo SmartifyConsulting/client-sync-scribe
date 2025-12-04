@@ -222,14 +222,31 @@ export default function Sessions() {
             </div>
 
             {/* Live Transcript Preview */}
-            {transcript && (
-              <div className="mt-4 p-4 rounded-lg bg-muted/50 border border-border">
-                <div className="flex items-center gap-2 mb-2">
-                  <FileText className="h-4 w-4 text-primary" />
-                  <p className="text-xs font-medium text-muted-foreground">Live Transcription</p>
+            {(transcript || isTranscribing) && (
+              <div className="mt-4 p-4 rounded-lg bg-primary/5 border-2 border-primary/20">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-semibold text-primary">Voice Transcription</p>
+                  </div>
+                  {transcript && !isTranscribing && (
+                    <span className="text-xs bg-green-500/10 text-green-600 px-2 py-0.5 rounded-full">
+                      ✓ Transcribed
+                    </span>
+                  )}
+                  {isTranscribing && (
+                    <span className="text-xs bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Processing...
+                    </span>
+                  )}
                 </div>
-                <div className="max-h-[150px] overflow-y-auto">
-                  <p className="text-sm text-foreground whitespace-pre-wrap">{transcript}</p>
+                <div className="max-h-[200px] overflow-y-auto bg-background/50 rounded p-3">
+                  {transcript ? (
+                    <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{transcript}</p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">Transcribing audio...</p>
+                  )}
                 </div>
               </div>
             )}
