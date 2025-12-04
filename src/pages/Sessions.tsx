@@ -3,7 +3,6 @@ import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import {
   Mic,
-  MicOff,
   Play,
   Square,
   FileText,
@@ -13,7 +12,6 @@ import {
   CheckCircle,
   AlertCircle,
   Loader2,
-  Pause,
   ArrowLeft,
   Volume2,
   Calendar,
@@ -71,16 +69,15 @@ export default function Sessions() {
 
   const { 
     isRecording, 
-    isPaused,
     isTranscribing, 
     transcript, 
     audioUrl,
     startRecording, 
-    pauseRecording,
-    resumeRecording,
     stopRecording,
     clearTranscript 
   } = useAudioRecording({
+    patientName: currentPatient?.name,
+    doctorName: "Dr. Georgia Adams", // TODO: Get from user profile
     onTranscriptionComplete: (text) => {
       // Store transcript and append to notes
       latestTranscriptRef.current = text;
@@ -93,16 +90,16 @@ export default function Sessions() {
     }
   });
 
-  // Session timer - pauses when recording is paused
+  // Session timer
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (sessionState === "active" && !isPaused) {
+    if (sessionState === "active") {
       interval = setInterval(() => {
         setSessionDuration(prev => prev + 1);
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [sessionState, isPaused]);
+  }, [sessionState]);
 
   const formatDuration = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600);
@@ -134,14 +131,6 @@ export default function Sessions() {
       stopRecording();
     } else {
       startRecording();
-    }
-  };
-
-  const togglePause = () => {
-    if (isPaused) {
-      resumeRecording();
-    } else {
-      pauseRecording();
     }
   };
 
@@ -237,12 +226,8 @@ export default function Sessions() {
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className={cn(
-                  "text-sm font-mono",
-                  isPaused ? "text-amber-500" : "text-foreground"
-                )}>
+                <span className="text-sm font-mono text-foreground">
                   {formatDuration(sessionDuration)}
-                  {isPaused && " (Paused)"}
                 </span>
               </div>
             </div>
@@ -270,41 +255,20 @@ export default function Sessions() {
                     <Mic className="h-10 w-10" />
                   )}
                 </button>
-
-                {/* Pause Button - Only visible when recording */}
-                {isRecording && !isTranscribing && (
-                  <button
-                    onClick={togglePause}
-                    className={cn(
-                      "flex h-16 w-16 items-center justify-center rounded-full transition-all duration-300",
-                      isPaused
-                        ? "bg-amber-500 text-white hover:bg-amber-600"
-                        : "bg-muted text-muted-foreground hover:bg-muted/80"
-                    )}
-                  >
-                    {isPaused ? (
-                      <Play className="h-7 w-7" />
-                    ) : (
-                      <Pause className="h-7 w-7" />
-                    )}
-                  </button>
-                )}
               </div>
               
               <p className="text-sm text-muted-foreground text-center">
                 {isTranscribing 
                   ? "Transcribing audio..." 
                   : isRecording 
-                    ? isPaused 
-                      ? "Recording paused. Tap play to resume or stop to transcribe"
-                      : "Recording... Tap pause or stop to transcribe" 
+                    ? "Recording... Tap to stop and transcribe" 
                     : "Tap to start recording"}
               </p>
               
               {/* Audio Waveform Visualizer */}
               {(isRecording || isTranscribing) && (
                 <div className="w-full max-w-xs mt-4">
-                  <AudioWaveform isRecording={isRecording && !isPaused} />
+                  <AudioWaveform isRecording={isRecording} />
                   {isTranscribing && (
                     <p className="text-xs text-center text-muted-foreground mt-2">Processing audio...</p>
                   )}
