@@ -89,7 +89,8 @@ export default function PatientProfile() {
   }
 
   const initials = patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2);
-  const completedSessions = sessions.filter(s => s.status === 'completed');
+  // Only show completed sessions that have actual transcripts
+  const completedSessions = sessions.filter(s => s.status === 'completed' && s.transcript && s.transcript.trim().length > 0 && s.transcript !== 'No transcript available for this session.');
   const inProgressSessions = sessions.filter(s => s.status === 'in_progress');
 
   return (
@@ -144,11 +145,8 @@ export default function PatientProfile() {
         <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-sm text-muted-foreground">Total Sessions</p>
           <p className="mt-1 text-2xl font-semibold text-foreground">
-            {sessions.length}
+            {completedSessions.length}
           </p>
-          {inProgressSessions.length > 0 && (
-            <p className="text-xs text-amber-600 mt-1">{inProgressSessions.length} in progress</p>
-          )}
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-sm text-muted-foreground">Status</p>
@@ -184,9 +182,9 @@ export default function PatientProfile() {
             <div className="flex h-32 items-center justify-center">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
-          ) : sessions.length === 0 ? (
+          ) : completedSessions.length === 0 && inProgressSessions.length === 0 ? (
             <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
-              No sessions yet. Start your first session with this patient!
+              No sessions with recordings yet. Start your first session with this patient!
             </div>
           ) : (
             <>
