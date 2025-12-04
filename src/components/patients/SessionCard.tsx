@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
+import { Link } from "react-router-dom";
 import {
   Clock,
   MoreVertical,
@@ -8,6 +9,7 @@ import {
   Sparkles,
   ChevronDown,
   ChevronUp,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -22,8 +24,9 @@ export function SessionCard({ session, index }: SessionCardProps) {
   const [isTranscriptOpen, setIsTranscriptOpen] = useState(false);
 
   return (
-    <div
-      className="rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-md animate-fade-in"
+    <Link
+      to={`/sessions/${session.id}`}
+      className="block rounded-xl border border-border bg-card p-5 transition-all hover:shadow-md hover:border-primary/30 animate-fade-in group"
       style={{ animationDelay: `${index * 100}ms` }}
     >
       <div className="flex items-start justify-between">
@@ -32,7 +35,7 @@ export function SessionCard({ session, index }: SessionCardProps) {
             <Clock className="h-5 w-5 text-accent-foreground" />
           </div>
           <div>
-            <p className="font-medium text-foreground">
+            <p className="font-medium text-foreground group-hover:text-primary transition-colors">
               {format(new Date(session.started_at), "MMM d, yyyy")}
             </p>
             <p className="text-sm text-muted-foreground">
@@ -41,9 +44,7 @@ export function SessionCard({ session, index }: SessionCardProps) {
             </p>
           </div>
         </div>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <MoreVertical className="h-4 w-4" />
-        </Button>
+        <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
       
       {/* AI Summary */}
@@ -96,6 +97,6 @@ export function SessionCard({ session, index }: SessionCardProps) {
           </ul>
         </div>
       )}
-    </div>
+    </Link>
   );
 }

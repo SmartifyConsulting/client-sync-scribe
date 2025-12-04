@@ -10,6 +10,7 @@ import Patients from "./pages/Patients";
 import PatientProfile from "./pages/PatientProfile";
 import CalendarView from "./pages/CalendarView";
 import Sessions from "./pages/Sessions";
+import SessionDetail from "./pages/SessionDetail";
 import Documents from "./pages/Documents";
 import Settings from "./pages/Settings";
 import TodoList from "./pages/TodoList";
@@ -57,6 +58,7 @@ const App = () => (
             <Route path="/calendar" element={<CalendarView />} />
             <Route path="/todos" element={<TodoList />} />
             <Route path="/sessions" element={<Sessions />} />
+            <Route path="/sessions/:id" element={<SessionDetail />} />
             <Route path="/documents" element={<Documents />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
