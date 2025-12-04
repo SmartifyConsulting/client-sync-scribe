@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import {
   Mic,
   MicOff,
@@ -12,6 +12,9 @@ import {
   CheckCircle,
   AlertCircle,
   Loader2,
+  Pause,
+  ArrowLeft,
+  Volume2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -41,9 +44,13 @@ export default function Sessions() {
 
   const { 
     isRecording, 
+    isPaused,
     isTranscribing, 
     transcript, 
+    audioUrl,
     startRecording, 
+    pauseRecording,
+    resumeRecording,
     stopRecording,
     clearTranscript 
   } = useAudioRecording({
@@ -53,16 +60,16 @@ export default function Sessions() {
     }
   });
 
-  // Session timer
+  // Session timer - pauses when recording is paused
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (sessionState === "active") {
+    if (sessionState === "active" && !isPaused) {
       interval = setInterval(() => {
         setSessionDuration(prev => prev + 1);
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [sessionState]);
+  }, [sessionState, isPaused]);
 
   const formatDuration = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600);
@@ -95,6 +102,14 @@ export default function Sessions() {
     }
   };
 
+  const togglePause = () => {
+    if (isPaused) {
+      resumeRecording();
+    } else {
+      pauseRecording();
+    }
+  };
+
   const endSession = async () => {
     if (isRecording) {
       stopRecording();
@@ -122,7 +137,19 @@ export default function Sessions() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header */}
+      {/* Header with Back Link */}
+      <div className="flex items-center gap-4">
+        {currentPatient && (
+          <Link
+            to={`/patients/${patientId}`}
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to {currentPatient.name}
+          </Link>
+        )}
+      </div>
+
       <div>
         <h1 className="text-3xl font-bold text-foreground">Session Mode</h1>
         <p className="mt-1 text-muted-foreground">
@@ -175,45 +202,74 @@ export default function Sessions() {
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-mono text-foreground">
+                <span className={cn(
+                  "text-sm font-mono",
+                  isPaused ? "text-amber-500" : "text-foreground"
+                )}>
                   {formatDuration(sessionDuration)}
+                  {isPaused && " (Paused)"}
                 </span>
               </div>
             </div>
 
             {/* Recording Controls */}
             <div className="flex flex-col items-center gap-4 py-8">
-              <button
-                onClick={toggleRecording}
-                disabled={isTranscribing}
-                className={cn(
-                  "flex h-24 w-24 items-center justify-center rounded-full transition-all duration-300",
-                  isTranscribing && "opacity-50 cursor-not-allowed",
-                  isRecording
-                    ? "bg-destructive text-destructive-foreground animate-pulse-soft shadow-lg"
-                    : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-glow"
+              <div className="flex items-center gap-4">
+                {/* Main Record Button */}
+                <button
+                  onClick={toggleRecording}
+                  disabled={isTranscribing}
+                  className={cn(
+                    "flex h-24 w-24 items-center justify-center rounded-full transition-all duration-300",
+                    isTranscribing && "opacity-50 cursor-not-allowed",
+                    isRecording
+                      ? "bg-destructive text-destructive-foreground animate-pulse-soft shadow-lg"
+                      : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-glow"
+                  )}
+                >
+                  {isTranscribing ? (
+                    <Loader2 className="h-10 w-10 animate-spin" />
+                  ) : isRecording ? (
+                    <Square className="h-10 w-10" />
+                  ) : (
+                    <Mic className="h-10 w-10" />
+                  )}
+                </button>
+
+                {/* Pause Button - Only visible when recording */}
+                {isRecording && !isTranscribing && (
+                  <button
+                    onClick={togglePause}
+                    className={cn(
+                      "flex h-16 w-16 items-center justify-center rounded-full transition-all duration-300",
+                      isPaused
+                        ? "bg-amber-500 text-white hover:bg-amber-600"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80"
+                    )}
+                  >
+                    {isPaused ? (
+                      <Play className="h-7 w-7" />
+                    ) : (
+                      <Pause className="h-7 w-7" />
+                    )}
+                  </button>
                 )}
-              >
-                {isTranscribing ? (
-                  <Loader2 className="h-10 w-10 animate-spin" />
-                ) : isRecording ? (
-                  <MicOff className="h-10 w-10" />
-                ) : (
-                  <Mic className="h-10 w-10" />
-                )}
-              </button>
-              <p className="text-sm text-muted-foreground">
+              </div>
+              
+              <p className="text-sm text-muted-foreground text-center">
                 {isTranscribing 
                   ? "Transcribing audio..." 
                   : isRecording 
-                    ? "Recording... Tap to stop and transcribe" 
+                    ? isPaused 
+                      ? "Recording paused. Tap play to resume or stop to transcribe"
+                      : "Recording... Tap pause or stop to transcribe" 
                     : "Tap to start recording"}
               </p>
               
               {/* Audio Waveform Visualizer */}
               {(isRecording || isTranscribing) && (
                 <div className="w-full max-w-xs mt-4">
-                  <AudioWaveform isRecording={isRecording} />
+                  <AudioWaveform isRecording={isRecording && !isPaused} />
                   {isTranscribing && (
                     <p className="text-xs text-center text-muted-foreground mt-2">Processing audio...</p>
                   )}
@@ -248,6 +304,19 @@ export default function Sessions() {
                     <p className="text-sm text-muted-foreground italic">Transcribing audio...</p>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* Audio Playback */}
+            {audioUrl && !isRecording && (
+              <div className="mt-4 p-4 rounded-lg bg-muted/50 border border-border">
+                <div className="flex items-center gap-2 mb-2">
+                  <Volume2 className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-sm font-medium text-foreground">Recording Playback</p>
+                </div>
+                <audio controls className="w-full" src={audioUrl}>
+                  Your browser does not support audio playback.
+                </audio>
               </div>
             )}
 
@@ -297,7 +366,7 @@ export default function Sessions() {
             <div>
               <p className="font-medium text-foreground">Session Completed Successfully</p>
               <p className="text-sm text-muted-foreground">
-                Summary and action points have been generated and saved to patient history
+                Summary and action points have been generated, saved to patient history, and added to your to-do list
               </p>
             </div>
           </div>
@@ -316,6 +385,15 @@ export default function Sessions() {
                   <p className="text-muted-foreground italic">No transcription recorded.</p>
                 )}
               </div>
+              {/* Audio Playback in completed state */}
+              {audioUrl && (
+                <div className="mt-4 pt-4 border-t border-border">
+                  <p className="text-xs text-muted-foreground mb-2">Listen to recording:</p>
+                  <audio controls className="w-full h-10" src={audioUrl}>
+                    Your browser does not support audio playback.
+                  </audio>
+                </div>
+              )}
             </div>
 
             {/* Summary */}
@@ -352,9 +430,12 @@ export default function Sessions() {
                 )}
               </div>
               {actionPoints.length > 0 && (
-                <Button className="w-full mt-4 gap-2" size="sm">
-                  Add to Calendar
-                </Button>
+                <div className="mt-4 pt-3 border-t border-border">
+                  <p className="text-xs text-green-600 flex items-center gap-1">
+                    <CheckCircle className="h-3 w-3" />
+                    Added to To-Do List
+                  </p>
+                </div>
               )}
             </div>
           </div>
@@ -363,8 +444,14 @@ export default function Sessions() {
             <Button variant="outline" onClick={() => setSessionState("idle")}>
               Start New Session
             </Button>
-            <Button variant="outline">Generate Document</Button>
-            <Button variant="outline">Email Summary</Button>
+            <Button variant="outline" asChild>
+              <Link to="/todos">View To-Do List</Link>
+            </Button>
+            {currentPatient && (
+              <Button variant="outline" asChild>
+                <Link to={`/patients/${patientId}`}>View Patient Profile</Link>
+              </Button>
+            )}
           </div>
         </div>
       )}

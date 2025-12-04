@@ -36,6 +36,75 @@ function processBase64Chunks(base64String: string, chunkSize = 32768): Uint8Arra
   return result;
 }
 
+// Format transcript with speaker labels using AI
+async function formatWithSpeakerLabels(rawText: string, apiKey: string): Promise<string> {
+  try {
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      console.log("No LOVABLE_API_KEY, returning raw transcript");
+      return rawText;
+    }
+
+    console.log("Formatting transcript with speaker labels...");
+    
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          {
+            role: "system",
+            content: `You are a transcript formatter. Your task is to take a raw transcript and format it as a script-style dialogue with speaker labels.
+
+Rules:
+1. Identify different speakers based on context, speech patterns, and conversation flow
+2. Label speakers as "Practitioner:" and "Patient:" (or "Speaker 1:", "Speaker 2:" if unclear)
+3. Each speaker's turn should start on a new line with their label
+4. Preserve all the original content - do not summarize or remove anything
+5. If you cannot determine speaker changes, use your best judgment based on conversational flow
+6. Add line breaks between speaker turns for readability
+
+Example output format:
+Practitioner: Hello, how are you feeling today?
+
+Patient: I've been experiencing some headaches lately.
+
+Practitioner: When did these headaches start?
+
+Patient: About two weeks ago.`,
+          },
+          {
+            role: "user",
+            content: `Please format this transcript with speaker labels:\n\n${rawText}`,
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("AI formatting failed:", response.status);
+      return rawText;
+    }
+
+    const data = await response.json();
+    const formattedText = data.choices?.[0]?.message?.content;
+    
+    if (formattedText) {
+      console.log("Successfully formatted transcript with speaker labels");
+      return formattedText;
+    }
+    
+    return rawText;
+  } catch (error) {
+    console.error("Error formatting transcript:", error);
+    return rawText;
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -68,6 +137,8 @@ serve(async (req) => {
     const blob = new Blob([arrayBuffer], { type: 'audio/webm' });
     formData.append('file', blob, 'audio.webm');
     formData.append('model', 'whisper-1');
+    formData.append('response_format', 'verbose_json');
+    formData.append('timestamp_granularities[]', 'segment');
 
     console.log('Sending to OpenAI Whisper API...');
 
@@ -87,10 +158,15 @@ serve(async (req) => {
     }
 
     const result = await response.json();
-    console.log('Transcription successful:', result.text?.substring(0, 50) + '...');
+    console.log('Raw transcription successful');
+    
+    const rawText = result.text || '';
+    
+    // Format with speaker labels using AI
+    const formattedText = await formatWithSpeakerLabels(rawText, OPENAI_API_KEY);
 
     return new Response(
-      JSON.stringify({ text: result.text }),
+      JSON.stringify({ text: formattedText, raw: rawText }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 

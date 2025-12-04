@@ -9,11 +9,14 @@ interface UseAudioRecordingOptions {
 export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
   const { toast } = useToast();
   const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [transcript, setTranscript] = useState('');
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const startRecording = useCallback(async () => {
     try {
@@ -25,6 +28,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
           noiseSuppression: true,
         }
       });
+      
+      streamRef.current = stream;
       
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType: 'audio/webm;codecs=opus',
@@ -41,14 +46,23 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
 
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        
+        // Create URL for playback
+        const url = URL.createObjectURL(audioBlob);
+        setAudioUrl(url);
+        
         await transcribeAudio(audioBlob);
         
         // Stop all tracks
-        stream.getTracks().forEach(track => track.stop());
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(track => track.stop());
+          streamRef.current = null;
+        }
       };
 
       mediaRecorder.start(1000); // Collect data every second
       setIsRecording(true);
+      setIsPaused(false);
       
       toast({
         title: "Recording Started",
@@ -64,10 +78,33 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
     }
   }, [toast]);
 
+  const pauseRecording = useCallback(() => {
+    if (mediaRecorderRef.current && isRecording && !isPaused) {
+      mediaRecorderRef.current.pause();
+      setIsPaused(true);
+      toast({
+        title: "Recording Paused",
+        description: "Tap resume to continue recording",
+      });
+    }
+  }, [isRecording, isPaused, toast]);
+
+  const resumeRecording = useCallback(() => {
+    if (mediaRecorderRef.current && isRecording && isPaused) {
+      mediaRecorderRef.current.resume();
+      setIsPaused(false);
+      toast({
+        title: "Recording Resumed",
+        description: "Continue speaking",
+      });
+    }
+  }, [isRecording, isPaused, toast]);
+
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      setIsPaused(false);
     }
   }, [isRecording]);
 
@@ -105,7 +142,7 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
       
       // Append to existing transcript
       setTranscript(prev => {
-        const newTranscript = prev ? `${prev} ${transcribedText}` : transcribedText;
+        const newTranscript = prev ? `${prev}\n\n${transcribedText}` : transcribedText;
         options.onTranscriptionComplete?.(newTranscript);
         return newTranscript;
       });
@@ -128,13 +165,21 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
 
   const clearTranscript = useCallback(() => {
     setTranscript('');
-  }, []);
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+      setAudioUrl(null);
+    }
+  }, [audioUrl]);
 
   return {
     isRecording,
+    isPaused,
     isTranscribing,
     transcript,
+    audioUrl,
     startRecording,
+    pauseRecording,
+    resumeRecording,
     stopRecording,
     clearTranscript,
   };
