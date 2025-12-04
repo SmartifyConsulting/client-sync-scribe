@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
+import { format } from "date-fns";
 import {
   Mic,
   MicOff,
@@ -15,6 +16,7 @@ import {
   Pause,
   ArrowLeft,
   Volume2,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,6 +25,7 @@ import { useAudioRecording } from "@/hooks/useAudioRecording";
 import { AudioWaveform } from "@/components/sessions/AudioWaveform";
 import { useSessions } from "@/hooks/useSessions";
 import { usePatients } from "@/hooks/usePatients";
+import { Badge } from "@/components/ui/badge";
 
 type SessionState = "idle" | "active" | "processing" | "completed";
 
@@ -37,8 +40,9 @@ export default function Sessions() {
   const [sessionDuration, setSessionDuration] = useState(0);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
+  const navigate = useNavigate();
   const { patients } = usePatients();
-  const { createSession, completeSession } = useSessions();
+  const { sessions, loading: sessionsLoading, createSession, completeSession } = useSessions();
   
   const currentPatient = patients.find(p => p.id === patientId);
 
@@ -455,6 +459,57 @@ export default function Sessions() {
           </div>
         </div>
       )}
+
+      {/* All Sessions List */}
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <Calendar className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-semibold text-foreground">All Sessions</h2>
+          </div>
+          <Badge variant="secondary">{sessions.length} sessions</Badge>
+        </div>
+        
+        {sessionsLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : sessions.length === 0 ? (
+          <p className="text-muted-foreground text-center py-8">No sessions recorded yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {sessions.map((session) => (
+              <div
+                key={session.id}
+                onClick={() => navigate(`/sessions/${session.id}`)}
+                className="flex items-center justify-between p-4 rounded-lg border border-border bg-background hover:bg-accent/50 cursor-pointer transition-colors"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                    <User className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">{session.title || 'Untitled Session'}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {session.patient?.name || 'Unknown Patient'} • {format(new Date(session.started_at), 'MMM d, yyyy h:mm a')}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  {session.duration_minutes && (
+                    <span className="text-sm text-muted-foreground">
+                      {session.duration_minutes} min
+                    </span>
+                  )}
+                  <Badge variant={session.status === 'completed' ? 'default' : session.status === 'in_progress' ? 'secondary' : 'outline'}>
+                    {session.status === 'completed' ? 'Completed' : session.status === 'in_progress' ? 'In Progress' : 'Cancelled'}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
