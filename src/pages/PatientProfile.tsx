@@ -68,6 +68,7 @@ export default function PatientProfile() {
 
   const initials = patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2);
   const completedSessions = sessions.filter(s => s.status === 'completed');
+  const inProgressSessions = sessions.filter(s => s.status === 'in_progress');
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -121,8 +122,11 @@ export default function PatientProfile() {
         <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-sm text-muted-foreground">Total Sessions</p>
           <p className="mt-1 text-2xl font-semibold text-foreground">
-            {completedSessions.length}
+            {sessions.length}
           </p>
+          {inProgressSessions.length > 0 && (
+            <p className="text-xs text-amber-600 mt-1">{inProgressSessions.length} in progress</p>
+          )}
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-sm text-muted-foreground">Status</p>
@@ -151,14 +155,60 @@ export default function PatientProfile() {
             <div className="flex h-32 items-center justify-center">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
-          ) : completedSessions.length === 0 ? (
+          ) : sessions.length === 0 ? (
             <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
               No sessions yet. Start your first session with this patient!
             </div>
           ) : (
-            completedSessions.map((session, index) => (
-              <SessionCard key={session.id} session={session} index={index} />
-            ))
+            <>
+              {/* In Progress Sessions */}
+              {inProgressSessions.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-sm font-medium text-muted-foreground">In Progress</h3>
+                  {inProgressSessions.map((session, index) => (
+                    <div
+                      key={session.id}
+                      className="rounded-xl border-2 border-amber-500/30 bg-amber-500/5 p-4 flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10">
+                          <Clock className="h-5 w-5 text-amber-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">
+                            {format(new Date(session.started_at), "MMM d, yyyy")} - In Progress
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Started at {format(new Date(session.started_at), "h:mm a")}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-xs bg-amber-500/10 text-amber-600 px-2 py-1 rounded-full">
+                        Ongoing
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Completed Sessions */}
+              {completedSessions.length > 0 && (
+                <div className="space-y-3">
+                  {inProgressSessions.length > 0 && (
+                    <h3 className="text-sm font-medium text-muted-foreground mt-6">Completed</h3>
+                  )}
+                  {completedSessions.map((session, index) => (
+                    <SessionCard key={session.id} session={session} index={index} />
+                  ))}
+                </div>
+              )}
+
+              {completedSessions.length === 0 && inProgressSessions.length > 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No completed sessions yet.
+                </p>
+              )}
+            </>
           )}
         </TabsContent>
 
@@ -199,22 +249,103 @@ export default function PatientProfile() {
         </TabsContent>
 
         <TabsContent value="details">
-          <div className="rounded-xl border border-border bg-card p-6 space-y-6">
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div>
-                <p className="text-sm text-muted-foreground">Date of Birth</p>
-                <p className="mt-1 text-foreground">
-                  {patient.dob ? format(new Date(patient.dob), "MMMM d, yyyy") : "Not provided"}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Address</p>
-                <p className="mt-1 text-foreground">{patient.address || "Not provided"}</p>
+          <div className="rounded-xl border border-border bg-card p-6 space-y-8">
+            {/* Personal Information */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Personal Information</h3>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div>
+                  <p className="text-sm text-muted-foreground">Date of Birth</p>
+                  <p className="mt-1 text-foreground">
+                    {patient.dob ? format(new Date(patient.dob), "MMMM d, yyyy") : "Not provided"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="mt-1 text-foreground">{patient.email || "Not provided"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Phone</p>
+                  <p className="mt-1 text-foreground">{patient.phone || "Not provided"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Occupation</p>
+                  <p className="mt-1 text-foreground">{patient.occupation || "Not provided"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Employer</p>
+                  <p className="mt-1 text-foreground">{patient.employer || "Not provided"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Referred By</p>
+                  <p className="mt-1 text-foreground">{patient.referred_by || "Not provided"}</p>
+                </div>
               </div>
             </div>
+
+            {/* Address Information */}
             <div>
-              <p className="text-sm text-muted-foreground">Notes</p>
-              <p className="mt-1 text-foreground">{patient.notes || "No notes"}</p>
+              <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Address</h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <p className="text-sm text-muted-foreground">Physical Address</p>
+                  <p className="mt-1 text-foreground">{patient.physical_address || patient.address || "Not provided"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Postal Address</p>
+                  <p className="mt-1 text-foreground">
+                    {patient.same_as_physical ? "Same as physical address" : (patient.postal_address || "Not provided")}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Medical Aid Information */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Medical Aid</h3>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div>
+                  <p className="text-sm text-muted-foreground">Medical Aid Provider</p>
+                  <p className="mt-1 text-foreground">{patient.medical_aid || "Not provided"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Medical Aid Number</p>
+                  <p className="mt-1 text-foreground">{patient.medical_aid_number || "Not provided"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Primary Member</p>
+                  <p className="mt-1 text-foreground">{patient.primary_member || "Not provided"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">General Practitioner</p>
+                  <p className="mt-1 text-foreground">{patient.general_practitioner || "Not provided"}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Next of Kin */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Next of Kin</h3>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div>
+                  <p className="text-sm text-muted-foreground">Name</p>
+                  <p className="mt-1 text-foreground">{patient.next_of_kin_name || "Not provided"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Phone</p>
+                  <p className="mt-1 text-foreground">{patient.next_of_kin_phone || "Not provided"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="mt-1 text-foreground">{patient.next_of_kin_email || "Not provided"}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Notes</h3>
+              <p className="text-foreground">{patient.notes || "No notes"}</p>
             </div>
           </div>
         </TabsContent>
