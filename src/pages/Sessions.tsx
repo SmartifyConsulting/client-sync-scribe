@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Mic,
   MicOff,
@@ -10,46 +11,112 @@ import {
   Sparkles,
   CheckCircle,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { useAudioRecording } from "@/hooks/useAudioRecording";
+import { useSessions } from "@/hooks/useSessions";
+import { usePatients } from "@/hooks/usePatients";
 
 type SessionState = "idle" | "active" | "processing" | "completed";
 
 export default function Sessions() {
+  const [searchParams] = useSearchParams();
+  const patientId = searchParams.get("patient");
+  
   const [sessionState, setSessionState] = useState<SessionState>("idle");
-  const [isRecording, setIsRecording] = useState(false);
   const [notes, setNotes] = useState("");
   const [summary, setSummary] = useState("");
   const [actionPoints, setActionPoints] = useState<string[]>([]);
+  const [sessionDuration, setSessionDuration] = useState(0);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
-  const startSession = () => {
+  const { patients } = usePatients();
+  const { createSession, completeSession } = useSessions();
+  
+  const currentPatient = patients.find(p => p.id === patientId);
+
+  const { 
+    isRecording, 
+    isTranscribing, 
+    transcript, 
+    startRecording, 
+    stopRecording,
+    clearTranscript 
+  } = useAudioRecording({
+    onTranscriptionComplete: (text) => {
+      // Append transcription to notes
+      setNotes(prev => prev ? `${prev}\n\n${text}` : text);
+    }
+  });
+
+  // Session timer
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (sessionState === "active") {
+      interval = setInterval(() => {
+        setSessionDuration(prev => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [sessionState]);
+
+  const formatDuration = (seconds: number) => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const startSession = async () => {
     setSessionState("active");
     setNotes("");
     setSummary("");
     setActionPoints([]);
+    setSessionDuration(0);
+    clearTranscript();
+    
+    if (patientId) {
+      const session = await createSession(patientId, `Session - ${new Date().toLocaleDateString()}`);
+      if (session) {
+        setCurrentSessionId(session.id);
+      }
+    }
   };
 
   const toggleRecording = () => {
-    setIsRecording(!isRecording);
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
   };
 
-  const endSession = () => {
+  const endSession = async () => {
+    if (isRecording) {
+      stopRecording();
+    }
+    
     setSessionState("processing");
-    // Simulate AI processing
-    setTimeout(() => {
-      setSummary(
-        "Client discussed progress on Q4 financial targets. Key concerns include cash flow timing and vendor payment schedules. Agreed to implement new budgeting framework and schedule follow-up review in two weeks."
-      );
-      setActionPoints([
-        "Draft new budgeting framework proposal",
-        "Review vendor contracts for payment terms",
-        "Schedule follow-up meeting for December 17th",
-        "Send summary report to client",
-      ]);
-      setSessionState("completed");
-    }, 2000);
+    
+    // Combine transcript and notes for AI processing
+    const fullContent = [transcript, notes].filter(Boolean).join('\n\n');
+    
+    if (currentSessionId && fullContent) {
+      const result = await completeSession(currentSessionId, fullContent, notes);
+      if (result) {
+        setSummary(result.summary || "Session completed successfully.");
+        setActionPoints(result.action_points || []);
+      }
+    } else {
+      // Fallback if no content
+      setSummary("Session completed. No content was recorded or noted.");
+      setActionPoints([]);
+    }
+    
+    setSessionState("completed");
   };
 
   return (
@@ -58,7 +125,7 @@ export default function Sessions() {
       <div>
         <h1 className="text-3xl font-bold text-foreground">Session Mode</h1>
         <p className="mt-1 text-muted-foreground">
-          Record, transcribe, and generate AI summaries for client sessions
+          Record, transcribe, and generate AI summaries for patient sessions
         </p>
       </div>
 
@@ -75,6 +142,11 @@ export default function Sessions() {
             Begin a new consultation session to capture notes, record audio, and
             generate AI-powered summaries and action points.
           </p>
+          {currentPatient && (
+            <p className="text-sm text-primary mb-4">
+              Session for: <span className="font-medium">{currentPatient.name}</span>
+            </p>
+          )}
           <Button onClick={startSession} size="lg" className="gap-2">
             <Play className="h-5 w-5" />
             Start New Session
@@ -92,13 +164,19 @@ export default function Sessions() {
                   <User className="h-5 w-5 text-accent-foreground" />
                 </div>
                 <div>
-                  <p className="font-medium text-foreground">Current Session</p>
-                  <p className="text-sm text-muted-foreground">Select a client</p>
+                  <p className="font-medium text-foreground">
+                    {currentPatient?.name || "Current Session"}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {currentPatient ? "Recording session" : "Select a patient"}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-mono text-foreground">00:12:34</span>
+                <span className="text-sm font-mono text-foreground">
+                  {formatDuration(sessionDuration)}
+                </span>
               </div>
             </div>
 
@@ -106,26 +184,42 @@ export default function Sessions() {
             <div className="flex flex-col items-center gap-4 py-8">
               <button
                 onClick={toggleRecording}
+                disabled={isTranscribing}
                 className={cn(
                   "flex h-24 w-24 items-center justify-center rounded-full transition-all duration-300",
+                  isTranscribing && "opacity-50 cursor-not-allowed",
                   isRecording
                     ? "bg-destructive text-destructive-foreground animate-pulse-soft shadow-lg"
                     : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-glow"
                 )}
               >
-                {isRecording ? (
+                {isTranscribing ? (
+                  <Loader2 className="h-10 w-10 animate-spin" />
+                ) : isRecording ? (
                   <MicOff className="h-10 w-10" />
                 ) : (
                   <Mic className="h-10 w-10" />
                 )}
               </button>
               <p className="text-sm text-muted-foreground">
-                {isRecording ? "Recording in progress..." : "Tap to start recording"}
+                {isTranscribing 
+                  ? "Transcribing audio..." 
+                  : isRecording 
+                    ? "Recording... Tap to stop and transcribe" 
+                    : "Tap to start recording"}
               </p>
             </div>
 
+            {/* Live Transcript Preview */}
+            {transcript && (
+              <div className="mt-4 p-3 rounded-lg bg-muted/50 border border-border">
+                <p className="text-xs font-medium text-muted-foreground mb-1">Transcription:</p>
+                <p className="text-sm text-foreground line-clamp-3">{transcript}</p>
+              </div>
+            )}
+
             <div className="flex gap-3 pt-4 border-t border-border">
-              <Button variant="outline" className="flex-1" onClick={endSession}>
+              <Button variant="outline" className="flex-1" onClick={endSession} disabled={isTranscribing}>
                 <Square className="h-4 w-4 mr-2" />
                 End Session
               </Button>
@@ -139,7 +233,7 @@ export default function Sessions() {
               <h3 className="font-semibold text-foreground">Session Notes</h3>
             </div>
             <Textarea
-              placeholder="Type your notes here during the session..."
+              placeholder="Type your notes here during the session. Voice transcriptions will be appended automatically..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="min-h-[300px] resize-none"
@@ -170,7 +264,7 @@ export default function Sessions() {
             <div>
               <p className="font-medium text-foreground">Session Completed Successfully</p>
               <p className="text-sm text-muted-foreground">
-                Summary and action points have been generated and saved to client history
+                Summary and action points have been generated and saved to patient history
               </p>
             </div>
           </div>
@@ -191,19 +285,25 @@ export default function Sessions() {
                 <AlertCircle className="h-5 w-5 text-warning" />
                 <h3 className="font-semibold text-foreground">Action Points</h3>
               </div>
-              <ul className="space-y-3">
-                {actionPoints.map((point, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-                      {index + 1}
-                    </span>
-                    <span className="text-foreground">{point}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button className="w-full mt-6 gap-2">
-                Add to Calendar
-              </Button>
+              {actionPoints.length > 0 ? (
+                <ul className="space-y-3">
+                  {actionPoints.map((point, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
+                        {index + 1}
+                      </span>
+                      <span className="text-foreground">{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-muted-foreground">No action points generated.</p>
+              )}
+              {actionPoints.length > 0 && (
+                <Button className="w-full mt-6 gap-2">
+                  Add to Calendar
+                </Button>
+              )}
             </div>
           </div>
 
