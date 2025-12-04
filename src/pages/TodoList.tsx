@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Plus,
   Mic,
@@ -20,11 +20,13 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface TodoItem {
   id: string;
-  text: string;
+  title: string;
   completed: boolean;
   priority: "low" | "medium" | "high";
-  createdAt: Date;
-  dueDate?: string;
+  created_at: string;
+  due_date?: string | null;
+  patient_id?: string | null;
+  session_id?: string | null;
 }
 
 const priorityColors = {
@@ -41,32 +43,8 @@ const priorityLabels = {
 
 export default function TodoList() {
   const { toast } = useToast();
-  const [todos, setTodos] = useState<TodoItem[]>([
-    {
-      id: "1",
-      text: "Review financial documents for Sarah Johnson",
-      completed: false,
-      priority: "high",
-      createdAt: new Date(),
-      dueDate: "Dec 5, 2024",
-    },
-    {
-      id: "2",
-      text: "Draft proposal for Michael Chen",
-      completed: false,
-      priority: "medium",
-      createdAt: new Date(),
-      dueDate: "Dec 6, 2024",
-    },
-    {
-      id: "3",
-      text: "Schedule follow-up with Emma Williams",
-      completed: true,
-      priority: "low",
-      createdAt: new Date(),
-    },
-  ]);
-
+  const [todos, setTodos] = useState<TodoItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [newTaskText, setNewTaskText] = useState("");
   const [newTaskPriority, setNewTaskPriority] = useState<"low" | "medium" | "high">("medium");
   const [isRecording, setIsRecording] = useState(false);
@@ -77,6 +55,37 @@ export default function TodoList() {
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+
+  // Fetch todos from database
+  const fetchTodos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('todos')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setTodos((data || []).map(todo => ({
+        ...todo,
+        completed: todo.status === 'completed',
+        priority: todo.priority as "low" | "medium" | "high",
+      })));
+    } catch (error) {
+      console.error('Error fetching todos:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load todos",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTodos();
+  }, []);
 
   const startRecording = async () => {
     try {
@@ -125,7 +134,6 @@ export default function TodoList() {
     try {
       const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
       
-      // Convert to base64
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve, reject) => {
         reader.onloadend = () => {
@@ -137,7 +145,6 @@ export default function TodoList() {
       reader.readAsDataURL(audioBlob);
       const base64Audio = await base64Promise;
 
-      // Call the Whisper transcription edge function
       const { data, error } = await supabase.functions.invoke('transcribe-audio', {
         body: { audio: base64Audio }
       });
@@ -167,63 +174,136 @@ export default function TodoList() {
     }
   };
 
-  const addTask = () => {
+  const addTask = async () => {
     if (!newTaskText.trim()) return;
 
-    const newTodo: TodoItem = {
-      id: Date.now().toString(),
-      text: newTaskText.trim(),
-      completed: false,
-      priority: newTaskPriority,
-      createdAt: new Date(),
-    };
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
 
-    setTodos([newTodo, ...todos]);
-    setNewTaskText("");
-    setNewTaskPriority("medium");
+      const { data, error } = await supabase
+        .from('todos')
+        .insert({
+          user_id: user.id,
+          title: newTaskText.trim(),
+          priority: newTaskPriority,
+          status: 'pending',
+        })
+        .select()
+        .single();
 
-    toast({
-      title: "Task added",
-      description: "New task has been added to your list",
-    });
+      if (error) throw error;
+
+      setTodos([{ ...data, completed: false, priority: data.priority as "low" | "medium" | "high" }, ...todos]);
+      setNewTaskText("");
+      setNewTaskPriority("medium");
+
+      toast({
+        title: "Task added",
+        description: "New task has been added to your list",
+      });
+    } catch (error) {
+      console.error('Error adding task:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add task",
+        variant: "destructive",
+      });
+    }
   };
 
-  const toggleComplete = (id: string) => {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
+  const toggleComplete = async (id: string) => {
+    const todo = todos.find(t => t.id === id);
+    if (!todo) return;
+
+    const newStatus = todo.completed ? 'pending' : 'completed';
+    
+    try {
+      const { error } = await supabase
+        .from('todos')
+        .update({ 
+          status: newStatus,
+          completed_at: newStatus === 'completed' ? new Date().toISOString() : null
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setTodos(
+        todos.map((t) =>
+          t.id === id ? { ...t, completed: !t.completed } : t
+        )
+      );
+    } catch (error) {
+      console.error('Error updating task:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update task",
+        variant: "destructive",
+      });
+    }
   };
 
-  const deleteTask = (id: string) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
-    toast({
-      title: "Task deleted",
-      description: "Task has been removed from your list",
-    });
+  const deleteTask = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('todos')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setTodos(todos.filter((todo) => todo.id !== id));
+      toast({
+        title: "Task deleted",
+        description: "Task has been removed from your list",
+      });
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete task",
+        variant: "destructive",
+      });
+    }
   };
 
   const startEditing = (todo: TodoItem) => {
     setEditingId(todo.id);
-    setEditText(todo.text);
+    setEditText(todo.title);
   };
 
-  const saveEdit = (id: string) => {
+  const saveEdit = async (id: string) => {
     if (!editText.trim()) return;
 
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, text: editText.trim() } : todo
-      )
-    );
-    setEditingId(null);
-    setEditText("");
+    try {
+      const { error } = await supabase
+        .from('todos')
+        .update({ title: editText.trim() })
+        .eq('id', id);
 
-    toast({
-      title: "Task updated",
-      description: "Your changes have been saved",
-    });
+      if (error) throw error;
+
+      setTodos(
+        todos.map((todo) =>
+          todo.id === id ? { ...todo, title: editText.trim() } : todo
+        )
+      );
+      setEditingId(null);
+      setEditText("");
+
+      toast({
+        title: "Task updated",
+        description: "Your changes have been saved",
+      });
+    } catch (error) {
+      console.error('Error updating task:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update task",
+        variant: "destructive",
+      });
+    }
   };
 
   const cancelEdit = () => {
@@ -239,6 +319,14 @@ export default function TodoList() {
 
   const completedCount = todos.filter((t) => t.completed).length;
   const activeCount = todos.filter((t) => !t.completed).length;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in max-w-3xl">
@@ -403,7 +491,7 @@ export default function TodoList() {
                           todo.completed && "line-through text-muted-foreground"
                         )}
                       >
-                        {todo.text}
+                        {todo.title}
                       </p>
                       <div className="flex items-center gap-3 mt-1">
                         <span
@@ -415,10 +503,10 @@ export default function TodoList() {
                           <Flag className="h-3 w-3" />
                           {priorityLabels[todo.priority]}
                         </span>
-                        {todo.dueDate && (
+                        {todo.due_date && (
                           <span className="flex items-center gap-1 text-xs text-muted-foreground">
                             <Calendar className="h-3 w-3" />
-                            {todo.dueDate}
+                            {new Date(todo.due_date).toLocaleDateString()}
                           </span>
                         )}
                       </div>
