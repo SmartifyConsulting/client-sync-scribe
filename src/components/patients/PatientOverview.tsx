@@ -20,10 +20,20 @@ interface PatientOverviewProps {
   sessions: Session[];
 }
 
+interface MedicationItem {
+  name: string;
+  date: string;
+}
+
+interface ConditionItem {
+  name: string;
+  date: string;
+}
+
 interface SummaryData {
   summary: string;
-  medications: string[];
-  conditions: string[];
+  medications: MedicationItem[];
+  conditions: ConditionItem[];
 }
 
 export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
@@ -199,11 +209,14 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
             <h4 className="font-medium text-foreground">Medications</h4>
           </div>
           {summaryData.medications.length > 0 ? (
-            <ul className="space-y-1.5">
+            <ul className="space-y-2">
               {summaryData.medications.map((med, i) => (
-                <li key={i} className="text-sm text-muted-foreground flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                  {med}
+                <li key={i} className="text-sm flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 mt-1.5 shrink-0" />
+                  <div>
+                    <span className="text-foreground font-medium">{med.name}</span>
+                    <span className="text-muted-foreground ml-2 text-xs">({med.date})</span>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -219,11 +232,14 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
             <h4 className="font-medium text-foreground">Conditions</h4>
           </div>
           {summaryData.conditions.length > 0 ? (
-            <ul className="space-y-1.5">
+            <ul className="space-y-2">
               {summaryData.conditions.map((cond, i) => (
-                <li key={i} className="text-sm text-muted-foreground flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                  {cond}
+                <li key={i} className="text-sm flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+                  <div>
+                    <span className="text-foreground font-medium">{cond.name}</span>
+                    <span className="text-muted-foreground ml-2 text-xs">({cond.date})</span>
+                  </div>
                 </li>
               ))}
             </ul>

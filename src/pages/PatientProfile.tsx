@@ -8,10 +8,14 @@ import {
   Clock,
   Upload,
   Loader2,
+  StickyNote,
+  Save,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { usePatient } from "@/hooks/usePatients";
+import { useState, useEffect } from "react";
 import { useSessions } from "@/hooks/useSessions";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -27,8 +31,25 @@ export default function PatientProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { patient, loading: patientLoading } = usePatient(id || "");
+  const { patient, loading: patientLoading, updatePatient } = usePatient(id || "");
   const { sessions, loading: sessionsLoading } = useSessions(id);
+  
+  const [additionalNotes, setAdditionalNotes] = useState("");
+  const [savingNotes, setSavingNotes] = useState(false);
+
+  // Initialize notes from patient data
+  useEffect(() => {
+    if (patient?.notes) {
+      setAdditionalNotes(patient.notes);
+    }
+  }, [patient?.notes]);
+
+  const handleSaveNotes = async () => {
+    if (!patient) return;
+    setSavingNotes(true);
+    await updatePatient({ notes: additionalNotes });
+    setSavingNotes(false);
+  };
 
   const handleStartSession = () => {
     navigate(`/sessions?patient=${id}`);
@@ -150,6 +171,7 @@ export default function PatientProfile() {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="sessions">Session History</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="notes">Notes</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab - AI Summary */}
@@ -349,11 +371,44 @@ export default function PatientProfile() {
               </div>
             </div>
 
-            {/* Notes */}
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Notes</h3>
-              <p className="text-foreground">{patient.notes || "No notes"}</p>
+          </div>
+        </TabsContent>
+
+        {/* Notes Tab */}
+        <TabsContent value="notes">
+          <div className="rounded-xl border border-border bg-card p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+                  <StickyNote className="h-5 w-5 text-accent-foreground" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground">Additional Notes</h3>
+                  <p className="text-xs text-muted-foreground">Add any additional information about this patient</p>
+                </div>
+              </div>
+              <Button 
+                onClick={handleSaveNotes} 
+                disabled={savingNotes}
+                className="gap-2"
+              >
+                {savingNotes ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                Save Notes
+              </Button>
             </div>
+            <Textarea
+              placeholder="Enter any additional notes, observations, or important information about this patient..."
+              value={additionalNotes}
+              onChange={(e) => setAdditionalNotes(e.target.value)}
+              className="min-h-[300px] resize-none"
+            />
+            <p className="text-xs text-muted-foreground">
+              Last updated: {patient.updated_at ? format(new Date(patient.updated_at), "MMM d, yyyy 'at' h:mm a") : "Never"}
+            </p>
           </div>
         </TabsContent>
       </Tabs>

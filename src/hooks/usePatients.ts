@@ -147,32 +147,56 @@ export function usePatient(id: string) {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchPatient = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('patients')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (error) throw error;
+      setPatient(data);
+    } catch (error: any) {
+      console.error('Error fetching patient:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load patient',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updatePatient = async (updates: Partial<Patient>) => {
+    try {
+      const { data, error } = await supabase
+        .from('patients')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      setPatient(data);
+      toast({ title: 'Success', description: 'Patient updated successfully' });
+      return data;
+    } catch (error: any) {
+      console.error('Error updating patient:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update patient',
+        variant: 'destructive',
+      });
+      return null;
+    }
+  };
+
   useEffect(() => {
-    const fetchPatient = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('patients')
-          .select('*')
-          .eq('id', id)
-          .maybeSingle();
-
-        if (error) throw error;
-        setPatient(data);
-      } catch (error: any) {
-        console.error('Error fetching patient:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to load patient',
-          variant: 'destructive',
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (id) fetchPatient();
   }, [id]);
 
-  return { patient, loading };
+  return { patient, loading, updatePatient, refetch: fetchPatient };
 }

@@ -28,7 +28,7 @@ serve(async (req) => {
     // Build context from patient data and sessions
     const sessionSummaries = sessions
       ?.filter((s: any) => s.status === 'completed')
-      ?.map((s: any) => `- ${s.started_at}: ${s.summary || 'No summary available'}`)
+      ?.map((s: any) => `- Date: ${s.started_at} | Summary: ${s.summary || 'No summary available'} | Transcript: ${s.transcript || 'No transcript'}`)
       ?.join('\n') || 'No completed sessions yet.';
 
     const patientContext = `
@@ -41,7 +41,7 @@ General Practitioner: ${patient.general_practitioner || 'Unknown'}
 Occupation: ${patient.occupation || 'Unknown'}
 Notes: ${patient.notes || 'None'}
 
-Session History:
+Session History (with dates):
 ${sessionSummaries}
 `;
 
@@ -60,22 +60,25 @@ ${sessionSummaries}
 
 Your task is to analyze patient records and session history to provide:
 1. A comprehensive narrative summary of the patient's history from first visit to present
-2. A list of any medications mentioned (even if implied or discussed)
-3. A list of any conditions, symptoms, or health concerns mentioned
+2. A list of any medications mentioned with the DATE they were prescribed or discussed
+3. A list of any conditions, symptoms, or health concerns mentioned with the DATE they were reported
 
 IMPORTANT FORMATTING RULES:
 - In the summary text, wrap ANY medication names with <med>medication name</med> tags
 - In the summary text, wrap ANY conditions/symptoms with <condition>condition name</condition> tags
-- Be thorough in identifying medications and conditions from the session notes
+- For medications array, include the date in format: "Medication Name (Month Year)" e.g. "Ibuprofen (Dec 2024)"
+- For conditions array, include the date in format: "Condition Name (Month Year)" e.g. "Chronic back pain (Nov 2024)"
+- Extract dates from the session history provided
+- If no specific date is available, use "Date unknown"
 
 Example summary format:
-"The patient presented with <condition>chronic back pain</condition> and was prescribed <med>ibuprofen</med> for pain management. Follow-up sessions addressed <condition>anxiety</condition> symptoms..."
+"The patient presented with <condition>chronic back pain</condition> in November 2024 and was prescribed <med>ibuprofen</med> for pain management. Follow-up sessions addressed <condition>anxiety</condition> symptoms..."
 
 Respond in JSON format:
 {
   "summary": "Comprehensive narrative with <med> and <condition> tags inline",
-  "medications": ["medication1", "medication2"],
-  "conditions": ["condition1", "condition2"]
+  "medications": [{"name": "Ibuprofen", "date": "Dec 2024"}],
+  "conditions": [{"name": "Chronic back pain", "date": "Nov 2024"}]
 }`,
           },
           {
@@ -98,13 +101,27 @@ Respond in JSON format:
                   },
                   medications: {
                     type: "array",
-                    items: { type: "string" },
-                    description: "List of all medications mentioned",
+                    items: {
+                      type: "object",
+                      properties: {
+                        name: { type: "string", description: "Medication name" },
+                        date: { type: "string", description: "Date prescribed or discussed (e.g., 'Dec 2024')" },
+                      },
+                      required: ["name", "date"],
+                    },
+                    description: "List of all medications with dates",
                   },
                   conditions: {
                     type: "array",
-                    items: { type: "string" },
-                    description: "List of all conditions/symptoms mentioned",
+                    items: {
+                      type: "object",
+                      properties: {
+                        name: { type: "string", description: "Condition or symptom name" },
+                        date: { type: "string", description: "Date first reported (e.g., 'Nov 2024')" },
+                      },
+                      required: ["name", "date"],
+                    },
+                    description: "List of all conditions/symptoms with dates",
                   },
                 },
                 required: ["summary", "medications", "conditions"],
