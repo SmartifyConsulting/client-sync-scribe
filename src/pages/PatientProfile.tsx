@@ -7,9 +7,7 @@ import {
   FileText,
   Clock,
   Upload,
-  MoreVertical,
   Loader2,
-  CheckCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,6 +15,7 @@ import { usePatient } from "@/hooks/usePatients";
 import { useSessions } from "@/hooks/useSessions";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { SessionCard } from "@/components/patients/SessionCard";
 
 const mockDocuments = [
   { id: "1", name: "Financial Statement Q3.pdf", type: "Report", date: "Nov 15, 2024" },
@@ -158,54 +157,7 @@ export default function PatientProfile() {
             </div>
           ) : (
             completedSessions.map((session, index) => (
-              <div
-                key={session.id}
-                className="rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-md"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                      <Clock className="h-5 w-5 text-accent-foreground" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">
-                        {format(new Date(session.started_at), "MMM d, yyyy")}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {format(new Date(session.started_at), "h:mm a")}
-                        {session.duration_minutes && ` · ${session.duration_minutes} min`}
-                      </p>
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </div>
-                
-                {session.summary && (
-                  <p className="mt-4 text-sm text-muted-foreground">{session.summary}</p>
-                )}
-                
-                {session.action_points && session.action_points.length > 0 && (
-                  <div className="mt-4">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Action Points
-                    </p>
-                    <ul className="mt-2 space-y-1">
-                      {session.action_points.map((point, i) => (
-                        <li
-                          key={i}
-                          className="flex items-center gap-2 text-sm text-foreground"
-                        >
-                          <CheckCircle className="h-4 w-4 text-success shrink-0" />
-                          {point}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
+              <SessionCard key={session.id} session={session} index={index} />
             ))
           )}
         </TabsContent>
