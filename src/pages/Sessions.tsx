@@ -169,28 +169,29 @@ export default function Sessions() {
   };
 
   const endSession = async () => {
+    console.log("=== endSession called ===");
+    console.log("isRecording:", isRecording, "isTranscribing:", isTranscribing);
+    
     if (isRecording) {
+      // If still recording, set flag and stop - let transcription callback handle completion
+      console.log("Still recording, setting flag and stopping...");
+      shouldEndSessionRef.current = true;
       stopRecording();
+      // Don't proceed - onTranscriptionComplete will call handleSessionComplete
+      return;
     }
     
-    setSessionState("processing");
-    
-    // Combine transcript and notes for AI processing
-    const fullContent = [transcript, notes].filter(Boolean).join('\n\n');
-    
-    if (currentSessionId && fullContent) {
-      const result = await completeSession(currentSessionId, fullContent, notes);
-      if (result) {
-        setSummary(result.summary || "Session completed successfully.");
-        setActionPoints(result.action_points || []);
-      }
-    } else {
-      // Fallback if no content
-      setSummary("Session completed. No content was recorded or noted.");
-      setActionPoints([]);
+    if (isTranscribing) {
+      // If transcribing, set flag and wait for callback
+      console.log("Transcribing in progress, setting flag...");
+      shouldEndSessionRef.current = true;
+      return;
     }
     
-    setSessionState("completed");
+    // No recording/transcription in progress - complete immediately
+    console.log("No recording in progress, completing immediately");
+    const fullContent = latestTranscriptRef.current || transcript || notes;
+    await handleSessionComplete(fullContent || '');
   };
 
   return (
