@@ -38,7 +38,7 @@ export default function Sessions() {
   const [actionPoints, setActionPoints] = useState<string[]>([]);
   const [sessionDuration, setSessionDuration] = useState(0);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const shouldEndSessionRef = useRef(false);
+  const [pendingCompletion, setPendingCompletion] = useState(false);
   const latestTranscriptRef = useRef<string>("");
   const currentSessionIdRef = useRef<string | null>(null);
   const notesRef = useRef<string>("");
@@ -113,7 +113,8 @@ export default function Sessions() {
     }
     
     setSessionState("completed");
-    shouldEndSessionRef.current = false;
+    setSessionState("completed");
+    setPendingCompletion(false);
     console.log("=== handleSessionComplete END ===");
   }, [completeSession]);
 
@@ -129,25 +130,23 @@ export default function Sessions() {
     patientName: currentPatient?.name,
     doctorName: "Dr. Georgia Adams",
     onTranscriptionComplete: (text) => {
-      console.log("=== onTranscriptionComplete START ===");
+      console.log("=== onTranscriptionComplete ===");
       console.log("text length:", text?.length);
-      console.log("shouldEndSessionRef.current:", shouldEndSessionRef.current);
-      console.log("currentSessionIdRef.current:", currentSessionIdRef.current);
       
-      // Store transcript and append to notes
+      // Store transcript
       latestTranscriptRef.current = text;
       setNotes(prev => prev ? `${prev}\n\n${text}` : text);
-      
-      // Auto-end session if stop was pressed
-      if (shouldEndSessionRef.current) {
-        console.log("Condition met! Calling handleSessionComplete...");
-        handleSessionComplete(text);
-      } else {
-        console.log("shouldEndSessionRef is false, NOT calling handleSessionComplete");
-      }
-      console.log("=== onTranscriptionComplete END ===");
     }
   });
+
+  // Watch for transcription completion when pending session end
+  useEffect(() => {
+    if (pendingCompletion && !isRecording && !isTranscribing) {
+      console.log("Pending completion triggered - transcription done");
+      const transcriptToUse = latestTranscriptRef.current || transcript;
+      handleSessionComplete(transcriptToUse || '');
+    }
+  }, [pendingCompletion, isRecording, isTranscribing, transcript, handleSessionComplete]);
 
   // Session timer
   useEffect(() => {
@@ -187,10 +186,6 @@ export default function Sessions() {
     console.log("=== toggleRecording called ===");
     console.log("isRecording:", isRecording);
     if (isRecording) {
-      // Set flag to auto-end session after transcription completes
-      console.log("Setting shouldEndSessionRef to true");
-      shouldEndSessionRef.current = true;
-      console.log("shouldEndSessionRef.current after set:", shouldEndSessionRef.current);
       stopRecording();
     } else {
       startRecording();
@@ -202,18 +197,17 @@ export default function Sessions() {
     console.log("isRecording:", isRecording, "isTranscribing:", isTranscribing);
     
     if (isRecording) {
-      // If still recording, set flag and stop - let transcription callback handle completion
-      console.log("Still recording, setting flag and stopping...");
-      shouldEndSessionRef.current = true;
+      // Stop recording and set pending flag
+      console.log("Still recording, stopping and setting pending...");
       stopRecording();
-      // Don't proceed - onTranscriptionComplete will call handleSessionComplete
+      setPendingCompletion(true);
       return;
     }
     
     if (isTranscribing) {
-      // If transcribing, set flag and wait for callback
-      console.log("Transcribing in progress, setting flag...");
-      shouldEndSessionRef.current = true;
+      // Wait for transcription to complete
+      console.log("Transcribing in progress, setting pending...");
+      setPendingCompletion(true);
       return;
     }
     
