@@ -302,14 +302,31 @@ export default function Sessions() {
             </div>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Transcription */}
+            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <Mic className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-foreground">Transcription</h3>
+              </div>
+              <div className="max-h-[250px] overflow-y-auto">
+                {transcript ? (
+                  <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">{transcript}</p>
+                ) : (
+                  <p className="text-muted-foreground italic">No transcription recorded.</p>
+                )}
+              </div>
+            </div>
+
             {/* Summary */}
             <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
               <div className="flex items-center gap-3 mb-4">
                 <Sparkles className="h-5 w-5 text-primary" />
                 <h3 className="font-semibold text-foreground">AI Summary</h3>
               </div>
-              <p className="text-muted-foreground leading-relaxed">{summary}</p>
+              <div className="max-h-[250px] overflow-y-auto">
+                <p className="text-muted-foreground leading-relaxed">{summary}</p>
+              </div>
             </div>
 
             {/* Action Points */}
@@ -318,22 +335,24 @@ export default function Sessions() {
                 <AlertCircle className="h-5 w-5 text-warning" />
                 <h3 className="font-semibold text-foreground">Action Points</h3>
               </div>
-              {actionPoints.length > 0 ? (
-                <ul className="space-y-3">
-                  {actionPoints.map((point, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-                        {index + 1}
-                      </span>
-                      <span className="text-foreground">{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-muted-foreground">No action points generated.</p>
-              )}
+              <div className="max-h-[200px] overflow-y-auto">
+                {actionPoints.length > 0 ? (
+                  <ul className="space-y-3">
+                    {actionPoints.map((point, index) => (
+                      <li key={index} className="flex items-start gap-3">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
+                          {index + 1}
+                        </span>
+                        <span className="text-foreground">{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-muted-foreground">No action points generated.</p>
+                )}
+              </div>
               {actionPoints.length > 0 && (
-                <Button className="w-full mt-6 gap-2">
+                <Button className="w-full mt-4 gap-2" size="sm">
                   Add to Calendar
                 </Button>
               )}
