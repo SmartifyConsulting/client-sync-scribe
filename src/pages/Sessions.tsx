@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
+import { AudioWaveform } from "@/components/sessions/AudioWaveform";
 import { useSessions } from "@/hooks/useSessions";
 import { usePatients } from "@/hooks/usePatients";
 
@@ -208,6 +209,16 @@ export default function Sessions() {
                     ? "Recording... Tap to stop and transcribe" 
                     : "Tap to start recording"}
               </p>
+              
+              {/* Audio Waveform Visualizer */}
+              {(isRecording || isTranscribing) && (
+                <div className="w-full max-w-xs mt-4">
+                  <AudioWaveform isRecording={isRecording} />
+                  {isTranscribing && (
+                    <p className="text-xs text-center text-muted-foreground mt-2">Processing audio...</p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Live Transcript Preview */}
