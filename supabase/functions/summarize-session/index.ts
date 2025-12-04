@@ -6,14 +6,20 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log("summarize-session function called");
+  
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { notes, transcript } = await req.json();
+    const body = await req.json();
+    console.log("Request body received:", JSON.stringify(body).substring(0, 200));
+    
+    const { notes, transcript } = body;
     
     if (!notes && !transcript) {
+      console.log("No notes or transcript provided");
       return new Response(
         JSON.stringify({ error: "Notes or transcript required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -22,6 +28,7 @@ serve(async (req) => {
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
+      console.error("LOVABLE_API_KEY is not configured");
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
