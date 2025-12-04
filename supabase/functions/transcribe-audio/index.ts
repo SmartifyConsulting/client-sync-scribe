@@ -37,7 +37,7 @@ function processBase64Chunks(base64String: string, chunkSize = 32768): Uint8Arra
 }
 
 // Format transcript with speaker labels using AI
-async function formatWithSpeakerLabels(rawText: string, apiKey: string): Promise<string> {
+async function formatWithSpeakerLabels(rawText: string, patientName: string, doctorName: string): Promise<string> {
   try {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -46,6 +46,7 @@ async function formatWithSpeakerLabels(rawText: string, apiKey: string): Promise
     }
 
     console.log("Formatting transcript with speaker labels...");
+    console.log("Patient name:", patientName, "Doctor name:", doctorName);
     
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -62,20 +63,20 @@ async function formatWithSpeakerLabels(rawText: string, apiKey: string): Promise
 
 Rules:
 1. Identify different speakers based on context, speech patterns, and conversation flow
-2. Label speakers as "Practitioner:" and "Patient:" (or "Speaker 1:", "Speaker 2:" if unclear)
+2. Label the doctor/practitioner as "${doctorName}:" and the patient as "${patientName}:"
 3. Each speaker's turn should start on a new line with their label
 4. Preserve all the original content - do not summarize or remove anything
 5. If you cannot determine speaker changes, use your best judgment based on conversational flow
 6. Add line breaks between speaker turns for readability
 
 Example output format:
-Practitioner: Hello, how are you feeling today?
+${doctorName}: Hello, how are you feeling today?
 
-Patient: I've been experiencing some headaches lately.
+${patientName}: I've been experiencing some headaches lately.
 
-Practitioner: When did these headaches start?
+${doctorName}: When did these headaches start?
 
-Patient: About two weeks ago.`,
+${patientName}: About two weeks ago.`,
           },
           {
             role: "user",
@@ -112,7 +113,7 @@ serve(async (req) => {
   }
 
   try {
-    const { audio } = await req.json();
+    const { audio, patientName, doctorName } = await req.json();
     
     if (!audio) {
       console.error('No audio data provided');
@@ -124,6 +125,10 @@ serve(async (req) => {
       console.error('OPENAI_API_KEY is not configured');
       throw new Error('OPENAI_API_KEY is not configured');
     }
+    
+    // Default names if not provided
+    const patient = patientName || 'Patient';
+    const doctor = doctorName || 'Doctor';
 
     console.log('Processing audio data, length:', audio.length);
 
@@ -163,7 +168,7 @@ serve(async (req) => {
     const rawText = result.text || '';
     
     // Format with speaker labels using AI
-    const formattedText = await formatWithSpeakerLabels(rawText, OPENAI_API_KEY);
+    const formattedText = await formatWithSpeakerLabels(rawText, patient, doctor);
 
     return new Response(
       JSON.stringify({ text: formattedText, raw: rawText }),

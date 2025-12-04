@@ -4,12 +4,13 @@ import { useToast } from '@/hooks/use-toast';
 
 interface UseAudioRecordingOptions {
   onTranscriptionComplete?: (text: string) => void;
+  patientName?: string;
+  doctorName?: string;
 }
 
 export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
   const { toast } = useToast();
   const [isRecording, setIsRecording] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -60,9 +61,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
         }
       };
 
-      mediaRecorder.start(1000); // Collect data every second
+      mediaRecorder.start(1000);
       setIsRecording(true);
-      setIsPaused(false);
       
       toast({
         title: "Recording Started",
@@ -78,33 +78,10 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
     }
   }, [toast]);
 
-  const pauseRecording = useCallback(() => {
-    if (mediaRecorderRef.current && isRecording && !isPaused) {
-      mediaRecorderRef.current.pause();
-      setIsPaused(true);
-      toast({
-        title: "Recording Paused",
-        description: "Tap resume to continue recording",
-      });
-    }
-  }, [isRecording, isPaused, toast]);
-
-  const resumeRecording = useCallback(() => {
-    if (mediaRecorderRef.current && isRecording && isPaused) {
-      mediaRecorderRef.current.resume();
-      setIsPaused(false);
-      toast({
-        title: "Recording Resumed",
-        description: "Continue speaking",
-      });
-    }
-  }, [isRecording, isPaused, toast]);
-
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-      setIsPaused(false);
     }
   }, [isRecording]);
 
@@ -127,7 +104,11 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
       console.log('Sending audio for transcription, size:', base64Audio.length);
 
       const { data, error } = await supabase.functions.invoke('transcribe-audio', {
-        body: { audio: base64Audio },
+        body: { 
+          audio: base64Audio,
+          patientName: options.patientName,
+          doctorName: options.doctorName,
+        },
       });
 
       if (error) {
@@ -173,13 +154,10 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
 
   return {
     isRecording,
-    isPaused,
     isTranscribing,
     transcript,
     audioUrl,
     startRecording,
-    pauseRecording,
-    resumeRecording,
     stopRecording,
     clearTranscript,
   };
