@@ -193,6 +193,7 @@ export type Database = {
       sessions: {
         Row: {
           action_points: Json | null
+          audio_url: string | null
           created_at: string
           duration_minutes: number | null
           ended_at: string | null
@@ -209,6 +210,7 @@ export type Database = {
         }
         Insert: {
           action_points?: Json | null
+          audio_url?: string | null
           created_at?: string
           duration_minutes?: number | null
           ended_at?: string | null
@@ -225,6 +227,7 @@ export type Database = {
         }
         Update: {
           action_points?: Json | null
+          audio_url?: string | null
           created_at?: string
           duration_minutes?: number | null
           ended_at?: string | null
@@ -245,6 +248,66 @@ export type Database = {
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      todos: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          patient_id: string | null
+          priority: string
+          session_id: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          patient_id?: string | null
+          priority?: string
+          session_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          patient_id?: string | null
+          priority?: string
+          session_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "todos_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "todos_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
             referencedColumns: ["id"]
           },
         ]

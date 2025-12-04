@@ -140,15 +140,19 @@ const completeSession = async (id: string, content: string, additionalNotes?: st
         ? `${content}\n\nAdditional Notes:\n${additionalNotes}`
         : content;
 
+      console.log('Completing session with content length:', fullContent?.length);
+
       // Generate AI summary from transcript/notes
       const { data: summaryData, error: summaryError } = await supabase.functions.invoke('summarize-session', {
-        body: { notes: fullContent, transcript: content },
+        body: { notes: additionalNotes, transcript: content },
       });
 
       if (summaryError) {
         console.error('AI summary error:', summaryError);
         // Continue without AI summary
       }
+
+      console.log('Summary data received:', summaryData);
 
       const startedSession = sessions.find(s => s.id === id);
       const durationMinutes = startedSession 
@@ -166,11 +170,36 @@ const completeSession = async (id: string, content: string, additionalNotes?: st
       if (summaryData && !summaryData.error) {
         updates.summary = summaryData.summary;
         updates.action_points = summaryData.action_points || [];
+        
+        // Auto-add action points to todos
+        if (summaryData.action_points && summaryData.action_points.length > 0) {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const todosToInsert = summaryData.action_points.map((point: string) => ({
+              user_id: user.id,
+              session_id: id,
+              patient_id: startedSession?.patient_id || null,
+              title: point,
+              priority: 'medium',
+              status: 'pending',
+            }));
+            
+            const { error: todoError } = await supabase
+              .from('todos')
+              .insert(todosToInsert);
+            
+            if (todoError) {
+              console.error('Error adding todos:', todoError);
+            } else {
+              console.log('Added', todosToInsert.length, 'todos from session');
+            }
+          }
+        }
       }
 
       const result = await updateSession(id, updates);
       if (result) {
-        toast({ title: 'Session Completed', description: 'Session has been saved with AI summary' });
+        toast({ title: 'Session Completed', description: 'Session saved with AI summary and action items added to to-do list' });
       }
       return result;
     } catch (error: any) {

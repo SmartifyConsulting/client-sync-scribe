@@ -25,7 +25,9 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // Prioritize transcript over notes for better context
     const content = transcript || notes;
+    console.log("Processing content for summary, length:", content?.length);
     
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -38,22 +40,28 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a professional medical/clinical assistant that creates concise session summaries. 
-Your task is to analyze session notes or transcripts and provide:
-1. A professional summary (single paragraph, 2-4 sentences)
-2. A list of action points extracted from the session
+            content: `You are a professional medical/clinical assistant that creates detailed session summaries. 
+
+Your task is to analyze the session transcript or notes and provide:
+1. A comprehensive professional summary (2-4 sentences) that captures the main discussion points, any symptoms/conditions mentioned, treatments discussed, and key decisions made
+2. A list of specific, actionable action points/tasks that were mentioned or should be done as a result of this session
+
+IMPORTANT GUIDELINES:
+- Actually read and analyze the transcript content thoroughly
+- Extract REAL action points mentioned in the conversation (e.g., "patient should take medication X", "schedule follow-up in 2 weeks", "order blood tests")
+- If the transcript is a dialogue, pay attention to what was agreed upon
+- Include medications discussed, tests ordered, lifestyle recommendations, follow-up appointments
+- Make action points specific and actionable (not generic like "follow up")
 
 Respond in JSON format:
 {
-  "summary": "Professional summary paragraph here",
-  "action_points": ["Action point 1", "Action point 2", "Action point 3"]
-}
-
-Keep the summary professional and focused on key discussion points. Action points should be specific and actionable.`,
+  "summary": "Detailed professional summary paragraph that reflects the actual conversation content",
+  "action_points": ["Specific action 1", "Specific action 2", "Specific action 3"]
+}`,
           },
           {
             role: "user",
-            content: `Please analyze this session content and provide a summary with action points:\n\n${content}`,
+            content: `Please analyze this session content thoroughly and provide a detailed summary with specific action points:\n\n${content}`,
           },
         ],
         tools: [
@@ -61,18 +69,18 @@ Keep the summary professional and focused on key discussion points. Action point
             type: "function",
             function: {
               name: "generate_session_summary",
-              description: "Generate a professional summary and action points from session notes",
+              description: "Generate a professional summary and action points from session transcript",
               parameters: {
                 type: "object",
                 properties: {
                   summary: {
                     type: "string",
-                    description: "A professional single-paragraph summary of the session (2-4 sentences)",
+                    description: "A comprehensive professional summary of the session (2-4 sentences) based on actual content discussed",
                   },
                   action_points: {
                     type: "array",
                     items: { type: "string" },
-                    description: "List of specific, actionable tasks extracted from the session",
+                    description: "List of specific, actionable tasks extracted from the session - things that need to be done",
                   },
                 },
                 required: ["summary", "action_points"],
@@ -104,11 +112,14 @@ Keep the summary professional and focused on key discussion points. Action point
     }
 
     const data = await response.json();
+    console.log("AI response received");
     
     // Extract the tool call result
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
     if (toolCall?.function?.arguments) {
       const result = JSON.parse(toolCall.function.arguments);
+      console.log("Summary generated:", result.summary?.substring(0, 100) + "...");
+      console.log("Action points:", result.action_points?.length);
       return new Response(JSON.stringify(result), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
