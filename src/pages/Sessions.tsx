@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import {
@@ -39,12 +39,35 @@ export default function Sessions() {
   const [actionPoints, setActionPoints] = useState<string[]>([]);
   const [sessionDuration, setSessionDuration] = useState(0);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const shouldEndSessionRef = useRef(false);
+  const latestTranscriptRef = useRef<string>("");
 
   const navigate = useNavigate();
   const { patients } = usePatients();
   const { sessions, loading: sessionsLoading, createSession, completeSession } = useSessions();
   
   const currentPatient = patients.find(p => p.id === patientId);
+
+  // Callback to handle session completion after transcription
+  const handleSessionComplete = useCallback(async (transcriptText: string) => {
+    setSessionState("processing");
+    
+    const fullContent = [transcriptText, notes].filter(Boolean).join('\n\n');
+    
+    if (currentSessionId && fullContent) {
+      const result = await completeSession(currentSessionId, fullContent, notes);
+      if (result) {
+        setSummary(result.summary || "Session completed successfully.");
+        setActionPoints(result.action_points || []);
+      }
+    } else {
+      setSummary("Session completed. No content was recorded or noted.");
+      setActionPoints([]);
+    }
+    
+    setSessionState("completed");
+    shouldEndSessionRef.current = false;
+  }, [currentSessionId, notes, completeSession]);
 
   const { 
     isRecording, 
@@ -59,8 +82,14 @@ export default function Sessions() {
     clearTranscript 
   } = useAudioRecording({
     onTranscriptionComplete: (text) => {
-      // Append transcription to notes
+      // Store transcript and append to notes
+      latestTranscriptRef.current = text;
       setNotes(prev => prev ? `${prev}\n\n${text}` : text);
+      
+      // Auto-end session if stop was pressed
+      if (shouldEndSessionRef.current) {
+        handleSessionComplete(text);
+      }
     }
   });
 
@@ -100,6 +129,8 @@ export default function Sessions() {
 
   const toggleRecording = () => {
     if (isRecording) {
+      // Set flag to auto-end session after transcription completes
+      shouldEndSessionRef.current = true;
       stopRecording();
     } else {
       startRecording();
