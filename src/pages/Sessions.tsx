@@ -38,7 +38,7 @@ export default function Sessions() {
   const [actionPoints, setActionPoints] = useState<string[]>([]);
   const [sessionDuration, setSessionDuration] = useState(0);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const [pendingCompletion, setPendingCompletion] = useState(false);
+  const pendingCompletionRef = useRef(false);
   const latestTranscriptRef = useRef<string>("");
   const currentSessionIdRef = useRef<string | null>(null);
   const notesRef = useRef<string>("");
@@ -113,8 +113,7 @@ export default function Sessions() {
     }
     
     setSessionState("completed");
-    setSessionState("completed");
-    setPendingCompletion(false);
+    pendingCompletionRef.current = false;
     console.log("=== handleSessionComplete END ===");
   }, [completeSession]);
 
@@ -132,21 +131,19 @@ export default function Sessions() {
     onTranscriptionComplete: (text) => {
       console.log("=== onTranscriptionComplete ===");
       console.log("text length:", text?.length);
+      console.log("pendingCompletionRef:", pendingCompletionRef.current);
       
       // Store transcript
       latestTranscriptRef.current = text;
       setNotes(prev => prev ? `${prev}\n\n${text}` : text);
+      
+      // If pending completion, trigger it now with the transcript
+      if (pendingCompletionRef.current) {
+        console.log("Pending completion - triggering handleSessionComplete with transcript");
+        handleSessionComplete(text);
+      }
     }
   });
-
-  // Watch for transcription completion when pending session end
-  useEffect(() => {
-    if (pendingCompletion && !isRecording && !isTranscribing) {
-      console.log("Pending completion triggered - transcription done");
-      const transcriptToUse = latestTranscriptRef.current || transcript;
-      handleSessionComplete(transcriptToUse || '');
-    }
-  }, [pendingCompletion, isRecording, isTranscribing, transcript, handleSessionComplete]);
 
   // Session timer
   useEffect(() => {
@@ -196,18 +193,13 @@ export default function Sessions() {
     console.log("=== endSession called ===");
     console.log("isRecording:", isRecording, "isTranscribing:", isTranscribing);
     
-    if (isRecording) {
-      // Stop recording and set pending flag
-      console.log("Still recording, stopping and setting pending...");
-      stopRecording();
-      setPendingCompletion(true);
-      return;
-    }
-    
-    if (isTranscribing) {
-      // Wait for transcription to complete
-      console.log("Transcribing in progress, setting pending...");
-      setPendingCompletion(true);
+    if (isRecording || isTranscribing) {
+      // Set pending flag - onTranscriptionComplete will handle completion
+      console.log("Recording/transcribing in progress, setting pending flag...");
+      pendingCompletionRef.current = true;
+      if (isRecording) {
+        stopRecording();
+      }
       return;
     }
     
