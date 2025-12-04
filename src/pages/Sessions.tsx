@@ -39,6 +39,8 @@ export default function Sessions() {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const shouldEndSessionRef = useRef(false);
   const latestTranscriptRef = useRef<string>("");
+  const currentSessionIdRef = useRef<string | null>(null);
+  const notesRef = useRef<string>("");
 
   const navigate = useNavigate();
   const { patients } = usePatients();
@@ -46,26 +48,45 @@ export default function Sessions() {
   
   const currentPatient = patients.find(p => p.id === patientId);
 
+  // Keep refs in sync with state
+  useEffect(() => {
+    currentSessionIdRef.current = currentSessionId;
+  }, [currentSessionId]);
+
+  useEffect(() => {
+    notesRef.current = notes;
+  }, [notes]);
+
   // Callback to handle session completion after transcription
   const handleSessionComplete = useCallback(async (transcriptText: string) => {
+    console.log("handleSessionComplete called with transcript length:", transcriptText?.length);
+    console.log("currentSessionIdRef:", currentSessionIdRef.current);
+    
     setSessionState("processing");
     
-    const fullContent = [transcriptText, notes].filter(Boolean).join('\n\n');
+    const sessionId = currentSessionIdRef.current;
+    const currentNotes = notesRef.current;
+    const fullContent = [transcriptText, currentNotes].filter(Boolean).join('\n\n');
     
-    if (currentSessionId && fullContent) {
-      const result = await completeSession(currentSessionId, fullContent, notes);
+    console.log("Session ID:", sessionId, "Full content length:", fullContent?.length);
+    
+    if (sessionId && fullContent) {
+      console.log("Calling completeSession...");
+      const result = await completeSession(sessionId, fullContent, currentNotes);
+      console.log("completeSession result:", result);
       if (result) {
         setSummary(result.summary || "Session completed successfully.");
         setActionPoints(result.action_points || []);
       }
     } else {
+      console.log("No session ID or content, skipping completion");
       setSummary("Session completed. No content was recorded or noted.");
       setActionPoints([]);
     }
     
     setSessionState("completed");
     shouldEndSessionRef.current = false;
-  }, [currentSessionId, notes, completeSession]);
+  }, [completeSession]);
 
   const { 
     isRecording, 
@@ -77,14 +98,16 @@ export default function Sessions() {
     clearTranscript 
   } = useAudioRecording({
     patientName: currentPatient?.name,
-    doctorName: "Dr. Georgia Adams", // TODO: Get from user profile
+    doctorName: "Dr. Georgia Adams",
     onTranscriptionComplete: (text) => {
+      console.log("onTranscriptionComplete called, text length:", text?.length);
       // Store transcript and append to notes
       latestTranscriptRef.current = text;
       setNotes(prev => prev ? `${prev}\n\n${text}` : text);
       
       // Auto-end session if stop was pressed
       if (shouldEndSessionRef.current) {
+        console.log("shouldEndSessionRef is true, calling handleSessionComplete");
         handleSessionComplete(text);
       }
     }
