@@ -100,16 +100,23 @@ export default function Sessions() {
     patientName: currentPatient?.name,
     doctorName: "Dr. Georgia Adams",
     onTranscriptionComplete: (text) => {
-      console.log("onTranscriptionComplete called, text length:", text?.length);
+      console.log("=== onTranscriptionComplete START ===");
+      console.log("text length:", text?.length);
+      console.log("shouldEndSessionRef.current:", shouldEndSessionRef.current);
+      console.log("currentSessionIdRef.current:", currentSessionIdRef.current);
+      
       // Store transcript and append to notes
       latestTranscriptRef.current = text;
       setNotes(prev => prev ? `${prev}\n\n${text}` : text);
       
       // Auto-end session if stop was pressed
       if (shouldEndSessionRef.current) {
-        console.log("shouldEndSessionRef is true, calling handleSessionComplete");
+        console.log("Condition met! Calling handleSessionComplete...");
         handleSessionComplete(text);
+      } else {
+        console.log("shouldEndSessionRef is false, NOT calling handleSessionComplete");
       }
+      console.log("=== onTranscriptionComplete END ===");
     }
   });
 
@@ -148,9 +155,13 @@ export default function Sessions() {
   };
 
   const toggleRecording = () => {
+    console.log("=== toggleRecording called ===");
+    console.log("isRecording:", isRecording);
     if (isRecording) {
       // Set flag to auto-end session after transcription completes
+      console.log("Setting shouldEndSessionRef to true");
       shouldEndSessionRef.current = true;
+      console.log("shouldEndSessionRef.current after set:", shouldEndSessionRef.current);
       stopRecording();
     } else {
       startRecording();
