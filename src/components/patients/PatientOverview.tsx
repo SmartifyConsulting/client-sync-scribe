@@ -169,7 +169,7 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
             </div>
             <div>
               <h3 className="font-semibold text-foreground">AI Patient Summary</h3>
-              <p className="text-xs text-muted-foreground">Generated from complete patient history</p>
+              <p className="text-xs text-muted-foreground">Summarized from all session transcriptions and history</p>
             </div>
           </div>
           <Button variant="ghost" size="sm" onClick={generateSummary} className="gap-2">
