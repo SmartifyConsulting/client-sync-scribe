@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import {
@@ -59,8 +60,9 @@ export default function Sessions() {
 
   // Callback to handle session completion after transcription
   const handleSessionComplete = useCallback(async (transcriptText: string) => {
-    console.log("handleSessionComplete called with transcript length:", transcriptText?.length);
-    console.log("currentSessionIdRef:", currentSessionIdRef.current);
+    console.log("=== handleSessionComplete START ===");
+    console.log("transcriptText length:", transcriptText?.length);
+    console.log("sessionId:", currentSessionIdRef.current);
     
     setSessionState("processing");
     
@@ -68,24 +70,51 @@ export default function Sessions() {
     const currentNotes = notesRef.current;
     const fullContent = [transcriptText, currentNotes].filter(Boolean).join('\n\n');
     
-    console.log("Session ID:", sessionId, "Full content length:", fullContent?.length);
+    console.log("fullContent length:", fullContent?.length);
     
-    if (sessionId && fullContent) {
-      console.log("Calling completeSession...");
-      const result = await completeSession(sessionId, fullContent, currentNotes);
-      console.log("completeSession result:", result);
-      if (result) {
-        setSummary(result.summary || "Session completed successfully.");
-        setActionPoints(result.action_points || []);
+    if (sessionId) {
+      try {
+        if (fullContent) {
+          console.log("Calling completeSession with content...");
+          const result = await completeSession(sessionId, fullContent, currentNotes);
+          console.log("completeSession result:", result);
+          if (result) {
+            setSummary(result.summary || "Session completed successfully.");
+            setActionPoints(result.action_points || []);
+          }
+        } else {
+          // No content but still need to mark session as completed
+          console.log("No content, marking session as completed without AI...");
+          const { error } = await supabase
+            .from('sessions')
+            .update({ 
+              status: 'completed', 
+              ended_at: new Date().toISOString(),
+              summary: "Session completed. No content was recorded or noted."
+            })
+            .eq('id', sessionId);
+          
+          if (error) console.error("Error updating session:", error);
+          setSummary("Session completed. No content was recorded or noted.");
+          setActionPoints([]);
+        }
+      } catch (error) {
+        console.error("Error in handleSessionComplete:", error);
+        // Still mark as completed even on error
+        await supabase
+          .from('sessions')
+          .update({ status: 'completed', ended_at: new Date().toISOString() })
+          .eq('id', sessionId);
       }
     } else {
-      console.log("No session ID or content, skipping completion");
+      console.log("No session ID!");
       setSummary("Session completed. No content was recorded or noted.");
       setActionPoints([]);
     }
     
     setSessionState("completed");
     shouldEndSessionRef.current = false;
+    console.log("=== handleSessionComplete END ===");
   }, [completeSession]);
 
   const { 
