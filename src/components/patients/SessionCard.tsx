@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Clock,
-  MoreVertical,
   CheckCircle,
   Mic,
   Sparkles,
@@ -11,7 +10,6 @@ import {
   ChevronUp,
   ExternalLink,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { Session } from "@/hooks/useSessions";
 
@@ -21,12 +19,22 @@ interface SessionCardProps {
 }
 
 export function SessionCard({ session, index }: SessionCardProps) {
+  const navigate = useNavigate();
   const [isTranscriptOpen, setIsTranscriptOpen] = useState(false);
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking on interactive elements
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('[data-no-navigate]')) {
+      return;
+    }
+    navigate(`/sessions/${session.id}`);
+  };
+
   return (
-    <Link
-      to={`/sessions/${session.id}`}
-      className="block rounded-xl border border-border bg-card p-5 transition-all hover:shadow-md hover:border-primary/30 animate-fade-in group"
+    <div
+      onClick={handleCardClick}
+      className="rounded-xl border border-border bg-card p-5 transition-all hover:shadow-md hover:border-primary/30 animate-fade-in group cursor-pointer"
       style={{ animationDelay: `${index * 100}ms` }}
     >
       <div className="flex items-start justify-between">
@@ -71,7 +79,7 @@ export function SessionCard({ session, index }: SessionCardProps) {
             </button>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <div className="mt-2 p-3 rounded-lg bg-muted/30 border border-border max-h-[200px] overflow-y-auto">
+            <div data-no-navigate className="mt-2 p-3 rounded-lg bg-muted/30 border border-border max-h-[200px] overflow-y-auto">
               <p className="text-sm text-muted-foreground whitespace-pre-wrap">{session.transcript}</p>
             </div>
           </CollapsibleContent>
@@ -97,6 +105,6 @@ export function SessionCard({ session, index }: SessionCardProps) {
           </ul>
         </div>
       )}
-    </Link>
+    </div>
   );
 }
