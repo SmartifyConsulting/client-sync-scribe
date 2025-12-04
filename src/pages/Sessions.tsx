@@ -223,9 +223,14 @@ export default function Sessions() {
 
             {/* Live Transcript Preview */}
             {transcript && (
-              <div className="mt-4 p-3 rounded-lg bg-muted/50 border border-border">
-                <p className="text-xs font-medium text-muted-foreground mb-1">Transcription:</p>
-                <p className="text-sm text-foreground line-clamp-3">{transcript}</p>
+              <div className="mt-4 p-4 rounded-lg bg-muted/50 border border-border">
+                <div className="flex items-center gap-2 mb-2">
+                  <FileText className="h-4 w-4 text-primary" />
+                  <p className="text-xs font-medium text-muted-foreground">Live Transcription</p>
+                </div>
+                <div className="max-h-[150px] overflow-y-auto">
+                  <p className="text-sm text-foreground whitespace-pre-wrap">{transcript}</p>
+                </div>
               </div>
             )}
 
