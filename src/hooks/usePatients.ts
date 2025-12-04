@@ -27,6 +27,7 @@ export interface Patient {
   next_of_kin_phone: string | null;
   next_of_kin_email: string | null;
   general_practitioner: string | null;
+  last_visit?: string | null;
 }
 
 export function usePatients() {
@@ -43,7 +44,27 @@ export function usePatients() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setPatients(data || []);
+
+      // Fetch last visit for each patient
+      const patientsWithLastVisit = await Promise.all(
+        (data || []).map(async (patient) => {
+          const { data: sessionData } = await supabase
+            .from('sessions')
+            .select('started_at')
+            .eq('patient_id', patient.id)
+            .eq('status', 'completed')
+            .order('started_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          
+          return {
+            ...patient,
+            last_visit: sessionData?.started_at || null,
+          };
+        })
+      );
+
+      setPatients(patientsWithLastVisit);
     } catch (error: any) {
       console.error('Error fetching patients:', error);
       toast({

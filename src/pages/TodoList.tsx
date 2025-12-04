@@ -17,6 +17,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface TodoItem {
   id: string;
@@ -311,6 +317,34 @@ export default function TodoList() {
     setEditText("");
   };
 
+  const updatePriority = async (id: string, newPriority: "low" | "medium" | "high") => {
+    try {
+      const { error } = await supabase
+        .from('todos')
+        .update({ priority: newPriority })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setTodos(
+        todos.map((todo) =>
+          todo.id === id ? { ...todo, priority: newPriority } : todo
+        )
+      );
+      toast({
+        title: "Priority updated",
+        description: `Task priority changed to ${priorityLabels[newPriority]}`,
+      });
+    } catch (error) {
+      console.error('Error updating priority:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update priority",
+        variant: "destructive",
+      });
+    }
+  };
+
   const filteredTodos = todos.filter((todo) => {
     if (filter === "active") return !todo.completed;
     if (filter === "completed") return todo.completed;
@@ -494,15 +528,39 @@ export default function TodoList() {
                         {todo.title}
                       </p>
                       <div className="flex items-center gap-3 mt-1">
-                        <span
-                          className={cn(
-                            "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium",
-                            priorityColors[todo.priority]
-                          )}
-                        >
-                          <Flag className="h-3 w-3" />
-                          {priorityLabels[todo.priority]}
-                        </span>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              className={cn(
+                                "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity",
+                                priorityColors[todo.priority]
+                              )}
+                            >
+                              <Flag className="h-3 w-3" />
+                              {priorityLabels[todo.priority]}
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start">
+                            {(["low", "medium", "high"] as const).map((p) => (
+                              <DropdownMenuItem
+                                key={p}
+                                onClick={() => updatePriority(todo.id, p)}
+                                className={cn(
+                                  "gap-2",
+                                  todo.priority === p && "bg-accent"
+                                )}
+                              >
+                                <Flag className={cn(
+                                  "h-3 w-3",
+                                  p === "high" && "text-destructive",
+                                  p === "medium" && "text-warning",
+                                  p === "low" && "text-muted-foreground"
+                                )} />
+                                {priorityLabels[p]}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                         {todo.due_date && (
                           <span className="flex items-center gap-1 text-xs text-muted-foreground">
                             <Calendar className="h-3 w-3" />

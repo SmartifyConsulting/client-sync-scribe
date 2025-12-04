@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock } from "lucide-react";
+import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock, X, CalendarIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -20,16 +20,35 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Label } from "@/components/ui/label";
 
 export default function Patients() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { patients, loading, createPatient, deletePatient } = usePatients();
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
+  const [filterOpen, setFilterOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newPatient, setNewPatient] = useState({
     name: "",
@@ -53,9 +72,34 @@ export default function Patients() {
   });
   const [creating, setCreating] = useState(false);
 
-  const filteredPatients = patients.filter((patient) =>
-    patient.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredPatients = patients.filter((patient) => {
+    // Name filter
+    if (searchQuery && !patient.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false;
+    }
+    // Status filter
+    if (statusFilter !== "all" && patient.status !== statusFilter) {
+      return false;
+    }
+    // Date range filter (using created_at)
+    const patientDate = new Date(patient.created_at);
+    if (dateFrom && patientDate < dateFrom) {
+      return false;
+    }
+    if (dateTo && patientDate > dateTo) {
+      return false;
+    }
+    return true;
+  });
+
+  const clearFilters = () => {
+    setStatusFilter("all");
+    setDateFrom(undefined);
+    setDateTo(undefined);
+    setFilterOpen(false);
+  };
+
+  const hasActiveFilters = statusFilter !== "all" || dateFrom || dateTo;
 
   const handleCreatePatient = async () => {
     if (!newPatient.name.trim()) {
@@ -354,10 +398,82 @@ export default function Patients() {
             className="pl-10"
           />
         </div>
-        <Button variant="outline" className="gap-2">
-          <Filter className="h-4 w-4" />
-          Filter
-        </Button>
+        <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className={cn("gap-2", hasActiveFilters && "border-primary text-primary")}>
+              <Filter className="h-4 w-4" />
+              Filter
+              {hasActiveFilters && (
+                <span className="ml-1 rounded-full bg-primary text-primary-foreground px-1.5 py-0.5 text-xs">
+                  {[statusFilter !== "all", dateFrom, dateTo].filter(Boolean).length}
+                </span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80" align="end">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium">Filters</h4>
+                {hasActiveFilters && (
+                  <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 text-xs">
+                    <X className="h-3 w-3 mr-1" />
+                    Clear all
+                  </Button>
+                )}
+              </div>
+              
+              {/* Status Filter */}
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All statuses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All statuses</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Date Range Filter */}
+              <div className="space-y-2">
+                <Label>Date Added (From)</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateFrom ? format(dateFrom, "PPP") : "Select date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={dateFrom} onSelect={setDateFrom} />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Date Added (To)</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateTo ? format(dateTo, "PPP") : "Select date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={dateTo} onSelect={setDateTo} />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <Button className="w-full" onClick={() => setFilterOpen(false)}>
+                Apply Filters
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Patient List */}
@@ -379,6 +495,9 @@ export default function Patients() {
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">
                     Added
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">
+                    Last Visit
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">
                     Status
@@ -429,6 +548,12 @@ export default function Patients() {
                     </td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">
                       {new Date(patient.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
+                      {patient.last_visit 
+                        ? new Date(patient.last_visit).toLocaleDateString() 
+                        : <span className="text-muted-foreground/50">No visits</span>
+                      }
                     </td>
                     <td className="px-6 py-4">
                       <span
