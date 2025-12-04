@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -18,6 +18,12 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
+  
+  // Use refs to always have latest options
+  const optionsRef = useRef(options);
+  useEffect(() => {
+    optionsRef.current = options;
+  }, [options]);
 
   const startRecording = useCallback(async () => {
     try {
@@ -106,8 +112,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
       const { data, error } = await supabase.functions.invoke('transcribe-audio', {
         body: { 
           audio: base64Audio,
-          patientName: options.patientName,
-          doctorName: options.doctorName,
+          patientName: optionsRef.current.patientName,
+          doctorName: optionsRef.current.doctorName,
         },
       });
 
@@ -121,10 +127,11 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
 
       const transcribedText = data?.text || '';
       
-      // Append to existing transcript
+      // Append to existing transcript and call callback with latest ref
       setTranscript(prev => {
         const newTranscript = prev ? `${prev}\n\n${transcribedText}` : transcribedText;
-        options.onTranscriptionComplete?.(newTranscript);
+        console.log('Calling onTranscriptionComplete with text length:', newTranscript.length);
+        optionsRef.current.onTranscriptionComplete?.(newTranscript);
         return newTranscript;
       });
 
