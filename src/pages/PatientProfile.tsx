@@ -16,6 +16,7 @@ import { useSessions } from "@/hooks/useSessions";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCard } from "@/components/patients/SessionCard";
+import { PatientOverview } from "@/components/patients/PatientOverview";
 
 const mockDocuments = [
   { id: "1", name: "Financial Statement Q3.pdf", type: "Report", date: "Nov 15, 2024" },
@@ -143,12 +144,18 @@ export default function PatientProfile() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="sessions" className="space-y-6">
+      <Tabs defaultValue="details" className="space-y-6">
         <TabsList className="bg-muted/50">
+          <TabsTrigger value="details">Details</TabsTrigger>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="sessions">Session History</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
-          <TabsTrigger value="details">Details</TabsTrigger>
         </TabsList>
+
+        {/* Overview Tab - AI Summary */}
+        <TabsContent value="overview">
+          <PatientOverview patient={patient} sessions={sessions} />
+        </TabsContent>
 
         <TabsContent value="sessions" className="space-y-4">
           {sessionsLoading ? (
