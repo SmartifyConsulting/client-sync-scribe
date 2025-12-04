@@ -16,7 +16,9 @@ import {
   ArrowLeft,
   Volume2,
   Calendar,
+  Pill,
 } from "lucide-react";
+import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -38,6 +40,8 @@ export default function Sessions() {
   const [actionPoints, setActionPoints] = useState<string[]>([]);
   const [sessionDuration, setSessionDuration] = useState(0);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [showPrescriptionEditor, setShowPrescriptionEditor] = useState(false);
+  const [prescription, setPrescription] = useState<string | null>(null);
   const pendingCompletionRef = useRef(false);
   const latestTranscriptRef = useRef<string>("");
   const currentSessionIdRef = useRef<string | null>(null);
@@ -169,6 +173,7 @@ export default function Sessions() {
     setSummary("");
     setActionPoints([]);
     setSessionDuration(0);
+    setPrescription(null);
     clearTranscript();
     
     if (patientId) {
@@ -177,6 +182,12 @@ export default function Sessions() {
         setCurrentSessionId(session.id);
       }
     }
+  };
+
+  const handleSavePrescription = (prescriptionData: { content: string; rawTranscript: string }) => {
+    setPrescription(prescriptionData.content);
+    // Append prescription to notes
+    setNotes(prev => prev ? `${prev}\n\n--- PRESCRIPTION ---\n${prescriptionData.content}` : `--- PRESCRIPTION ---\n${prescriptionData.content}`);
   };
 
   const toggleRecording = () => {
@@ -370,11 +381,32 @@ export default function Sessions() {
             )}
 
             <div className="flex gap-3 pt-4 border-t border-border">
+              <Button 
+                variant="outline" 
+                className="flex-1 gap-2" 
+                onClick={() => setShowPrescriptionEditor(true)}
+              >
+                <Pill className="h-4 w-4" />
+                Record Prescription
+              </Button>
               <Button variant="outline" className="flex-1" onClick={endSession} disabled={isTranscribing}>
                 <Square className="h-4 w-4 mr-2" />
                 End Session
               </Button>
             </div>
+
+            {/* Saved Prescription Preview */}
+            {prescription && (
+              <div className="mt-4 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <Pill className="h-4 w-4 text-green-600" />
+                  <p className="text-sm font-medium text-green-600">Prescription Saved</p>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Prescription has been recorded and will be saved with this session.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Notes Panel */}
@@ -555,6 +587,15 @@ export default function Sessions() {
           </div>
         )}
       </div>
+      {/* Prescription Editor Modal */}
+      {showPrescriptionEditor && currentPatient && (
+        <PrescriptionEditor
+          patientName={currentPatient.name}
+          doctorName="Dr. Georgia Adams"
+          onClose={() => setShowPrescriptionEditor(false)}
+          onSave={handleSavePrescription}
+        />
+      )}
     </div>
   );
 }
