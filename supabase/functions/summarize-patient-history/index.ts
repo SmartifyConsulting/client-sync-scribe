@@ -40,6 +40,7 @@ Medical Aid: ${patient.medical_aid || 'None'}
 General Practitioner: ${patient.general_practitioner || 'Unknown'}
 Occupation: ${patient.occupation || 'Unknown'}
 Notes: ${patient.notes || 'None'}
+Allergies: ${patient.allergies || 'None recorded'}
 
 Session History (with dates):
 ${sessionSummaries}
@@ -60,26 +61,29 @@ ${sessionSummaries}
 
 Your task is to analyze patient records and session history to provide:
 1. A comprehensive narrative summary of the patient's history from first visit to present
-2. A list of any medications mentioned with the DATE they were prescribed or discussed
-3. A list of any conditions, symptoms, or health concerns mentioned with the DATE they were reported
+2. A list of SYMPTOMS (temporary/recurring symptoms like headaches, fatigue, pain) with dates and status
+3. A list of CONDITIONS (diagnosed illnesses/diseases like diabetes, hypertension, asthma) with dates and status
+4. A list of MEDICATIONS mentioned with dates and whether currently in use
+5. A list of known ALLERGIES
+
+IMPORTANT DEFINITIONS:
+- SYMPTOMS: Temporary or recurring physical/mental symptoms that come and go (headache, back pain, nausea, fatigue, dizziness, etc.)
+- CONDITIONS: Named medical diagnoses, diseases, or chronic illnesses (diabetes, hypertension, asthma, arthritis, depression, etc.)
+- MEDICATIONS: Any prescribed or discussed medications
+- ALLERGIES: Known drug or other allergies
 
 IMPORTANT FORMATTING RULES:
 - In the summary text, wrap ANY medication names with <med>medication name</med> tags
-- In the summary text, wrap ANY conditions/symptoms with <condition>condition name</condition> tags
-- For medications array, include the date in format: "Medication Name (Month Year)" e.g. "Ibuprofen (Dec 2024)"
-- For conditions array, include the date in format: "Condition Name (Month Year)" e.g. "Chronic back pain (Nov 2024)"
+- In the summary text, wrap ANY symptoms with <symptom>symptom name</symptom> tags
+- In the summary text, wrap ANY conditions with <condition>condition name</condition> tags
+- For each array item, include status: "active" if currently present/in-use, "inactive" if resolved/not-in-use
 - Extract dates from the session history provided
 - If no specific date is available, use "Date unknown"
 
 Example summary format:
-"The patient presented with <condition>chronic back pain</condition> in November 2024 and was prescribed <med>ibuprofen</med> for pain management. Follow-up sessions addressed <condition>anxiety</condition> symptoms..."
+"The patient presented with <symptom>chronic back pain</symptom> in November 2024 and was diagnosed with <condition>lumbar disc herniation</condition>. They were prescribed <med>ibuprofen</med> for pain management..."
 
-Respond in JSON format:
-{
-  "summary": "Comprehensive narrative with <med> and <condition> tags inline",
-  "medications": [{"name": "Ibuprofen", "date": "Dec 2024"}],
-  "conditions": [{"name": "Chronic back pain", "date": "Nov 2024"}]
-}`,
+Respond in JSON format with the structure defined in the function parameters.`,
           },
           {
             role: "user",
@@ -91,13 +95,39 @@ Respond in JSON format:
             type: "function",
             function: {
               name: "generate_patient_summary",
-              description: "Generate a comprehensive patient history summary with highlighted medications and conditions",
+              description: "Generate a comprehensive patient history summary with symptoms, conditions, medications, and allergies",
               parameters: {
                 type: "object",
                 properties: {
                   summary: {
                     type: "string",
-                    description: "A comprehensive narrative summary with <med> tags around medications and <condition> tags around conditions",
+                    description: "A comprehensive narrative summary with <med>, <symptom>, and <condition> tags",
+                  },
+                  symptoms: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        name: { type: "string", description: "Symptom name (e.g., headache, back pain, fatigue)" },
+                        date: { type: "string", description: "Date first reported (e.g., 'Nov 2024')" },
+                        status: { type: "string", enum: ["active", "inactive"], description: "Current status" },
+                      },
+                      required: ["name", "date", "status"],
+                    },
+                    description: "List of symptoms (temporary/recurring physical or mental symptoms)",
+                  },
+                  conditions: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        name: { type: "string", description: "Condition/disease name (e.g., diabetes, hypertension)" },
+                        date: { type: "string", description: "Date diagnosed (e.g., 'Nov 2024')" },
+                        status: { type: "string", enum: ["active", "inactive"], description: "Current status" },
+                      },
+                      required: ["name", "date", "status"],
+                    },
+                    description: "List of diagnosed conditions/diseases/illnesses",
                   },
                   medications: {
                     type: "array",
@@ -106,25 +136,26 @@ Respond in JSON format:
                       properties: {
                         name: { type: "string", description: "Medication name" },
                         date: { type: "string", description: "Date prescribed or discussed (e.g., 'Dec 2024')" },
+                        status: { type: "string", enum: ["active", "inactive"], description: "Currently in use or not" },
                       },
-                      required: ["name", "date"],
+                      required: ["name", "date", "status"],
                     },
-                    description: "List of all medications with dates",
+                    description: "List of all medications with usage status",
                   },
-                  conditions: {
+                  allergies: {
                     type: "array",
                     items: {
                       type: "object",
                       properties: {
-                        name: { type: "string", description: "Condition or symptom name" },
-                        date: { type: "string", description: "Date first reported (e.g., 'Nov 2024')" },
+                        name: { type: "string", description: "Allergy name" },
+                        severity: { type: "string", enum: ["mild", "moderate", "severe"], description: "Severity level" },
                       },
-                      required: ["name", "date"],
+                      required: ["name", "severity"],
                     },
-                    description: "List of all conditions/symptoms with dates",
+                    description: "List of known allergies",
                   },
                 },
-                required: ["summary", "medications", "conditions"],
+                required: ["summary", "symptoms", "conditions", "medications", "allergies"],
                 additionalProperties: false,
               },
             },
@@ -173,7 +204,7 @@ Respond in JSON format:
         });
       } catch {
         return new Response(
-          JSON.stringify({ summary: content_response, medications: [], conditions: [] }),
+          JSON.stringify({ summary: content_response, symptoms: [], conditions: [], medications: [], allergies: [] }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
