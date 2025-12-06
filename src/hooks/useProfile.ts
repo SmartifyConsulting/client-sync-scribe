@@ -7,6 +7,7 @@ export interface Profile {
   full_name: string | null;
   practice_number: string | null;
   doctor_number: string | null;
+  practice_address: string | null;
   logo_url: string | null;
   created_at: string;
   updated_at: string;

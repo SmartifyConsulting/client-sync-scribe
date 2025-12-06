@@ -21,6 +21,7 @@ export default {
         playfair: ["Playfair Display", "serif"],
         roboto: ["Roboto", "sans-serif"],
         "source-serif": ["Source Serif 4", "serif"],
+        rockwell: ["Rockwell", "Georgia", "serif"],
       },
       colors: {
         border: "hsl(var(--border))",

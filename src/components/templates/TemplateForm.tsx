@@ -41,6 +41,7 @@ const FONT_OPTIONS = [
   { value: "merriweather", label: "Merriweather", preview: "font-merriweather" },
   { value: "playfair", label: "Playfair Display", preview: "font-playfair" },
   { value: "source-serif", label: "Source Serif", preview: "font-source-serif" },
+  { value: "rockwell", label: "Rockwell", preview: "font-rockwell" },
 ];
 
 export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" }: TemplateFormProps) {
@@ -213,13 +214,21 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
             </p>
           </div>
           <div>
-            <span className="text-muted-foreground">Doctor Number:</span>
+            <span className="text-muted-foreground">Doctor Registration Number:</span>
             <p className="font-medium text-foreground">
               {profile?.doctor_number || (
                 <span className="text-amber-600">Not set - Update in Settings</span>
               )}
             </p>
           </div>
+        </div>
+        <div className="mt-3">
+          <span className="text-muted-foreground">Practice Address:</span>
+          <p className="font-medium text-foreground">
+            {(profile as any)?.practice_address || (
+              <span className="text-amber-600">Not set - Update in Settings</span>
+            )}
+          </p>
         </div>
       </div>
 
@@ -389,7 +398,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
           Cancel
         </Button>
         <Button onClick={handleSubmit} className="flex-1">
-          {mode === "edit" ? "Save Changes" : "Create Template"}
+          {mode === "edit" ? "Save Changes" : "Save"}
         </Button>
       </div>
     </div>

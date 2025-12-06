@@ -7,6 +7,7 @@ import {
   Trash2,
   Copy,
   MoreVertical,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -222,6 +223,7 @@ export default function Documents() {
   const [isNewTemplateOpen, setIsNewTemplateOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
   const [templateToDelete, setTemplateToDelete] = useState<Template | null>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
 
   const filteredTemplates = templates.filter((template) =>
     template.name.toLowerCase().includes(templateSearchQuery.toLowerCase()) ||
@@ -387,6 +389,10 @@ export default function Documents() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setPreviewTemplate(template)}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      Preview Template
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setEditingTemplate(template)}>
                       <Edit3 className="h-4 w-4 mr-2" />
                       Edit Template
@@ -546,6 +552,95 @@ export default function Documents() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Template Preview Dialog */}
+      <Dialog open={!!previewTemplate} onOpenChange={(open) => !open && setPreviewTemplate(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Template Preview: {previewTemplate?.name}</DialogTitle>
+            <DialogDescription>
+              Preview of the template content and formatting
+            </DialogDescription>
+          </DialogHeader>
+          {previewTemplate && (
+            <div className="space-y-4">
+              {/* Template Meta */}
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <span className="rounded-full bg-muted px-2.5 py-0.5 font-medium">
+                  {previewTemplate.category || "Uncategorized"}
+                </span>
+                <span>Last modified: {previewTemplate.lastModified}</span>
+                {previewTemplate.fontFamily && (
+                  <span>Font: {previewTemplate.fontFamily}</span>
+                )}
+              </div>
+
+              {/* Template Preview */}
+              <div className="border border-border rounded-lg p-6 bg-card/50">
+                {/* Logo Preview */}
+                {previewTemplate.logoUrl && (
+                  <div 
+                    className="mb-4"
+                    style={{ 
+                      textAlign: previewTemplate.logoPosition?.x && previewTemplate.logoPosition.x > 66 
+                        ? 'right' 
+                        : previewTemplate.logoPosition?.x && previewTemplate.logoPosition.x > 33 
+                          ? 'center' 
+                          : 'left' 
+                    }}
+                  >
+                    <img 
+                      src={previewTemplate.logoUrl} 
+                      alt="Template logo" 
+                      className="max-h-16 inline-block"
+                    />
+                  </div>
+                )}
+                
+                {/* Content Preview */}
+                <pre 
+                  className={`whitespace-pre-wrap text-sm text-foreground font-${previewTemplate.fontFamily || 'sans'}`}
+                  style={{ fontFamily: previewTemplate.fontFamily === 'sans' ? 'inherit' : undefined }}
+                >
+                  {previewTemplate.content}
+                </pre>
+              </div>
+
+              {/* Placeholders */}
+              {previewTemplate.placeholders && previewTemplate.placeholders.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium text-foreground mb-2">Dynamic Placeholders:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {previewTemplate.placeholders.map((placeholder) => (
+                      <span 
+                        key={placeholder} 
+                        className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full"
+                      >
+                        [{placeholder}]
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-4 border-t border-border">
+                <Button variant="outline" onClick={() => setPreviewTemplate(null)} className="flex-1">
+                  Close
+                </Button>
+                <Button 
+                  onClick={() => {
+                    handleSelectTemplate(previewTemplate);
+                    setPreviewTemplate(null);
+                  }} 
+                  className="flex-1"
+                >
+                  Use Template
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
