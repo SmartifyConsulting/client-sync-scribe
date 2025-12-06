@@ -17,3 +17,9 @@ verify_jwt = true
 
 [functions.send-patient-invitation]
 verify_jwt = true
+
+[functions.send-invoice-report]
+verify_jwt = true
+
+[functions.summarize-patient-history]
+verify_jwt = true
