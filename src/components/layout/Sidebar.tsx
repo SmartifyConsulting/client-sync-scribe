@@ -22,13 +22,13 @@ import { Badge } from "@/components/ui/badge";
 
 const doctorNavItems = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/" },
+  { icon: Inbox, label: "Inbox", to: "/inbox" },
   { icon: Users, label: "Patients", to: "/patients" },
   { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: CheckSquare, label: "To-Do List", to: "/todos" },
   { icon: FileText, label: "Templates", to: "/documents" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
   { icon: Receipt, label: "Invoices", to: "/invoices" },
-  { icon: Inbox, label: "Inbox", to: "/inbox" },
 ];
 
 const patientNavItems = [

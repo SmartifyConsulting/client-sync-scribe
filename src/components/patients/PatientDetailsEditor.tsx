@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Pencil, Save, X, Loader2, AlertCircle } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Pencil, Check, X, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { Patient } from "@/hooks/usePatients";
+import { useToast } from "@/hooks/use-toast";
 
 interface PatientDetailsEditorProps {
   patient: Patient;
@@ -14,8 +15,11 @@ interface PatientDetailsEditorProps {
 }
 
 export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorProps) {
+  const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -63,38 +67,66 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         next_of_kin_phone: patient.next_of_kin_phone || "",
         next_of_kin_email: patient.next_of_kin_email || "",
       });
+      setHasChanges(false);
     }
   }, [patient]);
 
-  const handleSave = async () => {
+  // Auto-save function
+  const performSave = useCallback(async (data: typeof formData) => {
+    if (!data.name.trim()) return; // Don't save if name is empty
+    
     setSaving(true);
     await onSave({
-      name: formData.name,
-      email: formData.email || null,
-      phone: formData.phone || null,
-      dob: formData.dob || null,
-      occupation: formData.occupation || null,
-      employer: formData.employer || null,
-      referred_by: formData.referred_by || null,
-      physical_address: formData.physical_address || null,
-      postal_address: formData.same_as_physical ? formData.physical_address : (formData.postal_address || null),
-      same_as_physical: formData.same_as_physical,
-      medical_aid: formData.medical_aid || null,
-      medical_aid_number: formData.medical_aid_number || null,
-      primary_member: formData.primary_member || null,
-      general_practitioner: formData.general_practitioner || null,
-      next_of_kin_name: formData.next_of_kin_name || null,
-      next_of_kin_phone: formData.next_of_kin_phone || null,
-      next_of_kin_email: formData.next_of_kin_email || null,
-      // These fields need to be cast as they may not be in the Patient type yet
+      name: data.name,
+      email: data.email || null,
+      phone: data.phone || null,
+      dob: data.dob || null,
+      occupation: data.occupation || null,
+      employer: data.employer || null,
+      referred_by: data.referred_by || null,
+      physical_address: data.physical_address || null,
+      postal_address: data.same_as_physical ? data.physical_address : (data.postal_address || null),
+      same_as_physical: data.same_as_physical,
+      medical_aid: data.medical_aid || null,
+      medical_aid_number: data.medical_aid_number || null,
+      primary_member: data.primary_member || null,
+      general_practitioner: data.general_practitioner || null,
+      next_of_kin_name: data.next_of_kin_name || null,
+      next_of_kin_phone: data.next_of_kin_phone || null,
+      next_of_kin_email: data.next_of_kin_email || null,
       ...({
-        medical_insurance_product: formData.medical_insurance_product || null,
-        claims_email: formData.claims_email || null,
-        allergies: formData.allergies || null,
+        medical_insurance_product: data.medical_insurance_product || null,
+        claims_email: data.claims_email || null,
+        allergies: data.allergies || null,
       } as any),
     });
     setSaving(false);
-    setIsEditing(false);
+    setHasChanges(false);
+  }, [onSave]);
+
+  // Debounced auto-save effect
+  useEffect(() => {
+    if (!isEditing || !hasChanges) return;
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    saveTimeoutRef.current = setTimeout(() => {
+      performSave(formData);
+    }, 1500); // Auto-save after 1.5 seconds of inactivity
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [formData, isEditing, hasChanges, performSave]);
+
+  // Update form data and mark as having changes
+  const updateFormData = (updates: Partial<typeof formData>) => {
+    setFormData(prev => ({ ...prev, ...updates }));
+    setHasChanges(true);
   };
 
   const handleCancel = () => {
@@ -253,19 +285,27 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
   // Edit Mode
   return (
     <div className="rounded-xl border border-border bg-card p-6 space-y-8">
-      {/* Header with Save/Cancel Buttons */}
+      {/* Header with status indicator */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-foreground">Edit Patient Details</h2>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="gap-2" onClick={handleCancel} disabled={saving}>
-            <X className="h-4 w-4" />
-            Cancel
-          </Button>
-          <Button size="sm" className="gap-2" onClick={handleSave} disabled={saving}>
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Save Changes
-          </Button>
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-semibold text-foreground">Edit Patient Details</h2>
+          {saving && (
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Loader2 className="h-3 w-3 animate-spin" />
+              Saving...
+            </span>
+          )}
+          {!saving && !hasChanges && isEditing && (
+            <span className="flex items-center gap-1.5 text-xs text-green-600">
+              <Check className="h-3 w-3" />
+              Saved
+            </span>
+          )}
         </div>
+        <Button variant="outline" size="sm" className="gap-2" onClick={handleCancel} disabled={saving}>
+          <X className="h-4 w-4" />
+          Done
+        </Button>
       </div>
 
       {/* Personal Information */}
@@ -277,7 +317,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) => updateFormData({ name: e.target.value })}
               placeholder="Patient name"
             />
           </div>
@@ -287,7 +327,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
               id="dob"
               type="date"
               value={formData.dob}
-              onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
+              onChange={(e) => updateFormData({ dob: e.target.value })}
             />
           </div>
           <div className="space-y-2">
@@ -296,7 +336,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
               id="email"
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              onChange={(e) => updateFormData({ email: e.target.value })}
               placeholder="patient@email.com"
             />
           </div>
@@ -305,7 +345,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             <Input
               id="phone"
               value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={(e) => updateFormData({ phone: e.target.value })}
               placeholder="+1 (555) 123-4567"
             />
           </div>
@@ -314,7 +354,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             <Input
               id="occupation"
               value={formData.occupation}
-              onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
+              onChange={(e) => updateFormData({ occupation: e.target.value })}
               placeholder="Job title"
             />
           </div>
@@ -323,7 +363,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             <Input
               id="employer"
               value={formData.employer}
-              onChange={(e) => setFormData({ ...formData, employer: e.target.value })}
+              onChange={(e) => updateFormData({ employer: e.target.value })}
               placeholder="Company name"
             />
           </div>
@@ -332,7 +372,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             <Input
               id="referred_by"
               value={formData.referred_by}
-              onChange={(e) => setFormData({ ...formData, referred_by: e.target.value })}
+              onChange={(e) => updateFormData({ referred_by: e.target.value })}
               placeholder="Referral source"
             />
           </div>
@@ -348,7 +388,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             <Textarea
               id="physical_address"
               value={formData.physical_address}
-              onChange={(e) => setFormData({ ...formData, physical_address: e.target.value })}
+              onChange={(e) => updateFormData({ physical_address: e.target.value })}
               placeholder="Enter physical address"
               rows={2}
             />
@@ -357,7 +397,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             <Checkbox
               id="same_as_physical"
               checked={formData.same_as_physical}
-              onCheckedChange={(checked) => setFormData({ ...formData, same_as_physical: checked as boolean })}
+              onCheckedChange={(checked) => updateFormData({ same_as_physical: checked as boolean })}
             />
             <Label htmlFor="same_as_physical" className="text-sm">Postal address same as physical address</Label>
           </div>
@@ -367,7 +407,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
               <Textarea
                 id="postal_address"
                 value={formData.postal_address}
-                onChange={(e) => setFormData({ ...formData, postal_address: e.target.value })}
+                onChange={(e) => updateFormData({ postal_address: e.target.value })}
                 placeholder="Enter postal address"
                 rows={2}
               />
@@ -385,7 +425,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             <Input
               id="medical_aid"
               value={formData.medical_aid}
-              onChange={(e) => setFormData({ ...formData, medical_aid: e.target.value })}
+              onChange={(e) => updateFormData({ medical_aid: e.target.value })}
               placeholder="Insurance provider"
             />
           </div>
@@ -394,7 +434,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             <Input
               id="medical_insurance_product"
               value={formData.medical_insurance_product}
-              onChange={(e) => setFormData({ ...formData, medical_insurance_product: e.target.value })}
+              onChange={(e) => updateFormData({ medical_insurance_product: e.target.value })}
               placeholder="e.g., Executive Plan"
             />
           </div>
@@ -403,7 +443,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             <Input
               id="medical_aid_number"
               value={formData.medical_aid_number}
-              onChange={(e) => setFormData({ ...formData, medical_aid_number: e.target.value })}
+              onChange={(e) => updateFormData({ medical_aid_number: e.target.value })}
               placeholder="Member number"
             />
           </div>
@@ -412,7 +452,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             <Input
               id="primary_member"
               value={formData.primary_member}
-              onChange={(e) => setFormData({ ...formData, primary_member: e.target.value })}
+              onChange={(e) => updateFormData({ primary_member: e.target.value })}
               placeholder="Primary member name"
             />
           </div>
@@ -422,7 +462,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
               id="claims_email"
               type="email"
               value={formData.claims_email}
-              onChange={(e) => setFormData({ ...formData, claims_email: e.target.value })}
+              onChange={(e) => updateFormData({ claims_email: e.target.value })}
               placeholder="claims@insurance.com"
             />
           </div>
@@ -431,7 +471,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             <Input
               id="general_practitioner"
               value={formData.general_practitioner}
-              onChange={(e) => setFormData({ ...formData, general_practitioner: e.target.value })}
+              onChange={(e) => updateFormData({ general_practitioner: e.target.value })}
               placeholder="GP name"
             />
           </div>
@@ -443,7 +483,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             <Textarea
               id="allergies"
               value={formData.allergies}
-              onChange={(e) => setFormData({ ...formData, allergies: e.target.value })}
+              onChange={(e) => updateFormData({ allergies: e.target.value })}
               placeholder="List any allergies (medications, food, etc.)"
               rows={2}
             />
@@ -460,7 +500,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             <Input
               id="next_of_kin_name"
               value={formData.next_of_kin_name}
-              onChange={(e) => setFormData({ ...formData, next_of_kin_name: e.target.value })}
+              onChange={(e) => updateFormData({ next_of_kin_name: e.target.value })}
               placeholder="Full name"
             />
           </div>
@@ -469,7 +509,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             <Input
               id="next_of_kin_phone"
               value={formData.next_of_kin_phone}
-              onChange={(e) => setFormData({ ...formData, next_of_kin_phone: e.target.value })}
+              onChange={(e) => updateFormData({ next_of_kin_phone: e.target.value })}
               placeholder="Phone number"
             />
           </div>
@@ -479,7 +519,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
               id="next_of_kin_email"
               type="email"
               value={formData.next_of_kin_email}
-              onChange={(e) => setFormData({ ...formData, next_of_kin_email: e.target.value })}
+              onChange={(e) => updateFormData({ next_of_kin_email: e.target.value })}
               placeholder="Email address"
             />
           </div>
