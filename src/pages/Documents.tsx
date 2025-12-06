@@ -183,7 +183,7 @@ Professional Consultant`,
 =======
 
 Practice Number: [PracticeNumber]
-Doctor Number: [DoctorNumber]
+Doctor Registration Number: [DoctorNumber]
 
 Invoice Number: INV-[InvoiceNumber]
 Date: [SessionDate]
@@ -200,6 +200,54 @@ Payment Terms: Due within 30 days
 
 Thank you for your business.`,
     placeholders: ["PracticeNumber", "DoctorNumber", "InvoiceNumber", "SessionDate", "ClientName", "Content"],
+  },
+  {
+    id: "5",
+    name: "Medical Certificate",
+    description: "Certificate for patients to substantiate absence from work",
+    lastModified: "Just now",
+    category: "Certificate",
+    content: `MEDICAL CERTIFICATE
+===================
+
+Practice Number: [PracticeNumber]
+Doctor Registration Number: [DoctorNumber]
+Practice Address: [PracticeAddress]
+
+I have today examined:
+
+Patient: [PatientName]
+
+Of: [PatientAddress]
+
+
+Date of consultation: [ConsultationDate]
+
+Time of Consultation: [ConsultationTime]
+
+
+Nature of illness or injury: [NatureOfIllness]
+
+..............................................................................................................
+
+..............................................................................................................
+
+
+Recommended sick leave from: [SickLeaveFrom] until [SickLeaveUntil] [Inclusive]
+
+Other information / recommendations: [OtherRecommendations]
+
+..............................................................................................................
+
+..............................................................................................................
+
+..............................................................................................................
+
+
+Doctor's Name: [DoctorName]
+
+Doctor's Signature: ................................................ Date: [SignatureDate]`,
+    placeholders: ["PracticeNumber", "DoctorNumber", "PracticeAddress", "PatientName", "PatientAddress", "ConsultationDate", "ConsultationTime", "NatureOfIllness", "SickLeaveFrom", "SickLeaveUntil", "OtherRecommendations", "DoctorName", "SignatureDate"],
   },
 ];
 
