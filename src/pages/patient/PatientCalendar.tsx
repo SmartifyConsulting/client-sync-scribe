@@ -1,66 +1,75 @@
-import { useState } from "react";
-import { Calendar, Clock, MapPin, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Calendar, Clock, MapPin, User, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isToday } from "date-fns";
+import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isToday, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Appointment {
   id: string;
   title: string;
-  date: Date;
-  time: string;
-  doctor: string;
-  location: string;
+  start_time: string;
+  end_time: string;
+  location: string | null;
+  description: string | null;
   type: string;
 }
 
-const mockAppointments: Appointment[] = [
-  {
-    id: "1",
-    title: "Follow-up Consultation",
-    date: addDays(new Date(), 1),
-    time: "10:00 AM",
-    doctor: "Dr. Georgia Adams",
-    location: "Suite 4, Medical Centre",
-    type: "consultation",
-  },
-  {
-    id: "2",
-    title: "Blood Test Results",
-    date: addDays(new Date(), 3),
-    time: "2:30 PM",
-    doctor: "Dr. Georgia Adams",
-    location: "Suite 4, Medical Centre",
-    type: "results",
-  },
-  {
-    id: "3",
-    title: "Annual Check-up",
-    date: addDays(new Date(), 7),
-    time: "9:00 AM",
-    doctor: "Dr. Georgia Adams",
-    location: "Suite 4, Medical Centre",
-    type: "checkup",
-  },
-];
-
 export default function PatientCalendar() {
+  const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      fetchAppointments();
+    }
+  }, [user]);
+
+  const fetchAppointments = async () => {
+    if (!user) return;
+    setLoading(true);
+
+    try {
+      // Get appointments where the patient_user_id matches the current user
+      const { data, error } = await supabase
+        .from("appointments")
+        .select("*")
+        .order("start_time", { ascending: true });
+
+      if (error) throw error;
+      setAppointments(data || []);
+    } catch (error) {
+      console.error("Error fetching appointments:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const weekDays = eachDayOfInterval({
     start: currentWeekStart,
     end: endOfWeek(currentWeekStart, { weekStartsOn: 1 }),
   });
 
-  const selectedDayAppointments = mockAppointments.filter((apt) =>
-    isSameDay(apt.date, selectedDate)
+  const selectedDayAppointments = appointments.filter((apt) =>
+    isSameDay(parseISO(apt.start_time), selectedDate)
   );
 
-  const upcomingAppointments = mockAppointments
-    .filter((apt) => apt.date >= new Date())
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
+  const upcomingAppointments = appointments
+    .filter((apt) => parseISO(apt.start_time) >= new Date())
+    .slice(0, 5);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -106,8 +115,8 @@ export default function PatientCalendar() {
             <CardContent>
               <div className="grid grid-cols-7 gap-2">
                 {weekDays.map((day) => {
-                  const dayAppointments = mockAppointments.filter((apt) =>
-                    isSameDay(apt.date, day)
+                  const dayAppointments = appointments.filter((apt) =>
+                    isSameDay(parseISO(apt.start_time), day)
                   );
                   const isSelected = isSameDay(day, selectedDate);
 
@@ -173,17 +182,18 @@ export default function PatientCalendar() {
                         <div className="mt-1 flex flex-wrap gap-3 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
-                            {apt.time}
+                            {format(parseISO(apt.start_time), "h:mm a")} - {format(parseISO(apt.end_time), "h:mm a")}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <User className="h-3 w-3" />
-                            {apt.doctor}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />
-                            {apt.location}
-                          </span>
+                          {apt.location && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {apt.location}
+                            </span>
+                          )}
                         </div>
+                        {apt.description && (
+                          <p className="mt-2 text-sm text-muted-foreground">{apt.description}</p>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -200,28 +210,36 @@ export default function PatientCalendar() {
             <CardDescription>Your next scheduled visits</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {upcomingAppointments.map((apt) => (
-                <div
-                  key={apt.id}
-                  className="p-3 rounded-lg bg-muted/50 space-y-2"
-                >
-                  <p className="font-medium text-sm">{apt.title}</p>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Calendar className="h-3 w-3" />
-                    {format(apt.date, "MMM d, yyyy")}
+            {upcomingAppointments.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">
+                No upcoming appointments
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {upcomingAppointments.map((apt) => (
+                  <div
+                    key={apt.id}
+                    className="p-3 rounded-lg bg-muted/50 space-y-2"
+                  >
+                    <p className="font-medium text-sm">{apt.title}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Calendar className="h-3 w-3" />
+                      {format(parseISO(apt.start_time), "MMM d, yyyy")}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      {format(parseISO(apt.start_time), "h:mm a")}
+                    </div>
+                    {apt.location && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <MapPin className="h-3 w-3" />
+                        {apt.location}
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3" />
-                    {apt.time}
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <User className="h-3 w-3" />
-                    {apt.doctor}
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

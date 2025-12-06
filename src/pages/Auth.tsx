@@ -179,10 +179,11 @@ export default function Auth() {
 
                 // Link user to patient record if it exists
                 if (invitation.patient_id) {
-                  // Update the patient record with additional info from registration
+                  // Update the patient record with patient_user_id and additional info from registration
                   await supabase
                     .from('patients')
                     .update({
+                      patient_user_id: data.user.id,
                       email: email,
                       phone: phone,
                       dob: dob || null,
