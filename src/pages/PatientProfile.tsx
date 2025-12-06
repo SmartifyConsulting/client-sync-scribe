@@ -380,16 +380,20 @@ export default function PatientProfile() {
               </div>
             </div>
 
-            {/* Medical Aid Information */}
+            {/* Medical Insurance Information */}
             <div>
-              <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Medical Aid</h3>
+              <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Medical Insurance</h3>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <div>
-                  <p className="text-sm text-muted-foreground">Medical Aid Provider</p>
+                  <p className="text-sm text-muted-foreground">Medical Insurance Provider</p>
                   <p className="mt-1 text-foreground">{patient.medical_aid || "Not provided"}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Medical Aid Number</p>
+                  <p className="text-sm text-muted-foreground">Medical Insurance Product</p>
+                  <p className="mt-1 text-foreground">{(patient as any).medical_insurance_product || "Not provided"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Medical Insurance Number</p>
                   <p className="mt-1 text-foreground">{patient.medical_aid_number || "Not provided"}</p>
                 </div>
                 <div>

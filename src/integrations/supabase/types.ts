@@ -390,6 +390,7 @@ export type Database = {
           id: string
           medical_aid: string | null
           medical_aid_number: string | null
+          medical_insurance_product: string | null
           name: string
           next_of_kin_email: string | null
           next_of_kin_name: string | null
@@ -419,6 +420,7 @@ export type Database = {
           id?: string
           medical_aid?: string | null
           medical_aid_number?: string | null
+          medical_insurance_product?: string | null
           name: string
           next_of_kin_email?: string | null
           next_of_kin_name?: string | null
@@ -448,6 +450,7 @@ export type Database = {
           id?: string
           medical_aid?: string | null
           medical_aid_number?: string | null
+          medical_insurance_product?: string | null
           name?: string
           next_of_kin_email?: string | null
           next_of_kin_name?: string | null
