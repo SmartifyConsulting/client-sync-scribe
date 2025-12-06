@@ -25,6 +25,7 @@ import { SessionCard } from "@/components/patients/SessionCard";
 import { PatientOverview } from "@/components/patients/PatientOverview";
 import { InvitePatientDialog } from "@/components/patients/InvitePatientDialog";
 import { DoctorsOnProfile } from "@/components/patients/DoctorsOnProfile";
+import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 
 const mockDocuments = [
   { id: "1", name: "Financial Statement Q3.pdf", type: "Report", date: "Nov 15, 2024" },
@@ -329,115 +330,7 @@ export default function PatientProfile() {
         </TabsContent>
 
         <TabsContent value="details">
-          <div className="rounded-xl border border-border bg-card p-6 space-y-8">
-            {/* Personal Information */}
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Personal Information</h3>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <div>
-                  <p className="text-sm text-muted-foreground">Date of Birth</p>
-                  <p className="mt-1 text-foreground">
-                    {patient.dob ? format(new Date(patient.dob), "MMMM d, yyyy") : "Not provided"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="mt-1 text-foreground">{patient.email || "Not provided"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Phone</p>
-                  <p className="mt-1 text-foreground">{patient.phone || "Not provided"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Occupation</p>
-                  <p className="mt-1 text-foreground">{patient.occupation || "Not provided"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Employer</p>
-                  <p className="mt-1 text-foreground">{patient.employer || "Not provided"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Referred By</p>
-                  <p className="mt-1 text-foreground">{patient.referred_by || "Not provided"}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Address Information */}
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Address</h3>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <p className="text-sm text-muted-foreground">Physical Address</p>
-                  <p className="mt-1 text-foreground">{patient.physical_address || patient.address || "Not provided"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Postal Address</p>
-                  <p className="mt-1 text-foreground">
-                    {patient.same_as_physical ? "Same as physical address" : (patient.postal_address || "Not provided")}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Medical Insurance Information */}
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Medical Insurance</h3>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <div>
-                  <p className="text-sm text-muted-foreground">Medical Insurance Provider</p>
-                  <p className="mt-1 text-foreground">{patient.medical_aid || "Not provided"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Medical Insurance Product</p>
-                  <p className="mt-1 text-foreground">{(patient as any).medical_insurance_product || "Not provided"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Medical Insurance Number</p>
-                  <p className="mt-1 text-foreground">{patient.medical_aid_number || "Not provided"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Primary Member</p>
-                  <p className="mt-1 text-foreground">{patient.primary_member || "Not provided"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Claims Email</p>
-                  <p className="mt-1 text-foreground">{(patient as any).claims_email || "Not provided"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">General Practitioner</p>
-                  <p className="mt-1 text-foreground">{patient.general_practitioner || "Not provided"}</p>
-                </div>
-                <div className="sm:col-span-2 lg:col-span-3">
-                  <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                    <AlertCircle className="h-3.5 w-3.5" />
-                    Allergies
-                  </p>
-                  <p className="mt-1 text-foreground">{(patient as any).allergies || "None recorded"}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Next of Kin */}
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Next of Kin</h3>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <div>
-                  <p className="text-sm text-muted-foreground">Name</p>
-                  <p className="mt-1 text-foreground">{patient.next_of_kin_name || "Not provided"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Phone</p>
-                  <p className="mt-1 text-foreground">{patient.next_of_kin_phone || "Not provided"}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="mt-1 text-foreground">{patient.next_of_kin_email || "Not provided"}</p>
-                </div>
-              </div>
-            </div>
-
-          </div>
+          <PatientDetailsEditor patient={patient} onSave={updatePatient} />
         </TabsContent>
 
         {/* Notes Tab */}
