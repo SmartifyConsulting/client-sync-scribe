@@ -16,6 +16,9 @@ import {
   Inbox,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "@/components/ui/badge";
 
 const doctorNavItems = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/" },
@@ -39,6 +42,24 @@ const patientNavItems = [
 export function Sidebar() {
   const { role, loading, isPatient } = useUserRole();
   const navItems = isPatient ? patientNavItems : doctorNavItems;
+
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ['unread-messages-count'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return 0;
+      
+      const { count, error } = await supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('recipient_id', user.id)
+        .eq('is_read', false);
+      
+      if (error) return 0;
+      return count || 0;
+    },
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
 
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-border bg-sidebar">
@@ -72,7 +93,12 @@ export function Sidebar() {
                 }
               >
                 <item.icon className="h-5 w-5" />
-                {item.label}
+                <span className="flex-1">{item.label}</span>
+                {item.label === "Inbox" && unreadCount > 0 && (
+                  <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </Badge>
+                )}
               </NavLink>
             ))
           )}
