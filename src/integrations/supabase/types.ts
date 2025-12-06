@@ -190,6 +190,36 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string
+          doctor_number: string | null
+          full_name: string | null
+          id: string
+          logo_url: string | null
+          practice_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_number?: string | null
+          full_name?: string | null
+          id: string
+          logo_url?: string | null
+          practice_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          doctor_number?: string | null
+          full_name?: string | null
+          id?: string
+          logo_url?: string | null
+          practice_number?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sessions: {
         Row: {
           action_points: Json | null
