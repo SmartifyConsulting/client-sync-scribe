@@ -24,6 +24,7 @@ import PatientCalendar from "./pages/patient/PatientCalendar";
 import PrescriptionHistory from "./pages/patient/PrescriptionHistory";
 import Invoices from "./pages/patient/Invoices";
 import PatientAccessManagement from "./pages/patient/PatientAccessManagement";
+import DoctorInvoices from "./pages/doctor/Invoices";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +86,7 @@ const App = () => (
             <Route path="/sessions" element={<Sessions />} />
             <Route path="/sessions/:id" element={<SessionDetail />} />
             <Route path="/documents" element={<Documents />} />
+            <Route path="/invoices" element={<DoctorInvoices />} />
             
             {/* Patient routes */}
             <Route path="/patient/calendar" element={<PatientCalendar />} />
