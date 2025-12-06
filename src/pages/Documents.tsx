@@ -249,6 +249,155 @@ Doctor's Name: [DoctorName]
 Doctor's Signature: ................................................ Date: [SignatureDate]`,
     placeholders: ["PracticeNumber", "DoctorNumber", "PracticeAddress", "PatientName", "PatientAddress", "ConsultationDate", "ConsultationTime", "NatureOfIllness", "SickLeaveFrom", "SickLeaveUntil", "OtherRecommendations", "DoctorName", "SignatureDate"],
   },
+  {
+    id: "6",
+    name: "Referral Letter",
+    description: "Letter for referring patients to specialists",
+    lastModified: "Just now",
+    category: "Letter",
+    content: `REFERRAL LETTER
+===============
+
+Practice Number: [PracticeNumber]
+Doctor Registration Number: [DoctorNumber]
+Practice Address: [PracticeAddress]
+
+Date: [ReferralDate]
+
+To: [SpecialistName]
+    [SpecialistSpecialty]
+    [SpecialistAddress]
+
+Dear [SpecialistTitle] [SpecialistName],
+
+RE: REFERRAL OF PATIENT - [PatientName]
+
+Patient Details:
+- Name: [PatientName]
+- Date of Birth: [PatientDOB]
+- Contact: [PatientContact]
+- Address: [PatientAddress]
+
+I am writing to refer the above-named patient for your expert opinion and management.
+
+PRESENTING COMPLAINT
+--------------------
+[PresentingComplaint]
+
+RELEVANT HISTORY
+----------------
+[RelevantHistory]
+
+CURRENT MEDICATIONS
+-------------------
+[CurrentMedications]
+
+INVESTIGATIONS PERFORMED
+------------------------
+[Investigations]
+
+REASON FOR REFERRAL
+-------------------
+[ReasonForReferral]
+
+I would be grateful if you could see this patient at your earliest convenience. Please do not hesitate to contact me if you require any further information.
+
+Yours sincerely,
+
+
+[DoctorName]
+Practice Number: [PracticeNumber]
+Tel: [PracticePhone]`,
+    placeholders: ["PracticeNumber", "DoctorNumber", "PracticeAddress", "ReferralDate", "SpecialistName", "SpecialistSpecialty", "SpecialistAddress", "SpecialistTitle", "PatientName", "PatientDOB", "PatientContact", "PatientAddress", "PresentingComplaint", "RelevantHistory", "CurrentMedications", "Investigations", "ReasonForReferral", "DoctorName", "PracticePhone"],
+  },
+  {
+    id: "7",
+    name: "Prescription",
+    description: "Template for medication prescriptions",
+    lastModified: "Just now",
+    category: "Prescription",
+    content: `PRESCRIPTION
+============
+
+Practice Number: [PracticeNumber]
+Doctor Registration Number: [DoctorNumber]
+Practice Address: [PracticeAddress]
+Tel: [PracticePhone]
+
+Date: [PrescriptionDate]
+
+PATIENT DETAILS
+---------------
+Name: [PatientName]
+Date of Birth: [PatientDOB]
+Address: [PatientAddress]
+Medical Aid: [MedicalAid]
+Medical Aid Number: [MedicalAidNumber]
+
+Rx:
+---
+
+1. [Medication1]
+   Dosage: [Dosage1]
+   Quantity: [Quantity1]
+   Instructions: [Instructions1]
+
+2. [Medication2]
+   Dosage: [Dosage2]
+   Quantity: [Quantity2]
+   Instructions: [Instructions2]
+
+3. [Medication3]
+   Dosage: [Dosage3]
+   Quantity: [Quantity3]
+   Instructions: [Instructions3]
+
+
+Repeats: [NumberOfRepeats]
+
+Special Instructions: [SpecialInstructions]
+
+
+Prescribing Doctor: [DoctorName]
+Registration Number: [DoctorNumber]
+
+Signature: ................................................
+
+Date: [SignatureDate]`,
+    placeholders: ["PracticeNumber", "DoctorNumber", "PracticeAddress", "PracticePhone", "PrescriptionDate", "PatientName", "PatientDOB", "PatientAddress", "MedicalAid", "MedicalAidNumber", "Medication1", "Dosage1", "Quantity1", "Instructions1", "Medication2", "Dosage2", "Quantity2", "Instructions2", "Medication3", "Dosage3", "Quantity3", "Instructions3", "NumberOfRepeats", "SpecialInstructions", "DoctorName", "SignatureDate"],
+  },
+  {
+    id: "8",
+    name: "General Template",
+    description: "Blank template for custom documents",
+    lastModified: "Just now",
+    category: "General",
+    content: `[DOCUMENT TITLE]
+================
+
+Practice Number: [PracticeNumber]
+Doctor Registration Number: [DoctorNumber]
+Practice Address: [PracticeAddress]
+
+Date: [Date]
+
+[Content]
+
+
+
+
+
+
+
+
+
+
+Signature: ................................................
+
+[DoctorName]
+Date: [SignatureDate]`,
+    placeholders: ["PracticeNumber", "DoctorNumber", "PracticeAddress", "Date", "Content", "DoctorName", "SignatureDate"],
+  },
 ];
 
 const allDocuments = [
