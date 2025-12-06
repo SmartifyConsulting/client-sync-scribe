@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { format, differenceInDays } from "date-fns";
+import { format, differenceInDays, startOfMonth, endOfMonth, parseISO, isWithinInterval } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Receipt, 
@@ -15,13 +15,17 @@ import {
   Pencil,
   Archive,
   MoreHorizontal,
-  X
+  X,
+  FileText,
+  Download
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { 
   Select, 
   SelectContent, 
@@ -44,7 +48,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface Invoice {
   id: string;
@@ -125,6 +138,9 @@ export default function DoctorInvoices() {
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [editForm, setEditForm] = useState({ description: "", amount: "", dueDate: "" });
   const [isSaving, setIsSaving] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [reportDateFrom, setReportDateFrom] = useState<Date | undefined>(startOfMonth(new Date()));
+  const [reportDateTo, setReportDateTo] = useState<Date | undefined>(endOfMonth(new Date()));
 
   useEffect(() => {
     fetchInvoices();
@@ -334,6 +350,56 @@ export default function DoctorInvoices() {
     return { issued, paid, overdue, archived, totalOutstanding };
   }, [invoices]);
 
+  // Report data grouped by month
+  const reportData = useMemo(() => {
+    if (!reportDateFrom || !reportDateTo) return [];
+
+    const filteredByDate = invoices.filter(invoice => {
+      const invoiceDate = parseISO(invoice.created_at);
+      return isWithinInterval(invoiceDate, { start: reportDateFrom, end: reportDateTo });
+    });
+
+    // Group by month
+    const monthlyGroups: Record<string, { invoices: Invoice[]; total: number; paidTotal: number; unpaidTotal: number }> = {};
+    
+    filteredByDate.forEach(invoice => {
+      const monthKey = format(parseISO(invoice.created_at), 'yyyy-MM');
+      if (!monthlyGroups[monthKey]) {
+        monthlyGroups[monthKey] = { invoices: [], total: 0, paidTotal: 0, unpaidTotal: 0 };
+      }
+      monthlyGroups[monthKey].invoices.push(invoice);
+      monthlyGroups[monthKey].total += Number(invoice.amount);
+      
+      const status = getInvoiceStatus(invoice);
+      if (status === 'paid') {
+        monthlyGroups[monthKey].paidTotal += Number(invoice.amount);
+      } else {
+        monthlyGroups[monthKey].unpaidTotal += Number(invoice.amount);
+      }
+    });
+
+    // Convert to array sorted by month
+    return Object.entries(monthlyGroups)
+      .map(([month, data]) => ({
+        month,
+        monthLabel: format(parseISO(`${month}-01`), 'MMMM yyyy'),
+        ...data,
+      }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+  }, [invoices, reportDateFrom, reportDateTo]);
+
+  const reportTotals = useMemo(() => {
+    return reportData.reduce(
+      (acc, month) => ({
+        total: acc.total + month.total,
+        paidTotal: acc.paidTotal + month.paidTotal,
+        unpaidTotal: acc.unpaidTotal + month.unpaidTotal,
+        invoiceCount: acc.invoiceCount + month.invoices.length,
+      }),
+      { total: 0, paidTotal: 0, unpaidTotal: 0, invoiceCount: 0 }
+    );
+  }, [reportData]);
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -344,11 +410,145 @@ export default function DoctorInvoices() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Invoices</h1>
-        <p className="mt-1 text-muted-foreground">
-          Manage and track all patient invoices
-        </p>
+      {/* Header with Report Button */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Invoices</h1>
+          <p className="mt-1 text-muted-foreground">
+            Manage and track all patient invoices
+          </p>
+        </div>
+        <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="gap-2">
+              <FileText className="h-4 w-4" />
+              Generate Report
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Invoice Report</DialogTitle>
+              <DialogDescription>
+                View invoice summary by date range with monthly totals
+              </DialogDescription>
+            </DialogHeader>
+            
+            {/* Date Range Selector */}
+            <div className="flex flex-wrap gap-4 items-end py-4 border-b">
+              <div className="space-y-2">
+                <Label>From Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-[180px] justify-start text-left font-normal",
+                        !reportDateFrom && "text-muted-foreground"
+                      )}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {reportDateFrom ? format(reportDateFrom, "PPP") : "Select date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={reportDateFrom}
+                      onSelect={setReportDateFrom}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="space-y-2">
+                <Label>To Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-[180px] justify-start text-left font-normal",
+                        !reportDateTo && "text-muted-foreground"
+                      )}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {reportDateTo ? format(reportDateTo, "PPP") : "Select date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={reportDateTo}
+                      onSelect={setReportDateTo}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            {/* Report Summary */}
+            <div className="grid gap-4 md:grid-cols-4 py-4">
+              <div className="rounded-lg border p-3">
+                <p className="text-sm text-muted-foreground">Total Invoices</p>
+                <p className="text-xl font-bold">{reportTotals.invoiceCount}</p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <p className="text-sm text-muted-foreground">Total Amount</p>
+                <p className="text-xl font-bold">R {reportTotals.total.toFixed(2)}</p>
+              </div>
+              <div className="rounded-lg border p-3 border-green-500/30 bg-green-500/5">
+                <p className="text-sm text-muted-foreground">Paid</p>
+                <p className="text-xl font-bold text-green-600">R {reportTotals.paidTotal.toFixed(2)}</p>
+              </div>
+              <div className="rounded-lg border p-3 border-amber-500/30 bg-amber-500/5">
+                <p className="text-sm text-muted-foreground">Outstanding</p>
+                <p className="text-xl font-bold text-amber-600">R {reportTotals.unpaidTotal.toFixed(2)}</p>
+              </div>
+            </div>
+
+            {/* Monthly Breakdown */}
+            {reportData.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No invoices found in the selected date range
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <h3 className="font-semibold">Monthly Breakdown</h3>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Month</TableHead>
+                      <TableHead className="text-center">Invoices</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead className="text-right">Paid</TableHead>
+                      <TableHead className="text-right">Outstanding</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {reportData.map((month) => (
+                      <TableRow key={month.month}>
+                        <TableCell className="font-medium">{month.monthLabel}</TableCell>
+                        <TableCell className="text-center">{month.invoices.length}</TableCell>
+                        <TableCell className="text-right">R {month.total.toFixed(2)}</TableCell>
+                        <TableCell className="text-right text-green-600">R {month.paidTotal.toFixed(2)}</TableCell>
+                        <TableCell className="text-right text-amber-600">R {month.unpaidTotal.toFixed(2)}</TableCell>
+                      </TableRow>
+                    ))}
+                    {/* Totals Row */}
+                    <TableRow className="border-t-2 font-bold bg-muted/50">
+                      <TableCell>Total</TableCell>
+                      <TableCell className="text-center">{reportTotals.invoiceCount}</TableCell>
+                      <TableCell className="text-right">R {reportTotals.total.toFixed(2)}</TableCell>
+                      <TableCell className="text-right text-green-600">R {reportTotals.paidTotal.toFixed(2)}</TableCell>
+                      <TableCell className="text-right text-amber-600">R {reportTotals.unpaidTotal.toFixed(2)}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Stats Cards */}
