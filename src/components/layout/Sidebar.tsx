@@ -16,7 +16,7 @@ const navItems = [
   { icon: Users, label: "Patients", to: "/patients" },
   { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: CheckSquare, label: "To-Do List", to: "/todos" },
-  { icon: FileText, label: "Documents", to: "/documents" },
+  { icon: FileText, label: "Templates", to: "/documents" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
 ];
 

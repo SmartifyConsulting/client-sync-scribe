@@ -1,17 +1,39 @@
-import { useState } from "react";
-import { User, Calendar, Bell, Shield, Database, CheckCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { User, Calendar, Bell, Shield, Database, CheckCircle, Building2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Settings() {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { profile, loading, updateProfile, uploadLogo } = useProfile();
   const [googleConnected, setGoogleConnected] = useState(false);
   const [outlookConnected, setOutlookConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    full_name: "",
+    practice_number: "",
+    doctor_number: "",
+  });
+
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        full_name: profile.full_name || "",
+        practice_number: profile.practice_number || "",
+        doctor_number: profile.doctor_number || "",
+      });
+    }
+  }, [profile]);
 
   const handleConnect = async (provider: "google" | "outlook") => {
     setIsConnecting(provider);
@@ -48,6 +70,56 @@ export default function Settings() {
     });
   };
 
+  const handleSaveProfile = async () => {
+    setIsSaving(true);
+    const { error } = await updateProfile(formData);
+    setIsSaving(false);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save profile changes",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Profile Updated",
+        description: "Your profile changes have been saved",
+      });
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploadingLogo(true);
+    const { error } = await uploadLogo(file);
+    setIsUploadingLogo(false);
+
+    if (error) {
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload logo",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Logo uploaded",
+        description: "Your practice logo has been updated",
+      });
+    }
+  };
+
   return (
     <div className="space-y-8 animate-fade-in max-w-3xl">
       {/* Header */}
@@ -67,22 +139,97 @@ export default function Settings() {
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
-            <Input id="name" defaultValue="Dr. Sarah Smith" />
+            <Input 
+              id="name" 
+              value={formData.full_name}
+              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+              placeholder="Dr. John Smith"
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" defaultValue="sarah.smith@practice.com" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input id="phone" defaultValue="+1 (555) 123-4567" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="practice">Practice Name</Label>
-            <Input id="practice" defaultValue="Smith Consulting" />
+            <Input 
+              id="email" 
+              type="email" 
+              value={user?.email || ""} 
+              disabled 
+              className="bg-muted"
+            />
           </div>
         </div>
-        <Button className="mt-6">Save Changes</Button>
+        <Button className="mt-6" onClick={handleSaveProfile} disabled={isSaving}>
+          {isSaving ? "Saving..." : "Save Changes"}
+        </Button>
+      </div>
+
+      {/* Practice Information */}
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+        <div className="flex items-center gap-3 mb-6">
+          <Building2 className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">Practice Information</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mb-6">
+          This information will appear on your document templates and letterheads.
+        </p>
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="practice_number">Practice Number</Label>
+            <Input 
+              id="practice_number" 
+              value={formData.practice_number}
+              onChange={(e) => setFormData({ ...formData, practice_number: e.target.value })}
+              placeholder="e.g., PR123456"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="doctor_number">Doctor Number</Label>
+            <Input 
+              id="doctor_number" 
+              value={formData.doctor_number}
+              onChange={(e) => setFormData({ ...formData, doctor_number: e.target.value })}
+              placeholder="e.g., MP123456"
+            />
+          </div>
+        </div>
+
+        {/* Logo Upload */}
+        <div className="mt-6 space-y-2">
+          <Label>Practice Logo</Label>
+          <p className="text-sm text-muted-foreground mb-3">
+            Upload your practice logo for letterheads and documents
+          </p>
+          <div className="flex items-center gap-4">
+            {profile?.logo_url && (
+              <img 
+                src={profile.logo_url} 
+                alt="Practice logo" 
+                className="h-16 w-auto object-contain rounded border border-border p-1"
+              />
+            )}
+            <div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleLogoUpload}
+                className="hidden"
+                id="logo-upload-settings"
+              />
+              <Button 
+                variant="outline" 
+                onClick={() => document.getElementById('logo-upload-settings')?.click()}
+                disabled={isUploadingLogo}
+                className="gap-2"
+              >
+                <Upload className="h-4 w-4" />
+                {isUploadingLogo ? "Uploading..." : profile?.logo_url ? "Change Logo" : "Upload Logo"}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <Button className="mt-6" onClick={handleSaveProfile} disabled={isSaving}>
+          {isSaving ? "Saving..." : "Save Practice Info"}
+        </Button>
       </div>
 
       {/* Calendar Integration */}
