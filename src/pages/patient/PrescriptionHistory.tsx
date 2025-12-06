@@ -1,94 +1,105 @@
-import { useState } from "react";
-import { FileText, Calendar, User, Pill, Download, Eye } from "lucide-react";
+import { useState, useEffect } from "react";
+import { FileText, Calendar, User, Pill, Download, Eye, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { format, subDays, subMonths } from "date-fns";
+import { format, parseISO } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Prescription {
   id: string;
   medication: string;
   dosage: string;
   frequency: string;
-  prescribedDate: Date;
-  doctor: string;
-  status: "active" | "completed" | "refill_needed";
-  instructions: string;
-  refillsRemaining: number;
+  instructions: string | null;
+  start_date: string;
+  end_date: string | null;
+  refills_remaining: number;
+  status: string;
+  created_at: string;
+  doctor_profile?: {
+    full_name: string | null;
+  };
 }
 
-const mockPrescriptions: Prescription[] = [
-  {
-    id: "1",
-    medication: "Amoxicillin 500mg",
-    dosage: "500mg",
-    frequency: "3 times daily",
-    prescribedDate: subDays(new Date(), 5),
-    doctor: "Dr. Georgia Adams",
-    status: "active",
-    instructions: "Take with food. Complete the full course.",
-    refillsRemaining: 0,
-  },
-  {
-    id: "2",
-    medication: "Omeprazole 20mg",
-    dosage: "20mg",
-    frequency: "Once daily (morning)",
-    prescribedDate: subDays(new Date(), 30),
-    doctor: "Dr. Georgia Adams",
-    status: "refill_needed",
-    instructions: "Take 30 minutes before breakfast.",
-    refillsRemaining: 2,
-  },
-  {
-    id: "3",
-    medication: "Vitamin D3 1000IU",
-    dosage: "1000IU",
-    frequency: "Once daily",
-    prescribedDate: subMonths(new Date(), 2),
-    doctor: "Dr. Georgia Adams",
-    status: "active",
-    instructions: "Take with a meal containing fat for better absorption.",
-    refillsRemaining: 5,
-  },
-  {
-    id: "4",
-    medication: "Ibuprofen 400mg",
-    dosage: "400mg",
-    frequency: "As needed (max 3 times daily)",
-    prescribedDate: subMonths(new Date(), 3),
-    doctor: "Dr. Georgia Adams",
-    status: "completed",
-    instructions: "Take with food. Do not exceed recommended dose.",
-    refillsRemaining: 0,
-  },
-];
-
-const statusColors = {
+const statusColors: Record<string, string> = {
   active: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
   completed: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
-  refill_needed: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
+  cancelled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
 };
 
-const statusLabels = {
+const statusLabels: Record<string, string> = {
   active: "Active",
   completed: "Completed",
-  refill_needed: "Refill Needed",
+  cancelled: "Cancelled",
 };
 
 export default function PrescriptionHistory() {
+  const { user } = useAuth();
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"all" | "active" | "completed" | "refill_needed">("all");
+  const [filter, setFilter] = useState<string>("all");
 
-  const filteredPrescriptions = mockPrescriptions.filter((rx) => {
+  useEffect(() => {
+    if (user) {
+      fetchPrescriptions();
+    }
+  }, [user]);
+
+  const fetchPrescriptions = async () => {
+    if (!user) return;
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase
+        .from("prescriptions")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Fetch doctor profiles for each prescription
+      const prescriptionsWithDoctors: Prescription[] = [];
+      for (const rx of data || []) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", rx.doctor_id)
+          .maybeSingle();
+
+        prescriptionsWithDoctors.push({
+          ...rx,
+          doctor_profile: profile || undefined,
+        });
+      }
+
+      setPrescriptions(prescriptionsWithDoctors);
+    } catch (error) {
+      console.error("Error fetching prescriptions:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredPrescriptions = prescriptions.filter((rx) => {
     const matchesSearch = rx.medication.toLowerCase().includes(search.toLowerCase());
     const matchesFilter = filter === "all" || rx.status === filter;
     return matchesSearch && matchesFilter;
   });
 
-  const activePrescriptions = mockPrescriptions.filter((rx) => rx.status === "active").length;
-  const refillNeeded = mockPrescriptions.filter((rx) => rx.status === "refill_needed").length;
+  const activePrescriptions = prescriptions.filter((rx) => rx.status === "active").length;
+  const refillNeeded = prescriptions.filter((rx) => rx.status === "active" && rx.refills_remaining > 0).length;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -109,7 +120,7 @@ export default function PrescriptionHistory() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Refills Needed</CardTitle>
+            <CardTitle className="text-sm font-medium">Refills Available</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-amber-600">{refillNeeded}</div>
@@ -120,7 +131,7 @@ export default function PrescriptionHistory() {
             <CardTitle className="text-sm font-medium">Total Prescriptions</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockPrescriptions.length}</div>
+            <div className="text-2xl font-bold">{prescriptions.length}</div>
           </CardContent>
         </Card>
       </div>
@@ -143,14 +154,14 @@ export default function PrescriptionHistory() {
             </div>
           </div>
           <div className="flex gap-2 mt-4">
-            {(["all", "active", "refill_needed", "completed"] as const).map((status) => (
+            {["all", "active", "completed", "cancelled"].map((status) => (
               <Button
                 key={status}
                 variant={filter === status ? "default" : "outline"}
                 size="sm"
                 onClick={() => setFilter(status)}
               >
-                {status === "all" ? "All" : statusLabels[status]}
+                {status === "all" ? "All" : statusLabels[status] || status}
               </Button>
             ))}
           </div>
@@ -159,7 +170,10 @@ export default function PrescriptionHistory() {
           <div className="space-y-4">
             {filteredPrescriptions.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">
-                No prescriptions found
+                {prescriptions.length === 0 
+                  ? "No prescriptions found. Your prescriptions will appear here once your doctor adds them."
+                  : "No prescriptions match your search criteria."
+                }
               </p>
             ) : (
               filteredPrescriptions.map((rx) => (
@@ -174,26 +188,30 @@ export default function PrescriptionHistory() {
                     <div className="flex items-start justify-between">
                       <div>
                         <p className="font-semibold">{rx.medication}</p>
-                        <p className="text-sm text-muted-foreground">{rx.frequency}</p>
+                        <p className="text-sm text-muted-foreground">{rx.dosage} - {rx.frequency}</p>
                       </div>
-                      <Badge className={statusColors[rx.status]}>
-                        {statusLabels[rx.status]}
+                      <Badge className={statusColors[rx.status] || statusColors.active}>
+                        {statusLabels[rx.status] || rx.status}
                       </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground">{rx.instructions}</p>
+                    {rx.instructions && (
+                      <p className="text-sm text-muted-foreground">{rx.instructions}</p>
+                    )}
                     <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        Prescribed: {format(rx.prescribedDate, "MMM d, yyyy")}
+                        Started: {format(parseISO(rx.start_date), "MMM d, yyyy")}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <User className="h-3 w-3" />
-                        {rx.doctor}
-                      </span>
-                      {rx.refillsRemaining > 0 && (
+                      {rx.doctor_profile?.full_name && (
+                        <span className="flex items-center gap-1">
+                          <User className="h-3 w-3" />
+                          {rx.doctor_profile.full_name}
+                        </span>
+                      )}
+                      {rx.refills_remaining > 0 && (
                         <span className="flex items-center gap-1">
                           <FileText className="h-3 w-3" />
-                          {rx.refillsRemaining} refill(s) remaining
+                          {rx.refills_remaining} refill(s) remaining
                         </span>
                       )}
                     </div>

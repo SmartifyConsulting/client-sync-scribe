@@ -229,6 +229,66 @@ export type Database = {
           },
         ]
       }
+      invoices: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          doctor_id: string
+          due_date: string
+          id: string
+          invoice_number: string
+          paid_at: string | null
+          patient_id: string
+          session_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description: string
+          doctor_id: string
+          due_date: string
+          id?: string
+          invoice_number: string
+          paid_at?: string | null
+          patient_id: string
+          session_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          doctor_id?: string
+          due_date?: string
+          id?: string
+          invoice_number?: string
+          paid_at?: string | null
+          patient_id?: string
+          session_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patient_invitations: {
         Row: {
           created_at: string
@@ -291,6 +351,7 @@ export type Database = {
           next_of_kin_phone: string | null
           notes: string | null
           occupation: string | null
+          patient_user_id: string | null
           phone: string | null
           physical_address: string | null
           postal_address: string | null
@@ -318,6 +379,7 @@ export type Database = {
           next_of_kin_phone?: string | null
           notes?: string | null
           occupation?: string | null
+          patient_user_id?: string | null
           phone?: string | null
           physical_address?: string | null
           postal_address?: string | null
@@ -345,6 +407,7 @@ export type Database = {
           next_of_kin_phone?: string | null
           notes?: string | null
           occupation?: string | null
+          patient_user_id?: string | null
           phone?: string | null
           physical_address?: string | null
           postal_address?: string | null
@@ -386,6 +449,72 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      prescriptions: {
+        Row: {
+          created_at: string
+          doctor_id: string
+          dosage: string
+          end_date: string | null
+          frequency: string
+          id: string
+          instructions: string | null
+          medication: string
+          patient_id: string
+          refills_remaining: number | null
+          session_id: string | null
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_id: string
+          dosage: string
+          end_date?: string | null
+          frequency: string
+          id?: string
+          instructions?: string | null
+          medication: string
+          patient_id: string
+          refills_remaining?: number | null
+          session_id?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string
+          dosage?: string
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          instructions?: string | null
+          medication?: string
+          patient_id?: string
+          refills_remaining?: number | null
+          session_id?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescriptions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prescriptions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

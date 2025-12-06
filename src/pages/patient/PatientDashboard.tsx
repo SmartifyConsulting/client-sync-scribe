@@ -1,12 +1,140 @@
-import { Calendar, FileText, Receipt, Clock, User } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Calendar, FileText, Receipt, Clock, User, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { format, parseISO, isFuture } from "date-fns";
+import { Link } from "react-router-dom";
+
+interface DashboardStats {
+  upcomingAppointments: number;
+  activePrescriptions: number;
+  recentSessions: number;
+  pendingInvoices: number;
+  pendingAmount: number;
+  nextAppointment?: {
+    title: string;
+    date: string;
+  };
+}
+
+interface DoctorAccess {
+  id: string;
+  granted_at: string;
+  doctor_profile?: {
+    full_name: string | null;
+    practice_number: string | null;
+  };
+}
 
 export default function PatientDashboard() {
   const { user } = useAuth();
   const { profile } = useProfile();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<DashboardStats>({
+    upcomingAppointments: 0,
+    activePrescriptions: 0,
+    recentSessions: 0,
+    pendingInvoices: 0,
+    pendingAmount: 0,
+  });
+  const [doctors, setDoctors] = useState<DoctorAccess[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user]);
+
+  const fetchDashboardData = async () => {
+    if (!user) return;
+    setLoading(true);
+
+    try {
+      // Fetch appointments
+      const { data: appointments } = await supabase
+        .from("appointments")
+        .select("*")
+        .order("start_time", { ascending: true });
+
+      const upcomingAppointments = (appointments || []).filter(
+        (apt) => isFuture(parseISO(apt.start_time))
+      );
+
+      // Fetch prescriptions
+      const { data: prescriptions } = await supabase
+        .from("prescriptions")
+        .select("*")
+        .eq("status", "active");
+
+      // Fetch invoices
+      const { data: invoices } = await supabase
+        .from("invoices")
+        .select("*")
+        .in("status", ["pending", "overdue"]);
+
+      const pendingAmount = (invoices || []).reduce(
+        (sum, inv) => sum + Number(inv.amount),
+        0
+      );
+
+      // Fetch connected doctors
+      const { data: accessData } = await supabase
+        .from("doctor_patient_access")
+        .select("*")
+        .eq("patient_user_id", user.id)
+        .eq("is_active", true);
+
+      const doctorsWithProfiles: DoctorAccess[] = [];
+      for (const access of accessData || []) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name, practice_number")
+          .eq("id", access.doctor_id)
+          .maybeSingle();
+
+        doctorsWithProfiles.push({
+          ...access,
+          doctor_profile: profile || undefined,
+        });
+      }
+
+      setDoctors(doctorsWithProfiles);
+      setStats({
+        upcomingAppointments: upcomingAppointments.length,
+        activePrescriptions: (prescriptions || []).length,
+        recentSessions: 0, // Sessions are doctor-owned
+        pendingInvoices: (invoices || []).length,
+        pendingAmount,
+        nextAppointment: upcomingAppointments[0]
+          ? {
+              title: upcomingAppointments[0].title,
+              date: format(parseISO(upcomingAppointments[0].start_time), "MMM d 'at' h:mm a"),
+            }
+          : undefined,
+      });
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-ZA", {
+      style: "currency",
+      currency: "ZAR",
+    }).format(amount);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -17,7 +145,7 @@ export default function PatientDashboard() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-foreground">
-            Welcome back, {profile?.full_name || 'Patient'}
+            Welcome back, {profile?.full_name || "Patient"}
           </h1>
           <p className="text-muted-foreground">
             Manage your health information and appointments
@@ -33,8 +161,12 @@ export default function PatientDashboard() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2</div>
-            <p className="text-xs text-muted-foreground">Next: Tomorrow at 10:00 AM</p>
+            <div className="text-2xl font-bold">{stats.upcomingAppointments}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.nextAppointment
+                ? `Next: ${stats.nextAppointment.date}`
+                : "No upcoming appointments"}
+            </p>
           </CardContent>
         </Card>
 
@@ -44,19 +176,19 @@ export default function PatientDashboard() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
-            <p className="text-xs text-muted-foreground">1 refill needed</p>
+            <div className="text-2xl font-bold">{stats.activePrescriptions}</div>
+            <p className="text-xs text-muted-foreground">Current medications</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Recent Sessions</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Connected Doctors</CardTitle>
+            <User className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">5</div>
-            <p className="text-xs text-muted-foreground">Last: {format(new Date(), "MMM d, yyyy")}</p>
+            <div className="text-2xl font-bold">{doctors.length}</div>
+            <p className="text-xs text-muted-foreground">Healthcare providers</p>
           </CardContent>
         </Card>
 
@@ -66,43 +198,51 @@ export default function PatientDashboard() {
             <Receipt className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">R 1,250</div>
-            <p className="text-xs text-muted-foreground">2 invoices pending</p>
+            <div className="text-2xl font-bold">{formatCurrency(stats.pendingAmount)}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.pendingInvoices} invoice(s) pending
+            </p>
           </CardContent>
         </Card>
       </div>
 
       {/* Quick Actions */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-primary" />
-              My Calendar
-            </CardTitle>
-            <CardDescription>View and manage your appointments</CardDescription>
-          </CardHeader>
-        </Card>
+        <Link to="/patient/calendar">
+          <Card className="cursor-pointer hover:bg-muted/50 transition-colors h-full">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-primary" />
+                My Calendar
+              </CardTitle>
+              <CardDescription>View and manage your appointments</CardDescription>
+            </CardHeader>
+          </Card>
+        </Link>
 
-        <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              Prescriptions
-            </CardTitle>
-            <CardDescription>View your prescription history</CardDescription>
-          </CardHeader>
-        </Card>
+        <Link to="/patient/prescriptions">
+          <Card className="cursor-pointer hover:bg-muted/50 transition-colors h-full">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                Prescriptions
+              </CardTitle>
+              <CardDescription>View your prescription history</CardDescription>
+            </CardHeader>
+          </Card>
+        </Link>
 
-        <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Receipt className="h-5 w-5 text-primary" />
-              Invoices
-            </CardTitle>
-            <CardDescription>View and pay your invoices</CardDescription>
-          </CardHeader>
-        </Card>
+        <Link to="/patient/invoices">
+          <Card className="cursor-pointer hover:bg-muted/50 transition-colors h-full">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Receipt className="h-5 w-5 text-primary" />
+                Invoices
+              </CardTitle>
+              <CardDescription>View and pay your invoices</CardDescription>
+            </CardHeader>
+          </Card>
+        </Link>
       </div>
 
       {/* Connected Doctors */}
@@ -113,24 +253,49 @@ export default function PatientDashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-lg border border-border">
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                  <User className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium">Dr. Georgia Adams</p>
-                  <p className="text-sm text-muted-foreground">General Practitioner</p>
-                </div>
+            {doctors.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No doctors connected yet.</p>
+                <Link to="/patient/access" className="text-primary hover:underline text-sm">
+                  Invite a doctor to get started
+                </Link>
               </div>
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">Connected since</p>
-                <p className="text-sm font-medium">{format(new Date(), "MMM yyyy")}</p>
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground text-center py-2">
-              Want to add another doctor? Go to Settings to invite a new provider.
-            </p>
+            ) : (
+              <>
+                {doctors.map((doctor) => (
+                  <div
+                    key={doctor.id}
+                    className="flex items-center justify-between p-4 rounded-lg border border-border"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                        <User className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium">
+                          {doctor.doctor_profile?.full_name || "Unknown Doctor"}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Practice: {doctor.doctor_profile?.practice_number || "N/A"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground">Connected since</p>
+                      <p className="text-sm font-medium">
+                        {format(parseISO(doctor.granted_at), "MMM yyyy")}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                <Link
+                  to="/patient/access"
+                  className="block text-center text-sm text-muted-foreground hover:text-primary py-2"
+                >
+                  Manage access or invite another doctor
+                </Link>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>
