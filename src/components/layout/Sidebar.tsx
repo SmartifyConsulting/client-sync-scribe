@@ -9,9 +9,13 @@ import {
   Mic,
   LogOut,
   CheckSquare,
+  Pill,
+  Receipt,
+  Loader2,
 } from "lucide-react";
+import { useUserRole } from "@/hooks/useUserRole";
 
-const navItems = [
+const doctorNavItems = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/" },
   { icon: Users, label: "Patients", to: "/patients" },
   { icon: Calendar, label: "Calendar", to: "/calendar" },
@@ -20,7 +24,17 @@ const navItems = [
   { icon: Mic, label: "Sessions", to: "/sessions" },
 ];
 
+const patientNavItems = [
+  { icon: LayoutDashboard, label: "Dashboard", to: "/" },
+  { icon: Calendar, label: "My Calendar", to: "/patient/calendar" },
+  { icon: Pill, label: "Prescriptions", to: "/patient/prescriptions" },
+  { icon: Receipt, label: "Invoices", to: "/patient/invoices" },
+];
+
 export function Sidebar() {
+  const { role, loading, isPatient } = useUserRole();
+  const navItems = isPatient ? patientNavItems : doctorNavItems;
+
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-border bg-sidebar">
       <div className="flex h-full flex-col">
@@ -34,23 +48,29 @@ export function Sidebar() {
 
         {/* Navigation */}
         <nav className="flex-1 space-y-1 p-4">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                  isActive
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-                )
-              }
-            >
-              <item.icon className="h-5 w-5" />
-              {item.label}
-            </NavLink>
-          ))}
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                    isActive
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                  )
+                }
+              >
+                <item.icon className="h-5 w-5" />
+                {item.label}
+              </NavLink>
+            ))
+          )}
         </nav>
 
         {/* Bottom Section */}

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
 import PatientProfile from "./pages/PatientProfile";
@@ -16,6 +17,12 @@ import Settings from "./pages/Settings";
 import TodoList from "./pages/TodoList";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+
+// Patient pages
+import PatientDashboard from "./pages/patient/PatientDashboard";
+import PatientCalendar from "./pages/patient/PatientCalendar";
+import PrescriptionHistory from "./pages/patient/PrescriptionHistory";
+import Invoices from "./pages/patient/Invoices";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +44,20 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function RoleBasedDashboard() {
+  const { isPatient, loading } = useUserRole();
+  
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  return isPatient ? <PatientDashboard /> : <Dashboard />;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -52,7 +73,10 @@ const App = () => (
               </ProtectedRoute>
             }
           >
-            <Route path="/" element={<Dashboard />} />
+            {/* Role-based dashboard */}
+            <Route path="/" element={<RoleBasedDashboard />} />
+            
+            {/* Doctor routes */}
             <Route path="/patients" element={<Patients />} />
             <Route path="/patients/:id" element={<PatientProfile />} />
             <Route path="/calendar" element={<CalendarView />} />
@@ -60,6 +84,13 @@ const App = () => (
             <Route path="/sessions" element={<Sessions />} />
             <Route path="/sessions/:id" element={<SessionDetail />} />
             <Route path="/documents" element={<Documents />} />
+            
+            {/* Patient routes */}
+            <Route path="/patient/calendar" element={<PatientCalendar />} />
+            <Route path="/patient/prescriptions" element={<PrescriptionHistory />} />
+            <Route path="/patient/invoices" element={<Invoices />} />
+            
+            {/* Common routes */}
             <Route path="/settings" element={<Settings />} />
           </Route>
           <Route path="*" element={<NotFound />} />
