@@ -11,11 +11,17 @@ import {
   CheckCircle,
   Clock,
   AlertTriangle,
-  DollarSign
+  DollarSign,
+  Pencil,
+  Archive,
+  MoreHorizontal,
+  X
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Select, 
   SelectContent, 
@@ -31,6 +37,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 
 interface Invoice {
@@ -48,9 +61,12 @@ interface Invoice {
   } | null;
 }
 
-type StatusFilter = "all" | "issued" | "paid" | "overdue" | "issued_overdue";
+type StatusFilter = "all" | "issued" | "paid" | "overdue" | "issued_overdue" | "archived";
 
-function getInvoiceStatus(invoice: Invoice): "issued" | "paid" | "overdue" {
+function getInvoiceStatus(invoice: Invoice): "issued" | "paid" | "overdue" | "archived" {
+  if (invoice.status === "archived") {
+    return "archived";
+  }
   if (invoice.status === "paid" || invoice.paid_at) {
     return "paid";
   }
@@ -66,7 +82,7 @@ function getInvoiceStatus(invoice: Invoice): "issued" | "paid" | "overdue" {
   return "issued";
 }
 
-function getStatusBadge(status: "issued" | "paid" | "overdue") {
+function getStatusBadge(status: "issued" | "paid" | "overdue" | "archived") {
   switch (status) {
     case "paid":
       return (
@@ -80,6 +96,13 @@ function getStatusBadge(status: "issued" | "paid" | "overdue") {
         <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/20 gap-1">
           <AlertTriangle className="h-3 w-3" />
           Overdue
+        </Badge>
+      );
+    case "archived":
+      return (
+        <Badge className="bg-muted text-muted-foreground hover:bg-muted gap-1">
+          <Archive className="h-3 w-3" />
+          Archived
         </Badge>
       );
     default:
@@ -99,6 +122,9 @@ export default function DoctorInvoices() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("issued_overdue");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+  const [editForm, setEditForm] = useState({ description: "", amount: "", dueDate: "" });
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchInvoices();
@@ -163,12 +189,109 @@ export default function DoctorInvoices() {
     }
   };
 
+  const archiveInvoice = async (invoiceId: string) => {
+    setUpdatingId(invoiceId);
+    try {
+      const { error } = await supabase
+        .from('invoices')
+        .update({ status: 'archived' })
+        .eq('id', invoiceId);
+
+      if (error) throw error;
+
+      setInvoices(prev => prev.map(inv => 
+        inv.id === invoiceId 
+          ? { ...inv, status: 'archived' }
+          : inv
+      ));
+
+      toast({
+        title: "Invoice Archived",
+        description: "Invoice has been archived",
+      });
+    } catch (error: any) {
+      console.error("Error archiving invoice:", error);
+      toast({
+        title: "Error",
+        description: "Failed to archive invoice",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const openEditDialog = (invoice: Invoice) => {
+    setEditingInvoice(invoice);
+    setEditForm({
+      description: invoice.description,
+      amount: String(invoice.amount),
+      dueDate: invoice.due_date,
+    });
+  };
+
+  const saveInvoiceEdit = async () => {
+    if (!editingInvoice) return;
+
+    if (!editForm.amount || parseFloat(editForm.amount) <= 0) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('invoices')
+        .update({
+          description: editForm.description,
+          amount: parseFloat(editForm.amount),
+          due_date: editForm.dueDate,
+        })
+        .eq('id', editingInvoice.id);
+
+      if (error) throw error;
+
+      setInvoices(prev => prev.map(inv => 
+        inv.id === editingInvoice.id 
+          ? { 
+              ...inv, 
+              description: editForm.description,
+              amount: parseFloat(editForm.amount),
+              due_date: editForm.dueDate,
+            }
+          : inv
+      ));
+
+      toast({
+        title: "Invoice Updated",
+        description: "Invoice details have been saved",
+      });
+      setEditingInvoice(null);
+    } catch (error: any) {
+      console.error("Error updating invoice:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update invoice",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const filteredInvoices = useMemo(() => {
     return invoices.filter(invoice => {
       const status = getInvoiceStatus(invoice);
       
-      // Status filter
-      if (statusFilter === "issued_overdue" && status === "paid") {
+      // Status filter - exclude archived by default unless specifically viewing archived
+      if (statusFilter !== "archived" && statusFilter !== "all" && status === "archived") {
+        return false;
+      }
+      if (statusFilter === "issued_overdue" && (status === "paid" || status === "archived")) {
         return false;
       }
       if (statusFilter === "issued" && status !== "issued") {
@@ -178,6 +301,9 @@ export default function DoctorInvoices() {
         return false;
       }
       if (statusFilter === "overdue" && status !== "overdue") {
+        return false;
+      }
+      if (statusFilter === "archived" && status !== "archived") {
         return false;
       }
       
@@ -196,14 +322,16 @@ export default function DoctorInvoices() {
   }, [invoices, statusFilter, searchQuery]);
 
   const stats = useMemo(() => {
-    const issued = invoices.filter(i => getInvoiceStatus(i) === "issued").length;
-    const paid = invoices.filter(i => getInvoiceStatus(i) === "paid").length;
-    const overdue = invoices.filter(i => getInvoiceStatus(i) === "overdue").length;
-    const totalOutstanding = invoices
+    const activeInvoices = invoices.filter(i => getInvoiceStatus(i) !== "archived");
+    const issued = activeInvoices.filter(i => getInvoiceStatus(i) === "issued").length;
+    const paid = activeInvoices.filter(i => getInvoiceStatus(i) === "paid").length;
+    const overdue = activeInvoices.filter(i => getInvoiceStatus(i) === "overdue").length;
+    const archived = invoices.filter(i => getInvoiceStatus(i) === "archived").length;
+    const totalOutstanding = activeInvoices
       .filter(i => getInvoiceStatus(i) !== "paid")
       .reduce((sum, i) => sum + Number(i.amount), 0);
     
-    return { issued, paid, overdue, totalOutstanding };
+    return { issued, paid, overdue, archived, totalOutstanding };
   }, [invoices]);
 
   if (loading) {
@@ -294,6 +422,7 @@ export default function DoctorInvoices() {
               <SelectItem value="issued">Issued Only</SelectItem>
               <SelectItem value="overdue">Overdue Only</SelectItem>
               <SelectItem value="paid">Paid Only</SelectItem>
+              <SelectItem value="archived">Archived</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -347,25 +476,50 @@ export default function DoctorInvoices() {
                     </TableCell>
                     <TableCell>{getStatusBadge(status)}</TableCell>
                     <TableCell className="text-right">
-                      {status !== "paid" && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => markAsPaid(invoice.id)}
-                          disabled={updatingId === invoice.id}
-                        >
-                          {updatingId === invoice.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            "Mark Paid"
-                          )}
-                        </Button>
-                      )}
-                      {status === "paid" && invoice.paid_at && (
-                        <span className="text-xs text-muted-foreground">
-                          Paid {format(new Date(invoice.paid_at), 'dd MMM')}
-                        </span>
-                      )}
+                      <div className="flex items-center justify-end gap-2">
+                        {status !== "paid" && status !== "archived" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => markAsPaid(invoice.id)}
+                            disabled={updatingId === invoice.id}
+                          >
+                            {updatingId === invoice.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              "Mark Paid"
+                            )}
+                          </Button>
+                        )}
+                        {status === "paid" && invoice.paid_at && (
+                          <span className="text-xs text-muted-foreground">
+                            Paid {format(new Date(invoice.paid_at), 'dd MMM')}
+                          </span>
+                        )}
+                        {status !== "paid" && status !== "archived" && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => openEditDialog(invoice)}>
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Edit Invoice
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                onClick={() => archiveInvoice(invoice.id)}
+                                className="text-muted-foreground"
+                              >
+                                <Archive className="h-4 w-4 mr-2" />
+                                Archive
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
@@ -374,6 +528,95 @@ export default function DoctorInvoices() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Edit Invoice Modal */}
+      {editingInvoice && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-lg animate-fade-in">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <Pencil className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">Edit Invoice</h2>
+                  <p className="text-sm text-muted-foreground">{editingInvoice.invoice_number}</p>
+                </div>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setEditingInvoice(null)}>
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  value={editForm.description}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Invoice description..."
+                  className="min-h-[80px]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-amount">Amount (R)</Label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="edit-amount"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={editForm.amount}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, amount: e.target.value }))}
+                      placeholder="0.00"
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-dueDate">Due Date</Label>
+                  <Input
+                    id="edit-dueDate"
+                    type="date"
+                    value={editForm.dueDate}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, dueDate: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t border-border">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="flex-1" 
+                  onClick={() => setEditingInvoice(null)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  className="flex-1 gap-2" 
+                  onClick={saveInvoiceEdit}
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Changes"
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
