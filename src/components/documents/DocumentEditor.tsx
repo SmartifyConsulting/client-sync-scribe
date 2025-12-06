@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Mic,
   MicOff,
@@ -7,6 +7,9 @@ import {
   Send,
   Loader2,
   Sparkles,
+  User,
+  Download,
+  Printer,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +17,17 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { usePatients } from "@/hooks/usePatients";
+import { useProfile } from "@/hooks/useProfile";
+import { useDocuments } from "@/hooks/useDocuments";
+import { exportToPDF, printDocument } from "@/utils/documentExport";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Template {
   id: string;
@@ -21,6 +35,9 @@ interface Template {
   description: string;
   content: string;
   placeholders: string[];
+  logoUrl?: string;
+  logoPosition?: { x: number; y: number };
+  fontFamily?: string;
 }
 
 interface DocumentEditorProps {
@@ -31,13 +48,64 @@ interface DocumentEditorProps {
 
 export function DocumentEditor({ template, onClose, onSave }: DocumentEditorProps) {
   const { toast } = useToast();
+  const { patients } = usePatients();
+  const { profile } = useProfile();
+  const { createDocument } = useDocuments();
   const [documentName, setDocumentName] = useState(`${template.name} - ${new Date().toLocaleDateString()}`);
   const [content, setContent] = useState(template.content);
+  const [selectedPatientId, setSelectedPatientId] = useState<string>("");
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [transcript, setTranscript] = useState("");
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+
+  // Auto-fill placeholders when patient or profile changes
+  useEffect(() => {
+    let updatedContent = template.content;
+    
+    // Fill in profile/doctor placeholders
+    if (profile) {
+      updatedContent = updatedContent
+        .replace(/\[PracticeNumber\]/g, profile.practice_number || "[PracticeNumber]")
+        .replace(/\[DoctorNumber\]/g, profile.doctor_number || "[DoctorNumber]")
+        .replace(/\[DoctorName\]/g, profile.full_name || "[DoctorName]")
+        .replace(/\[PracticeAddress\]/g, profile.practice_address || "[PracticeAddress]");
+    }
+
+    // Fill in patient placeholders if a patient is selected
+    if (selectedPatientId) {
+      const patient = patients.find(p => p.id === selectedPatientId);
+      if (patient) {
+        updatedContent = updatedContent
+          .replace(/\[PatientName\]/g, patient.name || "[PatientName]")
+          .replace(/\[ClientName\]/g, patient.name || "[ClientName]")
+          .replace(/\[PatientAddress\]/g, patient.physical_address || patient.address || "[PatientAddress]")
+          .replace(/\[PatientDOB\]/g, patient.dob ? new Date(patient.dob).toLocaleDateString() : "[PatientDOB]")
+          .replace(/\[PatientContact\]/g, patient.phone || patient.email || "[PatientContact]")
+          .replace(/\[MedicalAid\]/g, patient.medical_aid || "[MedicalAid]")
+          .replace(/\[MedicalAidNumber\]/g, patient.medical_aid_number || "[MedicalAidNumber]");
+        
+        // Update document name with patient name
+        setDocumentName(`${template.name} - ${patient.name} - ${new Date().toLocaleDateString()}`);
+      }
+    }
+
+    // Fill in date placeholders
+    const today = new Date().toLocaleDateString();
+    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    updatedContent = updatedContent
+      .replace(/\[Date\]/g, today)
+      .replace(/\[SessionDate\]/g, today)
+      .replace(/\[ConsultationDate\]/g, today)
+      .replace(/\[ReferralDate\]/g, today)
+      .replace(/\[PrescriptionDate\]/g, today)
+      .replace(/\[SignatureDate\]/g, today)
+      .replace(/\[ConsultationTime\]/g, now);
+
+    setContent(updatedContent);
+  }, [selectedPatientId, profile, patients, template.content]);
 
   const startRecording = async () => {
     try {
@@ -84,10 +152,9 @@ export function DocumentEditor({ template, onClose, onSave }: DocumentEditorProp
     setIsProcessing(true);
     
     // Simulate AI transcription and content generation
-    // In production, this would call an edge function with Whisper/Gemini
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    const simulatedTranscript = "The client has shown excellent progress in Q4. Key achievements include a 15% increase in revenue and successful expansion into two new markets. Recommendations for Q1 include focusing on customer retention and exploring partnership opportunities.";
+    const simulatedTranscript = "The patient has shown excellent progress. Key observations include improvement in symptoms and good response to treatment. Recommendations include continuing current medication and follow-up in 2 weeks.";
     
     setTranscript(simulatedTranscript);
     
@@ -113,17 +180,62 @@ export function DocumentEditor({ template, onClose, onSave }: DocumentEditorProp
     }
   };
 
-  const handleSave = () => {
-    onSave({ name: documentName, content });
-    toast({
-      title: "Document saved",
-      description: "Your document has been saved to the client's history",
+  const handleSave = async () => {
+    setIsSaving(true);
+    
+    const selectedPatient = patients.find(p => p.id === selectedPatientId);
+    
+    // Save to database
+    const result = await createDocument({
+      patient_id: selectedPatientId || undefined,
+      template_id: template.id,
+      name: documentName,
+      content: content,
+      template_name: template.name,
+      patient_name: selectedPatient?.name,
     });
+
+    setIsSaving(false);
+
+    if (result) {
+      onSave({ name: documentName, content });
+    }
   };
+
+  const handleExportPDF = async () => {
+    try {
+      await exportToPDF({
+        title: documentName,
+        content: content,
+        logoUrl: template.logoUrl,
+        logoPosition: template.logoPosition,
+        fontFamily: template.fontFamily,
+      });
+      toast({
+        title: "PDF Exported",
+        description: `"${documentName}" has been downloaded`,
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "Failed to export PDF",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePrint = () => {
+    printDocument(content, documentName, template.logoUrl, template.fontFamily);
+  };
+
+  // Get remaining unfilled placeholders
+  const unfilledPlaceholders = template.placeholders.filter(p => 
+    content.includes(`[${p}]`)
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+      <div className="relative w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-xl border border-border bg-card shadow-lg">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border p-4">
           <div>
@@ -138,6 +250,32 @@ export function DocumentEditor({ template, onClose, onSave }: DocumentEditorProp
         <div className="grid lg:grid-cols-3 divide-x divide-border">
           {/* Main Editor */}
           <div className="lg:col-span-2 p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+            {/* Patient Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="patient">Select Patient (for auto-fill)</Label>
+              <Select value={selectedPatientId} onValueChange={setSelectedPatientId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a patient to auto-fill placeholders" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No patient selected</SelectItem>
+                  {patients.map((patient) => (
+                    <SelectItem key={patient.id} value={patient.id}>
+                      <span className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        {patient.name}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedPatientId && (
+                <p className="text-xs text-success">
+                  ✓ Patient data has been auto-filled into the document
+                </p>
+              )}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="docName">Document Name</Label>
               <Input
@@ -153,13 +291,13 @@ export function DocumentEditor({ template, onClose, onSave }: DocumentEditorProp
                 id="content"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="min-h-[400px] font-mono text-sm"
+                className="min-h-[350px] font-mono text-sm"
               />
             </div>
           </div>
 
           {/* Voice Draft Panel */}
-          <div className="p-6 space-y-6 bg-muted/30">
+          <div className="p-6 space-y-6 bg-muted/30 max-h-[70vh] overflow-y-auto">
             <div>
               <h3 className="font-semibold text-foreground flex items-center gap-2">
                 <Mic className="h-4 w-4 text-primary" />
@@ -171,12 +309,12 @@ export function DocumentEditor({ template, onClose, onSave }: DocumentEditorProp
             </div>
 
             {/* Recording Button */}
-            <div className="flex flex-col items-center gap-4 py-6">
+            <div className="flex flex-col items-center gap-4 py-4">
               <button
                 onClick={isRecording ? stopRecording : startRecording}
                 disabled={isProcessing}
                 className={cn(
-                  "flex h-20 w-20 items-center justify-center rounded-full transition-all duration-300",
+                  "flex h-16 w-16 items-center justify-center rounded-full transition-all duration-300",
                   isRecording
                     ? "bg-destructive text-destructive-foreground animate-pulse-soft"
                     : isProcessing
@@ -185,16 +323,16 @@ export function DocumentEditor({ template, onClose, onSave }: DocumentEditorProp
                 )}
               >
                 {isProcessing ? (
-                  <Loader2 className="h-8 w-8 animate-spin" />
+                  <Loader2 className="h-6 w-6 animate-spin" />
                 ) : isRecording ? (
-                  <MicOff className="h-8 w-8" />
+                  <MicOff className="h-6 w-6" />
                 ) : (
-                  <Mic className="h-8 w-8" />
+                  <Mic className="h-6 w-6" />
                 )}
               </button>
-              <p className="text-sm text-muted-foreground text-center">
+              <p className="text-xs text-muted-foreground text-center">
                 {isProcessing
-                  ? "Processing your voice input..."
+                  ? "Processing..."
                   : isRecording
                   ? "Recording... Tap to stop"
                   : "Tap to start voice drafting"}
@@ -222,21 +360,38 @@ export function DocumentEditor({ template, onClose, onSave }: DocumentEditorProp
               </div>
             )}
 
-            {/* Placeholders */}
-            {template.placeholders.length > 0 && (
+            {/* Unfilled Placeholders */}
+            {unfilledPlaceholders.length > 0 && (
               <div className="space-y-2">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Available Placeholders
+                  Remaining Placeholders
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {template.placeholders.map((placeholder) => (
+                  {unfilledPlaceholders.map((placeholder) => (
                     <span
                       key={placeholder}
-                      className="rounded-full bg-accent px-2.5 py-1 text-xs font-medium text-accent-foreground"
+                      className="rounded-full bg-warning/20 text-warning-foreground px-2.5 py-1 text-xs font-medium"
                     >
                       [{placeholder}]
                     </span>
                   ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Fill these manually or use voice drafting
+                </p>
+              </div>
+            )}
+
+            {/* Auto-filled info */}
+            {profile && (
+              <div className="space-y-2 pt-4 border-t border-border">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Auto-filled from Profile
+                </p>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  {profile.full_name && <p>• Doctor: {profile.full_name}</p>}
+                  {profile.practice_number && <p>• Practice #: {profile.practice_number}</p>}
+                  {profile.doctor_number && <p>• Reg #: {profile.doctor_number}</p>}
                 </div>
               </div>
             )}
@@ -248,14 +403,18 @@ export function DocumentEditor({ template, onClose, onSave }: DocumentEditorProp
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={handleSave} className="gap-2">
-              <Save className="h-4 w-4" />
-              Save Draft
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handlePrint} className="gap-2">
+              <Printer className="h-4 w-4" />
+              Print
             </Button>
-            <Button className="gap-2">
-              <Send className="h-4 w-4" />
-              Send to Client
+            <Button variant="outline" onClick={handleExportPDF} className="gap-2">
+              <Download className="h-4 w-4" />
+              Export PDF
+            </Button>
+            <Button onClick={handleSave} disabled={isSaving} className="gap-2">
+              <Save className="h-4 w-4" />
+              {isSaving ? "Saving..." : "Save Document"}
             </Button>
           </div>
         </div>

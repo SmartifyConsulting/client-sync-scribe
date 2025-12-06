@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   FileText,
   Plus,
@@ -18,6 +18,7 @@ import { DocumentEditor } from "@/components/documents/DocumentEditor";
 import { TemplateForm, TemplateData } from "@/components/templates/TemplateForm";
 import { useToast } from "@/hooks/use-toast";
 import { useTemplates, Template } from "@/hooks/useTemplates";
+import { useDocuments, Document } from "@/hooks/useDocuments";
 import { exportToPDF, printDocument } from "@/utils/documentExport";
 import {
   Dialog,
@@ -50,20 +51,10 @@ interface DisplayTemplate extends Template {
   placeholders: string[];
 }
 
-const allDocuments = [
-  { id: "1", name: "Action Plan - Sarah Johnson.pdf", date: "Dec 3, 2024", client: "Sarah Johnson", template: "Client Action Plan" },
-  { id: "2", name: "Summary - Michael Chen.pdf", date: "Nov 30, 2024", client: "Michael Chen", template: "Session Summary" },
-  { id: "3", name: "Advice Letter - Emma Williams.pdf", date: "Nov 28, 2024", client: "Emma Williams", template: "Letter of Advice" },
-  { id: "4", name: "Invoice - John Davis.pdf", date: "Nov 25, 2024", client: "John Davis", template: "Invoice Template" },
-  { id: "5", name: "Action Plan - Lisa Brown.pdf", date: "Nov 22, 2024", client: "Lisa Brown", template: "Client Action Plan" },
-  { id: "6", name: "Summary - Robert Wilson.pdf", date: "Nov 20, 2024", client: "Robert Wilson", template: "Session Summary" },
-  { id: "7", name: "Advice Letter - Anna Martinez.pdf", date: "Nov 18, 2024", client: "Anna Martinez", template: "Letter of Advice" },
-  { id: "8", name: "Summary - David Lee.pdf", date: "Nov 15, 2024", client: "David Lee", template: "Session Summary" },
-];
-
 export default function Documents() {
   const { toast } = useToast();
-  const { templates: dbTemplates, loading, createTemplate, updateTemplate, deleteTemplate } = useTemplates();
+  const { templates: dbTemplates, loading: templatesLoading, createTemplate, updateTemplate, deleteTemplate } = useTemplates();
+  const { documents, loading: documentsLoading, deleteDocument } = useDocuments();
   const [templateSearchQuery, setTemplateSearchQuery] = useState("");
   const [documentSearchQuery, setDocumentSearchQuery] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState<DisplayTemplate | null>(null);
@@ -71,6 +62,8 @@ export default function Documents() {
   const [editingTemplate, setEditingTemplate] = useState<DisplayTemplate | null>(null);
   const [templateToDelete, setTemplateToDelete] = useState<DisplayTemplate | null>(null);
   const [previewTemplate, setPreviewTemplate] = useState<DisplayTemplate | null>(null);
+  const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
+  const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
   const [isExporting, setIsExporting] = useState(false);
 
   // Transform database templates to display format
@@ -85,10 +78,10 @@ export default function Documents() {
     (template.category?.toLowerCase() || "").includes(templateSearchQuery.toLowerCase())
   );
 
-  const filteredDocuments = allDocuments.filter((doc) =>
+  const filteredDocuments = documents.filter((doc) =>
     doc.name.toLowerCase().includes(documentSearchQuery.toLowerCase()) ||
-    doc.client.toLowerCase().includes(documentSearchQuery.toLowerCase()) ||
-    doc.template.toLowerCase().includes(documentSearchQuery.toLowerCase())
+    (doc.patient_name?.toLowerCase() || "").includes(documentSearchQuery.toLowerCase()) ||
+    (doc.template_name?.toLowerCase() || "").includes(documentSearchQuery.toLowerCase())
   );
 
   const handleSelectTemplate = (template: DisplayTemplate) => {
@@ -255,7 +248,7 @@ export default function Documents() {
           Select a template to start creating a document with voice drafting
         </p>
         
-        {loading ? (
+        {templatesLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
@@ -363,48 +356,80 @@ export default function Documents() {
             />
           </div>
         </div>
-        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-          <div className="divide-y divide-border max-h-[400px] overflow-y-auto">
-            {filteredDocuments.length > 0 ? (
-              filteredDocuments.map((doc) => (
-                <div
-                  key={doc.id}
-                  className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                    <FileText className="h-5 w-5 text-accent-foreground" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground truncate">{doc.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {doc.client} · {doc.date} · <span className="text-primary/70">{doc.template}</span>
-                    </p>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Download className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Printer className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Edit3 className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="p-8 text-center text-muted-foreground">
-                No documents found matching your search.
-              </div>
-            )}
+        {documentsLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
-        </div>
+        ) : (
+          <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+            <div className="divide-y divide-border max-h-[400px] overflow-y-auto">
+              {filteredDocuments.length > 0 ? (
+                filteredDocuments.map((doc) => (
+                  <div
+                    key={doc.id}
+                    className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors"
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+                      <FileText className="h-5 w-5 text-accent-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground truncate">{doc.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {doc.patient_name || "No patient"} · {formatDate(doc.created_at)} · <span className="text-primary/70">{doc.template_name || "Custom"}</span>
+                      </p>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8"
+                        onClick={() => setPreviewDocument(doc)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8"
+                        onClick={() => {
+                          exportToPDF({ title: doc.name, content: doc.content });
+                          toast({ title: "PDF Exported", description: `"${doc.name}" downloaded` });
+                        }}
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8"
+                        onClick={() => printDocument(doc.content, doc.name)}
+                      >
+                        <Printer className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={() => setDocumentToDelete(doc)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-8 text-center text-muted-foreground">
+                  {documents.length === 0 
+                    ? "No documents yet. Create your first document using a template above."
+                    : "No documents found matching your search."
+                  }
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         <p className="text-sm text-muted-foreground mt-2">
-          Showing {filteredDocuments.length} of {allDocuments.length} documents
+          Showing {filteredDocuments.length} of {documents.length} documents
         </p>
       </div>
 
@@ -575,6 +600,79 @@ export default function Documents() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Document Preview Dialog */}
+      <Dialog open={!!previewDocument} onOpenChange={(open) => !open && setPreviewDocument(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{previewDocument?.name}</DialogTitle>
+            <DialogDescription>
+              {previewDocument?.patient_name && `Patient: ${previewDocument.patient_name} · `}
+              Created: {previewDocument?.created_at ? formatDate(previewDocument.created_at) : ""}
+            </DialogDescription>
+          </DialogHeader>
+          {previewDocument && (
+            <div className="space-y-4">
+              <div className="border border-border rounded-lg p-6 bg-card/50">
+                <pre className="whitespace-pre-wrap text-sm text-foreground">
+                  {previewDocument.content}
+                </pre>
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t border-border">
+                <Button variant="outline" onClick={() => setPreviewDocument(null)} className="flex-1">
+                  Close
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => printDocument(previewDocument.content, previewDocument.name)}
+                  className="gap-2"
+                >
+                  <Printer className="h-4 w-4" />
+                  Print
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    exportToPDF({ title: previewDocument.name, content: previewDocument.content });
+                    toast({ title: "PDF Exported", description: `"${previewDocument.name}" downloaded` });
+                  }}
+                  className="gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Export PDF
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Document Confirmation */}
+      <AlertDialog open={!!documentToDelete} onOpenChange={(open) => !open && setDocumentToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Document</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{documentToDelete?.name}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={async () => {
+                if (documentToDelete) {
+                  await deleteDocument(documentToDelete.id);
+                  setDocumentToDelete(null);
+                }
+              }} 
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

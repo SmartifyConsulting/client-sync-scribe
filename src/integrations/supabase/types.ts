@@ -109,6 +109,60 @@ export type Database = {
         }
         Relationships: []
       }
+      documents: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          name: string
+          patient_id: string | null
+          patient_name: string | null
+          template_id: string | null
+          template_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          name: string
+          patient_id?: string | null
+          patient_name?: string | null
+          template_id?: string | null
+          template_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          name?: string
+          patient_id?: string | null
+          patient_name?: string | null
+          template_id?: string | null
+          template_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patients: {
         Row: {
           address: string | null
