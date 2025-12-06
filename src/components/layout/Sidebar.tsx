@@ -23,6 +23,7 @@ const doctorNavItems = [
   { icon: CheckSquare, label: "To-Do List", to: "/todos" },
   { icon: FileText, label: "Templates", to: "/documents" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
+  { icon: Receipt, label: "Invoices", to: "/invoices" },
 ];
 
 const patientNavItems = [
