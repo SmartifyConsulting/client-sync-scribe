@@ -381,32 +381,11 @@ export default function Sessions() {
             )}
 
             <div className="flex gap-3 pt-4 border-t border-border">
-              <Button 
-                variant="outline" 
-                className="flex-1 gap-2" 
-                onClick={() => setShowPrescriptionEditor(true)}
-              >
-                <Pill className="h-4 w-4" />
-                Record Prescription
-              </Button>
               <Button variant="outline" className="flex-1" onClick={endSession} disabled={isTranscribing}>
                 <Square className="h-4 w-4 mr-2" />
                 End Session
               </Button>
             </div>
-
-            {/* Saved Prescription Preview */}
-            {prescription && (
-              <div className="mt-4 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-                <div className="flex items-center gap-2 mb-2">
-                  <Pill className="h-4 w-4 text-green-600" />
-                  <p className="text-sm font-medium text-green-600">Prescription Saved</p>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Prescription has been recorded and will be saved with this session.
-                </p>
-              </div>
-            )}
           </div>
 
           {/* Notes Panel */}
@@ -422,6 +401,46 @@ export default function Sessions() {
               className="min-h-[300px] resize-none"
             />
           </div>
+        </div>
+      )}
+
+      {/* Prescription Panel - Outside of recording frame */}
+      {sessionState === "active" && (
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+                <Pill className="h-5 w-5 text-accent-foreground" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">Prescription</h3>
+                <p className="text-sm text-muted-foreground">
+                  {prescription ? "Prescription recorded" : "Voice-record a prescription for this session"}
+                </p>
+              </div>
+            </div>
+            <Button 
+              variant={prescription ? "secondary" : "default"}
+              className="gap-2" 
+              onClick={() => setShowPrescriptionEditor(true)}
+            >
+              <Pill className="h-4 w-4" />
+              {prescription ? "View/Edit Prescription" : "Record Prescription"}
+            </Button>
+          </div>
+          
+          {/* Saved Prescription Preview */}
+          {prescription && (
+            <div className="mt-4 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Pill className="h-4 w-4 text-green-600" />
+                <p className="text-sm font-medium text-green-600">Prescription Saved</p>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Prescription has been recorded and will be saved with this session.
+              </p>
+            </div>
+          )}
         </div>
       )}
 
