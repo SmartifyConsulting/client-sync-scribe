@@ -23,6 +23,7 @@ import PatientDashboard from "./pages/patient/PatientDashboard";
 import PatientCalendar from "./pages/patient/PatientCalendar";
 import PrescriptionHistory from "./pages/patient/PrescriptionHistory";
 import Invoices from "./pages/patient/Invoices";
+import PatientAccessManagement from "./pages/patient/PatientAccessManagement";
 
 const queryClient = new QueryClient();
 
@@ -89,6 +90,7 @@ const App = () => (
             <Route path="/patient/calendar" element={<PatientCalendar />} />
             <Route path="/patient/prescriptions" element={<PrescriptionHistory />} />
             <Route path="/patient/invoices" element={<Invoices />} />
+            <Route path="/patient/access" element={<PatientAccessManagement />} />
             
             {/* Common routes */}
             <Route path="/settings" element={<Settings />} />
