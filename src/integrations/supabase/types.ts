@@ -190,6 +190,36 @@ export type Database = {
         }
         Relationships: []
       }
+      practice_partners: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          mobile_number: string | null
+          registration_number: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          full_name: string
+          id?: string
+          mobile_number?: string | null
+          registration_number: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          mobile_number?: string | null
+          registration_number?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -197,6 +227,7 @@ export type Database = {
           full_name: string | null
           id: string
           logo_url: string | null
+          practice_address: string | null
           practice_number: string | null
           updated_at: string
         }
@@ -206,6 +237,7 @@ export type Database = {
           full_name?: string | null
           id: string
           logo_url?: string | null
+          practice_address?: string | null
           practice_number?: string | null
           updated_at?: string
         }
@@ -215,6 +247,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           logo_url?: string | null
+          practice_address?: string | null
           practice_number?: string | null
           updated_at?: string
         }
