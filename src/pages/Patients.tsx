@@ -62,8 +62,9 @@ export default function Patients() {
     referred_by: "",
     employer: "",
     occupation: "",
-    medical_aid: "",
-    medical_aid_number: "",
+    medical_insurance: "",
+    medical_insurance_product: "",
+    medical_insurance_number: "",
     primary_member: "",
     next_of_kin_name: "",
     next_of_kin_phone: "",
@@ -127,8 +128,9 @@ export default function Patients() {
       referred_by: newPatient.referred_by || null,
       employer: newPatient.employer || null,
       occupation: newPatient.occupation || null,
-      medical_aid: newPatient.medical_aid || null,
-      medical_aid_number: newPatient.medical_aid_number || null,
+      medical_aid: newPatient.medical_insurance || null,
+      medical_aid_number: newPatient.medical_insurance_number || null,
+      medical_insurance_product: newPatient.medical_insurance_product || null,
       primary_member: newPatient.primary_member || null,
       next_of_kin_name: newPatient.next_of_kin_name || null,
       next_of_kin_phone: newPatient.next_of_kin_phone || null,
@@ -142,8 +144,8 @@ export default function Patients() {
       setNewPatient({
         name: "", email: "", phone: "", notes: "", status: "active",
         physical_address: "", postal_address: "", same_as_physical: false,
-        referred_by: "", employer: "", occupation: "", medical_aid: "",
-        medical_aid_number: "", primary_member: "", next_of_kin_name: "",
+        referred_by: "", employer: "", occupation: "", medical_insurance: "",
+        medical_insurance_product: "", medical_insurance_number: "", primary_member: "", next_of_kin_name: "",
         next_of_kin_phone: "", next_of_kin_email: "", general_practitioner: "",
         claims_email: "",
       });
@@ -283,24 +285,32 @@ export default function Patients() {
                   </div>
                 </div>
 
-                {/* Medical Aid Information */}
+                {/* Medical Insurance Information */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-foreground border-b pb-2">Medical Aid Information</h3>
+                  <h3 className="text-sm font-semibold text-foreground border-b pb-2">Medical Insurance Information</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-foreground">Medical Aid</label>
+                      <label className="text-sm font-medium text-foreground">Medical Insurance</label>
                       <Input
-                        placeholder="Medical aid provider"
-                        value={newPatient.medical_aid}
-                        onChange={(e) => setNewPatient({ ...newPatient, medical_aid: e.target.value })}
+                        placeholder="Insurance provider"
+                        value={newPatient.medical_insurance}
+                        onChange={(e) => setNewPatient({ ...newPatient, medical_insurance: e.target.value })}
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-foreground">Medical Aid Number</label>
+                      <label className="text-sm font-medium text-foreground">Medical Insurance Product</label>
+                      <Input
+                        placeholder="e.g., Executive Plan"
+                        value={newPatient.medical_insurance_product}
+                        onChange={(e) => setNewPatient({ ...newPatient, medical_insurance_product: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-foreground">Medical Insurance Number</label>
                       <Input
                         placeholder="Member number"
-                        value={newPatient.medical_aid_number}
-                        onChange={(e) => setNewPatient({ ...newPatient, medical_aid_number: e.target.value })}
+                        value={newPatient.medical_insurance_number}
+                        onChange={(e) => setNewPatient({ ...newPatient, medical_insurance_number: e.target.value })}
                       />
                     </div>
                     <div>
@@ -315,7 +325,7 @@ export default function Patients() {
                       <label className="text-sm font-medium text-foreground">Claims Email</label>
                       <Input
                         type="email"
-                        placeholder="claims@medicalaid.com"
+                        placeholder="claims@insurance.com"
                         value={newPatient.claims_email}
                         onChange={(e) => setNewPatient({ ...newPatient, claims_email: e.target.value })}
                       />

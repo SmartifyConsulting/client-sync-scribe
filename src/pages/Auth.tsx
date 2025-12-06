@@ -47,8 +47,9 @@ export default function Auth() {
   const [sameAsPhysical, setSameAsPhysical] = useState(false);
   const [employer, setEmployer] = useState("");
   const [occupation, setOccupation] = useState("");
-  const [medicalAid, setMedicalAid] = useState("");
-  const [medicalAidNumber, setMedicalAidNumber] = useState("");
+  const [medicalInsurance, setMedicalInsurance] = useState("");
+  const [medicalInsuranceProduct, setMedicalInsuranceProduct] = useState("");
+  const [medicalInsuranceNumber, setMedicalInsuranceNumber] = useState("");
   const [primaryMember, setPrimaryMember] = useState("");
   const [nextOfKinName, setNextOfKinName] = useState("");
   const [nextOfKinPhone, setNextOfKinPhone] = useState("");
@@ -192,8 +193,9 @@ export default function Auth() {
                       same_as_physical: sameAsPhysical,
                       employer: employer,
                       occupation: occupation,
-                      medical_aid: medicalAid,
-                      medical_aid_number: medicalAidNumber,
+                      medical_aid: medicalInsurance,
+                      medical_aid_number: medicalInsuranceNumber,
+                      medical_insurance_product: medicalInsuranceProduct,
                       primary_member: primaryMember,
                       next_of_kin_name: nextOfKinName,
                       next_of_kin_phone: nextOfKinPhone,
@@ -562,30 +564,40 @@ export default function Auth() {
                       </div>
                     </div>
 
-                    {/* Medical Aid Section */}
+                    {/* Medical Insurance Section */}
                     <div className="pt-4 border-t border-border">
-                      <h3 className="text-sm font-medium text-foreground mb-4">Medical Aid Information</h3>
+                      <h3 className="text-sm font-medium text-foreground mb-4">Medical Insurance Information</h3>
                       
                       <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-2">
-                            <Label htmlFor="medicalAid">Medical Aid Provider</Label>
+                            <Label htmlFor="medicalInsurance">Medical Insurance Provider</Label>
                             <Input
-                              id="medicalAid"
+                              id="medicalInsurance"
                               placeholder="e.g., Discovery Health"
-                              value={medicalAid}
-                              onChange={(e) => setMedicalAid(e.target.value)}
+                              value={medicalInsurance}
+                              onChange={(e) => setMedicalInsurance(e.target.value)}
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="medicalAidNumber">Medical Aid Number</Label>
+                            <Label htmlFor="medicalInsuranceProduct">Medical Insurance Product</Label>
                             <Input
-                              id="medicalAidNumber"
-                              placeholder="Membership number"
-                              value={medicalAidNumber}
-                              onChange={(e) => setMedicalAidNumber(e.target.value)}
+                              id="medicalInsuranceProduct"
+                              placeholder="e.g., Executive Plan"
+                              value={medicalInsuranceProduct}
+                              onChange={(e) => setMedicalInsuranceProduct(e.target.value)}
                             />
                           </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="medicalInsuranceNumber">Medical Insurance Number</Label>
+                          <Input
+                            id="medicalInsuranceNumber"
+                            placeholder="Membership number"
+                            value={medicalInsuranceNumber}
+                            onChange={(e) => setMedicalInsuranceNumber(e.target.value)}
+                          />
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
