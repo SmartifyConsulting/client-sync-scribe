@@ -69,6 +69,7 @@ export default function Patients() {
     next_of_kin_phone: "",
     next_of_kin_email: "",
     general_practitioner: "",
+    claims_email: "",
   });
   const [creating, setCreating] = useState(false);
 
@@ -133,7 +134,8 @@ export default function Patients() {
       next_of_kin_phone: newPatient.next_of_kin_phone || null,
       next_of_kin_email: newPatient.next_of_kin_email || null,
       general_practitioner: newPatient.general_practitioner || null,
-    });
+      claims_email: newPatient.claims_email || null,
+    } as any);
 
     if (result) {
       setIsDialogOpen(false);
@@ -143,6 +145,7 @@ export default function Patients() {
         referred_by: "", employer: "", occupation: "", medical_aid: "",
         medical_aid_number: "", primary_member: "", next_of_kin_name: "",
         next_of_kin_phone: "", next_of_kin_email: "", general_practitioner: "",
+        claims_email: "",
       });
     }
     setCreating(false);
@@ -300,12 +303,21 @@ export default function Patients() {
                         onChange={(e) => setNewPatient({ ...newPatient, medical_aid_number: e.target.value })}
                       />
                     </div>
-                    <div className="col-span-2">
+                    <div>
                       <label className="text-sm font-medium text-foreground">Primary Member</label>
                       <Input
                         placeholder="Primary member name"
                         value={newPatient.primary_member}
                         onChange={(e) => setNewPatient({ ...newPatient, primary_member: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-foreground">Claims Email</label>
+                      <Input
+                        type="email"
+                        placeholder="claims@medicalaid.com"
+                        value={newPatient.claims_email}
+                        onChange={(e) => setNewPatient({ ...newPatient, claims_email: e.target.value })}
                       />
                     </div>
                   </div>

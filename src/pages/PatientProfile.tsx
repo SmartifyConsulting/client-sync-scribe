@@ -397,6 +397,10 @@ export default function PatientProfile() {
                   <p className="mt-1 text-foreground">{patient.primary_member || "Not provided"}</p>
                 </div>
                 <div>
+                  <p className="text-sm text-muted-foreground">Claims Email</p>
+                  <p className="mt-1 text-foreground">{(patient as any).claims_email || "Not provided"}</p>
+                </div>
+                <div>
                   <p className="text-sm text-muted-foreground">General Practitioner</p>
                   <p className="mt-1 text-foreground">{patient.general_practitioner || "Not provided"}</p>
                 </div>

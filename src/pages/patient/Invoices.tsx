@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { format, parseISO, isPast } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 interface Invoice {
   id: string;
@@ -46,9 +47,11 @@ const statusConfig: Record<string, { color: string; icon: typeof CheckCircle; la
 
 export default function Invoices() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
+  const [payingInvoiceId, setPayingInvoiceId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -115,6 +118,38 @@ export default function Invoices() {
       style: "currency",
       currency: "ZAR",
     }).format(amount);
+  };
+
+  const handlePayInvoice = async (invoiceId: string) => {
+    setPayingInvoiceId(invoiceId);
+    try {
+      const { error } = await supabase
+        .from("invoices")
+        .update({ 
+          status: "paid", 
+          paid_at: new Date().toISOString() 
+        })
+        .eq("id", invoiceId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Payment Successful",
+        description: "Your invoice has been marked as paid.",
+      });
+
+      // Refresh invoices
+      fetchInvoices();
+    } catch (error) {
+      console.error("Error paying invoice:", error);
+      toast({
+        title: "Payment Failed",
+        description: "There was an error processing your payment. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setPayingInvoiceId(null);
+    }
   };
 
   if (loading) {
@@ -245,8 +280,17 @@ export default function Invoices() {
                         <Download className="h-4 w-4" />
                       </Button>
                       {(invoice.status === "pending" || invoice.status === "overdue") && (
-                        <Button size="sm" className="gap-1">
-                          <CreditCard className="h-4 w-4" />
+                        <Button 
+                          size="sm" 
+                          className="gap-1"
+                          onClick={() => handlePayInvoice(invoice.id)}
+                          disabled={payingInvoiceId === invoice.id}
+                        >
+                          {payingInvoiceId === invoice.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <CreditCard className="h-4 w-4" />
+                          )}
                           Pay
                         </Button>
                       )}
