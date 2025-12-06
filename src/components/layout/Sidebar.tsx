@@ -13,6 +13,7 @@ import {
   Receipt,
   Loader2,
   Shield,
+  Inbox,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 
@@ -24,6 +25,7 @@ const doctorNavItems = [
   { icon: FileText, label: "Templates", to: "/documents" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
   { icon: Receipt, label: "Invoices", to: "/invoices" },
+  { icon: Inbox, label: "Inbox", to: "/inbox" },
 ];
 
 const patientNavItems = [
