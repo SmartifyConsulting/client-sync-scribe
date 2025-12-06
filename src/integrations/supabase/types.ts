@@ -315,6 +315,51 @@ export type Database = {
           },
         ]
       }
+      templates: {
+        Row: {
+          category: string | null
+          content: string
+          created_at: string
+          description: string | null
+          font_family: string | null
+          id: string
+          is_default: boolean | null
+          logo_position: Json | null
+          logo_url: string | null
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          content: string
+          created_at?: string
+          description?: string | null
+          font_family?: string | null
+          id?: string
+          is_default?: boolean | null
+          logo_position?: Json | null
+          logo_url?: string | null
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          content?: string
+          created_at?: string
+          description?: string | null
+          font_family?: string | null
+          id?: string
+          is_default?: boolean | null
+          logo_position?: Json | null
+          logo_url?: string | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       todos: {
         Row: {
           completed_at: string | null
