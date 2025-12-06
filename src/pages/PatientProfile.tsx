@@ -10,6 +10,7 @@ import {
   Loader2,
   StickyNote,
   Save,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,6 +22,7 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCard } from "@/components/patients/SessionCard";
 import { PatientOverview } from "@/components/patients/PatientOverview";
+import { InvitePatientDialog } from "@/components/patients/InvitePatientDialog";
 
 const mockDocuments = [
   { id: "1", name: "Financial Statement Q3.pdf", type: "Report", date: "Nov 15, 2024" },
@@ -128,7 +130,8 @@ export default function PatientProfile() {
             </div>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
+          <InvitePatientDialog patientId={patient.id} patientName={patient.name} />
           <Button variant="outline" className="gap-2" onClick={handleScheduleAppointment}>
             <Calendar className="h-4 w-4" />
             Schedule
@@ -347,6 +350,13 @@ export default function PatientProfile() {
                 <div>
                   <p className="text-sm text-muted-foreground">General Practitioner</p>
                   <p className="mt-1 text-foreground">{patient.general_practitioner || "Not provided"}</p>
+                </div>
+                <div className="sm:col-span-2 lg:col-span-3">
+                  <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    Allergies
+                  </p>
+                  <p className="mt-1 text-foreground">{(patient as any).allergies || "None recorded"}</p>
                 </div>
               </div>
             </div>
