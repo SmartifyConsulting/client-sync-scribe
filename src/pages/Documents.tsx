@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
-import { TemplateForm } from "@/components/templates/TemplateForm";
+import { TemplateForm, TemplateData } from "@/components/templates/TemplateForm";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -22,6 +22,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Template {
   id: string;
@@ -33,9 +49,10 @@ interface Template {
   placeholders: string[];
   logoUrl?: string;
   logoPosition?: { x: number; y: number };
+  fontFamily?: string;
 }
 
-const mockTemplates: Template[] = [
+const initialTemplates: Template[] = [
   {
     id: "1",
     name: "Client Action Plan",
@@ -185,20 +202,36 @@ Thank you for your business.`,
   },
 ];
 
-const recentDocuments = [
-  { id: "1", name: "Action Plan - Sarah Johnson.pdf", date: "Dec 3, 2024", client: "Sarah Johnson" },
-  { id: "2", name: "Summary - Michael Chen.pdf", date: "Nov 30, 2024", client: "Michael Chen" },
-  { id: "3", name: "Advice Letter - Emma Williams.pdf", date: "Nov 28, 2024", client: "Emma Williams" },
+const allDocuments = [
+  { id: "1", name: "Action Plan - Sarah Johnson.pdf", date: "Dec 3, 2024", client: "Sarah Johnson", template: "Client Action Plan" },
+  { id: "2", name: "Summary - Michael Chen.pdf", date: "Nov 30, 2024", client: "Michael Chen", template: "Session Summary" },
+  { id: "3", name: "Advice Letter - Emma Williams.pdf", date: "Nov 28, 2024", client: "Emma Williams", template: "Letter of Advice" },
+  { id: "4", name: "Invoice - John Davis.pdf", date: "Nov 25, 2024", client: "John Davis", template: "Invoice Template" },
+  { id: "5", name: "Action Plan - Lisa Brown.pdf", date: "Nov 22, 2024", client: "Lisa Brown", template: "Client Action Plan" },
+  { id: "6", name: "Summary - Robert Wilson.pdf", date: "Nov 20, 2024", client: "Robert Wilson", template: "Session Summary" },
+  { id: "7", name: "Advice Letter - Anna Martinez.pdf", date: "Nov 18, 2024", client: "Anna Martinez", template: "Letter of Advice" },
+  { id: "8", name: "Summary - David Lee.pdf", date: "Nov 15, 2024", client: "David Lee", template: "Session Summary" },
 ];
 
 export default function Documents() {
   const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [templates, setTemplates] = useState<Template[]>(initialTemplates);
+  const [templateSearchQuery, setTemplateSearchQuery] = useState("");
+  const [documentSearchQuery, setDocumentSearchQuery] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [isNewTemplateOpen, setIsNewTemplateOpen] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
+  const [templateToDelete, setTemplateToDelete] = useState<Template | null>(null);
 
-  const filteredTemplates = mockTemplates.filter((template) =>
-    template.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredTemplates = templates.filter((template) =>
+    template.name.toLowerCase().includes(templateSearchQuery.toLowerCase()) ||
+    template.category.toLowerCase().includes(templateSearchQuery.toLowerCase())
+  );
+
+  const filteredDocuments = allDocuments.filter((doc) =>
+    doc.name.toLowerCase().includes(documentSearchQuery.toLowerCase()) ||
+    doc.client.toLowerCase().includes(documentSearchQuery.toLowerCase()) ||
+    doc.template.toLowerCase().includes(documentSearchQuery.toLowerCase())
   );
 
   const handleSelectTemplate = (template: Template) => {
@@ -218,20 +251,64 @@ export default function Documents() {
     });
   };
 
-  const handleCreateTemplate = (template: {
-    name: string;
-    description: string;
-    category: string;
-    content: string;
-    logoUrl?: string;
-    logoPosition?: { x: number; y: number };
-  }) => {
-    console.log("Creating template:", template);
+  const handleCreateTemplate = (template: TemplateData) => {
+    const newTemplate: Template = {
+      id: Date.now().toString(),
+      name: template.name,
+      description: template.description,
+      category: template.category,
+      content: template.content,
+      lastModified: "Just now",
+      placeholders: extractPlaceholders(template.content),
+      logoUrl: template.logoUrl,
+      logoPosition: template.logoPosition,
+      fontFamily: template.fontFamily,
+    };
+    setTemplates([...templates, newTemplate]);
     toast({
       title: "Template Created",
       description: `"${template.name}" has been created successfully`,
     });
     setIsNewTemplateOpen(false);
+  };
+
+  const handleEditTemplate = (template: TemplateData) => {
+    setTemplates(templates.map(t => 
+      t.id === template.id 
+        ? {
+            ...t,
+            name: template.name,
+            description: template.description,
+            category: template.category,
+            content: template.content,
+            lastModified: "Just now",
+            placeholders: extractPlaceholders(template.content),
+            logoUrl: template.logoUrl,
+            logoPosition: template.logoPosition,
+            fontFamily: template.fontFamily,
+          }
+        : t
+    ));
+    toast({
+      title: "Template Updated",
+      description: `"${template.name}" has been updated successfully`,
+    });
+    setEditingTemplate(null);
+  };
+
+  const handleDeleteTemplate = () => {
+    if (!templateToDelete) return;
+    setTemplates(templates.filter(t => t.id !== templateToDelete.id));
+    toast({
+      title: "Template Deleted",
+      description: `"${templateToDelete.name}" has been deleted`,
+    });
+    setTemplateToDelete(null);
+  };
+
+  const extractPlaceholders = (content: string): string[] => {
+    const matches = content.match(/\[([^\]]+)\]/g) || [];
+    return [...new Set(matches.map(m => m.slice(1, -1)))];
   };
 
   return (
@@ -261,18 +338,19 @@ export default function Documents() {
             <TemplateForm
               onSubmit={handleCreateTemplate}
               onCancel={() => setIsNewTemplateOpen(false)}
+              mode="create"
             />
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* Search */}
+      {/* Template Search */}
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           placeholder="Search templates..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          value={templateSearchQuery}
+          onChange={(e) => setTemplateSearchQuery(e.target.value)}
           className="pl-10"
         />
       </div>
@@ -287,34 +365,59 @@ export default function Documents() {
           {filteredTemplates.map((template, index) => (
             <div
               key={template.id}
-              onClick={() => handleSelectTemplate(template)}
               className="group rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30 text-left cursor-pointer"
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <div className="flex items-start justify-between mb-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary/10">
+                <div 
+                  className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary/10"
+                  onClick={() => handleSelectTemplate(template)}
+                >
                   <FileText className="h-5 w-5 text-accent-foreground group-hover:text-primary" />
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setEditingTemplate(template)}>
+                      <Edit3 className="h-4 w-4 mr-2" />
+                      Edit Template
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleSelectTemplate(template)}>
+                      <Copy className="h-4 w-4 mr-2" />
+                      Use Template
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => setTemplateToDelete(template)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Template
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-              <h3 className="font-medium text-foreground mb-1">{template.name}</h3>
-              <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                {template.description}
-              </p>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">
-                  {template.lastModified}
-                </span>
-                <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                  {template.category}
-                </span>
+              <div onClick={() => handleSelectTemplate(template)}>
+                <h3 className="font-medium text-foreground mb-1">{template.name}</h3>
+                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                  {template.description}
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">
+                    {template.lastModified}
+                  </span>
+                  <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                    {template.category}
+                  </span>
+                </div>
               </div>
             </div>
           ))}
@@ -332,40 +435,60 @@ export default function Documents() {
         </div>
       </div>
 
-      {/* Recent Documents */}
+      {/* All Documents */}
       <div>
-        <h2 className="text-lg font-semibold text-foreground mb-4">Recent Documents</h2>
-        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-          <div className="divide-y divide-border">
-            {recentDocuments.map((doc) => (
-              <div
-                key={doc.id}
-                className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                  <FileText className="h-5 w-5 text-accent-foreground" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground truncate">{doc.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {doc.client} · {doc.date}
-                  </p>
-                </div>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Edit3 className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
+          <h2 className="text-lg font-semibold text-foreground">All Documents</h2>
+          <div className="relative max-w-xs">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search documents..."
+              value={documentSearchQuery}
+              onChange={(e) => setDocumentSearchQuery(e.target.value)}
+              className="pl-10"
+            />
           </div>
         </div>
+        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+          <div className="divide-y divide-border max-h-[400px] overflow-y-auto">
+            {filteredDocuments.length > 0 ? (
+              filteredDocuments.map((doc) => (
+                <div
+                  key={doc.id}
+                  className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+                    <FileText className="h-5 w-5 text-accent-foreground" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-foreground truncate">{doc.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {doc.client} · {doc.date} · <span className="text-primary/70">{doc.template}</span>
+                    </p>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Edit3 className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-8 text-center text-muted-foreground">
+                No documents found matching your search.
+              </div>
+            )}
+          </div>
+        </div>
+        <p className="text-sm text-muted-foreground mt-2">
+          Showing {filteredDocuments.length} of {allDocuments.length} documents
+        </p>
       </div>
 
       {/* Document Editor Modal */}
@@ -376,6 +499,53 @@ export default function Documents() {
           onSave={handleSaveDocument}
         />
       )}
+
+      {/* Edit Template Dialog */}
+      <Dialog open={!!editingTemplate} onOpenChange={(open) => !open && setEditingTemplate(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Template</DialogTitle>
+            <DialogDescription>
+              Modify this template's content, logo, and settings
+            </DialogDescription>
+          </DialogHeader>
+          {editingTemplate && (
+            <TemplateForm
+              initialData={{
+                id: editingTemplate.id,
+                name: editingTemplate.name,
+                description: editingTemplate.description,
+                category: editingTemplate.category,
+                content: editingTemplate.content,
+                logoUrl: editingTemplate.logoUrl,
+                logoPosition: editingTemplate.logoPosition,
+                fontFamily: editingTemplate.fontFamily,
+              }}
+              onSubmit={handleEditTemplate}
+              onCancel={() => setEditingTemplate(null)}
+              mode="edit"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!templateToDelete} onOpenChange={(open) => !open && setTemplateToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Template</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{templateToDelete?.name}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteTemplate} className="bg-destructive hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
