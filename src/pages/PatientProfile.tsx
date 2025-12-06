@@ -17,12 +17,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { usePatient } from "@/hooks/usePatients";
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useSessions } from "@/hooks/useSessions";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCard } from "@/components/patients/SessionCard";
 import { PatientOverview } from "@/components/patients/PatientOverview";
 import { InvitePatientDialog } from "@/components/patients/InvitePatientDialog";
+import { DoctorsOnProfile } from "@/components/patients/DoctorsOnProfile";
 
 const mockDocuments = [
   { id: "1", name: "Financial Statement Q3.pdf", type: "Report", date: "Nov 15, 2024" },
@@ -38,6 +40,45 @@ export default function PatientProfile() {
   
   const [additionalNotes, setAdditionalNotes] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
+  const [canViewAllSessions, setCanViewAllSessions] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // Check if current doctor has access to all sessions
+  useEffect(() => {
+    const checkPermissions = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+      
+      const patientUserId = (patient as any)?.patient_user_id;
+      if (!patientUserId || !user) {
+        setCanViewAllSessions(true); // Owner sees all
+        return;
+      }
+      
+      // Check if this doctor has session_summaries permission from the patient
+      const { data: accessRecords } = await supabase
+        .from('doctor_patient_access')
+        .select('permissions')
+        .eq('patient_user_id', patientUserId)
+        .eq('is_active', true);
+
+      if (!accessRecords || accessRecords.length === 0) {
+        setCanViewAllSessions(true); // If no access records, assume owner
+        return;
+      }
+
+      // Check if any doctor has session_summaries permission (meaning patient shares across doctors)
+      const hasSharedSessions = accessRecords.some(record => 
+        record.permissions.includes('session_summaries')
+      );
+      
+      setCanViewAllSessions(hasSharedSessions);
+    };
+
+    if (patient) {
+      checkPermissions();
+    }
+  }, [patient]);
 
   // Initialize notes from patient data
   useEffect(() => {
@@ -171,6 +212,7 @@ export default function PatientProfile() {
           <TabsTrigger value="details">Details</TabsTrigger>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="sessions">Session History</TabsTrigger>
+          <TabsTrigger value="doctors">Doctors</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
         </TabsList>
@@ -241,6 +283,13 @@ export default function PatientProfile() {
               )}
             </>
           )}
+        </TabsContent>
+
+        {/* Doctors Tab */}
+        <TabsContent value="doctors">
+          <div className="rounded-xl border border-border bg-card p-6">
+            <DoctorsOnProfile patientId={patient.id} patientName={patient.name} />
+          </div>
         </TabsContent>
 
         <TabsContent value="documents" className="space-y-4">

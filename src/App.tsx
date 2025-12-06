@@ -15,6 +15,7 @@ import SessionDetail from "./pages/SessionDetail";
 import Documents from "./pages/Documents";
 import Settings from "./pages/Settings";
 import TodoList from "./pages/TodoList";
+import Inbox from "./pages/Inbox";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -87,6 +88,7 @@ const App = () => (
             <Route path="/sessions/:id" element={<SessionDetail />} />
             <Route path="/documents" element={<Documents />} />
             <Route path="/invoices" element={<DoctorInvoices />} />
+            <Route path="/inbox" element={<Inbox />} />
             
             {/* Patient routes */}
             <Route path="/patient/calendar" element={<PatientCalendar />} />
