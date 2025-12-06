@@ -381,6 +381,7 @@ export type Database = {
         Row: {
           address: string | null
           allergies: string | null
+          claims_email: string | null
           created_at: string
           dob: string | null
           email: string | null
@@ -409,6 +410,7 @@ export type Database = {
         Insert: {
           address?: string | null
           allergies?: string | null
+          claims_email?: string | null
           created_at?: string
           dob?: string | null
           email?: string | null
@@ -437,6 +439,7 @@ export type Database = {
         Update: {
           address?: string | null
           allergies?: string | null
+          claims_email?: string | null
           created_at?: string
           dob?: string | null
           email?: string | null
