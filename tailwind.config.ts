@@ -15,6 +15,12 @@ export default {
     extend: {
       fontFamily: {
         sans: ["DM Sans", "system-ui", "sans-serif"],
+        lora: ["Lora", "serif"],
+        merriweather: ["Merriweather", "serif"],
+        "open-sans": ["Open Sans", "sans-serif"],
+        playfair: ["Playfair Display", "serif"],
+        roboto: ["Roboto", "sans-serif"],
+        "source-serif": ["Source Serif 4", "serif"],
       },
       colors: {
         border: "hsl(var(--border))",

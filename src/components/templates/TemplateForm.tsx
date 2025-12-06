@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { Upload, X, Image as ImageIcon, GripVertical } from "lucide-react";
+import { useState, useCallback, useEffect } from "react";
+import { Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,33 +7,71 @@ import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-interface TemplateFormProps {
-  onSubmit: (template: {
-    name: string;
-    description: string;
-    category: string;
-    content: string;
-    logoUrl?: string;
-    logoPosition?: { x: number; y: number };
-  }) => void;
-  onCancel: () => void;
+export interface TemplateData {
+  id?: string;
+  name: string;
+  description: string;
+  category: string;
+  content: string;
+  logoUrl?: string;
+  logoPosition?: { x: number; y: number };
+  fontFamily?: string;
 }
 
-export function TemplateForm({ onSubmit, onCancel }: TemplateFormProps) {
+interface TemplateFormProps {
+  initialData?: TemplateData;
+  onSubmit: (template: TemplateData) => void;
+  onCancel: () => void;
+  mode?: "create" | "edit";
+}
+
+const FONT_OPTIONS = [
+  { value: "sans", label: "DM Sans (Default)", preview: "font-sans" },
+  { value: "roboto", label: "Roboto", preview: "font-roboto" },
+  { value: "open-sans", label: "Open Sans", preview: "font-open-sans" },
+  { value: "lora", label: "Lora", preview: "font-lora" },
+  { value: "merriweather", label: "Merriweather", preview: "font-merriweather" },
+  { value: "playfair", label: "Playfair Display", preview: "font-playfair" },
+  { value: "source-serif", label: "Source Serif", preview: "font-source-serif" },
+];
+
+export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" }: TemplateFormProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
   const { user } = useAuth();
   const [isDragging, setIsDragging] = useState(false);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [logoPosition, setLogoPosition] = useState({ x: 50, y: 10 });
+  const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logoUrl || null);
+  const [logoPosition, setLogoPosition] = useState(initialData?.logoPosition || { x: 50, y: 10 });
   const [isUploading, setIsUploading] = useState(false);
+  const [selectedFont, setSelectedFont] = useState(initialData?.fontFamily || "sans");
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    category: "",
-    content: "",
+    name: initialData?.name || "",
+    description: initialData?.description || "",
+    category: initialData?.category || "",
+    content: initialData?.content || "",
   });
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name || "",
+        description: initialData.description || "",
+        category: initialData.category || "",
+        content: initialData.content || "",
+      });
+      setLogoPreview(initialData.logoUrl || null);
+      setLogoPosition(initialData.logoPosition || { x: 50, y: 10 });
+      setSelectedFont(initialData.fontFamily || "sans");
+    }
+  }, [initialData]);
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -92,14 +130,12 @@ export function TemplateForm({ onSubmit, onCancel }: TemplateFormProps) {
     setIsUploading(true);
 
     try {
-      // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
         setLogoPreview(e.target?.result as string);
       };
       reader.readAsDataURL(file);
 
-      // Upload to Supabase storage
       if (user) {
         const fileExt = file.name.split('.').pop();
         const fileName = `${user.id}/template-logo-${Date.now()}.${fileExt}`;
@@ -150,10 +186,16 @@ export function TemplateForm({ onSubmit, onCancel }: TemplateFormProps) {
     }
 
     onSubmit({
+      id: initialData?.id,
       ...formData,
       logoUrl: logoPreview || undefined,
       logoPosition: logoPreview ? logoPosition : undefined,
+      fontFamily: selectedFont,
     });
+  };
+
+  const getFontClass = (fontValue: string) => {
+    return FONT_OPTIONS.find(f => f.value === fontValue)?.preview || "font-sans";
   };
 
   return (
@@ -178,6 +220,27 @@ export function TemplateForm({ onSubmit, onCancel }: TemplateFormProps) {
               )}
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Font Selection */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-foreground">Document Font</label>
+        <Select value={selectedFont} onValueChange={setSelectedFont}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a font" />
+          </SelectTrigger>
+          <SelectContent>
+            {FONT_OPTIONS.map((font) => (
+              <SelectItem key={font.value} value={font.value}>
+                <span className={font.preview}>{font.label}</span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div className={`p-3 rounded-lg bg-muted/30 border border-border ${getFontClass(selectedFont)}`}>
+          <p className="text-sm text-muted-foreground">Font Preview:</p>
+          <p className="text-foreground">The quick brown fox jumps over the lazy dog.</p>
         </div>
       </div>
 
@@ -317,7 +380,7 @@ export function TemplateForm({ onSubmit, onCancel }: TemplateFormProps) {
           value={formData.content}
           onChange={(e) => setFormData({ ...formData, content: e.target.value })}
           rows={10}
-          className="font-mono text-sm"
+          className={`font-mono text-sm ${getFontClass(selectedFont)}`}
         />
       </div>
 
@@ -326,7 +389,7 @@ export function TemplateForm({ onSubmit, onCancel }: TemplateFormProps) {
           Cancel
         </Button>
         <Button onClick={handleSubmit} className="flex-1">
-          Create Template
+          {mode === "edit" ? "Save Changes" : "Create Template"}
         </Button>
       </div>
     </div>
