@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Loader2, Sparkles, Pill, HeartPulse, RefreshCw } from "lucide-react";
+import { Loader2, Sparkles, Pill, HeartPulse, RefreshCw, Activity, AlertTriangle, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Session } from "@/hooks/useSessions";
@@ -16,24 +17,32 @@ interface PatientOverviewProps {
     general_practitioner?: string | null;
     occupation?: string | null;
     notes?: string | null;
+    allergies?: string | null;
   };
   sessions: Session[];
 }
 
-interface MedicationItem {
+interface StatusItem {
   name: string;
   date: string;
+  status: "active" | "inactive";
 }
 
-interface ConditionItem {
+interface MedicationItem extends StatusItem {}
+interface SymptomItem extends StatusItem {}
+interface ConditionItem extends StatusItem {}
+
+interface AllergyItem {
   name: string;
-  date: string;
+  severity: "mild" | "moderate" | "severe";
 }
 
 interface SummaryData {
   summary: string;
   medications: MedicationItem[];
+  symptoms: SymptomItem[];
   conditions: ConditionItem[];
+  allergies: AllergyItem[];
 }
 
 export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
@@ -51,7 +60,25 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      setSummaryData(data);
+      // Ensure backwards compatibility - map old conditions to symptoms if needed
+      const processedData: SummaryData = {
+        summary: data.summary || "",
+        medications: (data.medications || []).map((m: any) => ({
+          ...m,
+          status: m.status || "active",
+        })),
+        symptoms: (data.symptoms || data.conditions || []).map((s: any) => ({
+          ...s,
+          status: s.status || "active",
+        })),
+        conditions: (data.conditions || []).map((c: any) => ({
+          ...c,
+          status: c.status || "active",
+        })),
+        allergies: data.allergies || [],
+      };
+
+      setSummaryData(processedData);
     } catch (error: any) {
       console.error("Error generating summary:", error);
       toast({
@@ -70,23 +97,51 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
     }
   }, [patient.id]);
 
-  // Parse and render summary with highlighted medications and conditions
+  const toggleStatus = (
+    type: "medications" | "symptoms" | "conditions",
+    index: number
+  ) => {
+    if (!summaryData) return;
+
+    setSummaryData((prev) => {
+      if (!prev) return prev;
+      const updated = { ...prev };
+      const item = updated[type][index];
+      updated[type] = [
+        ...updated[type].slice(0, index),
+        { ...item, status: item.status === "active" ? "inactive" : "active" },
+        ...updated[type].slice(index + 1),
+      ];
+      return updated;
+    });
+
+    toast({
+      title: "Status Updated",
+      description: `Item marked as ${summaryData[type][index].status === "active" ? "inactive" : "active"}`,
+    });
+  };
+
+  // Parse and render summary with highlighted elements
   const renderSummary = (text: string) => {
-    // Replace <med> tags with green styled spans
-    // Replace <condition> tags with blue styled spans
     const parts: React.ReactNode[] = [];
     let remaining = text;
     let key = 0;
 
     while (remaining.length > 0) {
       const medMatch = remaining.match(/<med>([^<]+)<\/med>/);
+      const symptomMatch = remaining.match(/<symptom>([^<]+)<\/symptom>/);
       const condMatch = remaining.match(/<condition>([^<]+)<\/condition>/);
 
-      let firstMatch: { type: "med" | "condition"; index: number; text: string; fullMatch: string } | null = null;
+      let firstMatch: { type: "med" | "symptom" | "condition"; index: number; text: string; fullMatch: string } | null = null;
 
       if (medMatch && medMatch.index !== undefined) {
         if (!firstMatch || medMatch.index < firstMatch.index) {
           firstMatch = { type: "med", index: medMatch.index, text: medMatch[1], fullMatch: medMatch[0] };
+        }
+      }
+      if (symptomMatch && symptomMatch.index !== undefined) {
+        if (!firstMatch || symptomMatch.index < firstMatch.index) {
+          firstMatch = { type: "symptom", index: symptomMatch.index, text: symptomMatch[1], fullMatch: symptomMatch[0] };
         }
       }
       if (condMatch && condMatch.index !== undefined) {
@@ -96,12 +151,10 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
       }
 
       if (firstMatch) {
-        // Add text before the match
         if (firstMatch.index > 0) {
           parts.push(<span key={key++}>{remaining.substring(0, firstMatch.index)}</span>);
         }
 
-        // Add the highlighted match
         if (firstMatch.type === "med") {
           parts.push(
             <span
@@ -109,6 +162,16 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
               className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-green-500/15 text-green-700 dark:text-green-400 font-medium"
             >
               <Pill className="h-3 w-3" />
+              {firstMatch.text}
+            </span>
+          );
+        } else if (firstMatch.type === "symptom") {
+          parts.push(
+            <span
+              key={key++}
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-400 font-medium"
+            >
+              <Activity className="h-3 w-3" />
               {firstMatch.text}
             </span>
           );
@@ -126,13 +189,23 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
 
         remaining = remaining.substring(firstMatch.index + firstMatch.fullMatch.length);
       } else {
-        // No more matches, add remaining text
         parts.push(<span key={key++}>{remaining}</span>);
         break;
       }
     }
 
     return parts;
+  };
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case "severe":
+        return "bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30";
+      case "moderate":
+        return "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30";
+      default:
+        return "bg-yellow-500/15 text-yellow-700 dark:text-yellow-400 border-yellow-500/30";
+    }
   };
 
   if (loading) {
@@ -189,16 +262,50 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
             <Pill className="h-3 w-3" />
             Medication
           </span>
-          <span className="text-muted-foreground">Medications prescribed or discussed</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-amber-500/15 text-amber-700 dark:text-amber-400 font-medium">
+            <Activity className="h-3 w-3" />
+            Symptom
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-blue-500/15 text-blue-700 dark:text-blue-400 font-medium">
             <HeartPulse className="h-3 w-3" />
             Condition
           </span>
-          <span className="text-muted-foreground">Conditions or symptoms identified</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-red-500/15 text-red-700 dark:text-red-400 font-medium">
+            <AlertTriangle className="h-3 w-3" />
+            Allergy
+          </span>
         </div>
       </div>
+
+      {/* Allergies Section */}
+      {(summaryData.allergies.length > 0 || patient.allergies) && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <h4 className="font-medium text-foreground">Allergies</h4>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {summaryData.allergies.map((allergy, i) => (
+              <Badge
+                key={i}
+                variant="outline"
+                className={`${getSeverityColor(allergy.severity)} capitalize`}
+              >
+                {allergy.name} ({allergy.severity})
+              </Badge>
+            ))}
+            {patient.allergies && summaryData.allergies.length === 0 && (
+              <span className="text-sm text-foreground">{patient.allergies}</span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Quick Reference Lists */}
       <div className="grid gap-4 md:grid-cols-2">
@@ -211,12 +318,30 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
           {summaryData.medications.length > 0 ? (
             <ul className="space-y-2">
               {summaryData.medications.map((med, i) => (
-                <li key={i} className="text-sm flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 mt-1.5 shrink-0" />
-                  <div>
-                    <span className="text-foreground font-medium">{med.name}</span>
-                    <span className="text-muted-foreground ml-2 text-xs">({med.date})</span>
+                <li key={i} className="text-sm flex items-center justify-between gap-2 group">
+                  <div className="flex items-start gap-2 flex-1">
+                    <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${med.status === "active" ? "bg-green-500" : "bg-muted-foreground/40"}`} />
+                    <div className={med.status === "inactive" ? "opacity-60" : ""}>
+                      <span className="text-foreground font-medium">{med.name}</span>
+                      <span className="text-muted-foreground ml-2 text-xs">({med.date})</span>
+                    </div>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => toggleStatus("medications", i)}
+                  >
+                    {med.status === "active" ? (
+                      <span className="flex items-center gap-1 text-xs text-green-600">
+                        <Check className="h-3 w-3" /> In Use
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <X className="h-3 w-3" /> Not Used
+                      </span>
+                    )}
+                  </Button>
                 </li>
               ))}
             </ul>
@@ -225,26 +350,85 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
           )}
         </div>
 
-        {/* Conditions List */}
+        {/* Symptoms List */}
         <div className="rounded-xl border border-border bg-card p-5">
           <div className="flex items-center gap-2 mb-3">
-            <HeartPulse className="h-4 w-4 text-blue-600" />
-            <h4 className="font-medium text-foreground">Conditions</h4>
+            <Activity className="h-4 w-4 text-amber-600" />
+            <h4 className="font-medium text-foreground">Symptoms</h4>
           </div>
-          {summaryData.conditions.length > 0 ? (
+          {summaryData.symptoms.length > 0 ? (
             <ul className="space-y-2">
-              {summaryData.conditions.map((cond, i) => (
-                <li key={i} className="text-sm flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
-                  <div>
-                    <span className="text-foreground font-medium">{cond.name}</span>
-                    <span className="text-muted-foreground ml-2 text-xs">({cond.date})</span>
+              {summaryData.symptoms.map((symptom, i) => (
+                <li key={i} className="text-sm flex items-center justify-between gap-2 group">
+                  <div className="flex items-start gap-2 flex-1">
+                    <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${symptom.status === "active" ? "bg-amber-500" : "bg-muted-foreground/40"}`} />
+                    <div className={symptom.status === "inactive" ? "opacity-60" : ""}>
+                      <span className="text-foreground font-medium">{symptom.name}</span>
+                      <span className="text-muted-foreground ml-2 text-xs">({symptom.date})</span>
+                    </div>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => toggleStatus("symptoms", i)}
+                  >
+                    {symptom.status === "active" ? (
+                      <span className="flex items-center gap-1 text-xs text-amber-600">
+                        <Check className="h-3 w-3" /> Active
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <X className="h-3 w-3" /> Resolved
+                      </span>
+                    )}
+                  </Button>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-muted-foreground italic">No conditions recorded</p>
+            <p className="text-sm text-muted-foreground italic">No symptoms recorded</p>
+          )}
+        </div>
+
+        {/* Conditions List */}
+        <div className="rounded-xl border border-border bg-card p-5 md:col-span-2">
+          <div className="flex items-center gap-2 mb-3">
+            <HeartPulse className="h-4 w-4 text-blue-600" />
+            <h4 className="font-medium text-foreground">Conditions / Diagnoses</h4>
+          </div>
+          {summaryData.conditions.length > 0 ? (
+            <div className="grid gap-2 sm:grid-cols-2">
+              {summaryData.conditions.map((cond, i) => (
+                <div key={i} className="text-sm flex items-center justify-between gap-2 group p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="flex items-start gap-2 flex-1">
+                    <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${cond.status === "active" ? "bg-blue-500" : "bg-muted-foreground/40"}`} />
+                    <div className={cond.status === "inactive" ? "opacity-60" : ""}>
+                      <span className="text-foreground font-medium">{cond.name}</span>
+                      <span className="text-muted-foreground ml-2 text-xs">({cond.date})</span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => toggleStatus("conditions", i)}
+                  >
+                    {cond.status === "active" ? (
+                      <span className="flex items-center gap-1 text-xs text-blue-600">
+                        <Check className="h-3 w-3" /> Active
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <X className="h-3 w-3" /> Resolved
+                      </span>
+                    )}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground italic">No conditions/diagnoses recorded</p>
           )}
         </div>
       </div>
