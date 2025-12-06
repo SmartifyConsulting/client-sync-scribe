@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { format, differenceInDays, startOfMonth, endOfMonth, parseISO, isWithinInterval } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
+import { jsPDF } from "jspdf";
 import { 
   Receipt, 
   Search, 
@@ -17,7 +18,8 @@ import {
   MoreHorizontal,
   X,
   FileText,
-  Download
+  Download,
+  Mail
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -58,6 +60,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useProfile } from "@/hooks/useProfile";
 
 interface Invoice {
   id: string;
@@ -130,6 +133,7 @@ function getStatusBadge(status: "issued" | "paid" | "overdue" | "archived") {
 
 export default function DoctorInvoices() {
   const { toast } = useToast();
+  const { profile } = useProfile();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -141,6 +145,9 @@ export default function DoctorInvoices() {
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [reportDateFrom, setReportDateFrom] = useState<Date | undefined>(startOfMonth(new Date()));
   const [reportDateTo, setReportDateTo] = useState<Date | undefined>(endOfMonth(new Date()));
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [emailAddress, setEmailAddress] = useState("");
 
   useEffect(() => {
     fetchInvoices();
@@ -400,6 +407,200 @@ export default function DoctorInvoices() {
     );
   }, [reportData]);
 
+  const generateReportPdf = () => {
+    if (!reportDateFrom || !reportDateTo) return null;
+    
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let yPos = 20;
+
+    // Header
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.text("Invoice Report", pageWidth / 2, yPos, { align: "center" });
+    yPos += 10;
+
+    // Practice info
+    if (profile?.full_name) {
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      doc.text(profile.full_name, pageWidth / 2, yPos, { align: "center" });
+      yPos += 6;
+    }
+    if (profile?.practice_number) {
+      doc.setFontSize(10);
+      doc.text(`Practice No: ${profile.practice_number}`, pageWidth / 2, yPos, { align: "center" });
+      yPos += 10;
+    }
+
+    // Date range
+    doc.setFontSize(11);
+    doc.text(
+      `Period: ${format(reportDateFrom, "dd MMM yyyy")} - ${format(reportDateTo, "dd MMM yyyy")}`,
+      pageWidth / 2,
+      yPos,
+      { align: "center" }
+    );
+    yPos += 15;
+
+    // Summary Section
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Summary", 20, yPos);
+    yPos += 8;
+
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Total Invoices: ${reportTotals.invoiceCount}`, 20, yPos);
+    yPos += 6;
+    doc.text(`Total Amount: R ${reportTotals.total.toFixed(2)}`, 20, yPos);
+    yPos += 6;
+    doc.text(`Paid: R ${reportTotals.paidTotal.toFixed(2)}`, 20, yPos);
+    yPos += 6;
+    doc.text(`Outstanding: R ${reportTotals.unpaidTotal.toFixed(2)}`, 20, yPos);
+    yPos += 15;
+
+    // Monthly Breakdown Table
+    if (reportData.length > 0) {
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Monthly Breakdown", 20, yPos);
+      yPos += 10;
+
+      // Table headers
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      const colWidths = [50, 25, 35, 35, 35];
+      const cols = ["Month", "Invoices", "Total", "Paid", "Outstanding"];
+      let xPos = 20;
+      cols.forEach((col, i) => {
+        doc.text(col, xPos, yPos);
+        xPos += colWidths[i];
+      });
+      yPos += 2;
+      doc.line(20, yPos, pageWidth - 20, yPos);
+      yPos += 6;
+
+      // Table rows
+      doc.setFont("helvetica", "normal");
+      reportData.forEach((month) => {
+        xPos = 20;
+        doc.text(month.monthLabel, xPos, yPos);
+        xPos += colWidths[0];
+        doc.text(String(month.invoices.length), xPos, yPos);
+        xPos += colWidths[1];
+        doc.text(`R ${month.total.toFixed(2)}`, xPos, yPos);
+        xPos += colWidths[2];
+        doc.text(`R ${month.paidTotal.toFixed(2)}`, xPos, yPos);
+        xPos += colWidths[3];
+        doc.text(`R ${month.unpaidTotal.toFixed(2)}`, xPos, yPos);
+        yPos += 6;
+      });
+
+      // Totals row
+      yPos += 2;
+      doc.line(20, yPos, pageWidth - 20, yPos);
+      yPos += 6;
+      doc.setFont("helvetica", "bold");
+      xPos = 20;
+      doc.text("Total", xPos, yPos);
+      xPos += colWidths[0];
+      doc.text(String(reportTotals.invoiceCount), xPos, yPos);
+      xPos += colWidths[1];
+      doc.text(`R ${reportTotals.total.toFixed(2)}`, xPos, yPos);
+      xPos += colWidths[2];
+      doc.text(`R ${reportTotals.paidTotal.toFixed(2)}`, xPos, yPos);
+      xPos += colWidths[3];
+      doc.text(`R ${reportTotals.unpaidTotal.toFixed(2)}`, xPos, yPos);
+    }
+
+    // Footer
+    const pageHeight = doc.internal.pageSize.getHeight();
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Generated on ${format(new Date(), "dd MMM yyyy 'at' HH:mm")}`, pageWidth / 2, pageHeight - 10, { align: "center" });
+
+    return doc;
+  };
+
+  const handleExportPdf = () => {
+    setIsExportingPdf(true);
+    try {
+      const doc = generateReportPdf();
+      if (doc) {
+        const fileName = `Invoice_Report_${format(reportDateFrom!, "yyyy-MM-dd")}_to_${format(reportDateTo!, "yyyy-MM-dd")}.pdf`;
+        doc.save(fileName);
+        toast({
+          title: "PDF Exported",
+          description: "Invoice report has been downloaded",
+        });
+      }
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast({
+        title: "Export Failed",
+        description: "Failed to generate PDF report",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
+  const handleEmailReport = async () => {
+    if (!emailAddress || !emailAddress.includes("@")) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSendingEmail(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-invoice-report", {
+        body: {
+          email: emailAddress,
+          doctorName: profile?.full_name || "Doctor",
+          practiceNumber: profile?.practice_number || "",
+          dateFrom: reportDateFrom ? format(reportDateFrom, "yyyy-MM-dd") : "",
+          dateTo: reportDateTo ? format(reportDateTo, "yyyy-MM-dd") : "",
+          reportData: reportData.map(m => ({
+            month: m.monthLabel,
+            invoiceCount: m.invoices.length,
+            total: m.total.toFixed(2),
+            paid: m.paidTotal.toFixed(2),
+            outstanding: m.unpaidTotal.toFixed(2),
+          })),
+          totals: {
+            invoiceCount: reportTotals.invoiceCount,
+            total: reportTotals.total.toFixed(2),
+            paid: reportTotals.paidTotal.toFixed(2),
+            outstanding: reportTotals.unpaidTotal.toFixed(2),
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Email Sent",
+        description: `Invoice report sent to ${emailAddress}`,
+      });
+      setEmailAddress("");
+    } catch (error: any) {
+      console.error("Error sending email:", error);
+      toast({
+        title: "Email Failed",
+        description: error.message || "Failed to send invoice report email",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -547,6 +748,47 @@ export default function DoctorInvoices() {
                 </Table>
               </div>
             )}
+
+            {/* Export Actions */}
+            <div className="flex flex-col gap-4 pt-4 border-t">
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="gap-2 flex-1"
+                  onClick={handleExportPdf}
+                  disabled={isExportingPdf || reportData.length === 0}
+                >
+                  {isExportingPdf ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
+                  Download PDF
+                </Button>
+              </div>
+              
+              <div className="flex gap-2">
+                <Input
+                  type="email"
+                  placeholder="Enter email address"
+                  value={emailAddress}
+                  onChange={(e) => setEmailAddress(e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  className="gap-2"
+                  onClick={handleEmailReport}
+                  disabled={isSendingEmail || reportData.length === 0 || !emailAddress}
+                >
+                  {isSendingEmail ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Mail className="h-4 w-4" />
+                  )}
+                  Email Report
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
