@@ -12,6 +12,7 @@ import {
   Pill,
   Receipt,
   Loader2,
+  Shield,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 
@@ -29,6 +30,7 @@ const patientNavItems = [
   { icon: Calendar, label: "My Calendar", to: "/patient/calendar" },
   { icon: Pill, label: "Prescriptions", to: "/patient/prescriptions" },
   { icon: Receipt, label: "Invoices", to: "/patient/invoices" },
+  { icon: Shield, label: "Access", to: "/patient/access" },
 ];
 
 export function Sidebar() {

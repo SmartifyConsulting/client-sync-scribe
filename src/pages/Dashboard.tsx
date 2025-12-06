@@ -2,17 +2,25 @@ import { Users, Calendar, FileText, TrendingUp } from "lucide-react";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { UpcomingAppointments } from "@/components/dashboard/UpcomingAppointments";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
+import { DoctorAccessRequests } from "@/components/doctor/DoctorAccessRequests";
+import { useProfile } from "@/hooks/useProfile";
 
 export default function Dashboard() {
+  const { profile } = useProfile();
+  const displayName = profile?.full_name || "Doctor";
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Good morning, Dr. Smith</h1>
+        <h1 className="text-3xl font-bold text-foreground">Good morning, {displayName}</h1>
         <p className="mt-1 text-muted-foreground">
           Here's an overview of your practice today
         </p>
       </div>
+
+      {/* Patient Access Requests */}
+      <DoctorAccessRequests />
 
       {/* Stats Grid */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
