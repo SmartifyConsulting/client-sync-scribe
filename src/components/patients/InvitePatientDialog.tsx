@@ -82,10 +82,10 @@ export function InvitePatientDialog({ patientId, patientName }: InvitePatientDia
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Invite Patient to MedPad</DialogTitle>
+          <DialogTitle>Invite Patient to mIRI</DialogTitle>
           <DialogDescription>
-            Send an invitation email to {patientName} to create their own MedPad account.
-            They will be able to view their health information and manage appointments.
+            Send an invitation email to {patientName} to create their own MedPad account. They will be able to view
+            their health information and manage appointments.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
