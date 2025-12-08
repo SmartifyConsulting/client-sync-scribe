@@ -1,6 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Mail, Lock, Loader2, User, Building2, MapPin, Plus, Trash2, Phone, Stethoscope, UserCircle } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  Loader2,
+  User,
+  Building2,
+  MapPin,
+  Plus,
+  Trash2,
+  Phone,
+  Stethoscope,
+  UserCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,17 +39,21 @@ export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  
+
   // Role selection
   const [userRole, setUserRole] = useState<UserRole>("doctor");
-  
+
   // Doctor registration fields
   const [fullName, setFullName] = useState("");
   const [practiceNumber, setPracticeNumber] = useState("");
   const [doctorNumber, setDoctorNumber] = useState("");
   const [practiceAddress, setPracticeAddress] = useState("");
   const [partners, setPartners] = useState<PartnerInput[]>([]);
-  const [newPartner, setNewPartner] = useState<PartnerInput>({ full_name: "", registration_number: "", mobile_number: "" });
+  const [newPartner, setNewPartner] = useState<PartnerInput>({
+    full_name: "",
+    registration_number: "",
+    mobile_number: "",
+  });
 
   // Patient registration fields
   const [phone, setPhone] = useState("");
@@ -99,24 +115,22 @@ export default function Auth() {
         // Sign up with additional metadata
         const { data, error } = await signUp(email, password);
         if (error) throw error;
-        
+
         if (data?.user) {
           // Insert user role
-          const { error: roleError } = await supabase
-            .from('user_roles')
-            .insert({
-              user_id: data.user.id,
-              role: userRole,
-            });
+          const { error: roleError } = await supabase.from("user_roles").insert({
+            user_id: data.user.id,
+            role: userRole,
+          });
 
           if (roleError) {
-            console.error('Role insert error:', roleError);
+            console.error("Role insert error:", roleError);
           }
 
           if (userRole === "doctor") {
             // Update profile with doctor info
             const { error: profileError } = await supabase
-              .from('profiles')
+              .from("profiles")
               .update({
                 full_name: fullName,
                 practice_number: practiceNumber,
@@ -124,65 +138,60 @@ export default function Auth() {
                 practice_address: practiceAddress,
                 role: userRole,
               })
-              .eq('id', data.user.id);
+              .eq("id", data.user.id);
 
             if (profileError) {
-              console.error('Profile update error:', profileError);
+              console.error("Profile update error:", profileError);
             }
 
             // Add partners if any
             if (partners.length > 0) {
-              const partnersToInsert = partners.map(p => ({
+              const partnersToInsert = partners.map((p) => ({
                 user_id: data.user.id,
                 full_name: p.full_name,
                 registration_number: p.registration_number,
                 mobile_number: p.mobile_number || null,
               }));
 
-              const { error: partnersError } = await supabase
-                .from('practice_partners')
-                .insert(partnersToInsert);
+              const { error: partnersError } = await supabase.from("practice_partners").insert(partnersToInsert);
 
               if (partnersError) {
-                console.error('Partners insert error:', partnersError);
+                console.error("Partners insert error:", partnersError);
               }
             }
           } else {
             // Patient registration - update profile
             const { error: profileError } = await supabase
-              .from('profiles')
+              .from("profiles")
               .update({
                 full_name: fullName,
                 role: userRole,
               })
-              .eq('id', data.user.id);
+              .eq("id", data.user.id);
 
             if (profileError) {
-              console.error('Profile update error:', profileError);
+              console.error("Profile update error:", profileError);
             }
 
             // If there's an invite token, update the invitation and link to the patient record
             if (inviteToken) {
               // Get the invitation details
               const { data: invitation, error: inviteError } = await supabase
-                .from('patient_invitations')
-                .select('*')
-                .eq('token', inviteToken)
-                .eq('status', 'pending')
+                .from("patient_invitations")
+                .select("*")
+                .eq("token", inviteToken)
+                .eq("status", "pending")
                 .single();
 
               if (!inviteError && invitation) {
                 // Update invitation status
-                await supabase
-                  .from('patient_invitations')
-                  .update({ status: 'accepted' })
-                  .eq('id', invitation.id);
+                await supabase.from("patient_invitations").update({ status: "accepted" }).eq("id", invitation.id);
 
                 // Link user to patient record if it exists
                 if (invitation.patient_id) {
                   // Update the patient record with patient_user_id and additional info from registration
                   await supabase
-                    .from('patients')
+                    .from("patients")
                     .update({
                       patient_user_id: data.user.id,
                       email: email,
@@ -204,23 +213,21 @@ export default function Auth() {
                       allergies: allergies,
                       referred_by: referredBy,
                     })
-                    .eq('id', invitation.patient_id);
+                    .eq("id", invitation.patient_id);
                 }
 
                 // Create doctor-patient access with default permissions
-                await supabase
-                  .from('doctor_patient_access')
-                  .insert({
-                    doctor_id: invitation.doctor_id,
-                    patient_user_id: data.user.id,
-                    permissions: ['patient_info', 'calendar', 'session_summaries', 'prescription_history'],
-                    is_active: true,
-                  });
+                await supabase.from("doctor_patient_access").insert({
+                  doctor_id: invitation.doctor_id,
+                  patient_user_id: data.user.id,
+                  permissions: ["patient_info", "calendar", "session_summaries", "prescription_history"],
+                  is_active: true,
+                });
               }
             }
           }
         }
-        
+
         toast({ title: "Account created!", description: "You can now sign in" });
         navigate("/");
       }
@@ -244,10 +251,8 @@ export default function Auth() {
               <span className="text-2xl font-bold text-primary-foreground">M</span>
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">MedPad</h1>
-          <p className="text-muted-foreground mt-2">
-            {isLogin ? "Sign in to your account" : "Create a new account"}
-          </p>
+          <h1 className="text-2xl font-bold text-foreground">mIRI</h1>
+          <p className="text-muted-foreground mt-2">{isLogin ? "Sign in to your account" : "Create a new account"}</p>
         </div>
 
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm max-h-[70vh] overflow-y-auto">
@@ -319,9 +324,7 @@ export default function Auth() {
                     </div>
                   </RadioGroup>
                   {inviteToken && (
-                    <p className="text-xs text-muted-foreground mt-2">
-                      You're registering via a doctor's invitation
-                    </p>
+                    <p className="text-xs text-muted-foreground mt-2">You're registering via a doctor's invitation</p>
                   )}
                 </div>
 
@@ -346,7 +349,7 @@ export default function Auth() {
                   <>
                     <div className="pt-4 border-t border-border">
                       <h3 className="text-sm font-medium text-foreground mb-4">Practice Information</h3>
-                      
+
                       <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-2">
@@ -389,15 +392,16 @@ export default function Auth() {
                     {/* Partners Section */}
                     <div className="pt-4 border-t border-border">
                       <h3 className="text-sm font-medium text-foreground mb-2">Practice Partners (Optional)</h3>
-                      <p className="text-xs text-muted-foreground mb-4">
-                        Add partners of the same practice
-                      </p>
+                      <p className="text-xs text-muted-foreground mb-4">Add partners of the same practice</p>
 
                       {/* Existing Partners */}
                       {partners.length > 0 && (
                         <div className="space-y-2 mb-4">
                           {partners.map((partner, index) => (
-                            <div key={index} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg border border-border text-sm">
+                            <div
+                              key={index}
+                              className="flex items-center justify-between p-2 bg-muted/30 rounded-lg border border-border text-sm"
+                            >
                               <div>
                                 <p className="font-medium text-foreground">{partner.full_name}</p>
                                 <p className="text-xs text-muted-foreground">
@@ -405,10 +409,10 @@ export default function Auth() {
                                   {partner.mobile_number && ` · ${partner.mobile_number}`}
                                 </p>
                               </div>
-                              <Button 
+                              <Button
                                 type="button"
-                                variant="ghost" 
-                                size="icon" 
+                                variant="ghost"
+                                size="icon"
                                 onClick={() => removePartner(index)}
                                 className="h-7 w-7 text-destructive hover:text-destructive"
                               >
@@ -422,8 +426,10 @@ export default function Auth() {
                       {/* Add New Partner */}
                       <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
                         <div className="space-y-2">
-                          <Label htmlFor="partnerName" className="text-xs">Partner Full Name</Label>
-                          <Input 
+                          <Label htmlFor="partnerName" className="text-xs">
+                            Partner Full Name
+                          </Label>
+                          <Input
                             id="partnerName"
                             value={newPartner.full_name}
                             onChange={(e) => setNewPartner({ ...newPartner, full_name: e.target.value })}
@@ -433,8 +439,10 @@ export default function Auth() {
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                           <div className="space-y-2">
-                            <Label htmlFor="partnerReg" className="text-xs">Registration Number</Label>
-                            <Input 
+                            <Label htmlFor="partnerReg" className="text-xs">
+                              Registration Number
+                            </Label>
+                            <Input
                               id="partnerReg"
                               value={newPartner.registration_number}
                               onChange={(e) => setNewPartner({ ...newPartner, registration_number: e.target.value })}
@@ -443,8 +451,10 @@ export default function Auth() {
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="partnerMobile" className="text-xs">Mobile (Optional)</Label>
-                            <Input 
+                            <Label htmlFor="partnerMobile" className="text-xs">
+                              Mobile (Optional)
+                            </Label>
+                            <Input
                               id="partnerMobile"
                               value={newPartner.mobile_number}
                               onChange={(e) => setNewPartner({ ...newPartner, mobile_number: e.target.value })}
@@ -453,13 +463,7 @@ export default function Auth() {
                             />
                           </div>
                         </div>
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={addPartner}
-                          className="w-full gap-1"
-                        >
+                        <Button type="button" variant="outline" size="sm" onClick={addPartner} className="w-full gap-1">
                           <Plus className="h-3 w-3" />
                           Add Partner
                         </Button>
@@ -473,7 +477,7 @@ export default function Auth() {
                   <>
                     <div className="pt-4 border-t border-border">
                       <h3 className="text-sm font-medium text-foreground mb-4">Personal Information</h3>
-                      
+
                       <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-2">
@@ -487,12 +491,7 @@ export default function Auth() {
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="dob">Date of Birth</Label>
-                            <Input
-                              id="dob"
-                              type="date"
-                              value={dob}
-                              onChange={(e) => setDob(e.target.value)}
-                            />
+                            <Input id="dob" type="date" value={dob} onChange={(e) => setDob(e.target.value)} />
                           </div>
                         </div>
 
@@ -515,7 +514,9 @@ export default function Auth() {
                             onChange={(e) => setSameAsPhysical(e.target.checked)}
                             className="h-4 w-4 rounded border-border"
                           />
-                          <Label htmlFor="sameAsPhysical" className="text-sm">Postal address same as physical</Label>
+                          <Label htmlFor="sameAsPhysical" className="text-sm">
+                            Postal address same as physical
+                          </Label>
                         </div>
 
                         {!sameAsPhysical && (
@@ -567,7 +568,7 @@ export default function Auth() {
                     {/* Medical Insurance Section */}
                     <div className="pt-4 border-t border-border">
                       <h3 className="text-sm font-medium text-foreground mb-4">Medical Insurance Information</h3>
-                      
+
                       <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-2">
@@ -637,7 +638,7 @@ export default function Auth() {
                     {/* Next of Kin Section */}
                     <div className="pt-4 border-t border-border">
                       <h3 className="text-sm font-medium text-foreground mb-4">Next of Kin</h3>
-                      
+
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <Label htmlFor="nextOfKinName">Full Name</Label>
@@ -683,11 +684,7 @@ export default function Auth() {
           </form>
 
           <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-primary hover:underline"
-            >
+            <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-sm text-primary hover:underline">
               {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
             </button>
           </div>
