@@ -26,3 +26,6 @@ verify_jwt = true
 
 [functions.submit-insurance-claim]
 verify_jwt = true
+
+[functions.narrate-briefing]
+verify_jwt = true

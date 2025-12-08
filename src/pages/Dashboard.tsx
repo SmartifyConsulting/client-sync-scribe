@@ -1,6 +1,6 @@
-import { Users, Calendar, FileText, TrendingUp } from "lucide-react";
+import { Users, Calendar } from "lucide-react";
 import { StatsCard } from "@/components/dashboard/StatsCard";
-import { UpcomingAppointments } from "@/components/dashboard/UpcomingAppointments";
+import { TodaysBriefing } from "@/components/dashboard/TodaysBriefing";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { DoctorAccessRequests } from "@/components/doctor/DoctorAccessRequests";
 import { useProfile } from "@/hooks/useProfile";
@@ -22,8 +22,8 @@ export default function Dashboard() {
       {/* Patient Access Requests */}
       <DoctorAccessRequests />
 
-      {/* Stats Grid */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Stats Grid - Only essential stats */}
+      <div className="grid gap-6 sm:grid-cols-2">
         <StatsCard
           title="Total Patients"
           value={128}
@@ -38,26 +38,12 @@ export default function Dashboard() {
           trend="neutral"
           icon={Calendar}
         />
-        <StatsCard
-          title="Documents Generated"
-          value={24}
-          change="+8 this week"
-          trend="up"
-          icon={FileText}
-        />
-        <StatsCard
-          title="Session Hours"
-          value="32h"
-          change="+15% vs last week"
-          trend="up"
-          icon={TrendingUp}
-        />
       </div>
 
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <UpcomingAppointments />
+          <TodaysBriefing />
         </div>
         <div>
           <RecentActivity />
