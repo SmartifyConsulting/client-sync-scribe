@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Receipt, Calendar, Download, CreditCard, CheckCircle, Clock, AlertCircle, Loader2 } from "lucide-react";
+import { Receipt, Calendar, Download, CreditCard, CheckCircle, Clock, AlertCircle, Loader2, Send } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,15 @@ import { format, parseISO, isPast } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
+interface PatientInfo {
+  name: string;
+  email: string | null;
+  claims_email: string | null;
+  medical_aid: string | null;
+  medical_aid_number: string | null;
+}
 
 interface Invoice {
   id: string;
@@ -17,6 +26,7 @@ interface Invoice {
   due_date: string;
   paid_at: string | null;
   created_at: string;
+  patient_id: string;
   doctor_profile?: {
     full_name: string | null;
   };
@@ -49,9 +59,11 @@ export default function Invoices() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [patientInfoMap, setPatientInfoMap] = useState<Record<string, PatientInfo>>({});
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
   const [payingInvoiceId, setPayingInvoiceId] = useState<string | null>(null);
+  const [submittingClaimId, setSubmittingClaimId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -71,14 +83,29 @@ export default function Invoices() {
 
       if (error) throw error;
 
-      // Fetch doctor profiles and update status for overdue invoices
+      // Fetch doctor profiles, patient info, and update status for overdue invoices
       const invoicesWithDoctors: Invoice[] = [];
+      const patientMap: Record<string, PatientInfo> = {};
+
       for (const inv of data || []) {
         const { data: profile } = await supabase
           .from("profiles")
           .select("full_name")
           .eq("id", inv.doctor_id)
           .maybeSingle();
+
+        // Fetch patient info if not already fetched
+        if (!patientMap[inv.patient_id]) {
+          const { data: patientData } = await supabase
+            .from("patients")
+            .select("name, email, claims_email, medical_aid, medical_aid_number")
+            .eq("id", inv.patient_id)
+            .maybeSingle();
+
+          if (patientData) {
+            patientMap[inv.patient_id] = patientData;
+          }
+        }
 
         // Check if invoice is overdue
         let status = inv.status;
@@ -93,6 +120,7 @@ export default function Invoices() {
         });
       }
 
+      setPatientInfoMap(patientMap);
       setInvoices(invoicesWithDoctors);
     } catch (error) {
       console.error("Error fetching invoices:", error);
@@ -149,6 +177,49 @@ export default function Invoices() {
       });
     } finally {
       setPayingInvoiceId(null);
+    }
+  };
+
+  const handleSubmitClaim = async (invoice: Invoice) => {
+    const patientInfo = patientInfoMap[invoice.patient_id];
+    if (!patientInfo?.claims_email) return;
+
+    setSubmittingClaimId(invoice.id);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const response = await supabase.functions.invoke("submit-insurance-claim", {
+        body: {
+          invoiceId: invoice.id,
+          claimsEmail: patientInfo.claims_email,
+          patientName: patientInfo.name,
+          patientEmail: patientInfo.email,
+          invoiceNumber: invoice.invoice_number,
+          amount: invoice.amount,
+          description: invoice.description,
+          doctorName: invoice.doctor_profile?.full_name || "Doctor",
+          dueDate: format(parseISO(invoice.due_date), "MMM d, yyyy"),
+          medicalInsurance: patientInfo.medical_aid,
+          medicalInsuranceNumber: patientInfo.medical_aid_number,
+        },
+      });
+
+      if (response.error) throw response.error;
+
+      toast({
+        title: "Claim Submitted",
+        description: `Invoice ${invoice.invoice_number} has been submitted to your medical insurance.`,
+      });
+    } catch (error) {
+      console.error("Error submitting claim:", error);
+      toast({
+        title: "Submission Failed",
+        description: "There was an error submitting your claim. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmittingClaimId(null);
     }
   };
 
@@ -279,6 +350,33 @@ export default function Invoices() {
                       <Button variant="ghost" size="icon">
                         <Download className="h-4 w-4" />
                       </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-1"
+                                onClick={() => handleSubmitClaim(invoice)}
+                                disabled={!patientInfoMap[invoice.patient_id]?.claims_email || submittingClaimId === invoice.id}
+                              >
+                                {submittingClaimId === invoice.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Send className="h-4 w-4" />
+                                )}
+                                Claim
+                              </Button>
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {patientInfoMap[invoice.patient_id]?.claims_email
+                              ? `Submit to ${patientInfoMap[invoice.patient_id].claims_email}`
+                              : "No claims email address configured"}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       {(invoice.status === "pending" || invoice.status === "overdue") && (
                         <Button 
                           size="sm" 
