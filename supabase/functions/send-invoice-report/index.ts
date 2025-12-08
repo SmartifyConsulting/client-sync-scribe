@@ -5,8 +5,7 @@ const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 interface MonthData {
@@ -41,20 +40,14 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { 
-      email, 
-      doctorName, 
-      practiceNumber, 
-      dateFrom, 
-      dateTo, 
-      reportData, 
-      totals 
-    }: ReportRequest = await req.json();
+    const { email, doctorName, practiceNumber, dateFrom, dateTo, reportData, totals }: ReportRequest = await req.json();
 
     console.log(`Sending invoice report to: ${email}`);
 
     // Build the monthly breakdown table rows
-    const monthlyRows = reportData.map(month => `
+    const monthlyRows = reportData
+      .map(
+        (month) => `
       <tr>
         <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${month.month}</td>
         <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">${month.invoiceCount}</td>
@@ -62,7 +55,9 @@ const handler = async (req: Request): Promise<Response> => {
         <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; color: #16a34a;">R ${month.paid}</td>
         <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; color: #d97706;">R ${month.outstanding}</td>
       </tr>
-    `).join("");
+    `,
+      )
+      .join("");
 
     const html = `
       <!DOCTYPE html>
@@ -128,7 +123,7 @@ const handler = async (req: Request): Promise<Response> => {
         </table>
 
         <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #9ca3af; font-size: 12px;">
-          <p>This report was generated automatically by MedPad.</p>
+          <p>This report was generated automatically by mIRI.</p>
           <p>Generated on ${new Date().toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
         </div>
       </body>
@@ -136,7 +131,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     const emailResponse = await resend.emails.send({
-      from: "MedPad <onboarding@resend.dev>",
+      from: "mIRI <onboarding@resend.dev>",
       to: [email],
       subject: `Invoice Report: ${dateFrom} to ${dateTo}`,
       html,
@@ -153,13 +148,10 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (error: any) {
     console.error("Error in send-invoice-report function:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
   }
 };
 
