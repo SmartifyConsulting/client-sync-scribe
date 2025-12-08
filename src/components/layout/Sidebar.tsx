@@ -44,17 +44,19 @@ export function Sidebar() {
   const navItems = isPatient ? patientNavItems : doctorNavItems;
 
   const { data: unreadCount = 0 } = useQuery({
-    queryKey: ['unread-messages-count'],
+    queryKey: ["unread-messages-count"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return 0;
-      
+
       const { count, error } = await supabase
-        .from('messages')
-        .select('*', { count: 'exact', head: true })
-        .eq('recipient_id', user.id)
-        .eq('is_read', false);
-      
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .eq("recipient_id", user.id)
+        .eq("is_read", false);
+
       if (error) return 0;
       return count || 0;
     },
@@ -69,7 +71,7 @@ export function Sidebar() {
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
             <span className="text-lg font-bold text-primary-foreground">M</span>
           </div>
-          <span className="text-xl font-semibold text-foreground">MedPad</span>
+          <span className="text-xl font-semibold text-foreground">mIRI</span>
         </div>
 
         {/* Navigation */}
@@ -88,7 +90,7 @@ export function Sidebar() {
                     "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                     isActive
                       ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
                   )
                 }
               >
@@ -113,11 +115,11 @@ export function Sidebar() {
             <Settings className="h-5 w-5" />
             Settings
           </NavLink>
-          <button 
+          <button
             onClick={async () => {
-              const { supabase } = await import('@/integrations/supabase/client');
+              const { supabase } = await import("@/integrations/supabase/client");
               await supabase.auth.signOut();
-              window.location.href = '/auth';
+              window.location.href = "/auth";
             }}
             className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
           >
