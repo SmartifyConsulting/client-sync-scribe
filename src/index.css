@@ -48,7 +48,7 @@
 
     --radius: 0.75rem;
 
-    /* Custom MedPad tokens */
+    /* Custom mIRI tokens */
     --gradient-primary: linear-gradient(135deg, hsl(168 76% 36%), hsl(168 76% 46%));
     --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 20% 98%));
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 15% 99%));
