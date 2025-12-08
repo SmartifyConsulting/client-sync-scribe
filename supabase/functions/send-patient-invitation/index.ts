@@ -29,10 +29,10 @@ const handler = async (req: Request): Promise<Response> => {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       console.error("No authorization header");
-      return new Response(
-        JSON.stringify({ error: "No authorization header" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "No authorization header" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Create Supabase client
@@ -43,13 +43,16 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     // Get the authenticated user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
     if (userError || !user) {
       console.error("User authentication failed:", userError);
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const { patientEmail, patientName, patientId, doctorName, practiceName }: InvitationRequest = await req.json();
@@ -69,10 +72,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (inviteError) {
       console.error("Failed to create invitation:", inviteError);
-      return new Response(
-        JSON.stringify({ error: "Failed to create invitation" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Failed to create invitation" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Get the app URL from environment or use a default
@@ -83,13 +86,13 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${RESEND_API_KEY}`,
+        Authorization: `Bearer ${RESEND_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "MedPad <onboarding@resend.dev>",
+        from: "mIRI <onboarding@resend.dev>",
         to: [patientEmail],
-        subject: `${doctorName} has invited you to join MedPad`,
+        subject: `${doctorName} has invited you to join mIRI`,
         html: `
           <!DOCTYPE html>
           <html>
@@ -99,15 +102,15 @@ const handler = async (req: Request): Promise<Response> => {
           </head>
           <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to MedPad</h1>
+              <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to mIRI</h1>
             </div>
             
             <div style="background: #f8fafc; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
               <p style="font-size: 18px; margin-top: 0;">Hello ${patientName},</p>
               
-              <p><strong>${doctorName}</strong> from <strong>${practiceName}</strong> has invited you to join MedPad - a secure platform for managing your healthcare journey.</p>
+              <p><strong>${doctorName}</strong> from <strong>${practiceName}</strong> has invited you to join mIRI - a secure platform for managing your healthcare journey.</p>
               
-              <p>With MedPad, you can:</p>
+              <p>With mIRI, you can:</p>
               <ul style="padding-left: 20px;">
                 <li>View your appointment calendar</li>
                 <li>Access your prescription history</li>
@@ -126,7 +129,7 @@ const handler = async (req: Request): Promise<Response> => {
               <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
               
               <p style="color: #94a3b8; font-size: 12px; margin-bottom: 0;">
-                MedPad - Secure Healthcare Management<br>
+                mIRI - Secure Healthcare Management<br>
                 This is an automated message, please do not reply directly to this email.
               </p>
             </div>
@@ -145,16 +148,16 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResult = await emailResponse.json();
     console.log("Email sent successfully:", emailResult);
 
-    return new Response(
-      JSON.stringify({ success: true, invitation: invitation }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ success: true, invitation: invitation }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (error: any) {
     console.error("Error in send-patient-invitation function:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 };
 
