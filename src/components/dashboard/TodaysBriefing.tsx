@@ -81,7 +81,40 @@ export function TodaysBriefing() {
       if (appointmentsError) throw appointmentsError;
 
       if (!appointmentsData || appointmentsData.length === 0) {
-        setAppointments([]);
+        // Use sample data for demo purposes
+        const sampleAppointments: AppointmentWithHistory[] = [
+          {
+            id: 'sample-1',
+            patientId: '',
+            patientName: 'Sarah Johnson',
+            startTime: new Date().toISOString(),
+            formattedTime: '9:00 AM',
+            lastSessionSummary: 'Patient reported improved sleep patterns after adjusting medication dosage. Anxiety levels have decreased, though work-related stress persists. Recommended continuing current treatment plan with follow-up in two weeks.',
+            allergies: 'Penicillin, Sulfa drugs',
+            conditions: null,
+          },
+          {
+            id: 'sample-2',
+            patientId: '',
+            patientName: 'Michael Chen',
+            startTime: new Date().toISOString(),
+            formattedTime: '10:30 AM',
+            lastSessionSummary: 'Follow-up on hypertension management. Blood pressure readings have stabilized with current medication. Patient adherent to low-sodium diet. Continue monitoring.',
+            allergies: null,
+            conditions: null,
+          },
+          {
+            id: 'sample-3',
+            patientId: '',
+            patientName: 'Emma Williams',
+            startTime: new Date().toISOString(),
+            formattedTime: '2:00 PM',
+            lastSessionSummary: null,
+            allergies: 'Latex',
+            conditions: null,
+          },
+        ];
+        setAppointments(sampleAppointments);
         setLoading(false);
         return;
       }
