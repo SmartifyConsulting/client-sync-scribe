@@ -1,10 +1,32 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle } from "lucide-react";
+import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { format, isToday, parseISO } from "date-fns";
+import { format, parseISO } from "date-fns";
+
+const VOICE_OPTIONS = [
+  { value: "alloy", label: "Alloy", description: "Neutral and balanced" },
+  { value: "echo", label: "Echo", description: "Warm and conversational" },
+  { value: "fable", label: "Fable", description: "Expressive and dynamic" },
+  { value: "onyx", label: "Onyx", description: "Deep and authoritative" },
+  { value: "nova", label: "Nova", description: "Friendly and upbeat" },
+  { value: "shimmer", label: "Shimmer", description: "Clear and gentle" },
+];
 
 interface AppointmentWithHistory {
   id: string;
@@ -23,11 +45,19 @@ export function TodaysBriefing() {
   const [loading, setLoading] = useState(true);
   const [isNarrating, setIsNarrating] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [selectedVoice, setSelectedVoice] = useState(() => {
+    return localStorage.getItem('briefing-voice') || 'alloy';
+  });
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     fetchTodaysAppointments();
   }, []);
+
+  const handleVoiceChange = (voice: string) => {
+    setSelectedVoice(voice);
+    localStorage.setItem('briefing-voice', voice);
+  };
 
   const fetchTodaysAppointments = async () => {
     try {
@@ -155,7 +185,7 @@ export function TodaysBriefing() {
       const briefingText = generateBriefingText();
       
       const { data, error } = await supabase.functions.invoke('narrate-briefing', {
-        body: { text: briefingText, voice: 'alloy' }
+        body: { text: briefingText, voice: selectedVoice }
       });
 
       if (error) throw error;
@@ -211,37 +241,66 @@ export function TodaysBriefing() {
 
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm">
-      <div className="border-b border-border p-5 flex items-center justify-between">
+      <div className="border-b border-border p-5 flex items-center justify-between gap-2">
         <div>
           <h3 className="text-lg font-semibold text-foreground">Today's Briefing</h3>
           <p className="text-sm text-muted-foreground">
             {appointments.length} appointment{appointments.length !== 1 ? 's' : ''} with patient context
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleNarrate}
-          disabled={isNarrating}
-          className="gap-2"
-        >
-          {isNarrating ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Generating...
-            </>
-          ) : isPlaying ? (
-            <>
-              <VolumeX className="h-4 w-4" />
-              Stop
-            </>
-          ) : (
-            <>
-              <Volume2 className="h-4 w-4" />
-              Narrate
-            </>
-          )}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Settings2 className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-64">
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Narrator Voice</Label>
+                <Select value={selectedVoice} onValueChange={handleVoiceChange}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {VOICE_OPTIONS.map((voice) => (
+                      <SelectItem key={voice.value} value={voice.value}>
+                        <div className="flex flex-col">
+                          <span>{voice.label}</span>
+                          <span className="text-xs text-muted-foreground">{voice.description}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </PopoverContent>
+          </Popover>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNarrate}
+            disabled={isNarrating}
+            className="gap-2"
+          >
+            {isNarrating ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : isPlaying ? (
+              <>
+                <VolumeX className="h-4 w-4" />
+                Stop
+              </>
+            ) : (
+              <>
+                <Volume2 className="h-4 w-4" />
+                Narrate
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {appointments.length === 0 ? (
