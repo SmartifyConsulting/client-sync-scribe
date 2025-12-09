@@ -6,10 +6,48 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+
+const DOCTOR_SPECIALTIES = [
+  "General Practitioner",
+  "Allergist/Immunologist",
+  "Anesthesiologist",
+  "Cardiologist",
+  "Dermatologist",
+  "Emergency Medicine Physician",
+  "Endocrinologist",
+  "Family Medicine Physician",
+  "Gastroenterologist",
+  "Geriatrician",
+  "Hematologist",
+  "Infectious Disease Specialist",
+  "Internist",
+  "Nephrologist",
+  "Neurologist",
+  "Obstetrician/Gynecologist",
+  "Oncologist",
+  "Ophthalmologist",
+  "Orthopedic Surgeon",
+  "Otolaryngologist (ENT)",
+  "Pathologist",
+  "Pediatrician",
+  "Physiatrist",
+  "Plastic Surgeon",
+  "Podiatrist",
+  "Psychiatrist",
+  "Psychologist",
+  "Pulmonologist",
+  "Radiologist",
+  "Rheumatologist",
+  "Sports Medicine Physician",
+  "Surgeon (General)",
+  "Urologist",
+  "Vascular Surgeon",
+];
 
 interface Partner {
   id: string;
@@ -36,6 +74,7 @@ export default function Settings() {
     practice_number: "",
     doctor_number: "",
     practice_address: "",
+    specialty: "",
   });
 
   useEffect(() => {
@@ -45,6 +84,7 @@ export default function Settings() {
         practice_number: profile.practice_number || "",
         doctor_number: profile.doctor_number || "",
         practice_address: profile.practice_address || "",
+        specialty: (profile as any).specialty || "",
       });
     }
   }, [profile]);
@@ -276,6 +316,24 @@ export default function Settings() {
               onChange={(e) => setFormData({ ...formData, doctor_number: e.target.value })}
               placeholder="e.g., MP123456"
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="specialty">Specialty</Label>
+            <Select 
+              value={formData.specialty} 
+              onValueChange={(value) => setFormData({ ...formData, specialty: value })}
+            >
+              <SelectTrigger id="specialty">
+                <SelectValue placeholder="Select your specialty" />
+              </SelectTrigger>
+              <SelectContent>
+                {DOCTOR_SPECIALTIES.map((specialty) => (
+                  <SelectItem key={specialty} value={specialty}>
+                    {specialty}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
