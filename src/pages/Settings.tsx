@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Calendar, Bell, Shield, Database, CheckCircle, Building2, Upload, Plus, Trash2, Users, Camera } from "lucide-react";
+import { User, Calendar, Bell, Shield, Database, CheckCircle, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, ShieldCheck, ShieldOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { TwoFactorSetup } from "@/components/auth/TwoFactorSetup";
 
 const DOCTOR_SPECIALTIES = [
   "General Practitioner",
@@ -70,6 +71,10 @@ export default function Settings() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [newPartner, setNewPartner] = useState({ full_name: "", registration_number: "", mobile_number: "" });
   const [isAddingPartner, setIsAddingPartner] = useState(false);
+  const [show2FASetup, setShow2FASetup] = useState(false);
+  const [mfaFactors, setMfaFactors] = useState<any[]>([]);
+  const [loadingMfa, setLoadingMfa] = useState(true);
+  const [disablingMfa, setDisablingMfa] = useState(false);
   
   const [formData, setFormData] = useState({
     full_name: "",
@@ -94,8 +99,45 @@ export default function Settings() {
   useEffect(() => {
     if (user) {
       fetchPartners();
+      fetchMfaFactors();
     }
   }, [user]);
+
+  const fetchMfaFactors = async () => {
+    setLoadingMfa(true);
+    try {
+      const { data, error } = await supabase.auth.mfa.listFactors();
+      if (!error && data) {
+        setMfaFactors(data.totp.filter(f => f.status === 'verified'));
+      }
+    } catch (error) {
+      console.error('Error fetching MFA factors:', error);
+    } finally {
+      setLoadingMfa(false);
+    }
+  };
+
+  const disableMfa = async (factorId: string) => {
+    setDisablingMfa(true);
+    try {
+      const { error } = await supabase.auth.mfa.unenroll({ factorId });
+      if (error) throw error;
+      
+      toast({
+        title: "2FA Disabled",
+        description: "Two-factor authentication has been disabled",
+      });
+      fetchMfaFactors();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to disable 2FA",
+        variant: "destructive",
+      });
+    } finally {
+      setDisablingMfa(false);
+    }
+  };
 
   const fetchPartners = async () => {
     if (!user) return;
@@ -681,15 +723,45 @@ export default function Settings() {
         </div>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-foreground">Two-Factor Authentication</p>
-              <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
+            <div className="flex items-center gap-3">
+              {loadingMfa ? (
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              ) : mfaFactors.length > 0 ? (
+                <ShieldCheck className="h-5 w-5 text-success" />
+              ) : (
+                <ShieldOff className="h-5 w-5 text-muted-foreground" />
+              )}
+              <div>
+                <p className="font-medium text-foreground">Two-Factor Authentication</p>
+                <p className="text-sm text-muted-foreground">
+                  {loadingMfa 
+                    ? "Checking status..." 
+                    : mfaFactors.length > 0 
+                      ? "Enabled - Your account is protected" 
+                      : "Add an extra layer of security"}
+                </p>
+              </div>
             </div>
-            <Button variant="outline">Enable</Button>
+            {loadingMfa ? null : mfaFactors.length > 0 ? (
+              <Button 
+                variant="outline" 
+                onClick={() => disableMfa(mfaFactors[0].id)}
+                disabled={disablingMfa}
+                className="text-destructive hover:text-destructive"
+              >
+                {disablingMfa ? "Disabling..." : "Disable"}
+              </Button>
+            ) : (
+              <Button variant="outline" onClick={() => setShow2FASetup(true)}>
+                Enable
+              </Button>
+            )}
           </div>
           <Separator />
           <div>
-            <Button variant="outline">Change Password</Button>
+            <Button variant="outline" onClick={() => window.location.href = "/forgot-password"}>
+              Change Password
+            </Button>
           </div>
         </div>
       </div>
@@ -707,6 +779,13 @@ export default function Settings() {
           </p>
         </div>
       </div>
+
+      {/* 2FA Setup Dialog */}
+      <TwoFactorSetup 
+        open={show2FASetup} 
+        onOpenChange={setShow2FASetup}
+        onSuccess={fetchMfaFactors}
+      />
     </div>
   );
 }

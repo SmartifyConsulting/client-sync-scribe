@@ -18,6 +18,8 @@ import Settings from "./pages/Settings";
 import TodoList from "./pages/TodoList";
 import Inbox from "./pages/Inbox";
 import Auth from "./pages/Auth";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 // Patient pages
@@ -72,6 +74,8 @@ const App = () => (
           {/* Public routes */}
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           
           {/* Protected routes */}
           <Route
