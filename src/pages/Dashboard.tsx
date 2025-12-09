@@ -15,11 +15,10 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Header with teal accent */}
-      <div className="relative pb-2">
-        <div className="absolute -left-2 top-0 w-1 h-12 bg-primary rounded-full" />
-        <h1 className="text-3xl font-bold text-foreground tracking-tight pl-4">{greeting}, <span className="text-primary">{displayName}</span></h1>
-        <p className="mt-2 text-muted-foreground text-lg pl-4">
+      {/* Header */}
+      <div className="pb-2">
+        <h1 className="text-3xl font-bold text-foreground tracking-tight">{greeting}, {displayName}</h1>
+        <p className="mt-2 text-muted-foreground text-lg">
           Here's what's happening with your practice today
         </p>
       </div>

@@ -21,17 +21,11 @@ export function StatsCard({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-2xl bg-card border border-border/50 p-6 transition-all duration-300 shadow-card hover:shadow-card-hover hover:border-primary/20",
+        "group relative overflow-hidden rounded-2xl bg-card p-6 transition-all duration-300 shadow-card hover:shadow-card-hover",
         className
       )}
     >
-      {/* Teal accent bar */}
-      <div className="absolute top-0 left-0 w-1 h-full bg-primary rounded-l-2xl" />
-      
-      {/* Subtle teal gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      
-      <div className="relative flex items-start justify-between">
+      <div className="flex items-start justify-between">
         <div className="space-y-3">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <p className="text-4xl font-bold text-foreground tracking-tight">{value}</p>
@@ -48,7 +42,7 @@ export function StatsCard({
             </p>
           )}
         </div>
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 transition-all duration-300 group-hover:bg-primary/20 group-hover:scale-105 group-hover:shadow-teal">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 transition-all duration-300 group-hover:bg-primary/15 group-hover:scale-105">
           <Icon className="h-7 w-7 text-primary" />
         </div>
       </div>
