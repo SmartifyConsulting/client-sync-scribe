@@ -46,6 +46,7 @@ export default function Sessions() {
   const [showInvoiceEditor, setShowInvoiceEditor] = useState(false);
   const [prescription, setPrescription] = useState<string | null>(null);
   const [invoice, setInvoice] = useState<{ id: string; invoice_number: string; amount: number } | null>(null);
+  const [currentMedications, setCurrentMedications] = useState<{ medication: string; dosage: string; frequency: string }[]>([]);
   const pendingCompletionRef = useRef(false);
   const latestTranscriptRef = useRef<string>("");
   const currentSessionIdRef = useRef<string | null>(null);
@@ -56,6 +57,25 @@ export default function Sessions() {
   const { sessions, loading: sessionsLoading, createSession, completeSession } = useSessions();
   
   const currentPatient = patients.find(p => p.id === patientId);
+
+  // Fetch active prescriptions when patient changes
+  useEffect(() => {
+    const fetchActivePrescriptions = async () => {
+      if (!patientId) return;
+      
+      const { data, error } = await supabase
+        .from('prescriptions')
+        .select('medication, dosage, frequency')
+        .eq('patient_id', patientId)
+        .eq('status', 'active');
+      
+      if (!error && data) {
+        setCurrentMedications(data);
+      }
+    };
+    
+    fetchActivePrescriptions();
+  }, [patientId]);
 
   // Keep refs in sync with state
   useEffect(() => {
@@ -656,6 +676,7 @@ export default function Sessions() {
           patientId={patientId}
           doctorName="Dr. Georgia Adams"
           allergies={currentPatient.allergies}
+          currentMedications={currentMedications}
           onClose={() => setShowPrescriptionEditor(false)}
           onSave={handleSavePrescription}
         />
