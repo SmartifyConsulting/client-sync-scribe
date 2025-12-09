@@ -576,6 +576,7 @@ export type Database = {
           practice_address: string | null
           practice_number: string | null
           role: Database["public"]["Enums"]["user_role"] | null
+          specialty: string | null
           updated_at: string
         }
         Insert: {
@@ -587,6 +588,7 @@ export type Database = {
           practice_address?: string | null
           practice_number?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
+          specialty?: string | null
           updated_at?: string
         }
         Update: {
@@ -598,6 +600,7 @@ export type Database = {
           practice_address?: string | null
           practice_number?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
+          specialty?: string | null
           updated_at?: string
         }
         Relationships: []

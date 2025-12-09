@@ -13,6 +13,11 @@ interface RoundTableNote {
   content: string;
 }
 
+interface LinkedDoctor {
+  name: string;
+  specialty: string | null;
+}
+
 interface AppointmentWithHistory {
   id: string;
   patientId: string;
@@ -23,7 +28,7 @@ interface AppointmentWithHistory {
   allergies: string | null;
   conditions: string | null;
   lastPrescription: string | null;
-  linkedDoctors: string[];
+  linkedDoctors: LinkedDoctor[];
   unreadRoundTableNotes: RoundTableNote[];
 }
 
@@ -75,7 +80,10 @@ export function TodaysBriefing() {
             allergies: 'Penicillin, Sulfa drugs',
             conditions: null,
             lastPrescription: 'Sertraline 50mg daily',
-            linkedDoctors: ['Dr. Emily Roberts', 'Dr. James Wilson'],
+            linkedDoctors: [
+              { name: 'Dr. Emily Roberts', specialty: 'Psychiatrist' },
+              { name: 'Dr. James Wilson', specialty: 'Cardiologist' }
+            ],
             unreadRoundTableNotes: [
               { patientName: 'Sarah Johnson', doctorName: 'Dr. Emily Roberts', content: 'Patient mentioned considering alternative therapy options. Worth discussing in next session.' }
             ],
@@ -90,7 +98,9 @@ export function TodaysBriefing() {
             allergies: null,
             conditions: null,
             lastPrescription: 'Lisinopril 10mg daily',
-            linkedDoctors: ['Dr. Sarah Thompson'],
+            linkedDoctors: [
+              { name: 'Dr. Sarah Thompson', specialty: 'Nephrologist' }
+            ],
             unreadRoundTableNotes: [],
           },
           {
@@ -119,7 +129,7 @@ export function TodaysBriefing() {
           let lastSessionSummary: string | null = null;
           let allergies: string | null = null;
           let lastPrescription: string | null = null;
-          let linkedDoctors: string[] = [];
+          let linkedDoctors: LinkedDoctor[] = [];
           let patientUserId: string | null = null;
           let unreadRoundTableNotes: RoundTableNote[] = [];
 
@@ -176,13 +186,16 @@ export function TodaysBriefing() {
                 const doctorIds = accessRecords.map(r => r.doctor_id);
                 const { data: doctors } = await supabase
                   .from('profiles')
-                  .select('id, full_name')
+                  .select('id, full_name, specialty')
                   .in('id', doctorIds);
 
                 if (doctors) {
                   linkedDoctors = doctors
                     .filter(d => d.full_name)
-                    .map(d => d.full_name as string);
+                    .map(d => ({ 
+                      name: d.full_name as string, 
+                      specialty: (d as any).specialty || null 
+                    }));
               }
             }
 
@@ -262,7 +275,10 @@ export function TodaysBriefing() {
       }
 
       if (apt.linkedDoctors.length > 0) {
-        briefing += `Other doctors on this patient's profile include: ${apt.linkedDoctors.join(', ')}. `;
+        const doctorList = apt.linkedDoctors.map(d => 
+          d.specialty ? `${d.name} (${d.specialty})` : d.name
+        ).join(', ');
+        briefing += `Other doctors on this patient's profile include: ${doctorList}. `;
       }
 
       if (apt.unreadRoundTableNotes.length > 0) {
@@ -511,7 +527,9 @@ export function TodaysBriefing() {
                   <Users className="h-3.5 w-3.5 text-blue-600" />
                   <span className="text-muted-foreground">
                     <span className="font-medium text-foreground">Other doctors: </span>
-                    {apt.linkedDoctors.join(', ')}
+                    {apt.linkedDoctors.map(d => 
+                      d.specialty ? `${d.name} (${d.specialty})` : d.name
+                    ).join(', ')}
                   </span>
                 </div>
               )}
