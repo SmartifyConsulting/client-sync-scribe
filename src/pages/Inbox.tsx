@@ -190,7 +190,7 @@ export default function Inbox() {
       </div>
 
       {selectedMessage ? (
-        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+        <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <Button variant="ghost" onClick={() => setSelectedMessage(null)} className="gap-2">
               <ArrowLeft className="h-4 w-4" />
@@ -319,7 +319,7 @@ function MessageList({
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border">
+    <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden divide-y divide-border">
       {messages.map((message) => (
         <div
           key={message.id}

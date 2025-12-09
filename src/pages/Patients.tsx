@@ -499,7 +499,7 @@ export default function Patients() {
       </div>
 
       {/* Patient List */}
-      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+      <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
         {filteredPatients.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
             {searchQuery ? "No patients found matching your search" : "No patients yet. Add your first patient!"}
@@ -508,23 +508,23 @@ export default function Patients() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-border bg-muted/30">
-                  <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">
+                <tr className="bg-primary">
+                  <th className="px-6 py-4 text-left text-sm font-medium text-primary-foreground">
                     Patient
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">
+                  <th className="px-6 py-4 text-left text-sm font-medium text-primary-foreground">
                     Contact
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">
+                  <th className="px-6 py-4 text-left text-sm font-medium text-primary-foreground">
                     Last Seen On
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">
+                  <th className="px-6 py-4 text-left text-sm font-medium text-primary-foreground">
                     Patient Since
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">
+                  <th className="px-6 py-4 text-left text-sm font-medium text-primary-foreground">
                     Status
                   </th>
-                  <th className="px-6 py-4 text-right text-sm font-medium text-muted-foreground">
+                  <th className="px-6 py-4 text-right text-sm font-medium text-primary-foreground">
                     Actions
                   </th>
                 </tr>

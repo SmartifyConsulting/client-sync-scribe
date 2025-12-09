@@ -297,7 +297,7 @@ export default function Sessions() {
           {/* Top Row: Recording Panel + Actions Panel */}
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Recording Panel */}
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
@@ -418,7 +418,7 @@ export default function Sessions() {
             {/* Actions Panel - Prescription & Invoice */}
             <div className="space-y-4">
               {/* Prescription Card */}
-              <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+              <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">

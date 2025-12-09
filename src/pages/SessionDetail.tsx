@@ -149,7 +149,7 @@ export default function SessionDetail() {
 
       {/* AI Summary */}
       {session.summary && (
-        <div className="rounded-xl border border-border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
               <Sparkles className="h-5 w-5 text-primary" />
@@ -165,7 +165,7 @@ export default function SessionDetail() {
 
       {/* Action Points / TO-DO List */}
       {session.action_points && session.action_points.length > 0 && (
-        <div className="rounded-xl border border-border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/10">
               <CheckCircle className="h-5 w-5 text-green-600" />
@@ -191,7 +191,7 @@ export default function SessionDetail() {
 
       {/* Transcription */}
       {session.transcript && (
-        <div className="rounded-xl border border-border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
               <Mic className="h-5 w-5 text-blue-600" />
@@ -211,7 +211,7 @@ export default function SessionDetail() {
 
       {/* Notes */}
       {session.notes && (
-        <div className="rounded-xl border border-border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-6">
           <h2 className="font-semibold text-foreground mb-3">Session Notes</h2>
           <p className="text-muted-foreground whitespace-pre-wrap">{session.notes}</p>
         </div>

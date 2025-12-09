@@ -795,7 +795,7 @@ export default function DoctorInvoices() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+        <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10">
               <Clock className="h-5 w-5 text-amber-600" />
@@ -806,7 +806,7 @@ export default function DoctorInvoices() {
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+        <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
               <AlertTriangle className="h-5 w-5 text-destructive" />
@@ -817,7 +817,7 @@ export default function DoctorInvoices() {
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+        <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/10">
               <CheckCircle className="h-5 w-5 text-green-600" />
@@ -828,7 +828,7 @@ export default function DoctorInvoices() {
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+        <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
               <DollarSign className="h-5 w-5 text-primary" />
@@ -871,17 +871,17 @@ export default function DoctorInvoices() {
       </div>
 
       {/* Invoices Table */}
-      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+      <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Invoice #</TableHead>
-              <TableHead>Patient</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Due Date</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+            <TableRow className="bg-primary hover:bg-primary">
+              <TableHead className="text-primary-foreground">Invoice #</TableHead>
+              <TableHead className="text-primary-foreground">Patient</TableHead>
+              <TableHead className="text-primary-foreground">Description</TableHead>
+              <TableHead className="text-primary-foreground">Amount</TableHead>
+              <TableHead className="text-primary-foreground">Due Date</TableHead>
+              <TableHead className="text-primary-foreground">Status</TableHead>
+              <TableHead className="text-right text-primary-foreground">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

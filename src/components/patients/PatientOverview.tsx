@@ -243,7 +243,7 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
   return (
     <div className="space-y-6">
       {/* AI Summary Card */}
-      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+      <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -386,7 +386,7 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
       {/* Quick Reference Lists */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* Medications List */}
-        <div className="rounded-xl border border-border bg-card p-5">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <div className="flex items-center gap-2 mb-3">
             <Pill className="h-4 w-4 text-green-600" />
             <h4 className="font-medium text-foreground">Medications</h4>
@@ -427,7 +427,7 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
         </div>
 
         {/* Symptoms List */}
-        <div className="rounded-xl border border-border bg-card p-5">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <div className="flex items-center gap-2 mb-3">
             <Activity className="h-4 w-4 text-amber-600" />
             <h4 className="font-medium text-foreground">Symptoms</h4>
@@ -468,7 +468,7 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
         </div>
 
         {/* Conditions List */}
-        <div className="rounded-xl border border-border bg-card p-5 md:col-span-2">
+        <div className="rounded-xl border border-primary bg-card p-5 md:col-span-2">
           <div className="flex items-center gap-2 mb-3">
             <HeartPulse className="h-4 w-4 text-blue-600" />
             <h4 className="font-medium text-foreground">Conditions / Diagnoses</h4>
