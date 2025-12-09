@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
+import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
 import PatientProfile from "./pages/PatientProfile";
@@ -68,7 +69,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
+          
+          {/* Protected routes */}
           <Route
             element={
               <ProtectedRoute>
@@ -77,7 +82,7 @@ const App = () => (
             }
           >
             {/* Role-based dashboard */}
-            <Route path="/" element={<RoleBasedDashboard />} />
+            <Route path="/dashboard" element={<RoleBasedDashboard />} />
             
             {/* Doctor routes */}
             <Route path="/patients" element={<Patients />} />

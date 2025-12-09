@@ -35,13 +35,18 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { signIn, signUp } = useAuth();
-  const [isLogin, setIsLogin] = useState(true);
+  
+  // Read mode and role from URL params
+  const modeParam = searchParams.get("mode");
+  const roleParam = searchParams.get("role") as UserRole | null;
+  
+  const [isLogin, setIsLogin] = useState(modeParam !== "signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Role selection
-  const [userRole, setUserRole] = useState<UserRole>("doctor");
+  // Role selection - default from URL param or doctor
+  const [userRole, setUserRole] = useState<UserRole>(roleParam || "doctor");
 
   // Doctor registration fields
   const [fullName, setFullName] = useState("");
@@ -110,7 +115,7 @@ export default function Auth() {
         const { error } = await signIn(email, password);
         if (error) throw error;
         toast({ title: "Welcome back!", description: "Successfully signed in" });
-        navigate("/");
+        navigate("/dashboard");
       } else {
         // Sign up with additional metadata
         const { data, error } = await signUp(email, password);
@@ -229,7 +234,7 @@ export default function Auth() {
         }
 
         toast({ title: "Account created!", description: "You can now sign in" });
-        navigate("/");
+        navigate("/dashboard");
       }
     } catch (error: any) {
       toast({
@@ -246,13 +251,21 @@ export default function Auth() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity"
+          >
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
               <span className="text-2xl font-bold text-primary-foreground">M</span>
             </div>
-          </div>
+          </button>
           <h1 className="text-2xl font-bold text-foreground">mIRI</h1>
-          <p className="text-muted-foreground mt-2">{isLogin ? "Sign in to your account" : "Create a new account"}</p>
+          <p className="text-muted-foreground mt-2">
+            {isLogin 
+              ? `${userRole === "doctor" ? "Doctor" : "Patient"} Sign In` 
+              : `${userRole === "doctor" ? "Healthcare Provider" : "Patient"} Registration`}
+          </p>
         </div>
 
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm max-h-[70vh] overflow-y-auto">
