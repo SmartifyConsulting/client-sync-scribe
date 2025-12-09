@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Settings2 } from "lucide-react";
+import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Settings2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -45,10 +45,12 @@ export function TodaysBriefing() {
   const [loading, setLoading] = useState(true);
   const [isNarrating, setIsNarrating] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isPreviewing, setIsPreviewing] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState(() => {
     return localStorage.getItem('briefing-voice') || 'alloy';
   });
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     fetchTodaysAppointments();
@@ -57,6 +59,48 @@ export function TodaysBriefing() {
   const handleVoiceChange = (voice: string) => {
     setSelectedVoice(voice);
     localStorage.setItem('briefing-voice', voice);
+  };
+
+  const handlePreviewVoice = async () => {
+    if (isPreviewing && previewAudioRef.current) {
+      previewAudioRef.current.pause();
+      previewAudioRef.current.currentTime = 0;
+      setIsPreviewing(false);
+      return;
+    }
+
+    setIsPreviewing(true);
+    
+    try {
+      const previewText = `Hello, I'm the ${selectedVoice} voice. This is how I'll narrate your daily briefing.`;
+      
+      const { data, error } = await supabase.functions.invoke('narrate-briefing', {
+        body: { text: previewText, voice: selectedVoice }
+      });
+
+      if (error) throw error;
+
+      if (data.audioContent) {
+        const audioBlob = new Blob(
+          [Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0))],
+          { type: 'audio/mp3' }
+        );
+        const audioUrl = URL.createObjectURL(audioBlob);
+        
+        if (previewAudioRef.current) {
+          previewAudioRef.current.src = audioUrl;
+          previewAudioRef.current.play();
+        }
+      }
+    } catch (error: any) {
+      console.error('Error previewing voice:', error);
+      toast({
+        title: "Preview failed",
+        description: error.message || "Could not generate voice preview",
+        variant: "destructive",
+      });
+      setIsPreviewing(false);
+    }
   };
 
   const fetchTodaysAppointments = async () => {
@@ -252,10 +296,17 @@ export function TodaysBriefing() {
     audioRef.current = new Audio();
     audioRef.current.onended = () => setIsPlaying(false);
     
+    previewAudioRef.current = new Audio();
+    previewAudioRef.current.onended = () => setIsPreviewing(false);
+    
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
+      }
+      if (previewAudioRef.current) {
+        previewAudioRef.current.pause();
+        previewAudioRef.current = null;
       }
     };
   }, []);
@@ -291,21 +342,40 @@ export function TodaysBriefing() {
             <PopoverContent align="end" className="w-64">
               <div className="space-y-3">
                 <Label className="text-sm font-medium">Narrator Voice</Label>
-                <Select value={selectedVoice} onValueChange={handleVoiceChange}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {VOICE_OPTIONS.map((voice) => (
-                      <SelectItem key={voice.value} value={voice.value}>
-                        <div className="flex flex-col">
-                          <span>{voice.label}</span>
-                          <span className="text-xs text-muted-foreground">{voice.description}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2">
+                  <Select value={selectedVoice} onValueChange={handleVoiceChange}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {VOICE_OPTIONS.map((voice) => (
+                        <SelectItem key={voice.value} value={voice.value}>
+                          <div className="flex flex-col">
+                            <span>{voice.label}</span>
+                            <span className="text-xs text-muted-foreground">{voice.description}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handlePreviewVoice}
+                    disabled={isPreviewing}
+                    className="shrink-0"
+                    title="Preview voice"
+                  >
+                    {isPreviewing ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Play className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Click the play button to hear a sample of the selected voice.
+                </p>
               </div>
             </PopoverContent>
           </Popover>
