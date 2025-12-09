@@ -189,7 +189,7 @@ export default function PatientProfile() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-4">
         <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-sm text-muted-foreground">Total Sessions</p>
           <p className="mt-1 text-2xl font-semibold text-foreground">
@@ -200,6 +200,15 @@ export default function PatientProfile() {
           <p className="text-sm text-muted-foreground">Status</p>
           <p className="mt-1 text-2xl font-semibold text-foreground capitalize">
             {patient.status}
+          </p>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <p className="text-sm text-muted-foreground">Last Seen On</p>
+          <p className="mt-1 text-2xl font-semibold text-foreground">
+            {patient.last_visit 
+              ? format(new Date(patient.last_visit), "MMM d, yyyy")
+              : <span className="text-muted-foreground text-lg">No visits yet</span>
+            }
           </p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
