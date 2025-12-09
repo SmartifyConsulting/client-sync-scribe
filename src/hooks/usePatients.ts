@@ -27,6 +27,9 @@ export interface Patient {
   next_of_kin_phone: string | null;
   next_of_kin_email: string | null;
   general_practitioner: string | null;
+  allergies: string | null;
+  claims_email: string | null;
+  medical_insurance_product: string | null;
   last_visit?: string | null;
 }
 
