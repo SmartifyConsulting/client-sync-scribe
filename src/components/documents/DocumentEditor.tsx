@@ -75,7 +75,7 @@ export function DocumentEditor({ template, onClose, onSave }: DocumentEditorProp
     }
 
     // Fill in patient placeholders if a patient is selected
-    if (selectedPatientId) {
+    if (selectedPatientId && selectedPatientId !== "none") {
       const patient = patients.find(p => p.id === selectedPatientId);
       if (patient) {
         updatedContent = updatedContent
@@ -258,7 +258,7 @@ export function DocumentEditor({ template, onClose, onSave }: DocumentEditorProp
                   <SelectValue placeholder="Select a patient to auto-fill placeholders" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No patient selected</SelectItem>
+                  <SelectItem value="none">No patient selected</SelectItem>
                   {patients.map((patient) => (
                     <SelectItem key={patient.id} value={patient.id}>
                       <span className="flex items-center gap-2">
