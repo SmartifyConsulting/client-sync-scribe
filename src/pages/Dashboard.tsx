@@ -4,16 +4,18 @@ import { TodaysBriefing } from "@/components/dashboard/TodaysBriefing";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { DoctorAccessRequests } from "@/components/doctor/DoctorAccessRequests";
 import { useProfile } from "@/hooks/useProfile";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export default function Dashboard() {
   const { profile } = useProfile();
+  const { isDoctor } = useUserRole();
   
   // Format display name based on role
   const getDisplayName = () => {
-    if (!profile?.full_name) return profile?.role === 'doctor' ? 'Doctor' : 'there';
+    if (!profile?.full_name) return isDoctor ? 'Doctor' : 'there';
     
     const nameParts = profile.full_name.split(' ');
-    if (profile.role === 'doctor') {
+    if (isDoctor) {
       // For doctors: "Dr. [Surname]"
       const surname = nameParts.length > 1 ? nameParts[nameParts.length - 1] : nameParts[0];
       return `Dr. ${surname}`;
