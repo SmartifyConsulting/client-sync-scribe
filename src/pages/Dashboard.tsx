@@ -7,7 +7,21 @@ import { useProfile } from "@/hooks/useProfile";
 
 export default function Dashboard() {
   const { profile } = useProfile();
-  const displayName = profile?.full_name?.split(' ')[0] || "Doctor";
+  
+  // Format display name based on role
+  const getDisplayName = () => {
+    if (!profile?.full_name) return profile?.role === 'doctor' ? 'Doctor' : 'there';
+    
+    const nameParts = profile.full_name.split(' ');
+    if (profile.role === 'doctor') {
+      // For doctors: "Dr. [Surname]"
+      const surname = nameParts.length > 1 ? nameParts[nameParts.length - 1] : nameParts[0];
+      return `Dr. ${surname}`;
+    } else {
+      // For patients: First name
+      return nameParts[0];
+    }
+  };
 
   // Get time-based greeting
   const hour = new Date().getHours();
@@ -17,7 +31,7 @@ export default function Dashboard() {
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div className="pb-2">
-        <h1 className="text-3xl font-bold text-foreground tracking-tight">{greeting}, {displayName}</h1>
+        <h1 className="text-3xl font-bold text-foreground tracking-tight">{greeting}, {getDisplayName()}</h1>
         <p className="mt-2 text-muted-foreground text-lg">
           Here's what's happening with your practice today
         </p>
