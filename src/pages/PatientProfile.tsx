@@ -141,79 +141,101 @@ export default function PatientProfile() {
   const inProgressSessions = sessions.filter(s => s.status === 'in_progress');
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-8 animate-fade-in">
       {/* Back Button */}
       <Link
         to="/patients"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
         Back to Patients
       </Link>
 
-      {/* Header */}
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex items-start gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-accent text-2xl font-semibold text-accent-foreground">
-            {initials}
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">{patient.name}</h1>
-            <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-              {patient.email && (
-                <span className="flex items-center gap-1.5">
-                  <Mail className="h-4 w-4" />
-                  {patient.email}
-                </span>
-              )}
-              {patient.phone && (
-                <span className="flex items-center gap-1.5">
-                  <Phone className="h-4 w-4" />
-                  {patient.phone}
-                </span>
-              )}
+      {/* Header Card */}
+      <div className="rounded-2xl bg-card p-6 shadow-card">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-5">
+            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10 text-3xl font-bold text-primary shadow-sm">
+              {initials}
+            </div>
+            <div className="space-y-1">
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{patient.name}</h1>
+              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                {patient.email && (
+                  <span className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-full">
+                    <Mail className="h-4 w-4 text-primary/70" />
+                    {patient.email}
+                  </span>
+                )}
+                {patient.phone && (
+                  <span className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-full">
+                    <Phone className="h-4 w-4 text-primary/70" />
+                    {patient.phone}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <InvitePatientDialog patientId={patient.id} patientName={patient.name} />
-          <Button variant="outline" className="gap-2" onClick={handleScheduleAppointment}>
-            <Calendar className="h-4 w-4" />
-            Schedule
-          </Button>
-          <Button className="gap-2" onClick={handleStartSession}>
-            <Clock className="h-4 w-4" />
-            Start Session
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <InvitePatientDialog patientId={patient.id} patientName={patient.name} />
+            <Button variant="outline" className="gap-2 h-11" onClick={handleScheduleAppointment}>
+              <Calendar className="h-4 w-4" />
+              Schedule
+            </Button>
+            <Button className="gap-2 h-11" onClick={handleStartSession}>
+              <Clock className="h-4 w-4" />
+              Start Session
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-4">
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Total Sessions</p>
-          <p className="mt-1 text-2xl font-semibold text-foreground">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="group rounded-2xl bg-card p-5 shadow-card hover:shadow-card-hover transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-muted-foreground">Total Sessions</p>
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center transition-transform group-hover:scale-105">
+              <FileText className="h-5 w-5 text-primary" />
+            </div>
+          </div>
+          <p className="mt-3 text-3xl font-bold text-foreground">
             {completedSessions.length}
           </p>
         </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Status</p>
-          <p className="mt-1 text-2xl font-semibold text-foreground capitalize">
+        <div className="group rounded-2xl bg-card p-5 shadow-card hover:shadow-card-hover transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-muted-foreground">Status</p>
+            <div className={`h-10 w-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 ${patient.status === 'active' ? 'bg-green-500/10' : 'bg-muted'}`}>
+              <div className={`h-3 w-3 rounded-full ${patient.status === 'active' ? 'bg-green-500' : 'bg-muted-foreground'}`} />
+            </div>
+          </div>
+          <p className="mt-3 text-3xl font-bold text-foreground capitalize">
             {patient.status}
           </p>
         </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Last Seen On</p>
-          <p className="mt-1 text-2xl font-semibold text-foreground">
+        <div className="group rounded-2xl bg-card p-5 shadow-card hover:shadow-card-hover transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-muted-foreground">Last Seen On</p>
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center transition-transform group-hover:scale-105">
+              <Clock className="h-5 w-5 text-primary" />
+            </div>
+          </div>
+          <p className="mt-3 text-3xl font-bold text-foreground">
             {patient.last_visit 
               ? format(new Date(patient.last_visit), "MMM d, yyyy")
-              : <span className="text-muted-foreground text-lg">No visits yet</span>
+              : <span className="text-muted-foreground text-xl font-medium">No visits</span>
             }
           </p>
         </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Patient Since</p>
-          <p className="mt-1 text-2xl font-semibold text-foreground">
+        <div className="group rounded-2xl bg-card p-5 shadow-card hover:shadow-card-hover transition-all duration-300">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-muted-foreground">Patient Since</p>
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center transition-transform group-hover:scale-105">
+              <Calendar className="h-5 w-5 text-primary" />
+            </div>
+          </div>
+          <p className="mt-3 text-3xl font-bold text-foreground">
             {format(new Date(patient.created_at), "MMM yyyy")}
           </p>
         </div>
@@ -221,14 +243,14 @@ export default function PatientProfile() {
 
       {/* Tabs */}
       <Tabs defaultValue="details" className="space-y-6">
-        <TabsList className="bg-muted/50">
-          <TabsTrigger value="details">Details</TabsTrigger>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="sessions">Session History</TabsTrigger>
-          <TabsTrigger value="doctors">Doctors</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-          <TabsTrigger value="notes">Notes</TabsTrigger>
-          <TabsTrigger value="roundtable" className="gap-1.5">
+        <TabsList className="bg-muted/30 p-1.5 rounded-xl h-auto flex-wrap">
+          <TabsTrigger value="details" className="rounded-lg px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">Details</TabsTrigger>
+          <TabsTrigger value="overview" className="rounded-lg px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">Overview</TabsTrigger>
+          <TabsTrigger value="sessions" className="rounded-lg px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">Session History</TabsTrigger>
+          <TabsTrigger value="doctors" className="rounded-lg px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">Doctors</TabsTrigger>
+          <TabsTrigger value="documents" className="rounded-lg px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">Documents</TabsTrigger>
+          <TabsTrigger value="notes" className="rounded-lg px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">Notes</TabsTrigger>
+          <TabsTrigger value="roundtable" className="rounded-lg px-4 py-2.5 gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
             Round Table
             {unreadRoundTableCount > 0 && (
               <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
@@ -247,27 +269,31 @@ export default function PatientProfile() {
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
           ) : completedSessions.length === 0 && inProgressSessions.length === 0 ? (
-            <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
-              No sessions with recordings yet. Start your first session with this patient!
+            <div className="rounded-2xl bg-card p-10 text-center shadow-card">
+              <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                <FileText className="h-7 w-7 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground">No sessions with recordings yet.</p>
+              <p className="text-sm text-muted-foreground mt-1">Start your first session with this patient!</p>
             </div>
           ) : (
             <>
               {/* In Progress Sessions */}
               {inProgressSessions.length > 0 && (
                 <div className="space-y-3">
-                  <h3 className="text-sm font-medium text-muted-foreground">In Progress</h3>
-                  {inProgressSessions.map((session, index) => (
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">In Progress</h3>
+                  {inProgressSessions.map((session) => (
                     <div
                       key={session.id}
                       onClick={() => navigate(`/sessions/${session.id}`)}
-                      className="rounded-xl border-2 border-amber-500/30 bg-amber-500/5 p-4 flex items-center justify-between cursor-pointer hover:bg-amber-500/10 transition-colors"
+                      className="rounded-2xl border-2 border-amber-500/30 bg-amber-500/5 p-5 flex items-center justify-between cursor-pointer hover:bg-amber-500/10 hover:shadow-md transition-all duration-300"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10">
-                          <Clock className="h-5 w-5 text-amber-600" />
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10">
+                          <Clock className="h-6 w-6 text-amber-600" />
                         </div>
                         <div>
-                          <p className="font-medium text-foreground hover:text-primary transition-colors">
+                          <p className="font-semibold text-foreground">
                             {format(new Date(session.started_at), "MMM d, yyyy")} - In Progress
                           </p>
                           <p className="text-sm text-muted-foreground">
@@ -275,7 +301,7 @@ export default function PatientProfile() {
                           </p>
                         </div>
                       </div>
-                      <span className="text-xs bg-amber-500/10 text-amber-600 px-2 py-1 rounded-full">
+                      <span className="text-xs font-medium bg-amber-500/15 text-amber-600 px-3 py-1.5 rounded-full">
                         Ongoing
                       </span>
                     </div>
@@ -287,7 +313,7 @@ export default function PatientProfile() {
               {completedSessions.length > 0 && (
                 <div className="space-y-3">
                   {inProgressSessions.length > 0 && (
-                    <h3 className="text-sm font-medium text-muted-foreground mt-6">Completed</h3>
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8">Completed</h3>
                   )}
                   {completedSessions.map((session, index) => (
                     <SessionCard key={session.id} session={session} index={index} />
@@ -296,7 +322,7 @@ export default function PatientProfile() {
               )}
 
               {completedSessions.length === 0 && inProgressSessions.length > 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">
+                <p className="text-sm text-muted-foreground text-center py-6">
                   No completed sessions yet.
                 </p>
               )}
@@ -306,38 +332,41 @@ export default function PatientProfile() {
 
         {/* Doctors Tab */}
         <TabsContent value="doctors">
-          <div className="rounded-xl border border-border bg-card p-6">
+          <div className="rounded-2xl bg-card p-6 shadow-card">
             <DoctorsOnProfile patientId={patient.id} patientName={patient.name} />
           </div>
         </TabsContent>
 
         <TabsContent value="documents" className="space-y-4">
           <div className="flex justify-end">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2 h-11">
               <Upload className="h-4 w-4" />
               Upload Document
             </Button>
           </div>
-          <div className="rounded-xl border border-border bg-card overflow-hidden">
+          <div className="rounded-2xl bg-card shadow-card overflow-hidden">
             {mockDocuments.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground">
-                No documents yet
+              <div className="p-10 text-center">
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                  <FileText className="h-7 w-7 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground">No documents yet</p>
               </div>
             ) : (
-              <div className="divide-y divide-border">
+              <div className="divide-y divide-border/50">
                 {mockDocuments.map((doc) => (
                   <div
                     key={doc.id}
-                    className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors"
+                    className="flex items-center gap-4 p-5 hover:bg-muted/30 transition-all duration-200 cursor-pointer"
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                      <FileText className="h-5 w-5 text-accent-foreground" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                      <FileText className="h-6 w-6 text-primary" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-foreground">{doc.name}</p>
+                      <p className="font-semibold text-foreground">{doc.name}</p>
                       <p className="text-sm text-muted-foreground">{doc.date}</p>
                     </div>
-                    <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                    <span className="rounded-full bg-muted/70 px-3 py-1.5 text-xs font-medium text-muted-foreground">
                       {doc.type}
                     </span>
                   </div>
@@ -353,21 +382,21 @@ export default function PatientProfile() {
 
         {/* Notes Tab */}
         <TabsContent value="notes">
-          <div className="rounded-xl border border-border bg-card p-6 space-y-4">
+          <div className="rounded-2xl bg-card p-6 shadow-card space-y-5">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                  <StickyNote className="h-5 w-5 text-accent-foreground" />
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                  <StickyNote className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground">Additional Notes</h3>
-                  <p className="text-xs text-muted-foreground">Add any additional information about this patient</p>
+                  <h3 className="font-semibold text-foreground text-lg">Additional Notes</h3>
+                  <p className="text-sm text-muted-foreground">Add any additional information about this patient</p>
                 </div>
               </div>
               <Button 
                 onClick={handleSaveNotes} 
                 disabled={savingNotes}
-                className="gap-2"
+                className="gap-2 h-11"
               >
                 {savingNotes ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -381,7 +410,7 @@ export default function PatientProfile() {
               placeholder="Enter any additional notes, observations, or important information about this patient..."
               value={additionalNotes}
               onChange={(e) => setAdditionalNotes(e.target.value)}
-              className="min-h-[300px] resize-none"
+              className="min-h-[300px] resize-none rounded-xl"
             />
             <p className="text-xs text-muted-foreground">
               Last updated: {patient.updated_at ? format(new Date(patient.updated_at), "MMM d, yyyy 'at' h:mm a") : "Never"}
@@ -391,7 +420,7 @@ export default function PatientProfile() {
 
         {/* Round Table Tab */}
         <TabsContent value="roundtable">
-          <div className="rounded-xl border border-border bg-card p-6">
+          <div className="rounded-2xl bg-card p-6 shadow-card">
             <RoundTable 
               patientId={patient.id} 
               patientName={patient.name}
