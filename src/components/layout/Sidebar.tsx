@@ -68,23 +68,26 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-[210px] bg-sidebar border-r border-sidebar-border">
-      <div className="flex h-full flex-col">
+      {/* Subtle teal gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] via-transparent to-primary/[0.02] pointer-events-none" />
+      
+      <div className="relative flex h-full flex-col">
         {/* Logo */}
-        <div className="flex h-20 items-center gap-3 px-6">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary shadow-md">
-            <span className="text-xl font-bold text-primary-foreground">M</span>
+        <div className="flex h-20 items-center gap-3 px-5">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-teal">
+            <span className="text-lg font-bold text-primary-foreground">M</span>
           </div>
           <div>
-            <span className="text-xl font-semibold text-foreground tracking-tight">mIRI</span>
-            <p className="text-xs text-muted-foreground">Medical Integrated Record Intelligence</p>
+            <span className="text-lg font-semibold text-foreground tracking-tight">mIRI</span>
+            <p className="text-[10px] text-primary/70 font-medium">Medical Intelligence</p>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-2 space-y-1">
+        <nav className="flex-1 px-3 py-2 space-y-1">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
             </div>
           ) : (
             navItems.map((item) => (
@@ -94,14 +97,14 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 onClick={onNavigate}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
+                    "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      ? "bg-primary text-primary-foreground shadow-teal"
+                      : "text-sidebar-foreground hover:bg-primary/10 hover:text-primary",
                   )
                 }
               >
-                <item.icon className="h-5 w-5" />
+                <item.icon className="h-4 w-4" />
                 <span className="flex-1">{item.label}</span>
                 {item.label === "Inbox" && unreadCount > 0 && (
                   <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-semibold text-destructive-foreground">
@@ -114,20 +117,20 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         </nav>
 
         {/* Bottom Section */}
-        <div className="p-4 space-y-1">
+        <div className="p-3 space-y-1 border-t border-primary/10">
           <NavLink
             to="/settings"
             onClick={onNavigate}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
+                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                  ? "bg-primary text-primary-foreground shadow-teal"
+                  : "text-sidebar-foreground hover:bg-primary/10 hover:text-primary",
               )
             }
           >
-            <Settings className="h-5 w-5" />
+            <Settings className="h-4 w-4" />
             Settings
           </NavLink>
           <button
@@ -136,9 +139,9 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               await supabase.auth.signOut();
               window.location.href = "/auth";
             }}
-            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
           >
-            <LogOut className="h-5 w-5" />
+            <LogOut className="h-4 w-4" />
             Sign Out
           </button>
         </div>

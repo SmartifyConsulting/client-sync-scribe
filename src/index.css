@@ -7,127 +7,141 @@
 @import "@fontsource/inter/600.css";
 @import "@fontsource/inter/700.css";
 
-/* mIRI - Clean Modern Design inspired by Airbnb */
+/* mIRI - Vibrant Teal Healthcare Design */
 
 @layer base {
   :root {
     /* Pure, clean backgrounds */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 12%;
+    --background: 180 20% 99%;
+    --foreground: 180 10% 10%;
 
-    /* Elevated surfaces with subtle warmth */
+    /* Cards with subtle teal warmth */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 12%;
+    --card-foreground: 180 10% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 12%;
+    --popover-foreground: 180 10% 10%;
 
-    /* Healthcare teal - trustworthy & calming */
-    --primary: 172 66% 50%;
+    /* Vibrant healthcare teal - STRIKING & BOLD */
+    --primary: 172 76% 42%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 172 66% 60%;
+    --primary-glow: 172 80% 55%;
+    --primary-muted: 172 50% 90%;
 
-    /* Neutral grays */
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 0 0% 25%;
+    /* Teal-tinted neutrals */
+    --secondary: 172 15% 96%;
+    --secondary-foreground: 172 20% 25%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 172 10% 95%;
+    --muted-foreground: 172 5% 45%;
 
-    --accent: 172 50% 95%;
-    --accent-foreground: 172 66% 35%;
+    /* Teal accent for highlights */
+    --accent: 172 60% 92%;
+    --accent-foreground: 172 76% 30%;
 
-    /* Status colors */
+    /* Status colors with teal harmony */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 152 69% 45%;
+    --success: 160 70% 42%;
     --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    /* Borders - very subtle */
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 172 66% 50%;
+    /* Teal-tinted borders */
+    --border: 172 20% 90%;
+    --input: 172 20% 90%;
+    --ring: 172 76% 42%;
 
     --radius: 1rem;
 
-    /* Modern shadows - soft & diffused */
+    /* Modern shadows with teal tint */
     --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.03);
     --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
-    --shadow-glow: 0 0 0 3px hsl(172 66% 50% / 0.1);
+    --shadow-glow: 0 0 0 3px hsl(172 76% 42% / 0.15), 0 0 20px hsl(172 76% 42% / 0.1);
+    --shadow-teal: 0 4px 14px -3px hsl(172 76% 42% / 0.25);
     --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 6px 16px rgb(0 0 0 / 0.04);
-    --shadow-card-hover: 0 2px 8px 0 rgb(0 0 0 / 0.06), 0 12px 24px rgb(0 0 0 / 0.08);
+    --shadow-card-hover: 0 2px 8px 0 hsl(172 76% 42% / 0.08), 0 12px 24px hsl(172 76% 42% / 0.12);
 
-    /* Sidebar - clean white */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 35%;
-    --sidebar-primary: 172 66% 50%;
+    /* Striking sidebar with teal accent */
+    --sidebar-background: 172 30% 98%;
+    --sidebar-foreground: 172 20% 30%;
+    --sidebar-primary: 172 76% 42%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 172 50% 96%;
-    --sidebar-accent-foreground: 172 66% 35%;
-    --sidebar-border: 220 13% 93%;
-    --sidebar-ring: 172 66% 50%;
+    --sidebar-accent: 172 60% 94%;
+    --sidebar-accent-foreground: 172 76% 30%;
+    --sidebar-border: 172 25% 92%;
+    --sidebar-ring: 172 76% 42%;
+
+    /* Gradients */
+    --gradient-teal: linear-gradient(135deg, hsl(172 76% 42%), hsl(172 80% 55%));
+    --gradient-teal-soft: linear-gradient(135deg, hsl(172 60% 92%), hsl(172 50% 96%));
+    --gradient-teal-radial: radial-gradient(circle at top right, hsl(172 76% 42% / 0.1), transparent 50%);
   }
 
   .dark {
-    --background: 0 0% 7%;
-    --foreground: 0 0% 95%;
+    --background: 180 15% 6%;
+    --foreground: 172 10% 95%;
 
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 95%;
+    --card: 180 15% 9%;
+    --card-foreground: 172 10% 95%;
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 180 15% 9%;
+    --popover-foreground: 172 10% 95%;
 
-    --primary: 172 60% 55%;
-    --primary-foreground: 0 0% 5%;
-    --primary-glow: 172 60% 65%;
+    --primary: 172 70% 50%;
+    --primary-foreground: 180 20% 5%;
+    --primary-glow: 172 75% 60%;
+    --primary-muted: 172 40% 20%;
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 90%;
+    --secondary: 172 15% 14%;
+    --secondary-foreground: 172 10% 90%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 172 10% 14%;
+    --muted-foreground: 172 5% 55%;
 
-    --accent: 172 40% 15%;
-    --accent-foreground: 172 60% 70%;
+    --accent: 172 50% 15%;
+    --accent-foreground: 172 70% 70%;
 
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 152 55% 50%;
+    --success: 160 60% 48%;
     --success-foreground: 0 0% 100%;
 
     --warning: 38 80% 55%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 172 60% 55%;
+    --border: 172 15% 18%;
+    --input: 172 15% 18%;
+    --ring: 172 70% 50%;
 
     --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.2);
     --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.3);
-    --shadow-glow: 0 0 0 3px hsl(172 60% 55% / 0.2);
+    --shadow-glow: 0 0 0 3px hsl(172 70% 50% / 0.25), 0 0 25px hsl(172 70% 50% / 0.15);
+    --shadow-teal: 0 4px 14px -3px hsl(172 70% 50% / 0.35);
     --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 6px 16px rgb(0 0 0 / 0.3);
-    --shadow-card-hover: 0 2px 8px 0 rgb(0 0 0 / 0.4), 0 12px 24px rgb(0 0 0 / 0.4);
+    --shadow-card-hover: 0 2px 8px 0 hsl(172 70% 50% / 0.15), 0 12px 24px hsl(172 70% 50% / 0.2);
 
-    --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 0 0% 75%;
-    --sidebar-primary: 172 60% 55%;
-    --sidebar-primary-foreground: 0 0% 5%;
+    --sidebar-background: 180 15% 7%;
+    --sidebar-foreground: 172 10% 75%;
+    --sidebar-primary: 172 70% 50%;
+    --sidebar-primary-foreground: 180 20% 5%;
     --sidebar-accent: 172 40% 12%;
-    --sidebar-accent-foreground: 172 60% 70%;
-    --sidebar-border: 0 0% 15%;
-    --sidebar-ring: 172 60% 55%;
+    --sidebar-accent-foreground: 172 70% 70%;
+    --sidebar-border: 172 15% 15%;
+    --sidebar-ring: 172 70% 50%;
+
+    --gradient-teal: linear-gradient(135deg, hsl(172 70% 50%), hsl(172 75% 60%));
+    --gradient-teal-soft: linear-gradient(135deg, hsl(172 40% 12%), hsl(172 30% 15%));
+    --gradient-teal-radial: radial-gradient(circle at top right, hsl(172 70% 50% / 0.15), transparent 50%);
   }
 }
 
@@ -154,28 +168,35 @@
 }
 
 @layer components {
-  /* Airbnb-style cards */
+  /* Striking teal cards */
   .card-modern {
-    @apply rounded-2xl bg-card border-0 transition-all duration-300;
+    @apply rounded-2xl bg-card border border-border/50 transition-all duration-300;
     box-shadow: var(--shadow-card);
   }
 
   .card-modern:hover {
     box-shadow: var(--shadow-card-hover);
     transform: translateY(-2px);
+    @apply border-primary/20;
   }
 
-  /* Clean stat cards */
+  /* Teal accent stat cards */
   .stat-card {
-    @apply rounded-2xl bg-card p-6 transition-all duration-200;
+    @apply rounded-2xl bg-card p-6 transition-all duration-200 border border-border/50 relative overflow-hidden;
     box-shadow: var(--shadow-sm);
   }
 
-  .stat-card:hover {
-    box-shadow: var(--shadow-md);
+  .stat-card::before {
+    content: '';
+    @apply absolute top-0 left-0 w-1 h-full bg-primary;
   }
 
-  /* Modern input styles */
+  .stat-card:hover {
+    box-shadow: var(--shadow-teal);
+    @apply border-primary/30;
+  }
+
+  /* Modern input with teal focus */
   .input-modern {
     @apply rounded-xl border-2 border-transparent bg-secondary/50 px-4 py-3 transition-all duration-200;
   }
@@ -196,23 +217,67 @@
   }
 
   .nav-item:hover {
-    @apply bg-secondary;
+    @apply bg-accent;
   }
 
   .nav-item.active {
     @apply bg-primary text-primary-foreground;
+    box-shadow: var(--shadow-teal);
+  }
+
+  /* Teal gradient header */
+  .header-gradient {
+    background: var(--gradient-teal-radial), hsl(var(--background));
+  }
+
+  /* Striking teal badge */
+  .badge-teal {
+    @apply bg-primary/10 text-primary border border-primary/20 font-medium;
+  }
+
+  /* Teal glow effect */
+  .glow-teal {
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Teal icon container */
+  .icon-teal {
+    @apply bg-primary/10 text-primary p-2 rounded-xl;
+  }
+
+  /* Floating action button */
+  .fab-teal {
+    @apply bg-primary text-primary-foreground rounded-full p-4 transition-all duration-300;
+    box-shadow: var(--shadow-teal);
+  }
+
+  .fab-teal:hover {
+    @apply bg-primary-glow;
+    box-shadow: 0 6px 20px -3px hsl(172 76% 42% / 0.4);
+    transform: translateY(-2px);
   }
 }
 
 @layer utilities {
-  /* Glass effect */
+  /* Glass effect with teal tint */
   .glass {
-    @apply bg-card/80 backdrop-blur-xl;
+    @apply bg-card/80 backdrop-blur-xl border border-primary/5;
   }
 
   /* Gradient text */
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-glow;
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-teal);
+  }
+
+  /* Teal underline accent */
+  .underline-teal {
+    @apply relative;
+  }
+
+  .underline-teal::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-12 h-1 bg-primary rounded-full;
   }
 
   /* Smooth scrolling */
@@ -230,18 +295,40 @@
     display: none;
   }
 
-  /* Subtle hover lift */
+  /* Subtle hover lift with teal shadow */
   .hover-lift {
     @apply transition-all duration-300;
   }
 
   .hover-lift:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-teal);
+  }
+
+  /* Teal border accent */
+  .border-teal-accent {
+    @apply border-l-4 border-l-primary;
+  }
+
+  /* Teal dot indicator */
+  .dot-teal {
+    @apply w-2 h-2 rounded-full bg-primary;
   }
 
   /* Safe area for mobile devices with notches/home indicators */
   .safe-area-pb {
     padding-bottom: env(safe-area-inset-bottom, 8px);
+  }
+
+  /* Teal shimmer animation */
+  .shimmer-teal {
+    background: linear-gradient(
+      90deg,
+      hsl(172 76% 42% / 0) 0%,
+      hsl(172 76% 42% / 0.1) 50%,
+      hsl(172 76% 42% / 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
   }
 }
