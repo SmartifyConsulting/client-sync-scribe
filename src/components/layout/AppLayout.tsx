@@ -19,7 +19,7 @@ export function AppLayout() {
       </div>
       
       {/* Main content - responsive margins */}
-      <main className="min-h-screen md:ml-72 pb-24 md:pb-0">
+      <main className="min-h-screen md:ml-60 pb-24 md:pb-0">
         <div className="px-4 py-6 md:px-8 md:py-8 max-w-7xl">
           <AnimatePresence mode="wait">
             <PageTransition key={location.pathname}>
