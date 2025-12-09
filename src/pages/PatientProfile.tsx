@@ -11,6 +11,7 @@ import {
   StickyNote,
   Save,
   AlertCircle,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,6 +27,7 @@ import { PatientOverview } from "@/components/patients/PatientOverview";
 import { InvitePatientDialog } from "@/components/patients/InvitePatientDialog";
 import { DoctorsOnProfile } from "@/components/patients/DoctorsOnProfile";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
+import { RoundTable } from "@/components/patients/RoundTable";
 
 const mockDocuments = [
   { id: "1", name: "Financial Statement Q3.pdf", type: "Report", date: "Nov 15, 2024" },
@@ -43,6 +45,7 @@ export default function PatientProfile() {
   const [savingNotes, setSavingNotes] = useState(false);
   const [canViewAllSessions, setCanViewAllSessions] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [unreadRoundTableCount, setUnreadRoundTableCount] = useState(0);
 
   // Check if current doctor has access to all sessions
   useEffect(() => {
@@ -216,6 +219,12 @@ export default function PatientProfile() {
           <TabsTrigger value="doctors">Doctors</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
+          <TabsTrigger value="roundtable" className="gap-1.5">
+            Round Table
+            {unreadRoundTableCount > 0 && (
+              <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
+            )}
+          </TabsTrigger>
         </TabsList>
 
         {/* Overview Tab - AI Summary */}
@@ -368,6 +377,17 @@ export default function PatientProfile() {
             <p className="text-xs text-muted-foreground">
               Last updated: {patient.updated_at ? format(new Date(patient.updated_at), "MMM d, yyyy 'at' h:mm a") : "Never"}
             </p>
+          </div>
+        </TabsContent>
+
+        {/* Round Table Tab */}
+        <TabsContent value="roundtable">
+          <div className="rounded-xl border border-border bg-card p-6">
+            <RoundTable 
+              patientId={patient.id} 
+              patientName={patient.name}
+              onUnreadCountChange={setUnreadRoundTableCount}
+            />
           </div>
         </TabsContent>
       </Tabs>
