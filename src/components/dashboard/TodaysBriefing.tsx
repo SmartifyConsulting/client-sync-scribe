@@ -1,11 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Play, Pause, Pill, Users } from "lucide-react";
+import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Play, Pause, Pill, Users, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
 
+
+interface RoundTableNote {
+  patientName: string;
+  doctorName: string;
+  content: string;
+}
 
 interface AppointmentWithHistory {
   id: string;
@@ -18,6 +24,7 @@ interface AppointmentWithHistory {
   conditions: string | null;
   lastPrescription: string | null;
   linkedDoctors: string[];
+  unreadRoundTableNotes: RoundTableNote[];
 }
 
 export function TodaysBriefing() {
@@ -69,6 +76,9 @@ export function TodaysBriefing() {
             conditions: null,
             lastPrescription: 'Sertraline 50mg daily',
             linkedDoctors: ['Dr. Emily Roberts', 'Dr. James Wilson'],
+            unreadRoundTableNotes: [
+              { patientName: 'Sarah Johnson', doctorName: 'Dr. Emily Roberts', content: 'Patient mentioned considering alternative therapy options. Worth discussing in next session.' }
+            ],
           },
           {
             id: 'sample-2',
@@ -81,6 +91,7 @@ export function TodaysBriefing() {
             conditions: null,
             lastPrescription: 'Lisinopril 10mg daily',
             linkedDoctors: ['Dr. Sarah Thompson'],
+            unreadRoundTableNotes: [],
           },
           {
             id: 'sample-3',
@@ -93,6 +104,7 @@ export function TodaysBriefing() {
             conditions: null,
             lastPrescription: null,
             linkedDoctors: [],
+            unreadRoundTableNotes: [],
           },
         ];
         setAppointments(sampleAppointments);
@@ -109,6 +121,7 @@ export function TodaysBriefing() {
           let lastPrescription: string | null = null;
           let linkedDoctors: string[] = [];
           let patientUserId: string | null = null;
+          let unreadRoundTableNotes: RoundTableNote[] = [];
 
           if (apt.patient_id) {
             // Get patient info
@@ -170,9 +183,34 @@ export function TodaysBriefing() {
                   linkedDoctors = doctors
                     .filter(d => d.full_name)
                     .map(d => d.full_name as string);
-                }
               }
             }
+
+            // Get unread round table notes for this patient
+            const { data: allNotes } = await supabase
+              .from('round_table_notes')
+              .select('id, doctor_id, doctor_name, content')
+              .eq('patient_id', apt.patient_id)
+              .neq('doctor_id', user.id)
+              .order('created_at', { ascending: false });
+
+            if (allNotes && allNotes.length > 0) {
+              const { data: readNotes } = await supabase
+                .from('round_table_reads')
+                .select('note_id')
+                .eq('doctor_id', user.id);
+
+              const readNoteIds = new Set(readNotes?.map(r => r.note_id) || []);
+              
+              unreadRoundTableNotes = allNotes
+                .filter(note => !readNoteIds.has(note.id))
+                .map(note => ({
+                  patientName,
+                  doctorName: note.doctor_name,
+                  content: note.content
+                }));
+            }
+          }
           }
 
           return {
@@ -186,6 +224,7 @@ export function TodaysBriefing() {
             conditions: null,
             lastPrescription,
             linkedDoctors,
+            unreadRoundTableNotes,
           };
         })
       );
@@ -224,6 +263,13 @@ export function TodaysBriefing() {
 
       if (apt.linkedDoctors.length > 0) {
         briefing += `Other doctors on this patient's profile include: ${apt.linkedDoctors.join(', ')}. `;
+      }
+
+      if (apt.unreadRoundTableNotes.length > 0) {
+        briefing += `There ${apt.unreadRoundTableNotes.length === 1 ? 'is' : 'are'} ${apt.unreadRoundTableNotes.length} unread Round Table note${apt.unreadRoundTableNotes.length > 1 ? 's' : ''} for this patient. `;
+        apt.unreadRoundTableNotes.forEach((note, noteIndex) => {
+          briefing += `${note.doctorName} wrote: ${note.content} `;
+        });
       }
       
       if (index < appointments.length - 1) {
@@ -467,6 +513,32 @@ export function TodaysBriefing() {
                     <span className="font-medium text-foreground">Other doctors: </span>
                     {apt.linkedDoctors.join(', ')}
                   </span>
+                </div>
+              )}
+
+              {apt.unreadRoundTableNotes.length > 0 && (
+                <div className="ml-[52px] mt-2 space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <MessageCircle className="h-3.5 w-3.5 text-amber-600" />
+                    <span className="font-medium text-amber-600">
+                      {apt.unreadRoundTableNotes.length} unread Round Table note{apt.unreadRoundTableNotes.length > 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  {apt.unreadRoundTableNotes.slice(0, 2).map((note, noteIndex) => (
+                    <div key={noteIndex} className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                      <p className="text-xs font-medium text-amber-700 dark:text-amber-400 mb-1">
+                        {note.doctorName}
+                      </p>
+                      <p className="text-sm text-foreground">
+                        {note.content.length > 150 ? note.content.substring(0, 150) + '...' : note.content}
+                      </p>
+                    </div>
+                  ))}
+                  {apt.unreadRoundTableNotes.length > 2 && (
+                    <p className="text-xs text-muted-foreground">
+                      +{apt.unreadRoundTableNotes.length - 2} more note{apt.unreadRoundTableNotes.length - 2 > 1 ? 's' : ''}
+                    </p>
+                  )}
                 </div>
               )}
             </div>

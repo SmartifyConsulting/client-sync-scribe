@@ -602,6 +602,73 @@ export type Database = {
         }
         Relationships: []
       }
+      round_table_notes: {
+        Row: {
+          content: string
+          created_at: string
+          doctor_id: string
+          doctor_name: string
+          id: string
+          patient_id: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          doctor_id: string
+          doctor_name: string
+          id?: string
+          patient_id: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          doctor_id?: string
+          doctor_name?: string
+          id?: string
+          patient_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "round_table_notes_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      round_table_reads: {
+        Row: {
+          doctor_id: string
+          id: string
+          note_id: string
+          read_at: string
+        }
+        Insert: {
+          doctor_id: string
+          id?: string
+          note_id: string
+          read_at?: string
+        }
+        Update: {
+          doctor_id?: string
+          id?: string
+          note_id?: string
+          read_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "round_table_reads_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "round_table_notes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sessions: {
         Row: {
           action_points: Json | null
