@@ -362,7 +362,7 @@ export default function Documents() {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+          <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
             <div className="divide-y divide-border max-h-[400px] overflow-y-auto">
               {filteredDocuments.length > 0 ? (
                 filteredDocuments.map((doc) => (

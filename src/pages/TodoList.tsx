@@ -373,7 +373,7 @@ export default function TodoList() {
       </div>
 
       {/* Add New Task */}
-      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+      <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-foreground mb-4">Add New Task</h2>
 
         {/* Voice Recording */}
@@ -472,7 +472,7 @@ export default function TodoList() {
       </div>
 
       {/* Task List */}
-      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+      <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
         {filteredTodos.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
             {filter === "all"

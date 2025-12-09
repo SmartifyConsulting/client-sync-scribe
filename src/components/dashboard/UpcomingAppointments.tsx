@@ -71,10 +71,10 @@ export function UpcomingAppointments() {
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card shadow-sm">
-      <div className="border-b border-border p-5">
-        <h3 className="text-lg font-semibold text-foreground">Today's Schedule</h3>
-        <p className="text-sm text-muted-foreground">
+    <div className="rounded-xl border border-primary bg-card shadow-sm">
+      <div className="rounded-t-xl bg-primary p-5">
+        <h3 className="text-lg font-semibold text-primary-foreground">Today's Schedule</h3>
+        <p className="text-sm text-primary-foreground/80">
           {appointments.length} appointments scheduled
         </p>
       </div>

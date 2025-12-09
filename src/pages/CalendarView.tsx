@@ -282,7 +282,7 @@ export default function CalendarView() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Calendar */}
-        <div className="lg:col-span-2 rounded-xl border border-border bg-card p-6 shadow-sm">
+        <div className="lg:col-span-2 rounded-xl border border-primary bg-card p-6 shadow-sm">
           {/* Month Navigation */}
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-foreground">{monthName}</h2>
@@ -366,10 +366,10 @@ export default function CalendarView() {
         </div>
 
         {/* Today's Schedule */}
-        <div className="rounded-xl border border-border bg-card shadow-sm">
-          <div className="border-b border-border p-5">
-            <h3 className="text-lg font-semibold text-foreground">Today's Schedule</h3>
-            <p className="text-sm text-muted-foreground">
+        <div className="rounded-xl border border-primary bg-card shadow-sm">
+          <div className="rounded-t-xl bg-primary p-5">
+            <h3 className="text-lg font-semibold text-primary-foreground">Today's Schedule</h3>
+            <p className="text-sm text-primary-foreground/80">
               {currentDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
             </p>
           </div>
