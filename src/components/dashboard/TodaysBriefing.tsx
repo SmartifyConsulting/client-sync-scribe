@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Settings2, Play } from "lucide-react";
+import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Settings2, Play, Pause, Pill, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -47,6 +47,7 @@ export function TodaysBriefing() {
   const [loading, setLoading] = useState(true);
   const [isNarrating, setIsNarrating] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState(() => {
     return localStorage.getItem('briefing-voice') || 'alloy';
@@ -307,10 +308,12 @@ export function TodaysBriefing() {
   };
 
   const handleNarrate = async () => {
-    if (isPlaying && audioRef.current) {
+    // If playing, stop completely
+    if (isPlaying && !isPaused && audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       setIsPlaying(false);
+      setIsPaused(false);
       return;
     }
 
@@ -336,6 +339,7 @@ export function TodaysBriefing() {
           audioRef.current.src = audioUrl;
           audioRef.current.play();
           setIsPlaying(true);
+          setIsPaused(false);
         }
       }
     } catch (error: any) {
@@ -350,9 +354,33 @@ export function TodaysBriefing() {
     }
   };
 
+  const handlePauseResume = () => {
+    if (!audioRef.current) return;
+    
+    if (isPaused) {
+      audioRef.current.play();
+      setIsPaused(false);
+    } else {
+      audioRef.current.pause();
+      setIsPaused(true);
+    }
+  };
+
+  const handleStop = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setIsPlaying(false);
+      setIsPaused(false);
+    }
+  };
+
   useEffect(() => {
     audioRef.current = new Audio();
-    audioRef.current.onended = () => setIsPlaying(false);
+    audioRef.current.onended = () => {
+      setIsPlaying(false);
+      setIsPaused(false);
+    };
     
     previewAudioRef.current = new Audio();
     previewAudioRef.current.onended = () => setIsPreviewing(false);
@@ -437,30 +465,57 @@ export function TodaysBriefing() {
               </div>
             </PopoverContent>
           </Popover>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleNarrate}
-            disabled={isNarrating}
-            className="gap-2"
-          >
-            {isNarrating ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Generating...
-              </>
-            ) : isPlaying ? (
-              <>
+          {isPlaying ? (
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePauseResume}
+                className="gap-2"
+              >
+                {isPaused ? (
+                  <>
+                    <Play className="h-4 w-4" />
+                    Resume
+                  </>
+                ) : (
+                  <>
+                    <Pause className="h-4 w-4" />
+                    Pause
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleStop}
+                className="gap-2"
+              >
                 <VolumeX className="h-4 w-4" />
                 Stop
-              </>
-            ) : (
-              <>
-                <Volume2 className="h-4 w-4" />
-                Narrate
-              </>
-            )}
-          </Button>
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleNarrate}
+              disabled={isNarrating}
+              className="gap-2"
+            >
+              {isNarrating ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Volume2 className="h-4 w-4" />
+                  Narrate
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -504,7 +559,7 @@ export function TodaysBriefing() {
               </div>
 
               {apt.lastSessionSummary ? (
-                <div className="ml-13 pl-13 bg-muted/50 rounded-lg p-3 ml-[52px]">
+                <div className="bg-muted/50 rounded-lg p-3 ml-[52px]">
                   <p className="text-sm text-muted-foreground">
                     <span className="font-medium text-foreground">Last session: </span>
                     {apt.lastSessionSummary.length > 200 
@@ -517,6 +572,26 @@ export function TodaysBriefing() {
                   <p className="text-sm text-muted-foreground italic">
                     No previous session notes available
                   </p>
+                </div>
+              )}
+
+              {apt.lastPrescription && (
+                <div className="flex items-center gap-2 ml-[52px] text-sm">
+                  <Pill className="h-3.5 w-3.5 text-green-600" />
+                  <span className="text-muted-foreground">
+                    <span className="font-medium text-foreground">Last prescription: </span>
+                    {apt.lastPrescription}
+                  </span>
+                </div>
+              )}
+
+              {apt.linkedDoctors.length > 0 && (
+                <div className="flex items-center gap-2 ml-[52px] text-sm">
+                  <Users className="h-3.5 w-3.5 text-blue-600" />
+                  <span className="text-muted-foreground">
+                    <span className="font-medium text-foreground">Other doctors: </span>
+                    {apt.linkedDoctors.join(', ')}
+                  </span>
                 </div>
               )}
             </div>
