@@ -21,14 +21,14 @@ export function StatsCard({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md",
+        "group relative overflow-hidden rounded-2xl bg-card p-6 transition-all duration-300 shadow-card hover:shadow-card-hover",
         className
       )}
     >
       <div className="flex items-start justify-between">
-        <div className="space-y-2">
+        <div className="space-y-3">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-3xl font-semibold text-foreground">{value}</p>
+          <p className="text-4xl font-bold text-foreground tracking-tight">{value}</p>
           {change && (
             <p
               className={cn(
@@ -42,11 +42,10 @@ export function StatsCard({
             </p>
           )}
         </div>
-        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary/10">
-          <Icon className="h-6 w-6 text-primary" />
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 transition-all duration-300 group-hover:bg-primary/15 group-hover:scale-105">
+          <Icon className="h-7 w-7 text-primary" />
         </div>
       </div>
-      <div className="absolute -bottom-8 -right-8 h-24 w-24 rounded-full bg-primary/5 transition-transform duration-500 group-hover:scale-150" />
     </div>
   );
 }

@@ -5,8 +5,8 @@ export function AppLayout() {
   return (
     <div className="min-h-screen bg-background">
       <Sidebar />
-      <main className="pl-64">
-        <div className="min-h-screen p-8">
+      <main className="ml-72 min-h-screen">
+        <div className="px-8 py-8 max-w-7xl">
           <Outlet />
         </div>
       </main>

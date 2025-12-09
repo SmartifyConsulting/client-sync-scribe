@@ -18,7 +18,6 @@ import {
 import { useUserRole } from "@/hooks/useUserRole";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
 
 const doctorNavItems = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/" },
@@ -60,24 +59,27 @@ export function Sidebar() {
       if (error) return 0;
       return count || 0;
     },
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 30000,
   });
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-border bg-sidebar">
+    <aside className="fixed left-0 top-0 z-40 h-screen w-72 bg-sidebar border-r border-sidebar-border">
       <div className="flex h-full flex-col">
         {/* Logo */}
-        <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-6">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <span className="text-lg font-bold text-primary-foreground">M</span>
+        <div className="flex h-20 items-center gap-3 px-6">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary shadow-md">
+            <span className="text-xl font-bold text-primary-foreground">M</span>
           </div>
-          <span className="text-xl font-semibold text-foreground">mIRI</span>
+          <div>
+            <span className="text-xl font-semibold text-foreground tracking-tight">mIRI</span>
+            <p className="text-xs text-muted-foreground">Medical Records</p>
+          </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-4">
+        <nav className="flex-1 px-4 py-2 space-y-1">
           {loading ? (
-            <div className="flex items-center justify-center py-8">
+            <div className="flex items-center justify-center py-12">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             </div>
           ) : (
@@ -87,19 +89,19 @@ export function Sidebar() {
                 to={item.to}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                    "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
                     isActive
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   )
                 }
               >
                 <item.icon className="h-5 w-5" />
                 <span className="flex-1">{item.label}</span>
                 {item.label === "Inbox" && unreadCount > 0 && (
-                  <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs">
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-semibold text-destructive-foreground">
                     {unreadCount > 99 ? "99+" : unreadCount}
-                  </Badge>
+                  </span>
                 )}
               </NavLink>
             ))
@@ -107,10 +109,17 @@ export function Sidebar() {
         </nav>
 
         {/* Bottom Section */}
-        <div className="border-t border-sidebar-border p-4">
+        <div className="p-4 space-y-1">
           <NavLink
             to="/settings"
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-all duration-200 hover:bg-sidebar-accent/50"
+            className={({ isActive }) =>
+              cn(
+                "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
+                isActive
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              )
+            }
           >
             <Settings className="h-5 w-5" />
             Settings
@@ -121,7 +130,7 @@ export function Sidebar() {
               await supabase.auth.signOut();
               window.location.href = "/auth";
             }}
-            className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
           >
             <LogOut className="h-5 w-5" />
             Sign Out
