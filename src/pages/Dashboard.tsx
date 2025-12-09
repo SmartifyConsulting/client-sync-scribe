@@ -1,4 +1,4 @@
-import { Users, Calendar } from "lucide-react";
+import { Users, Calendar, TrendingUp } from "lucide-react";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { TodaysBriefing } from "@/components/dashboard/TodaysBriefing";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
@@ -7,23 +7,27 @@ import { useProfile } from "@/hooks/useProfile";
 
 export default function Dashboard() {
   const { profile } = useProfile();
-  const displayName = profile?.full_name || "Doctor";
+  const displayName = profile?.full_name?.split(' ')[0] || "Doctor";
+
+  // Get time-based greeting
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Good morning, {displayName}</h1>
-        <p className="mt-1 text-muted-foreground">
-          Here's an overview of your practice today
+      <div className="pb-2">
+        <h1 className="text-3xl font-bold text-foreground tracking-tight">{greeting}, {displayName}</h1>
+        <p className="mt-2 text-muted-foreground text-lg">
+          Here's what's happening with your practice today
         </p>
       </div>
 
       {/* Patient Access Requests */}
       <DoctorAccessRequests />
 
-      {/* Stats Grid - Only essential stats */}
-      <div className="grid gap-6 sm:grid-cols-2">
+      {/* Stats Grid */}
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         <StatsCard
           title="Total Patients"
           value={128}
@@ -37,6 +41,13 @@ export default function Dashboard() {
           change="2 completed"
           trend="neutral"
           icon={Calendar}
+        />
+        <StatsCard
+          title="This Week"
+          value={24}
+          change="+8% from last week"
+          trend="up"
+          icon={TrendingUp}
         />
       </div>
 
