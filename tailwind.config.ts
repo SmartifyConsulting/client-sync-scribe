@@ -31,11 +31,11 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-34:           DEFAULT: "hsl(var(--primary))",
-35:           foreground: "hsl(var(--primary-foreground))",
-36:           glow: "hsl(var(--primary-glow))",
-37:           muted: "hsl(var(--primary-muted))",
-38:         },
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+          glow: "hsl(var(--primary-glow))",
+          muted: "hsl(var(--primary-muted))",
+        },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
