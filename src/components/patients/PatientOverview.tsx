@@ -37,12 +37,20 @@ interface AllergyItem {
   severity: "mild" | "moderate" | "severe";
 }
 
+interface MedicationConflict {
+  medication1: string;
+  medication2?: string;
+  reason: string;
+  severity: "low" | "moderate" | "high";
+}
+
 interface SummaryData {
   summary: string;
   medications: MedicationItem[];
   symptoms: SymptomItem[];
   conditions: ConditionItem[];
   allergies: AllergyItem[];
+  conflicts: MedicationConflict[];
 }
 
 export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
@@ -76,6 +84,7 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
           status: c.status || "active",
         })),
         allergies: data.allergies || [],
+        conflicts: data.conflicts || [],
       };
 
       setSummaryData(processedData);
@@ -282,6 +291,73 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
           </span>
         </div>
       </div>
+
+      {/* Conflicting Medication Alert */}
+      {summaryData.conflicts && summaryData.conflicts.length > 0 && (
+        <div className="rounded-xl border border-orange-500/30 bg-orange-500/5 p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="h-5 w-5 text-orange-600" />
+            <h4 className="font-semibold text-foreground">Conflicting Medication Alert</h4>
+          </div>
+          <p className="text-xs text-muted-foreground mb-4">
+            The following medications may conflict with each other or with patient allergies. Please review before prescribing.
+          </p>
+          <div className="space-y-3">
+            {summaryData.conflicts.map((conflict, i) => (
+              <div
+                key={i}
+                className={`flex items-start gap-3 p-3 rounded-lg border ${
+                  conflict.severity === "high"
+                    ? "bg-red-500/10 border-red-500/30"
+                    : conflict.severity === "moderate"
+                    ? "bg-orange-500/10 border-orange-500/30"
+                    : "bg-yellow-500/10 border-yellow-500/30"
+                }`}
+              >
+                <div
+                  className={`shrink-0 mt-0.5 w-2 h-2 rounded-full ${
+                    conflict.severity === "high"
+                      ? "bg-red-500"
+                      : conflict.severity === "moderate"
+                      ? "bg-orange-500"
+                      : "bg-yellow-500"
+                  }`}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="outline" className="bg-card border-border text-foreground font-medium">
+                      <Pill className="h-3 w-3 mr-1" />
+                      {conflict.medication1}
+                    </Badge>
+                    {conflict.medication2 && (
+                      <>
+                        <span className="text-muted-foreground text-xs">+</span>
+                        <Badge variant="outline" className="bg-card border-border text-foreground font-medium">
+                          <Pill className="h-3 w-3 mr-1" />
+                          {conflict.medication2}
+                        </Badge>
+                      </>
+                    )}
+                    <Badge
+                      variant="outline"
+                      className={`ml-auto capitalize text-xs ${
+                        conflict.severity === "high"
+                          ? "bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30"
+                          : conflict.severity === "moderate"
+                          ? "bg-orange-500/15 text-orange-700 dark:text-orange-400 border-orange-500/30"
+                          : "bg-yellow-500/15 text-yellow-700 dark:text-yellow-400 border-yellow-500/30"
+                      }`}
+                    >
+                      {conflict.severity} risk
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1.5">{conflict.reason}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Allergies Section */}
       {(summaryData.allergies.length > 0 || patient.allergies) && (
