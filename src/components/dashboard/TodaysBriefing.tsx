@@ -68,11 +68,10 @@ export function TodaysBriefing() {
       if (appointmentsError) throw appointmentsError;
 
       if (!appointmentsData || appointmentsData.length === 0) {
-        // Use sample data for demo purposes - fetch real patient IDs
+        // Use sample data for demo purposes - fetch real patient IDs (including demo patients)
         const { data: realPatients } = await supabase
           .from('patients')
           .select('id, name, allergies')
-          .eq('user_id', user.id)
           .limit(3);
 
         const sampleAppointments: AppointmentWithHistory[] = [
