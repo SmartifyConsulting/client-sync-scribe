@@ -1,32 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Settings2, Play, Pause, Pill, Users } from "lucide-react";
+import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Play, Pause, Pill, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
 
-const VOICE_OPTIONS = [
-  { value: "alloy", label: "Alloy", description: "Neutral and balanced" },
-  { value: "echo", label: "Echo", description: "Warm and conversational" },
-  { value: "fable", label: "Fable", description: "Expressive and dynamic" },
-  { value: "onyx", label: "Onyx", description: "Deep and authoritative" },
-  { value: "nova", label: "Nova", description: "Friendly and upbeat" },
-  { value: "shimmer", label: "Shimmer", description: "Clear and gentle" },
-];
 
 interface AppointmentWithHistory {
   id: string;
@@ -48,63 +27,12 @@ export function TodaysBriefing() {
   const [isNarrating, setIsNarrating] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [isPreviewing, setIsPreviewing] = useState(false);
-  const [selectedVoice, setSelectedVoice] = useState(() => {
-    return localStorage.getItem('briefing-voice') || 'alloy';
-  });
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     fetchTodaysAppointments();
   }, []);
 
-  const handleVoiceChange = (voice: string) => {
-    setSelectedVoice(voice);
-    localStorage.setItem('briefing-voice', voice);
-  };
-
-  const handlePreviewVoice = async () => {
-    if (isPreviewing && previewAudioRef.current) {
-      previewAudioRef.current.pause();
-      previewAudioRef.current.currentTime = 0;
-      setIsPreviewing(false);
-      return;
-    }
-
-    setIsPreviewing(true);
-    
-    try {
-      const previewText = `Hello, I'm the ${selectedVoice} voice. This is how I'll narrate your daily briefing.`;
-      
-      const { data, error } = await supabase.functions.invoke('narrate-briefing', {
-        body: { text: previewText, voice: selectedVoice }
-      });
-
-      if (error) throw error;
-
-      if (data.audioContent) {
-        const audioBlob = new Blob(
-          [Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0))],
-          { type: 'audio/mp3' }
-        );
-        const audioUrl = URL.createObjectURL(audioBlob);
-        
-        if (previewAudioRef.current) {
-          previewAudioRef.current.src = audioUrl;
-          previewAudioRef.current.play();
-        }
-      }
-    } catch (error: any) {
-      console.error('Error previewing voice:', error);
-      toast({
-        title: "Preview failed",
-        description: error.message || "Could not generate voice preview",
-        variant: "destructive",
-      });
-      setIsPreviewing(false);
-    }
-  };
 
   const fetchTodaysAppointments = async () => {
     try {
@@ -323,7 +251,7 @@ export function TodaysBriefing() {
       const briefingText = generateBriefingText();
       
       const { data, error } = await supabase.functions.invoke('narrate-briefing', {
-        body: { text: briefingText, voice: selectedVoice }
+        body: { text: briefingText, voice: 'nova' }
       });
 
       if (error) throw error;
@@ -382,17 +310,10 @@ export function TodaysBriefing() {
       setIsPaused(false);
     };
     
-    previewAudioRef.current = new Audio();
-    previewAudioRef.current.onended = () => setIsPreviewing(false);
-    
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
-      }
-      if (previewAudioRef.current) {
-        previewAudioRef.current.pause();
-        previewAudioRef.current = null;
       }
     };
   }, []);
@@ -419,52 +340,6 @@ export function TodaysBriefing() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Settings2 className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="end" className="w-64">
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">Narrator Voice</Label>
-                <div className="flex gap-2">
-                  <Select value={selectedVoice} onValueChange={handleVoiceChange}>
-                    <SelectTrigger className="flex-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {VOICE_OPTIONS.map((voice) => (
-                        <SelectItem key={voice.value} value={voice.value}>
-                          <div className="flex flex-col">
-                            <span>{voice.label}</span>
-                            <span className="text-xs text-muted-foreground">{voice.description}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handlePreviewVoice}
-                    disabled={isPreviewing}
-                    className="shrink-0"
-                    title="Preview voice"
-                  >
-                    {isPreviewing ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Play className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Click the play button to hear a sample of the selected voice.
-                </p>
-              </div>
-            </PopoverContent>
-          </Popover>
           {isPlaying ? (
             <div className="flex items-center gap-1">
               <Button
