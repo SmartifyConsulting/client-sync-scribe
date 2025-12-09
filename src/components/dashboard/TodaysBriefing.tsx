@@ -474,12 +474,18 @@ export function TodaysBriefing() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <Link
-                      to={apt.patientId ? `/patients/${apt.patientId}` : '#'}
-                      className="font-medium text-foreground hover:text-primary transition-colors truncate"
-                    >
-                      {apt.patientName}
-                    </Link>
+                    {apt.patientId ? (
+                      <Link
+                        to={`/patients/${apt.patientId}`}
+                        className="font-medium text-primary hover:underline transition-colors truncate"
+                      >
+                        {apt.patientName}
+                      </Link>
+                    ) : (
+                      <span className="font-medium text-foreground truncate">
+                        {apt.patientName}
+                      </span>
+                    )}
                     <span className="flex items-center gap-1 text-sm text-muted-foreground shrink-0">
                       <Clock className="h-3.5 w-3.5" />
                       {apt.formattedTime}
