@@ -37,6 +37,8 @@ interface AppointmentWithHistory {
   lastSessionSummary: string | null;
   allergies: string | null;
   conditions: string | null;
+  lastPrescription: string | null;
+  linkedDoctors: string[];
 }
 
 export function TodaysBriefing() {
@@ -136,6 +138,8 @@ export function TodaysBriefing() {
             lastSessionSummary: 'Patient reported improved sleep patterns after adjusting medication dosage. Anxiety levels have decreased, though work-related stress persists. Recommended continuing current treatment plan with follow-up in two weeks.',
             allergies: 'Penicillin, Sulfa drugs',
             conditions: null,
+            lastPrescription: 'Sertraline 50mg daily',
+            linkedDoctors: ['Dr. Emily Roberts', 'Dr. James Wilson'],
           },
           {
             id: 'sample-2',
@@ -146,6 +150,8 @@ export function TodaysBriefing() {
             lastSessionSummary: 'Follow-up on hypertension management. Blood pressure readings have stabilized with current medication. Patient adherent to low-sodium diet. Continue monitoring.',
             allergies: null,
             conditions: null,
+            lastPrescription: 'Lisinopril 10mg daily',
+            linkedDoctors: ['Dr. Sarah Thompson'],
           },
           {
             id: 'sample-3',
@@ -156,6 +162,8 @@ export function TodaysBriefing() {
             lastSessionSummary: null,
             allergies: 'Latex',
             conditions: null,
+            lastPrescription: null,
+            linkedDoctors: [],
           },
         ];
         setAppointments(sampleAppointments);
@@ -169,18 +177,22 @@ export function TodaysBriefing() {
           let patientName = apt.title || "Unknown Patient";
           let lastSessionSummary: string | null = null;
           let allergies: string | null = null;
+          let lastPrescription: string | null = null;
+          let linkedDoctors: string[] = [];
+          let patientUserId: string | null = null;
 
           if (apt.patient_id) {
             // Get patient info
             const { data: patient } = await supabase
               .from('patients')
-              .select('name, allergies')
+              .select('name, allergies, patient_user_id')
               .eq('id', apt.patient_id)
-              .single();
+              .maybeSingle();
 
             if (patient) {
               patientName = patient.name;
               allergies = patient.allergies;
+              patientUserId = patient.patient_user_id;
             }
 
             // Get last session summary
@@ -191,10 +203,46 @@ export function TodaysBriefing() {
               .eq('status', 'completed')
               .order('ended_at', { ascending: false })
               .limit(1)
-              .single();
+              .maybeSingle();
 
             if (lastSession) {
               lastSessionSummary = lastSession.summary;
+            }
+
+            // Get last prescription
+            const { data: prescription } = await supabase
+              .from('prescriptions')
+              .select('medication, dosage, frequency')
+              .eq('patient_id', apt.patient_id)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            if (prescription) {
+              lastPrescription = `${prescription.medication} ${prescription.dosage} ${prescription.frequency}`;
+            }
+
+            // Get linked doctors for this patient
+            if (patientUserId) {
+              const { data: accessRecords } = await supabase
+                .from('doctor_patient_access')
+                .select('doctor_id')
+                .eq('patient_user_id', patientUserId)
+                .eq('is_active', true);
+
+              if (accessRecords && accessRecords.length > 0) {
+                const doctorIds = accessRecords.map(r => r.doctor_id);
+                const { data: doctors } = await supabase
+                  .from('profiles')
+                  .select('id, full_name')
+                  .in('id', doctorIds);
+
+                if (doctors) {
+                  linkedDoctors = doctors
+                    .filter(d => d.full_name)
+                    .map(d => d.full_name as string);
+                }
+              }
             }
           }
 
@@ -207,6 +255,8 @@ export function TodaysBriefing() {
             lastSessionSummary,
             allergies,
             conditions: null,
+            lastPrescription,
+            linkedDoctors,
           };
         })
       );
@@ -237,6 +287,14 @@ export function TodaysBriefing() {
         briefing += `From your last session: ${apt.lastSessionSummary} `;
       } else {
         briefing += `This appears to be a new patient or their first recorded session. `;
+      }
+
+      if (apt.lastPrescription) {
+        briefing += `Their most recent prescription was ${apt.lastPrescription}. `;
+      }
+
+      if (apt.linkedDoctors.length > 0) {
+        briefing += `Other doctors on this patient's profile include: ${apt.linkedDoctors.join(', ')}. `;
       }
       
       if (index < appointments.length - 1) {
