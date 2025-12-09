@@ -9,6 +9,9 @@ export interface Profile {
   doctor_number: string | null;
   practice_address: string | null;
   logo_url: string | null;
+  avatar_url: string | null;
+  role: 'doctor' | 'patient' | null;
+  specialty: string | null;
   created_at: string;
   updated_at: string;
 }
