@@ -51,6 +51,25 @@ interface DisplayTemplate extends Template {
   placeholders: string[];
 }
 
+// Helper functions defined outside component to avoid hoisting issues
+const extractPlaceholders = (content: string): string[] => {
+  const matches = content.match(/\[([^\]]+)\]/g) || [];
+  return [...new Set(matches.map(m => m.slice(1, -1)))];
+};
+
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
+  return date.toLocaleDateString();
+};
+
 export default function Documents() {
   const { toast } = useToast();
   const { templates: dbTemplates, loading: templatesLoading, createTemplate, updateTemplate, deleteTemplate } = useTemplates();
@@ -177,24 +196,6 @@ export default function Documents() {
       template.logo_url || undefined,
       template.font_family || undefined
     );
-  };
-
-  const extractPlaceholders = (content: string): string[] => {
-    const matches = content.match(/\[([^\]]+)\]/g) || [];
-    return [...new Set(matches.map(m => m.slice(1, -1)))];
-  };
-
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) return "Today";
-    if (diffDays === 1) return "Yesterday";
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
-    return date.toLocaleDateString();
   };
 
   return (
