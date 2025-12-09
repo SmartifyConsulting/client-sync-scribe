@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Mic,
   Square,
@@ -8,19 +8,42 @@ import {
   Loader2,
   FileText,
   Pill,
+  AlertTriangle,
+  CheckCircle,
+  Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
 import { AudioWaveform } from "./AudioWaveform";
+import { supabase } from "@/integrations/supabase/client";
+
+interface MedicationConflict {
+  type: "drug-drug" | "drug-allergy";
+  medication1: string;
+  medication2?: string;
+  severity: "low" | "moderate" | "high";
+  explanation: string;
+  recommendation: string;
+}
+
+interface CurrentMedication {
+  medication: string;
+  dosage: string;
+  frequency: string;
+}
 
 interface PrescriptionEditorProps {
   patientName: string;
+  patientId: string;
   doctorName?: string;
+  allergies?: string | null;
+  currentMedications?: CurrentMedication[];
   onClose: () => void;
   onSave: (prescription: { content: string; rawTranscript: string }) => void;
 }
@@ -47,8 +70,11 @@ Signature: ___________________
 `;
 
 export function PrescriptionEditor({ 
-  patientName, 
+  patientName,
+  patientId,
   doctorName = "Dr. Georgia Adams",
+  allergies,
+  currentMedications = [],
   onClose, 
   onSave 
 }: PrescriptionEditorProps) {
@@ -61,6 +87,9 @@ export function PrescriptionEditor({
       .replace("[PRESCRIPTION_CONTENT]", "");
   });
   const [rawTranscript, setRawTranscript] = useState("");
+  const [conflicts, setConflicts] = useState<MedicationConflict[]>([]);
+  const [isCheckingConflicts, setIsCheckingConflicts] = useState(false);
+  const [conflictCheckDone, setConflictCheckDone] = useState(false);
 
   const handleTranscriptionComplete = useCallback((text: string) => {
     setRawTranscript(text);
@@ -91,6 +120,72 @@ export function PrescriptionEditor({
     onTranscriptionComplete: handleTranscriptionComplete,
   });
 
+  // Check for medication conflicts
+  const checkConflicts = useCallback(async (medicationText: string) => {
+    if (!medicationText.trim()) return;
+    
+    setIsCheckingConflicts(true);
+    setConflictCheckDone(false);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('check-medication-conflicts', {
+        body: {
+          newMedication: medicationText,
+          currentMedications,
+          allergies: allergies || 'None known',
+        },
+      });
+
+      if (error) throw error;
+      
+      if (data?.conflicts && data.conflicts.length > 0) {
+        setConflicts(data.conflicts);
+        toast({
+          title: "⚠️ Medication Conflict Detected",
+          description: `${data.conflicts.length} potential conflict(s) found. Please review before saving.`,
+          variant: "destructive",
+        });
+      } else {
+        setConflicts([]);
+      }
+      setConflictCheckDone(true);
+    } catch (error: any) {
+      console.error("Error checking conflicts:", error);
+      // Don't block the prescription if conflict check fails
+      setConflictCheckDone(true);
+    } finally {
+      setIsCheckingConflicts(false);
+    }
+  }, [currentMedications, allergies, toast]);
+
+  // Check conflicts when content changes (debounced via transcription complete)
+  useEffect(() => {
+    if (rawTranscript) {
+      checkConflicts(rawTranscript);
+    }
+  }, [rawTranscript, checkConflicts]);
+
+  const handleSave = () => {
+    if (conflicts.length > 0) {
+      const highSeverityConflicts = conflicts.filter(c => c.severity === 'high');
+      if (highSeverityConflicts.length > 0) {
+        toast({
+          title: "High-Risk Conflicts Detected",
+          description: "Please review the high-severity medication conflicts before proceeding.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    
+    onSave({ content, rawTranscript: rawTranscript || transcript || "" });
+    toast({
+      title: "Prescription Saved",
+      description: "The prescription has been saved to the session",
+    });
+    onClose();
+  };
+
   const toggleRecording = () => {
     if (isRecording) {
       stopRecording();
@@ -99,13 +194,13 @@ export function PrescriptionEditor({
     }
   };
 
-  const handleSave = () => {
-    onSave({ content, rawTranscript: rawTranscript || transcript || "" });
-    toast({
-      title: "Prescription Saved",
-      description: "The prescription has been saved to the session",
-    });
-    onClose();
+  // Manual check button handler
+  const handleManualCheck = () => {
+    const medicationsMatch = content.match(/MEDICATIONS:\s*([\s\S]*?)(?=─|$)/);
+    const medicationsText = medicationsMatch?.[1]?.trim() || rawTranscript || '';
+    if (medicationsText) {
+      checkConflicts(medicationsText);
+    }
   };
 
   const handlePrint = () => {
@@ -155,8 +250,102 @@ export function PrescriptionEditor({
                 id="prescription-content"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="min-h-[400px] font-mono text-sm"
+                className="min-h-[300px] font-mono text-sm"
               />
+            </div>
+
+            {/* Conflict Check Section */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-muted-foreground" />
+                  <Label>Medication Safety Check</Label>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleManualCheck}
+                  disabled={isCheckingConflicts}
+                  className="gap-2"
+                >
+                  {isCheckingConflicts ? (
+                    <>
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Checking...
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="h-3 w-3" />
+                      Check Conflicts
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {/* Conflict Results */}
+              {conflictCheckDone && conflicts.length === 0 && (
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/30">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-green-700 dark:text-green-400">
+                    No medication conflicts detected
+                  </span>
+                </div>
+              )}
+
+              {conflicts.length > 0 && (
+                <div className="space-y-2">
+                  {conflicts.map((conflict, i) => (
+                    <div
+                      key={i}
+                      className={cn(
+                        "p-3 rounded-lg border",
+                        conflict.severity === "high"
+                          ? "bg-red-500/10 border-red-500/30"
+                          : conflict.severity === "moderate"
+                          ? "bg-orange-500/10 border-orange-500/30"
+                          : "bg-yellow-500/10 border-yellow-500/30"
+                      )}
+                    >
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className={cn(
+                          "h-4 w-4 mt-0.5 shrink-0",
+                          conflict.severity === "high" ? "text-red-600" :
+                          conflict.severity === "moderate" ? "text-orange-600" : "text-yellow-600"
+                        )} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <Badge variant="outline" className="text-xs bg-card">
+                              {conflict.medication1}
+                            </Badge>
+                            {conflict.medication2 && (
+                              <>
+                                <span className="text-xs text-muted-foreground">+</span>
+                                <Badge variant="outline" className="text-xs bg-card">
+                                  {conflict.medication2}
+                                </Badge>
+                              </>
+                            )}
+                            <Badge className={cn(
+                              "text-xs capitalize ml-auto",
+                              conflict.severity === "high" 
+                                ? "bg-red-500/20 text-red-700 dark:text-red-400"
+                                : conflict.severity === "moderate"
+                                ? "bg-orange-500/20 text-orange-700 dark:text-orange-400"
+                                : "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400"
+                            )}>
+                              {conflict.severity} risk
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">{conflict.explanation}</p>
+                          <p className="text-xs text-foreground mt-1 font-medium">
+                            → {conflict.recommendation}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

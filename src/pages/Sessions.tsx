@@ -650,10 +650,12 @@ export default function Sessions() {
         )}
       </div>
       {/* Prescription Editor Modal */}
-      {showPrescriptionEditor && currentPatient && (
+      {showPrescriptionEditor && currentPatient && patientId && (
         <PrescriptionEditor
           patientName={currentPatient.name}
+          patientId={patientId}
           doctorName="Dr. Georgia Adams"
+          allergies={currentPatient.allergies}
           onClose={() => setShowPrescriptionEditor(false)}
           onSave={handleSavePrescription}
         />
