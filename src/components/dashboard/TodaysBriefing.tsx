@@ -393,7 +393,7 @@ export function TodaysBriefing() {
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card shadow-sm">
+    <div className="rounded-xl border border-primary bg-card shadow-sm">
       <div className="rounded-t-xl bg-primary p-5 flex items-center justify-between gap-2">
         <div>
           <h3 className="text-lg font-semibold text-primary-foreground">Today's Briefing</h3>
@@ -438,7 +438,7 @@ export function TodaysBriefing() {
               size="sm"
               onClick={handleNarrate}
               disabled={isNarrating}
-              className="gap-2"
+              className="gap-2 bg-white text-primary border-primary hover:bg-primary/10"
             >
               {isNarrating ? (
                 <>

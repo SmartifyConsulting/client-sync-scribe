@@ -104,7 +104,7 @@ export function RecentActivity() {
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card shadow-sm">
+    <div className="rounded-xl border border-primary bg-card shadow-sm">
       <div className="rounded-t-xl bg-primary p-5">
         <h3 className="text-lg font-semibold text-primary-foreground">Recent Activity</h3>
         <p className="text-sm text-primary-foreground/80">Your latest actions</p>
