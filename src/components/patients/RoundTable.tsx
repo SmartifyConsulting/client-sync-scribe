@@ -11,6 +11,7 @@ interface RoundTableNote {
   patient_id: string;
   doctor_id: string;
   doctor_name: string;
+  doctor_specialty: string | null;
   content: string;
   created_at: string;
   isRead: boolean;
@@ -30,6 +31,7 @@ export function RoundTable({ patientId, patientName, onUnreadCountChange }: Roun
   const [submitting, setSubmitting] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserName, setCurrentUserName] = useState<string>("");
+  const [currentUserSpecialty, setCurrentUserSpecialty] = useState<string | null>(null);
 
   useEffect(() => {
     fetchNotes();
@@ -66,10 +68,11 @@ export function RoundTable({ patientId, patientName, onUnreadCountChange }: Roun
       setCurrentUserId(user.id);
       const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name')
+        .select('full_name, specialty')
         .eq('id', user.id)
         .maybeSingle();
       setCurrentUserName(profile?.full_name || 'Doctor');
+      setCurrentUserSpecialty((profile as any)?.specialty || null);
     }
   };
 
@@ -95,8 +98,20 @@ export function RoundTable({ patientId, patientName, onUnreadCountChange }: Roun
 
       const readNoteIds = new Set(readsData?.map(r => r.note_id) || []);
 
+      // Fetch specialties for all doctors who wrote notes
+      const doctorIds = [...new Set((notesData || []).map(n => n.doctor_id))];
+      const { data: doctorProfiles } = await supabase
+        .from('profiles')
+        .select('id, specialty')
+        .in('id', doctorIds);
+      
+      const doctorSpecialties = new Map(
+        (doctorProfiles || []).map(p => [p.id, (p as any).specialty])
+      );
+
       const notesWithReadStatus = (notesData || []).map(note => ({
         ...note,
+        doctor_specialty: doctorSpecialties.get(note.doctor_id) || null,
         isRead: readNoteIds.has(note.id) || note.doctor_id === user.id
       }));
 
@@ -254,7 +269,14 @@ export function RoundTable({ patientId, patientName, onUnreadCountChange }: Roun
                     {note.doctor_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                   </div>
                   <div>
-                    <p className="font-medium text-foreground">{note.doctor_name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-foreground">{note.doctor_name}</p>
+                      {note.doctor_specialty && (
+                        <span className="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
+                          {note.doctor_specialty}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       {format(new Date(note.created_at), "MMM d, yyyy 'at' h:mm a")}
                     </p>
