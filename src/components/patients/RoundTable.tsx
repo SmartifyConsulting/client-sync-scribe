@@ -36,6 +36,30 @@ export function RoundTable({ patientId, patientName, onUnreadCountChange }: Roun
     fetchCurrentUser();
   }, [patientId]);
 
+  // Real-time subscription for round table notes
+  useEffect(() => {
+    const channel = supabase
+      .channel(`round_table_${patientId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'round_table_notes',
+          filter: `patient_id=eq.${patientId}`
+        },
+        (payload) => {
+          console.log('Round table realtime update:', payload);
+          fetchNotes();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [patientId]);
+
   const fetchCurrentUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
