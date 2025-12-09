@@ -38,7 +38,11 @@ const patientNavItems = [
   { icon: Shield, label: "Access", to: "/patient/access" },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  onNavigate?: () => void;
+}
+
+export function Sidebar({ onNavigate }: SidebarProps) {
   const { role, loading, isPatient } = useUserRole();
   const navItems = isPatient ? patientNavItems : doctorNavItems;
 
@@ -87,6 +91,7 @@ export function Sidebar() {
               <NavLink
                 key={item.to}
                 to={item.to}
+                onClick={onNavigate}
                 className={({ isActive }) =>
                   cn(
                     "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
@@ -112,6 +117,7 @@ export function Sidebar() {
         <div className="p-4 space-y-1">
           <NavLink
             to="/settings"
+            onClick={onNavigate}
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
