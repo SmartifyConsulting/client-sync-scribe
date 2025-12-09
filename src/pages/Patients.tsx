@@ -516,10 +516,10 @@ export default function Patients() {
                     Contact
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">
-                    Added
+                    Last Seen On
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">
-                    Last Visit
+                    Patient Since
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-muted-foreground">
                     Status
@@ -569,13 +569,13 @@ export default function Patients() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">
-                      {new Date(patient.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
                       {patient.last_visit 
                         ? new Date(patient.last_visit).toLocaleDateString() 
-                        : <span className="text-muted-foreground/50">No visits</span>
+                        : <span className="text-muted-foreground/50">No visits yet</span>
                       }
+                    </td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
+                      {new Date(patient.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4">
                       <span
