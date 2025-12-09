@@ -68,16 +68,22 @@ export function TodaysBriefing() {
       if (appointmentsError) throw appointmentsError;
 
       if (!appointmentsData || appointmentsData.length === 0) {
-        // Use sample data for demo purposes
+        // Use sample data for demo purposes - fetch real patient IDs
+        const { data: realPatients } = await supabase
+          .from('patients')
+          .select('id, name, allergies')
+          .eq('user_id', user.id)
+          .limit(3);
+
         const sampleAppointments: AppointmentWithHistory[] = [
           {
             id: 'sample-1',
-            patientId: '',
-            patientName: 'Sarah Johnson',
+            patientId: realPatients?.[0]?.id || '',
+            patientName: realPatients?.[0]?.name || 'Sarah Johnson',
             startTime: new Date().toISOString(),
             formattedTime: '9:00 AM',
             lastSessionSummary: 'Patient reported improved sleep patterns after adjusting medication dosage. Anxiety levels have decreased, though work-related stress persists. Recommended continuing current treatment plan with follow-up in two weeks.',
-            allergies: 'Penicillin, Sulfa drugs',
+            allergies: realPatients?.[0]?.allergies || 'Penicillin, Sulfa drugs',
             conditions: null,
             lastPrescription: 'Sertraline 50mg daily',
             linkedDoctors: [
@@ -85,17 +91,17 @@ export function TodaysBriefing() {
               { name: 'Dr. James Wilson', specialty: 'Cardiologist' }
             ],
             unreadRoundTableNotes: [
-              { patientName: 'Sarah Johnson', doctorName: 'Dr. Emily Roberts', content: 'Patient mentioned considering alternative therapy options. Worth discussing in next session.' }
+              { patientName: realPatients?.[0]?.name || 'Sarah Johnson', doctorName: 'Dr. Emily Roberts', content: 'Patient mentioned considering alternative therapy options. Worth discussing in next session.' }
             ],
           },
           {
             id: 'sample-2',
-            patientId: '',
-            patientName: 'Michael Chen',
+            patientId: realPatients?.[1]?.id || '',
+            patientName: realPatients?.[1]?.name || 'Michael Chen',
             startTime: new Date().toISOString(),
             formattedTime: '10:30 AM',
             lastSessionSummary: 'Follow-up on hypertension management. Blood pressure readings have stabilized with current medication. Patient adherent to low-sodium diet. Continue monitoring.',
-            allergies: null,
+            allergies: realPatients?.[1]?.allergies || null,
             conditions: null,
             lastPrescription: 'Lisinopril 10mg daily',
             linkedDoctors: [
@@ -105,12 +111,12 @@ export function TodaysBriefing() {
           },
           {
             id: 'sample-3',
-            patientId: '',
-            patientName: 'Emma Williams',
+            patientId: realPatients?.[2]?.id || '',
+            patientName: realPatients?.[2]?.name || 'Emma Williams',
             startTime: new Date().toISOString(),
             formattedTime: '2:00 PM',
             lastSessionSummary: null,
-            allergies: 'Latex',
+            allergies: realPatients?.[2]?.allergies || 'Latex',
             conditions: null,
             lastPrescription: null,
             linkedDoctors: [],
