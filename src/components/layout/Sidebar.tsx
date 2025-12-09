@@ -72,7 +72,7 @@ export function Sidebar() {
           </div>
           <div>
             <span className="text-xl font-semibold text-foreground tracking-tight">mIRI</span>
-            <p className="text-xs text-muted-foreground">Medical Records</p>
+            <p className="text-xs text-muted-foreground">Medical Integrated Record Intelligence</p>
           </div>
         </div>
 
@@ -92,7 +92,7 @@ export function Sidebar() {
                     "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
                     isActive
                       ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                   )
                 }
               >
@@ -117,7 +117,7 @@ export function Sidebar() {
                 "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
                 isActive
                   ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
               )
             }
           >
