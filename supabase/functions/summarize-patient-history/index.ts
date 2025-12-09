@@ -65,12 +65,20 @@ Your task is to analyze patient records and session history to provide:
 3. A list of CONDITIONS (diagnosed illnesses/diseases like diabetes, hypertension, asthma) with dates and status
 4. A list of MEDICATIONS mentioned with dates and whether currently in use
 5. A list of known ALLERGIES
+6. A list of MEDICATION CONFLICTS - any medications that may interact negatively with each other or with the patient's allergies
 
 IMPORTANT DEFINITIONS:
 - SYMPTOMS: Temporary or recurring physical/mental symptoms that come and go (headache, back pain, nausea, fatigue, dizziness, etc.)
 - CONDITIONS: Named medical diagnoses, diseases, or chronic illnesses (diabetes, hypertension, asthma, arthritis, depression, etc.)
 - MEDICATIONS: Any prescribed or discussed medications
 - ALLERGIES: Known drug or other allergies
+- CONFLICTS: Potential drug-drug interactions OR drug-allergy conflicts. Common conflicts include:
+  * NSAIDs (ibuprofen, aspirin) with blood thinners (warfarin)
+  * ACE inhibitors with potassium supplements
+  * SSRIs with MAOIs
+  * Medications containing substances the patient is allergic to
+  * Statins with certain antibiotics
+  * Opioids with benzodiazepines
 
 IMPORTANT FORMATTING RULES:
 - In the summary text, wrap ANY medication names with <med>medication name</med> tags
@@ -79,6 +87,7 @@ IMPORTANT FORMATTING RULES:
 - For each array item, include status: "active" if currently present/in-use, "inactive" if resolved/not-in-use
 - Extract dates from the session history provided
 - If no specific date is available, use "Date unknown"
+- ALWAYS check for medication conflicts, especially between currently active medications
 
 Example summary format:
 "The patient presented with <symptom>chronic back pain</symptom> in November 2024 and was diagnosed with <condition>lumbar disc herniation</condition>. They were prescribed <med>ibuprofen</med> for pain management..."
@@ -154,8 +163,22 @@ Respond in JSON format with the structure defined in the function parameters.`,
                     },
                     description: "List of known allergies",
                   },
+                  conflicts: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        medication1: { type: "string", description: "First medication or the medication causing conflict" },
+                        medication2: { type: "string", description: "Second medication that conflicts with the first, or omit if allergy-related" },
+                        reason: { type: "string", description: "Brief explanation of why these conflict (e.g., 'Increased bleeding risk', 'Patient allergic to penicillin derivatives')" },
+                        severity: { type: "string", enum: ["low", "moderate", "high"], description: "Risk severity level" },
+                      },
+                      required: ["medication1", "reason", "severity"],
+                    },
+                    description: "List of potential medication conflicts or drug-allergy interactions",
+                  },
                 },
-                required: ["summary", "symptoms", "conditions", "medications", "allergies"],
+                required: ["summary", "symptoms", "conditions", "medications", "allergies", "conflicts"],
                 additionalProperties: false,
               },
             },
@@ -204,7 +227,7 @@ Respond in JSON format with the structure defined in the function parameters.`,
         });
       } catch {
         return new Response(
-          JSON.stringify({ summary: content_response, symptoms: [], conditions: [], medications: [], allergies: [] }),
+          JSON.stringify({ summary: content_response, symptoms: [], conditions: [], medications: [], allergies: [], conflicts: [] }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
