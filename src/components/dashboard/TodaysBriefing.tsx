@@ -394,10 +394,10 @@ export function TodaysBriefing() {
 
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm">
-      <div className="border-b border-border p-5 flex items-center justify-between gap-2">
+      <div className="rounded-t-xl bg-primary p-5 flex items-center justify-between gap-2">
         <div>
-          <h3 className="text-lg font-semibold text-foreground">Today's Briefing</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="text-lg font-semibold text-primary-foreground">Today's Briefing</h3>
+          <p className="text-sm text-primary-foreground/80">
             {appointments.length} appointment{appointments.length !== 1 ? 's' : ''} with patient context
           </p>
         </div>

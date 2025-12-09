@@ -105,9 +105,9 @@ export function RecentActivity() {
 
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm">
-      <div className="border-b border-border p-5">
-        <h3 className="text-lg font-semibold text-foreground">Recent Activity</h3>
-        <p className="text-sm text-muted-foreground">Your latest actions</p>
+      <div className="rounded-t-xl bg-primary p-5">
+        <h3 className="text-lg font-semibold text-primary-foreground">Recent Activity</h3>
+        <p className="text-sm text-primary-foreground/80">Your latest actions</p>
       </div>
       <div className="p-4 space-y-4">
         {activities.map((activity) => {
