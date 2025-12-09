@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { BottomNav } from "./BottomNav";
+import { MobileHeader } from "./MobileHeader";
 import { PageTransition } from "./PageTransition";
 import { AnimatePresence } from "framer-motion";
 
@@ -9,6 +10,9 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Mobile header - hidden on desktop */}
+      <MobileHeader />
+      
       {/* Desktop sidebar - hidden on mobile */}
       <div className="hidden md:block">
         <Sidebar />
