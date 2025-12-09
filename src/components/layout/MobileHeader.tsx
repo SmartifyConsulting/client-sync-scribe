@@ -22,7 +22,7 @@ export function MobileHeader() {
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="p-0 w-72">
+        <SheetContent side="left" className="p-0 w-60">
           <Sidebar onNavigate={() => setOpen(false)} />
         </SheetContent>
       </Sheet>

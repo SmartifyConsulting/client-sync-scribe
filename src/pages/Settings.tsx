@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Calendar, Bell, Shield, Database, CheckCircle, Building2, Upload, Plus, Trash2, Users } from "lucide-react";
+import { User, Calendar, Bell, Shield, Database, CheckCircle, Building2, Upload, Plus, Trash2, Users, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const DOCTOR_SPECIALTIES = [
   "General Practitioner",
@@ -65,6 +66,7 @@ export default function Settings() {
   const [isConnecting, setIsConnecting] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [newPartner, setNewPartner] = useState({ full_name: "", registration_number: "", mobile_number: "" });
   const [isAddingPartner, setIsAddingPartner] = useState(false);
@@ -247,6 +249,73 @@ export default function Settings() {
     }
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    
+    const fileExt = file.name.split('.').pop();
+    const filePath = `${user.id}/avatar.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload profile picture",
+        variant: "destructive",
+      });
+      setIsUploadingAvatar(false);
+      return;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ avatar_url: `${publicUrl}?t=${Date.now()}` })
+      .eq('id', user.id);
+
+    setIsUploadingAvatar(false);
+
+    if (updateError) {
+      toast({
+        title: "Error",
+        description: "Failed to update profile picture",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Profile picture updated",
+        description: "Your profile picture has been changed",
+      });
+      window.location.reload();
+    }
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <div className="space-y-8 animate-fade-in max-w-3xl">
       {/* Header */}
@@ -263,6 +332,39 @@ export default function Settings() {
           <User className="h-5 w-5 text-primary" />
           <h2 className="text-lg font-semibold text-foreground">Profile</h2>
         </div>
+
+        {/* Profile Picture */}
+        <div className="flex items-center gap-6 mb-6">
+          <div className="relative group">
+            <Avatar className="h-20 w-20 border-2 border-border">
+              <AvatarImage src={(profile as any)?.avatar_url} alt={profile?.full_name || "Profile"} />
+              <AvatarFallback className="text-lg bg-primary/10 text-primary">
+                {profile?.full_name ? getInitials(profile.full_name) : "U"}
+              </AvatarFallback>
+            </Avatar>
+            <label 
+              htmlFor="avatar-upload"
+              className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+            >
+              <Camera className="h-6 w-6 text-white" />
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarUpload}
+              className="hidden"
+              id="avatar-upload"
+              disabled={isUploadingAvatar}
+            />
+          </div>
+          <div>
+            <p className="font-medium text-foreground">Profile Picture</p>
+            <p className="text-sm text-muted-foreground">
+              {isUploadingAvatar ? "Uploading..." : "Hover over image to change"}
+            </p>
+          </div>
+        </div>
+
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
