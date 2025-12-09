@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Mail,
@@ -12,15 +12,43 @@ import {
   Phone,
   Stethoscope,
   UserCircle,
+  Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+
+const DOCTOR_SPECIALTIES = [
+  "General Practitioner",
+  "Cardiologist",
+  "Dermatologist",
+  "Endocrinologist",
+  "Gastroenterologist",
+  "Neurologist",
+  "Oncologist",
+  "Ophthalmologist",
+  "Orthopaedics",
+  "Paediatrician",
+  "Psychiatrist",
+  "Pulmonologist",
+  "Radiologist",
+  "Rheumatologist",
+  "Urologist",
+  "Other",
+];
 
 interface PartnerInput {
   full_name: string;
@@ -53,6 +81,10 @@ export default function Auth() {
   const [practiceNumber, setPracticeNumber] = useState("");
   const [doctorNumber, setDoctorNumber] = useState("");
   const [practiceAddress, setPracticeAddress] = useState("");
+  const [specialty, setSpecialty] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [partners, setPartners] = useState<PartnerInput[]>([]);
   const [newPartner, setNewPartner] = useState<PartnerInput>({
     full_name: "",
@@ -106,6 +138,37 @@ export default function Auth() {
     setPartners(partners.filter((_, i) => i !== index));
   };
 
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadAvatar = async (userId: string): Promise<string | null> => {
+    if (!avatarFile) return null;
+    
+    const fileExt = avatarFile.name.split('.').pop();
+    const fileName = `${userId}/avatar.${fileExt}`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(fileName, avatarFile, { upsert: true });
+    
+    if (uploadError) {
+      console.error('Avatar upload error:', uploadError);
+      return null;
+    }
+    
+    const { data } = supabase.storage.from('avatars').getPublicUrl(fileName);
+    return data.publicUrl;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -133,6 +196,12 @@ export default function Auth() {
           }
 
           if (userRole === "doctor") {
+            // Upload avatar if provided
+            let avatarUrl: string | null = null;
+            if (avatarFile) {
+              avatarUrl = await uploadAvatar(data.user.id);
+            }
+
             // Update profile with doctor info
             const { error: profileError } = await supabase
               .from("profiles")
@@ -141,6 +210,8 @@ export default function Auth() {
                 practice_number: practiceNumber,
                 doctor_number: doctorNumber,
                 practice_address: practiceAddress,
+                specialty: specialty || null,
+                avatar_url: avatarUrl,
                 role: userRole,
               })
               .eq("id", data.user.id);
@@ -360,10 +431,61 @@ export default function Auth() {
                 {/* Doctor-specific fields */}
                 {userRole === "doctor" && (
                   <>
+                    {/* Profile Photo */}
+                    <div className="pt-4 border-t border-border">
+                      <h3 className="text-sm font-medium text-foreground mb-4">Profile Photo</h3>
+                      <div className="flex items-center gap-4">
+                        <Avatar className="h-20 w-20">
+                          <AvatarImage src={avatarPreview || undefined} />
+                          <AvatarFallback className="text-lg bg-muted">
+                            {fullName ? fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'DR'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <input
+                            type="file"
+                            ref={avatarInputRef}
+                            accept="image/*"
+                            onChange={handleAvatarChange}
+                            className="hidden"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => avatarInputRef.current?.click()}
+                            className="gap-2"
+                          >
+                            <Camera className="h-4 w-4" />
+                            {avatarPreview ? 'Change Photo' : 'Upload Photo'}
+                          </Button>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            JPG, PNG or GIF (max 2MB)
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="pt-4 border-t border-border">
                       <h3 className="text-sm font-medium text-foreground mb-4">Practice Information</h3>
 
                       <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="specialty">Specialty</Label>
+                          <Select value={specialty} onValueChange={setSpecialty}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select your specialty" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {DOCTOR_SPECIALTIES.map((spec) => (
+                                <SelectItem key={spec} value={spec}>
+                                  {spec}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-2">
                             <Label htmlFor="practiceNumber">Practice Number</Label>
