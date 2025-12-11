@@ -201,16 +201,16 @@ export default function Sessions() {
     }
   });
 
-  // Session timer
+  // Session timer - only counts when recording
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (sessionState === "active") {
+    if (isRecording) {
       interval = setInterval(() => {
         setSessionDuration(prev => prev + 1);
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [sessionState]);
+  }, [isRecording]);
 
   const formatDuration = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600);
