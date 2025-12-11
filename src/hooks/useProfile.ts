@@ -12,6 +12,7 @@ export interface Profile {
   avatar_url: string | null;
   role: 'doctor' | 'patient' | null;
   specialty: string | null;
+  mobile_number: string | null;
   created_at: string;
   updated_at: string;
 }

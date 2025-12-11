@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check } from "lucide-react";
+import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,23 @@ import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+const COUNTRY_CODES = [
+  { code: "+27", country: "South Africa", flag: "🇿🇦" },
+  { code: "+1", country: "USA/Canada", flag: "🇺🇸" },
+  { code: "+44", country: "United Kingdom", flag: "🇬🇧" },
+  { code: "+267", country: "Botswana", flag: "🇧🇼" },
+  { code: "+264", country: "Namibia", flag: "🇳🇦" },
+  { code: "+268", country: "Eswatini", flag: "🇸🇿" },
+  { code: "+266", country: "Lesotho", flag: "🇱🇸" },
+  { code: "+258", country: "Mozambique", flag: "🇲🇿" },
+  { code: "+263", country: "Zimbabwe", flag: "🇿🇼" },
+  { code: "+61", country: "Australia", flag: "🇦🇺" },
+  { code: "+91", country: "India", flag: "🇮🇳" },
+  { code: "+49", country: "Germany", flag: "🇩🇪" },
+  { code: "+33", country: "France", flag: "🇫🇷" },
+  { code: "+971", country: "UAE", flag: "🇦🇪" },
+];
 
 const DOCTOR_SPECIALTIES = [
   "General Practitioner",
@@ -99,16 +116,30 @@ export default function Profile() {
     doctor_number: "",
     practice_address: "",
     specialty: "",
+    mobile_number: "",
+    country_code: "+27",
   });
 
   useEffect(() => {
     if (profile) {
+      // Parse existing mobile number if it has a country code
+      let countryCode = "+27";
+      let mobileNumber = (profile as any).mobile_number || "";
+      
+      const matchedCode = COUNTRY_CODES.find(c => mobileNumber.startsWith(c.code));
+      if (matchedCode) {
+        countryCode = matchedCode.code;
+        mobileNumber = mobileNumber.replace(matchedCode.code, "").trim();
+      }
+      
       setFormData({
         full_name: profile.full_name || "",
         practice_number: profile.practice_number || "",
         doctor_number: profile.doctor_number || "",
         practice_address: profile.practice_address || "",
         specialty: (profile as any).specialty || "",
+        mobile_number: mobileNumber,
+        country_code: countryCode,
       });
     }
   }, [profile]);
@@ -341,7 +372,20 @@ export default function Profile() {
 
   const handleSaveProfile = async () => {
     setIsSaving(true);
-    const { error } = await updateProfile(formData);
+    
+    // Combine country code with mobile number
+    const fullMobileNumber = formData.mobile_number 
+      ? `${formData.country_code}${formData.mobile_number.replace(/^0+/, '')}` 
+      : "";
+    
+    const { error } = await updateProfile({
+      full_name: formData.full_name,
+      practice_number: formData.practice_number,
+      doctor_number: formData.doctor_number,
+      practice_address: formData.practice_address,
+      specialty: formData.specialty,
+      mobile_number: fullMobileNumber,
+    });
     setIsSaving(false);
 
     if (error) {
@@ -523,6 +567,39 @@ export default function Profile() {
               value={user?.email || ""} 
               disabled 
               className="bg-muted"
+            />
+          </div>
+        </div>
+
+        {/* Mobile Number with Country Code */}
+        <div className="mt-6 space-y-2">
+          <Label htmlFor="mobile">Mobile Number</Label>
+          <div className="flex gap-2">
+            <Select 
+              value={formData.country_code} 
+              onValueChange={(value) => setFormData({ ...formData, country_code: value })}
+            >
+              <SelectTrigger className="w-[140px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {COUNTRY_CODES.map((country) => (
+                  <SelectItem key={country.code} value={country.code}>
+                    <span className="flex items-center gap-2">
+                      <span>{country.flag}</span>
+                      <span>{country.code}</span>
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input 
+              id="mobile" 
+              type="tel"
+              value={formData.mobile_number}
+              onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value.replace(/[^0-9]/g, '') })}
+              placeholder="82 123 4567"
+              className="flex-1"
             />
           </div>
         </div>

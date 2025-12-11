@@ -575,6 +575,7 @@ export type Database = {
           id: string
           logo_url: string | null
           mailbox_id: string
+          mobile_number: string | null
           practice_address: string | null
           practice_number: string | null
           role: Database["public"]["Enums"]["user_role"] | null
@@ -589,6 +590,7 @@ export type Database = {
           id: string
           logo_url?: string | null
           mailbox_id?: string
+          mobile_number?: string | null
           practice_address?: string | null
           practice_number?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
@@ -603,6 +605,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           mailbox_id?: string
+          mobile_number?: string | null
           practice_address?: string | null
           practice_number?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
