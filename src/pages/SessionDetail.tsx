@@ -16,11 +16,13 @@ import {
   Receipt,
   FileText,
   FileBadge,
+  FileEdit,
 } from "lucide-react";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
 import { MedicalCertificateEditor } from "@/components/sessions/MedicalCertificateEditor";
 import { ReferralLetterEditor } from "@/components/sessions/ReferralLetterEditor";
+import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/useSessions";
 import {
@@ -47,6 +49,7 @@ export default function SessionDetail() {
   const [showInvoiceEditor, setShowInvoiceEditor] = useState(false);
   const [showMedicalCertificateEditor, setShowMedicalCertificateEditor] = useState(false);
   const [showReferralLetterEditor, setShowReferralLetterEditor] = useState(false);
+  const [showGeneralLetterEditor, setShowGeneralLetterEditor] = useState(false);
 
   const handleDelete = async () => {
     if (!id) return;
@@ -166,38 +169,46 @@ export default function SessionDetail() {
       {session.status === "completed" && session.patient && (
         <div className="rounded-xl border border-border bg-card p-6">
           <h2 className="font-semibold text-foreground mb-4">Quick Actions</h2>
-          <div className="flex flex-wrap gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
             <Button
               variant="outline"
-              className="gap-2"
+              className="gap-1.5 text-sm h-10 px-3"
               onClick={() => setShowPrescriptionEditor(true)}
             >
-              <Pill className="h-4 w-4" />
-              Create Prescription
+              <Pill className="h-4 w-4 shrink-0" />
+              <span className="truncate">Prescription</span>
             </Button>
             <Button
               variant="outline"
-              className="gap-2"
+              className="gap-1.5 text-sm h-10 px-3"
               onClick={() => setShowInvoiceEditor(true)}
             >
-              <Receipt className="h-4 w-4" />
-              Create Invoice
+              <Receipt className="h-4 w-4 shrink-0" />
+              <span className="truncate">Invoice</span>
             </Button>
             <Button
               variant="outline"
-              className="gap-2"
+              className="gap-1.5 text-sm h-10 px-3"
               onClick={() => setShowMedicalCertificateEditor(true)}
             >
-              <FileBadge className="h-4 w-4" />
-              Medical Certificate
+              <FileBadge className="h-4 w-4 shrink-0" />
+              <span className="truncate">Medical Certificate</span>
             </Button>
             <Button
               variant="outline"
-              className="gap-2"
+              className="gap-1.5 text-sm h-10 px-3"
               onClick={() => setShowReferralLetterEditor(true)}
             >
-              <FileText className="h-4 w-4" />
-              Referral Letter
+              <FileText className="h-4 w-4 shrink-0" />
+              <span className="truncate">Referral Letter</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="gap-1.5 text-sm h-10 px-3"
+              onClick={() => setShowGeneralLetterEditor(true)}
+            >
+              <FileEdit className="h-4 w-4 shrink-0" />
+              <span className="truncate">General Letter</span>
             </Button>
           </div>
         </div>
@@ -380,6 +391,22 @@ export default function SessionDetail() {
             toast({
               title: "Referral Letter created",
               description: "The referral letter has been saved.",
+            });
+          }}
+        />
+      )}
+
+      {/* General Letter Editor Modal */}
+      {showGeneralLetterEditor && session.patient && (
+        <GeneralLetterEditor
+          patientId={session.patient_id}
+          patientName={session.patient.name}
+          sessionId={id}
+          onClose={() => setShowGeneralLetterEditor(false)}
+          onSave={() => {
+            toast({
+              title: "General Letter created",
+              description: "The letter has been saved.",
             });
           }}
         />
