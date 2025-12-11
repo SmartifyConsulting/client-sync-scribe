@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Upload, X, Eye, EyeOff, Move } from "lucide-react";
+import { Upload, X, Eye, EyeOff, Move, Bold, Italic, Underline } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { Toggle } from "@/components/ui/toggle";
 import {
   Select,
   SelectContent,
@@ -56,12 +57,52 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
   const [showPreview, setShowPreview] = useState(false);
   const [isDraggingLogo, setIsDraggingLogo] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLTextAreaElement>(null);
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
     description: initialData?.description || "",
     category: initialData?.category || "",
     content: initialData?.content || "",
   });
+
+  // Text formatting functions
+  const applyFormatting = (format: 'bold' | 'italic' | 'underline') => {
+    const textarea = contentRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = formData.content.substring(start, end);
+    
+    if (start === end) return; // No selection
+
+    let wrappedText = '';
+    switch (format) {
+      case 'bold':
+        wrappedText = `**${selectedText}**`;
+        break;
+      case 'italic':
+        wrappedText = `*${selectedText}*`;
+        break;
+      case 'underline':
+        wrappedText = `__${selectedText}__`;
+        break;
+    }
+
+    const newContent = 
+      formData.content.substring(0, start) + 
+      wrappedText + 
+      formData.content.substring(end);
+    
+    setFormData({ ...formData, content: newContent });
+
+    // Restore cursor position after update
+    setTimeout(() => {
+      textarea.focus();
+      const newCursorPos = start + wrappedText.length;
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
+  };
 
   useEffect(() => {
     if (initialData) {
@@ -493,7 +534,38 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
         <p className="text-xs text-muted-foreground mb-2">
           Use [PlaceholderName] for dynamic fields. Available: [PatientName], [PracticeNumber], [DoctorNumber], [PracticeAddress], [DoctorName]
         </p>
+        {/* Formatting Toolbar */}
+        <div className="flex items-center gap-1 mb-2 p-1 border border-border rounded-md bg-muted/30 w-fit">
+          <Toggle
+            size="sm"
+            aria-label="Bold"
+            onClick={() => applyFormatting('bold')}
+            className="h-8 w-8 p-0"
+          >
+            <Bold className="h-4 w-4" />
+          </Toggle>
+          <Toggle
+            size="sm"
+            aria-label="Italic"
+            onClick={() => applyFormatting('italic')}
+            className="h-8 w-8 p-0"
+          >
+            <Italic className="h-4 w-4" />
+          </Toggle>
+          <Toggle
+            size="sm"
+            aria-label="Underline"
+            onClick={() => applyFormatting('underline')}
+            className="h-8 w-8 p-0"
+          >
+            <Underline className="h-4 w-4" />
+          </Toggle>
+          <span className="text-xs text-muted-foreground ml-2 px-2 border-l border-border">
+            Select text, then click to format
+          </span>
+        </div>
         <Textarea
+          ref={contentRef}
           placeholder={`Example template:\n\nLETTERHEAD\n==========\nPractice Number: [PracticeNumber]\nDoctor Number: [DoctorNumber]\n\nDear [PatientName],\n\nYour content here...`}
           value={formData.content}
           onChange={(e) => setFormData({ ...formData, content: e.target.value })}
