@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
-import { Upload, X } from "lucide-react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { Upload, X, Eye, EyeOff, Move } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,6 +53,9 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
   const [logoPosition, setLogoPosition] = useState(initialData?.logoPosition || { x: 50, y: 10 });
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFont, setSelectedFont] = useState(initialData?.fontFamily || "sans");
+  const [showPreview, setShowPreview] = useState(false);
+  const [isDraggingLogo, setIsDraggingLogo] = useState(false);
+  const previewRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
     description: initialData?.description || "",
@@ -176,6 +179,37 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
     setLogoPreview(null);
   };
 
+  // Logo drag handlers for positioning
+  const handleLogoMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDraggingLogo(true);
+  };
+
+  const handleLogoMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDraggingLogo || !previewRef.current) return;
+    
+    const rect = previewRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+    
+    setLogoPosition({ x: Math.round(x), y: Math.round(y) });
+  }, [isDraggingLogo]);
+
+  const handleLogoMouseUp = useCallback(() => {
+    setIsDraggingLogo(false);
+  }, []);
+
+  useEffect(() => {
+    if (isDraggingLogo) {
+      window.addEventListener('mousemove', handleLogoMouseMove);
+      window.addEventListener('mouseup', handleLogoMouseUp);
+      return () => {
+        window.removeEventListener('mousemove', handleLogoMouseMove);
+        window.removeEventListener('mouseup', handleLogoMouseUp);
+      };
+    }
+  }, [isDraggingLogo, handleLogoMouseMove, handleLogoMouseUp]);
+
   const handleSubmit = () => {
     if (!formData.name.trim() || !formData.content.trim()) {
       toast({
@@ -199,8 +233,80 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
     return FONT_OPTIONS.find(f => f.value === fontValue)?.preview || "font-sans";
   };
 
+  const replacePlaceholders = (content: string) => {
+    return content
+      .replace(/\[PracticeNumber\]/g, profile?.practice_number || "[PracticeNumber]")
+      .replace(/\[DoctorNumber\]/g, profile?.doctor_number || "[DoctorNumber]")
+      .replace(/\[PracticeAddress\]/g, (profile as any)?.practice_address || "[PracticeAddress]")
+      .replace(/\[DoctorName\]/g, profile?.full_name || "[DoctorName]");
+  };
+
   return (
     <div className="space-y-6">
+      {/* Preview Toggle */}
+      <div className="flex items-center justify-between">
+        <h4 className="text-sm font-medium text-foreground">Template Editor</h4>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowPreview(!showPreview)}
+          className="gap-2"
+        >
+          {showPreview ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          {showPreview ? "Hide Preview" : "Show Preview"}
+        </Button>
+      </div>
+
+      {/* Live Preview Panel */}
+      {showPreview && (
+        <div className="border border-border rounded-lg overflow-hidden bg-white">
+          <div className="bg-muted/50 px-4 py-2 border-b border-border flex items-center justify-between">
+            <span className="text-sm font-medium text-foreground">Live Preview</span>
+            {logoPreview && (
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <Move className="h-3 w-3" />
+                Drag logo to reposition
+              </span>
+            )}
+          </div>
+          <div 
+            ref={previewRef}
+            className="p-8 min-h-[300px] relative bg-white"
+            style={{ cursor: isDraggingLogo ? 'grabbing' : 'default' }}
+          >
+            {/* Draggable Logo */}
+            {logoPreview && (
+              <div
+                className={`absolute cursor-grab ${isDraggingLogo ? 'cursor-grabbing' : ''}`}
+                style={{
+                  left: `${logoPosition.x}%`,
+                  top: `${logoPosition.y}%`,
+                  transform: 'translate(-50%, -50%)',
+                }}
+                onMouseDown={handleLogoMouseDown}
+              >
+                <div className="relative group">
+                  <img
+                    src={logoPreview}
+                    alt="Logo"
+                    className="max-h-16 max-w-[150px] object-contain pointer-events-none"
+                    draggable={false}
+                  />
+                  <div className="absolute inset-0 border-2 border-dashed border-primary/50 rounded opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              </div>
+            )}
+            
+            {/* Content Preview */}
+            <div className={`${logoPreview ? 'mt-20' : ''} ${getFontClass(selectedFont)}`}>
+              <pre className="whitespace-pre-wrap text-sm text-gray-800 font-inherit">
+                {replacePlaceholders(formData.content) || "Your template content will appear here..."}
+              </pre>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Doctor Information Display */}
       <div className="p-4 rounded-lg bg-muted/50 border border-border">
         <h4 className="text-sm font-medium text-foreground mb-3">Doctor Information</h4>
@@ -280,6 +386,9 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
               </div>
               <div className="flex-1">
                 <p className="text-sm text-foreground font-medium">Logo Position</p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Use the preview panel above to drag and position your logo, or enter values manually.
+                </p>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   <div>
                     <label className="text-xs text-muted-foreground">X Position (%)</label>
@@ -382,10 +491,10 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
       <div>
         <label className="text-sm font-medium text-foreground">Content *</label>
         <p className="text-xs text-muted-foreground mb-2">
-          Use [PlaceholderName] for dynamic fields. Available: [ClientName], [SessionDate], [PracticeNumber], [DoctorNumber]
+          Use [PlaceholderName] for dynamic fields. Available: [PatientName], [PracticeNumber], [DoctorNumber], [PracticeAddress], [DoctorName]
         </p>
         <Textarea
-          placeholder={`Example template:\n\nLETTERHEAD\n==========\nPractice Number: [PracticeNumber]\nDoctor Number: [DoctorNumber]\n\nDear [ClientName],\n\nYour content here...`}
+          placeholder={`Example template:\n\nLETTERHEAD\n==========\nPractice Number: [PracticeNumber]\nDoctor Number: [DoctorNumber]\n\nDear [PatientName],\n\nYour content here...`}
           value={formData.content}
           onChange={(e) => setFormData({ ...formData, content: e.target.value })}
           rows={10}
