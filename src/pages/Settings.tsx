@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Calendar, Bell, Shield, Database, CheckCircle, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, ShieldCheck, ShieldOff } from "lucide-react";
+import { User, Calendar, Bell, Shield, Database, CheckCircle, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, ShieldCheck, ShieldOff, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -51,11 +51,29 @@ const DOCTOR_SPECIALTIES = [
   "Vascular Surgeon",
 ];
 
+const CURRENCIES = [
+  { code: "ZAR", symbol: "R", name: "South African Rand" },
+  { code: "USD", symbol: "$", name: "US Dollar" },
+  { code: "EUR", symbol: "€", name: "Euro" },
+  { code: "GBP", symbol: "£", name: "British Pound" },
+  { code: "BWP", symbol: "P", name: "Botswana Pula" },
+  { code: "NAD", symbol: "N$", name: "Namibian Dollar" },
+  { code: "SZL", symbol: "E", name: "Swazi Lilangeni" },
+  { code: "LSL", symbol: "M", name: "Lesotho Loti" },
+];
+
 interface Partner {
   id: string;
   full_name: string;
   registration_number: string;
   mobile_number: string;
+}
+
+interface ServicePrice {
+  id: string;
+  service_name: string;
+  default_price: number;
+  currency: string;
 }
 
 export default function Settings() {
@@ -75,6 +93,12 @@ export default function Settings() {
   const [mfaFactors, setMfaFactors] = useState<any[]>([]);
   const [loadingMfa, setLoadingMfa] = useState(true);
   const [disablingMfa, setDisablingMfa] = useState(false);
+  
+  // Pricing state
+  const [servicePrices, setServicePrices] = useState<ServicePrice[]>([]);
+  const [newService, setNewService] = useState({ service_name: "", default_price: "", currency: "ZAR" });
+  const [isAddingService, setIsAddingService] = useState(false);
+  const [selectedCurrency, setSelectedCurrency] = useState("ZAR");
   
   const [formData, setFormData] = useState({
     full_name: "",
@@ -100,8 +124,108 @@ export default function Settings() {
     if (user) {
       fetchPartners();
       fetchMfaFactors();
+      fetchServicePrices();
     }
   }, [user]);
+
+  const fetchServicePrices = async () => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from('service_prices')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: true });
+    
+    if (!error && data) {
+      setServicePrices(data);
+      // Set currency from first service if exists
+      if (data.length > 0) {
+        setSelectedCurrency(data[0].currency);
+        setNewService(prev => ({ ...prev, currency: data[0].currency }));
+      }
+    }
+  };
+
+  const addServicePrice = async () => {
+    if (!user || !newService.service_name.trim() || !newService.default_price) {
+      toast({
+        title: "Missing fields",
+        description: "Service name and price are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsAddingService(true);
+    const { data, error } = await supabase
+      .from('service_prices')
+      .insert({
+        user_id: user.id,
+        service_name: newService.service_name,
+        default_price: parseFloat(newService.default_price),
+        currency: selectedCurrency,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add service",
+        variant: "destructive",
+      });
+    } else {
+      setServicePrices([...servicePrices, data]);
+      setNewService({ service_name: "", default_price: "", currency: selectedCurrency });
+      toast({
+        title: "Service added",
+        description: `${newService.service_name} has been added`,
+      });
+    }
+    setIsAddingService(false);
+  };
+
+  const removeServicePrice = async (id: string) => {
+    const { error } = await supabase
+      .from('service_prices')
+      .delete()
+      .eq('id', id);
+
+    if (!error) {
+      setServicePrices(servicePrices.filter(s => s.id !== id));
+      toast({
+        title: "Service removed",
+        description: "Service has been removed from your pricing list",
+      });
+    }
+  };
+
+  const updateAllServicesCurrency = async (newCurrency: string) => {
+    if (!user || servicePrices.length === 0) {
+      setSelectedCurrency(newCurrency);
+      setNewService(prev => ({ ...prev, currency: newCurrency }));
+      return;
+    }
+
+    const { error } = await supabase
+      .from('service_prices')
+      .update({ currency: newCurrency })
+      .eq('user_id', user.id);
+
+    if (!error) {
+      setServicePrices(servicePrices.map(s => ({ ...s, currency: newCurrency })));
+      setSelectedCurrency(newCurrency);
+      setNewService(prev => ({ ...prev, currency: newCurrency }));
+      toast({
+        title: "Currency updated",
+        description: `All services updated to ${newCurrency}`,
+      });
+    }
+  };
+
+  const getCurrencySymbol = (code: string) => {
+    return CURRENCIES.find(c => c.code === code)?.symbol || code;
+  };
 
   const fetchMfaFactors = async () => {
     setLoadingMfa(true);
@@ -603,6 +727,98 @@ export default function Settings() {
           <Button onClick={addPartner} disabled={isAddingPartner} className="gap-2">
             <Plus className="h-4 w-4" />
             {isAddingPartner ? "Adding..." : "Add Partner"}
+          </Button>
+        </div>
+      </div>
+
+      {/* Pricing */}
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+        <div className="flex items-center gap-3 mb-6">
+          <DollarSign className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">Pricing</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mb-6">
+          Define your service types and default prices. These will appear when creating invoices.
+        </p>
+
+        {/* Currency Selection */}
+        <div className="mb-6">
+          <Label htmlFor="currency">Currency</Label>
+          <Select value={selectedCurrency} onValueChange={updateAllServicesCurrency}>
+            <SelectTrigger id="currency" className="w-[280px] mt-2">
+              <SelectValue placeholder="Select currency" />
+            </SelectTrigger>
+            <SelectContent>
+              {CURRENCIES.map((currency) => (
+                <SelectItem key={currency.code} value={currency.code}>
+                  {currency.symbol} - {currency.name} ({currency.code})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Existing Services */}
+        {servicePrices.length > 0 && (
+          <div className="space-y-3 mb-6">
+            {servicePrices.map((service) => (
+              <div key={service.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
+                <div className="flex items-center gap-4">
+                  <div>
+                    <p className="font-medium text-foreground">{service.service_name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Default: {getCurrencySymbol(service.currency)} {Number(service.default_price).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => removeServicePrice(service.id)}
+                  className="h-8 w-8 text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Add New Service */}
+        <div className="space-y-4 p-4 border border-dashed border-border rounded-lg">
+          <p className="text-sm font-medium text-foreground">Add New Service</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="service_name">Service Name *</Label>
+              <Input 
+                id="service_name" 
+                value={newService.service_name}
+                onChange={(e) => setNewService({ ...newService, service_name: e.target.value })}
+                placeholder="e.g., Consultation, Follow-up, Procedure"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="service_price">Default Price ({getCurrencySymbol(selectedCurrency)}) *</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  {getCurrencySymbol(selectedCurrency)}
+                </span>
+                <Input 
+                  id="service_price" 
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={newService.default_price}
+                  onChange={(e) => setNewService({ ...newService, default_price: e.target.value })}
+                  placeholder="0.00"
+                  className="pl-8"
+                />
+              </div>
+            </div>
+          </div>
+          <Button onClick={addServicePrice} disabled={isAddingService} className="gap-2">
+            <Plus className="h-4 w-4" />
+            {isAddingService ? "Adding..." : "Add Service"}
           </Button>
         </div>
       </div>

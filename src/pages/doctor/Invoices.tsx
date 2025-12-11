@@ -79,6 +79,13 @@ interface Patient {
   name: string;
 }
 
+interface ServicePrice {
+  id: string;
+  service_name: string;
+  default_price: number;
+  currency: string;
+}
+
 interface Invoice {
   id: string;
   invoice_number: string;
@@ -95,6 +102,17 @@ interface Invoice {
 }
 
 type StatusFilter = "all" | "issued" | "paid" | "overdue" | "issued_overdue" | "archived";
+
+const CURRENCIES = [
+  { code: "ZAR", symbol: "R" },
+  { code: "USD", symbol: "$" },
+  { code: "EUR", symbol: "€" },
+  { code: "GBP", symbol: "£" },
+  { code: "BWP", symbol: "P" },
+  { code: "NAD", symbol: "N$" },
+  { code: "SZL", symbol: "E" },
+  { code: "LSL", symbol: "M" },
+];
 
 function getInvoiceStatus(invoice: Invoice): "issued" | "paid" | "overdue" | "archived" {
   if (invoice.status === "archived") {
@@ -172,6 +190,10 @@ export default function DoctorInvoices() {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [patientSelectorOpen, setPatientSelectorOpen] = useState(false);
   const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
+  const [servicePrices, setServicePrices] = useState<ServicePrice[]>([]);
+  const [selectedService, setSelectedService] = useState<ServicePrice | null>(null);
+  const [serviceSelectorOpen, setServiceSelectorOpen] = useState(false);
+  const [invoiceCurrency, setInvoiceCurrency] = useState("ZAR");
   const [newInvoiceForm, setNewInvoiceForm] = useState({
     description: "",
     amount: "",
@@ -181,7 +203,30 @@ export default function DoctorInvoices() {
   useEffect(() => {
     fetchInvoices();
     fetchPatients();
+    fetchServicePrices();
   }, []);
+
+  const fetchServicePrices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('service_prices')
+        .select('*')
+        .order('service_name');
+      
+      if (error) throw error;
+      setServicePrices(data || []);
+      // Set default currency if services exist
+      if (data && data.length > 0) {
+        setInvoiceCurrency(data[0].currency);
+      }
+    } catch (error) {
+      console.error("Error fetching service prices:", error);
+    }
+  };
+
+  const getCurrencySymbol = (code: string) => {
+    return CURRENCIES.find(c => c.code === code)?.symbol || code;
+  };
 
   const fetchPatients = async () => {
     try {
@@ -705,6 +750,7 @@ export default function DoctorInvoices() {
       // Reset form
       setShowCreateDialog(false);
       setSelectedPatient(null);
+      setSelectedService(null);
       setNewInvoiceForm({
         description: "",
         amount: "",
@@ -818,6 +864,75 @@ export default function DoctorInvoices() {
                   </Popover>
                 </div>
 
+                {/* Service Selector */}
+                {servicePrices.length > 0 && (
+                  <div className="space-y-2">
+                    <Label>Service (Optional)</Label>
+                    <Popover open={serviceSelectorOpen} onOpenChange={setServiceSelectorOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={serviceSelectorOpen}
+                          className="w-full justify-between"
+                        >
+                          {selectedService ? (
+                            <span className="flex items-center gap-2">
+                              <DollarSign className="h-4 w-4 text-muted-foreground" />
+                              {selectedService.service_name} - {getCurrencySymbol(selectedService.currency)} {Number(selectedService.default_price).toFixed(2)}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">Select a service...</span>
+                          )}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[400px] p-0" align="start">
+                        <Command>
+                          <CommandInput placeholder="Search services..." />
+                          <CommandList>
+                            <CommandEmpty>No service found.</CommandEmpty>
+                            <CommandGroup>
+                              {servicePrices.map((service) => (
+                                <CommandItem
+                                  key={service.id}
+                                  value={service.service_name}
+                                  onSelect={() => {
+                                    setSelectedService(service);
+                                    setServiceSelectorOpen(false);
+                                    setInvoiceCurrency(service.currency);
+                                    setNewInvoiceForm(prev => ({
+                                      ...prev,
+                                      description: service.service_name,
+                                      amount: String(service.default_price),
+                                    }));
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      selectedService?.id === service.id ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  <div className="flex justify-between w-full">
+                                    <span>{service.service_name}</span>
+                                    <span className="text-muted-foreground">
+                                      {getCurrencySymbol(service.currency)} {Number(service.default_price).toFixed(2)}
+                                    </span>
+                                  </div>
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    <p className="text-xs text-muted-foreground">
+                      Select a service to auto-fill description and amount. You can override the price below.
+                    </p>
+                  </div>
+                )}
+
                 {/* Description */}
                 <div className="space-y-2">
                   <Label htmlFor="new-description">Description</Label>
@@ -833,9 +948,11 @@ export default function DoctorInvoices() {
                 {/* Amount and Due Date */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="new-amount">Amount (R)</Label>
+                    <Label htmlFor="new-amount">Amount ({getCurrencySymbol(invoiceCurrency)})</Label>
                     <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                        {getCurrencySymbol(invoiceCurrency)}
+                      </span>
                       <Input
                         id="new-amount"
                         type="number"
@@ -844,7 +961,7 @@ export default function DoctorInvoices() {
                         value={newInvoiceForm.amount}
                         onChange={(e) => setNewInvoiceForm(prev => ({ ...prev, amount: e.target.value }))}
                         placeholder="0.00"
-                        className="pl-9"
+                        className="pl-8"
                       />
                     </div>
                   </div>
@@ -868,6 +985,7 @@ export default function DoctorInvoices() {
                   onClick={() => {
                     setShowCreateDialog(false);
                     setSelectedPatient(null);
+                    setSelectedService(null);
                     setNewInvoiceForm({
                       description: "",
                       amount: "",
