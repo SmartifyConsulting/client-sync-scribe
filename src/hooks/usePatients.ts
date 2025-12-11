@@ -181,7 +181,25 @@ export function usePatient(id: string) {
         .maybeSingle();
 
       if (error) throw error;
-      setPatient(data);
+      
+      // Fetch last visit from sessions
+      if (data) {
+        const { data: sessionData } = await supabase
+          .from('sessions')
+          .select('started_at')
+          .eq('patient_id', id)
+          .eq('status', 'completed')
+          .order('started_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        setPatient({
+          ...data,
+          last_visit: sessionData?.started_at || null,
+        });
+      } else {
+        setPatient(data);
+      }
     } catch (error: any) {
       console.error('Error fetching patient:', error);
       toast({

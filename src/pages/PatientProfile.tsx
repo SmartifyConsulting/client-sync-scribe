@@ -244,14 +244,14 @@ export default function PatientProfile() {
 
       {/* Tabs */}
       <Tabs defaultValue="details" className="space-y-6">
-        <TabsList className="bg-primary p-1.5 rounded-xl h-auto flex-wrap">
-          <TabsTrigger value="details" className="rounded-lg px-4 py-2.5 text-primary-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Details</TabsTrigger>
-          <TabsTrigger value="overview" className="rounded-lg px-4 py-2.5 text-primary-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Overview</TabsTrigger>
-          <TabsTrigger value="sessions" className="rounded-lg px-4 py-2.5 text-primary-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Session History</TabsTrigger>
-          <TabsTrigger value="doctors" className="rounded-lg px-4 py-2.5 text-primary-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Doctors</TabsTrigger>
-          <TabsTrigger value="documents" className="rounded-lg px-4 py-2.5 text-primary-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Documents</TabsTrigger>
-          <TabsTrigger value="notes" className="rounded-lg px-4 py-2.5 text-primary-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">Notes</TabsTrigger>
-          <TabsTrigger value="roundtable" className="rounded-lg px-4 py-2.5 gap-1.5 text-primary-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+        <TabsList className="bg-primary/90 p-1.5 rounded-xl h-auto flex-wrap">
+          <TabsTrigger value="details" className="rounded-lg px-4 py-2.5 text-white/90 hover:text-white data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Details</TabsTrigger>
+          <TabsTrigger value="overview" className="rounded-lg px-4 py-2.5 text-white/90 hover:text-white data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Overview</TabsTrigger>
+          <TabsTrigger value="sessions" className="rounded-lg px-4 py-2.5 text-white/90 hover:text-white data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Session History</TabsTrigger>
+          <TabsTrigger value="doctors" className="rounded-lg px-4 py-2.5 text-white/90 hover:text-white data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Doctors</TabsTrigger>
+          <TabsTrigger value="documents" className="rounded-lg px-4 py-2.5 text-white/90 hover:text-white data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Documents</TabsTrigger>
+          <TabsTrigger value="notes" className="rounded-lg px-4 py-2.5 text-white/90 hover:text-white data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Notes</TabsTrigger>
+          <TabsTrigger value="roundtable" className="rounded-lg px-4 py-2.5 gap-1.5 text-white/90 hover:text-white data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
             Round Table
             {unreadRoundTableCount > 0 && (
               <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
