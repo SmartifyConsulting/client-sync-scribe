@@ -22,6 +22,8 @@ import {
   ChevronsUpDown,
   Check,
   Search,
+  Brain,
+  ShieldAlert,
 } from "lucide-react";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
@@ -69,6 +71,9 @@ export default function Sessions() {
   const [invoice, setInvoice] = useState<{ id: string; invoice_number: string; amount: number } | null>(null);
   const [currentMedications, setCurrentMedications] = useState<{ medication: string; dosage: string; frequency: string }[]>([]);
   const [patientSelectorOpen, setPatientSelectorOpen] = useState(false);
+  const [aiDiagnosis, setAiDiagnosis] = useState<string | null>(null);
+  const [isGeneratingDiagnosis, setIsGeneratingDiagnosis] = useState(false);
+  const [pastPatientSessions, setPastPatientSessions] = useState<any[]>([]);
   const pendingCompletionRef = useRef(false);
   const latestTranscriptRef = useRef<string>("");
   const currentSessionIdRef = useRef<string | null>(null);
@@ -104,6 +109,78 @@ export default function Sessions() {
     
     fetchActivePrescriptions();
   }, [patientId]);
+
+  // Fetch past sessions for patient (for AI clinician context)
+  useEffect(() => {
+    const fetchPastSessions = async () => {
+      if (!patientId) return;
+      
+      const { data, error } = await supabase
+        .from('sessions')
+        .select('id, summary, started_at, status')
+        .eq('patient_id', patientId)
+        .eq('status', 'completed')
+        .order('started_at', { ascending: false })
+        .limit(10);
+      
+      if (!error && data) {
+        setPastPatientSessions(data.map(s => ({
+          date: format(new Date(s.started_at), 'MMM d, yyyy'),
+          summary: s.summary
+        })));
+      }
+    };
+    
+    fetchPastSessions();
+  }, [patientId]);
+
+  // Generate AI Clinician Diagnosis
+  const generateAIDiagnosis = async () => {
+    if (!currentPatient || !summary) return;
+    
+    setIsGeneratingDiagnosis(true);
+    setAiDiagnosis(null);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-clinician-diagnosis', {
+        body: {
+          sessionSummary: summary,
+          sessionTranscript: transcript,
+          patientName: currentPatient.name,
+          patientAge: currentPatient.dob ? calculateAge(currentPatient.dob) : null,
+          allergies: currentPatient.allergies,
+          currentMedications: currentMedications,
+          pastSessions: pastPatientSessions,
+          conditions: currentPatient.notes // Using notes field for conditions
+        }
+      });
+      
+      if (error) throw error;
+      
+      if (data?.recommendation) {
+        setAiDiagnosis(data.recommendation);
+      } else if (data?.error) {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      console.error('Error generating AI diagnosis:', error);
+      setAiDiagnosis('Failed to generate diagnostic recommendation. Please try again.');
+    } finally {
+      setIsGeneratingDiagnosis(false);
+    }
+  };
+
+  // Helper to calculate age from DOB
+  const calculateAge = (dob: string): number => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
 
   // Keep refs in sync with state
   useEffect(() => {
@@ -227,6 +304,7 @@ export default function Sessions() {
     setSessionDuration(0);
     setPrescription(null);
     setInvoice(null);
+    setAiDiagnosis(null);
     clearTranscript();
     
     if (patientId) {
@@ -709,6 +787,58 @@ export default function Sessions() {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* AI Clinician Decision Support */}
+          <div className="rounded-xl border border-primary/30 bg-card p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <Brain className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground">AI Clinician</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Get AI-powered diagnostic recommendations based on patient history
+                  </p>
+                </div>
+              </div>
+              <Button 
+                variant={aiDiagnosis ? "secondary" : "default"}
+                className="gap-2" 
+                onClick={generateAIDiagnosis}
+                disabled={isGeneratingDiagnosis || !summary}
+              >
+                {isGeneratingDiagnosis ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Brain className="h-4 w-4" />
+                    {aiDiagnosis ? "Regenerate" : "Generate Analysis"}
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {/* Disclaimer Banner */}
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-4">
+              <ShieldAlert className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+              <p className="text-xs text-amber-700">
+                <strong>For Clinical Decision Support Only:</strong> This AI analysis is confidential and intended to assist physician judgment. 
+                It is not a diagnosis and should not be shared with patients. Always apply clinical expertise.
+              </p>
+            </div>
+
+            {aiDiagnosis && (
+              <div className="mt-4 p-4 rounded-lg bg-muted/50 border border-border max-h-[400px] overflow-y-auto">
+                <pre className="text-sm text-foreground whitespace-pre-wrap font-sans leading-relaxed">
+                  {aiDiagnosis}
+                </pre>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-3">

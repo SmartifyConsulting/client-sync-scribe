@@ -32,3 +32,6 @@ verify_jwt = true
 
 [functions.check-medication-conflicts]
 verify_jwt = true
+
+[functions.ai-clinician-diagnosis]
+verify_jwt = true
