@@ -153,38 +153,38 @@ export default function PatientProfile() {
       </Link>
 
       {/* Header Card */}
-      <div className="rounded-2xl bg-card p-6 shadow-card">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-5">
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10 text-3xl font-bold text-primary shadow-sm">
+      <div className="rounded-2xl bg-card p-5 shadow-card">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-xl font-bold text-primary">
               {initials}
             </div>
-            <div className="space-y-1">
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">{patient.name}</h1>
-              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-foreground">{patient.name}</h1>
+              <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mt-1">
                 {patient.email && (
-                  <span className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-full">
-                    <Mail className="h-4 w-4 text-primary/70" />
+                  <span className="flex items-center gap-1.5">
+                    <Mail className="h-3.5 w-3.5 text-primary/70" />
                     {patient.email}
                   </span>
                 )}
                 {patient.phone && (
-                  <span className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-full">
-                    <Phone className="h-4 w-4 text-primary/70" />
+                  <span className="flex items-center gap-1.5">
+                    <Phone className="h-3.5 w-3.5 text-primary/70" />
                     {patient.phone}
                   </span>
                 )}
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex items-center gap-2">
             <InvitePatientDialog patientId={patient.id} patientName={patient.name} />
-            <Button variant="outline" className="gap-2 h-11" onClick={handleScheduleAppointment}>
-              <Calendar className="h-4 w-4" />
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={handleScheduleAppointment}>
+              <Calendar className="h-3.5 w-3.5" />
               Schedule
             </Button>
-            <Button className="gap-2 h-11" onClick={handleStartSession}>
-              <Clock className="h-4 w-4" />
+            <Button size="sm" className="gap-1.5" onClick={handleStartSession}>
+              <Clock className="h-3.5 w-3.5" />
               Start Session
             </Button>
           </div>
@@ -192,51 +192,43 @@ export default function PatientProfile() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="group rounded-2xl bg-card p-5 shadow-card hover:shadow-card-hover transition-all duration-300">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-xl bg-card p-4 shadow-sm border border-border/50">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-muted-foreground">Total Sessions</p>
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center transition-transform group-hover:scale-105">
-              <FileText className="h-5 w-5 text-primary" />
-            </div>
+            <p className="text-xs font-medium text-muted-foreground">Total Sessions</p>
+            <FileText className="h-4 w-4 text-primary" />
           </div>
-          <p className="mt-3 text-3xl font-bold text-foreground">
+          <p className="mt-2 text-2xl font-bold text-foreground">
             {completedSessions.length}
           </p>
         </div>
-        <div className="group rounded-2xl bg-card p-5 shadow-card hover:shadow-card-hover transition-all duration-300">
+        <div className="rounded-xl bg-card p-4 shadow-sm border border-border/50">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-muted-foreground">Status</p>
-            <div className={`h-10 w-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 ${patient.status === 'active' ? 'bg-green-500/10' : 'bg-muted'}`}>
-              <div className={`h-3 w-3 rounded-full ${patient.status === 'active' ? 'bg-green-500' : 'bg-muted-foreground'}`} />
-            </div>
+            <p className="text-xs font-medium text-muted-foreground">Status</p>
+            <div className={`h-2.5 w-2.5 rounded-full ${patient.status === 'active' ? 'bg-green-500' : 'bg-muted-foreground'}`} />
           </div>
-          <p className="mt-3 text-3xl font-bold text-foreground capitalize">
+          <p className="mt-2 text-2xl font-bold text-foreground capitalize">
             {patient.status}
           </p>
         </div>
-        <div className="group rounded-2xl bg-card p-5 shadow-card hover:shadow-card-hover transition-all duration-300">
+        <div className="rounded-xl bg-card p-4 shadow-sm border border-border/50">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-muted-foreground">Last Seen On</p>
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center transition-transform group-hover:scale-105">
-              <Clock className="h-5 w-5 text-primary" />
-            </div>
+            <p className="text-xs font-medium text-muted-foreground">Last Seen On</p>
+            <Clock className="h-4 w-4 text-primary" />
           </div>
-          <p className="mt-3 text-3xl font-bold text-foreground">
+          <p className="mt-2 text-2xl font-bold text-foreground">
             {patient.last_visit 
               ? format(new Date(patient.last_visit), "MMM d, yyyy")
-              : <span className="text-muted-foreground text-xl font-medium">No visits</span>
+              : <span className="text-muted-foreground text-base font-medium">No visits</span>
             }
           </p>
         </div>
-        <div className="group rounded-2xl bg-card p-5 shadow-card hover:shadow-card-hover transition-all duration-300">
+        <div className="rounded-xl bg-card p-4 shadow-sm border border-border/50">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-muted-foreground">Patient Since</p>
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center transition-transform group-hover:scale-105">
-              <Calendar className="h-5 w-5 text-primary" />
-            </div>
+            <p className="text-xs font-medium text-muted-foreground">Patient Since</p>
+            <Calendar className="h-4 w-4 text-primary" />
           </div>
-          <p className="mt-3 text-3xl font-bold text-foreground">
+          <p className="mt-2 text-2xl font-bold text-foreground">
             {format(new Date(patient.created_at), "MMM yyyy")}
           </p>
         </div>
