@@ -162,6 +162,7 @@ export default function Documents() {
       description: template.description,
       category: template.category,
       content: template.content,
+      header_footer_template_id: template.headerFooterTemplateId,
     });
     
     if (result) {
@@ -177,6 +178,7 @@ export default function Documents() {
       description: template.description,
       category: template.category,
       content: template.content,
+      header_footer_template_id: template.headerFooterTemplateId,
     });
     
     if (success) {
@@ -633,6 +635,7 @@ export default function Documents() {
                 description: editingTemplate.description || "",
                 category: editingTemplate.category || "",
                 content: editingTemplate.content,
+                headerFooterTemplateId: editingTemplate.header_footer_template_id || "",
               }}
               onSubmit={handleEditTemplate}
               onCancel={() => setEditingTemplate(null)}

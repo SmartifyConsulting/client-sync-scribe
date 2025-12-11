@@ -154,7 +154,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
     
     if (!selectedHeaderFooter) {
       return (
-        <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 2fr 1fr' }}>
+        <div className="grid grid-cols-3 gap-4">
           {placeholders.map((label) => (
             <div key={label} className="min-h-[24px] border border-dashed border-gray-300 rounded flex items-center justify-center p-2">
               <span className="text-xs text-gray-400">{label}</span>
@@ -174,7 +174,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
       : sectionData as { left?: SectionContent; center?: SectionContent; right?: SectionContent } | null;
 
     return (
-      <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 2fr 1fr' }}>
+      <div className="grid grid-cols-3 gap-4">
         <div className="min-h-[24px]">{renderSectionPreview(section?.left)}</div>
         <div className="min-h-[24px]">{renderSectionPreview(section?.center)}</div>
         <div className="min-h-[24px]">{renderSectionPreview(section?.right)}</div>
