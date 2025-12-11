@@ -1,12 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
-  Mic,
-  MicOff,
   X,
   Save,
-  Send,
   Loader2,
-  Sparkles,
   User,
   Download,
   Printer,
@@ -15,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { usePatients } from "@/hooks/usePatients";
 import { useProfile } from "@/hooks/useProfile";
@@ -54,12 +49,7 @@ export function DocumentEditor({ template, onClose, onSave }: DocumentEditorProp
   const [documentName, setDocumentName] = useState(`${template.name} - ${new Date().toLocaleDateString()}`);
   const [content, setContent] = useState(template.content);
   const [selectedPatientId, setSelectedPatientId] = useState<string>("");
-  const [isRecording, setIsRecording] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [transcript, setTranscript] = useState("");
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
 
   // Auto-fill placeholders when patient or profile changes
   useEffect(() => {
@@ -102,83 +92,11 @@ export function DocumentEditor({ template, onClose, onSave }: DocumentEditorProp
       .replace(/\[ReferralDate\]/g, today)
       .replace(/\[PrescriptionDate\]/g, today)
       .replace(/\[SignatureDate\]/g, today)
+      .replace(/\[InvoiceDate\]/g, today)
       .replace(/\[ConsultationTime\]/g, now);
 
     setContent(updatedContent);
   }, [selectedPatientId, profile, patients, template.content]);
-
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      chunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          chunksRef.current.push(e.data);
-        }
-      };
-
-      mediaRecorder.onstop = async () => {
-        stream.getTracks().forEach(track => track.stop());
-        await processAudio();
-      };
-
-      mediaRecorder.start();
-      setIsRecording(true);
-      
-      toast({
-        title: "Recording started",
-        description: "Speak clearly to dictate your document content",
-      });
-    } catch (error) {
-      toast({
-        title: "Microphone access denied",
-        description: "Please allow microphone access to use voice drafting",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-    }
-  };
-
-  const processAudio = async () => {
-    setIsProcessing(true);
-    
-    // Simulate AI transcription and content generation
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const simulatedTranscript = "The patient has shown excellent progress. Key observations include improvement in symptoms and good response to treatment. Recommendations include continuing current medication and follow-up in 2 weeks.";
-    
-    setTranscript(simulatedTranscript);
-    
-    // Auto-populate the document content
-    const updatedContent = content
-      .replace("[Content]", simulatedTranscript)
-      .replace("[Summary]", simulatedTranscript)
-      .replace("[Details]", simulatedTranscript);
-    
-    setContent(updatedContent);
-    setIsProcessing(false);
-    
-    toast({
-      title: "Transcription complete",
-      description: "Your voice input has been added to the document",
-    });
-  };
-
-  const handleInsertTranscript = () => {
-    if (transcript) {
-      setContent(prev => prev + "\n\n" + transcript);
-      setTranscript("");
-    }
-  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -235,7 +153,7 @@ export function DocumentEditor({ template, onClose, onSave }: DocumentEditorProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-xl border border-border bg-card shadow-lg">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border p-4">
           <div>
@@ -247,155 +165,89 @@ export function DocumentEditor({ template, onClose, onSave }: DocumentEditorProp
           </Button>
         </div>
 
-        <div className="grid lg:grid-cols-3 divide-x divide-border">
-          {/* Main Editor */}
-          <div className="lg:col-span-2 p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-            {/* Patient Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="patient">Select Patient (for auto-fill)</Label>
-              <Select value={selectedPatientId} onValueChange={setSelectedPatientId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a patient to auto-fill placeholders" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">No patient selected</SelectItem>
-                  {patients.map((patient) => (
-                    <SelectItem key={patient.id} value={patient.id}>
-                      <span className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        {patient.name}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selectedPatientId && (
-                <p className="text-xs text-success">
-                  ✓ Patient data has been auto-filled into the document
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="docName">Document Name</Label>
-              <Input
-                id="docName"
-                value={documentName}
-                onChange={(e) => setDocumentName(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="content">Content</Label>
-              <Textarea
-                id="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="min-h-[350px] font-mono text-sm"
-              />
-            </div>
-          </div>
-
-          {/* Voice Draft Panel */}
-          <div className="p-6 space-y-6 bg-muted/30 max-h-[70vh] overflow-y-auto">
-            <div>
-              <h3 className="font-semibold text-foreground flex items-center gap-2">
-                <Mic className="h-4 w-4 text-primary" />
-                Voice Draft
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Dictate content to auto-populate your document
-              </p>
-            </div>
-
-            {/* Recording Button */}
-            <div className="flex flex-col items-center gap-4 py-4">
-              <button
-                onClick={isRecording ? stopRecording : startRecording}
-                disabled={isProcessing}
-                className={cn(
-                  "flex h-16 w-16 items-center justify-center rounded-full transition-all duration-300",
-                  isRecording
-                    ? "bg-destructive text-destructive-foreground animate-pulse-soft"
-                    : isProcessing
-                    ? "bg-muted text-muted-foreground cursor-not-allowed"
-                    : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-glow"
-                )}
-              >
-                {isProcessing ? (
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                ) : isRecording ? (
-                  <MicOff className="h-6 w-6" />
-                ) : (
-                  <Mic className="h-6 w-6" />
-                )}
-              </button>
-              <p className="text-xs text-muted-foreground text-center">
-                {isProcessing
-                  ? "Processing..."
-                  : isRecording
-                  ? "Recording... Tap to stop"
-                  : "Tap to start voice drafting"}
-              </p>
-            </div>
-
-            {/* Transcript Preview */}
-            {transcript && (
-              <div className="space-y-3 animate-fade-in">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium text-foreground">Transcribed Content</span>
-                </div>
-                <div className="rounded-lg border border-border bg-card p-3">
-                  <p className="text-sm text-muted-foreground">{transcript}</p>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                  onClick={handleInsertTranscript}
-                >
-                  Insert at cursor
-                </Button>
-              </div>
-            )}
-
-            {/* Unfilled Placeholders */}
-            {unfilledPlaceholders.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Remaining Placeholders
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {unfilledPlaceholders.map((placeholder) => (
-                    <span
-                      key={placeholder}
-                      className="rounded-full bg-warning/20 text-warning-foreground px-2.5 py-1 text-xs font-medium"
-                    >
-                      [{placeholder}]
+        {/* Main Editor */}
+        <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+          {/* Patient Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="patient">Select Patient (for auto-fill)</Label>
+            <Select value={selectedPatientId} onValueChange={setSelectedPatientId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a patient to auto-fill placeholders" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No patient selected</SelectItem>
+                {patients.map((patient) => (
+                  <SelectItem key={patient.id} value={patient.id}>
+                    <span className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      {patient.name}
                     </span>
-                  ))}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Fill these manually or use voice drafting
-                </p>
-              </div>
-            )}
-
-            {/* Auto-filled info */}
-            {profile && (
-              <div className="space-y-2 pt-4 border-t border-border">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Auto-filled from Profile
-                </p>
-                <div className="text-xs text-muted-foreground space-y-1">
-                  {profile.full_name && <p>• Doctor: {profile.full_name}</p>}
-                  {profile.practice_number && <p>• Practice #: {profile.practice_number}</p>}
-                  {profile.doctor_number && <p>• Reg #: {profile.doctor_number}</p>}
-                </div>
-              </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {selectedPatientId && selectedPatientId !== "none" && (
+              <p className="text-xs text-green-600">
+                ✓ Patient data has been auto-filled into the document
+              </p>
             )}
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="docName">Document Name</Label>
+            <Input
+              id="docName"
+              value={documentName}
+              onChange={(e) => setDocumentName(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="content">Content</Label>
+            <Textarea
+              id="content"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              className="min-h-[300px] font-mono text-sm"
+            />
+          </div>
+
+          {/* Unfilled Placeholders */}
+          {unfilledPlaceholders.length > 0 && (
+            <div className="space-y-2 p-4 rounded-lg bg-muted/50 border border-border">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Remaining Placeholders to Fill
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {unfilledPlaceholders.map((placeholder) => (
+                  <span
+                    key={placeholder}
+                    className="rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400 px-2.5 py-1 text-xs font-medium"
+                  >
+                    [{placeholder}]
+                  </span>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Edit the content above to fill in these placeholders manually
+              </p>
+            </div>
+          )}
+
+          {/* Auto-filled info */}
+          {profile && (
+            <div className="space-y-2 p-4 rounded-lg bg-muted/30 border border-border">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Auto-filled from Your Profile
+              </p>
+              <div className="text-xs text-muted-foreground space-y-1">
+                {profile.full_name && <p>• Doctor: {profile.full_name}</p>}
+                {profile.practice_number && <p>• Practice #: {profile.practice_number}</p>}
+                {profile.doctor_number && <p>• Registration #: {profile.doctor_number}</p>}
+                {profile.practice_address && <p>• Address: {profile.practice_address}</p>}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
