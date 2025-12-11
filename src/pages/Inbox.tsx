@@ -42,9 +42,18 @@ export default function Inbox() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [activeTab, setActiveTab] = useState<"inbox" | "sent">("inbox");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCurrentUser();
+  }, []);
+
+  useEffect(() => {
+    const getEmail = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserEmail(user?.email || null);
+    };
+    getEmail();
   }, []);
 
   useEffect(() => {
@@ -179,17 +188,6 @@ export default function Inbox() {
       </div>
     );
   }
-
-  // Get user email for mailbox display
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-  
-  useEffect(() => {
-    const getEmail = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUserEmail(user?.email || null);
-    };
-    getEmail();
-  }, []);
 
   return (
     <div className="space-y-6 animate-fade-in">
