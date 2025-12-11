@@ -242,7 +242,7 @@ export default function SessionDetail() {
                 const isDoctor = speaker.toLowerCase().includes('dr') || speaker.toLowerCase().includes('doctor');
                 
                 return (
-                  <p key={index} className={`leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
+                  <p key={index} className={`leading-relaxed ${isDoctor ? 'text-primary-dark' : 'text-foreground'}`}>
                     <span className="font-bold">{speaker}</span>:{text}
                   </p>
                 );

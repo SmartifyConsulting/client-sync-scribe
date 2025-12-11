@@ -26,6 +26,7 @@
     --primary: 172 66% 50%;
     --primary-foreground: 0 0% 100%;
     --primary-glow: 172 66% 60%;
+    --primary-dark: 172 70% 30%;
 
     /* Neutral grays */
     --secondary: 220 14% 96%;
@@ -88,6 +89,7 @@
     --primary: 172 60% 55%;
     --primary-foreground: 0 0% 5%;
     --primary-glow: 172 60% 65%;
+    --primary-dark: 172 65% 40%;
 
     --secondary: 0 0% 15%;
     --secondary-foreground: 0 0% 90%;
@@ -145,6 +147,7 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-size: 15px;
   }
 
   /* Smooth focus states */
