@@ -38,7 +38,8 @@ serve(async (req) => {
       attachmentsCount: payload.attachments?.length || 0,
     });
 
-    // Extract the recipient email (the user's mailbox)
+    // Extract the mailbox ID from the recipient email
+    // Format: docs-{mailbox_id}@inbox.miri.health
     const recipientEmail = payload.to?.toLowerCase();
     
     if (!recipientEmail) {
@@ -49,28 +50,36 @@ serve(async (req) => {
       );
     }
 
-    // Find the user by their email
-    const { data: userData, error: userError } = await supabase.auth.admin.listUsers();
+    // Extract mailbox_id from email format: docs-{mailbox_id}@inbox.miri.health
+    const mailboxMatch = recipientEmail.match(/^docs-([a-f0-9-]+)@/i);
     
-    if (userError) {
-      console.error("Error listing users:", userError);
+    if (!mailboxMatch) {
+      console.error("Invalid mailbox email format:", recipientEmail);
       return new Response(
-        JSON.stringify({ error: "Failed to find user" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Invalid mailbox email format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const user = userData.users.find(u => u.email?.toLowerCase() === recipientEmail);
+    const mailboxIdPrefix = mailboxMatch[1];
+    console.log("Looking up user by mailbox_id prefix:", mailboxIdPrefix);
+
+    // Find the user by mailbox_id (starts with the prefix)
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, full_name')
+      .ilike('mailbox_id', `${mailboxIdPrefix}%`)
+      .single();
     
-    if (!user) {
-      console.error("User not found for email:", recipientEmail);
+    if (profileError || !profile) {
+      console.error("User not found for mailbox:", mailboxIdPrefix, profileError);
       return new Response(
         JSON.stringify({ error: "User not found" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log("Found user:", user.id);
+    console.log("Found user:", profile.id);
 
     // Create document content from email
     const documentContent = `
@@ -94,7 +103,7 @@ ${payload.attachments && payload.attachments.length > 0
     const { data: document, error: docError } = await supabase
       .from("documents")
       .insert({
-        user_id: user.id,
+        user_id: profile.id,
         name: `Email: ${payload.subject || "No Subject"} - ${new Date().toLocaleDateString()}`,
         content: documentContent,
         template_name: "Email Document",
