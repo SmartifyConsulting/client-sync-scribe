@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, Bell, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff, CreditCard } from "lucide-react";
+import { Calendar, Bell, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff, CreditCard, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
@@ -7,6 +7,18 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { TwoFactorSetup } from "@/components/auth/TwoFactorSetup";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+
+// Mock payment history data
+const paymentHistory = [
+  { id: "1", date: new Date(2024, 10, 1), description: "Professional Plan - Monthly", amount: 49.99, status: "paid" },
+  { id: "2", date: new Date(2024, 9, 1), description: "Professional Plan - Monthly", amount: 49.99, status: "paid" },
+  { id: "3", date: new Date(2024, 8, 1), description: "Professional Plan - Monthly", amount: 49.99, status: "paid" },
+  { id: "4", date: new Date(2024, 7, 1), description: "Professional Plan - Monthly", amount: 49.99, status: "paid" },
+  { id: "5", date: new Date(2024, 6, 1), description: "Professional Plan - Monthly", amount: 49.99, status: "paid" },
+];
 
 export default function Settings() {
   const { toast } = useToast();
@@ -290,17 +302,52 @@ export default function Settings() {
               Add Payment
             </Button>
           </div>
-          <Separator />
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-foreground">Billing History</p>
-              <p className="text-sm text-muted-foreground">View past invoices and receipts</p>
-            </div>
-            <Button variant="outline">
-              View History
-            </Button>
-          </div>
         </div>
+      </div>
+
+      {/* Payment History */}
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+        <div className="flex items-center gap-3 mb-6">
+          <Receipt className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">Payment History</h2>
+        </div>
+        <div className="rounded-lg border border-border overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead>Date</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Receipt</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paymentHistory.map((payment) => (
+                <TableRow key={payment.id}>
+                  <TableCell className="font-medium">
+                    {format(payment.date, "MMM d, yyyy")}
+                  </TableCell>
+                  <TableCell>{payment.description}</TableCell>
+                  <TableCell>${payment.amount.toFixed(2)}</TableCell>
+                  <TableCell>
+                    <Badge variant={payment.status === "paid" ? "default" : "destructive"} className="capitalize">
+                      {payment.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="sm">
+                      Download
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        {paymentHistory.length === 0 && (
+          <p className="text-center text-muted-foreground py-8">No payment history yet</p>
+        )}
       </div>
 
       {/* Data */}
