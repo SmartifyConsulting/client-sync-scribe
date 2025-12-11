@@ -12,14 +12,18 @@ import {
   Printer,
   Loader2,
   Mail,
+  LayoutTemplate,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
 import { TemplateForm, TemplateData } from "@/components/templates/TemplateForm";
+import { HeaderFooterTemplateForm, HeaderFooterTemplateData } from "@/components/templates/HeaderFooterTemplateForm";
 import { useToast } from "@/hooks/use-toast";
 import { useTemplates, Template } from "@/hooks/useTemplates";
+import { useHeaderFooterTemplates, HeaderFooterTemplate } from "@/hooks/useHeaderFooterTemplates";
 import { useDocuments, Document } from "@/hooks/useDocuments";
 import { useProfile } from "@/hooks/useProfile";
 import { exportToPDF, printDocument } from "@/utils/documentExport";
@@ -56,7 +60,7 @@ interface DisplayTemplate extends Template {
   placeholders: string[];
 }
 
-// Helper functions defined outside component to avoid hoisting issues
+// Helper functions
 const extractPlaceholders = (content: string): string[] => {
   const matches = content.match(/\[([^\]]+)\]/g) || [];
   return [...new Set(matches.map(m => m.slice(1, -1)))];
@@ -75,7 +79,6 @@ const formatDate = (dateString: string): string => {
   return date.toLocaleDateString();
 };
 
-// Render content with HTML formatting (allows only safe formatting tags)
 const renderFormattedContent = (content: string): string => {
   const safeContent = content
     .replace(/</g, '&lt;')
@@ -93,15 +96,22 @@ const renderFormattedContent = (content: string): string => {
 export default function Documents() {
   const { toast } = useToast();
   const { templates: dbTemplates, loading: templatesLoading, createTemplate, updateTemplate, deleteTemplate } = useTemplates();
+  const { templates: headerFooterTemplates, isLoading: hfLoading, createTemplate: createHFTemplate, updateTemplate: updateHFTemplate, deleteTemplate: deleteHFTemplate } = useHeaderFooterTemplates();
   const { documents, loading: documentsLoading, deleteDocument } = useDocuments();
   const { profile } = useProfile();
+  
+  const [activeTab, setActiveTab] = useState("content");
   const [templateSearchQuery, setTemplateSearchQuery] = useState("");
   const [documentSearchQuery, setDocumentSearchQuery] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState<DisplayTemplate | null>(null);
   const [isNewTemplateOpen, setIsNewTemplateOpen] = useState(false);
+  const [isNewHFTemplateOpen, setIsNewHFTemplateOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<DisplayTemplate | null>(null);
+  const [editingHFTemplate, setEditingHFTemplate] = useState<HeaderFooterTemplate | null>(null);
   const [templateToDelete, setTemplateToDelete] = useState<DisplayTemplate | null>(null);
+  const [hfTemplateToDelete, setHfTemplateToDelete] = useState<HeaderFooterTemplate | null>(null);
   const [previewTemplate, setPreviewTemplate] = useState<DisplayTemplate | null>(null);
+  const [previewHFTemplate, setPreviewHFTemplate] = useState<HeaderFooterTemplate | null>(null);
   const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
   const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
   const [shareDocument, setShareDocument] = useState<Document | null>(null);
@@ -116,8 +126,11 @@ export default function Documents() {
   }));
 
   const filteredTemplates = templates.filter((template) =>
-    template.name.toLowerCase().includes(templateSearchQuery.toLowerCase()) ||
-    (template.category?.toLowerCase() || "").includes(templateSearchQuery.toLowerCase())
+    template.name.toLowerCase().includes(templateSearchQuery.toLowerCase())
+  );
+
+  const filteredHFTemplates = headerFooterTemplates.filter((template) =>
+    template.name.toLowerCase().includes(templateSearchQuery.toLowerCase())
   );
 
   const filteredDocuments = documents.filter((doc) =>
@@ -149,9 +162,6 @@ export default function Documents() {
       description: template.description,
       category: template.category,
       content: template.content,
-      logo_url: template.logoUrl,
-      logo_position: template.logoPosition,
-      font_family: template.fontFamily,
     });
     
     if (result) {
@@ -167,9 +177,6 @@ export default function Documents() {
       description: template.description,
       category: template.category,
       content: template.content,
-      logo_url: template.logoUrl,
-      logo_position: template.logoPosition,
-      font_family: template.fontFamily,
     });
     
     if (success) {
@@ -184,6 +191,38 @@ export default function Documents() {
     if (success) {
       setTemplateToDelete(null);
     }
+  };
+
+  const handleCreateHFTemplate = async (template: HeaderFooterTemplateData) => {
+    await createHFTemplate.mutateAsync({
+      name: template.name,
+      description: template.description,
+      header: template.header,
+      footer: template.footer,
+      font_family: template.fontFamily || "sans",
+      is_default: false,
+    });
+    setIsNewHFTemplateOpen(false);
+  };
+
+  const handleEditHFTemplate = async (template: HeaderFooterTemplateData) => {
+    if (!template.id) return;
+    
+    await updateHFTemplate.mutateAsync({
+      id: template.id,
+      name: template.name,
+      description: template.description,
+      header: template.header,
+      footer: template.footer,
+      font_family: template.fontFamily || "sans",
+    });
+    setEditingHFTemplate(null);
+  };
+
+  const handleDeleteHFTemplate = async () => {
+    if (!hfTemplateToDelete) return;
+    await deleteHFTemplate.mutateAsync(hfTemplateToDelete.id);
+    setHfTemplateToDelete(null);
   };
 
   const handleSendDocumentEmail = async () => {
@@ -222,6 +261,22 @@ export default function Documents() {
     }
   };
 
+  const renderHFSectionPreview = (section: { text: string; alignment: string; imageUrl?: string }) => {
+    return (
+      <div style={{ textAlign: section.alignment as any }}>
+        {section.imageUrl && (
+          <img src={section.imageUrl} alt="" className="max-h-10 inline-block mb-1" />
+        )}
+        {section.text && (
+          <div 
+            className="whitespace-pre-wrap text-xs"
+            dangerouslySetInnerHTML={{ __html: renderFormattedContent(section.text) }}
+          />
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
@@ -229,136 +284,250 @@ export default function Documents() {
         <div>
           <h1 className="text-3xl font-bold text-foreground">Templates</h1>
           <p className="mt-1 text-muted-foreground">
-            Create and manage document templates
+            Manage header/footer layouts and content templates separately
           </p>
         </div>
-        <Dialog open={isNewTemplateOpen} onOpenChange={setIsNewTemplateOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              New Template
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Create New Template</DialogTitle>
-              <DialogDescription>
-                Create a reusable document template with your practice letterhead
-              </DialogDescription>
-            </DialogHeader>
-            <TemplateForm
-              onSubmit={handleCreateTemplate}
-              onCancel={() => setIsNewTemplateOpen(false)}
-              mode="create"
-            />
-          </DialogContent>
-        </Dialog>
       </div>
 
-      {/* Template Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search templates..."
-          value={templateSearchQuery}
-          onChange={(e) => setTemplateSearchQuery(e.target.value)}
-          className="pl-10"
-        />
-      </div>
+      {/* Tabs for Template Types */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="bg-primary">
+          <TabsTrigger value="header-footer" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+            <LayoutTemplate className="h-4 w-4 mr-2" />
+            Header & Footer
+          </TabsTrigger>
+          <TabsTrigger value="content" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+            <FileText className="h-4 w-4 mr-2" />
+            Content Templates
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Templates Grid */}
-      <div>
-        <h2 className="text-lg font-semibold text-foreground mb-4">Templates</h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Select a template to start creating a document with voice drafting
-        </p>
-        
-        {templatesLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        {/* Header/Footer Templates Tab */}
+        <TabsContent value="header-footer" className="space-y-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground">
+              Create reusable header and footer layouts that apply to all your documents
+            </p>
+            <Dialog open={isNewHFTemplateOpen} onOpenChange={setIsNewHFTemplateOpen}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  New Header/Footer
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Create Header & Footer Template</DialogTitle>
+                  <DialogDescription>
+                    Design a reusable header and footer layout for your documents
+                  </DialogDescription>
+                </DialogHeader>
+                <HeaderFooterTemplateForm
+                  onSubmit={handleCreateHFTemplate}
+                  onCancel={() => setIsNewHFTemplateOpen(false)}
+                  mode="create"
+                />
+              </DialogContent>
+            </Dialog>
           </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {filteredTemplates.map((template, index) => (
-              <div
-                key={template.id}
-                className="group rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30 text-left cursor-pointer"
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div 
-                    className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary/10"
-                    onClick={() => handleSelectTemplate(template)}
-                  >
-                    <FileText className="h-5 w-5 text-accent-foreground group-hover:text-primary" />
+
+          {/* Search */}
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search header/footer templates..."
+              value={templateSearchQuery}
+              onChange={(e) => setTemplateSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {/* Header/Footer Templates Grid */}
+          {hfLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredHFTemplates.map((template) => (
+                <div
+                  key={template.id}
+                  className="group rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary/10">
+                      <LayoutTemplate className="h-5 w-5 text-accent-foreground group-hover:text-primary" />
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setPreviewHFTemplate(template)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          Preview
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setEditingHFTemplate(template)}>
+                          <Edit3 className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => setHfTemplateToDelete(template)} className="text-destructive focus:text-destructive">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => setPreviewTemplate(template)}>
-                        <Eye className="h-4 w-4 mr-2" />
-                        Preview Template
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setEditingTemplate(template)}>
-                        <Edit3 className="h-4 w-4 mr-2" />
-                        Edit Template
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleSelectTemplate(template)}>
-                        <Copy className="h-4 w-4 mr-2" />
-                        Use Template
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        onClick={() => setTemplateToDelete(template)}
-                        className="text-destructive focus:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete Template
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                <div onClick={() => handleSelectTemplate(template)}>
                   <h3 className="font-medium text-foreground mb-1">{template.name}</h3>
                   <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                    {template.description}
+                    {template.description || "No description"}
                   </p>
-                  <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">
+                    {formatDate(template.updated_at)}
+                  </span>
+                </div>
+              ))}
+
+              {/* Add New Card */}
+              <div 
+                onClick={() => setIsNewHFTemplateOpen(true)}
+                className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/50 p-5 text-center transition-colors hover:bg-muted/30 cursor-pointer min-h-[160px]"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted mb-3">
+                  <Plus className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <p className="font-medium text-muted-foreground">Create Header/Footer</p>
+              </div>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Content Templates Tab */}
+        <TabsContent value="content" className="space-y-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground">
+              Create document content templates (header/footer will be applied from your selected layout)
+            </p>
+            <Dialog open={isNewTemplateOpen} onOpenChange={setIsNewTemplateOpen}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  New Content Template
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Create Content Template</DialogTitle>
+                  <DialogDescription>
+                    Create a reusable document content template
+                  </DialogDescription>
+                </DialogHeader>
+                <TemplateForm
+                  onSubmit={handleCreateTemplate}
+                  onCancel={() => setIsNewTemplateOpen(false)}
+                  mode="create"
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {/* Search */}
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search content templates..."
+              value={templateSearchQuery}
+              onChange={(e) => setTemplateSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {/* Content Templates Grid */}
+          {templatesLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {filteredTemplates.map((template, index) => (
+                <div
+                  key={template.id}
+                  className="group rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30 text-left cursor-pointer"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div 
+                      className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary/10"
+                      onClick={() => handleSelectTemplate(template)}
+                    >
+                      <FileText className="h-5 w-5 text-accent-foreground group-hover:text-primary" />
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setPreviewTemplate(template)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          Preview
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setEditingTemplate(template)}>
+                          <Edit3 className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleSelectTemplate(template)}>
+                          <Copy className="h-4 w-4 mr-2" />
+                          Use Template
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={() => setTemplateToDelete(template)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  <div onClick={() => handleSelectTemplate(template)}>
+                    <h3 className="font-medium text-foreground mb-1">{template.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                      {template.description}
+                    </p>
                     <span className="text-xs text-muted-foreground">
                       {template.lastModified}
                     </span>
-                    <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                      {template.category}
-                    </span>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
 
-            {/* Add New Template Card */}
-            <div 
-              onClick={() => setIsNewTemplateOpen(true)}
-              className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/50 p-5 text-center transition-colors hover:bg-muted/30 cursor-pointer"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted mb-3">
-                <Plus className="h-5 w-5 text-muted-foreground" />
+              {/* Add New Template Card */}
+              <div 
+                onClick={() => setIsNewTemplateOpen(true)}
+                className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/50 p-5 text-center transition-colors hover:bg-muted/30 cursor-pointer"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted mb-3">
+                  <Plus className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <p className="font-medium text-muted-foreground">Create Template</p>
               </div>
-              <p className="font-medium text-muted-foreground">Create Template</p>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </TabsContent>
+      </Tabs>
 
-      {/* All Documents */}
+      {/* All Documents Section */}
       <div>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
           <h2 className="text-lg font-semibold text-foreground">All Documents</h2>
@@ -395,52 +564,22 @@ export default function Documents() {
                       </p>
                     </div>
                     <div className="flex gap-1">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8"
-                        onClick={() => setPreviewDocument(doc)}
-                        title="Preview"
-                      >
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setPreviewDocument(doc)} title="Preview">
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8"
-                        onClick={() => setShareDocument(doc)}
-                        title="Share via Email"
-                      >
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShareDocument(doc)} title="Share via Email">
                         <Mail className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8"
-                        onClick={() => {
-                          exportToPDF({ title: doc.name, content: doc.content });
-                          toast({ title: "PDF Exported", description: `"${doc.name}" downloaded` });
-                        }}
-                        title="Export PDF"
-                      >
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                        exportToPDF({ title: doc.name, content: doc.content });
+                        toast({ title: "PDF Exported", description: `"${doc.name}" downloaded` });
+                      }} title="Export PDF">
                         <Download className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8"
-                        onClick={() => printDocument(doc.content, doc.name)}
-                        title="Print"
-                      >
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => printDocument(doc.content, doc.name)} title="Print">
                         <Printer className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                        onClick={() => setDocumentToDelete(doc)}
-                        title="Delete"
-                      >
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setDocumentToDelete(doc)} title="Delete">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -477,13 +616,13 @@ export default function Documents() {
         />
       )}
 
-      {/* Edit Template Dialog */}
+      {/* Edit Content Template Dialog */}
       <Dialog open={!!editingTemplate} onOpenChange={(open) => !open && setEditingTemplate(null)}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Template</DialogTitle>
+            <DialogTitle>Edit Content Template</DialogTitle>
             <DialogDescription>
-              Modify this template's content, logo, and settings
+              Modify this template's content
             </DialogDescription>
           </DialogHeader>
           {editingTemplate && (
@@ -494,9 +633,6 @@ export default function Documents() {
                 description: editingTemplate.description || "",
                 category: editingTemplate.category || "",
                 content: editingTemplate.content,
-                logoUrl: editingTemplate.logo_url || undefined,
-                logoPosition: editingTemplate.logo_position || undefined,
-                fontFamily: editingTemplate.font_family || undefined,
               }}
               onSubmit={handleEditTemplate}
               onCancel={() => setEditingTemplate(null)}
@@ -506,7 +642,34 @@ export default function Documents() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Edit Header/Footer Template Dialog */}
+      <Dialog open={!!editingHFTemplate} onOpenChange={(open) => !open && setEditingHFTemplate(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Header & Footer Template</DialogTitle>
+            <DialogDescription>
+              Modify this header and footer layout
+            </DialogDescription>
+          </DialogHeader>
+          {editingHFTemplate && (
+            <HeaderFooterTemplateForm
+              initialData={{
+                id: editingHFTemplate.id,
+                name: editingHFTemplate.name,
+                description: editingHFTemplate.description || "",
+                fontFamily: editingHFTemplate.font_family || "sans",
+                header: editingHFTemplate.header as any,
+                footer: editingHFTemplate.footer as any,
+              }}
+              onSubmit={handleEditHFTemplate}
+              onCancel={() => setEditingHFTemplate(null)}
+              mode="edit"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Content Template Confirmation */}
       <AlertDialog open={!!templateToDelete} onOpenChange={(open) => !open && setTemplateToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -524,7 +687,25 @@ export default function Documents() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Template Preview Dialog */}
+      {/* Delete Header/Footer Template Confirmation */}
+      <AlertDialog open={!!hfTemplateToDelete} onOpenChange={(open) => !open && setHfTemplateToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Header/Footer Template</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{hfTemplateToDelete?.name}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteHFTemplate} className="bg-destructive hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Content Template Preview Dialog */}
       <Dialog open={!!previewTemplate} onOpenChange={(open) => !open && setPreviewTemplate(null)}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -535,32 +716,9 @@ export default function Documents() {
           </DialogHeader>
           {previewTemplate && (
             <div className="space-y-4">
-              {/* Template Preview */}
               <div className="border border-border rounded-lg p-6 bg-white">
-                {/* Logo Preview */}
-                {previewTemplate.logo_url && (
-                  <div 
-                    className="mb-4"
-                    style={{ 
-                      textAlign: previewTemplate.logo_position?.x && previewTemplate.logo_position.x > 66 
-                        ? 'right' 
-                        : previewTemplate.logo_position?.x && previewTemplate.logo_position.x > 33 
-                          ? 'center' 
-                          : 'left' 
-                    }}
-                  >
-                    <img 
-                      src={previewTemplate.logo_url} 
-                      alt="Template logo" 
-                      className="max-h-16 inline-block"
-                    />
-                  </div>
-                )}
-                
-                {/* Content Preview */}
                 <div 
-                  className={`whitespace-pre-wrap text-sm text-foreground`}
-                  style={{ fontFamily: previewTemplate.font_family === 'serif' ? 'serif' : previewTemplate.font_family === 'mono' ? 'monospace' : 'inherit' }}
+                  className="whitespace-pre-wrap text-sm text-foreground"
                   dangerouslySetInnerHTML={{ __html: renderFormattedContent(previewTemplate.content) }}
                 />
               </div>
@@ -577,6 +735,57 @@ export default function Documents() {
                   className="flex-1"
                 >
                   Use Template
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Header/Footer Template Preview Dialog */}
+      <Dialog open={!!previewHFTemplate} onOpenChange={(open) => !open && setPreviewHFTemplate(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{previewHFTemplate?.name}</DialogTitle>
+            <DialogDescription>
+              {previewHFTemplate?.description || "Header & Footer preview"}
+            </DialogDescription>
+          </DialogHeader>
+          {previewHFTemplate && (
+            <div className="space-y-4">
+              <div className="border border-border rounded-lg p-6 bg-white">
+                {/* Header Preview */}
+                <div className="grid grid-cols-3 gap-4 pb-4 border-b border-gray-200 mb-4">
+                  {renderHFSectionPreview(previewHFTemplate.header.left)}
+                  {renderHFSectionPreview(previewHFTemplate.header.center)}
+                  {renderHFSectionPreview(previewHFTemplate.header.right)}
+                </div>
+                
+                {/* Content Placeholder */}
+                <div className="min-h-[100px] py-4 flex items-center justify-center">
+                  <p className="text-gray-400 italic text-sm">Document content appears here</p>
+                </div>
+                
+                {/* Footer Preview */}
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200 mt-4">
+                  {renderHFSectionPreview(previewHFTemplate.footer.left)}
+                  {renderHFSectionPreview(previewHFTemplate.footer.center)}
+                  {renderHFSectionPreview(previewHFTemplate.footer.right)}
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t border-border">
+                <Button variant="outline" onClick={() => setPreviewHFTemplate(null)} className="flex-1">
+                  Close
+                </Button>
+                <Button 
+                  onClick={() => {
+                    setEditingHFTemplate(previewHFTemplate);
+                    setPreviewHFTemplate(null);
+                  }} 
+                  className="flex-1"
+                >
+                  Edit Template
                 </Button>
               </div>
             </div>

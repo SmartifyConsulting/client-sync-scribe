@@ -229,6 +229,45 @@ export type Database = {
           },
         ]
       }
+      header_footer_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          font_family: string | null
+          footer: Json | null
+          header: Json | null
+          id: string
+          is_default: boolean | null
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          font_family?: string | null
+          footer?: Json | null
+          header?: Json | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          font_family?: string | null
+          footer?: Json | null
+          header?: Json | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           amount: number
