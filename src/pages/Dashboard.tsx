@@ -99,16 +99,12 @@ export default function Dashboard() {
       <div className="flex items-start justify-between pb-2">
         <div>
           <h1 className="text-3xl font-bold text-foreground tracking-tight">{greeting}, {getDisplayName()}</h1>
-          <p className="mt-2 text-muted-foreground text-lg">
+          <p className="mt-2 text-muted-foreground text-[10px]">
             Here's what's happening with your practice today, {formattedDate}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Link to="/profile" className="flex items-center gap-3 rounded-xl px-4 py-2 hover:bg-accent transition-colors">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium text-foreground">My Profile</p>
-              <p className="text-xs text-muted-foreground">{profile?.full_name || "User"}</p>
-            </div>
+          <Link to="/profile" className="rounded-xl p-2 hover:bg-accent transition-colors">
             <div className="relative">
               <Avatar className="h-10 w-10 border-2 border-primary/20">
                 <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} />
