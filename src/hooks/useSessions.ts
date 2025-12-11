@@ -12,6 +12,7 @@ export interface Session {
   transcript: string | null;
   summary: string | null;
   action_points: string[];
+  audio_url: string | null;
   duration_minutes: number | null;
   status: 'in_progress' | 'completed' | 'cancelled';
   started_at: string;
