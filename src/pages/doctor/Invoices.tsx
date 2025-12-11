@@ -175,6 +175,7 @@ export default function DoctorInvoices() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("issued_overdue");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+  const [viewingInvoice, setViewingInvoice] = useState<Invoice | null>(null);
   const [editForm, setEditForm] = useState({ description: "", amount: "", dueDate: "" });
   const [isSaving, setIsSaving] = useState(false);
   const [showReportDialog, setShowReportDialog] = useState(false);
@@ -1298,7 +1299,14 @@ export default function DoctorInvoices() {
                 const status = getInvoiceStatus(invoice);
                 return (
                   <TableRow key={invoice.id}>
-                    <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
+                    <TableCell>
+                      <button
+                        onClick={() => setViewingInvoice(invoice)}
+                        className="font-medium text-primary hover:underline cursor-pointer"
+                      >
+                        {invoice.invoice_number}
+                      </button>
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
@@ -1456,6 +1464,96 @@ export default function DoctorInvoices() {
                   )}
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Invoice Modal */}
+      {viewingInvoice && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-lg animate-fade-in">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <Receipt className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">Invoice Details</h2>
+                  <p className="text-sm text-muted-foreground">{viewingInvoice.invoice_number}</p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewingInvoice(null)}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Patient</p>
+                  <p className="font-medium">{viewingInvoice.patient?.name || "Unknown"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Status</p>
+                  <div className="mt-1">{getStatusBadge(getInvoiceStatus(viewingInvoice))}</div>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm text-muted-foreground">Description</p>
+                <p className="font-medium">{viewingInvoice.description}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Amount</p>
+                  <p className="font-semibold text-lg">{getCurrencySymbol(invoiceCurrency)} {Number(viewingInvoice.amount).toFixed(2)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Due Date</p>
+                  <p className="font-medium">{format(new Date(viewingInvoice.due_date), 'dd MMMM yyyy')}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Created</p>
+                  <p className="font-medium">{format(new Date(viewingInvoice.created_at), 'dd MMM yyyy')}</p>
+                </div>
+                {viewingInvoice.paid_at && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Paid On</p>
+                    <p className="font-medium">{format(new Date(viewingInvoice.paid_at), 'dd MMM yyyy')}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-6 border-t border-border mt-6">
+              <Button 
+                variant="outline" 
+                className="flex-1" 
+                onClick={() => setViewingInvoice(null)}
+              >
+                Close
+              </Button>
+              {getInvoiceStatus(viewingInvoice) !== "paid" && getInvoiceStatus(viewingInvoice) !== "archived" && (
+                <Button 
+                  className="flex-1" 
+                  onClick={() => {
+                    openEditDialog(viewingInvoice);
+                    setViewingInvoice(null);
+                  }}
+                >
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit
+                </Button>
+              )}
             </div>
           </div>
         </div>
