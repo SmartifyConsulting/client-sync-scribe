@@ -6,6 +6,7 @@ import {
   Sparkles,
   Mic,
   CheckCircle,
+  Circle,
   User,
   Loader2,
   Trash2,
@@ -206,13 +207,13 @@ export default function SessionDetail() {
               <p className="text-xs text-muted-foreground">Tasks extracted from this session</p>
             </div>
           </div>
-          <ul className="space-y-2">
+          <ul className="space-y-2 ml-4">
             {session.action_points.map((point, i) => (
               <li
                 key={i}
                 className="flex items-start gap-3 text-foreground p-3 rounded-lg bg-muted/30"
               >
-                <CheckCircle className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                <Circle className="h-4 w-4 text-primary fill-primary shrink-0 mt-0.5" />
                 <span>{point}</span>
               </li>
             ))}
