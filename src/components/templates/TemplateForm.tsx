@@ -173,11 +173,9 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
     return safeContent;
   };
 
-  const renderSectionPreview = (section: SectionContent, className?: string) => {
-    if (!section.text && !section.imageUrl) return null;
-    
+  const renderSectionPreview = (section: SectionContent) => {
     return (
-      <div className={className} style={{ textAlign: section.alignment }}>
+      <div style={{ textAlign: section.alignment }}>
         {section.imageUrl && (
           <img 
             src={section.imageUrl} 
@@ -218,11 +216,11 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
             <span className="text-sm font-medium text-foreground">Live Preview</span>
           </div>
           <div className={`p-6 min-h-[400px] ${getFontClass(selectedFont)}`}>
-            {/* Header Preview */}
+          {/* Header Preview */}
             <div className="grid grid-cols-3 gap-4 pb-4 border-b border-gray-200 mb-4">
-              {renderSectionPreview(header.left, "text-left")}
-              {renderSectionPreview(header.center, "text-center")}
-              {renderSectionPreview(header.right, "text-right")}
+              {renderSectionPreview(header.left)}
+              {renderSectionPreview(header.center)}
+              {renderSectionPreview(header.right)}
             </div>
             
             {/* Body Preview */}
@@ -235,9 +233,9 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
             
             {/* Footer Preview */}
             <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200 mt-4">
-              {renderSectionPreview(footer.left, "text-left")}
-              {renderSectionPreview(footer.center, "text-center")}
-              {renderSectionPreview(footer.right, "text-right")}
+              {renderSectionPreview(footer.left)}
+              {renderSectionPreview(footer.center)}
+              {renderSectionPreview(footer.right)}
             </div>
           </div>
         </div>
