@@ -1,10 +1,14 @@
-import { Users, Calendar, TrendingUp } from "lucide-react";
+import { Users, Calendar, TrendingUp, LogOut } from "lucide-react";
+import { Link } from "react-router-dom";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { TodaysBriefing } from "@/components/dashboard/TodaysBriefing";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { DoctorAccessRequests } from "@/components/doctor/DoctorAccessRequests";
 import { useProfile } from "@/hooks/useProfile";
 import { useUserRole } from "@/hooks/useUserRole";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Dashboard() {
   const { profile } = useProfile();
@@ -25,18 +29,54 @@ export default function Dashboard() {
     }
   };
 
+  const getInitials = () => {
+    if (!profile?.full_name) return "U";
+    const names = profile.full_name.split(" ");
+    return names.map(n => n[0]).join("").toUpperCase().slice(0, 2);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/auth";
+  };
+
   // Get time-based greeting
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Header */}
-      <div className="pb-2">
-        <h1 className="text-3xl font-bold text-foreground tracking-tight">{greeting}, {getDisplayName()}</h1>
-        <p className="mt-2 text-muted-foreground text-lg">
-          Here's what's happening with your practice today
-        </p>
+      {/* Header with Profile */}
+      <div className="flex items-start justify-between pb-2">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">{greeting}, {getDisplayName()}</h1>
+          <p className="mt-2 text-muted-foreground text-lg">
+            Here's what's happening with your practice today
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link to="/profile" className="flex items-center gap-3 rounded-xl px-4 py-2 hover:bg-accent transition-colors">
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-medium text-foreground">My Profile</p>
+              <p className="text-xs text-muted-foreground">{profile?.full_name || "User"}</p>
+            </div>
+            <Avatar className="h-10 w-10 border-2 border-primary/20">
+              <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} />
+              <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                {getInitials()}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={handleLogout}
+            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            title="Log out"
+          >
+            <LogOut className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
       {/* Patient Access Requests */}

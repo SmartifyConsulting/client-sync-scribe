@@ -526,6 +526,22 @@ export default function Profile() {
             />
           </div>
         </div>
+
+        {/* Mailbox Email */}
+        <div className="mt-6 p-4 rounded-lg bg-primary/5 border border-primary/20">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+              <Upload className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="font-medium text-foreground">Document Mailbox</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                External parties (e.g., radiologists, labs) can email documents to this address and they will be saved under your Documents.
+              </p>
+              <p className="text-sm font-medium text-primary mt-2">{user?.email || "Not available"}</p>
+            </div>
+          </div>
+        </div>
         <Button className="mt-6" onClick={handleSaveProfile} disabled={isSaving}>
           {isSaving ? "Saving..." : "Save Changes"}
         </Button>
