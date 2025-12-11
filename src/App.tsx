@@ -15,6 +15,7 @@ import Sessions from "./pages/Sessions";
 import SessionDetail from "./pages/SessionDetail";
 import Documents from "./pages/Documents";
 import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
 import TodoList from "./pages/TodoList";
 import Inbox from "./pages/Inbox";
 import Auth from "./pages/Auth";
@@ -107,6 +108,7 @@ const App = () => (
             
             {/* Common routes */}
             <Route path="/settings" element={<Settings />} />
+            <Route path="/profile" element={<Profile />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
