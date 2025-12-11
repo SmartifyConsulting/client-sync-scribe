@@ -852,6 +852,7 @@ export type Database = {
           created_at: string
           description: string | null
           font_family: string | null
+          header_footer_template_id: string | null
           id: string
           is_default: boolean | null
           logo_position: Json | null
@@ -866,6 +867,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           font_family?: string | null
+          header_footer_template_id?: string | null
           id?: string
           is_default?: boolean | null
           logo_position?: Json | null
@@ -880,6 +882,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           font_family?: string | null
+          header_footer_template_id?: string | null
           id?: string
           is_default?: boolean | null
           logo_position?: Json | null
@@ -888,7 +891,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "templates_header_footer_template_id_fkey"
+            columns: ["header_footer_template_id"]
+            isOneToOne: false
+            referencedRelation: "header_footer_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       todos: {
         Row: {
