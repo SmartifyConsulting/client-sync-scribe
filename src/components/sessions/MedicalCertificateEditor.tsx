@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { X, FileText, Mic, Square, Loader2, Save, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -9,11 +9,11 @@ import { useAudioRecording } from "@/hooks/useAudioRecording";
 import { AudioWaveform } from "./AudioWaveform";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { useProfile } from "@/hooks/useProfile";
 
 interface MedicalCertificateEditorProps {
   patientId: string;
   patientName: string;
-  doctorName?: string;
   sessionId?: string;
   onClose: () => void;
   onSave: (certificate: { content: string }) => void;
@@ -42,23 +42,30 @@ Signature: ___________________
 export function MedicalCertificateEditor({ 
   patientId,
   patientName,
-  doctorName = "Dr. Georgia Adams",
   sessionId,
   onClose, 
   onSave 
 }: MedicalCertificateEditorProps) {
   const { toast } = useToast();
-  const [content, setContent] = useState(() => {
-    return CERTIFICATE_TEMPLATE
-      .replace(/\[DATE\]/g, new Date().toLocaleDateString())
-      .replace(/\[PATIENT_NAME\]/g, patientName)
-      .replace(/\[DOCTOR_NAME\]/g, doctorName)
-      .replace("[CERTIFICATE_CONTENT]", "")
-      .replace("[LEAVE_PERIOD]", "");
-  });
+  const { profile } = useProfile();
+  const doctorName = profile?.full_name || "Doctor";
+  
+  const [content, setContent] = useState("");
   const [rawTranscript, setRawTranscript] = useState("");
   const [leavePeriod, setLeavePeriod] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+
+  // Initialize content when doctor name is available
+  useEffect(() => {
+    setContent(
+      CERTIFICATE_TEMPLATE
+        .replace(/\[DATE\]/g, new Date().toLocaleDateString())
+        .replace(/\[PATIENT_NAME\]/g, patientName)
+        .replace(/\[DOCTOR_NAME\]/g, doctorName)
+        .replace("[CERTIFICATE_CONTENT]", "")
+        .replace("[LEAVE_PERIOD]", "")
+    );
+  }, [patientName, doctorName]);
 
   const handleTranscriptionComplete = useCallback((text: string) => {
     setRawTranscript(text);
