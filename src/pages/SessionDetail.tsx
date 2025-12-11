@@ -9,6 +9,9 @@ import {
   User,
   Loader2,
   Trash2,
+  Play,
+  Pause,
+  Volume2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/useSessions";
@@ -162,6 +165,34 @@ export default function SessionDetail() {
           <p className="text-foreground leading-relaxed">{session.summary}</p>
         </div>
       )}
+
+      {/* Audio Recording */}
+      <div className="rounded-xl border border-border bg-card p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10">
+            <Volume2 className="h-5 w-5 text-purple-600" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-foreground">Session Recording</h2>
+            <p className="text-xs text-muted-foreground">Audio from the consultation</p>
+          </div>
+        </div>
+        {session.audio_url ? (
+          <audio 
+            controls 
+            className="w-full"
+            src={session.audio_url}
+          >
+            Your browser does not support the audio element.
+          </audio>
+        ) : (
+          <div className="bg-muted/30 rounded-lg p-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              No audio recording available for this session. Audio recordings are only saved when explicitly enabled during recording.
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* Action Points / TO-DO List */}
       {session.action_points && session.action_points.length > 0 && (

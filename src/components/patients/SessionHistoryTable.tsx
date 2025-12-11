@@ -122,16 +122,16 @@ export function SessionHistoryTable({ sessions, patientId, patientName, allergie
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleGenerateInvoice(session)}>
                           <Receipt className="mr-2 h-4 w-4" />
-                          Generate Invoice
+                          Create Invoice
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => handleGenerateDocument(session, "sick-leave")}>
                           <FileText className="mr-2 h-4 w-4" />
-                          Sick Leave Note
+                          Create Sick Leave Note
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleGenerateDocument(session, "referral")}>
                           <FileText className="mr-2 h-4 w-4" />
-                          Referral Letter
+                          Create Referral Letter
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
