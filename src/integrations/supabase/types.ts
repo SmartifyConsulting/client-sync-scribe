@@ -675,6 +675,36 @@ export type Database = {
           },
         ]
       }
+      service_prices: {
+        Row: {
+          created_at: string
+          currency: string
+          default_price: number
+          id: string
+          service_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          default_price?: number
+          id?: string
+          service_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          default_price?: number
+          id?: string
+          service_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       sessions: {
         Row: {
           action_points: Json | null
