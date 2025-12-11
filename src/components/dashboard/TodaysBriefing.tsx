@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Play, Pause, Pill, Users, MessageCircle } from "lucide-react";
+import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Play, Pause, Pill, Users, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, addDays, isSameDay } from "date-fns";
 
 
 interface RoundTableNote {
@@ -39,30 +39,33 @@ export function TodaysBriefing() {
   const [isNarrating, setIsNarrating] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    fetchTodaysAppointments();
-  }, []);
+    fetchAppointmentsForDate(selectedDate);
+  }, [selectedDate]);
 
+  const isToday = isSameDay(selectedDate, new Date());
 
-  const fetchTodaysAppointments = async () => {
+  const fetchAppointmentsForDate = async (date: Date) => {
+    setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-      const todayEnd = new Date();
-      todayEnd.setHours(23, 59, 59, 999);
+      const dayStart = new Date(date);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(date);
+      dayEnd.setHours(23, 59, 59, 999);
 
-      // Fetch today's appointments
+      // Fetch appointments for selected date
       const { data: appointmentsData, error: appointmentsError } = await supabase
         .from('appointments')
         .select('id, patient_id, title, start_time')
         .eq('user_id', user.id)
-        .gte('start_time', todayStart.toISOString())
-        .lte('start_time', todayEnd.toISOString())
+        .gte('start_time', dayStart.toISOString())
+        .lte('start_time', dayEnd.toISOString())
         .order('start_time', { ascending: true });
 
       if (appointmentsError) throw appointmentsError;
@@ -397,14 +400,35 @@ export function TodaysBriefing() {
     );
   }
 
+  const formattedSelectedDate = format(selectedDate, 'd MMMM yyyy');
+  const briefingTitle = isToday ? "Today's Briefing" : `Briefing for ${format(selectedDate, 'EEEE')}`;
+
   return (
     <div className="rounded-xl border border-primary bg-card shadow-sm">
       <div className="rounded-t-xl bg-primary p-5 flex items-center justify-between gap-2">
-        <div>
-          <h3 className="text-lg font-semibold text-primary-foreground">Today's Briefing</h3>
-          <p className="text-sm text-primary-foreground/80">
-            {appointments.length} appointment{appointments.length !== 1 ? 's' : ''} with patient context
-          </p>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSelectedDate(addDays(selectedDate, -1))}
+            className="h-8 w-8 text-primary-foreground hover:bg-white/20"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-primary-foreground">{briefingTitle}</h3>
+            <p className="text-sm text-primary-foreground/80">
+              {formattedSelectedDate} • {appointments.length} appointment{appointments.length !== 1 ? 's' : ''}
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSelectedDate(addDays(selectedDate, 1))}
+            className="h-8 w-8 text-primary-foreground hover:bg-white/20"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </Button>
         </div>
         <div className="flex items-center gap-2">
           {isPlaying ? (
@@ -443,7 +467,7 @@ export function TodaysBriefing() {
               size="sm"
               onClick={handleNarrate}
               disabled={isNarrating}
-              className="gap-2 bg-white/90 text-primary border border-white/50 hover:bg-white hover:text-primary"
+              className="gap-2 bg-white text-primary border border-white/50 hover:bg-accent hover:text-primary"
             >
               {isNarrating ? (
                 <>
