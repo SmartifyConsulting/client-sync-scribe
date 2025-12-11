@@ -18,6 +18,7 @@ import {
   Calendar,
   Pill,
   Receipt,
+  Users,
 } from "lucide-react";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
@@ -29,12 +30,23 @@ import { AudioWaveform } from "@/components/sessions/AudioWaveform";
 import { useSessions } from "@/hooks/useSessions";
 import { usePatients } from "@/hooks/usePatients";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type SessionState = "idle" | "active" | "processing" | "completed";
 
 export default function Sessions() {
-  const [searchParams] = useSearchParams();
-  const patientId = searchParams.get("patient");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlPatientId = searchParams.get("patient");
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(urlPatientId);
+  
+  // Use URL param if provided, otherwise use selected patient
+  const patientId = urlPatientId || selectedPatientId;
   
   const [sessionState, setSessionState] = useState<SessionState>("idle");
   const [notes, setNotes] = useState("");
@@ -53,10 +65,16 @@ export default function Sessions() {
   const notesRef = useRef<string>("");
 
   const navigate = useNavigate();
-  const { patients } = usePatients();
+  const { patients, loading: patientsLoading } = usePatients();
   const { sessions, loading: sessionsLoading, createSession, completeSession } = useSessions();
   
   const currentPatient = patients.find(p => p.id === patientId);
+
+  // Handle patient selection
+  const handlePatientSelect = (value: string) => {
+    setSelectedPatientId(value);
+    setSearchParams({ patient: value });
+  };
 
   // Fetch active prescriptions when patient changes
   useEffect(() => {
@@ -271,21 +289,80 @@ export default function Sessions() {
       {sessionState === "idle" && (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card p-12 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent mb-4">
-            <Play className="h-8 w-8 text-accent-foreground" />
+            {currentPatient ? (
+              <Play className="h-8 w-8 text-accent-foreground" />
+            ) : (
+              <Users className="h-8 w-8 text-accent-foreground" />
+            )}
           </div>
           <h2 className="text-xl font-semibold text-foreground mb-2">
-            Ready to Start
+            {currentPatient ? "Ready to Start" : "Select a Patient"}
           </h2>
           <p className="text-muted-foreground mb-6 max-w-md">
-            Begin a new consultation session to capture notes, record audio, and
-            generate AI-powered summaries and action points.
+            {currentPatient 
+              ? "Begin a new consultation session to capture notes, record audio, and generate AI-powered summaries and action points."
+              : "Choose a patient to start a new consultation session."}
           </p>
-          {currentPatient && (
-            <p className="text-sm text-primary mb-4">
-              Session for: <span className="font-medium">{currentPatient.name}</span>
-            </p>
+          
+          {/* Patient Selector */}
+          {!currentPatient && (
+            <div className="w-full max-w-xs mb-6">
+              <Select 
+                value={selectedPatientId || ""} 
+                onValueChange={handlePatientSelect}
+              >
+                <SelectTrigger className="w-full bg-background">
+                  <SelectValue placeholder="Select a patient..." />
+                </SelectTrigger>
+                <SelectContent className="bg-popover z-50">
+                  {patientsLoading ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : patients.length === 0 ? (
+                    <div className="py-4 text-center text-sm text-muted-foreground">
+                      No patients found
+                    </div>
+                  ) : (
+                    patients.map((patient) => (
+                      <SelectItem key={patient.id} value={patient.id}>
+                        <span className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          {patient.name}
+                        </span>
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
           )}
-          <Button onClick={startSession} size="lg" className="gap-2">
+          
+          {currentPatient && (
+            <div className="mb-4 space-y-2">
+              <p className="text-sm text-primary">
+                Session for: <span className="font-medium">{currentPatient.name}</span>
+              </p>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => {
+                  setSelectedPatientId(null);
+                  setSearchParams({});
+                }}
+                className="text-xs text-muted-foreground"
+              >
+                Change patient
+              </Button>
+            </div>
+          )}
+          
+          <Button 
+            onClick={startSession} 
+            size="lg" 
+            className="gap-2"
+            disabled={!currentPatient}
+          >
             <Play className="h-5 w-5" />
             Start New Session
           </Button>
