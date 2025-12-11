@@ -79,13 +79,13 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
     let wrappedText = '';
     switch (format) {
       case 'bold':
-        wrappedText = `**${selectedText}**`;
+        wrappedText = `<b>${selectedText}</b>`;
         break;
       case 'italic':
-        wrappedText = `*${selectedText}*`;
+        wrappedText = `<i>${selectedText}</i>`;
         break;
       case 'underline':
-        wrappedText = `__${selectedText}__`;
+        wrappedText = `<u>${selectedText}</u>`;
         break;
     }
 
@@ -102,6 +102,22 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
       const newCursorPos = start + wrappedText.length;
       textarea.setSelectionRange(newCursorPos, newCursorPos);
     }, 0);
+  };
+
+  // Render content with HTML formatting
+  const renderFormattedContent = (content: string) => {
+    // Only allow safe HTML tags for formatting
+    const safeContent = content
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/&lt;b&gt;/g, '<b>')
+      .replace(/&lt;\/b&gt;/g, '</b>')
+      .replace(/&lt;i&gt;/g, '<i>')
+      .replace(/&lt;\/i&gt;/g, '</i>')
+      .replace(/&lt;u&gt;/g, '<u>')
+      .replace(/&lt;\/u&gt;/g, '</u>')
+      .replace(/\n/g, '<br/>');
+    return safeContent;
   };
 
   useEffect(() => {
@@ -340,9 +356,12 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
             
             {/* Content Preview */}
             <div className={`${logoPreview ? 'mt-20' : ''} ${getFontClass(selectedFont)}`}>
-              <pre className="whitespace-pre-wrap text-sm text-gray-800 font-inherit">
-                {replacePlaceholders(formData.content) || "Your template content will appear here..."}
-              </pre>
+              <div 
+                className="whitespace-pre-wrap text-sm text-gray-800"
+                dangerouslySetInnerHTML={{ 
+                  __html: renderFormattedContent(replacePlaceholders(formData.content)) || "Your template content will appear here..." 
+                }}
+              />
             </div>
           </div>
         </div>
