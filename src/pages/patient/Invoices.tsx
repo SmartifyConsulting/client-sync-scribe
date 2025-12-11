@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Receipt, Calendar, Download, CreditCard, CheckCircle, Clock, AlertCircle, Loader2, Send } from "lucide-react";
+import { Receipt, Calendar, Download, CreditCard, CheckCircle, Clock, AlertCircle, Loader2, Send, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -64,6 +64,7 @@ export default function Invoices() {
   const [filter, setFilter] = useState<string>("all");
   const [payingInvoiceId, setPayingInvoiceId] = useState<string | null>(null);
   const [submittingClaimId, setSubmittingClaimId] = useState<string | null>(null);
+  const [viewingInvoice, setViewingInvoice] = useState<Invoice | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -321,7 +322,12 @@ export default function Invoices() {
                     <div className="flex-1 space-y-2">
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="font-semibold">{invoice.invoice_number}</p>
+                          <button
+                            onClick={() => setViewingInvoice(invoice)}
+                            className="font-semibold text-primary hover:underline cursor-pointer text-left"
+                          >
+                            {invoice.invoice_number}
+                          </button>
                           <p className="text-sm text-muted-foreground">{invoice.description}</p>
                         </div>
                         <div className="text-right">
@@ -400,6 +406,101 @@ export default function Invoices() {
           </div>
         </CardContent>
       </Card>
+
+      {/* View Invoice Modal */}
+      {viewingInvoice && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-lg animate-fade-in">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <Receipt className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">Invoice Details</h2>
+                  <p className="text-sm text-muted-foreground">{viewingInvoice.invoice_number}</p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewingInvoice(null)}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {viewingInvoice.doctor_profile?.full_name && (
+                <div>
+                  <p className="text-sm text-muted-foreground">From Doctor</p>
+                  <p className="font-medium">{viewingInvoice.doctor_profile.full_name}</p>
+                </div>
+              )}
+
+              <div>
+                <p className="text-sm text-muted-foreground">Description</p>
+                <p className="font-medium">{viewingInvoice.description}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Amount</p>
+                  <p className="font-semibold text-lg">{formatCurrency(Number(viewingInvoice.amount))}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Status</p>
+                  <div className="mt-1">
+                    <Badge className={statusConfig[viewingInvoice.status]?.color || statusConfig.pending.color}>
+                      {statusConfig[viewingInvoice.status]?.label || viewingInvoice.status}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Issued On</p>
+                  <p className="font-medium">{format(parseISO(viewingInvoice.created_at), 'dd MMMM yyyy')}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Due Date</p>
+                  <p className="font-medium">{format(parseISO(viewingInvoice.due_date), 'dd MMMM yyyy')}</p>
+                </div>
+              </div>
+
+              {viewingInvoice.paid_at && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Paid On</p>
+                  <p className="font-medium">{format(parseISO(viewingInvoice.paid_at), 'dd MMMM yyyy')}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 pt-6 border-t border-border mt-6">
+              <Button 
+                variant="outline" 
+                className="flex-1" 
+                onClick={() => setViewingInvoice(null)}
+              >
+                Close
+              </Button>
+              {(viewingInvoice.status === "pending" || viewingInvoice.status === "overdue") && (
+                <Button 
+                  className="flex-1 gap-1"
+                  onClick={() => {
+                    handlePayInvoice(viewingInvoice.id);
+                    setViewingInvoice(null);
+                  }}
+                >
+                  <CreditCard className="h-4 w-4" />
+                  Mark as Paid
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
