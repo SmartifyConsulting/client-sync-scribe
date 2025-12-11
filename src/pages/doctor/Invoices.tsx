@@ -19,7 +19,11 @@ import {
   X,
   FileText,
   Download,
-  Mail
+  Mail,
+  Plus,
+  ChevronsUpDown,
+  Check,
+  Send
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -58,9 +62,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/hooks/useProfile";
+
+interface Patient {
+  id: string;
+  name: string;
+}
 
 interface Invoice {
   id: string;
@@ -148,10 +165,37 @@ export default function DoctorInvoices() {
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [emailAddress, setEmailAddress] = useState("");
+  
+  // Create invoice state
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [patientSelectorOpen, setPatientSelectorOpen] = useState(false);
+  const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
+  const [newInvoiceForm, setNewInvoiceForm] = useState({
+    description: "",
+    amount: "",
+    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+  });
 
   useEffect(() => {
     fetchInvoices();
+    fetchPatients();
   }, []);
+
+  const fetchPatients = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('patients')
+        .select('id, name')
+        .order('name');
+      
+      if (error) throw error;
+      setPatients(data || []);
+    } catch (error) {
+      console.error("Error fetching patients:", error);
+    }
+  };
 
   const fetchInvoices = async () => {
     try {
@@ -601,6 +645,83 @@ export default function DoctorInvoices() {
     }
   };
 
+  const generateInvoiceNumber = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const random = Math.random().toString(36).substring(2, 7).toUpperCase();
+    return `INV-${year}${month}-${random}`;
+  };
+
+  const handleCreateInvoice = async () => {
+    if (!selectedPatient) {
+      toast({
+        title: "No Patient Selected",
+        description: "Please select a patient first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!newInvoiceForm.amount || parseFloat(newInvoiceForm.amount) <= 0) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid amount greater than 0",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsCreatingInvoice(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const invoiceNumber = generateInvoiceNumber();
+      
+      const { data, error } = await supabase
+        .from('invoices')
+        .insert({
+          patient_id: selectedPatient.id,
+          doctor_id: user.id,
+          invoice_number: invoiceNumber,
+          description: newInvoiceForm.description || `Consultation - ${selectedPatient.name}`,
+          amount: parseFloat(newInvoiceForm.amount),
+          due_date: newInvoiceForm.dueDate,
+          status: 'pending',
+        })
+        .select(`*, patient:patients(id, name)`)
+        .single();
+
+      if (error) throw error;
+
+      setInvoices(prev => [data, ...prev]);
+      
+      toast({
+        title: "Invoice Created",
+        description: `Invoice ${invoiceNumber} has been created successfully`,
+      });
+
+      // Reset form
+      setShowCreateDialog(false);
+      setSelectedPatient(null);
+      setNewInvoiceForm({
+        description: "",
+        amount: "",
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      });
+    } catch (error: any) {
+      console.error("Error creating invoice:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create invoice",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingInvoice(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -611,7 +732,7 @@ export default function DoctorInvoices() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header with Report Button */}
+      {/* Header with Create and Report Buttons */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Invoices</h1>
@@ -619,14 +740,173 @@ export default function DoctorInvoices() {
             Manage and track all patient invoices
           </p>
         </div>
-        <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <FileText className="h-4 w-4" />
-              Generate Report
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+        <div className="flex gap-2">
+          {/* Create Invoice Dialog */}
+          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                Create Invoice
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Create New Invoice</DialogTitle>
+                <DialogDescription>
+                  Select a patient and enter invoice details
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4 py-4">
+                {/* Patient Selector with Search */}
+                <div className="space-y-2">
+                  <Label>Patient</Label>
+                  <Popover open={patientSelectorOpen} onOpenChange={setPatientSelectorOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={patientSelectorOpen}
+                        className="w-full justify-between"
+                      >
+                        {selectedPatient ? (
+                          <span className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            {selectedPatient.name}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">Select a patient...</span>
+                        )}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[400px] p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Search patients..." />
+                        <CommandList>
+                          <CommandEmpty>No patient found.</CommandEmpty>
+                          <CommandGroup>
+                            {patients.map((patient) => (
+                              <CommandItem
+                                key={patient.id}
+                                value={patient.name}
+                                onSelect={() => {
+                                  setSelectedPatient(patient);
+                                  setPatientSelectorOpen(false);
+                                  if (!newInvoiceForm.description) {
+                                    setNewInvoiceForm(prev => ({
+                                      ...prev,
+                                      description: `Consultation - ${patient.name}`
+                                    }));
+                                  }
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    selectedPatient?.id === patient.id ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                <User className="mr-2 h-4 w-4 text-muted-foreground" />
+                                {patient.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* Description */}
+                <div className="space-y-2">
+                  <Label htmlFor="new-description">Description</Label>
+                  <Textarea
+                    id="new-description"
+                    value={newInvoiceForm.description}
+                    onChange={(e) => setNewInvoiceForm(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Invoice description..."
+                    className="min-h-[80px]"
+                  />
+                </div>
+
+                {/* Amount and Due Date */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="new-amount">Amount (R)</Label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="new-amount"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={newInvoiceForm.amount}
+                        onChange={(e) => setNewInvoiceForm(prev => ({ ...prev, amount: e.target.value }))}
+                        placeholder="0.00"
+                        className="pl-9"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="new-dueDate">Due Date</Label>
+                    <Input
+                      id="new-dueDate"
+                      type="date"
+                      value={newInvoiceForm.dueDate}
+                      onChange={(e) => setNewInvoiceForm(prev => ({ ...prev, dueDate: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t border-border">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="flex-1" 
+                  onClick={() => {
+                    setShowCreateDialog(false);
+                    setSelectedPatient(null);
+                    setNewInvoiceForm({
+                      description: "",
+                      amount: "",
+                      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    });
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  className="flex-1 gap-2" 
+                  onClick={handleCreateInvoice}
+                  disabled={isCreatingInvoice || !selectedPatient}
+                >
+                  {isCreatingInvoice ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4" />
+                      Create Invoice
+                    </>
+                  )}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Report Dialog */}
+          <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <FileText className="h-4 w-4" />
+                Generate Report
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Invoice Report</DialogTitle>
               <DialogDescription>
@@ -791,6 +1071,7 @@ export default function DoctorInvoices() {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Stats Cards */}
