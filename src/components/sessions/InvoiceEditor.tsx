@@ -44,12 +44,28 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
   const [patientDetails, setPatientDetails] = useState<PatientDetails | null>(null);
   const [servicePrices, setServicePrices] = useState<ServicePrice[]>([]);
   const [selectedService, setSelectedService] = useState<string>("");
+  const [currency, setCurrency] = useState<string>("ZAR");
   const [lineItems, setLineItems] = useState<LineItem[]>([
     { id: crypto.randomUUID(), description: `Consultation session - ${patientName}`, amount: "" }
   ]);
   const [dueDate, setDueDate] = useState(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
   const [rawTranscript, setRawTranscript] = useState("");
   const [activeLineItemId, setActiveLineItemId] = useState<string | null>(null);
+
+  const CURRENCIES = [
+    { code: "ZAR", symbol: "R" },
+    { code: "USD", symbol: "$" },
+    { code: "EUR", symbol: "€" },
+    { code: "GBP", symbol: "£" },
+    { code: "BWP", symbol: "P" },
+    { code: "NAD", symbol: "N$" },
+    { code: "SZL", symbol: "E" },
+    { code: "LSL", symbol: "M" },
+  ];
+
+  const getCurrencySymbol = (code: string) => {
+    return CURRENCIES.find(c => c.code === code)?.symbol || code;
+  };
 
   const totalAmount = lineItems.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
 
@@ -81,6 +97,10 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
 
       if (!servicesError && servicesData) {
         setServicePrices(servicesData);
+        // Set currency from first service if available
+        if (servicesData.length > 0) {
+          setCurrency(servicesData[0].currency);
+        }
       }
     };
 
@@ -301,7 +321,7 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
                   </div>
                   <div className="w-28">
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">R</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">{getCurrencySymbol(currency)}</span>
                       <Input
                         type="number"
                         step="0.01"
@@ -330,7 +350,7 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
               {/* Total */}
               <div className="flex justify-end items-center gap-4 pt-2 border-t border-border">
                 <span className="text-sm font-medium text-muted-foreground">Total:</span>
-                <span className="text-lg font-semibold text-foreground">R {totalAmount.toFixed(2)}</span>
+                <span className="text-lg font-semibold text-foreground">{getCurrencySymbol(currency)} {totalAmount.toFixed(2)}</span>
               </div>
             </div>
 
