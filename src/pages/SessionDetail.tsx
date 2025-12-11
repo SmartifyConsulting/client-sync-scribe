@@ -233,10 +233,24 @@ export default function SessionDetail() {
               <p className="text-xs text-muted-foreground">Voice recording transcript</p>
             </div>
           </div>
-          <div className="bg-muted/30 rounded-lg p-4 max-h-[400px] overflow-y-auto">
-            <p className="text-foreground whitespace-pre-wrap leading-relaxed">
-              {session.transcript}
-            </p>
+          <div className="bg-muted/30 rounded-lg p-4 max-h-[400px] overflow-y-auto space-y-2">
+            {session.transcript.split('\n').map((line, index) => {
+              const colonIndex = line.indexOf(':');
+              if (colonIndex > 0 && colonIndex < 50) {
+                const speaker = line.substring(0, colonIndex);
+                const text = line.substring(colonIndex + 1);
+                const isDoctor = speaker.toLowerCase().includes('dr') || speaker.toLowerCase().includes('doctor');
+                
+                return (
+                  <p key={index} className={`leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
+                    <span className="font-bold">{speaker}</span>:{text}
+                  </p>
+                );
+              }
+              return line.trim() ? (
+                <p key={index} className="text-foreground leading-relaxed">{line}</p>
+              ) : null;
+            })}
           </div>
         </div>
       )}
