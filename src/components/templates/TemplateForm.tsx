@@ -259,12 +259,15 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
       {/* Header/Footer Template Selector */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-foreground">Header & Footer Template</label>
-        <Select value={selectedHeaderFooterId} onValueChange={setSelectedHeaderFooterId}>
+        <Select 
+          value={selectedHeaderFooterId || "none"} 
+          onValueChange={(val) => setSelectedHeaderFooterId(val === "none" ? "" : val)}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Select a header/footer template" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">None</SelectItem>
+            <SelectItem value="none">None</SelectItem>
             {headerFooterTemplates.map((template) => (
               <SelectItem key={template.id} value={template.id}>
                 {template.name}
