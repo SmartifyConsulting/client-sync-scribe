@@ -17,7 +17,7 @@ import Documents from "./pages/Documents";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import TodoList from "./pages/TodoList";
-import Inbox from "./pages/Inbox";
+import Notifications from "./pages/Notifications";
 import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -98,7 +98,7 @@ const App = () => (
             <Route path="/sessions/:id" element={<SessionDetail />} />
             <Route path="/documents" element={<Documents />} />
             <Route path="/invoices" element={<DoctorInvoices />} />
-            <Route path="/inbox" element={<Inbox />} />
+            <Route path="/notifications" element={<Notifications />} />
             
             {/* Patient routes */}
             <Route path="/patient/calendar" element={<PatientCalendar />} />

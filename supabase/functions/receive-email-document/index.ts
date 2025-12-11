@@ -121,6 +121,25 @@ ${payload.attachments && payload.attachments.length > 0
 
     console.log("Document created successfully:", document.id);
 
+    // Create a notification for the user
+    const { error: notificationError } = await supabase
+      .from("notifications")
+      .insert({
+        user_id: profile.id,
+        type: "document_received",
+        title: "New Document Received",
+        description: `Email from ${payload.from}: ${payload.subject || "No Subject"}`,
+        reference_id: document.id,
+        is_read: false,
+      });
+
+    if (notificationError) {
+      console.error("Error creating notification:", notificationError);
+      // Don't fail the request if notification fails
+    } else {
+      console.log("Notification created for user:", profile.id);
+    }
+
     // If there are attachments, we could store them in Supabase Storage
     // For now, we just note them in the document content
 
