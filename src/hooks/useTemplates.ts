@@ -225,6 +225,46 @@ Date: [SignatureDate]`,
     font_family: "sans",
     is_default: true,
   },
+  {
+    name: "Invoice",
+    description: "Billing invoice for patient services",
+    category: "Invoice",
+    content: `INVOICE
+=======
+
+Practice Number: [PracticeNumber]
+Doctor Registration Number: [DoctorNumber]
+Practice Address: [PracticeAddress]
+
+Invoice Number: INV-[InvoiceNumber]
+Date: [InvoiceDate]
+
+BILL TO:
+Patient: [PatientName]
+Address: [PatientAddress]
+Medical Aid: [MedicalAid]
+Medical Aid Number: [MedicalAidNumber]
+
+SERVICES PROVIDED
+-----------------
+[Services]
+
+AMOUNT DUE
+----------
+Total: [TotalAmount]
+
+Payment Terms: Due within 30 days
+Bank Details: [BankDetails]
+
+Thank you for your patronage.
+
+[DoctorName]
+[PracticeNumber]`,
+    logo_url: null,
+    logo_position: null,
+    font_family: "sans",
+    is_default: true,
+  },
 ];
 
 export function useTemplates() {
