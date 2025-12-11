@@ -180,6 +180,17 @@ export default function Inbox() {
     );
   }
 
+  // Get user email for mailbox display
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const getEmail = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserEmail(user?.email || null);
+    };
+    getEmail();
+  }, []);
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
@@ -187,6 +198,13 @@ export default function Inbox() {
         <p className="mt-1 text-muted-foreground">
           Messages from other doctors about shared patients
         </p>
+        {userEmail && (
+          <div className="mt-2 flex items-center gap-2 text-sm">
+            <Mail className="h-4 w-4 text-primary" />
+            <span className="text-muted-foreground">Mailbox:</span>
+            <span className="font-medium text-foreground">{userEmail}</span>
+          </div>
+        )}
       </div>
 
       {selectedMessage ? (
