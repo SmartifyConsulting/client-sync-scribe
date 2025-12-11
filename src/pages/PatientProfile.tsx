@@ -12,6 +12,7 @@ import {
   Save,
   AlertCircle,
   Star,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -29,11 +30,16 @@ import { InvitePatientDialog } from "@/components/patients/InvitePatientDialog";
 import { DoctorsOnProfile } from "@/components/patients/DoctorsOnProfile";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { RoundTable } from "@/components/patients/RoundTable";
+import { useTemplates } from "@/hooks/useTemplates";
+import { useDocuments } from "@/hooks/useDocuments";
+import { DocumentEditor } from "@/components/documents/DocumentEditor";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
-const mockDocuments = [
-  { id: "1", name: "Financial Statement Q3.pdf", type: "Report", date: "Nov 15, 2024" },
-  { id: "2", name: "Action Plan 2024.docx", type: "Plan", date: "Nov 1, 2024" },
-];
 
 export default function PatientProfile() {
   const { id } = useParams<{ id: string }>();
@@ -41,12 +47,16 @@ export default function PatientProfile() {
   const { toast } = useToast();
   const { patient, loading: patientLoading, updatePatient } = usePatient(id || "");
   const { sessions, loading: sessionsLoading } = useSessions(id);
+  const { templates, loading: templatesLoading } = useTemplates();
+  const { documents, loading: documentsLoading, fetchDocuments } = useDocuments();
   
   const [additionalNotes, setAdditionalNotes] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
   const [canViewAllSessions, setCanViewAllSessions] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [unreadRoundTableCount, setUnreadRoundTableCount] = useState(0);
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
 
   // Check if current doctor has access to all sessions
   useEffect(() => {
@@ -334,41 +344,64 @@ export default function PatientProfile() {
         </TabsContent>
 
         <TabsContent value="documents" className="space-y-4">
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" className="gap-2 h-11" onClick={() => setShowTemplateSelector(true)}>
+              <Plus className="h-4 w-4" />
+              Create New Document
+            </Button>
             <Button variant="outline" className="gap-2 h-11">
               <Upload className="h-4 w-4" />
               Upload Document
             </Button>
           </div>
           <div className="rounded-2xl bg-card shadow-card overflow-hidden">
-            {mockDocuments.length === 0 ? (
-              <div className="p-10 text-center">
-                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
-                  <FileText className="h-7 w-7 text-muted-foreground" />
-                </div>
-                <p className="text-muted-foreground">No documents yet</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-border/50">
-                {mockDocuments.map((doc) => (
-                  <div
-                    key={doc.id}
-                    className="flex items-center gap-4 p-5 hover:bg-muted/30 transition-all duration-200 cursor-pointer"
-                  >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-                      <FileText className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-foreground">{doc.name}</p>
-                      <p className="text-sm text-muted-foreground">{doc.date}</p>
-                    </div>
-                    <span className="rounded-full bg-muted/70 px-3 py-1.5 text-xs font-medium text-muted-foreground">
-                      {doc.type}
-                    </span>
+            {(() => {
+              const patientDocuments = documents.filter(doc => doc.patient_id === patient.id);
+              if (documentsLoading) {
+                return (
+                  <div className="p-10 text-center">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
                   </div>
-                ))}
-              </div>
-            )}
+                );
+              }
+              if (patientDocuments.length === 0) {
+                return (
+                  <div className="p-10 text-center">
+                    <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                      <FileText className="h-7 w-7 text-muted-foreground" />
+                    </div>
+                    <p className="text-muted-foreground">No documents yet</p>
+                    <p className="text-sm text-muted-foreground mt-1">Create a new document from a template</p>
+                  </div>
+                );
+              }
+              return (
+                <div className="divide-y divide-border/50">
+                  {patientDocuments.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="flex items-center gap-4 p-5 hover:bg-muted/30 transition-all duration-200 cursor-pointer"
+                      onClick={() => navigate(`/documents?view=${doc.id}`)}
+                    >
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                        <FileText className="h-6 w-6 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-foreground">{doc.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {format(new Date(doc.created_at), "MMM d, yyyy")}
+                        </p>
+                      </div>
+                      {doc.template_name && (
+                        <span className="rounded-full bg-muted/70 px-3 py-1.5 text-xs font-medium text-muted-foreground">
+                          {doc.template_name}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         </TabsContent>
 
@@ -425,6 +458,69 @@ export default function PatientProfile() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Template Selector Dialog */}
+      <Dialog open={showTemplateSelector} onOpenChange={setShowTemplateSelector}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Select a Template</DialogTitle>
+          </DialogHeader>
+          {templatesLoading ? (
+            <div className="py-8 text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+            </div>
+          ) : templates.length === 0 ? (
+            <div className="py-8 text-center">
+              <p className="text-muted-foreground">No templates available.</p>
+              <Button className="mt-4" onClick={() => navigate('/documents')}>
+                Create Templates
+              </Button>
+            </div>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {templates.map((template) => (
+                <button
+                  key={template.id}
+                  onClick={() => {
+                    setSelectedTemplate(template);
+                    setShowTemplateSelector(false);
+                  }}
+                  className="flex items-start gap-3 p-4 rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-all text-left"
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                    <FileText className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-foreground">{template.name}</p>
+                    {template.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">
+                        {template.description}
+                      </p>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Document Editor */}
+      {selectedTemplate && patient && (
+        <DocumentEditor
+          template={selectedTemplate}
+          preSelectedPatientId={patient.id}
+          onClose={() => setSelectedTemplate(null)}
+          onSave={() => {
+            setSelectedTemplate(null);
+            fetchDocuments();
+            toast({
+              title: "Document created",
+              description: "The document has been saved to this patient's profile.",
+            });
+          }}
+        />
+      )}
     </div>
   );
 }

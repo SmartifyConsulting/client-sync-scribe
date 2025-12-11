@@ -125,13 +125,13 @@ export function SessionHistoryTable({ sessions, patientId, patientName, allergie
                           Create Invoice
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleGenerateDocument(session, "sick-leave")}>
+                        <DropdownMenuItem onClick={() => handleGenerateDocument(session, "medical-certificate")}>
                           <FileText className="mr-2 h-4 w-4" />
-                          Create Sick Leave Note
+                          Medical Certificate
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleGenerateDocument(session, "referral")}>
                           <FileText className="mr-2 h-4 w-4" />
-                          Create Referral Letter
+                          Referral Letter
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

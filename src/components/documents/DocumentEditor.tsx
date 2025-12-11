@@ -33,18 +33,19 @@ interface Template {
 
 interface DocumentEditorProps {
   template: Template;
+  preSelectedPatientId?: string;
   onClose: () => void;
   onSave: (document: { name: string; content: string }) => void;
 }
 
-export function DocumentEditor({ template, onClose, onSave }: DocumentEditorProps) {
+export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave }: DocumentEditorProps) {
   const { toast } = useToast();
   const { patients } = usePatients();
   const { profile } = useProfile();
   const { createDocument } = useDocuments();
   const [documentName, setDocumentName] = useState(`${template.name} - ${new Date().toLocaleDateString()}`);
   const [content, setContent] = useState(template.content);
-  const [selectedPatientId, setSelectedPatientId] = useState<string>("");
+  const [selectedPatientId, setSelectedPatientId] = useState<string>(preSelectedPatientId || "");
   const [isSaving, setIsSaving] = useState(false);
 
   // Auto-fill placeholders when patient or profile changes
