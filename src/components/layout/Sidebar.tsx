@@ -15,40 +15,24 @@ import {
   Shield,
   Inbox,
   User,
-  ChevronDown,
   LucideIcon,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-
-interface SubNavItem {
-  icon: LucideIcon;
-  label: string;
-  to: string;
-}
 
 interface NavItem {
   icon: LucideIcon;
   label: string;
   to: string;
-  subItems?: SubNavItem[];
 }
 
 const doctorNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/" },
   { icon: Inbox, label: "Inbox", to: "/inbox" },
-  { 
-    icon: Users, 
-    label: "Patients", 
-    to: "/patients",
-    subItems: [
-      { icon: Mic, label: "Sessions", to: "/sessions" },
-      { icon: Receipt, label: "Invoices", to: "/invoices" },
-    ]
-  },
+  { icon: Users, label: "Patients", to: "/patients" },
+  { icon: Mic, label: "Sessions", to: "/sessions" },
+  { icon: Receipt, label: "Invoices", to: "/invoices" },
   { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: CheckSquare, label: "To-Do List", to: "/todos" },
   { icon: FileText, label: "Templates", to: "/documents" },
@@ -69,10 +53,6 @@ interface SidebarProps {
 export function Sidebar({ onNavigate }: SidebarProps) {
   const { role, loading, isPatient } = useUserRole();
   const navItems = isPatient ? patientNavItems : doctorNavItems;
-  const location = useLocation();
-  const [patientsOpen, setPatientsOpen] = useState(
-    ["/patients", "/sessions", "/invoices"].some(path => location.pathname.startsWith(path))
-  );
 
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ["unread-messages-count"],
@@ -93,11 +73,6 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     },
     refetchInterval: 30000,
   });
-
-  const isSubItemActive = (subItems?: { to: string }[]) => {
-    if (!subItems) return false;
-    return subItems.some(sub => location.pathname.startsWith(sub.to));
-  };
 
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-[210px] bg-sidebar border-r border-sidebar-border">
@@ -120,92 +95,29 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            navItems.map((item) => {
-              const hasSubItems = 'subItems' in item && item.subItems;
-              
-              if (hasSubItems) {
-                return (
-                  <Collapsible key={item.to} open={patientsOpen} onOpenChange={setPatientsOpen}>
-                    <CollapsibleTrigger asChild>
-                      <button
-                        className={cn(
-                          "flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
-                          (location.pathname === item.to || isSubItemActive(item.subItems))
-                            ? "bg-primary/10 text-primary"
-                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                        )}
-                      >
-                        <item.icon className="h-5 w-5" />
-                        <span className="flex-1 text-left">{item.label}</span>
-                        <ChevronDown className={cn(
-                          "h-4 w-4 transition-transform duration-200",
-                          patientsOpen && "rotate-180"
-                        )} />
-                      </button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="space-y-1 pt-1">
-                      <NavLink
-                        to={item.to}
-                        onClick={onNavigate}
-                        end
-                        className={({ isActive }) =>
-                          cn(
-                            "flex items-center gap-3 rounded-xl px-4 py-2.5 pl-12 text-sm font-medium transition-all duration-200",
-                            isActive
-                              ? "bg-primary text-primary-foreground shadow-sm"
-                              : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                          )
-                        }
-                      >
-                        All Patients
-                      </NavLink>
-                      {item.subItems?.map((subItem) => (
-                        <NavLink
-                          key={subItem.to}
-                          to={subItem.to}
-                          onClick={onNavigate}
-                          className={({ isActive }) =>
-                            cn(
-                              "flex items-center gap-3 rounded-xl px-4 py-2.5 pl-12 text-sm font-medium transition-all duration-200",
-                              isActive
-                                ? "bg-primary text-primary-foreground shadow-sm"
-                                : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                            )
-                          }
-                        >
-                          <subItem.icon className="h-4 w-4" />
-                          {subItem.label}
-                        </NavLink>
-                      ))}
-                    </CollapsibleContent>
-                  </Collapsible>
-                );
-              }
-
-              return (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  onClick={onNavigate}
-                  className={({ isActive }) =>
-                    cn(
-                      "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
-                      isActive
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                    )
-                  }
-                >
-                  <item.icon className="h-5 w-5" />
-                  <span className="flex-1">{item.label}</span>
-                  {item.label === "Inbox" && unreadCount > 0 && (
-                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-semibold text-destructive-foreground">
-                      {unreadCount > 99 ? "99+" : unreadCount}
-                    </span>
-                  )}
-                </NavLink>
-              );
-            })
+            navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={onNavigate}
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                  )
+                }
+              >
+                <item.icon className="h-5 w-5" />
+                <span className="flex-1">{item.label}</span>
+                {item.label === "Inbox" && unreadCount > 0 && (
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-semibold text-destructive-foreground">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
+              </NavLink>
+            ))
           )}
         </nav>
 

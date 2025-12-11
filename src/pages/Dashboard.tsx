@@ -9,10 +9,51 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Dashboard() {
   const { profile } = useProfile();
   const { isDoctor } = useUserRole();
+
+  // Query for unread messages count
+  const { data: unreadMessagesCount = 0 } = useQuery({
+    queryKey: ["unread-messages-dashboard"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return 0;
+
+      const { count, error } = await supabase
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .eq("recipient_id", user.id)
+        .eq("is_read", false);
+
+      if (error) return 0;
+      return count || 0;
+    },
+    refetchInterval: 30000,
+  });
+
+  // Query for pending todos count
+  const { data: pendingTodosCount = 0 } = useQuery({
+    queryKey: ["pending-todos-dashboard"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return 0;
+
+      const { count, error } = await supabase
+        .from("todos")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("status", "pending");
+
+      if (error) return 0;
+      return count || 0;
+    },
+    refetchInterval: 30000,
+  });
+
+  const totalNotifications = unreadMessagesCount + pendingTodosCount;
   
   // Format display name based on role
   const getDisplayName = () => {
@@ -60,12 +101,19 @@ export default function Dashboard() {
               <p className="text-sm font-medium text-foreground">My Profile</p>
               <p className="text-xs text-muted-foreground">{profile?.full_name || "User"}</p>
             </div>
-            <Avatar className="h-10 w-10 border-2 border-primary/20">
-              <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} />
-              <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                {getInitials()}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="h-10 w-10 border-2 border-primary/20">
+                <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} />
+                <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                  {getInitials()}
+                </AvatarFallback>
+              </Avatar>
+              {totalNotifications > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-xs font-semibold text-destructive-foreground">
+                  {totalNotifications > 99 ? "99+" : totalNotifications}
+                </span>
+              )}
+            </div>
           </Link>
           <Button 
             variant="ghost" 
