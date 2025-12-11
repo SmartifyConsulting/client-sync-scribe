@@ -1,19 +1,10 @@
-import { useState, useCallback, useEffect, useRef } from "react";
-import { Upload, X, Eye, EyeOff, Move } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { TemplateSectionEditor, SectionContent } from "./TemplateSectionEditor";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 export interface TemplateData {
   id?: string;
@@ -24,18 +15,7 @@ export interface TemplateData {
   logoUrl?: string;
   logoPosition?: { x: number; y: number };
   fontFamily?: string;
-  // New structured content
-  header?: {
-    left: SectionContent;
-    center: SectionContent;
-    right: SectionContent;
-  };
   body?: SectionContent;
-  footer?: {
-    left: SectionContent;
-    center: SectionContent;
-    right: SectionContent;
-  };
 }
 
 interface TemplateFormProps {
@@ -44,17 +24,6 @@ interface TemplateFormProps {
   onCancel: () => void;
   mode?: "create" | "edit";
 }
-
-const FONT_OPTIONS = [
-  { value: "sans", label: "DM Sans (Default)", preview: "font-sans" },
-  { value: "roboto", label: "Roboto", preview: "font-roboto" },
-  { value: "open-sans", label: "Open Sans", preview: "font-open-sans" },
-  { value: "lora", label: "Lora", preview: "font-lora" },
-  { value: "merriweather", label: "Merriweather", preview: "font-merriweather" },
-  { value: "playfair", label: "Playfair Display", preview: "font-playfair" },
-  { value: "source-serif", label: "Source Serif", preview: "font-source-serif" },
-  { value: "rockwell", label: "Rockwell", preview: "font-rockwell" },
-];
 
 const defaultSectionContent = (): SectionContent => ({
   text: "",
@@ -65,8 +34,6 @@ const defaultSectionContent = (): SectionContent => ({
 export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" }: TemplateFormProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
-  const { user } = useAuth();
-  const [selectedFont, setSelectedFont] = useState(initialData?.fontFamily || "sans");
   const [showPreview, setShowPreview] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -74,21 +41,9 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
     description: initialData?.description || "",
   });
 
-  const [header, setHeader] = useState({
-    left: initialData?.header?.left || defaultSectionContent(),
-    center: initialData?.header?.center || { ...defaultSectionContent(), alignment: 'center' as const },
-    right: initialData?.header?.right || { ...defaultSectionContent(), alignment: 'right' as const },
-  });
-
   const [body, setBody] = useState<SectionContent>(
     initialData?.body || { text: initialData?.content || "", alignment: "left" }
   );
-
-  const [footer, setFooter] = useState({
-    left: initialData?.footer?.left || defaultSectionContent(),
-    center: initialData?.footer?.center || { ...defaultSectionContent(), alignment: 'center' as const },
-    right: initialData?.footer?.right || { ...defaultSectionContent(), alignment: 'right' as const },
-  });
 
   useEffect(() => {
     if (initialData) {
@@ -96,18 +51,11 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
         name: initialData.name || "",
         description: initialData.description || "",
       });
-      setSelectedFont(initialData.fontFamily || "sans");
       
-      if (initialData.header) {
-        setHeader(initialData.header);
-      }
       if (initialData.body) {
         setBody(initialData.body);
       } else if (initialData.content) {
         setBody({ text: initialData.content, alignment: "left" });
-      }
-      if (initialData.footer) {
-        setFooter(initialData.footer);
       }
     }
   }, [initialData]);
@@ -122,32 +70,14 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
       return;
     }
 
-    // Combine all sections into legacy content format for backward compatibility
-    const combinedContent = [
-      header.left.text,
-      header.center.text,
-      header.right.text,
-      body.text,
-      footer.left.text,
-      footer.center.text,
-      footer.right.text,
-    ].filter(Boolean).join('\n\n');
-
     onSubmit({
       id: initialData?.id,
       name: formData.name,
       description: formData.description,
       category: "",
-      content: combinedContent || body.text,
-      fontFamily: selectedFont,
-      header,
+      content: body.text,
       body,
-      footer,
     });
-  };
-
-  const getFontClass = (fontValue: string) => {
-    return FONT_OPTIONS.find(f => f.value === fontValue)?.preview || "font-sans";
   };
 
   const replacePlaceholders = (text: string) => {
@@ -197,7 +127,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
     <div className="space-y-6">
       {/* Preview Toggle */}
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium text-foreground">Template Editor</h4>
+        <h4 className="text-sm font-medium text-foreground">Content Template Editor</h4>
         <Button
           variant="outline"
           size="sm"
@@ -213,29 +143,25 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
       {showPreview && (
         <div className="border border-border rounded-lg overflow-hidden bg-white">
           <div className="bg-muted/50 px-4 py-2 border-b border-border">
-            <span className="text-sm font-medium text-foreground">Live Preview</span>
+            <span className="text-sm font-medium text-foreground">Content Preview</span>
           </div>
-          <div className={`p-6 min-h-[400px] ${getFontClass(selectedFont)}`}>
-          {/* Header Preview */}
-            <div className="grid grid-cols-3 gap-4 pb-4 border-b border-gray-200 mb-4">
-              {renderSectionPreview(header.left)}
-              {renderSectionPreview(header.center)}
-              {renderSectionPreview(header.right)}
+          <div className="p-6 min-h-[200px]">
+            {/* Header placeholder */}
+            <div className="pb-4 border-b border-dashed border-gray-200 mb-4">
+              <p className="text-gray-400 italic text-xs text-center">Header will appear here (from Header/Footer template)</p>
             </div>
             
             {/* Body Preview */}
-            <div className="min-h-[200px] py-4">
+            <div className="min-h-[150px] py-4">
               {renderSectionPreview(body)}
               {!body.text && !body.imageUrl && (
                 <p className="text-gray-400 italic">Main content will appear here...</p>
               )}
             </div>
             
-            {/* Footer Preview */}
-            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200 mt-4">
-              {renderSectionPreview(footer.left)}
-              {renderSectionPreview(footer.center)}
-              {renderSectionPreview(footer.right)}
+            {/* Footer placeholder */}
+            <div className="pt-4 border-t border-dashed border-gray-200 mt-4">
+              <p className="text-gray-400 italic text-xs text-center">Footer will appear here (from Header/Footer template)</p>
             </div>
           </div>
         </div>
@@ -261,23 +187,6 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
         />
       </div>
 
-      {/* Font Selection */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">Document Font</label>
-        <Select value={selectedFont} onValueChange={setSelectedFont}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select a font" />
-          </SelectTrigger>
-          <SelectContent>
-            {FONT_OPTIONS.map((font) => (
-              <SelectItem key={font.value} value={font.value}>
-                <span className={font.preview}>{font.label}</span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       {/* Dynamic Fields Info */}
       <div className="p-3 rounded-lg bg-muted/50 border border-border">
         <p className="text-sm font-medium text-foreground mb-2">Available Dynamic Fields</p>
@@ -291,46 +200,8 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
           <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[DoctorNumber]</code>
           <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PracticeAddress]</code>
           <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[Date]</code>
-        </div>
-      </div>
-
-      {/* HEADER SECTION */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <h4 className="text-sm font-semibold text-foreground">Header</h4>
-          <span className="text-xs text-muted-foreground">(3 columns: Left, Center, Right)</span>
-        </div>
-        <div className="grid grid-cols-3 gap-3 p-4 border border-border rounded-lg bg-card">
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Left</label>
-            <TemplateSectionEditor
-              value={header.left}
-              onChange={(v) => setHeader({ ...header, left: v })}
-              placeholder="Logo, practice name..."
-              rows={2}
-              compact
-            />
-          </div>
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Center</label>
-            <TemplateSectionEditor
-              value={header.center}
-              onChange={(v) => setHeader({ ...header, center: v })}
-              placeholder="Title, heading..."
-              rows={2}
-              compact
-            />
-          </div>
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Right</label>
-            <TemplateSectionEditor
-              value={header.right}
-              onChange={(v) => setHeader({ ...header, right: v })}
-              placeholder="Date, reference..."
-              rows={2}
-              compact
-            />
-          </div>
+          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PatientAddress]</code>
+          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PatientDOB]</code>
         </div>
       </div>
 
@@ -355,48 +226,8 @@ This is to certify that [PatientName] was examined at our practice on [Date].
 
 Yours faithfully,
 [DoctorName]"
-            rows={10}
+            rows={12}
           />
-        </div>
-      </div>
-
-      {/* FOOTER SECTION */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <h4 className="text-sm font-semibold text-foreground">Footer</h4>
-          <span className="text-xs text-muted-foreground">(3 columns: Left, Center, Right)</span>
-        </div>
-        <div className="grid grid-cols-3 gap-3 p-4 border border-border rounded-lg bg-card">
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Left</label>
-            <TemplateSectionEditor
-              value={footer.left}
-              onChange={(v) => setFooter({ ...footer, left: v })}
-              placeholder="Practice details..."
-              rows={2}
-              compact
-            />
-          </div>
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Center</label>
-            <TemplateSectionEditor
-              value={footer.center}
-              onChange={(v) => setFooter({ ...footer, center: v })}
-              placeholder="Page number..."
-              rows={2}
-              compact
-            />
-          </div>
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Right</label>
-            <TemplateSectionEditor
-              value={footer.right}
-              onChange={(v) => setFooter({ ...footer, right: v })}
-              placeholder="Contact info..."
-              rows={2}
-              compact
-            />
-          </div>
         </div>
       </div>
 
