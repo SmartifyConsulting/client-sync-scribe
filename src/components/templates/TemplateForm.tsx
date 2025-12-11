@@ -367,35 +367,24 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
         </div>
       )}
 
-      {/* Doctor Information Display */}
-      <div className="p-4 rounded-lg bg-muted/50 border border-border">
-        <h4 className="text-sm font-medium text-foreground mb-3">Doctor Information</h4>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-muted-foreground">Practice Number:</span>
-            <p className="font-medium text-foreground">
-              {profile?.practice_number || (
-                <span className="text-amber-600">Not set - Update in Settings</span>
-              )}
-            </p>
-          </div>
-          <div>
-            <span className="text-muted-foreground">Doctor Registration Number:</span>
-            <p className="font-medium text-foreground">
-              {profile?.doctor_number || (
-                <span className="text-amber-600">Not set - Update in Settings</span>
-              )}
-            </p>
-          </div>
-        </div>
-        <div className="mt-3">
-          <span className="text-muted-foreground">Practice Address:</span>
-          <p className="font-medium text-foreground">
-            {(profile as any)?.practice_address || (
-              <span className="text-amber-600">Not set - Update in Settings</span>
-            )}
-          </p>
-        </div>
+      {/* Template Name */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-foreground">Template Name *</label>
+        <Input
+          placeholder="e.g., Medical Certificate, Referral Letter"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+        />
+      </div>
+
+      {/* Description */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-foreground">Description</label>
+        <Input
+          placeholder="Brief description of when to use this template"
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+        />
       </div>
 
       {/* Font Selection */}
@@ -519,42 +508,30 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
         )}
       </div>
 
-      {/* Template Details */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="text-sm font-medium text-foreground">Template Name *</label>
-          <Input
-            placeholder="e.g., Progress Report"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          />
+      {/* Template Content */}
+      <div className="space-y-3">
+        <label className="text-sm font-medium text-foreground">Template Content *</label>
+        
+        {/* Placeholder Instructions */}
+        <div className="p-3 rounded-lg bg-muted/50 border border-border">
+          <p className="text-sm font-medium text-foreground mb-2">Available Dynamic Fields</p>
+          <p className="text-xs text-muted-foreground mb-2">
+            Use these placeholders in your template - they will be automatically replaced with actual data when creating a document.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PatientName]</code>
+            <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[DoctorName]</code>
+            <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PracticeNumber]</code>
+            <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[DoctorNumber]</code>
+            <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PracticeAddress]</code>
+            <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[Date]</code>
+            <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PatientAddress]</code>
+            <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PatientDOB]</code>
+          </div>
         </div>
-        <div>
-          <label className="text-sm font-medium text-foreground">Category</label>
-          <Input
-            placeholder="e.g., Report, Letter, Plan"
-            value={formData.category}
-            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-          />
-        </div>
-      </div>
 
-      <div>
-        <label className="text-sm font-medium text-foreground">Description</label>
-        <Input
-          placeholder="Brief description of the template"
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-        />
-      </div>
-
-      <div>
-        <label className="text-sm font-medium text-foreground">Content *</label>
-        <p className="text-xs text-muted-foreground mb-2">
-          Use [PlaceholderName] for dynamic fields. Available: [PatientName], [PracticeNumber], [DoctorNumber], [PracticeAddress], [DoctorName]
-        </p>
         {/* Formatting Toolbar */}
-        <div className="flex items-center gap-1 mb-2 p-1 border border-border rounded-md bg-muted/30 w-fit">
+        <div className="flex items-center gap-1 p-1 border border-border rounded-md bg-muted/30 w-fit">
           <Toggle
             size="sm"
             aria-label="Bold"
@@ -583,12 +560,13 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
             Select text, then click to format
           </span>
         </div>
+
         <Textarea
           ref={contentRef}
-          placeholder={`Example template:\n\nLETTERHEAD\n==========\nPractice Number: [PracticeNumber]\nDoctor Number: [DoctorNumber]\n\nDear [PatientName],\n\nYour content here...`}
+          placeholder={`Enter your template content here...\n\nExample:\n\n[DoctorName]\nPractice #: [PracticeNumber]\n[PracticeAddress]\n\nDate: [Date]\n\nTo Whom It May Concern,\n\nThis is to certify that [PatientName] was seen at our practice...\n\nYours faithfully,\n[DoctorName]`}
           value={formData.content}
           onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-          rows={10}
+          rows={12}
           className={`font-mono text-sm ${getFontClass(selectedFont)}`}
         />
       </div>
