@@ -4,7 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
+import { useHeaderFooterTemplates } from "@/hooks/useHeaderFooterTemplates";
 import { TemplateSectionEditor, SectionContent } from "./TemplateSectionEditor";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export interface TemplateData {
   id?: string;
@@ -16,6 +24,7 @@ export interface TemplateData {
   logoPosition?: { x: number; y: number };
   fontFamily?: string;
   body?: SectionContent;
+  headerFooterTemplateId?: string;
 }
 
 interface TemplateFormProps {
@@ -34,7 +43,11 @@ const defaultSectionContent = (): SectionContent => ({
 export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" }: TemplateFormProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
+  const { templates: headerFooterTemplates } = useHeaderFooterTemplates();
   const [showPreview, setShowPreview] = useState(false);
+  const [selectedHeaderFooterId, setSelectedHeaderFooterId] = useState<string>(
+    initialData?.headerFooterTemplateId || ""
+  );
   
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
@@ -45,12 +58,15 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
     initialData?.body || { text: initialData?.content || "", alignment: "left" }
   );
 
+  const selectedHeaderFooter = headerFooterTemplates.find(t => t.id === selectedHeaderFooterId);
+
   useEffect(() => {
     if (initialData) {
       setFormData({
         name: initialData.name || "",
         description: initialData.description || "",
       });
+      setSelectedHeaderFooterId(initialData.headerFooterTemplateId || "");
       
       if (initialData.body) {
         setBody(initialData.body);
@@ -77,6 +93,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
       category: "",
       content: body.text,
       body,
+      headerFooterTemplateId: selectedHeaderFooterId || undefined,
     });
   };
 
@@ -103,7 +120,8 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
     return safeContent;
   };
 
-  const renderSectionPreview = (section: SectionContent) => {
+  const renderSectionPreview = (section: SectionContent | undefined) => {
+    if (!section) return null;
     return (
       <div style={{ textAlign: section.alignment }}>
         {section.imageUrl && (
@@ -119,6 +137,36 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
             dangerouslySetInnerHTML={{ __html: renderFormattedContent(replacePlaceholders(section.text)) }}
           />
         )}
+      </div>
+    );
+  };
+
+  const renderHeaderFooterPreview = (type: 'header' | 'footer') => {
+    if (!selectedHeaderFooter) {
+      return (
+        <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 2fr 1fr' }}>
+          <div className="min-h-[20px] border border-dashed border-gray-300 rounded flex items-center justify-center">
+            <span className="text-xs text-gray-400">Left</span>
+          </div>
+          <div className="min-h-[20px] border border-dashed border-gray-300 rounded flex items-center justify-center">
+            <span className="text-xs text-gray-400">Center</span>
+          </div>
+          <div className="min-h-[20px] border border-dashed border-gray-300 rounded flex items-center justify-center">
+            <span className="text-xs text-gray-400">Right</span>
+          </div>
+        </div>
+      );
+    }
+
+    const section = type === 'header' 
+      ? selectedHeaderFooter.header as { left: SectionContent; center: SectionContent; right: SectionContent }
+      : selectedHeaderFooter.footer as { left: SectionContent; center: SectionContent; right: SectionContent };
+
+    return (
+      <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 2fr 1fr' }}>
+        <div>{renderSectionPreview(section?.left)}</div>
+        <div>{renderSectionPreview(section?.center)}</div>
+        <div>{renderSectionPreview(section?.right)}</div>
       </div>
     );
   };
@@ -145,23 +193,33 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
           <div className="bg-muted/50 px-4 py-2 border-b border-border">
             <span className="text-sm font-medium text-foreground">Content Preview</span>
           </div>
-          <div className="p-6 min-h-[200px]">
-            {/* Header placeholder */}
-            <div className="pb-4 border-b border-dashed border-gray-200 mb-4">
-              <p className="text-gray-400 italic text-xs text-center">Header will appear here (from Header/Footer template)</p>
-            </div>
-            
-            {/* Body Preview */}
-            <div className="min-h-[150px] py-4">
-              {renderSectionPreview(body)}
-              {!body.text && !body.imageUrl && (
-                <p className="text-gray-400 italic">Main content will appear here...</p>
+          <div className="p-6 min-h-[300px]">
+            {/* Header Preview */}
+            <div className="pb-4 border-b border-gray-200 mb-4">
+              {renderHeaderFooterPreview('header')}
+              {!selectedHeaderFooter && (
+                <p className="text-gray-400 italic text-xs text-center mt-2">Select a Header/Footer template below</p>
               )}
             </div>
             
-            {/* Footer placeholder */}
-            <div className="pt-4 border-t border-dashed border-gray-200 mt-4">
-              <p className="text-gray-400 italic text-xs text-center">Footer will appear here (from Header/Footer template)</p>
+            {/* Body Preview */}
+            <div className="min-h-[150px] py-4" style={{ textAlign: body.alignment }}>
+              {body.imageUrl && (
+                <img src={body.imageUrl} alt="" className="max-h-16 inline-block mb-2" />
+              )}
+              {body.text ? (
+                <div 
+                  className="whitespace-pre-wrap"
+                  dangerouslySetInnerHTML={{ __html: renderFormattedContent(replacePlaceholders(body.text)) }}
+                />
+              ) : (
+                <p className="text-gray-400 italic text-center">Main content will appear here...</p>
+              )}
+            </div>
+            
+            {/* Footer Preview */}
+            <div className="pt-4 border-t border-gray-200 mt-4">
+              {renderHeaderFooterPreview('footer')}
             </div>
           </div>
         </div>
@@ -185,6 +243,27 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
         />
+      </div>
+
+      {/* Header/Footer Template Selector */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-foreground">Header & Footer Template</label>
+        <Select value={selectedHeaderFooterId} onValueChange={setSelectedHeaderFooterId}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a header/footer template" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">None</SelectItem>
+            {headerFooterTemplates.map((template) => (
+              <SelectItem key={template.id} value={template.id}>
+                {template.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">
+          This header and footer will be used when creating documents with this template.
+        </p>
       </div>
 
       {/* Dynamic Fields Info */}

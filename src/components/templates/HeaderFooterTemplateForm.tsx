@@ -180,11 +180,11 @@ export function HeaderFooterTemplateForm({
             <span className="text-sm font-medium text-foreground">Live Preview</span>
           </div>
           <div className={`p-6 min-h-[300px] ${getFontClass(selectedFont)}`}>
-            {/* Header Preview */}
-            <div className="grid grid-cols-3 gap-4 pb-4 border-b border-gray-200 mb-4">
-              {renderSectionPreview(header.left)}
-              {renderSectionPreview(header.center)}
-              {renderSectionPreview(header.right)}
+            {/* Header Preview - center zone wider */}
+            <div className="grid gap-4 pb-4 border-b border-gray-200 mb-4" style={{ gridTemplateColumns: '1fr 2fr 1fr' }}>
+              <div>{renderSectionPreview(header.left)}</div>
+              <div>{renderSectionPreview(header.center)}</div>
+              <div>{renderSectionPreview(header.right)}</div>
             </div>
             
             {/* Content Placeholder */}
@@ -192,11 +192,11 @@ export function HeaderFooterTemplateForm({
               <p className="text-gray-400 italic text-sm">Document content will appear here...</p>
             </div>
             
-            {/* Footer Preview */}
-            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200 mt-4">
-              {renderSectionPreview(footer.left)}
-              {renderSectionPreview(footer.center)}
-              {renderSectionPreview(footer.right)}
+            {/* Footer Preview - center zone wider */}
+            <div className="grid gap-4 pt-4 border-t border-gray-200 mt-4" style={{ gridTemplateColumns: '1fr 2fr 1fr' }}>
+              <div>{renderSectionPreview(footer.left)}</div>
+              <div>{renderSectionPreview(footer.center)}</div>
+              <div>{renderSectionPreview(footer.right)}</div>
             </div>
           </div>
         </div>
@@ -260,7 +260,7 @@ export function HeaderFooterTemplateForm({
           <h4 className="text-sm font-semibold text-foreground">Header</h4>
           <span className="text-xs text-muted-foreground">(3 columns: Left, Center, Right)</span>
         </div>
-        <div className="grid grid-cols-3 gap-3 p-4 border border-border rounded-lg bg-card">
+        <div className="grid gap-3 p-4 border border-border rounded-lg bg-card" style={{ gridTemplateColumns: '1fr 2fr 1fr' }}>
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">Left</label>
             <TemplateSectionEditor
@@ -300,7 +300,7 @@ export function HeaderFooterTemplateForm({
           <h4 className="text-sm font-semibold text-foreground">Footer</h4>
           <span className="text-xs text-muted-foreground">(3 columns: Left, Center, Right)</span>
         </div>
-        <div className="grid grid-cols-3 gap-3 p-4 border border-border rounded-lg bg-card">
+        <div className="grid gap-3 p-4 border border-border rounded-lg bg-card" style={{ gridTemplateColumns: '1fr 2fr 1fr' }}>
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">Left</label>
             <TemplateSectionEditor
