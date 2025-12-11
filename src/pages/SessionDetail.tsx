@@ -171,40 +171,35 @@ export default function SessionDetail() {
           <h2 className="font-semibold text-foreground mb-4">Quick Actions</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
             <Button
-              variant="outline"
-              className="gap-1.5 text-sm h-10 px-3"
+              className="gap-1.5 text-sm h-10 px-3 bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => setShowPrescriptionEditor(true)}
             >
               <Pill className="h-4 w-4 shrink-0" />
               <span className="truncate">Prescription</span>
             </Button>
             <Button
-              variant="outline"
-              className="gap-1.5 text-sm h-10 px-3"
+              className="gap-1.5 text-sm h-10 px-3 bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => setShowInvoiceEditor(true)}
             >
               <Receipt className="h-4 w-4 shrink-0" />
               <span className="truncate">Invoice</span>
             </Button>
             <Button
-              variant="outline"
-              className="gap-1.5 text-sm h-10 px-3"
+              className="gap-1.5 text-sm h-10 px-3 bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => setShowMedicalCertificateEditor(true)}
             >
               <FileBadge className="h-4 w-4 shrink-0" />
               <span className="truncate">Medical Certificate</span>
             </Button>
             <Button
-              variant="outline"
-              className="gap-1.5 text-sm h-10 px-3"
+              className="gap-1.5 text-sm h-10 px-3 bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => setShowReferralLetterEditor(true)}
             >
               <FileText className="h-4 w-4 shrink-0" />
               <span className="truncate">Referral Letter</span>
             </Button>
             <Button
-              variant="outline"
-              className="gap-1.5 text-sm h-10 px-3"
+              className="gap-1.5 text-sm h-10 px-3 bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => setShowGeneralLetterEditor(true)}
             >
               <FileEdit className="h-4 w-4 shrink-0" />
