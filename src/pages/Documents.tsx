@@ -11,15 +11,19 @@ import {
   Download,
   Printer,
   Loader2,
+  Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
 import { TemplateForm, TemplateData } from "@/components/templates/TemplateForm";
 import { useToast } from "@/hooks/use-toast";
 import { useTemplates, Template } from "@/hooks/useTemplates";
 import { useDocuments, Document } from "@/hooks/useDocuments";
+import { useProfile } from "@/hooks/useProfile";
 import { exportToPDF, printDocument } from "@/utils/documentExport";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +31,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -74,6 +79,7 @@ export default function Documents() {
   const { toast } = useToast();
   const { templates: dbTemplates, loading: templatesLoading, createTemplate, updateTemplate, deleteTemplate } = useTemplates();
   const { documents, loading: documentsLoading, deleteDocument } = useDocuments();
+  const { profile } = useProfile();
   const [templateSearchQuery, setTemplateSearchQuery] = useState("");
   const [documentSearchQuery, setDocumentSearchQuery] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState<DisplayTemplate | null>(null);
@@ -83,7 +89,9 @@ export default function Documents() {
   const [previewTemplate, setPreviewTemplate] = useState<DisplayTemplate | null>(null);
   const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
   const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
-  const [isExporting, setIsExporting] = useState(false);
+  const [shareDocument, setShareDocument] = useState<Document | null>(null);
+  const [shareEmail, setShareEmail] = useState("");
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   // Transform database templates to display format
   const templates: DisplayTemplate[] = dbTemplates.map(t => ({
@@ -163,39 +171,40 @@ export default function Documents() {
     }
   };
 
-  const handleExportPDF = async (template: DisplayTemplate) => {
-    setIsExporting(true);
+  const handleSendDocumentEmail = async () => {
+    if (!shareDocument || !shareEmail) return;
+    
+    setIsSendingEmail(true);
     try {
-      await exportToPDF({
-        title: template.name,
-        content: template.content,
-        logoUrl: template.logo_url || undefined,
-        logoPosition: template.logo_position || undefined,
-        fontFamily: template.font_family || undefined,
+      const { data, error } = await supabase.functions.invoke("send-document-email", {
+        body: {
+          to: shareEmail,
+          subject: shareDocument.name,
+          documentName: shareDocument.name,
+          documentContent: shareDocument.content,
+          senderName: profile?.full_name || "MedPad User",
+          practiceName: profile?.practice_address ? `Practice #${profile.practice_number}` : undefined,
+        },
       });
+
+      if (error) throw error;
+
       toast({
-        title: "PDF Exported",
-        description: `"${template.name}" has been downloaded`,
+        title: "Document Sent",
+        description: `"${shareDocument.name}" has been emailed to ${shareEmail}`,
       });
+      setShareDocument(null);
+      setShareEmail("");
     } catch (error) {
-      console.error("Export error:", error);
+      console.error("Email error:", error);
       toast({
-        title: "Export Failed",
-        description: "Failed to export PDF. Please try again.",
+        title: "Failed to Send",
+        description: "Could not send the document. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setIsExporting(false);
+      setIsSendingEmail(false);
     }
-  };
-
-  const handlePrint = (template: DisplayTemplate) => {
-    printDocument(
-      template.content,
-      template.name,
-      template.logo_url || undefined,
-      template.font_family || undefined
-    );
   };
 
   return (
@@ -293,15 +302,6 @@ export default function Documents() {
                         Use Template
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleExportPDF(template)}>
-                        <Download className="h-4 w-4 mr-2" />
-                        Export as PDF
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handlePrint(template)}>
-                        <Printer className="h-4 w-4 mr-2" />
-                        Print Template
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
                       <DropdownMenuItem 
                         onClick={() => setTemplateToDelete(template)}
                         className="text-destructive focus:text-destructive"
@@ -385,8 +385,18 @@ export default function Documents() {
                         size="icon" 
                         className="h-8 w-8"
                         onClick={() => setPreviewDocument(doc)}
+                        title="Preview"
                       >
                         <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8"
+                        onClick={() => setShareDocument(doc)}
+                        title="Share via Email"
+                      >
+                        <Mail className="h-4 w-4" />
                       </Button>
                       <Button 
                         variant="ghost" 
@@ -396,6 +406,7 @@ export default function Documents() {
                           exportToPDF({ title: doc.name, content: doc.content });
                           toast({ title: "PDF Exported", description: `"${doc.name}" downloaded` });
                         }}
+                        title="Export PDF"
                       >
                         <Download className="h-4 w-4" />
                       </Button>
@@ -404,6 +415,7 @@ export default function Documents() {
                         size="icon" 
                         className="h-8 w-8"
                         onClick={() => printDocument(doc.content, doc.name)}
+                        title="Print"
                       >
                         <Printer className="h-4 w-4" />
                       </Button>
@@ -412,6 +424,7 @@ export default function Documents() {
                         size="icon" 
                         className="h-8 w-8 text-destructive hover:text-destructive"
                         onClick={() => setDocumentToDelete(doc)}
+                        title="Delete"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -543,23 +556,6 @@ export default function Documents() {
                   Close
                 </Button>
                 <Button 
-                  variant="outline"
-                  onClick={() => handlePrint(previewTemplate)}
-                  className="gap-2"
-                >
-                  <Printer className="h-4 w-4" />
-                  Print
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => handleExportPDF(previewTemplate)}
-                  disabled={isExporting}
-                  className="gap-2"
-                >
-                  <Download className="h-4 w-4" />
-                  {isExporting ? "Exporting..." : "Export PDF"}
-                </Button>
-                <Button 
                   onClick={() => {
                     handleSelectTemplate(previewTemplate);
                     setPreviewTemplate(null);
@@ -595,6 +591,17 @@ export default function Documents() {
               <div className="flex gap-3 pt-4 border-t border-border">
                 <Button variant="outline" onClick={() => setPreviewDocument(null)} className="flex-1">
                   Close
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    setShareDocument(previewDocument);
+                    setPreviewDocument(null);
+                  }}
+                  className="gap-2"
+                >
+                  <Mail className="h-4 w-4" />
+                  Share
                 </Button>
                 <Button 
                   variant="outline"
@@ -646,6 +653,57 @@ export default function Documents() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Share Document Dialog */}
+      <Dialog open={!!shareDocument} onOpenChange={(open) => { if (!open) { setShareDocument(null); setShareEmail(""); }}}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Share Document</DialogTitle>
+            <DialogDescription>
+              Send "{shareDocument?.name}" via email
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="recipient-email">Recipient Email</Label>
+              <Input
+                id="recipient-email"
+                type="email"
+                placeholder="Enter email address"
+                value={shareEmail}
+                onChange={(e) => setShareEmail(e.target.value)}
+              />
+            </div>
+            {shareDocument?.patient_name && (
+              <p className="text-sm text-muted-foreground">
+                Patient: {shareDocument.patient_name}
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShareDocument(null); setShareEmail(""); }}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSendDocumentEmail}
+              disabled={!shareEmail || isSendingEmail}
+              className="gap-2"
+            >
+              {isSendingEmail ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Mail className="h-4 w-4" />
+                  Send Email
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

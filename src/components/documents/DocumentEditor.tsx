@@ -2,10 +2,7 @@ import { useState, useEffect } from "react";
 import {
   X,
   Save,
-  Loader2,
   User,
-  Download,
-  Printer,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +12,6 @@ import { useToast } from "@/hooks/use-toast";
 import { usePatients } from "@/hooks/usePatients";
 import { useProfile } from "@/hooks/useProfile";
 import { useDocuments } from "@/hooks/useDocuments";
-import { exportToPDF, printDocument } from "@/utils/documentExport";
 import {
   Select,
   SelectContent,
@@ -118,32 +114,6 @@ export function DocumentEditor({ template, onClose, onSave }: DocumentEditorProp
     if (result) {
       onSave({ name: documentName, content });
     }
-  };
-
-  const handleExportPDF = async () => {
-    try {
-      await exportToPDF({
-        title: documentName,
-        content: content,
-        logoUrl: template.logoUrl,
-        logoPosition: template.logoPosition,
-        fontFamily: template.fontFamily,
-      });
-      toast({
-        title: "PDF Exported",
-        description: `"${documentName}" has been downloaded`,
-      });
-    } catch (error) {
-      toast({
-        title: "Export Failed",
-        description: "Failed to export PDF",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handlePrint = () => {
-    printDocument(content, documentName, template.logoUrl, template.fontFamily);
   };
 
   // Get remaining unfilled placeholders
@@ -255,20 +225,10 @@ export function DocumentEditor({ template, onClose, onSave }: DocumentEditorProp
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handlePrint} className="gap-2">
-              <Printer className="h-4 w-4" />
-              Print
-            </Button>
-            <Button variant="outline" onClick={handleExportPDF} className="gap-2">
-              <Download className="h-4 w-4" />
-              Export PDF
-            </Button>
-            <Button onClick={handleSave} disabled={isSaving} className="gap-2">
-              <Save className="h-4 w-4" />
-              {isSaving ? "Saving..." : "Save Document"}
-            </Button>
-          </div>
+          <Button onClick={handleSave} disabled={isSaving} className="gap-2">
+            <Save className="h-4 w-4" />
+            {isSaving ? "Saving..." : "Save Document"}
+          </Button>
         </div>
       </div>
     </div>
