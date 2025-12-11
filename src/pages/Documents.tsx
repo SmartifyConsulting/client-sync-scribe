@@ -500,26 +500,15 @@ export default function Documents() {
       <Dialog open={!!previewTemplate} onOpenChange={(open) => !open && setPreviewTemplate(null)}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Template Preview: {previewTemplate?.name}</DialogTitle>
+            <DialogTitle>{previewTemplate?.name}</DialogTitle>
             <DialogDescription>
-              Preview of the template content and formatting
+              {previewTemplate?.description || "Template preview"}
             </DialogDescription>
           </DialogHeader>
           {previewTemplate && (
             <div className="space-y-4">
-              {/* Template Meta */}
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span className="rounded-full bg-muted px-2.5 py-0.5 font-medium">
-                  {previewTemplate.category || "Uncategorized"}
-                </span>
-                <span>Last modified: {previewTemplate.lastModified}</span>
-                {previewTemplate.font_family && (
-                  <span>Font: {previewTemplate.font_family}</span>
-                )}
-              </div>
-
               {/* Template Preview */}
-              <div className="border border-border rounded-lg p-6 bg-card/50">
+              <div className="border border-border rounded-lg p-6 bg-white">
                 {/* Logo Preview */}
                 {previewTemplate.logo_url && (
                   <div 
@@ -548,23 +537,6 @@ export default function Documents() {
                   {previewTemplate.content}
                 </pre>
               </div>
-
-              {/* Placeholders */}
-              {previewTemplate.placeholders && previewTemplate.placeholders.length > 0 && (
-                <div>
-                  <p className="text-sm font-medium text-foreground mb-2">Dynamic Placeholders:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {previewTemplate.placeholders.map((placeholder) => (
-                      <span 
-                        key={placeholder} 
-                        className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full"
-                      >
-                        [{placeholder}]
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               <div className="flex gap-3 pt-4 border-t border-border">
                 <Button variant="outline" onClick={() => setPreviewTemplate(null)} className="flex-1">
