@@ -10,6 +10,7 @@ import { AudioWaveform } from "./AudioWaveform";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/hooks/useProfile";
+import { useTemplateWithHeaderFooter } from "@/hooks/useTemplateWithHeaderFooter";
 
 interface GeneralLetterEditorProps {
   patientId: string;
@@ -19,7 +20,7 @@ interface GeneralLetterEditorProps {
   onSave: (letter: { content: string }) => void;
 }
 
-const GENERAL_TEMPLATE = `[PRACTICE_ADDRESS]
+const FALLBACK_TEMPLATE = `[PRACTICE_ADDRESS]
 Practice No: [PRACTICE_NUMBER]
 Registration No: [DOCTOR_NUMBER]
 
@@ -46,6 +47,8 @@ export function GeneralLetterEditor({
 }: GeneralLetterEditorProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
+  const { formattedContent: savedTemplate, isLoading: templateLoading } = useTemplateWithHeaderFooter("General");
+  
   const doctorName = profile?.full_name || "Doctor";
   const practiceNumber = profile?.practice_number || "";
   const practiceAddress = profile?.practice_address || "";
@@ -56,37 +59,52 @@ export function GeneralLetterEditor({
   const [subject, setSubject] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  // Initialize content when doctor name is available
+  // Use saved template or fallback
+  const baseTemplate = savedTemplate || FALLBACK_TEMPLATE;
+
+  // Initialize content when template is available
   useEffect(() => {
+    if (templateLoading) return;
+    
     setContent(
-      GENERAL_TEMPLATE
+      baseTemplate
         .replace(/\[DATE\]/g, new Date().toLocaleDateString())
         .replace(/\[PATIENT_NAME\]/g, patientName)
+        .replace(/\[PatientName\]/g, patientName)
         .replace(/\[DOCTOR_NAME\]/g, doctorName)
-        .replace("[PRACTICE_NUMBER]", practiceNumber)
-        .replace("[PRACTICE_ADDRESS]", practiceAddress)
-        .replace("[DOCTOR_NUMBER]", doctorNumber)
+        .replace(/\[DoctorName\]/g, doctorName)
+        .replace(/\[PRACTICE_NUMBER\]/g, practiceNumber)
+        .replace(/\[PracticeNumber\]/g, practiceNumber)
+        .replace(/\[PRACTICE_ADDRESS\]/g, practiceAddress)
+        .replace(/\[PracticeAddress\]/g, practiceAddress)
+        .replace(/\[DOCTOR_NUMBER\]/g, doctorNumber)
+        .replace(/\[DoctorNumber\]/g, doctorNumber)
         .replace("[LETTER_CONTENT]", "")
     );
-  }, [patientName, doctorName, practiceNumber, practiceAddress, doctorNumber]);
+  }, [patientName, doctorName, practiceNumber, practiceAddress, doctorNumber, baseTemplate, templateLoading]);
 
   const handleTranscriptionComplete = useCallback((text: string) => {
     setRawTranscript(text);
-    setContent(prev => {
-      return GENERAL_TEMPLATE
+    setContent(
+      baseTemplate
         .replace(/\[DATE\]/g, new Date().toLocaleDateString())
         .replace(/\[PATIENT_NAME\]/g, patientName)
+        .replace(/\[PatientName\]/g, patientName)
         .replace(/\[DOCTOR_NAME\]/g, doctorName)
-        .replace("[PRACTICE_NUMBER]", practiceNumber)
-        .replace("[PRACTICE_ADDRESS]", practiceAddress)
-        .replace("[DOCTOR_NUMBER]", doctorNumber)
-        .replace("[LETTER_CONTENT]", text);
-    });
+        .replace(/\[DoctorName\]/g, doctorName)
+        .replace(/\[PRACTICE_NUMBER\]/g, practiceNumber)
+        .replace(/\[PracticeNumber\]/g, practiceNumber)
+        .replace(/\[PRACTICE_ADDRESS\]/g, practiceAddress)
+        .replace(/\[PracticeAddress\]/g, practiceAddress)
+        .replace(/\[DOCTOR_NUMBER\]/g, doctorNumber)
+        .replace(/\[DoctorNumber\]/g, doctorNumber)
+        .replace("[LETTER_CONTENT]", text)
+    );
     toast({
       title: "Transcription Complete",
       description: "Letter has been populated from voice recording",
     });
-  }, [patientName, doctorName, practiceNumber, practiceAddress, doctorNumber, toast]);
+  }, [patientName, doctorName, practiceNumber, practiceAddress, doctorNumber, baseTemplate, toast]);
 
   const { 
     isRecording, 

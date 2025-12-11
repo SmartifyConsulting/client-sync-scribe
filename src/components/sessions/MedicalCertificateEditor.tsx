@@ -10,6 +10,7 @@ import { AudioWaveform } from "./AudioWaveform";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/hooks/useProfile";
+import { useTemplateWithHeaderFooter } from "@/hooks/useTemplateWithHeaderFooter";
 
 interface MedicalCertificateEditorProps {
   patientId: string;
@@ -19,7 +20,7 @@ interface MedicalCertificateEditorProps {
   onSave: (certificate: { content: string }) => void;
 }
 
-const CERTIFICATE_TEMPLATE = `MEDICAL CERTIFICATE
+const FALLBACK_TEMPLATE = `MEDICAL CERTIFICATE
 
 [PRACTICE_ADDRESS]
 Practice No: [PRACTICE_NUMBER]
@@ -52,6 +53,8 @@ export function MedicalCertificateEditor({
 }: MedicalCertificateEditorProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
+  const { formattedContent: savedTemplate, isLoading: templateLoading } = useTemplateWithHeaderFooter("Medical Certificate");
+  
   const doctorName = profile?.full_name || "Doctor";
   const practiceNumber = profile?.practice_number || "";
   const practiceAddress = profile?.practice_address || "";
@@ -62,39 +65,58 @@ export function MedicalCertificateEditor({
   const [leavePeriod, setLeavePeriod] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  // Initialize content when doctor name is available
+  // Use saved template or fallback
+  const baseTemplate = savedTemplate || FALLBACK_TEMPLATE;
+
+  // Initialize content when template is available
   useEffect(() => {
+    if (templateLoading) return;
+    
     setContent(
-      CERTIFICATE_TEMPLATE
+      baseTemplate
         .replace(/\[DATE\]/g, new Date().toLocaleDateString())
         .replace(/\[PATIENT_NAME\]/g, patientName)
+        .replace(/\[PatientName\]/g, patientName)
         .replace(/\[DOCTOR_NAME\]/g, doctorName)
-        .replace("[PRACTICE_NUMBER]", practiceNumber)
-        .replace("[PRACTICE_ADDRESS]", practiceAddress)
-        .replace("[DOCTOR_NUMBER]", doctorNumber)
+        .replace(/\[DoctorName\]/g, doctorName)
+        .replace(/\[PRACTICE_NUMBER\]/g, practiceNumber)
+        .replace(/\[PracticeNumber\]/g, practiceNumber)
+        .replace(/\[PRACTICE_ADDRESS\]/g, practiceAddress)
+        .replace(/\[PracticeAddress\]/g, practiceAddress)
+        .replace(/\[DOCTOR_NUMBER\]/g, doctorNumber)
+        .replace(/\[DoctorNumber\]/g, doctorNumber)
         .replace("[CERTIFICATE_CONTENT]", "")
         .replace("[LEAVE_PERIOD]", "")
+        .replace(/\[ConsultationDate\]/g, new Date().toLocaleDateString())
+        .replace(/\[ConsultationTime\]/g, new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
     );
-  }, [patientName, doctorName, practiceNumber, practiceAddress, doctorNumber]);
+  }, [patientName, doctorName, practiceNumber, practiceAddress, doctorNumber, baseTemplate, templateLoading]);
 
   const handleTranscriptionComplete = useCallback((text: string) => {
     setRawTranscript(text);
-    setContent(prev => {
-      return CERTIFICATE_TEMPLATE
+    setContent(
+      baseTemplate
         .replace(/\[DATE\]/g, new Date().toLocaleDateString())
         .replace(/\[PATIENT_NAME\]/g, patientName)
+        .replace(/\[PatientName\]/g, patientName)
         .replace(/\[DOCTOR_NAME\]/g, doctorName)
-        .replace("[PRACTICE_NUMBER]", practiceNumber)
-        .replace("[PRACTICE_ADDRESS]", practiceAddress)
-        .replace("[DOCTOR_NUMBER]", doctorNumber)
+        .replace(/\[DoctorName\]/g, doctorName)
+        .replace(/\[PRACTICE_NUMBER\]/g, practiceNumber)
+        .replace(/\[PracticeNumber\]/g, practiceNumber)
+        .replace(/\[PRACTICE_ADDRESS\]/g, practiceAddress)
+        .replace(/\[PracticeAddress\]/g, practiceAddress)
+        .replace(/\[DOCTOR_NUMBER\]/g, doctorNumber)
+        .replace(/\[DoctorNumber\]/g, doctorNumber)
         .replace("[CERTIFICATE_CONTENT]", text)
-        .replace("[LEAVE_PERIOD]", leavePeriod);
-    });
+        .replace("[LEAVE_PERIOD]", leavePeriod)
+        .replace(/\[ConsultationDate\]/g, new Date().toLocaleDateString())
+        .replace(/\[ConsultationTime\]/g, new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
+    );
     toast({
       title: "Transcription Complete",
       description: "Certificate has been populated from voice recording",
     });
-  }, [patientName, doctorName, practiceNumber, practiceAddress, doctorNumber, leavePeriod, toast]);
+  }, [patientName, doctorName, practiceNumber, practiceAddress, doctorNumber, leavePeriod, baseTemplate, toast]);
 
   const { 
     isRecording, 
