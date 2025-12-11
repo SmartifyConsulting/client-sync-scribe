@@ -21,6 +21,9 @@ interface ReferralLetterEditorProps {
 
 const REFERRAL_TEMPLATE = `REFERRAL LETTER
 
+[PRACTICE_ADDRESS]
+Practice No: [PRACTICE_NUMBER]
+
 Date: [DATE]
 Patient: [PATIENT_NAME]
 Referring Doctor: [DOCTOR_NAME]
@@ -55,6 +58,8 @@ export function ReferralLetterEditor({
   const { toast } = useToast();
   const { profile } = useProfile();
   const doctorName = profile?.full_name || "Doctor";
+  const practiceNumber = profile?.practice_number || "";
+  const practiceAddress = profile?.practice_address || "";
   
   const [content, setContent] = useState("");
   const [rawTranscript, setRawTranscript] = useState("");
@@ -68,10 +73,12 @@ export function ReferralLetterEditor({
         .replace(/\[DATE\]/g, new Date().toLocaleDateString())
         .replace(/\[PATIENT_NAME\]/g, patientName)
         .replace(/\[DOCTOR_NAME\]/g, doctorName)
+        .replace("[PRACTICE_NUMBER]", practiceNumber)
+        .replace("[PRACTICE_ADDRESS]", practiceAddress)
         .replace("[REFERRED_TO]", "")
         .replace("[REFERRAL_CONTENT]", "")
     );
-  }, [patientName, doctorName]);
+  }, [patientName, doctorName, practiceNumber, practiceAddress]);
 
   const handleTranscriptionComplete = useCallback((text: string) => {
     setRawTranscript(text);
@@ -80,6 +87,8 @@ export function ReferralLetterEditor({
         .replace(/\[DATE\]/g, new Date().toLocaleDateString())
         .replace(/\[PATIENT_NAME\]/g, patientName)
         .replace(/\[DOCTOR_NAME\]/g, doctorName)
+        .replace("[PRACTICE_NUMBER]", practiceNumber)
+        .replace("[PRACTICE_ADDRESS]", practiceAddress)
         .replace("[REFERRED_TO]", referredTo)
         .replace("[REFERRAL_CONTENT]", text);
     });
@@ -87,7 +96,7 @@ export function ReferralLetterEditor({
       title: "Transcription Complete",
       description: "Referral letter has been populated from voice recording",
     });
-  }, [patientName, doctorName, referredTo, toast]);
+  }, [patientName, doctorName, practiceNumber, practiceAddress, referredTo, toast]);
 
   const { 
     isRecording, 

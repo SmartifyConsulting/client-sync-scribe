@@ -1,9 +1,10 @@
 import { useState, useCallback, useEffect } from "react";
-import { X, FileText, DollarSign, Send, Loader2, Mic, Square, Save } from "lucide-react";
+import { X, FileText, DollarSign, Send, Loader2, Mic, Square, Save, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
@@ -14,6 +15,13 @@ interface PatientDetails {
   name: string;
   medical_aid: string | null;
   medical_aid_number: string | null;
+}
+
+interface ServicePrice {
+  id: string;
+  service_name: string;
+  default_price: number;
+  currency: string;
 }
 
 interface InvoiceEditorProps {
@@ -28,6 +36,8 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [patientDetails, setPatientDetails] = useState<PatientDetails | null>(null);
+  const [servicePrices, setServicePrices] = useState<ServicePrice[]>([]);
+  const [selectedService, setSelectedService] = useState<string>("");
   const [formData, setFormData] = useState({
     description: `Consultation session - ${patientName}`,
     amount: "",
@@ -35,30 +45,56 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
   });
   const [rawTranscript, setRawTranscript] = useState("");
 
-  // Fetch patient details including medical aid info
+  // Fetch patient details and service prices
   useEffect(() => {
-    const fetchPatientDetails = async () => {
-      const { data, error } = await supabase
+    const fetchData = async () => {
+      // Fetch patient details
+      const { data: patientData, error: patientError } = await supabase
         .from('patients')
         .select('name, medical_aid, medical_aid_number')
         .eq('id', patientId)
         .single();
 
-      if (!error && data) {
-        setPatientDetails(data);
-        // Update description with medical aid info if available
-        const medicalAidInfo = data.medical_aid && data.medical_aid_number 
-          ? `\nMedical Aid: ${data.medical_aid}\nMember Number: ${data.medical_aid_number}`
+      if (!patientError && patientData) {
+        setPatientDetails(patientData);
+        const medicalAidInfo = patientData.medical_aid && patientData.medical_aid_number 
+          ? `\nMedical Aid: ${patientData.medical_aid}\nMember Number: ${patientData.medical_aid_number}`
           : '';
         setFormData(prev => ({
           ...prev,
-          description: `Consultation session - ${data.name}${medicalAidInfo}`,
+          description: `Consultation session - ${patientData.name}${medicalAidInfo}`,
         }));
+      }
+
+      // Fetch service prices
+      const { data: servicesData, error: servicesError } = await supabase
+        .from('service_prices')
+        .select('*')
+        .order('service_name');
+
+      if (!servicesError && servicesData) {
+        setServicePrices(servicesData);
       }
     };
 
-    fetchPatientDetails();
+    fetchData();
   }, [patientId]);
+
+  // Handle service selection
+  const handleServiceSelect = (serviceId: string) => {
+    setSelectedService(serviceId);
+    const service = servicePrices.find(s => s.id === serviceId);
+    if (service) {
+      const medicalAidInfo = patientDetails?.medical_aid && patientDetails?.medical_aid_number 
+        ? `\nMedical Aid: ${patientDetails.medical_aid}\nMember Number: ${patientDetails.medical_aid_number}`
+        : '';
+      setFormData(prev => ({
+        ...prev,
+        description: `${service.service_name} - ${patientDetails?.name || patientName}${medicalAidInfo}`,
+        amount: service.default_price.toString(),
+      }));
+    }
+  };
 
   const handleTranscriptionComplete = useCallback((text: string) => {
     setRawTranscript(text);
@@ -181,6 +217,25 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
         <div className="grid lg:grid-cols-3 divide-x divide-border">
           {/* Main Form */}
           <form onSubmit={handleSubmit} className="lg:col-span-2 p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+            {/* Service Selection */}
+            {servicePrices.length > 0 && (
+              <div className="space-y-2">
+                <Label htmlFor="service">Select Service (Optional)</Label>
+                <Select value={selectedService} onValueChange={handleServiceSelect}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a service to auto-fill..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {servicePrices.map((service) => (
+                      <SelectItem key={service.id} value={service.id}>
+                        {service.service_name} - {service.currency} {service.default_price.toFixed(2)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Textarea
