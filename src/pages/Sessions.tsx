@@ -253,14 +253,17 @@ export default function Sessions() {
   const { 
     isRecording, 
     isTranscribing, 
+    isSavingAudio,
     transcript, 
     audioUrl,
+    savedAudioUrl,
     startRecording, 
     stopRecording,
     clearTranscript 
   } = useAudioRecording({
     patientName: currentPatient?.name,
     doctorName: "Dr. Georgia Adams",
+    sessionId: currentSessionId || undefined,
     onTranscriptionComplete: (text) => {
       console.log("=== onTranscriptionComplete ===");
       console.log("text length:", text?.length);
@@ -274,6 +277,22 @@ export default function Sessions() {
       if (pendingCompletionRef.current) {
         console.log("Pending completion - triggering handleSessionComplete with transcript");
         handleSessionComplete(text);
+      }
+    },
+    onAudioSaved: async (audioStorageUrl) => {
+      console.log("Audio saved to storage:", audioStorageUrl);
+      // Update session with audio URL
+      if (currentSessionIdRef.current) {
+        const { error } = await supabase
+          .from('sessions')
+          .update({ audio_url: audioStorageUrl })
+          .eq('id', currentSessionIdRef.current);
+        
+        if (error) {
+          console.error("Error saving audio URL to session:", error);
+        } else {
+          console.log("Audio URL saved to session successfully");
+        }
       }
     }
   });

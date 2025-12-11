@@ -4,16 +4,20 @@ import { useToast } from '@/hooks/use-toast';
 
 interface UseAudioRecordingOptions {
   onTranscriptionComplete?: (text: string) => void;
+  onAudioSaved?: (audioUrl: string) => void;
   patientName?: string;
   doctorName?: string;
+  sessionId?: string;
 }
 
 export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
   const { toast } = useToast();
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [isSavingAudio, setIsSavingAudio] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [savedAudioUrl, setSavedAudioUrl] = useState<string | null>(null);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -24,6 +28,41 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
   useEffect(() => {
     optionsRef.current = options;
   }, [options]);
+
+  const uploadAudioToStorage = async (audioBlob: Blob, sessionId: string): Promise<string | null> => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('No authenticated user for audio upload');
+        return null;
+      }
+
+      const fileName = `${user.id}/${sessionId}_${Date.now()}.webm`;
+      
+      const { data, error } = await supabase.storage
+        .from('session-audio')
+        .upload(fileName, audioBlob, {
+          contentType: 'audio/webm',
+          upsert: true,
+        });
+
+      if (error) {
+        console.error('Error uploading audio:', error);
+        return null;
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('session-audio')
+        .getPublicUrl(fileName);
+
+      console.log('Audio uploaded successfully:', urlData.publicUrl);
+      return urlData.publicUrl;
+    } catch (error) {
+      console.error('Error in uploadAudioToStorage:', error);
+      return null;
+    }
+  };
 
   const startRecording = useCallback(async () => {
     try {
@@ -54,9 +93,21 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
         
-        // Create URL for playback
+        // Create URL for local playback
         const url = URL.createObjectURL(audioBlob);
         setAudioUrl(url);
+        
+        // Upload to storage if sessionId is provided
+        const currentSessionId = optionsRef.current.sessionId;
+        if (currentSessionId) {
+          setIsSavingAudio(true);
+          const storageUrl = await uploadAudioToStorage(audioBlob, currentSessionId);
+          if (storageUrl) {
+            setSavedAudioUrl(storageUrl);
+            optionsRef.current.onAudioSaved?.(storageUrl);
+          }
+          setIsSavingAudio(false);
+        }
         
         await transcribeAudio(audioBlob);
         
@@ -157,13 +208,16 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
       URL.revokeObjectURL(audioUrl);
       setAudioUrl(null);
     }
+    setSavedAudioUrl(null);
   }, [audioUrl]);
 
   return {
     isRecording,
     isTranscribing,
+    isSavingAudio,
     transcript,
     audioUrl,
+    savedAudioUrl,
     startRecording,
     stopRecording,
     clearTranscript,
