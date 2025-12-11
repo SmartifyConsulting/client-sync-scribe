@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone } from "lucide-react";
+import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy } from "lucide-react";
+import { useToast as useGlobalToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -596,7 +597,7 @@ export default function Profile() {
             <Input 
               id="mobile" 
               type="tel"
-              value={formData.mobile_number}
+              value={formatPhoneNumber(formData.mobile_number)}
               onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value.replace(/[^0-9]/g, '') })}
               placeholder="82 123 4567"
               className="flex-1"
@@ -938,9 +939,19 @@ export default function Profile() {
   );
 }
 
+// Format phone number with spaces
+function formatPhoneNumber(value: string): string {
+  const digits = value.replace(/\D/g, '');
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 5) return `${digits.slice(0, 2)} ${digits.slice(2)}`;
+  return `${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5, 9)}`;
+}
+
 // Mailbox Section Component
 function MailboxSection({ userId }: { userId?: string }) {
   const [mailboxEmail, setMailboxEmail] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const { toast } = useGlobalToast();
 
   useEffect(() => {
     const fetchMailboxId = async () => {
@@ -959,6 +970,17 @@ function MailboxSection({ userId }: { userId?: string }) {
     fetchMailboxId();
   }, [userId]);
 
+  const handleCopy = async () => {
+    if (!mailboxEmail) return;
+    await navigator.clipboard.writeText(mailboxEmail);
+    setCopied(true);
+    toast({
+      title: "Copied",
+      description: "Mailbox email copied to clipboard",
+    });
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="mt-6 p-4 rounded-lg bg-primary/5 border border-primary/20">
       <div className="flex items-start gap-3">
@@ -971,9 +993,20 @@ function MailboxSection({ userId }: { userId?: string }) {
             External parties (e.g., radiologists, labs) can email documents to this address and they will be saved under your Documents.
           </p>
           {mailboxEmail ? (
-            <code className="inline-block text-sm font-medium text-primary bg-primary/10 px-3 py-1.5 rounded mt-2">
-              {mailboxEmail}
-            </code>
+            <div className="flex items-center gap-2 mt-2">
+              <code className="inline-block text-sm font-medium text-primary bg-primary/10 px-3 py-1.5 rounded">
+                {mailboxEmail}
+              </code>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCopy}
+                className="gap-1.5 h-8"
+              >
+                {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? "Copied" : "Copy"}
+              </Button>
+            </div>
           ) : (
             <p className="text-sm text-muted-foreground mt-2">Loading...</p>
           )}
