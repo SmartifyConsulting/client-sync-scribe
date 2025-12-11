@@ -120,53 +120,64 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
     return safeContent;
   };
 
-  const renderSectionPreview = (section: SectionContent | undefined) => {
-    if (!section) return null;
+  const renderSectionPreview = (section: SectionContent | undefined | null, placeholder?: string) => {
+    const hasContent = section && (section.text || section.imageUrl);
+    const alignment = section?.alignment || 'left';
+    
     return (
-      <div style={{ textAlign: section.alignment }}>
-        {section.imageUrl && (
-          <img 
-            src={section.imageUrl} 
-            alt="" 
-            className="max-h-12 inline-block mb-1"
-          />
-        )}
-        {section.text && (
-          <div 
-            className="whitespace-pre-wrap text-sm"
-            dangerouslySetInnerHTML={{ __html: renderFormattedContent(replacePlaceholders(section.text)) }}
-          />
-        )}
+      <div className="min-h-[24px]" style={{ textAlign: alignment as 'left' | 'center' | 'right' }}>
+        {hasContent ? (
+          <>
+            {section?.imageUrl && (
+              <img 
+                src={section.imageUrl} 
+                alt="" 
+                className="max-h-12 inline-block mb-1"
+              />
+            )}
+            {section?.text && (
+              <div 
+                className="whitespace-pre-wrap text-sm"
+                dangerouslySetInnerHTML={{ __html: renderFormattedContent(replacePlaceholders(section.text)) }}
+              />
+            )}
+          </>
+        ) : placeholder ? (
+          <span className="text-xs text-gray-400">{placeholder}</span>
+        ) : null}
       </div>
     );
   };
 
   const renderHeaderFooterPreview = (type: 'header' | 'footer') => {
+    const placeholders = ['Left', 'Center', 'Right'];
+    
     if (!selectedHeaderFooter) {
       return (
         <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 2fr 1fr' }}>
-          <div className="min-h-[20px] border border-dashed border-gray-300 rounded flex items-center justify-center">
-            <span className="text-xs text-gray-400">Left</span>
-          </div>
-          <div className="min-h-[20px] border border-dashed border-gray-300 rounded flex items-center justify-center">
-            <span className="text-xs text-gray-400">Center</span>
-          </div>
-          <div className="min-h-[20px] border border-dashed border-gray-300 rounded flex items-center justify-center">
-            <span className="text-xs text-gray-400">Right</span>
-          </div>
+          {placeholders.map((label) => (
+            <div key={label} className="min-h-[24px] border border-dashed border-gray-300 rounded flex items-center justify-center p-2">
+              <span className="text-xs text-gray-400">{label}</span>
+            </div>
+          ))}
         </div>
       );
     }
 
-    const section = type === 'header' 
-      ? selectedHeaderFooter.header as { left: SectionContent; center: SectionContent; right: SectionContent }
-      : selectedHeaderFooter.footer as { left: SectionContent; center: SectionContent; right: SectionContent };
+    const sectionData = type === 'header' 
+      ? selectedHeaderFooter.header 
+      : selectedHeaderFooter.footer;
+    
+    // Handle both direct object and JSON parsed object
+    const section = typeof sectionData === 'string' 
+      ? JSON.parse(sectionData) 
+      : sectionData as { left?: SectionContent; center?: SectionContent; right?: SectionContent } | null;
 
     return (
       <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 2fr 1fr' }}>
-        <div>{renderSectionPreview(section?.left)}</div>
-        <div>{renderSectionPreview(section?.center)}</div>
-        <div>{renderSectionPreview(section?.right)}</div>
+        <div className="min-h-[24px]">{renderSectionPreview(section?.left)}</div>
+        <div className="min-h-[24px]">{renderSectionPreview(section?.center)}</div>
+        <div className="min-h-[24px]">{renderSectionPreview(section?.right)}</div>
       </div>
     );
   };
