@@ -13,7 +13,7 @@ import {
   Receipt,
   Loader2,
   Shield,
-  Inbox,
+  Bell,
   User,
   LucideIcon,
 } from "lucide-react";
@@ -29,7 +29,7 @@ interface NavItem {
 
 const doctorNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/" },
-  { icon: Inbox, label: "Inbox", to: "/inbox" },
+  { icon: Bell, label: "Notifications", to: "/notifications" },
   { icon: CheckSquare, label: "To-Do List", to: "/todos" },
   { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: Users, label: "Patients", to: "/patients" },
@@ -55,21 +55,28 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const navItems = isPatient ? patientNavItems : doctorNavItems;
 
   const { data: unreadCount = 0 } = useQuery({
-    queryKey: ["unread-messages-count"],
+    queryKey: ["unread-notifications-count"],
     queryFn: async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) return 0;
 
-      const { count, error } = await supabase
+      // Count unread messages
+      const { count: messagesCount } = await supabase
         .from("messages")
         .select("*", { count: "exact", head: true })
         .eq("recipient_id", user.id)
         .eq("is_read", false);
 
-      if (error) return 0;
-      return count || 0;
+      // Count unread notifications (documents, etc.)
+      const { count: notificationsCount } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("is_read", false);
+
+      return (messagesCount || 0) + (notificationsCount || 0);
     },
     refetchInterval: 30000,
   });
@@ -111,7 +118,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               >
                 <item.icon className="h-5 w-5" />
                 <span className="flex-1">{item.label}</span>
-                {item.label === "Inbox" && unreadCount > 0 && (
+                {item.label === "Notifications" && unreadCount > 0 && (
                   <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-semibold text-destructive-foreground">
                     {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
