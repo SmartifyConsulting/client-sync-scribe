@@ -14,6 +14,7 @@ import {
   Loader2,
   Shield,
   Inbox,
+  User,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useQuery } from "@tanstack/react-query";
@@ -115,6 +116,21 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
         {/* Bottom Section */}
         <div className="p-4 space-y-1">
+          <NavLink
+            to="/profile"
+            onClick={onNavigate}
+            className={({ isActive }) =>
+              cn(
+                "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
+                isActive
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+              )
+            }
+          >
+            <User className="h-5 w-5" />
+            Profile
+          </NavLink>
           <NavLink
             to="/settings"
             onClick={onNavigate}
