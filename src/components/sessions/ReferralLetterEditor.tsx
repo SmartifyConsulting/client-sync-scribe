@@ -23,6 +23,7 @@ const REFERRAL_TEMPLATE = `REFERRAL LETTER
 
 [PRACTICE_ADDRESS]
 Practice No: [PRACTICE_NUMBER]
+Registration No: [DOCTOR_NUMBER]
 
 Date: [DATE]
 Patient: [PATIENT_NAME]
@@ -60,6 +61,7 @@ export function ReferralLetterEditor({
   const doctorName = profile?.full_name || "Doctor";
   const practiceNumber = profile?.practice_number || "";
   const practiceAddress = profile?.practice_address || "";
+  const doctorNumber = profile?.doctor_number || "";
   
   const [content, setContent] = useState("");
   const [rawTranscript, setRawTranscript] = useState("");
@@ -75,10 +77,11 @@ export function ReferralLetterEditor({
         .replace(/\[DOCTOR_NAME\]/g, doctorName)
         .replace("[PRACTICE_NUMBER]", practiceNumber)
         .replace("[PRACTICE_ADDRESS]", practiceAddress)
+        .replace("[DOCTOR_NUMBER]", doctorNumber)
         .replace("[REFERRED_TO]", "")
         .replace("[REFERRAL_CONTENT]", "")
     );
-  }, [patientName, doctorName, practiceNumber, practiceAddress]);
+  }, [patientName, doctorName, practiceNumber, practiceAddress, doctorNumber]);
 
   const handleTranscriptionComplete = useCallback((text: string) => {
     setRawTranscript(text);
@@ -89,6 +92,7 @@ export function ReferralLetterEditor({
         .replace(/\[DOCTOR_NAME\]/g, doctorName)
         .replace("[PRACTICE_NUMBER]", practiceNumber)
         .replace("[PRACTICE_ADDRESS]", practiceAddress)
+        .replace("[DOCTOR_NUMBER]", doctorNumber)
         .replace("[REFERRED_TO]", referredTo)
         .replace("[REFERRAL_CONTENT]", text);
     });
@@ -96,7 +100,7 @@ export function ReferralLetterEditor({
       title: "Transcription Complete",
       description: "Referral letter has been populated from voice recording",
     });
-  }, [patientName, doctorName, practiceNumber, practiceAddress, referredTo, toast]);
+  }, [patientName, doctorName, practiceNumber, practiceAddress, doctorNumber, referredTo, toast]);
 
   const { 
     isRecording, 
