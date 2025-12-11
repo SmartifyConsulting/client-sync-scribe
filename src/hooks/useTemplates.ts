@@ -80,40 +80,6 @@ Doctor's Signature: ................................................ Date: [Sign
     is_default: true,
   },
   {
-    name: "Leave Note",
-    description: "Note for patient leave from work or school",
-    category: "Certificate",
-    content: `LEAVE NOTE
-==========
-
-Practice Number: [PracticeNumber]
-Doctor Registration Number: [DoctorNumber]
-Practice Address: [PracticeAddress]
-
-Date: [Date]
-
-TO WHOM IT MAY CONCERN
-
-This is to certify that [PatientName] of [PatientAddress] attended this practice on [ConsultationDate].
-
-Based on my examination, the patient requires leave from [LeaveFrom] to [LeaveUntil] inclusive.
-
-Reason: [Reason]
-
-..............................................................................................................
-
-..............................................................................................................
-
-
-Doctor's Name: [DoctorName]
-
-Doctor's Signature: ................................................ Date: [SignatureDate]`,
-    logo_url: null,
-    logo_position: null,
-    font_family: "sans",
-    is_default: true,
-  },
-  {
     name: "Referral Letter",
     description: "Letter for referring patients to specialists",
     category: "Letter",
