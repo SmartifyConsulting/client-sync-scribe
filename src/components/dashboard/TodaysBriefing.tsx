@@ -439,11 +439,11 @@ export function TodaysBriefing() {
             </div>
           ) : (
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={handleNarrate}
               disabled={isNarrating}
-              className="gap-2 bg-white text-primary border-primary hover:bg-primary/10"
+              className="gap-2 bg-white/90 text-primary border border-white/50 hover:bg-white hover:text-primary"
             >
               {isNarrating ? (
                 <>

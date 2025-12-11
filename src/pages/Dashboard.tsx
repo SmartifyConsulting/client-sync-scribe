@@ -84,6 +84,14 @@ export default function Dashboard() {
   // Get time-based greeting
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  
+  // Format today's date
+  const today = new Date();
+  const formattedDate = today.toLocaleDateString('en-GB', { 
+    day: 'numeric', 
+    month: 'long', 
+    year: 'numeric' 
+  });
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -92,7 +100,7 @@ export default function Dashboard() {
         <div>
           <h1 className="text-3xl font-bold text-foreground tracking-tight">{greeting}, {getDisplayName()}</h1>
           <p className="mt-2 text-muted-foreground text-lg">
-            Here's what's happening with your practice today
+            Here's what's happening with your practice today, {formattedDate}
           </p>
         </div>
         <div className="flex items-center gap-3">

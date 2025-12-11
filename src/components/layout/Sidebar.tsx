@@ -30,11 +30,11 @@ interface NavItem {
 const doctorNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/" },
   { icon: Inbox, label: "Inbox", to: "/inbox" },
+  { icon: CheckSquare, label: "To-Do List", to: "/todos" },
+  { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: Users, label: "Patients", to: "/patients" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
   { icon: Receipt, label: "Invoices", to: "/invoices" },
-  { icon: Calendar, label: "Calendar", to: "/calendar" },
-  { icon: CheckSquare, label: "To-Do List", to: "/todos" },
   { icon: FileText, label: "Templates", to: "/documents" },
 ];
 
