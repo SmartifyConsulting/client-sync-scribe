@@ -23,6 +23,7 @@ import { useSessions } from "@/hooks/useSessions";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCard } from "@/components/patients/SessionCard";
+import { SessionHistoryTable } from "@/components/patients/SessionHistoryTable";
 import { PatientOverview } from "@/components/patients/PatientOverview";
 import { InvitePatientDialog } from "@/components/patients/InvitePatientDialog";
 import { DoctorsOnProfile } from "@/components/patients/DoctorsOnProfile";
@@ -309,15 +310,18 @@ export default function PatientProfile() {
                 </div>
               )}
 
-              {/* Completed Sessions */}
+              {/* Completed Sessions Table */}
               {completedSessions.length > 0 && (
                 <div className="space-y-3">
                   {inProgressSessions.length > 0 && (
                     <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8">Completed</h3>
                   )}
-                  {completedSessions.map((session, index) => (
-                    <SessionCard key={session.id} session={session} index={index} />
-                  ))}
+                  <SessionHistoryTable 
+                    sessions={completedSessions} 
+                    patientId={patient.id} 
+                    patientName={patient.name}
+                    allergies={patient.allergies}
+                  />
                 </div>
               )}
 
