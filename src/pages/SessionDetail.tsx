@@ -15,9 +15,12 @@ import {
   Pill,
   Receipt,
   FileText,
+  FileBadge,
 } from "lucide-react";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
+import { MedicalCertificateEditor } from "@/components/sessions/MedicalCertificateEditor";
+import { ReferralLetterEditor } from "@/components/sessions/ReferralLetterEditor";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/useSessions";
 import {
@@ -42,6 +45,8 @@ export default function SessionDetail() {
   const { deleteSession } = useSessions();
   const [showPrescriptionEditor, setShowPrescriptionEditor] = useState(false);
   const [showInvoiceEditor, setShowInvoiceEditor] = useState(false);
+  const [showMedicalCertificateEditor, setShowMedicalCertificateEditor] = useState(false);
+  const [showReferralLetterEditor, setShowReferralLetterEditor] = useState(false);
 
   const handleDelete = async () => {
     if (!id) return;
@@ -181,15 +186,15 @@ export default function SessionDetail() {
             <Button
               variant="outline"
               className="gap-2"
-              onClick={() => navigate(`/documents?template=sick-leave&patient=${session.patient_id}&session=${id}`)}
+              onClick={() => setShowMedicalCertificateEditor(true)}
             >
-              <FileText className="h-4 w-4" />
-              Sick Leave Note
+              <FileBadge className="h-4 w-4" />
+              Medical Certificate
             </Button>
             <Button
               variant="outline"
               className="gap-2"
-              onClick={() => navigate(`/documents?template=referral&patient=${session.patient_id}&session=${id}`)}
+              onClick={() => setShowReferralLetterEditor(true)}
             >
               <FileText className="h-4 w-4" />
               Referral Letter
@@ -343,6 +348,38 @@ export default function SessionDetail() {
             toast({
               title: "Invoice created",
               description: `Invoice #${invoice.invoice_number} has been created.`,
+            });
+          }}
+        />
+      )}
+
+      {/* Medical Certificate Editor Modal */}
+      {showMedicalCertificateEditor && session.patient && (
+        <MedicalCertificateEditor
+          patientId={session.patient_id}
+          patientName={session.patient.name}
+          sessionId={id}
+          onClose={() => setShowMedicalCertificateEditor(false)}
+          onSave={() => {
+            toast({
+              title: "Medical Certificate created",
+              description: "The medical certificate has been saved.",
+            });
+          }}
+        />
+      )}
+
+      {/* Referral Letter Editor Modal */}
+      {showReferralLetterEditor && session.patient && (
+        <ReferralLetterEditor
+          patientId={session.patient_id}
+          patientName={session.patient.name}
+          sessionId={id}
+          onClose={() => setShowReferralLetterEditor(false)}
+          onSave={() => {
+            toast({
+              title: "Referral Letter created",
+              description: "The referral letter has been saved.",
             });
           }}
         />
