@@ -99,7 +99,7 @@ export default function Dashboard() {
       <div className="flex items-start justify-between pb-2">
         <div>
           <h1 className="text-3xl font-bold text-foreground tracking-tight">{greeting}, {getDisplayName()}</h1>
-          <p className="mt-2 text-muted-foreground text-[10px]">
+          <p className="mt-2 text-muted-foreground text-[12px]">
             Here's what's happening with your practice today, {formattedDate}
           </p>
         </div>
@@ -107,7 +107,7 @@ export default function Dashboard() {
           <Link to="/profile" className="rounded-xl p-2 hover:bg-accent transition-colors">
             <div className="relative">
               <Avatar className="h-10 w-10 border-2 border-primary/20">
-                <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} />
+                <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} className="object-cover" />
                 <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                   {getInitials()}
                 </AvatarFallback>
