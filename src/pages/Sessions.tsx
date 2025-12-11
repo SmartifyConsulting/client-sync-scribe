@@ -19,6 +19,9 @@ import {
   Pill,
   Receipt,
   Users,
+  ChevronsUpDown,
+  Check,
+  Search,
 } from "lucide-react";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
@@ -31,12 +34,18 @@ import { useSessions } from "@/hooks/useSessions";
 import { usePatients } from "@/hooks/usePatients";
 import { Badge } from "@/components/ui/badge";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 type SessionState = "idle" | "active" | "processing" | "completed";
 
@@ -59,6 +68,7 @@ export default function Sessions() {
   const [prescription, setPrescription] = useState<string | null>(null);
   const [invoice, setInvoice] = useState<{ id: string; invoice_number: string; amount: number } | null>(null);
   const [currentMedications, setCurrentMedications] = useState<{ medication: string; dosage: string; frequency: string }[]>([]);
+  const [patientSelectorOpen, setPatientSelectorOpen] = useState(false);
   const pendingCompletionRef = useRef(false);
   const latestTranscriptRef = useRef<string>("");
   const currentSessionIdRef = useRef<string | null>(null);
@@ -304,37 +314,61 @@ export default function Sessions() {
               : "Choose a patient to start a new consultation session."}
           </p>
           
-          {/* Patient Selector */}
+          {/* Patient Selector with Search */}
           {!currentPatient && (
             <div className="w-full max-w-xs mb-6">
-              <Select 
-                value={selectedPatientId || ""} 
-                onValueChange={handlePatientSelect}
-              >
-                <SelectTrigger className="w-full bg-background">
-                  <SelectValue placeholder="Select a patient..." />
-                </SelectTrigger>
-                <SelectContent className="bg-popover z-50">
-                  {patientsLoading ? (
-                    <div className="flex items-center justify-center py-4">
-                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : patients.length === 0 ? (
-                    <div className="py-4 text-center text-sm text-muted-foreground">
-                      No patients found
-                    </div>
-                  ) : (
-                    patients.map((patient) => (
-                      <SelectItem key={patient.id} value={patient.id}>
-                        <span className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          {patient.name}
-                        </span>
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+              <Popover open={patientSelectorOpen} onOpenChange={setPatientSelectorOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={patientSelectorOpen}
+                    className="w-full justify-between bg-background"
+                  >
+                    {selectedPatientId 
+                      ? patients.find(p => p.id === selectedPatientId)?.name 
+                      : "Search patients..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[300px] p-0 bg-popover z-50" align="center">
+                  <Command>
+                    <CommandInput placeholder="Search by name..." />
+                    <CommandList>
+                      <CommandEmpty>
+                        {patientsLoading ? (
+                          <div className="flex items-center justify-center py-4">
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          </div>
+                        ) : (
+                          "No patients found."
+                        )}
+                      </CommandEmpty>
+                      <CommandGroup>
+                        {patients.map((patient) => (
+                          <CommandItem
+                            key={patient.id}
+                            value={patient.name}
+                            onSelect={() => {
+                              handlePatientSelect(patient.id);
+                              setPatientSelectorOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedPatientId === patient.id ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            <User className="mr-2 h-4 w-4 text-muted-foreground" />
+                            {patient.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
           )}
           
