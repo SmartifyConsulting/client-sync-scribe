@@ -42,18 +42,29 @@ export default function Inbox() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [activeTab, setActiveTab] = useState<"inbox" | "sent">("inbox");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [mailboxEmail, setMailboxEmail] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCurrentUser();
   }, []);
 
   useEffect(() => {
-    const getEmail = async () => {
+    const getMailboxEmail = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      setUserEmail(user?.email || null);
+      if (!user) return;
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('mailbox_id')
+        .eq('id', user.id)
+        .single();
+      
+      if (profile?.mailbox_id) {
+        // Format: docs-{mailbox_id}@inbox.miri.health
+        setMailboxEmail(`docs-${profile.mailbox_id.slice(0, 8)}@inbox.miri.health`);
+      }
     };
-    getEmail();
+    getMailboxEmail();
   }, []);
 
   useEffect(() => {
@@ -196,11 +207,16 @@ export default function Inbox() {
         <p className="mt-1 text-muted-foreground">
           Messages from other doctors about shared patients
         </p>
-        {userEmail && (
-          <div className="mt-2 flex items-center gap-2 text-sm">
-            <Mail className="h-4 w-4 text-primary" />
-            <span className="text-muted-foreground">Mailbox:</span>
-            <span className="font-medium text-foreground">{userEmail}</span>
+        {mailboxEmail && (
+          <div className="mt-3 p-3 rounded-lg bg-primary/5 border border-primary/20">
+            <div className="flex items-center gap-2 text-sm">
+              <Mail className="h-4 w-4 text-primary" />
+              <span className="text-muted-foreground">Document Mailbox:</span>
+              <code className="font-medium text-primary bg-primary/10 px-2 py-0.5 rounded">{mailboxEmail}</code>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1.5">
+              External parties can email documents to this address and they'll appear in your Documents.
+            </p>
           </div>
         )}
       </div>

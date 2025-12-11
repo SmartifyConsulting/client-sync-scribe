@@ -528,20 +528,7 @@ export default function Profile() {
         </div>
 
         {/* Mailbox Email */}
-        <div className="mt-6 p-4 rounded-lg bg-primary/5 border border-primary/20">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
-              <Upload className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <p className="font-medium text-foreground">Document Mailbox</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                External parties (e.g., radiologists, labs) can email documents to this address and they will be saved under your Documents.
-              </p>
-              <p className="text-sm font-medium text-primary mt-2">{user?.email || "Not available"}</p>
-            </div>
-          </div>
-        </div>
+        <MailboxSection userId={user?.id} />
         <Button className="mt-6" onClick={handleSaveProfile} disabled={isSaving}>
           {isSaving ? "Saving..." : "Save Changes"}
         </Button>
@@ -868,6 +855,51 @@ export default function Profile() {
             <Plus className="h-4 w-4" />
             {isAddingService ? "Adding..." : "Add Service"}
           </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Mailbox Section Component
+function MailboxSection({ userId }: { userId?: string }) {
+  const [mailboxEmail, setMailboxEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchMailboxId = async () => {
+      if (!userId) return;
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('mailbox_id')
+        .eq('id', userId)
+        .single();
+      
+      if (profile?.mailbox_id) {
+        setMailboxEmail(`docs-${profile.mailbox_id.slice(0, 8)}@inbox.miri.health`);
+      }
+    };
+    fetchMailboxId();
+  }, [userId]);
+
+  return (
+    <div className="mt-6 p-4 rounded-lg bg-primary/5 border border-primary/20">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+          <Upload className="h-5 w-5 text-primary" />
+        </div>
+        <div className="flex-1">
+          <p className="font-medium text-foreground">Document Mailbox</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            External parties (e.g., radiologists, labs) can email documents to this address and they will be saved under your Documents.
+          </p>
+          {mailboxEmail ? (
+            <code className="inline-block text-sm font-medium text-primary bg-primary/10 px-3 py-1.5 rounded mt-2">
+              {mailboxEmail}
+            </code>
+          ) : (
+            <p className="text-sm text-muted-foreground mt-2">Loading...</p>
+          )}
         </div>
       </div>
     </div>
