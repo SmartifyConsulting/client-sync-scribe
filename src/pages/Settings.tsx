@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, Bell, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff, CreditCard, Receipt } from "lucide-react";
+import { Calendar, Bell, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff, CreditCard, Receipt, Download, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
@@ -10,6 +10,10 @@ import { TwoFactorSetup } from "@/components/auth/TwoFactorSetup";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 // Mock payment history data
 const paymentHistory = [
@@ -18,6 +22,12 @@ const paymentHistory = [
   { id: "3", date: new Date(2024, 8, 1), description: "Professional Plan - Monthly", amount: 49.99, status: "paid" },
   { id: "4", date: new Date(2024, 7, 1), description: "Professional Plan - Monthly", amount: 49.99, status: "paid" },
   { id: "5", date: new Date(2024, 6, 1), description: "Professional Plan - Monthly", amount: 49.99, status: "paid" },
+];
+
+const plans = [
+  { id: "basic", name: "Basic", price: 19.99, features: ["Up to 50 patients", "Basic templates", "Email support"] },
+  { id: "professional", name: "Professional", price: 49.99, features: ["Unlimited patients", "All templates", "Priority support", "Calendar sync"] },
+  { id: "enterprise", name: "Enterprise", price: 99.99, features: ["Everything in Pro", "Custom branding", "API access", "Dedicated support"] },
 ];
 
 export default function Settings() {
@@ -30,6 +40,18 @@ export default function Settings() {
   const [mfaFactors, setMfaFactors] = useState<any[]>([]);
   const [loadingMfa, setLoadingMfa] = useState(true);
   const [disablingMfa, setDisablingMfa] = useState(false);
+  
+  // Billing state
+  const [showManagePlan, setShowManagePlan] = useState(false);
+  const [showAddPayment, setShowAddPayment] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState("professional");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvc, setCardCvc] = useState("");
+  const [cardName, setCardName] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
+  const [isSavingPlan, setIsSavingPlan] = useState(false);
+  const [isSavingPayment, setIsSavingPayment] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -105,6 +127,54 @@ export default function Settings() {
       title: "Calendar Disconnected",
       description: `${provider === "google" ? "Google" : "Outlook"} Calendar has been disconnected`,
     });
+  };
+
+  const handleSavePlan = async () => {
+    setIsSavingPlan(true);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setIsSavingPlan(false);
+    setShowManagePlan(false);
+    const plan = plans.find(p => p.id === selectedPlan);
+    toast({
+      title: "Plan Updated",
+      description: `You are now on the ${plan?.name} plan`,
+    });
+  };
+
+  const handleSavePayment = async () => {
+    if (!cardNumber || !cardExpiry || !cardCvc || !cardName) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all card details",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsSavingPayment(true);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setPaymentMethod(`•••• •••• •••• ${cardNumber.slice(-4)}`);
+    setIsSavingPayment(false);
+    setShowAddPayment(false);
+    setCardNumber("");
+    setCardExpiry("");
+    setCardCvc("");
+    setCardName("");
+    toast({
+      title: "Payment Method Added",
+      description: "Your card has been saved successfully",
+    });
+  };
+
+  const handleDownloadReceipt = (payment: typeof paymentHistory[0]) => {
+    toast({
+      title: "Downloading Receipt",
+      description: `Receipt for ${format(payment.date, "MMMM yyyy")} is being downloaded`,
+    });
+    // Simulate download
+    const link = document.createElement('a');
+    link.href = `data:text/plain;charset=utf-8,Receipt for ${payment.description}%0ADate: ${format(payment.date, "MMMM d, yyyy")}%0AAmount: $${payment.amount.toFixed(2)}%0AStatus: ${payment.status}`;
+    link.download = `receipt-${format(payment.date, "yyyy-MM")}.txt`;
+    link.click();
   };
 
   return (
@@ -286,9 +356,11 @@ export default function Settings() {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium text-foreground">Current Plan</p>
-              <p className="text-sm text-muted-foreground">Professional Plan - Active</p>
+              <p className="text-sm text-muted-foreground">
+                {plans.find(p => p.id === selectedPlan)?.name} Plan - Active
+              </p>
             </div>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => setShowManagePlan(true)}>
               Manage Plan
             </Button>
           </div>
@@ -296,10 +368,12 @@ export default function Settings() {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium text-foreground">Payment Method</p>
-              <p className="text-sm text-muted-foreground">No payment method added</p>
+              <p className="text-sm text-muted-foreground">
+                {paymentMethod || "No payment method added"}
+              </p>
             </div>
-            <Button variant="outline">
-              Add Payment
+            <Button variant="outline" onClick={() => setShowAddPayment(true)}>
+              {paymentMethod ? "Update Payment" : "Add Payment"}
             </Button>
           </div>
         </div>
@@ -336,7 +410,8 @@ export default function Settings() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => handleDownloadReceipt(payment)}>
+                      <Download className="h-4 w-4 mr-1" />
                       Download
                     </Button>
                   </TableCell>
@@ -370,6 +445,119 @@ export default function Settings() {
         onOpenChange={setShow2FASetup}
         onSuccess={fetchMfaFactors}
       />
+
+      {/* Manage Plan Dialog */}
+      <Dialog open={showManagePlan} onOpenChange={setShowManagePlan}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Manage Your Plan</DialogTitle>
+            <DialogDescription>
+              Choose the plan that best fits your practice needs
+            </DialogDescription>
+          </DialogHeader>
+          <RadioGroup value={selectedPlan} onValueChange={setSelectedPlan} className="space-y-4 mt-4">
+            {plans.map((plan) => (
+              <div
+                key={plan.id}
+                className={`relative flex items-start rounded-lg border p-4 cursor-pointer transition-colors ${
+                  selectedPlan === plan.id ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                }`}
+                onClick={() => setSelectedPlan(plan.id)}
+              >
+                <RadioGroupItem value={plan.id} id={plan.id} className="mt-1" />
+                <div className="ml-3 flex-1">
+                  <Label htmlFor={plan.id} className="font-semibold text-foreground cursor-pointer">
+                    {plan.name}
+                    <span className="ml-2 text-primary">${plan.price}/mo</span>
+                  </Label>
+                  <ul className="mt-2 text-sm text-muted-foreground space-y-1">
+                    {plan.features.map((feature, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <Check className="h-3 w-3 text-primary" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ))}
+          </RadioGroup>
+          <DialogFooter className="mt-6">
+            <Button variant="outline" onClick={() => setShowManagePlan(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSavePlan} disabled={isSavingPlan}>
+              {isSavingPlan ? "Saving..." : "Update Plan"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Payment Dialog */}
+      <Dialog open={showAddPayment} onOpenChange={setShowAddPayment}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{paymentMethod ? "Update Payment Method" : "Add Payment Method"}</DialogTitle>
+            <DialogDescription>
+              Enter your card details to {paymentMethod ? "update" : "add"} a payment method
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="cardName">Cardholder Name</Label>
+              <Input
+                id="cardName"
+                placeholder="John Doe"
+                value={cardName}
+                onChange={(e) => setCardName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cardNumber">Card Number</Label>
+              <Input
+                id="cardNumber"
+                placeholder="4242 4242 4242 4242"
+                value={cardNumber}
+                onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, "").slice(0, 16))}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="cardExpiry">Expiry Date</Label>
+                <Input
+                  id="cardExpiry"
+                  placeholder="MM/YY"
+                  value={cardExpiry}
+                  onChange={(e) => {
+                    let value = e.target.value.replace(/\D/g, "").slice(0, 4);
+                    if (value.length > 2) {
+                      value = value.slice(0, 2) + "/" + value.slice(2);
+                    }
+                    setCardExpiry(value);
+                  }}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cardCvc">CVC</Label>
+                <Input
+                  id="cardCvc"
+                  placeholder="123"
+                  value={cardCvc}
+                  onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="mt-6">
+            <Button variant="outline" onClick={() => setShowAddPayment(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSavePayment} disabled={isSavingPayment}>
+              {isSavingPayment ? "Saving..." : "Save Card"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
