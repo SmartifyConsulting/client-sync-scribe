@@ -21,6 +21,9 @@ interface MedicalCertificateEditorProps {
 
 const CERTIFICATE_TEMPLATE = `MEDICAL CERTIFICATE
 
+[PRACTICE_ADDRESS]
+Practice No: [PRACTICE_NUMBER]
+
 Date: [DATE]
 Patient: [PATIENT_NAME]
 Doctor: [DOCTOR_NAME]
@@ -49,6 +52,8 @@ export function MedicalCertificateEditor({
   const { toast } = useToast();
   const { profile } = useProfile();
   const doctorName = profile?.full_name || "Doctor";
+  const practiceNumber = profile?.practice_number || "";
+  const practiceAddress = profile?.practice_address || "";
   
   const [content, setContent] = useState("");
   const [rawTranscript, setRawTranscript] = useState("");
@@ -62,10 +67,12 @@ export function MedicalCertificateEditor({
         .replace(/\[DATE\]/g, new Date().toLocaleDateString())
         .replace(/\[PATIENT_NAME\]/g, patientName)
         .replace(/\[DOCTOR_NAME\]/g, doctorName)
+        .replace("[PRACTICE_NUMBER]", practiceNumber)
+        .replace("[PRACTICE_ADDRESS]", practiceAddress)
         .replace("[CERTIFICATE_CONTENT]", "")
         .replace("[LEAVE_PERIOD]", "")
     );
-  }, [patientName, doctorName]);
+  }, [patientName, doctorName, practiceNumber, practiceAddress]);
 
   const handleTranscriptionComplete = useCallback((text: string) => {
     setRawTranscript(text);
@@ -74,6 +81,8 @@ export function MedicalCertificateEditor({
         .replace(/\[DATE\]/g, new Date().toLocaleDateString())
         .replace(/\[PATIENT_NAME\]/g, patientName)
         .replace(/\[DOCTOR_NAME\]/g, doctorName)
+        .replace("[PRACTICE_NUMBER]", practiceNumber)
+        .replace("[PRACTICE_ADDRESS]", practiceAddress)
         .replace("[CERTIFICATE_CONTENT]", text)
         .replace("[LEAVE_PERIOD]", leavePeriod);
     });
@@ -81,7 +90,7 @@ export function MedicalCertificateEditor({
       title: "Transcription Complete",
       description: "Certificate has been populated from voice recording",
     });
-  }, [patientName, doctorName, leavePeriod, toast]);
+  }, [patientName, doctorName, practiceNumber, practiceAddress, leavePeriod, toast]);
 
   const { 
     isRecording, 
