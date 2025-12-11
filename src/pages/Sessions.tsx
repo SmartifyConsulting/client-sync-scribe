@@ -294,205 +294,127 @@ export default function Sessions() {
 
       {sessionState === "active" && (
         <div className="space-y-6">
-          {/* Top Row: Recording Panel + Actions Panel */}
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Recording Panel */}
-            <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                    <User className="h-5 w-5 text-accent-foreground" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground">
-                      {currentPatient?.name || "Current Session"}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {currentPatient ? "Recording session" : "Select a patient"}
-                    </p>
-                  </div>
+          {/* Recording Panel */}
+          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm max-w-2xl mx-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+                  <User className="h-5 w-5 text-accent-foreground" />
                 </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-mono text-foreground">
-                    {formatDuration(sessionDuration)}
-                  </span>
+                <div>
+                  <p className="font-medium text-foreground">
+                    {currentPatient?.name || "Current Session"}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {currentPatient ? "Recording session" : "Select a patient"}
+                  </p>
                 </div>
               </div>
-
-              {/* Recording Controls */}
-              <div className="flex flex-col items-center gap-4 py-8">
-                <div className="flex items-center gap-4">
-                  {/* Main Record Button */}
-                  <button
-                    onClick={toggleRecording}
-                    disabled={isTranscribing}
-                    className={cn(
-                      "flex h-24 w-24 items-center justify-center rounded-full transition-all duration-300",
-                      isTranscribing && "opacity-50 cursor-not-allowed",
-                      isRecording
-                        ? "bg-destructive text-destructive-foreground animate-pulse-soft shadow-lg"
-                        : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-glow"
-                    )}
-                  >
-                    {isTranscribing ? (
-                      <Loader2 className="h-10 w-10 animate-spin" />
-                    ) : isRecording ? (
-                      <Square className="h-10 w-10" />
-                    ) : (
-                      <Mic className="h-10 w-10" />
-                    )}
-                  </button>
-                </div>
-                
-                <p className="text-sm text-muted-foreground text-center">
-                  {isTranscribing 
-                    ? "Transcribing audio..." 
-                    : isRecording 
-                      ? "Recording... Tap to stop and transcribe" 
-                      : "Tap to start recording"}
-                </p>
-                
-                {/* Audio Waveform Visualizer */}
-                {(isRecording || isTranscribing) && (
-                  <div className="w-full max-w-xs mt-4">
-                    <AudioWaveform isRecording={isRecording} />
-                    {isTranscribing && (
-                      <p className="text-xs text-center text-muted-foreground mt-2">Processing audio...</p>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Live Transcript Preview */}
-              {(transcript || isTranscribing) && (
-                <div className="mt-4 p-4 rounded-lg bg-primary/5 border-2 border-primary/20">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-primary" />
-                      <p className="text-sm font-semibold text-primary">Voice Transcription</p>
-                    </div>
-                    {transcript && !isTranscribing && (
-                      <span className="text-xs bg-green-500/10 text-green-600 px-2 py-0.5 rounded-full">
-                        ✓ Transcribed
-                      </span>
-                    )}
-                    {isTranscribing && (
-                      <span className="text-xs bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                        Processing...
-                      </span>
-                    )}
-                  </div>
-                  <div className="max-h-[200px] overflow-y-auto bg-background/50 rounded p-3">
-                    {transcript ? (
-                      <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{transcript}</p>
-                    ) : (
-                      <p className="text-sm text-muted-foreground italic">Transcribing audio...</p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Audio Playback */}
-              {audioUrl && !isRecording && (
-                <div className="mt-4 p-4 rounded-lg bg-muted/50 border border-border">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Volume2 className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-sm font-medium text-foreground">Recording Playback</p>
-                  </div>
-                  <audio controls className="w-full" src={audioUrl}>
-                    Your browser does not support audio playback.
-                  </audio>
-                </div>
-              )}
-
-              <div className="flex gap-3 pt-4 border-t border-border">
-                <Button variant="outline" className="flex-1" onClick={endSession} disabled={isTranscribing}>
-                  <Square className="h-4 w-4 mr-2" />
-                  End Session
-                </Button>
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-mono text-foreground">
+                  {formatDuration(sessionDuration)}
+                </span>
               </div>
             </div>
 
-            {/* Actions Panel - Prescription & Invoice */}
-            <div className="space-y-4">
-              {/* Prescription Card */}
-              <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                      <Pill className="h-5 w-5 text-accent-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">Prescription</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {prescription ? "Prescription recorded" : "Voice-record a prescription"}
-                      </p>
-                    </div>
-                  </div>
-                  <Button 
-                    variant={prescription ? "secondary" : "default"}
-                    className="gap-2" 
-                    onClick={() => setShowPrescriptionEditor(true)}
-                  >
-                    <Pill className="h-4 w-4" />
-                    {prescription ? "View/Edit" : "Record"}
-                  </Button>
-                </div>
-                
-                {prescription && (
-                  <div className="mt-4 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                      <p className="text-sm font-medium text-green-600">Prescription Saved</p>
-                    </div>
-                  </div>
-                )}
+            {/* Recording Controls */}
+            <div className="flex flex-col items-center gap-4 py-8">
+              <div className="flex items-center gap-4">
+                {/* Main Record Button */}
+                <button
+                  onClick={toggleRecording}
+                  disabled={isTranscribing}
+                  className={cn(
+                    "flex h-24 w-24 items-center justify-center rounded-full transition-all duration-300",
+                    isTranscribing && "opacity-50 cursor-not-allowed",
+                    isRecording
+                      ? "bg-destructive text-destructive-foreground animate-pulse-soft shadow-lg"
+                      : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-glow"
+                  )}
+                >
+                  {isTranscribing ? (
+                    <Loader2 className="h-10 w-10 animate-spin" />
+                  ) : isRecording ? (
+                    <Square className="h-10 w-10" />
+                  ) : (
+                    <Mic className="h-10 w-10" />
+                  )}
+                </button>
               </div>
+              
+              <p className="text-sm text-muted-foreground text-center">
+                {isTranscribing 
+                  ? "Transcribing audio..." 
+                  : isRecording 
+                    ? "Recording... Tap to stop and transcribe" 
+                    : "Tap to start recording"}
+              </p>
+              
+              {/* Audio Waveform Visualizer */}
+              {(isRecording || isTranscribing) && (
+                <div className="w-full max-w-xs mt-4">
+                  <AudioWaveform isRecording={isRecording} />
+                  {isTranscribing && (
+                    <p className="text-xs text-center text-muted-foreground mt-2">Processing audio...</p>
+                  )}
+                </div>
+              )}
+            </div>
 
-              {/* Invoice Card */}
-              <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                      <Receipt className="h-5 w-5 text-accent-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">Invoice</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {invoice ? `Invoice ${invoice.invoice_number}` : "Generate an invoice for this session"}
-                      </p>
-                    </div>
+            {/* Live Transcript Preview */}
+            {(transcript || isTranscribing) && (
+              <div className="mt-4 p-4 rounded-lg bg-primary/5 border-2 border-primary/20">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-semibold text-primary">Voice Transcription</p>
                   </div>
-                  <Button 
-                    variant={invoice ? "secondary" : "default"}
-                    className="gap-2" 
-                    onClick={() => setShowInvoiceEditor(true)}
-                    disabled={!patientId}
-                  >
-                    <Receipt className="h-4 w-4" />
-                    {invoice ? "View" : "Generate"}
-                  </Button>
+                  {transcript && !isTranscribing && (
+                    <span className="text-xs bg-green-500/10 text-green-600 px-2 py-0.5 rounded-full">
+                      ✓ Transcribed
+                    </span>
+                  )}
+                  {isTranscribing && (
+                    <span className="text-xs bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Processing...
+                    </span>
+                  )}
                 </div>
-                
-                {invoice && (
-                  <div className="mt-4 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        <p className="text-sm font-medium text-green-600">Invoice Created</p>
-                      </div>
-                      <p className="text-sm font-semibold text-foreground">R {invoice.amount.toFixed(2)}</p>
-                    </div>
-                  </div>
-                )}
+                <div className="max-h-[200px] overflow-y-auto bg-background/50 rounded p-3">
+                  {transcript ? (
+                    <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{transcript}</p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">Transcribing audio...</p>
+                  )}
+                </div>
               </div>
+            )}
+
+            {/* Audio Playback */}
+            {audioUrl && !isRecording && (
+              <div className="mt-4 p-4 rounded-lg bg-muted/50 border border-border">
+                <div className="flex items-center gap-2 mb-2">
+                  <Volume2 className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-sm font-medium text-foreground">Recording Playback</p>
+                </div>
+                <audio controls className="w-full" src={audioUrl}>
+                  Your browser does not support audio playback.
+                </audio>
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-4 border-t border-border">
+              <Button variant="outline" className="flex-1" onClick={endSession} disabled={isTranscribing}>
+                <Square className="h-4 w-4 mr-2" />
+                End Session
+              </Button>
             </div>
           </div>
 
           {/* Notes Panel - Below */}
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="rounded-xl border border-border bg-card p-6 shadow-sm max-w-2xl mx-auto">
             <div className="flex items-center gap-3 mb-4">
               <FileText className="h-5 w-5 text-primary" />
               <h3 className="font-semibold text-foreground">Session Notes</h3>
@@ -598,6 +520,81 @@ export default function Sessions() {
                     <CheckCircle className="h-3 w-3" />
                     Added to To-Do List
                   </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Post-Session Actions: Prescription & Invoice */}
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Prescription Card */}
+            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+                    <Pill className="h-5 w-5 text-accent-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Prescription</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {prescription ? "Prescription recorded" : "Create a prescription for this session"}
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  variant={prescription ? "secondary" : "default"}
+                  className="gap-2" 
+                  onClick={() => setShowPrescriptionEditor(true)}
+                >
+                  <Pill className="h-4 w-4" />
+                  {prescription ? "View/Edit" : "Create"}
+                </Button>
+              </div>
+              
+              {prescription && (
+                <div className="mt-4 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <p className="text-sm font-medium text-green-600">Prescription Saved</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Invoice Card */}
+            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+                    <Receipt className="h-5 w-5 text-accent-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Invoice</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {invoice ? `Invoice ${invoice.invoice_number}` : "Generate an invoice for this session"}
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  variant={invoice ? "secondary" : "default"}
+                  className="gap-2" 
+                  onClick={() => setShowInvoiceEditor(true)}
+                  disabled={!patientId}
+                >
+                  <Receipt className="h-4 w-4" />
+                  {invoice ? "View" : "Generate"}
+                </Button>
+              </div>
+              
+              {invoice && (
+                <div className="mt-4 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <p className="text-sm font-medium text-green-600">Invoice Created</p>
+                    </div>
+                    <p className="text-sm font-semibold text-foreground">R {invoice.amount.toFixed(2)}</p>
+                  </div>
                 </div>
               )}
             </div>
