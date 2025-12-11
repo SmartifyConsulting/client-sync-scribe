@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { X, FileText, DollarSign, Send, Loader2, Mic, Square, Save, ChevronDown } from "lucide-react";
+import { X, FileText, DollarSign, Send, Loader2, Mic, Square, Save, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +10,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
 import { AudioWaveform } from "./AudioWaveform";
 import { cn } from "@/lib/utils";
+
+interface LineItem {
+  id: string;
+  description: string;
+  amount: string;
+}
 
 interface PatientDetails {
   name: string;
@@ -38,12 +44,14 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
   const [patientDetails, setPatientDetails] = useState<PatientDetails | null>(null);
   const [servicePrices, setServicePrices] = useState<ServicePrice[]>([]);
   const [selectedService, setSelectedService] = useState<string>("");
-  const [formData, setFormData] = useState({
-    description: `Consultation session - ${patientName}`,
-    amount: "",
-    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-  });
+  const [lineItems, setLineItems] = useState<LineItem[]>([
+    { id: crypto.randomUUID(), description: `Consultation session - ${patientName}`, amount: "" }
+  ]);
+  const [dueDate, setDueDate] = useState(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
   const [rawTranscript, setRawTranscript] = useState("");
+  const [activeLineItemId, setActiveLineItemId] = useState<string | null>(null);
+
+  const totalAmount = lineItems.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
 
   // Fetch patient details and service prices
   useEffect(() => {
@@ -58,12 +66,11 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
       if (!patientError && patientData) {
         setPatientDetails(patientData);
         const medicalAidInfo = patientData.medical_aid && patientData.medical_aid_number 
-          ? `\nMedical Aid: ${patientData.medical_aid}\nMember Number: ${patientData.medical_aid_number}`
+          ? ` (${patientData.medical_aid} - ${patientData.medical_aid_number})`
           : '';
-        setFormData(prev => ({
-          ...prev,
-          description: `Consultation session - ${patientData.name}${medicalAidInfo}`,
-        }));
+        setLineItems([
+          { id: crypto.randomUUID(), description: `Consultation session - ${patientData.name}${medicalAidInfo}`, amount: "" }
+        ]);
       }
 
       // Fetch service prices
@@ -80,33 +87,63 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
     fetchData();
   }, [patientId]);
 
-  // Handle service selection
+  // Handle service selection - adds a new line item
   const handleServiceSelect = (serviceId: string) => {
     setSelectedService(serviceId);
     const service = servicePrices.find(s => s.id === serviceId);
     if (service) {
       const medicalAidInfo = patientDetails?.medical_aid && patientDetails?.medical_aid_number 
-        ? `\nMedical Aid: ${patientDetails.medical_aid}\nMember Number: ${patientDetails.medical_aid_number}`
+        ? ` (${patientDetails.medical_aid} - ${patientDetails.medical_aid_number})`
         : '';
-      setFormData(prev => ({
-        ...prev,
+      const newItem: LineItem = {
+        id: crypto.randomUUID(),
         description: `${service.service_name} - ${patientDetails?.name || patientName}${medicalAidInfo}`,
         amount: service.default_price.toString(),
-      }));
+      };
+      setLineItems(prev => [...prev, newItem]);
+      setSelectedService("");
     }
+  };
+
+  const addLineItem = () => {
+    const newItem: LineItem = {
+      id: crypto.randomUUID(),
+      description: "",
+      amount: "",
+    };
+    setLineItems(prev => [...prev, newItem]);
+  };
+
+  const removeLineItem = (id: string) => {
+    if (lineItems.length > 1) {
+      setLineItems(prev => prev.filter(item => item.id !== id));
+    }
+  };
+
+  const updateLineItem = (id: string, field: 'description' | 'amount', value: string) => {
+    setLineItems(prev => prev.map(item => 
+      item.id === id ? { ...item, [field]: value } : item
+    ));
   };
 
   const handleTranscriptionComplete = useCallback((text: string) => {
     setRawTranscript(text);
-    setFormData(prev => ({
-      ...prev,
-      description: text,
-    }));
+    // Add transcribed text to the active line item or create a new one
+    if (activeLineItemId) {
+      updateLineItem(activeLineItemId, 'description', text);
+    } else {
+      const newItem: LineItem = {
+        id: crypto.randomUUID(),
+        description: text,
+        amount: "",
+      };
+      setLineItems(prev => [...prev, newItem]);
+    }
     toast({
       title: "Transcription Complete",
       description: "Invoice description has been populated from voice recording",
     });
-  }, [toast]);
+  }, [toast, activeLineItemId]);
 
   const { 
     isRecording, 
@@ -138,7 +175,7 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.amount || parseFloat(formData.amount) <= 0) {
+    if (totalAmount <= 0) {
       toast({
         title: "Invalid Amount",
         description: "Please enter a valid amount greater than 0",
@@ -155,6 +192,12 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
 
       const invoiceNumber = generateInvoiceNumber();
       
+      // Build combined description from all line items
+      const combinedDescription = lineItems
+        .filter(item => item.description.trim())
+        .map(item => `${item.description}${item.amount ? ` - R${parseFloat(item.amount).toFixed(2)}` : ''}`)
+        .join('\n');
+      
       const { data, error } = await supabase
         .from('invoices')
         .insert({
@@ -162,9 +205,9 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
           doctor_id: user.id,
           session_id: sessionId || null,
           invoice_number: invoiceNumber,
-          description: formData.description,
-          amount: parseFloat(formData.amount),
-          due_date: formData.dueDate,
+          description: combinedDescription,
+          amount: totalAmount,
+          due_date: dueDate,
           status: 'pending',
         })
         .select()
@@ -220,10 +263,10 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
             {/* Service Selection */}
             {servicePrices.length > 0 && (
               <div className="space-y-2">
-                <Label htmlFor="service">Select Service (Optional)</Label>
+                <Label htmlFor="service">Add Service</Label>
                 <Select value={selectedService} onValueChange={handleServiceSelect}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose a service to auto-fill..." />
+                    <SelectValue placeholder="Choose a service to add..." />
                   </SelectTrigger>
                   <SelectContent>
                     {servicePrices.map((service) => (
@@ -236,44 +279,69 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Invoice description..."
-                className="min-h-[150px]"
-              />
+            {/* Line Items */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Line Items</Label>
+                <Button type="button" variant="outline" size="sm" onClick={addLineItem} className="gap-1">
+                  <Plus className="h-3 w-3" />
+                  Add Line
+                </Button>
+              </div>
+              
+              {lineItems.map((item, index) => (
+                <div key={item.id} className="flex gap-2 items-start p-3 rounded-lg border border-border bg-muted/20">
+                  <div className="flex-1 space-y-2">
+                    <Input
+                      value={item.description}
+                      onChange={(e) => updateLineItem(item.id, 'description', e.target.value)}
+                      placeholder="Description..."
+                      onFocus={() => setActiveLineItemId(item.id)}
+                    />
+                  </div>
+                  <div className="w-28">
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">R</span>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={item.amount}
+                        onChange={(e) => updateLineItem(item.id, 'amount', e.target.value)}
+                        placeholder="0.00"
+                        className="pl-7"
+                      />
+                    </div>
+                  </div>
+                  {lineItems.length > 1 && (
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => removeLineItem(item.id)}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+              
+              {/* Total */}
+              <div className="flex justify-end items-center gap-4 pt-2 border-t border-border">
+                <span className="text-sm font-medium text-muted-foreground">Total:</span>
+                <span className="text-lg font-semibold text-foreground">R {totalAmount.toFixed(2)}</span>
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="amount">Amount (R)</Label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="amount"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.amount}
-                    onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
-                    placeholder="0.00"
-                    className="pl-9"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="dueDate">Due Date</Label>
-                <Input
-                  id="dueDate"
-                  type="date"
-                  value={formData.dueDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="dueDate">Due Date</Label>
+              <Input
+                id="dueDate"
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+              />
             </div>
           </form>
 
@@ -362,7 +430,7 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} className="gap-2" disabled={isSubmitting || !formData.amount}>
+          <Button onClick={handleSubmit} className="gap-2" disabled={isSubmitting || totalAmount <= 0}>
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
