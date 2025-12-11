@@ -75,6 +75,21 @@ const formatDate = (dateString: string): string => {
   return date.toLocaleDateString();
 };
 
+// Render content with HTML formatting (allows only safe formatting tags)
+const renderFormattedContent = (content: string): string => {
+  const safeContent = content
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/&lt;b&gt;/g, '<b>')
+    .replace(/&lt;\/b&gt;/g, '</b>')
+    .replace(/&lt;i&gt;/g, '<i>')
+    .replace(/&lt;\/i&gt;/g, '</i>')
+    .replace(/&lt;u&gt;/g, '<u>')
+    .replace(/&lt;\/u&gt;/g, '</u>')
+    .replace(/\n/g, '<br/>');
+  return safeContent;
+};
+
 export default function Documents() {
   const { toast } = useToast();
   const { templates: dbTemplates, loading: templatesLoading, createTemplate, updateTemplate, deleteTemplate } = useTemplates();
@@ -543,12 +558,11 @@ export default function Documents() {
                 )}
                 
                 {/* Content Preview */}
-                <pre 
-                  className={`whitespace-pre-wrap text-sm text-foreground font-${previewTemplate.font_family || 'sans'}`}
-                  style={{ fontFamily: previewTemplate.font_family === 'sans' ? 'inherit' : undefined }}
-                >
-                  {previewTemplate.content}
-                </pre>
+                <div 
+                  className={`whitespace-pre-wrap text-sm text-foreground`}
+                  style={{ fontFamily: previewTemplate.font_family === 'serif' ? 'serif' : previewTemplate.font_family === 'mono' ? 'monospace' : 'inherit' }}
+                  dangerouslySetInnerHTML={{ __html: renderFormattedContent(previewTemplate.content) }}
+                />
               </div>
 
               <div className="flex gap-3 pt-4 border-t border-border">
@@ -583,9 +597,10 @@ export default function Documents() {
           {previewDocument && (
             <div className="space-y-4">
               <div className="border border-border rounded-lg p-6 bg-card/50">
-                <pre className="whitespace-pre-wrap text-sm text-foreground">
-                  {previewDocument.content}
-                </pre>
+                <div 
+                  className="whitespace-pre-wrap text-sm text-foreground"
+                  dangerouslySetInnerHTML={{ __html: renderFormattedContent(previewDocument.content) }}
+                />
               </div>
 
               <div className="flex gap-3 pt-4 border-t border-border">
