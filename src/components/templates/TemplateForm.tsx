@@ -1,13 +1,12 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Upload, X, Eye, EyeOff, Move, Bold, Italic, Underline } from "lucide-react";
+import { Upload, X, Eye, EyeOff, Move } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Toggle } from "@/components/ui/toggle";
+import { TemplateSectionEditor, SectionContent } from "./TemplateSectionEditor";
 import {
   Select,
   SelectContent,
@@ -25,6 +24,18 @@ export interface TemplateData {
   logoUrl?: string;
   logoPosition?: { x: number; y: number };
   fontFamily?: string;
+  // New structured content
+  header?: {
+    left: SectionContent;
+    center: SectionContent;
+    right: SectionContent;
+  };
+  body?: SectionContent;
+  footer?: {
+    left: SectionContent;
+    center: SectionContent;
+    right: SectionContent;
+  };
 }
 
 interface TemplateFormProps {
@@ -45,68 +56,110 @@ const FONT_OPTIONS = [
   { value: "rockwell", label: "Rockwell", preview: "font-rockwell" },
 ];
 
+const defaultSectionContent = (): SectionContent => ({
+  text: "",
+  alignment: "left",
+  imageUrl: undefined,
+});
+
 export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" }: TemplateFormProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
   const { user } = useAuth();
-  const [isDragging, setIsDragging] = useState(false);
-  const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logoUrl || null);
-  const [logoPosition, setLogoPosition] = useState(initialData?.logoPosition || { x: 50, y: 10 });
-  const [isUploading, setIsUploading] = useState(false);
   const [selectedFont, setSelectedFont] = useState(initialData?.fontFamily || "sans");
   const [showPreview, setShowPreview] = useState(false);
-  const [isDraggingLogo, setIsDraggingLogo] = useState(false);
-  const previewRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLTextAreaElement>(null);
+  
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
     description: initialData?.description || "",
-    category: initialData?.category || "",
-    content: initialData?.content || "",
   });
 
-  // Text formatting functions
-  const applyFormatting = (format: 'bold' | 'italic' | 'underline') => {
-    const textarea = contentRef.current;
-    if (!textarea) return;
+  const [header, setHeader] = useState({
+    left: initialData?.header?.left || defaultSectionContent(),
+    center: initialData?.header?.center || { ...defaultSectionContent(), alignment: 'center' as const },
+    right: initialData?.header?.right || { ...defaultSectionContent(), alignment: 'right' as const },
+  });
 
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = formData.content.substring(start, end);
-    
-    if (start === end) return; // No selection
+  const [body, setBody] = useState<SectionContent>(
+    initialData?.body || { text: initialData?.content || "", alignment: "left" }
+  );
 
-    let wrappedText = '';
-    switch (format) {
-      case 'bold':
-        wrappedText = `<b>${selectedText}</b>`;
-        break;
-      case 'italic':
-        wrappedText = `<i>${selectedText}</i>`;
-        break;
-      case 'underline':
-        wrappedText = `<u>${selectedText}</u>`;
-        break;
+  const [footer, setFooter] = useState({
+    left: initialData?.footer?.left || defaultSectionContent(),
+    center: initialData?.footer?.center || { ...defaultSectionContent(), alignment: 'center' as const },
+    right: initialData?.footer?.right || { ...defaultSectionContent(), alignment: 'right' as const },
+  });
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name || "",
+        description: initialData.description || "",
+      });
+      setSelectedFont(initialData.fontFamily || "sans");
+      
+      if (initialData.header) {
+        setHeader(initialData.header);
+      }
+      if (initialData.body) {
+        setBody(initialData.body);
+      } else if (initialData.content) {
+        setBody({ text: initialData.content, alignment: "left" });
+      }
+      if (initialData.footer) {
+        setFooter(initialData.footer);
+      }
+    }
+  }, [initialData]);
+
+  const handleSubmit = () => {
+    if (!formData.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Template name is required",
+        variant: "destructive",
+      });
+      return;
     }
 
-    const newContent = 
-      formData.content.substring(0, start) + 
-      wrappedText + 
-      formData.content.substring(end);
-    
-    setFormData({ ...formData, content: newContent });
+    // Combine all sections into legacy content format for backward compatibility
+    const combinedContent = [
+      header.left.text,
+      header.center.text,
+      header.right.text,
+      body.text,
+      footer.left.text,
+      footer.center.text,
+      footer.right.text,
+    ].filter(Boolean).join('\n\n');
 
-    // Restore cursor position after update
-    setTimeout(() => {
-      textarea.focus();
-      const newCursorPos = start + wrappedText.length;
-      textarea.setSelectionRange(newCursorPos, newCursorPos);
-    }, 0);
+    onSubmit({
+      id: initialData?.id,
+      name: formData.name,
+      description: formData.description,
+      category: "",
+      content: combinedContent || body.text,
+      fontFamily: selectedFont,
+      header,
+      body,
+      footer,
+    });
   };
 
-  // Render content with HTML formatting
+  const getFontClass = (fontValue: string) => {
+    return FONT_OPTIONS.find(f => f.value === fontValue)?.preview || "font-sans";
+  };
+
+  const replacePlaceholders = (text: string) => {
+    return text
+      .replace(/\[PracticeNumber\]/g, profile?.practice_number || "[PracticeNumber]")
+      .replace(/\[DoctorNumber\]/g, profile?.doctor_number || "[DoctorNumber]")
+      .replace(/\[PracticeAddress\]/g, (profile as any)?.practice_address || "[PracticeAddress]")
+      .replace(/\[DoctorName\]/g, profile?.full_name || "[DoctorName]")
+      .replace(/\[Date\]/g, new Date().toLocaleDateString());
+  };
+
   const renderFormattedContent = (content: string) => {
-    // Only allow safe HTML tags for formatting
     const safeContent = content
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
@@ -120,182 +173,26 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
     return safeContent;
   };
 
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        name: initialData.name || "",
-        description: initialData.description || "",
-        category: initialData.category || "",
-        content: initialData.content || "",
-      });
-      setLogoPreview(initialData.logoUrl || null);
-      setLogoPosition(initialData.logoPosition || { x: 50, y: 10 });
-      setSelectedFont(initialData.fontFamily || "sans");
-    }
-  }, [initialData]);
-
-  const handleDragEnter = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  }, []);
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }, []);
-
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      await handleFileUpload(files[0]);
-    }
-  }, [user]);
-
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      await handleFileUpload(files[0]);
-    }
-  };
-
-  const handleFileUpload = async (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload an image file (PNG, JPG, etc.)",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: "Please upload an image smaller than 5MB",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsUploading(true);
-
-    try {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setLogoPreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-
-      if (user) {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${user.id}/template-logo-${Date.now()}.${fileExt}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('logos')
-          .upload(fileName, file, { upsert: true });
-
-        if (uploadError) {
-          throw uploadError;
-        }
-
-        const { data } = supabase.storage
-          .from('logos')
-          .getPublicUrl(fileName);
-
-        setLogoPreview(data.publicUrl);
-      }
-
-      toast({
-        title: "Logo uploaded",
-        description: "Your logo has been uploaded successfully",
-      });
-    } catch (error) {
-      console.error('Upload error:', error);
-      toast({
-        title: "Upload failed",
-        description: "Failed to upload logo. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const removeLogo = () => {
-    setLogoPreview(null);
-  };
-
-  // Logo drag handlers for positioning
-  const handleLogoMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDraggingLogo(true);
-  };
-
-  const handleLogoMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDraggingLogo || !previewRef.current) return;
+  const renderSectionPreview = (section: SectionContent, className?: string) => {
+    if (!section.text && !section.imageUrl) return null;
     
-    const rect = previewRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
-    
-    setLogoPosition({ x: Math.round(x), y: Math.round(y) });
-  }, [isDraggingLogo]);
-
-  const handleLogoMouseUp = useCallback(() => {
-    setIsDraggingLogo(false);
-  }, []);
-
-  useEffect(() => {
-    if (isDraggingLogo) {
-      window.addEventListener('mousemove', handleLogoMouseMove);
-      window.addEventListener('mouseup', handleLogoMouseUp);
-      return () => {
-        window.removeEventListener('mousemove', handleLogoMouseMove);
-        window.removeEventListener('mouseup', handleLogoMouseUp);
-      };
-    }
-  }, [isDraggingLogo, handleLogoMouseMove, handleLogoMouseUp]);
-
-  const handleSubmit = () => {
-    if (!formData.name.trim() || !formData.content.trim()) {
-      toast({
-        title: "Error",
-        description: "Template name and content are required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    onSubmit({
-      id: initialData?.id,
-      ...formData,
-      logoUrl: logoPreview || undefined,
-      logoPosition: logoPreview ? logoPosition : undefined,
-      fontFamily: selectedFont,
-    });
-  };
-
-  const getFontClass = (fontValue: string) => {
-    return FONT_OPTIONS.find(f => f.value === fontValue)?.preview || "font-sans";
-  };
-
-  const replacePlaceholders = (content: string) => {
-    return content
-      .replace(/\[PracticeNumber\]/g, profile?.practice_number || "[PracticeNumber]")
-      .replace(/\[DoctorNumber\]/g, profile?.doctor_number || "[DoctorNumber]")
-      .replace(/\[PracticeAddress\]/g, (profile as any)?.practice_address || "[PracticeAddress]")
-      .replace(/\[DoctorName\]/g, profile?.full_name || "[DoctorName]");
+    return (
+      <div className={className} style={{ textAlign: section.alignment }}>
+        {section.imageUrl && (
+          <img 
+            src={section.imageUrl} 
+            alt="" 
+            className="max-h-12 inline-block mb-1"
+          />
+        )}
+        {section.text && (
+          <div 
+            className="whitespace-pre-wrap text-sm"
+            dangerouslySetInnerHTML={{ __html: renderFormattedContent(replacePlaceholders(section.text)) }}
+          />
+        )}
+      </div>
+    );
   };
 
   return (
@@ -317,51 +214,30 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
       {/* Live Preview Panel */}
       {showPreview && (
         <div className="border border-border rounded-lg overflow-hidden bg-white">
-          <div className="bg-muted/50 px-4 py-2 border-b border-border flex items-center justify-between">
+          <div className="bg-muted/50 px-4 py-2 border-b border-border">
             <span className="text-sm font-medium text-foreground">Live Preview</span>
-            {logoPreview && (
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <Move className="h-3 w-3" />
-                Drag logo to reposition
-              </span>
-            )}
           </div>
-          <div 
-            ref={previewRef}
-            className="p-8 min-h-[300px] relative bg-white"
-            style={{ cursor: isDraggingLogo ? 'grabbing' : 'default' }}
-          >
-            {/* Draggable Logo */}
-            {logoPreview && (
-              <div
-                className={`absolute cursor-grab ${isDraggingLogo ? 'cursor-grabbing' : ''}`}
-                style={{
-                  left: `${logoPosition.x}%`,
-                  top: `${logoPosition.y}%`,
-                  transform: 'translate(-50%, -50%)',
-                }}
-                onMouseDown={handleLogoMouseDown}
-              >
-                <div className="relative group">
-                  <img
-                    src={logoPreview}
-                    alt="Logo"
-                    className="max-h-16 max-w-[150px] object-contain pointer-events-none"
-                    draggable={false}
-                  />
-                  <div className="absolute inset-0 border-2 border-dashed border-primary/50 rounded opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-              </div>
-            )}
+          <div className={`p-6 min-h-[400px] ${getFontClass(selectedFont)}`}>
+            {/* Header Preview */}
+            <div className="grid grid-cols-3 gap-4 pb-4 border-b border-gray-200 mb-4">
+              {renderSectionPreview(header.left, "text-left")}
+              {renderSectionPreview(header.center, "text-center")}
+              {renderSectionPreview(header.right, "text-right")}
+            </div>
             
-            {/* Content Preview */}
-            <div className={`${logoPreview ? 'mt-20' : ''} ${getFontClass(selectedFont)}`}>
-              <div 
-                className="whitespace-pre-wrap text-sm text-gray-800"
-                dangerouslySetInnerHTML={{ 
-                  __html: renderFormattedContent(replacePlaceholders(formData.content)) || "Your template content will appear here..." 
-                }}
-              />
+            {/* Body Preview */}
+            <div className="min-h-[200px] py-4">
+              {renderSectionPreview(body)}
+              {!body.text && !body.imageUrl && (
+                <p className="text-gray-400 italic">Main content will appear here...</p>
+              )}
+            </div>
+            
+            {/* Footer Preview */}
+            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200 mt-4">
+              {renderSectionPreview(footer.left, "text-left")}
+              {renderSectionPreview(footer.center, "text-center")}
+              {renderSectionPreview(footer.right, "text-right")}
             </div>
           </div>
         </div>
@@ -402,181 +278,137 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
             ))}
           </SelectContent>
         </Select>
-        <div className={`p-3 rounded-lg bg-muted/30 border border-border ${getFontClass(selectedFont)}`}>
-          <p className="text-sm text-muted-foreground">Font Preview:</p>
-          <p className="text-foreground">The quick brown fox jumps over the lazy dog.</p>
-        </div>
       </div>
 
-      {/* Logo Upload with Drag & Drop */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">Letterhead Logo</label>
+      {/* Dynamic Fields Info */}
+      <div className="p-3 rounded-lg bg-muted/50 border border-border">
+        <p className="text-sm font-medium text-foreground mb-2">Available Dynamic Fields</p>
         <p className="text-xs text-muted-foreground mb-2">
-          Upload a logo to appear on your letterhead. Drag and drop or click to select.
+          Use these placeholders - they will be replaced with actual data when creating documents.
         </p>
-        
-        {logoPreview ? (
-          <div className="relative border border-border rounded-lg p-4 bg-card">
-            <div className="flex items-start gap-4">
-              <div className="relative group">
-                <img
-                  src={logoPreview}
-                  alt="Logo preview"
-                  className="max-h-20 max-w-[200px] object-contain rounded"
-                />
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={removeLogo}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-foreground font-medium">Logo Position</p>
-                <p className="text-xs text-muted-foreground mb-2">
-                  Use the preview panel above to drag and position your logo, or enter values manually.
-                </p>
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  <div>
-                    <label className="text-xs text-muted-foreground">X Position (%)</label>
-                    <Input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={logoPosition.x}
-                      onChange={(e) => setLogoPosition({ ...logoPosition, x: Number(e.target.value) })}
-                      className="h-8"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-muted-foreground">Y Position (%)</label>
-                    <Input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={logoPosition.y}
-                      onChange={(e) => setLogoPosition({ ...logoPosition, y: Number(e.target.value) })}
-                      className="h-8"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div
-            onDragEnter={handleDragEnter}
-            onDragLeave={handleDragLeave}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-            className={`
-              border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer
-              ${isDragging 
-                ? 'border-primary bg-primary/5' 
-                : 'border-border hover:border-primary/50 hover:bg-muted/30'
-              }
-            `}
-            onClick={() => document.getElementById('logo-upload')?.click()}
-          >
-            <input
-              id="logo-upload"
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-            <div className="flex flex-col items-center gap-2">
-              {isUploading ? (
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-              ) : (
-                <>
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
-                    <Upload className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm font-medium text-foreground">
-                    Drop your logo here or click to upload
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    PNG, JPG up to 5MB
-                  </p>
-                </>
-              )}
-            </div>
-          </div>
-        )}
+        <div className="flex flex-wrap gap-2">
+          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PatientName]</code>
+          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[DoctorName]</code>
+          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PracticeNumber]</code>
+          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[DoctorNumber]</code>
+          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PracticeAddress]</code>
+          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[Date]</code>
+        </div>
       </div>
 
-      {/* Template Content */}
+      {/* HEADER SECTION */}
       <div className="space-y-3">
-        <label className="text-sm font-medium text-foreground">Template Content *</label>
-        
-        {/* Placeholder Instructions */}
-        <div className="p-3 rounded-lg bg-muted/50 border border-border">
-          <p className="text-sm font-medium text-foreground mb-2">Available Dynamic Fields</p>
-          <p className="text-xs text-muted-foreground mb-2">
-            Use these placeholders in your template - they will be automatically replaced with actual data when creating a document.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PatientName]</code>
-            <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[DoctorName]</code>
-            <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PracticeNumber]</code>
-            <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[DoctorNumber]</code>
-            <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PracticeAddress]</code>
-            <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[Date]</code>
-            <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PatientAddress]</code>
-            <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PatientDOB]</code>
+        <div className="flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-foreground">Header</h4>
+          <span className="text-xs text-muted-foreground">(3 columns: Left, Center, Right)</span>
+        </div>
+        <div className="grid grid-cols-3 gap-3 p-4 border border-border rounded-lg bg-card">
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Left</label>
+            <TemplateSectionEditor
+              value={header.left}
+              onChange={(v) => setHeader({ ...header, left: v })}
+              placeholder="Logo, practice name..."
+              rows={2}
+              compact
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Center</label>
+            <TemplateSectionEditor
+              value={header.center}
+              onChange={(v) => setHeader({ ...header, center: v })}
+              placeholder="Title, heading..."
+              rows={2}
+              compact
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Right</label>
+            <TemplateSectionEditor
+              value={header.right}
+              onChange={(v) => setHeader({ ...header, right: v })}
+              placeholder="Date, reference..."
+              rows={2}
+              compact
+            />
           </div>
         </div>
-
-        {/* Formatting Toolbar */}
-        <div className="flex items-center gap-1 p-1 border border-border rounded-md bg-muted/30 w-fit">
-          <Toggle
-            size="sm"
-            aria-label="Bold"
-            onClick={() => applyFormatting('bold')}
-            className="h-8 w-8 p-0"
-          >
-            <Bold className="h-4 w-4" />
-          </Toggle>
-          <Toggle
-            size="sm"
-            aria-label="Italic"
-            onClick={() => applyFormatting('italic')}
-            className="h-8 w-8 p-0"
-          >
-            <Italic className="h-4 w-4" />
-          </Toggle>
-          <Toggle
-            size="sm"
-            aria-label="Underline"
-            onClick={() => applyFormatting('underline')}
-            className="h-8 w-8 p-0"
-          >
-            <Underline className="h-4 w-4" />
-          </Toggle>
-          <span className="text-xs text-muted-foreground ml-2 px-2 border-l border-border">
-            Select text, then click to format
-          </span>
-        </div>
-
-        <Textarea
-          ref={contentRef}
-          placeholder={`Enter your template content here...\n\nExample:\n\n[DoctorName]\nPractice #: [PracticeNumber]\n[PracticeAddress]\n\nDate: [Date]\n\nTo Whom It May Concern,\n\nThis is to certify that [PatientName] was seen at our practice...\n\nYours faithfully,\n[DoctorName]`}
-          value={formData.content}
-          onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-          rows={12}
-          className={`font-mono text-sm ${getFontClass(selectedFont)}`}
-        />
       </div>
 
+      {/* CONTENT SECTION */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-foreground">Content</h4>
+          <span className="text-xs text-muted-foreground">(Main body of the document)</span>
+        </div>
+        <div className="p-4 border border-border rounded-lg bg-card">
+          <TemplateSectionEditor
+            value={body}
+            onChange={setBody}
+            placeholder="Enter the main content of your template here...
+
+Example:
+To Whom It May Concern,
+
+This is to certify that [PatientName] was examined at our practice on [Date].
+
+[Additional details here...]
+
+Yours faithfully,
+[DoctorName]"
+            rows={10}
+          />
+        </div>
+      </div>
+
+      {/* FOOTER SECTION */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-foreground">Footer</h4>
+          <span className="text-xs text-muted-foreground">(3 columns: Left, Center, Right)</span>
+        </div>
+        <div className="grid grid-cols-3 gap-3 p-4 border border-border rounded-lg bg-card">
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Left</label>
+            <TemplateSectionEditor
+              value={footer.left}
+              onChange={(v) => setFooter({ ...footer, left: v })}
+              placeholder="Practice details..."
+              rows={2}
+              compact
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Center</label>
+            <TemplateSectionEditor
+              value={footer.center}
+              onChange={(v) => setFooter({ ...footer, center: v })}
+              placeholder="Page number..."
+              rows={2}
+              compact
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Right</label>
+            <TemplateSectionEditor
+              value={footer.right}
+              onChange={(v) => setFooter({ ...footer, right: v })}
+              placeholder="Contact info..."
+              rows={2}
+              compact
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
       <div className="flex gap-3 pt-2">
         <Button variant="outline" onClick={onCancel} className="flex-1">
           Cancel
         </Button>
         <Button onClick={handleSubmit} className="flex-1">
-          {mode === "edit" ? "Save Changes" : "Save"}
+          {mode === "edit" ? "Save Changes" : "Save Template"}
         </Button>
       </div>
     </div>
