@@ -1094,15 +1094,15 @@ export default function DoctorInvoices() {
               </div>
               <div className="rounded-lg border p-3">
                 <p className="text-sm text-muted-foreground">Total Amount</p>
-                <p className="text-xl font-bold">R {reportTotals.total.toFixed(2)}</p>
+                <p className="text-xl font-bold">{getCurrencySymbol(invoiceCurrency)} {reportTotals.total.toFixed(2)}</p>
               </div>
               <div className="rounded-lg border p-3 border-green-500/30 bg-green-500/5">
                 <p className="text-sm text-muted-foreground">Paid</p>
-                <p className="text-xl font-bold text-green-600">R {reportTotals.paidTotal.toFixed(2)}</p>
+                <p className="text-xl font-bold text-green-600">{getCurrencySymbol(invoiceCurrency)} {reportTotals.paidTotal.toFixed(2)}</p>
               </div>
               <div className="rounded-lg border p-3 border-amber-500/30 bg-amber-500/5">
                 <p className="text-sm text-muted-foreground">Outstanding</p>
-                <p className="text-xl font-bold text-amber-600">R {reportTotals.unpaidTotal.toFixed(2)}</p>
+                <p className="text-xl font-bold text-amber-600">{getCurrencySymbol(invoiceCurrency)} {reportTotals.unpaidTotal.toFixed(2)}</p>
               </div>
             </div>
 
@@ -1129,18 +1129,18 @@ export default function DoctorInvoices() {
                       <TableRow key={month.month}>
                         <TableCell className="font-medium">{month.monthLabel}</TableCell>
                         <TableCell className="text-center">{month.invoices.length}</TableCell>
-                        <TableCell className="text-right">R {month.total.toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-green-600">R {month.paidTotal.toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-amber-600">R {month.unpaidTotal.toFixed(2)}</TableCell>
+                        <TableCell className="text-right">{getCurrencySymbol(invoiceCurrency)} {month.total.toFixed(2)}</TableCell>
+                        <TableCell className="text-right text-green-600">{getCurrencySymbol(invoiceCurrency)} {month.paidTotal.toFixed(2)}</TableCell>
+                        <TableCell className="text-right text-amber-600">{getCurrencySymbol(invoiceCurrency)} {month.unpaidTotal.toFixed(2)}</TableCell>
                       </TableRow>
                     ))}
                     {/* Totals Row */}
                     <TableRow className="border-t-2 font-bold bg-muted/50">
                       <TableCell>Total</TableCell>
                       <TableCell className="text-center">{reportTotals.invoiceCount}</TableCell>
-                      <TableCell className="text-right">R {reportTotals.total.toFixed(2)}</TableCell>
-                      <TableCell className="text-right text-green-600">R {reportTotals.paidTotal.toFixed(2)}</TableCell>
-                      <TableCell className="text-right text-amber-600">R {reportTotals.unpaidTotal.toFixed(2)}</TableCell>
+                      <TableCell className="text-right">{getCurrencySymbol(invoiceCurrency)} {reportTotals.total.toFixed(2)}</TableCell>
+                      <TableCell className="text-right text-green-600">{getCurrencySymbol(invoiceCurrency)} {reportTotals.paidTotal.toFixed(2)}</TableCell>
+                      <TableCell className="text-right text-amber-600">{getCurrencySymbol(invoiceCurrency)} {reportTotals.unpaidTotal.toFixed(2)}</TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
@@ -1233,7 +1233,7 @@ export default function DoctorInvoices() {
               <DollarSign className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">R {stats.totalOutstanding.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-foreground">{getCurrencySymbol(invoiceCurrency)} {stats.totalOutstanding.toFixed(2)}</p>
               <p className="text-sm text-muted-foreground">Outstanding</p>
             </div>
           </div>
@@ -1308,7 +1308,7 @@ export default function DoctorInvoices() {
                       </div>
                     </TableCell>
                     <TableCell className="max-w-[200px] truncate">{invoice.description}</TableCell>
-                    <TableCell className="font-semibold">R {Number(invoice.amount).toFixed(2)}</TableCell>
+                    <TableCell className="font-semibold">{getCurrencySymbol(invoiceCurrency)} {Number(invoice.amount).toFixed(2)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1 text-sm">
                         <Calendar className="h-3 w-3 text-muted-foreground" />
@@ -1403,9 +1403,11 @@ export default function DoctorInvoices() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-amount">Amount (R)</Label>
+                  <Label htmlFor="edit-amount">Amount ({getCurrencySymbol(invoiceCurrency)})</Label>
                   <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                      {getCurrencySymbol(invoiceCurrency)}
+                    </span>
                     <Input
                       id="edit-amount"
                       type="number"
@@ -1414,7 +1416,7 @@ export default function DoctorInvoices() {
                       value={editForm.amount}
                       onChange={(e) => setEditForm(prev => ({ ...prev, amount: e.target.value }))}
                       placeholder="0.00"
-                      className="pl-9"
+                      className="pl-8"
                     />
                   </div>
                 </div>
