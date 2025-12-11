@@ -52,8 +52,6 @@ export default function Dashboard() {
     },
     refetchInterval: 30000,
   });
-
-  const totalNotifications = unreadMessagesCount + pendingTodosCount;
   
   // Format display name based on role
   const getDisplayName = () => {
@@ -105,19 +103,12 @@ export default function Dashboard() {
         </div>
         <div className="flex items-center gap-3">
           <Link to="/profile" className="rounded-xl p-2 hover:bg-accent transition-colors">
-            <div className="relative">
-              <Avatar className="h-10 w-10 border-2 border-primary/20">
-                <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} className="object-cover" />
-                <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                  {getInitials()}
-                </AvatarFallback>
-              </Avatar>
-              {totalNotifications > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-xs font-semibold text-destructive-foreground">
-                  {totalNotifications > 99 ? "99+" : totalNotifications}
-                </span>
-              )}
-            </div>
+            <Avatar className="h-10 w-10 border-2 border-primary/20">
+              <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} className="object-cover" />
+              <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                {getInitials()}
+              </AvatarFallback>
+            </Avatar>
           </Link>
           <Button 
             variant="ghost" 
