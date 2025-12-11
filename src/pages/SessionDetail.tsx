@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import {
@@ -10,10 +11,13 @@ import {
   User,
   Loader2,
   Trash2,
-  Play,
-  Pause,
   Volume2,
+  Pill,
+  Receipt,
+  FileText,
 } from "lucide-react";
+import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
+import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/useSessions";
 import {
@@ -36,6 +40,8 @@ export default function SessionDetail() {
   const { toast } = useToast();
   const { session, loading } = useSession(id || "");
   const { deleteSession } = useSessions();
+  const [showPrescriptionEditor, setShowPrescriptionEditor] = useState(false);
+  const [showInvoiceEditor, setShowInvoiceEditor] = useState(false);
 
   const handleDelete = async () => {
     if (!id) return;
@@ -150,6 +156,47 @@ export default function SessionDetail() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
+
+      {/* Quick Actions */}
+      {session.status === "completed" && session.patient && (
+        <div className="rounded-xl border border-border bg-card p-6">
+          <h2 className="font-semibold text-foreground mb-4">Quick Actions</h2>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => setShowPrescriptionEditor(true)}
+            >
+              <Pill className="h-4 w-4" />
+              Create Prescription
+            </Button>
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => setShowInvoiceEditor(true)}
+            >
+              <Receipt className="h-4 w-4" />
+              Create Invoice
+            </Button>
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => navigate(`/documents?template=sick-leave&patient=${session.patient_id}&session=${id}`)}
+            >
+              <FileText className="h-4 w-4" />
+              Sick Leave Note
+            </Button>
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => navigate(`/documents?template=referral&patient=${session.patient_id}&session=${id}`)}
+            >
+              <FileText className="h-4 w-4" />
+              Referral Letter
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* AI Summary */}
       {session.summary && (
@@ -268,6 +315,37 @@ export default function SessionDetail() {
         <div className="rounded-xl border border-border bg-card p-8 text-center">
           <p className="text-muted-foreground">No content recorded for this session yet.</p>
         </div>
+      )}
+
+      {/* Prescription Editor Modal */}
+      {showPrescriptionEditor && session.patient && (
+        <PrescriptionEditor
+          patientId={session.patient_id}
+          patientName={session.patient.name}
+          onClose={() => setShowPrescriptionEditor(false)}
+          onSave={(prescription) => {
+            toast({
+              title: "Prescription created",
+              description: "The prescription has been saved successfully.",
+            });
+          }}
+        />
+      )}
+
+      {/* Invoice Editor Modal */}
+      {showInvoiceEditor && session.patient && (
+        <InvoiceEditor
+          patientId={session.patient_id}
+          patientName={session.patient.name}
+          sessionId={id}
+          onClose={() => setShowInvoiceEditor(false)}
+          onSave={(invoice) => {
+            toast({
+              title: "Invoice created",
+              description: `Invoice #${invoice.invoice_number} has been created.`,
+            });
+          }}
+        />
       )}
     </div>
   );
