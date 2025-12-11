@@ -10,6 +10,7 @@ import { AudioWaveform } from "./AudioWaveform";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/hooks/useProfile";
+import { useTemplateWithHeaderFooter } from "@/hooks/useTemplateWithHeaderFooter";
 
 interface ReferralLetterEditorProps {
   patientId: string;
@@ -19,7 +20,7 @@ interface ReferralLetterEditorProps {
   onSave: (letter: { content: string }) => void;
 }
 
-const REFERRAL_TEMPLATE = `REFERRAL LETTER
+const FALLBACK_TEMPLATE = `REFERRAL LETTER
 
 [PRACTICE_ADDRESS]
 Practice No: [PRACTICE_NUMBER]
@@ -58,6 +59,8 @@ export function ReferralLetterEditor({
 }: ReferralLetterEditorProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
+  const { formattedContent: savedTemplate, isLoading: templateLoading } = useTemplateWithHeaderFooter("Referral Letter");
+  
   const doctorName = profile?.full_name || "Doctor";
   const practiceNumber = profile?.practice_number || "";
   const practiceAddress = profile?.practice_address || "";
@@ -68,39 +71,56 @@ export function ReferralLetterEditor({
   const [referredTo, setReferredTo] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  // Initialize content when doctor name is available
+  // Use saved template or fallback
+  const baseTemplate = savedTemplate || FALLBACK_TEMPLATE;
+
+  // Initialize content when template is available
   useEffect(() => {
+    if (templateLoading) return;
+    
     setContent(
-      REFERRAL_TEMPLATE
+      baseTemplate
         .replace(/\[DATE\]/g, new Date().toLocaleDateString())
+        .replace(/\[ReferralDate\]/g, new Date().toLocaleDateString())
         .replace(/\[PATIENT_NAME\]/g, patientName)
+        .replace(/\[PatientName\]/g, patientName)
         .replace(/\[DOCTOR_NAME\]/g, doctorName)
-        .replace("[PRACTICE_NUMBER]", practiceNumber)
-        .replace("[PRACTICE_ADDRESS]", practiceAddress)
-        .replace("[DOCTOR_NUMBER]", doctorNumber)
+        .replace(/\[DoctorName\]/g, doctorName)
+        .replace(/\[PRACTICE_NUMBER\]/g, practiceNumber)
+        .replace(/\[PracticeNumber\]/g, practiceNumber)
+        .replace(/\[PRACTICE_ADDRESS\]/g, practiceAddress)
+        .replace(/\[PracticeAddress\]/g, practiceAddress)
+        .replace(/\[DOCTOR_NUMBER\]/g, doctorNumber)
+        .replace(/\[DoctorNumber\]/g, doctorNumber)
         .replace("[REFERRED_TO]", "")
         .replace("[REFERRAL_CONTENT]", "")
     );
-  }, [patientName, doctorName, practiceNumber, practiceAddress, doctorNumber]);
+  }, [patientName, doctorName, practiceNumber, practiceAddress, doctorNumber, baseTemplate, templateLoading]);
 
   const handleTranscriptionComplete = useCallback((text: string) => {
     setRawTranscript(text);
-    setContent(prev => {
-      return REFERRAL_TEMPLATE
+    setContent(
+      baseTemplate
         .replace(/\[DATE\]/g, new Date().toLocaleDateString())
+        .replace(/\[ReferralDate\]/g, new Date().toLocaleDateString())
         .replace(/\[PATIENT_NAME\]/g, patientName)
+        .replace(/\[PatientName\]/g, patientName)
         .replace(/\[DOCTOR_NAME\]/g, doctorName)
-        .replace("[PRACTICE_NUMBER]", practiceNumber)
-        .replace("[PRACTICE_ADDRESS]", practiceAddress)
-        .replace("[DOCTOR_NUMBER]", doctorNumber)
+        .replace(/\[DoctorName\]/g, doctorName)
+        .replace(/\[PRACTICE_NUMBER\]/g, practiceNumber)
+        .replace(/\[PracticeNumber\]/g, practiceNumber)
+        .replace(/\[PRACTICE_ADDRESS\]/g, practiceAddress)
+        .replace(/\[PracticeAddress\]/g, practiceAddress)
+        .replace(/\[DOCTOR_NUMBER\]/g, doctorNumber)
+        .replace(/\[DoctorNumber\]/g, doctorNumber)
         .replace("[REFERRED_TO]", referredTo)
-        .replace("[REFERRAL_CONTENT]", text);
-    });
+        .replace("[REFERRAL_CONTENT]", text)
+    );
     toast({
       title: "Transcription Complete",
       description: "Referral letter has been populated from voice recording",
     });
-  }, [patientName, doctorName, practiceNumber, practiceAddress, doctorNumber, referredTo, toast]);
+  }, [patientName, doctorName, practiceNumber, practiceAddress, doctorNumber, referredTo, baseTemplate, toast]);
 
   const { 
     isRecording, 
