@@ -539,15 +539,17 @@ export default function DoctorInvoices() {
     doc.text("Summary", 20, yPos);
     yPos += 8;
 
+    const currencySymbol = getCurrencySymbol(invoiceCurrency);
+    
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
     doc.text(`Total Invoices: ${reportTotals.invoiceCount}`, 20, yPos);
     yPos += 6;
-    doc.text(`Total Amount: R ${reportTotals.total.toFixed(2)}`, 20, yPos);
+    doc.text(`Total Amount: ${currencySymbol} ${reportTotals.total.toFixed(2)}`, 20, yPos);
     yPos += 6;
-    doc.text(`Paid: R ${reportTotals.paidTotal.toFixed(2)}`, 20, yPos);
+    doc.text(`Paid: ${currencySymbol} ${reportTotals.paidTotal.toFixed(2)}`, 20, yPos);
     yPos += 6;
-    doc.text(`Outstanding: R ${reportTotals.unpaidTotal.toFixed(2)}`, 20, yPos);
+    doc.text(`Outstanding: ${currencySymbol} ${reportTotals.unpaidTotal.toFixed(2)}`, 20, yPos);
     yPos += 15;
 
     // Monthly Breakdown Table
@@ -579,11 +581,11 @@ export default function DoctorInvoices() {
         xPos += colWidths[0];
         doc.text(String(month.invoices.length), xPos, yPos);
         xPos += colWidths[1];
-        doc.text(`R ${month.total.toFixed(2)}`, xPos, yPos);
+        doc.text(`${currencySymbol} ${month.total.toFixed(2)}`, xPos, yPos);
         xPos += colWidths[2];
-        doc.text(`R ${month.paidTotal.toFixed(2)}`, xPos, yPos);
+        doc.text(`${currencySymbol} ${month.paidTotal.toFixed(2)}`, xPos, yPos);
         xPos += colWidths[3];
-        doc.text(`R ${month.unpaidTotal.toFixed(2)}`, xPos, yPos);
+        doc.text(`${currencySymbol} ${month.unpaidTotal.toFixed(2)}`, xPos, yPos);
         yPos += 6;
       });
 
@@ -597,11 +599,11 @@ export default function DoctorInvoices() {
       xPos += colWidths[0];
       doc.text(String(reportTotals.invoiceCount), xPos, yPos);
       xPos += colWidths[1];
-      doc.text(`R ${reportTotals.total.toFixed(2)}`, xPos, yPos);
+      doc.text(`${currencySymbol} ${reportTotals.total.toFixed(2)}`, xPos, yPos);
       xPos += colWidths[2];
-      doc.text(`R ${reportTotals.paidTotal.toFixed(2)}`, xPos, yPos);
+      doc.text(`${currencySymbol} ${reportTotals.paidTotal.toFixed(2)}`, xPos, yPos);
       xPos += colWidths[3];
-      doc.text(`R ${reportTotals.unpaidTotal.toFixed(2)}`, xPos, yPos);
+      doc.text(`${currencySymbol} ${reportTotals.unpaidTotal.toFixed(2)}`, xPos, yPos);
     }
 
     // Footer
@@ -1469,72 +1471,122 @@ export default function DoctorInvoices() {
         </div>
       )}
 
-      {/* View Invoice Modal */}
+      {/* View Invoice Modal - Template Format */}
       {viewingInvoice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-lg animate-fade-in">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <Receipt className="h-5 w-5 text-primary" />
-                </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-border bg-card shadow-lg animate-fade-in">
+            {/* Invoice Template Header */}
+            <div className="bg-primary text-primary-foreground p-6">
+              <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground">Invoice Details</h2>
-                  <p className="text-sm text-muted-foreground">{viewingInvoice.invoice_number}</p>
+                  <h1 className="text-2xl font-bold">INVOICE</h1>
+                  <p className="text-primary-foreground/80 text-sm mt-1">{viewingInvoice.invoice_number}</p>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setViewingInvoice(null)}
+                  className="text-primary-foreground hover:bg-primary-foreground/10"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setViewingInvoice(null)}
-              >
-                <X className="h-5 w-5" />
-              </Button>
             </div>
 
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            {/* Practice Info */}
+            <div className="p-6 border-b border-border">
+              <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <p className="text-sm text-muted-foreground">Patient</p>
-                  <p className="font-medium">{viewingInvoice.patient?.name || "Unknown"}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">From</p>
+                  <p className="font-semibold text-foreground">{profile?.full_name || "Doctor"}</p>
+                  {profile?.practice_number && (
+                    <p className="text-sm text-muted-foreground">Practice No: {profile.practice_number}</p>
+                  )}
+                  {profile?.doctor_number && (
+                    <p className="text-sm text-muted-foreground">Registration No: {profile.doctor_number}</p>
+                  )}
+                  {profile?.practice_address && (
+                    <p className="text-sm text-muted-foreground mt-1">{profile.practice_address}</p>
+                  )}
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Status</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Bill To</p>
+                  <p className="font-semibold text-foreground">{viewingInvoice.patient?.name || "Unknown"}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Invoice Details */}
+            <div className="p-6 border-b border-border">
+              <div className="grid grid-cols-3 gap-4 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Invoice Date</p>
+                  <p className="font-medium">{format(new Date(viewingInvoice.created_at), 'dd MMMM yyyy')}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Due Date</p>
+                  <p className="font-medium">{format(new Date(viewingInvoice.due_date), 'dd MMMM yyyy')}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Status</p>
                   <div className="mt-1">{getStatusBadge(getInvoiceStatus(viewingInvoice))}</div>
                 </div>
               </div>
+            </div>
 
-              <div>
-                <p className="text-sm text-muted-foreground">Description</p>
-                <p className="font-medium">{viewingInvoice.description}</p>
-              </div>
+            {/* Line Items */}
+            <div className="p-6 border-b border-border">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border text-sm text-muted-foreground">
+                    <th className="text-left py-2 font-medium">Description</th>
+                    <th className="text-right py-2 font-medium">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {viewingInvoice.description.split('\n').map((line, idx) => {
+                    const parts = line.split(' - ');
+                    const hasAmount = parts.length > 1 && parts[parts.length - 1].match(/^[A-Z]?\$?R?[\d,.]+$/);
+                    const description = hasAmount ? parts.slice(0, -1).join(' - ') : line;
+                    const lineAmount = hasAmount ? parts[parts.length - 1] : null;
+                    
+                    return (
+                      <tr key={idx} className="border-b border-border/50">
+                        <td className="py-3 text-foreground">{description}</td>
+                        <td className="py-3 text-right text-foreground">
+                          {lineAmount || ''}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Amount</p>
-                  <p className="font-semibold text-lg">{getCurrencySymbol(invoiceCurrency)} {Number(viewingInvoice.amount).toFixed(2)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Due Date</p>
-                  <p className="font-medium">{format(new Date(viewingInvoice.due_date), 'dd MMMM yyyy')}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Created</p>
-                  <p className="font-medium">{format(new Date(viewingInvoice.created_at), 'dd MMM yyyy')}</p>
-                </div>
-                {viewingInvoice.paid_at && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Paid On</p>
-                    <p className="font-medium">{format(new Date(viewingInvoice.paid_at), 'dd MMM yyyy')}</p>
+            {/* Total */}
+            <div className="p-6 border-b border-border bg-muted/30">
+              <div className="flex justify-end">
+                <div className="w-48 space-y-2">
+                  <div className="flex justify-between text-lg font-bold">
+                    <span>Total</span>
+                    <span>{getCurrencySymbol(invoiceCurrency)} {Number(viewingInvoice.amount).toFixed(2)}</span>
                   </div>
-                )}
+                </div>
               </div>
             </div>
 
-            <div className="flex gap-3 pt-6 border-t border-border mt-6">
+            {/* Payment Info */}
+            {viewingInvoice.paid_at && (
+              <div className="p-6 border-b border-border bg-green-500/5">
+                <div className="flex items-center gap-2 text-green-600">
+                  <CheckCircle className="h-5 w-5" />
+                  <span className="font-medium">Paid on {format(new Date(viewingInvoice.paid_at), 'dd MMMM yyyy')}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-3 p-6">
               <Button 
                 variant="outline" 
                 className="flex-1" 
