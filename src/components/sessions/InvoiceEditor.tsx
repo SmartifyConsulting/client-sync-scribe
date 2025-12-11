@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { X, FileText, DollarSign, Send, Loader2, Mic, Square, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
 import { AudioWaveform } from "./AudioWaveform";
 import { cn } from "@/lib/utils";
+
+interface PatientDetails {
+  name: string;
+  medical_aid: string | null;
+  medical_aid_number: string | null;
+}
 
 interface InvoiceEditorProps {
   patientId: string;
@@ -21,12 +27,38 @@ interface InvoiceEditorProps {
 export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSave }: InvoiceEditorProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [patientDetails, setPatientDetails] = useState<PatientDetails | null>(null);
   const [formData, setFormData] = useState({
     description: `Consultation session - ${patientName}`,
     amount: "",
     dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
   });
   const [rawTranscript, setRawTranscript] = useState("");
+
+  // Fetch patient details including medical aid info
+  useEffect(() => {
+    const fetchPatientDetails = async () => {
+      const { data, error } = await supabase
+        .from('patients')
+        .select('name, medical_aid, medical_aid_number')
+        .eq('id', patientId)
+        .single();
+
+      if (!error && data) {
+        setPatientDetails(data);
+        // Update description with medical aid info if available
+        const medicalAidInfo = data.medical_aid && data.medical_aid_number 
+          ? `\nMedical Aid: ${data.medical_aid}\nMember Number: ${data.medical_aid_number}`
+          : '';
+        setFormData(prev => ({
+          ...prev,
+          description: `Consultation session - ${data.name}${medicalAidInfo}`,
+        }));
+      }
+    };
+
+    fetchPatientDetails();
+  }, [patientId]);
 
   const handleTranscriptionComplete = useCallback((text: string) => {
     setRawTranscript(text);
