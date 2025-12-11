@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Calendar, Bell, Shield, Database, CheckCircle, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, ShieldCheck, ShieldOff, DollarSign } from "lucide-react";
+import { User, Calendar, Bell, Shield, Database, CheckCircle, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, ShieldCheck, ShieldOff, DollarSign, Pencil, X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -99,6 +99,9 @@ export default function Settings() {
   const [newService, setNewService] = useState({ service_name: "", default_price: "", currency: "ZAR" });
   const [isAddingService, setIsAddingService] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState("ZAR");
+  const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
+  const [editingService, setEditingService] = useState({ service_name: "", default_price: "" });
+  const [isSavingService, setIsSavingService] = useState(false);
   
   const [formData, setFormData] = useState({
     full_name: "",
@@ -198,6 +201,60 @@ export default function Settings() {
         description: "Service has been removed from your pricing list",
       });
     }
+  };
+
+  const startEditingService = (service: ServicePrice) => {
+    setEditingServiceId(service.id);
+    setEditingService({
+      service_name: service.service_name,
+      default_price: String(service.default_price),
+    });
+  };
+
+  const cancelEditingService = () => {
+    setEditingServiceId(null);
+    setEditingService({ service_name: "", default_price: "" });
+  };
+
+  const saveEditingService = async () => {
+    if (!editingServiceId || !editingService.service_name.trim() || !editingService.default_price) {
+      toast({
+        title: "Missing fields",
+        description: "Service name and price are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSavingService(true);
+    const { error } = await supabase
+      .from('service_prices')
+      .update({
+        service_name: editingService.service_name,
+        default_price: parseFloat(editingService.default_price),
+      })
+      .eq('id', editingServiceId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update service",
+        variant: "destructive",
+      });
+    } else {
+      setServicePrices(servicePrices.map(s => 
+        s.id === editingServiceId 
+          ? { ...s, service_name: editingService.service_name, default_price: parseFloat(editingService.default_price) }
+          : s
+      ));
+      setEditingServiceId(null);
+      setEditingService({ service_name: "", default_price: "" });
+      toast({
+        title: "Service updated",
+        description: "Service has been updated",
+      });
+    }
+    setIsSavingService(false);
   };
 
   const updateAllServicesCurrency = async (newCurrency: string) => {
@@ -763,22 +820,82 @@ export default function Settings() {
           <div className="space-y-3 mb-6">
             {servicePrices.map((service) => (
               <div key={service.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
-                <div className="flex items-center gap-4">
-                  <div>
-                    <p className="font-medium text-foreground">{service.service_name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Default: {getCurrencySymbol(service.currency)} {Number(service.default_price).toFixed(2)}
-                    </p>
+                {editingServiceId === service.id ? (
+                  // Edit mode
+                  <div className="flex-1 grid gap-3 sm:grid-cols-2 mr-4">
+                    <Input 
+                      value={editingService.service_name}
+                      onChange={(e) => setEditingService({ ...editingService, service_name: e.target.value })}
+                      placeholder="Service name"
+                    />
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                        {getCurrencySymbol(selectedCurrency)}
+                      </span>
+                      <Input 
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={editingService.default_price}
+                        onChange={(e) => setEditingService({ ...editingService, default_price: e.target.value })}
+                        placeholder="0.00"
+                        className="pl-8"
+                      />
+                    </div>
                   </div>
+                ) : (
+                  // View mode
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <p className="font-medium text-foreground">{service.service_name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Default: {getCurrencySymbol(service.currency)} {Number(service.default_price).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                <div className="flex items-center gap-1">
+                  {editingServiceId === service.id ? (
+                    <>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={saveEditingService}
+                        disabled={isSavingService}
+                        className="h-8 w-8 text-green-600 hover:text-green-600"
+                      >
+                        {isSavingService ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={cancelEditingService}
+                        className="h-8 w-8 text-muted-foreground"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => startEditingService(service)}
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => removeServicePrice(service.id)}
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => removeServicePrice(service.id)}
-                  className="h-8 w-8 text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
               </div>
             ))}
           </div>
