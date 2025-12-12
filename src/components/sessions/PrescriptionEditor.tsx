@@ -12,6 +12,7 @@ import {
   Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DocumentPreview } from "./DocumentPreview";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -211,34 +212,12 @@ Signature: ___________________
 
   if (showPreview) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in">
-        <div className="relative w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-xl border border-border bg-card shadow-lg">
-          <div className="flex items-center justify-between border-b border-border p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Eye className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">Preview</h2>
-                <p className="text-sm text-muted-foreground">Prescription</p>
-              </div>
-            </div>
-            <Button variant="ghost" size="icon" onClick={() => setShowPreview(false)}>
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
-          <div className="p-6 max-h-[70vh] overflow-y-auto">
-            <pre className="whitespace-pre-wrap font-mono text-sm bg-muted/30 p-4 rounded-lg border border-border">
-              {generateContent()}
-            </pre>
-          </div>
-          <div className="flex items-center justify-end border-t border-border p-4">
-            <Button variant="outline" onClick={() => setShowPreview(false)}>
-              Back to Form
-            </Button>
-          </div>
-        </div>
-      </div>
+      <DocumentPreview
+        title="Prescription"
+        subtitle={`Patient: ${patientName}`}
+        content={generateContent()}
+        onClose={() => setShowPreview(false)}
+      />
     );
   }
 
