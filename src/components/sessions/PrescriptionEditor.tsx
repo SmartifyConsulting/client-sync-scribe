@@ -1,16 +1,15 @@
 import { useState, useCallback, useEffect } from "react";
 import {
-  Mic,
-  Square,
   X,
   Save,
-  Printer,
   Loader2,
-  FileText,
   Pill,
   AlertTriangle,
   CheckCircle,
   Shield,
+  Plus,
+  Trash2,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,9 +18,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { useAudioRecording } from "@/hooks/useAudioRecording";
-import { AudioWaveform } from "./AudioWaveform";
 import { supabase } from "@/integrations/supabase/client";
+import { useProfile } from "@/hooks/useProfile";
 
 interface MedicationConflict {
   type: "drug-drug" | "drug-allergy";
@@ -38,6 +36,15 @@ interface CurrentMedication {
   frequency: string;
 }
 
+interface MedicationItem {
+  id: string;
+  medication: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+  instructions: string;
+}
+
 interface PrescriptionEditorProps {
   patientName: string;
   patientId: string;
@@ -48,17 +55,75 @@ interface PrescriptionEditorProps {
   onSave: (prescription: { content: string; rawTranscript: string }) => void;
 }
 
-const PRESCRIPTION_TEMPLATE = `PRESCRIPTION
+export function PrescriptionEditor({ 
+  patientName,
+  patientId,
+  doctorName: propDoctorName,
+  allergies,
+  currentMedications = [],
+  onClose, 
+  onSave 
+}: PrescriptionEditorProps) {
+  const { toast } = useToast();
+  const { profile } = useProfile();
+  const doctorName = propDoctorName || profile?.full_name || "Doctor";
+  
+  const [medications, setMedications] = useState<MedicationItem[]>([
+    { id: crypto.randomUUID(), medication: "", dosage: "", frequency: "", duration: "", instructions: "" }
+  ]);
+  const [conflicts, setConflicts] = useState<MedicationConflict[]>([]);
+  const [isCheckingConflicts, setIsCheckingConflicts] = useState(false);
+  const [conflictCheckDone, setConflictCheckDone] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
-Date: [DATE]
-Patient: [PATIENT_NAME]
-Doctor: [DOCTOR_NAME]
+  const addMedication = () => {
+    setMedications(prev => [...prev, { 
+      id: crypto.randomUUID(), 
+      medication: "", 
+      dosage: "", 
+      frequency: "", 
+      duration: "", 
+      instructions: "" 
+    }]);
+  };
+
+  const removeMedication = (id: string) => {
+    if (medications.length > 1) {
+      setMedications(prev => prev.filter(m => m.id !== id));
+    }
+  };
+
+  const updateMedication = (id: string, field: keyof MedicationItem, value: string) => {
+    setMedications(prev => prev.map(m => 
+      m.id === id ? { ...m, [field]: value } : m
+    ));
+  };
+
+  const generateContent = () => {
+    const medicationLines = medications
+      .filter(m => m.medication.trim())
+      .map(m => {
+        let line = `• ${m.medication}`;
+        if (m.dosage) line += ` - ${m.dosage}`;
+        if (m.frequency) line += ` - ${m.frequency}`;
+        if (m.duration) line += ` for ${m.duration}`;
+        if (m.instructions) line += `\n  Instructions: ${m.instructions}`;
+        return line;
+      })
+      .join('\n\n');
+
+    return `PRESCRIPTION
+
+Date: ${new Date().toLocaleDateString()}
+Patient: ${patientName}
+Doctor: ${doctorName}
 
 ─────────────────────────────────────
 
 MEDICATIONS:
 
-[PRESCRIPTION_CONTENT]
+${medicationLines}
 
 ─────────────────────────────────────
 
@@ -66,63 +131,13 @@ Instructions: Take medications as prescribed above.
 Follow-up: As directed by physician.
 
 Signature: ___________________
-           [DOCTOR_NAME]
-`;
-
-export function PrescriptionEditor({ 
-  patientName,
-  patientId,
-  doctorName = "Dr. Georgia Adams",
-  allergies,
-  currentMedications = [],
-  onClose, 
-  onSave 
-}: PrescriptionEditorProps) {
-  const { toast } = useToast();
-  const [content, setContent] = useState(() => {
-    return PRESCRIPTION_TEMPLATE
-      .replace("[DATE]", new Date().toLocaleDateString())
-      .replace(/\[PATIENT_NAME\]/g, patientName)
-      .replace(/\[DOCTOR_NAME\]/g, doctorName)
-      .replace("[PRESCRIPTION_CONTENT]", "");
-  });
-  const [rawTranscript, setRawTranscript] = useState("");
-  const [conflicts, setConflicts] = useState<MedicationConflict[]>([]);
-  const [isCheckingConflicts, setIsCheckingConflicts] = useState(false);
-  const [conflictCheckDone, setConflictCheckDone] = useState(false);
-
-  const handleTranscriptionComplete = useCallback((text: string) => {
-    setRawTranscript(text);
-    // Update content with transcribed prescription
-    setContent(prev => {
-      const templateBase = PRESCRIPTION_TEMPLATE
-        .replace("[DATE]", new Date().toLocaleDateString())
-        .replace(/\[PATIENT_NAME\]/g, patientName)
-        .replace(/\[DOCTOR_NAME\]/g, doctorName)
-        .replace("[PRESCRIPTION_CONTENT]", text);
-      return templateBase;
-    });
-    toast({
-      title: "Transcription Complete",
-      description: "Prescription has been populated from voice recording",
-    });
-  }, [patientName, doctorName, toast]);
-
-  const { 
-    isRecording, 
-    isTranscribing, 
-    transcript,
-    startRecording, 
-    stopRecording,
-  } = useAudioRecording({
-    patientName,
-    doctorName,
-    onTranscriptionComplete: handleTranscriptionComplete,
-  });
+           ${doctorName}`;
+  };
 
   // Check for medication conflicts
-  const checkConflicts = useCallback(async (medicationText: string) => {
-    if (!medicationText.trim()) return;
+  const checkConflicts = useCallback(async () => {
+    const medicationNames = medications.filter(m => m.medication.trim()).map(m => m.medication);
+    if (medicationNames.length === 0) return;
     
     setIsCheckingConflicts(true);
     setConflictCheckDone(false);
@@ -130,7 +145,7 @@ export function PrescriptionEditor({
     try {
       const { data, error } = await supabase.functions.invoke('check-medication-conflicts', {
         body: {
-          newMedication: medicationText,
+          newMedication: medicationNames.join(', '),
           currentMedications,
           allergies: allergies || 'None known',
         },
@@ -151,21 +166,23 @@ export function PrescriptionEditor({
       setConflictCheckDone(true);
     } catch (error: any) {
       console.error("Error checking conflicts:", error);
-      // Don't block the prescription if conflict check fails
       setConflictCheckDone(true);
     } finally {
       setIsCheckingConflicts(false);
     }
-  }, [currentMedications, allergies, toast]);
+  }, [medications, currentMedications, allergies, toast]);
 
-  // Check conflicts when content changes (debounced via transcription complete)
-  useEffect(() => {
-    if (rawTranscript) {
-      checkConflicts(rawTranscript);
+  const handleSave = async () => {
+    const validMedications = medications.filter(m => m.medication.trim());
+    if (validMedications.length === 0) {
+      toast({
+        title: "Missing Information",
+        description: "Please add at least one medication",
+        variant: "destructive",
+      });
+      return;
     }
-  }, [rawTranscript, checkConflicts]);
 
-  const handleSave = () => {
     if (conflicts.length > 0) {
       const highSeverityConflicts = conflicts.filter(c => c.severity === 'high');
       if (highSeverityConflicts.length > 0) {
@@ -177,54 +194,57 @@ export function PrescriptionEditor({
         return;
       }
     }
-    
-    onSave({ content, rawTranscript: rawTranscript || transcript || "" });
-    toast({
-      title: "Prescription Saved",
-      description: "The prescription has been saved to the session",
-    });
-    onClose();
-  };
 
-  const toggleRecording = () => {
-    if (isRecording) {
-      stopRecording();
-    } else {
-      startRecording();
+    setIsSaving(true);
+    try {
+      const content = generateContent();
+      onSave({ content, rawTranscript: "" });
+      toast({
+        title: "Prescription Saved",
+        description: "The prescription has been saved to the session",
+      });
+      onClose();
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  // Manual check button handler
-  const handleManualCheck = () => {
-    const medicationsMatch = content.match(/MEDICATIONS:\s*([\s\S]*?)(?=─|$)/);
-    const medicationsText = medicationsMatch?.[1]?.trim() || rawTranscript || '';
-    if (medicationsText) {
-      checkConflicts(medicationsText);
-    }
-  };
-
-  const handlePrint = () => {
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Prescription - ${patientName}</title>
-            <style>
-              body { font-family: monospace; padding: 40px; white-space: pre-wrap; }
-            </style>
-          </head>
-          <body>${content}</body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.print();
-    }
-  };
+  if (showPreview) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in">
+        <div className="relative w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+          <div className="flex items-center justify-between border-b border-border p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Eye className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">Preview</h2>
+                <p className="text-sm text-muted-foreground">Prescription</p>
+              </div>
+            </div>
+            <Button variant="ghost" size="icon" onClick={() => setShowPreview(false)}>
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+          <div className="p-6 max-h-[70vh] overflow-y-auto">
+            <pre className="whitespace-pre-wrap font-mono text-sm bg-muted/30 p-4 rounded-lg border border-border">
+              {generateContent()}
+            </pre>
+          </div>
+          <div className="flex items-center justify-end border-t border-border p-4">
+            <Button variant="outline" onClick={() => setShowPreview(false)}>
+              Back to Form
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-xl border border-border bg-card shadow-lg">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border p-4">
           <div className="flex items-center gap-3">
@@ -241,191 +261,157 @@ export function PrescriptionEditor({
           </Button>
         </div>
 
-        <div className="grid lg:grid-cols-3 divide-x divide-border">
-          {/* Main Editor */}
-          <div className="lg:col-span-2 p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-            <div className="space-y-2">
-              <Label htmlFor="prescription-content">Prescription Content</Label>
-              <Textarea
-                id="prescription-content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="min-h-[300px] font-mono text-sm"
-              />
+        {/* Form */}
+        <div className="p-6 space-y-4 max-h-[55vh] overflow-y-auto">
+          {/* Medications */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label>Medications</Label>
+              <Button type="button" variant="outline" size="sm" onClick={addMedication} className="gap-1">
+                <Plus className="h-3 w-3" />
+                Add Medication
+              </Button>
             </div>
-
-            {/* Conflict Check Section */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-muted-foreground" />
-                  <Label>Medication Safety Check</Label>
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleManualCheck}
-                  disabled={isCheckingConflicts}
-                  className="gap-2"
-                >
-                  {isCheckingConflicts ? (
-                    <>
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      Checking...
-                    </>
-                  ) : (
-                    <>
-                      <Shield className="h-3 w-3" />
-                      Check Conflicts
-                    </>
-                  )}
-                </Button>
-              </div>
-
-              {/* Conflict Results */}
-              {conflictCheckDone && conflicts.length === 0 && (
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/30">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span className="text-sm text-green-700 dark:text-green-400">
-                    No medication conflicts detected
-                  </span>
-                </div>
-              )}
-
-              {conflicts.length > 0 && (
-                <div className="space-y-2">
-                  {conflicts.map((conflict, i) => (
-                    <div
-                      key={i}
-                      className={cn(
-                        "p-3 rounded-lg border",
-                        conflict.severity === "high"
-                          ? "bg-red-500/10 border-red-500/30"
-                          : conflict.severity === "moderate"
-                          ? "bg-orange-500/10 border-orange-500/30"
-                          : "bg-yellow-500/10 border-yellow-500/30"
-                      )}
+            
+            {medications.map((med, index) => (
+              <div key={med.id} className="p-3 rounded-lg border border-border bg-muted/20 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">Medication {index + 1}</span>
+                  {medications.length > 1 && (
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => removeMedication(med.id)}
+                      className="h-6 w-6 text-muted-foreground hover:text-destructive"
                     >
-                      <div className="flex items-start gap-2">
-                        <AlertTriangle className={cn(
-                          "h-4 w-4 mt-0.5 shrink-0",
-                          conflict.severity === "high" ? "text-red-600" :
-                          conflict.severity === "moderate" ? "text-orange-600" : "text-yellow-600"
-                        )} />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap mb-1">
-                            <Badge variant="outline" className="text-xs bg-card">
-                              {conflict.medication1}
-                            </Badge>
-                            {conflict.medication2 && (
-                              <>
-                                <span className="text-xs text-muted-foreground">+</span>
-                                <Badge variant="outline" className="text-xs bg-card">
-                                  {conflict.medication2}
-                                </Badge>
-                              </>
-                            )}
-                            <Badge className={cn(
-                              "text-xs capitalize ml-auto",
-                              conflict.severity === "high" 
-                                ? "bg-red-500/20 text-red-700 dark:text-red-400"
-                                : conflict.severity === "moderate"
-                                ? "bg-orange-500/20 text-orange-700 dark:text-orange-400"
-                                : "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400"
-                            )}>
-                              {conflict.severity} risk
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground">{conflict.explanation}</p>
-                          <p className="text-xs text-foreground mt-1 font-medium">
-                            → {conflict.recommendation}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
-              )}
-            </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Input
+                    value={med.medication}
+                    onChange={(e) => updateMedication(med.id, 'medication', e.target.value)}
+                    placeholder="Medication name *"
+                  />
+                  <Input
+                    value={med.dosage}
+                    onChange={(e) => updateMedication(med.id, 'dosage', e.target.value)}
+                    placeholder="Dosage (e.g., 500mg)"
+                  />
+                  <Input
+                    value={med.frequency}
+                    onChange={(e) => updateMedication(med.id, 'frequency', e.target.value)}
+                    placeholder="Frequency (e.g., twice daily)"
+                  />
+                  <Input
+                    value={med.duration}
+                    onChange={(e) => updateMedication(med.id, 'duration', e.target.value)}
+                    placeholder="Duration (e.g., 7 days)"
+                  />
+                </div>
+                <Input
+                  value={med.instructions}
+                  onChange={(e) => updateMedication(med.id, 'instructions', e.target.value)}
+                  placeholder="Special instructions (optional)"
+                />
+              </div>
+            ))}
           </div>
 
-          {/* Voice Recording Panel */}
-          <div className="p-6 space-y-6 bg-muted/30">
-            <div>
-              <h3 className="font-semibold text-foreground flex items-center gap-2">
-                <Mic className="h-4 w-4 text-primary" />
-                Voice Dictation
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Dictate the prescription to auto-populate
-              </p>
-            </div>
-
-            {/* Recording Button */}
-            <div className="flex flex-col items-center gap-4 py-6">
-              <button
-                onClick={toggleRecording}
-                disabled={isTranscribing}
-                className={cn(
-                  "flex h-20 w-20 items-center justify-center rounded-full transition-all duration-300",
-                  isTranscribing && "opacity-50 cursor-not-allowed",
-                  isRecording
-                    ? "bg-destructive text-destructive-foreground animate-pulse-soft"
-                    : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-glow"
-                )}
+          {/* Conflict Check Section */}
+          <div className="space-y-3 pt-2 border-t border-border">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4 text-muted-foreground" />
+                <Label>Medication Safety Check</Label>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={checkConflicts}
+                disabled={isCheckingConflicts}
+                className="gap-2"
               >
-                {isTranscribing ? (
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                ) : isRecording ? (
-                  <Square className="h-8 w-8" />
+                {isCheckingConflicts ? (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Checking...
+                  </>
                 ) : (
-                  <Mic className="h-8 w-8" />
+                  <>
+                    <Shield className="h-3 w-3" />
+                    Check Conflicts
+                  </>
                 )}
-              </button>
-              <p className="text-sm text-muted-foreground text-center">
-                {isTranscribing
-                  ? "Transcribing prescription..."
-                  : isRecording
-                  ? "Recording... Tap to stop"
-                  : "Tap to dictate prescription"}
-              </p>
+              </Button>
             </div>
 
-            {/* Audio Waveform */}
-            {(isRecording || isTranscribing) && (
-              <div className="w-full">
-                <AudioWaveform isRecording={isRecording} className="h-16" />
-                {isTranscribing && (
-                  <p className="text-xs text-center text-muted-foreground mt-2">Processing audio...</p>
-                )}
+            {/* Conflict Results */}
+            {conflictCheckDone && conflicts.length === 0 && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/30">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <span className="text-sm text-green-700 dark:text-green-400">
+                  No medication conflicts detected
+                </span>
               </div>
             )}
 
-            {/* Transcript Preview */}
-            {(transcript || rawTranscript) && !isRecording && !isTranscribing && (
-              <div className="space-y-3 animate-fade-in">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium text-foreground">Transcribed Content</span>
-                </div>
-                <div className="rounded-lg border border-border bg-card p-3 max-h-32 overflow-y-auto">
-                  <p className="text-sm text-muted-foreground">{rawTranscript || transcript}</p>
-                </div>
+            {conflicts.length > 0 && (
+              <div className="space-y-2">
+                {conflicts.map((conflict, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "p-3 rounded-lg border",
+                      conflict.severity === "high"
+                        ? "bg-red-500/10 border-red-500/30"
+                        : conflict.severity === "moderate"
+                        ? "bg-orange-500/10 border-orange-500/30"
+                        : "bg-yellow-500/10 border-yellow-500/30"
+                    )}
+                  >
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className={cn(
+                        "h-4 w-4 mt-0.5 shrink-0",
+                        conflict.severity === "high" ? "text-red-600" :
+                        conflict.severity === "moderate" ? "text-orange-600" : "text-yellow-600"
+                      )} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <Badge variant="outline" className="text-xs bg-card">
+                            {conflict.medication1}
+                          </Badge>
+                          {conflict.medication2 && (
+                            <>
+                              <span className="text-xs text-muted-foreground">+</span>
+                              <Badge variant="outline" className="text-xs bg-card">
+                                {conflict.medication2}
+                              </Badge>
+                            </>
+                          )}
+                          <Badge className={cn(
+                            "text-xs capitalize ml-auto",
+                            conflict.severity === "high" 
+                              ? "bg-red-500/20 text-red-700 dark:text-red-400"
+                              : conflict.severity === "moderate"
+                              ? "bg-orange-500/20 text-orange-700 dark:text-orange-400"
+                              : "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400"
+                          )}>
+                            {conflict.severity} risk
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{conflict.explanation}</p>
+                        <p className="text-xs text-foreground mt-1 font-medium">
+                          → {conflict.recommendation}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
-
-            {/* Tips */}
-            <div className="space-y-2 pt-4 border-t border-border">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Dictation Tips
-              </p>
-              <ul className="text-xs text-muted-foreground space-y-1">
-                <li>• Speak medication name clearly</li>
-                <li>• Include dosage and frequency</li>
-                <li>• Mention duration of treatment</li>
-                <li>• Add special instructions</li>
-              </ul>
-            </div>
           </div>
         </div>
 
@@ -435,13 +421,22 @@ export function PrescriptionEditor({
             Cancel
           </Button>
           <div className="flex gap-3">
-            <Button variant="outline" onClick={handlePrint} className="gap-2">
-              <Printer className="h-4 w-4" />
-              Print
+            <Button variant="outline" onClick={() => setShowPreview(true)} className="gap-2">
+              <Eye className="h-4 w-4" />
+              Preview
             </Button>
-            <Button onClick={handleSave} className="gap-2" disabled={!content.includes("MEDICATIONS:")}>
-              <Save className="h-4 w-4" />
-              Save Prescription
+            <Button onClick={handleSave} className="gap-2" disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  Save
+                </>
+              )}
             </Button>
           </div>
         </div>
