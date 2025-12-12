@@ -1,14 +1,11 @@
-import { useState, useCallback, useEffect } from "react";
-import { X, FileText, Mic, Square, Loader2, Save, Printer } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, FileText, Loader2, Save, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { useAudioRecording } from "@/hooks/useAudioRecording";
-import { AudioWaveform } from "./AudioWaveform";
 import { supabase } from "@/integrations/supabase/client";
-import { cn } from "@/lib/utils";
 import { useProfile } from "@/hooks/useProfile";
 import { useTemplateWithHeaderFooter } from "@/hooks/useTemplateWithHeaderFooter";
 
@@ -60,103 +57,49 @@ export function MedicalCertificateEditor({
   const practiceAddress = profile?.practice_address || "";
   const doctorNumber = profile?.doctor_number || "";
   
-  const [content, setContent] = useState("");
-  const [rawTranscript, setRawTranscript] = useState("");
   const [leavePeriod, setLeavePeriod] = useState("");
+  const [medicalReason, setMedicalReason] = useState("");
+  const [examinationDate, setExaminationDate] = useState(new Date().toISOString().split('T')[0]);
   const [isSaving, setIsSaving] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
-  // Use saved template or fallback
   const baseTemplate = savedTemplate || FALLBACK_TEMPLATE;
 
-  // Initialize content when template is available
-  useEffect(() => {
-    if (templateLoading) return;
-    
-    setContent(
-      baseTemplate
-        .replace(/\[DATE\]/g, new Date().toLocaleDateString())
-        .replace(/\[PATIENT_NAME\]/g, patientName)
-        .replace(/\[PatientName\]/g, patientName)
-        .replace(/\[DOCTOR_NAME\]/g, doctorName)
-        .replace(/\[DoctorName\]/g, doctorName)
-        .replace(/\[PRACTICE_NUMBER\]/g, practiceNumber)
-        .replace(/\[PracticeNumber\]/g, practiceNumber)
-        .replace(/\[PRACTICE_ADDRESS\]/g, practiceAddress)
-        .replace(/\[PracticeAddress\]/g, practiceAddress)
-        .replace(/\[DOCTOR_NUMBER\]/g, doctorNumber)
-        .replace(/\[DoctorNumber\]/g, doctorNumber)
-        .replace("[CERTIFICATE_CONTENT]", "")
-        .replace("[LEAVE_PERIOD]", "")
-        .replace(/\[ConsultationDate\]/g, new Date().toLocaleDateString())
-        .replace(/\[ConsultationTime\]/g, new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
-    );
-  }, [patientName, doctorName, practiceNumber, practiceAddress, doctorNumber, baseTemplate, templateLoading]);
-
-  const handleTranscriptionComplete = useCallback((text: string) => {
-    setRawTranscript(text);
-    setContent(
-      baseTemplate
-        .replace(/\[DATE\]/g, new Date().toLocaleDateString())
-        .replace(/\[PATIENT_NAME\]/g, patientName)
-        .replace(/\[PatientName\]/g, patientName)
-        .replace(/\[DOCTOR_NAME\]/g, doctorName)
-        .replace(/\[DoctorName\]/g, doctorName)
-        .replace(/\[PRACTICE_NUMBER\]/g, practiceNumber)
-        .replace(/\[PracticeNumber\]/g, practiceNumber)
-        .replace(/\[PRACTICE_ADDRESS\]/g, practiceAddress)
-        .replace(/\[PracticeAddress\]/g, practiceAddress)
-        .replace(/\[DOCTOR_NUMBER\]/g, doctorNumber)
-        .replace(/\[DoctorNumber\]/g, doctorNumber)
-        .replace("[CERTIFICATE_CONTENT]", text)
-        .replace("[LEAVE_PERIOD]", leavePeriod)
-        .replace(/\[ConsultationDate\]/g, new Date().toLocaleDateString())
-        .replace(/\[ConsultationTime\]/g, new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
-    );
-    toast({
-      title: "Transcription Complete",
-      description: "Certificate has been populated from voice recording",
-    });
-  }, [patientName, doctorName, practiceNumber, practiceAddress, doctorNumber, leavePeriod, baseTemplate, toast]);
-
-  const { 
-    isRecording, 
-    isTranscribing, 
-    transcript,
-    startRecording, 
-    stopRecording,
-  } = useAudioRecording({
-    patientName,
-    doctorName,
-    onTranscriptionComplete: handleTranscriptionComplete,
-  });
-
-  const toggleRecording = () => {
-    if (isRecording) {
-      stopRecording();
-    } else {
-      startRecording();
-    }
-  };
-
-  const handleLeavePeriodChange = (value: string) => {
-    setLeavePeriod(value);
-    setContent(prev => {
-      const lines = prev.split('\n');
-      const updatedLines = lines.map(line => {
-        if (line.startsWith('Period of Leave:')) {
-          return `Period of Leave: ${value}`;
-        }
-        return line;
-      });
-      return updatedLines.join('\n');
-    });
+  const generateContent = () => {
+    return baseTemplate
+      .replace(/\[DATE\]/g, new Date(examinationDate).toLocaleDateString())
+      .replace(/\[PATIENT_NAME\]/g, patientName)
+      .replace(/\[PatientName\]/g, patientName)
+      .replace(/\[DOCTOR_NAME\]/g, doctorName)
+      .replace(/\[DoctorName\]/g, doctorName)
+      .replace(/\[PRACTICE_NUMBER\]/g, practiceNumber)
+      .replace(/\[PracticeNumber\]/g, practiceNumber)
+      .replace(/\[PRACTICE_ADDRESS\]/g, practiceAddress)
+      .replace(/\[PracticeAddress\]/g, practiceAddress)
+      .replace(/\[DOCTOR_NUMBER\]/g, doctorNumber)
+      .replace(/\[DoctorNumber\]/g, doctorNumber)
+      .replace("[CERTIFICATE_CONTENT]", medicalReason)
+      .replace("[LEAVE_PERIOD]", leavePeriod)
+      .replace(/\[ConsultationDate\]/g, new Date(examinationDate).toLocaleDateString())
+      .replace(/\[ConsultationTime\]/g, new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   };
 
   const handleSave = async () => {
+    if (!leavePeriod.trim() || !medicalReason.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in the medical reason and period of leave",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
+
+      const content = generateContent();
 
       const { error } = await supabase
         .from('documents')
@@ -189,28 +132,42 @@ export function MedicalCertificateEditor({
     }
   };
 
-  const handlePrint = () => {
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Medical Certificate - ${patientName}</title>
-            <style>
-              body { font-family: monospace; padding: 40px; white-space: pre-wrap; }
-            </style>
-          </head>
-          <body>${content}</body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.print();
-    }
-  };
+  if (showPreview) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in">
+        <div className="relative w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+          <div className="flex items-center justify-between border-b border-border p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Eye className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">Preview</h2>
+                <p className="text-sm text-muted-foreground">Medical Certificate</p>
+              </div>
+            </div>
+            <Button variant="ghost" size="icon" onClick={() => setShowPreview(false)}>
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+          <div className="p-6 max-h-[70vh] overflow-y-auto">
+            <pre className="whitespace-pre-wrap font-mono text-sm bg-muted/30 p-4 rounded-lg border border-border">
+              {generateContent()}
+            </pre>
+          </div>
+          <div className="flex items-center justify-end border-t border-border p-4">
+            <Button variant="outline" onClick={() => setShowPreview(false)}>
+              Back to Form
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+      <div className="relative w-full max-w-lg max-h-[90vh] overflow-hidden rounded-xl border border-border bg-card shadow-lg">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border p-4">
           <div className="flex items-center gap-3">
@@ -227,106 +184,37 @@ export function MedicalCertificateEditor({
           </Button>
         </div>
 
-        <div className="grid lg:grid-cols-3 divide-x divide-border">
-          {/* Main Editor */}
-          <div className="lg:col-span-2 p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-            <div className="space-y-2">
-              <Label htmlFor="leave-period">Period of Leave</Label>
-              <Input
-                id="leave-period"
-                value={leavePeriod}
-                onChange={(e) => handleLeavePeriodChange(e.target.value)}
-                placeholder="e.g., 3 days (Dec 11 - Dec 13, 2025)"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="certificate-content">Certificate Content</Label>
-              <Textarea
-                id="certificate-content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="min-h-[300px] font-mono text-sm"
-              />
-            </div>
+        {/* Form */}
+        <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+          <div className="space-y-2">
+            <Label htmlFor="examination-date">Date of Examination</Label>
+            <Input
+              id="examination-date"
+              type="date"
+              value={examinationDate}
+              onChange={(e) => setExaminationDate(e.target.value)}
+            />
           </div>
 
-          {/* Voice Recording Panel */}
-          <div className="p-6 space-y-6 bg-muted/30">
-            <div>
-              <h3 className="font-semibold text-foreground flex items-center gap-2">
-                <Mic className="h-4 w-4 text-primary" />
-                Voice Dictation
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Dictate the medical reason
-              </p>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="leave-period">Period of Leave *</Label>
+            <Input
+              id="leave-period"
+              value={leavePeriod}
+              onChange={(e) => setLeavePeriod(e.target.value)}
+              placeholder="e.g., 3 days (Dec 11 - Dec 13, 2025)"
+            />
+          </div>
 
-            {/* Recording Button */}
-            <div className="flex flex-col items-center gap-4 py-6">
-              <button
-                onClick={toggleRecording}
-                disabled={isTranscribing}
-                className={cn(
-                  "flex h-20 w-20 items-center justify-center rounded-full transition-all duration-300",
-                  isTranscribing && "opacity-50 cursor-not-allowed",
-                  isRecording
-                    ? "bg-destructive text-destructive-foreground animate-pulse-soft"
-                    : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-glow"
-                )}
-              >
-                {isTranscribing ? (
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                ) : isRecording ? (
-                  <Square className="h-8 w-8" />
-                ) : (
-                  <Mic className="h-8 w-8" />
-                )}
-              </button>
-              <p className="text-sm text-muted-foreground text-center">
-                {isTranscribing
-                  ? "Transcribing..."
-                  : isRecording
-                  ? "Recording... Tap to stop"
-                  : "Tap to dictate"}
-              </p>
-            </div>
-
-            {/* Audio Waveform */}
-            {(isRecording || isTranscribing) && (
-              <div className="w-full">
-                <AudioWaveform isRecording={isRecording} className="h-16" />
-                {isTranscribing && (
-                  <p className="text-xs text-center text-muted-foreground mt-2">Processing audio...</p>
-                )}
-              </div>
-            )}
-
-            {/* Transcript Preview */}
-            {(transcript || rawTranscript) && !isRecording && !isTranscribing && (
-              <div className="space-y-3 animate-fade-in">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium text-foreground">Transcribed Content</span>
-                </div>
-                <div className="rounded-lg border border-border bg-card p-3 max-h-32 overflow-y-auto">
-                  <p className="text-sm text-muted-foreground">{rawTranscript || transcript}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Tips */}
-            <div className="space-y-2 pt-4 border-t border-border">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Dictation Tips
-              </p>
-              <ul className="text-xs text-muted-foreground space-y-1">
-                <li>• State the medical condition</li>
-                <li>• Mention symptoms observed</li>
-                <li>• Include treatment recommendation</li>
-              </ul>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="medical-reason">Medical Reason *</Label>
+            <Textarea
+              id="medical-reason"
+              value={medicalReason}
+              onChange={(e) => setMedicalReason(e.target.value)}
+              placeholder="Describe the medical condition and reason for leave..."
+              className="min-h-[120px]"
+            />
           </div>
         </div>
 
@@ -336,9 +224,9 @@ export function MedicalCertificateEditor({
             Cancel
           </Button>
           <div className="flex gap-3">
-            <Button variant="outline" onClick={handlePrint} className="gap-2">
-              <Printer className="h-4 w-4" />
-              Print
+            <Button variant="outline" onClick={() => setShowPreview(true)} className="gap-2">
+              <Eye className="h-4 w-4" />
+              Preview
             </Button>
             <Button onClick={handleSave} className="gap-2" disabled={isSaving}>
               {isSaving ? (
@@ -349,7 +237,7 @@ export function MedicalCertificateEditor({
               ) : (
                 <>
                   <Save className="h-4 w-4" />
-                  Save Certificate
+                  Save
                 </>
               )}
             </Button>
