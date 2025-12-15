@@ -845,6 +845,45 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          billing_cycle: string
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          paypal_subscription_id: string | null
+          plan_type: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          billing_cycle: string
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          paypal_subscription_id?: string | null
+          plan_type: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          billing_cycle?: string
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          paypal_subscription_id?: string | null
+          plan_type?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       templates: {
         Row: {
           category: string | null

@@ -35,3 +35,12 @@ verify_jwt = true
 
 [functions.ai-clinician-diagnosis]
 verify_jwt = true
+
+[functions.paypal-subscription]
+verify_jwt = false
+
+[functions.receive-email-document]
+verify_jwt = false
+
+[functions.send-document-email]
+verify_jwt = true
