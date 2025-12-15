@@ -34,15 +34,15 @@ serve(async (req) => {
 
     // Format document content as HTML
     const formattedContent = documentContent
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/&lt;b&gt;/g, '<b>')
-      .replace(/&lt;\/b&gt;/g, '</b>')
-      .replace(/&lt;i&gt;/g, '<i>')
-      .replace(/&lt;\/i&gt;/g, '</i>')
-      .replace(/&lt;u&gt;/g, '<u>')
-      .replace(/&lt;\/u&gt;/g, '</u>')
-      .replace(/\n/g, '<br/>');
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/&lt;b&gt;/g, "<b>")
+      .replace(/&lt;\/b&gt;/g, "</b>")
+      .replace(/&lt;i&gt;/g, "<i>")
+      .replace(/&lt;\/i&gt;/g, "</i>")
+      .replace(/&lt;u&gt;/g, "<u>")
+      .replace(/&lt;\/u&gt;/g, "</u>")
+      .replace(/\n/g, "<br/>");
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -66,11 +66,11 @@ serve(async (req) => {
         <div class="document-container">
           <div class="header">
             <strong>${documentName}</strong>
-            ${practiceName ? `<br/>From: ${practiceName}` : ''}
+            ${practiceName ? `<br/>From: ${practiceName}` : ""}
           </div>
           <div class="content">${formattedContent}</div>
           <div class="footer">
-            Sent by ${senderName}${practiceName ? ` - ${practiceName}` : ''}
+            Sent by ${senderName}${practiceName ? ` - ${practiceName}` : ""}
           </div>
         </div>
       </body>
@@ -84,7 +84,7 @@ serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "MedPad <noreply@resend.dev>",
+        from: "mIRI360 <noreply@resend.dev>",
         to: [to],
         subject: subject,
         html: htmlContent,
@@ -105,12 +105,9 @@ serve(async (req) => {
   } catch (error: unknown) {
     console.error("Error sending document email:", error);
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-    return new Response(
-      JSON.stringify({ error: errorMessage }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });

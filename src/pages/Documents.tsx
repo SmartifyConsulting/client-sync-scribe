@@ -63,7 +63,7 @@ interface DisplayTemplate extends Template {
 // Helper functions
 const extractPlaceholders = (content: string): string[] => {
   const matches = content.match(/\[([^\]]+)\]/g) || [];
-  return [...new Set(matches.map(m => m.slice(1, -1)))];
+  return [...new Set(matches.map((m) => m.slice(1, -1)))];
 };
 
 const formatDate = (dateString: string): string => {
@@ -71,35 +71,47 @@ const formatDate = (dateString: string): string => {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  
+
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Yesterday";
   if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? "s" : ""} ago`;
   return date.toLocaleDateString();
 };
 
 const renderFormattedContent = (content: string): string => {
   const safeContent = content
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/&lt;b&gt;/g, '<b>')
-    .replace(/&lt;\/b&gt;/g, '</b>')
-    .replace(/&lt;i&gt;/g, '<i>')
-    .replace(/&lt;\/i&gt;/g, '</i>')
-    .replace(/&lt;u&gt;/g, '<u>')
-    .replace(/&lt;\/u&gt;/g, '</u>')
-    .replace(/\n/g, '<br/>');
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/&lt;b&gt;/g, "<b>")
+    .replace(/&lt;\/b&gt;/g, "</b>")
+    .replace(/&lt;i&gt;/g, "<i>")
+    .replace(/&lt;\/i&gt;/g, "</i>")
+    .replace(/&lt;u&gt;/g, "<u>")
+    .replace(/&lt;\/u&gt;/g, "</u>")
+    .replace(/\n/g, "<br/>");
   return safeContent;
 };
 
 export default function Documents() {
   const { toast } = useToast();
-  const { templates: dbTemplates, loading: templatesLoading, createTemplate, updateTemplate, deleteTemplate } = useTemplates();
-  const { templates: headerFooterTemplates, isLoading: hfLoading, createTemplate: createHFTemplate, updateTemplate: updateHFTemplate, deleteTemplate: deleteHFTemplate } = useHeaderFooterTemplates();
+  const {
+    templates: dbTemplates,
+    loading: templatesLoading,
+    createTemplate,
+    updateTemplate,
+    deleteTemplate,
+  } = useTemplates();
+  const {
+    templates: headerFooterTemplates,
+    isLoading: hfLoading,
+    createTemplate: createHFTemplate,
+    updateTemplate: updateHFTemplate,
+    deleteTemplate: deleteHFTemplate,
+  } = useHeaderFooterTemplates();
   const { documents, loading: documentsLoading, deleteDocument } = useDocuments();
   const { profile } = useProfile();
-  
+
   const [activeTab, setActiveTab] = useState("content");
   const [templateSearchQuery, setTemplateSearchQuery] = useState("");
   const [documentSearchQuery, setDocumentSearchQuery] = useState("");
@@ -119,24 +131,25 @@ export default function Documents() {
   const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   // Transform database templates to display format
-  const templates: DisplayTemplate[] = dbTemplates.map(t => ({
+  const templates: DisplayTemplate[] = dbTemplates.map((t) => ({
     ...t,
     lastModified: t.updated_at ? formatDate(t.updated_at) : "Just now",
     placeholders: extractPlaceholders(t.content),
   }));
 
   const filteredTemplates = templates.filter((template) =>
-    template.name.toLowerCase().includes(templateSearchQuery.toLowerCase())
+    template.name.toLowerCase().includes(templateSearchQuery.toLowerCase()),
   );
 
   const filteredHFTemplates = headerFooterTemplates.filter((template) =>
-    template.name.toLowerCase().includes(templateSearchQuery.toLowerCase())
+    template.name.toLowerCase().includes(templateSearchQuery.toLowerCase()),
   );
 
-  const filteredDocuments = documents.filter((doc) =>
-    doc.name.toLowerCase().includes(documentSearchQuery.toLowerCase()) ||
-    (doc.patient_name?.toLowerCase() || "").includes(documentSearchQuery.toLowerCase()) ||
-    (doc.template_name?.toLowerCase() || "").includes(documentSearchQuery.toLowerCase())
+  const filteredDocuments = documents.filter(
+    (doc) =>
+      doc.name.toLowerCase().includes(documentSearchQuery.toLowerCase()) ||
+      (doc.patient_name?.toLowerCase() || "").includes(documentSearchQuery.toLowerCase()) ||
+      (doc.template_name?.toLowerCase() || "").includes(documentSearchQuery.toLowerCase()),
   );
 
   const handleSelectTemplate = (template: DisplayTemplate) => {
@@ -164,7 +177,7 @@ export default function Documents() {
       content: template.content,
       header_footer_template_id: template.headerFooterTemplateId,
     });
-    
+
     if (result) {
       setIsNewTemplateOpen(false);
     }
@@ -172,7 +185,7 @@ export default function Documents() {
 
   const handleEditTemplate = async (template: TemplateData) => {
     if (!template.id) return;
-    
+
     const success = await updateTemplate(template.id, {
       name: template.name,
       description: template.description,
@@ -180,7 +193,7 @@ export default function Documents() {
       content: template.content,
       header_footer_template_id: template.headerFooterTemplateId,
     });
-    
+
     if (success) {
       setEditingTemplate(null);
     }
@@ -188,7 +201,7 @@ export default function Documents() {
 
   const handleDeleteTemplate = async () => {
     if (!templateToDelete) return;
-    
+
     const success = await deleteTemplate(templateToDelete.id);
     if (success) {
       setTemplateToDelete(null);
@@ -209,7 +222,7 @@ export default function Documents() {
 
   const handleEditHFTemplate = async (template: HeaderFooterTemplateData) => {
     if (!template.id) return;
-    
+
     await updateHFTemplate.mutateAsync({
       id: template.id,
       name: template.name,
@@ -229,7 +242,7 @@ export default function Documents() {
 
   const handleSendDocumentEmail = async () => {
     if (!shareDocument || !shareEmail) return;
-    
+
     setIsSendingEmail(true);
     try {
       const { data, error } = await supabase.functions.invoke("send-document-email", {
@@ -238,7 +251,7 @@ export default function Documents() {
           subject: shareDocument.name,
           documentName: shareDocument.name,
           documentContent: shareDocument.content,
-          senderName: profile?.full_name || "MedPad User",
+          senderName: profile?.full_name || "mIRI360 User",
           practiceName: profile?.practice_address ? `Practice #${profile.practice_number}` : undefined,
         },
       });
@@ -266,11 +279,9 @@ export default function Documents() {
   const renderHFSectionPreview = (section: { text: string; alignment: string; imageUrl?: string }) => {
     return (
       <div style={{ textAlign: section.alignment as any }}>
-        {section.imageUrl && (
-          <img src={section.imageUrl} alt="" className="max-h-10 inline-block mb-1" />
-        )}
+        {section.imageUrl && <img src={section.imageUrl} alt="" className="max-h-10 inline-block mb-1" />}
         {section.text && (
-          <div 
+          <div
             className="whitespace-pre-wrap text-xs"
             dangerouslySetInnerHTML={{ __html: renderFormattedContent(section.text) }}
           />
@@ -285,20 +296,24 @@ export default function Documents() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Templates</h1>
-          <p className="mt-1 text-muted-foreground">
-            Manage header/footer layouts and content templates separately
-          </p>
+          <p className="mt-1 text-muted-foreground">Manage header/footer layouts and content templates separately</p>
         </div>
       </div>
 
       {/* Tabs for Template Types */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-primary">
-          <TabsTrigger value="header-footer" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+          <TabsTrigger
+            value="header-footer"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
+          >
             <LayoutTemplate className="h-4 w-4 mr-2" />
             Header & Footer
           </TabsTrigger>
-          <TabsTrigger value="content" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+          <TabsTrigger
+            value="content"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
+          >
             <FileText className="h-4 w-4 mr-2" />
             Content Templates
           </TabsTrigger>
@@ -320,9 +335,7 @@ export default function Documents() {
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Create Header & Footer Template</DialogTitle>
-                  <DialogDescription>
-                    Design a reusable header and footer layout for your documents
-                  </DialogDescription>
+                  <DialogDescription>Design a reusable header and footer layout for your documents</DialogDescription>
                 </DialogHeader>
                 <HeaderFooterTemplateForm
                   onSubmit={handleCreateHFTemplate}
@@ -362,7 +375,11 @@ export default function Documents() {
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -376,7 +393,10 @@ export default function Documents() {
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => setHfTemplateToDelete(template)} className="text-destructive focus:text-destructive">
+                        <DropdownMenuItem
+                          onClick={() => setHfTemplateToDelete(template)}
+                          className="text-destructive focus:text-destructive"
+                        >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Delete
                         </DropdownMenuItem>
@@ -387,14 +407,12 @@ export default function Documents() {
                   <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                     {template.description || "No description"}
                   </p>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDate(template.updated_at)}
-                  </span>
+                  <span className="text-xs text-muted-foreground">{formatDate(template.updated_at)}</span>
                 </div>
               ))}
 
               {/* Add New Card */}
-              <div 
+              <div
                 onClick={() => setIsNewHFTemplateOpen(true)}
                 className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/50 p-5 text-center transition-colors hover:bg-muted/30 cursor-pointer min-h-[160px]"
               >
@@ -423,9 +441,7 @@ export default function Documents() {
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Create Content Template</DialogTitle>
-                  <DialogDescription>
-                    Create a reusable document content template
-                  </DialogDescription>
+                  <DialogDescription>Create a reusable document content template</DialogDescription>
                 </DialogHeader>
                 <TemplateForm
                   onSubmit={handleCreateTemplate}
@@ -461,7 +477,7 @@ export default function Documents() {
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="flex items-start justify-between mb-3">
-                    <div 
+                    <div
                       className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary/10"
                       onClick={() => handleSelectTemplate(template)}
                     >
@@ -469,9 +485,9 @@ export default function Documents() {
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={(e) => e.stopPropagation()}
                         >
@@ -492,7 +508,7 @@ export default function Documents() {
                           Use Template
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => setTemplateToDelete(template)}
                           className="text-destructive focus:text-destructive"
                         >
@@ -504,18 +520,14 @@ export default function Documents() {
                   </div>
                   <div onClick={() => handleSelectTemplate(template)}>
                     <h3 className="font-medium text-foreground mb-1">{template.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                      {template.description}
-                    </p>
-                    <span className="text-xs text-muted-foreground">
-                      {template.lastModified}
-                    </span>
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{template.description}</p>
+                    <span className="text-xs text-muted-foreground">{template.lastModified}</span>
                   </div>
                 </div>
               ))}
 
               {/* Add New Template Card */}
-              <div 
+              <div
                 onClick={() => setIsNewTemplateOpen(true)}
                 className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/50 p-5 text-center transition-colors hover:bg-muted/30 cursor-pointer"
               >
@@ -552,36 +564,64 @@ export default function Documents() {
             <div className="divide-y divide-border max-h-[400px] overflow-y-auto">
               {filteredDocuments.length > 0 ? (
                 filteredDocuments.map((doc) => (
-                  <div
-                    key={doc.id}
-                    className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors"
-                  >
+                  <div key={doc.id} className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
                       <FileText className="h-5 w-5 text-accent-foreground" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-foreground truncate">{doc.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {doc.patient_name || "No patient"} · {formatDate(doc.created_at)} · <span className="text-primary/70">{doc.template_name || "Custom"}</span>
+                        {doc.patient_name || "No patient"} · {formatDate(doc.created_at)} ·{" "}
+                        <span className="text-primary/70">{doc.template_name || "Custom"}</span>
                       </p>
                     </div>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setPreviewDocument(doc)} title="Preview">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => setPreviewDocument(doc)}
+                        title="Preview"
+                      >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShareDocument(doc)} title="Share via Email">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => setShareDocument(doc)}
+                        title="Share via Email"
+                      >
                         <Mail className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
-                        exportToPDF({ title: doc.name, content: doc.content });
-                        toast({ title: "PDF Exported", description: `"${doc.name}" downloaded` });
-                      }} title="Export PDF">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          exportToPDF({ title: doc.name, content: doc.content });
+                          toast({ title: "PDF Exported", description: `"${doc.name}" downloaded` });
+                        }}
+                        title="Export PDF"
+                      >
                         <Download className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => printDocument(doc.content, doc.name)} title="Print">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => printDocument(doc.content, doc.name)}
+                        title="Print"
+                      >
                         <Printer className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setDocumentToDelete(doc)} title="Delete">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={() => setDocumentToDelete(doc)}
+                        title="Delete"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -589,10 +629,9 @@ export default function Documents() {
                 ))
               ) : (
                 <div className="p-8 text-center text-muted-foreground">
-                  {documents.length === 0 
+                  {documents.length === 0
                     ? "No documents yet. Create your first document using a template above."
-                    : "No documents found matching your search."
-                  }
+                    : "No documents found matching your search."}
                 </div>
               )}
             </div>
@@ -623,9 +662,7 @@ export default function Documents() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Content Template</DialogTitle>
-            <DialogDescription>
-              Modify this template's content
-            </DialogDescription>
+            <DialogDescription>Modify this template's content</DialogDescription>
           </DialogHeader>
           {editingTemplate && (
             <TemplateForm
@@ -650,9 +687,7 @@ export default function Documents() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Header & Footer Template</DialogTitle>
-            <DialogDescription>
-              Modify this header and footer layout
-            </DialogDescription>
+            <DialogDescription>Modify this header and footer layout</DialogDescription>
           </DialogHeader>
           {editingHFTemplate && (
             <HeaderFooterTemplateForm
@@ -713,9 +748,7 @@ export default function Documents() {
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{previewTemplate?.name}</DialogTitle>
-            <DialogDescription>
-              {previewTemplate?.description || "Template preview"}
-            </DialogDescription>
+            <DialogDescription>{previewTemplate?.description || "Template preview"}</DialogDescription>
           </DialogHeader>
           {previewTemplate && (
             <div className="space-y-4">
@@ -723,10 +756,14 @@ export default function Documents() {
                 {/* Header Section - Show linked header/footer if exists */}
                 {(() => {
                   const linkedHF = headerFooterTemplates.find(
-                    hf => hf.id === previewTemplate.header_footer_template_id
+                    (hf) => hf.id === previewTemplate.header_footer_template_id,
                   );
                   if (linkedHF) {
-                    const header = linkedHF.header as { left?: { text: string; alignment: string; imageUrl?: string }; center?: { text: string; alignment: string; imageUrl?: string }; right?: { text: string; alignment: string; imageUrl?: string } };
+                    const header = linkedHF.header as {
+                      left?: { text: string; alignment: string; imageUrl?: string };
+                      center?: { text: string; alignment: string; imageUrl?: string };
+                      right?: { text: string; alignment: string; imageUrl?: string };
+                    };
                     return (
                       <div className="pb-4 border-b border-gray-200 mb-4">
                         <div className="grid grid-cols-3 gap-4">
@@ -741,7 +778,7 @@ export default function Documents() {
                 })()}
 
                 {/* Body Content */}
-                <div 
+                <div
                   className="whitespace-pre-wrap text-sm text-foreground min-h-[100px]"
                   dangerouslySetInnerHTML={{ __html: renderFormattedContent(previewTemplate.content) }}
                 />
@@ -749,10 +786,14 @@ export default function Documents() {
                 {/* Footer Section - Show linked header/footer if exists */}
                 {(() => {
                   const linkedHF = headerFooterTemplates.find(
-                    hf => hf.id === previewTemplate.header_footer_template_id
+                    (hf) => hf.id === previewTemplate.header_footer_template_id,
                   );
                   if (linkedHF) {
-                    const footer = linkedHF.footer as { left?: { text: string; alignment: string; imageUrl?: string }; center?: { text: string; alignment: string; imageUrl?: string }; right?: { text: string; alignment: string; imageUrl?: string } };
+                    const footer = linkedHF.footer as {
+                      left?: { text: string; alignment: string; imageUrl?: string };
+                      center?: { text: string; alignment: string; imageUrl?: string };
+                      right?: { text: string; alignment: string; imageUrl?: string };
+                    };
                     return (
                       <div className="pt-4 border-t border-gray-200 mt-4">
                         <div className="grid grid-cols-3 gap-4">
@@ -770,7 +811,11 @@ export default function Documents() {
               {/* Show which header/footer is linked */}
               {previewTemplate.header_footer_template_id && (
                 <p className="text-xs text-muted-foreground">
-                  Using header/footer: <span className="font-medium">{headerFooterTemplates.find(hf => hf.id === previewTemplate.header_footer_template_id)?.name || "Unknown"}</span>
+                  Using header/footer:{" "}
+                  <span className="font-medium">
+                    {headerFooterTemplates.find((hf) => hf.id === previewTemplate.header_footer_template_id)?.name ||
+                      "Unknown"}
+                  </span>
                 </p>
               )}
 
@@ -778,11 +823,11 @@ export default function Documents() {
                 <Button variant="outline" onClick={() => setPreviewTemplate(null)} className="flex-1">
                   Close
                 </Button>
-                <Button 
+                <Button
                   onClick={() => {
                     handleSelectTemplate(previewTemplate);
                     setPreviewTemplate(null);
-                  }} 
+                  }}
                   className="flex-1"
                 >
                   Use Template
@@ -798,9 +843,7 @@ export default function Documents() {
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{previewHFTemplate?.name}</DialogTitle>
-            <DialogDescription>
-              {previewHFTemplate?.description || "Header & Footer preview"}
-            </DialogDescription>
+            <DialogDescription>{previewHFTemplate?.description || "Header & Footer preview"}</DialogDescription>
           </DialogHeader>
           {previewHFTemplate && (
             <div className="space-y-4">
@@ -811,12 +854,12 @@ export default function Documents() {
                   {renderHFSectionPreview(previewHFTemplate.header.center)}
                   {renderHFSectionPreview(previewHFTemplate.header.right)}
                 </div>
-                
+
                 {/* Content Placeholder */}
                 <div className="min-h-[100px] py-4 flex items-center justify-center">
                   <p className="text-gray-400 italic text-sm">Document content appears here</p>
                 </div>
-                
+
                 {/* Footer Preview */}
                 <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200 mt-4">
                   {renderHFSectionPreview(previewHFTemplate.footer.left)}
@@ -829,11 +872,11 @@ export default function Documents() {
                 <Button variant="outline" onClick={() => setPreviewHFTemplate(null)} className="flex-1">
                   Close
                 </Button>
-                <Button 
+                <Button
                   onClick={() => {
                     setEditingHFTemplate(previewHFTemplate);
                     setPreviewHFTemplate(null);
-                  }} 
+                  }}
                   className="flex-1"
                 >
                   Edit Template
@@ -857,7 +900,7 @@ export default function Documents() {
           {previewDocument && (
             <div className="space-y-4">
               <div className="border border-border rounded-lg p-6 bg-card/50">
-                <div 
+                <div
                   className="whitespace-pre-wrap text-sm text-foreground"
                   dangerouslySetInnerHTML={{ __html: renderFormattedContent(previewDocument.content) }}
                 />
@@ -867,7 +910,7 @@ export default function Documents() {
                 <Button variant="outline" onClick={() => setPreviewDocument(null)} className="flex-1">
                   Close
                 </Button>
-                <Button 
+                <Button
                   variant="outline"
                   onClick={() => {
                     setShareDocument(previewDocument);
@@ -878,7 +921,7 @@ export default function Documents() {
                   <Mail className="h-4 w-4" />
                   Share
                 </Button>
-                <Button 
+                <Button
                   variant="outline"
                   onClick={() => printDocument(previewDocument.content, previewDocument.name)}
                   className="gap-2"
@@ -886,7 +929,7 @@ export default function Documents() {
                   <Printer className="h-4 w-4" />
                   Print
                 </Button>
-                <Button 
+                <Button
                   variant="outline"
                   onClick={() => {
                     exportToPDF({ title: previewDocument.name, content: previewDocument.content });
@@ -914,13 +957,13 @@ export default function Documents() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={async () => {
                 if (documentToDelete) {
                   await deleteDocument(documentToDelete.id);
                   setDocumentToDelete(null);
                 }
-              }} 
+              }}
               className="bg-destructive hover:bg-destructive/90"
             >
               Delete
@@ -930,13 +973,19 @@ export default function Documents() {
       </AlertDialog>
 
       {/* Share Document Dialog */}
-      <Dialog open={!!shareDocument} onOpenChange={(open) => { if (!open) { setShareDocument(null); setShareEmail(""); }}}>
+      <Dialog
+        open={!!shareDocument}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShareDocument(null);
+            setShareEmail("");
+          }
+        }}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Share Document</DialogTitle>
-            <DialogDescription>
-              Send "{shareDocument?.name}" via email
-            </DialogDescription>
+            <DialogDescription>Send "{shareDocument?.name}" via email</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
@@ -950,20 +999,20 @@ export default function Documents() {
               />
             </div>
             {shareDocument?.patient_name && (
-              <p className="text-sm text-muted-foreground">
-                Patient: {shareDocument.patient_name}
-              </p>
+              <p className="text-sm text-muted-foreground">Patient: {shareDocument.patient_name}</p>
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setShareDocument(null); setShareEmail(""); }}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShareDocument(null);
+                setShareEmail("");
+              }}
+            >
               Cancel
             </Button>
-            <Button 
-              onClick={handleSendDocumentEmail}
-              disabled={!shareEmail || isSendingEmail}
-              className="gap-2"
-            >
+            <Button onClick={handleSendDocumentEmail} disabled={!shareEmail || isSendingEmail} className="gap-2">
               {isSendingEmail ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
