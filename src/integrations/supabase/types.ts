@@ -682,6 +682,39 @@ export type Database = {
           },
         ]
       }
+      pricing_config: {
+        Row: {
+          billing_cycle: string
+          created_at: string
+          id: string
+          name: string
+          price: number
+          role: string
+          savings: number | null
+          updated_at: string
+        }
+        Insert: {
+          billing_cycle: string
+          created_at?: string
+          id?: string
+          name: string
+          price: number
+          role: string
+          savings?: number | null
+          updated_at?: string
+        }
+        Update: {
+          billing_cycle?: string
+          created_at?: string
+          id?: string
+          name?: string
+          price?: number
+          role?: string
+          savings?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1089,7 +1122,7 @@ export type Database = {
         | "session_summaries"
         | "prescription_history"
       invitation_status: "pending" | "accepted" | "declined" | "expired"
-      user_role: "doctor" | "patient"
+      user_role: "doctor" | "patient" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1224,7 +1257,7 @@ export const Constants = {
         "prescription_history",
       ],
       invitation_status: ["pending", "accepted", "declined", "expired"],
-      user_role: ["doctor", "patient"],
+      user_role: ["doctor", "patient", "admin"],
     },
   },
 } as const

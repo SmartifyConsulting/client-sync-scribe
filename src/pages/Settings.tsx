@@ -17,16 +17,18 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useSearchParams } from "react-router-dom";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
-// Plan pricing
-const DOCTOR_PLANS = {
-  monthly: { price: 49.99, name: 'Doctor Monthly', period: 'month' },
-  annual: { price: 499.99, name: 'Doctor Annual', period: 'year', savings: 100 }
-};
+// Plan pricing will be loaded from database
+interface PlanConfig {
+  price: number;
+  name: string;
+  period: string;
+  savings?: number;
+}
 
-const PATIENT_PLANS = {
-  monthly: { price: 9.99, name: 'Patient Monthly', period: 'month' },
-  annual: { price: 99.99, name: 'Patient Annual', period: 'year', savings: 20 }
-};
+interface PricingPlans {
+  monthly: PlanConfig;
+  annual: PlanConfig;
+}
 
 interface Subscription {
   id: string;
@@ -77,9 +79,13 @@ export default function Settings() {
   const [processingPayment, setProcessingPayment] = useState(false);
   const [cancellingSubscription, setCancellingSubscription] = useState(false);
   const [reactivatingSubscription, setReactivatingSubscription] = useState(false);
+  const [plans, setPlans] = useState<PricingPlans>({
+    monthly: { price: 0, name: 'Loading...', period: 'month' },
+    annual: { price: 0, name: 'Loading...', period: 'year', savings: 0 }
+  });
+  const [loadingPricing, setLoadingPricing] = useState(true);
 
-  // Get the appropriate plans based on user role
-  const plans = role === 'patient' ? PATIENT_PLANS : DOCTOR_PLANS;
+  // Get the appropriate plan type based on user role
   const planType = role === 'patient' ? 'patient' : 'doctor';
 
   useEffect(() => {
@@ -89,6 +95,44 @@ export default function Settings() {
       fetchPaymentHistory();
     }
   }, [user]);
+
+  useEffect(() => {
+    fetchPricing();
+  }, [role]);
+
+  const fetchPricing = async () => {
+    setLoadingPricing(true);
+    try {
+      const roleType = role === 'patient' ? 'patient' : 'doctor';
+      const { data, error } = await supabase
+        .from('pricing_config')
+        .select('*')
+        .eq('role', roleType);
+
+      if (!error && data && data.length > 0) {
+        const monthlyPlan = data.find(p => p.billing_cycle === 'monthly');
+        const annualPlan = data.find(p => p.billing_cycle === 'annual');
+        
+        setPlans({
+          monthly: {
+            price: monthlyPlan?.price || 0,
+            name: monthlyPlan?.name || 'Monthly',
+            period: 'month'
+          },
+          annual: {
+            price: annualPlan?.price || 0,
+            name: annualPlan?.name || 'Annual',
+            period: 'year',
+            savings: annualPlan?.savings || 0
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching pricing:', error);
+    } finally {
+      setLoadingPricing(false);
+    }
+  };
 
   // Handle payment result from URL params
   useEffect(() => {
