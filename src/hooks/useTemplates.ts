@@ -73,9 +73,11 @@ Other information / recommendations: [OtherRecommendations]
 ..............................................................................................................
 
 
+[DoctorSignature]
+
 Doctor's Name: [DoctorName]
 
-Doctor's Signature: ................................................ Date: [SignatureDate]`,
+Date: [SignatureDate]`,
     logo_url: null,
     logo_position: null,
     font_family: "sans",
@@ -136,6 +138,8 @@ I would be grateful if you could see this patient at your earliest convenience. 
 Yours sincerely,
 
 
+[DoctorSignature]
+
 [DoctorName]
 Practice Number: [PracticeNumber]
 Tel: [PracticePhone]`,
@@ -191,10 +195,10 @@ Repeats: [NumberOfRepeats]
 Special Instructions: [SpecialInstructions]
 
 
+[DoctorSignature]
+
 Prescribing Doctor: [DoctorName]
 Registration Number: [DoctorNumber]
-
-Signature: ................................................
 
 Date: [SignatureDate]`,
     logo_url: null,
@@ -221,7 +225,7 @@ Date: [Date]
 
 
 
-Signature: ................................................
+[DoctorSignature]
 
 [DoctorName]
 Date: [SignatureDate]`,
