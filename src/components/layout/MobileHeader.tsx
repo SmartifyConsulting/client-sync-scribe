@@ -13,9 +13,9 @@ export function MobileHeader() {
         <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
           <span className="text-primary-foreground font-bold text-sm">M</span>
         </div>
-        <span className="font-semibold text-lg text-foreground">MedPad</span>
+        <span className="font-semibold text-lg text-foreground">mIRI360</span>
       </div>
-      
+
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" className="h-9 w-9">
