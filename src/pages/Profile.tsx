@@ -98,6 +98,7 @@ export default function Profile() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isUploadingSignature, setIsUploadingSignature] = useState(false);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [newPartner, setNewPartner] = useState({ full_name: "", registration_number: "", mobile_number: "" });
   const [isAddingPartner, setIsAddingPartner] = useState(false);
@@ -492,6 +493,64 @@ export default function Profile() {
     }
   };
 
+  const handleSignatureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an image file (PNG with transparent background recommended)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploadingSignature(true);
+    
+    const fileExt = file.name.split('.').pop();
+    const filePath = `${user.id}/signature.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload signature",
+        variant: "destructive",
+      });
+      setIsUploadingSignature(false);
+      return;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ signature_url: `${publicUrl}?t=${Date.now()}` })
+      .eq('id', user.id);
+
+    setIsUploadingSignature(false);
+
+    if (updateError) {
+      toast({
+        title: "Error",
+        description: "Failed to update signature",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Signature uploaded",
+        description: "Your electronic signature has been saved",
+      });
+      window.location.reload();
+    }
+  };
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -702,6 +761,41 @@ export default function Profile() {
               >
                 <Upload className="h-4 w-4" />
                 {isUploadingLogo ? "Uploading..." : profile?.logo_url ? "Change Logo" : "Upload Logo"}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Signature Upload */}
+        <div className="mt-6 space-y-2">
+          <Label>Electronic Signature</Label>
+          <p className="text-sm text-muted-foreground mb-3">
+            Upload your signature for documents. Use [DoctorSignature] placeholder in templates.
+          </p>
+          <div className="flex items-center gap-4">
+            {(profile as any)?.signature_url && (
+              <img 
+                src={(profile as any).signature_url} 
+                alt="Doctor signature" 
+                className="h-16 w-auto object-contain rounded border border-border p-1 bg-white"
+              />
+            )}
+            <div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleSignatureUpload}
+                className="hidden"
+                id="signature-upload"
+              />
+              <Button 
+                variant="outline" 
+                onClick={() => document.getElementById('signature-upload')?.click()}
+                disabled={isUploadingSignature}
+                className="gap-2"
+              >
+                <Upload className="h-4 w-4" />
+                {isUploadingSignature ? "Uploading..." : (profile as any)?.signature_url ? "Change Signature" : "Upload Signature"}
               </Button>
             </div>
           </div>
