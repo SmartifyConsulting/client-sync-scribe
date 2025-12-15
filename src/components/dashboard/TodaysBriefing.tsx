@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Play, Pause, Pill, Users, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Play, Pause, Pill, Users, MessageCircle, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -550,109 +551,109 @@ export function TodaysBriefing() {
       ) : (
         <div className="divide-y divide-border">
           {appointments.map((apt, index) => (
-            <div
-              key={apt.id}
-              className="p-4 space-y-2"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent shrink-0">
-                  <User className="h-5 w-5 text-accent-foreground" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    {apt.patientId ? (
-                      <Link
-                        to={`/patients/${apt.patientId}`}
-                        className="font-medium text-primary hover:underline transition-colors truncate"
-                      >
-                        {apt.patientName}
-                      </Link>
-                    ) : (
-                      <span className="font-medium text-foreground truncate">
-                        {apt.patientName}
-                      </span>
-                    )}
-                    <span className="flex items-center gap-1 text-sm text-muted-foreground shrink-0">
-                      <Clock className="h-3.5 w-3.5" />
-                      {apt.formattedTime}
-                    </span>
+            <Collapsible key={apt.id} defaultOpen={index === 0}>
+              <div className="p-3" style={{ animationDelay: `${index * 100}ms` }}>
+                <CollapsibleTrigger className="w-full">
+                  <div className="flex items-center gap-3 hover:bg-muted/50 rounded-lg p-1 -m-1 transition-colors">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent shrink-0">
+                      <User className="h-4 w-4 text-accent-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0 text-left">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-foreground truncate text-sm">
+                          {apt.patientName}
+                        </span>
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
+                          <Clock className="h-3 w-3" />
+                          {apt.formattedTime}
+                        </span>
+                        {apt.allergies && (
+                          <AlertCircle className="h-3.5 w-3.5 text-destructive shrink-0" />
+                        )}
+                        {apt.unreadRoundTableNotes.length > 0 && (
+                          <span className="bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 text-xs px-1.5 py-0.5 rounded-full">
+                            {apt.unreadRoundTableNotes.length}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
                   </div>
-                  
+                </CollapsibleTrigger>
+
+                <CollapsibleContent className="mt-2 space-y-2 ml-11">
+                  {apt.patientId && (
+                    <Link
+                      to={`/patients/${apt.patientId}`}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      View profile →
+                    </Link>
+                  )}
+
                   {apt.allergies && (
-                    <div className="flex items-center gap-1 text-sm text-destructive mt-1">
-                      <AlertCircle className="h-3.5 w-3.5" />
+                    <div className="flex items-center gap-1 text-xs text-destructive">
+                      <AlertCircle className="h-3 w-3" />
                       <span>Allergies: {apt.allergies}</span>
                     </div>
                   )}
-                </div>
-              </div>
 
-              {apt.lastSessionSummary ? (
-                <div className="bg-muted/50 rounded-lg p-3 ml-[52px]">
-                  <p className="text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">Last session: </span>
-                    {apt.lastSessionSummary.length > 200 
-                      ? apt.lastSessionSummary.substring(0, 200) + '...' 
-                      : apt.lastSessionSummary}
-                  </p>
-                </div>
-              ) : (
-                <div className="ml-[52px]">
-                  <p className="text-sm text-muted-foreground italic">
-                    No previous session notes available
-                  </p>
-                </div>
-              )}
-
-              {apt.lastPrescription && (
-                <div className="flex items-center gap-2 ml-[52px] text-sm">
-                  <Pill className="h-3.5 w-3.5 text-green-600" />
-                  <span className="text-muted-foreground">
-                    <span className="font-medium text-foreground">Last prescription: </span>
-                    {apt.lastPrescription}
-                  </span>
-                </div>
-              )}
-
-              {apt.linkedDoctors.length > 0 && (
-                <div className="flex items-center gap-2 ml-[52px] text-sm">
-                  <Users className="h-3.5 w-3.5 text-blue-600" />
-                  <span className="text-muted-foreground">
-                    <span className="font-medium text-foreground">Other doctors: </span>
-                    {apt.linkedDoctors.map(d => 
-                      d.specialty ? `${d.name} (${d.specialty})` : d.name
-                    ).join(', ')}
-                  </span>
-                </div>
-              )}
-
-              {apt.unreadRoundTableNotes.length > 0 && (
-                <div className="ml-[52px] mt-2 space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <MessageCircle className="h-3.5 w-3.5 text-amber-600" />
-                    <span className="font-medium text-amber-600">
-                      {apt.unreadRoundTableNotes.length} unread Round Table note{apt.unreadRoundTableNotes.length > 1 ? 's' : ''}
-                    </span>
-                  </div>
-                  {apt.unreadRoundTableNotes.slice(0, 2).map((note, noteIndex) => (
-                    <div key={noteIndex} className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
-                      <p className="text-xs font-medium text-amber-700 dark:text-amber-400 mb-1">
-                        {note.doctorName}
-                      </p>
-                      <p className="text-sm text-foreground">
-                        {note.content.length > 150 ? note.content.substring(0, 150) + '...' : note.content}
+                  {apt.lastSessionSummary ? (
+                    <div className="bg-muted/50 rounded-lg p-2">
+                      <p className="text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground">Last session: </span>
+                        {apt.lastSessionSummary.length > 150 
+                          ? apt.lastSessionSummary.substring(0, 150) + '...' 
+                          : apt.lastSessionSummary}
                       </p>
                     </div>
-                  ))}
-                  {apt.unreadRoundTableNotes.length > 2 && (
-                    <p className="text-xs text-muted-foreground">
-                      +{apt.unreadRoundTableNotes.length - 2} more note{apt.unreadRoundTableNotes.length - 2 > 1 ? 's' : ''}
+                  ) : (
+                    <p className="text-xs text-muted-foreground italic">
+                      No previous session notes
                     </p>
                   )}
-                </div>
-              )}
-            </div>
+
+                  {apt.lastPrescription && (
+                    <div className="flex items-center gap-1.5 text-xs">
+                      <Pill className="h-3 w-3 text-green-600" />
+                      <span className="text-muted-foreground">{apt.lastPrescription}</span>
+                    </div>
+                  )}
+
+                  {apt.linkedDoctors.length > 0 && (
+                    <div className="flex items-center gap-1.5 text-xs">
+                      <Users className="h-3 w-3 text-blue-600" />
+                      <span className="text-muted-foreground">
+                        {apt.linkedDoctors.map(d => 
+                          d.specialty ? `${d.name} (${d.specialty})` : d.name
+                        ).join(', ')}
+                      </span>
+                    </div>
+                  )}
+
+                  {apt.unreadRoundTableNotes.length > 0 && (
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <MessageCircle className="h-3 w-3 text-amber-600" />
+                        <span className="font-medium text-amber-600">
+                          {apt.unreadRoundTableNotes.length} unread note{apt.unreadRoundTableNotes.length > 1 ? 's' : ''}
+                        </span>
+                      </div>
+                      {apt.unreadRoundTableNotes.slice(0, 1).map((note, noteIndex) => (
+                        <div key={noteIndex} className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded p-2">
+                          <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
+                            {note.doctorName}
+                          </p>
+                          <p className="text-xs text-foreground mt-0.5">
+                            {note.content.length > 100 ? note.content.substring(0, 100) + '...' : note.content}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CollapsibleContent>
+              </div>
+            </Collapsible>
           ))}
         </div>
       )}
