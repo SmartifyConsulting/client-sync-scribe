@@ -96,7 +96,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-2 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-4 py-1 space-y-0.5 overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -109,7 +109,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 onClick={onNavigate}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
+                    "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
                     isActive
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
@@ -128,49 +128,51 @@ export function Sidebar({ onNavigate }: SidebarProps) {
           )}
         </nav>
 
-        {/* Bottom Section */}
-        <div className="p-4 space-y-1">
-          <NavLink
-            to="/profile"
-            onClick={onNavigate}
-            className={({ isActive }) =>
-              cn(
-                "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
-                isActive
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-              )
-            }
-          >
-            <User className="h-5 w-5" />
-            Profile
-          </NavLink>
-          <NavLink
-            to="/settings"
-            onClick={onNavigate}
-            className={({ isActive }) =>
-              cn(
-                "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
-                isActive
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-              )
-            }
-          >
-            <Settings className="h-5 w-5" />
-            Settings
-          </NavLink>
-          <button
-            onClick={async () => {
-              const { supabase } = await import("@/integrations/supabase/client");
-              await supabase.auth.signOut();
-              window.location.href = "/auth";
-            }}
-            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
-          >
-            <LogOut className="h-5 w-5" />
-            Sign Out
-          </button>
+        {/* Bottom Section - Account */}
+        <div className="border-t border-sidebar-border mt-auto">
+          <div className="p-3 space-y-0.5">
+            <NavLink
+              to="/profile"
+              onClick={onNavigate}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                )
+              }
+            >
+              <User className="h-5 w-5" />
+              Profile
+            </NavLink>
+            <NavLink
+              to="/settings"
+              onClick={onNavigate}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                )
+              }
+            >
+              <Settings className="h-5 w-5" />
+              Settings
+            </NavLink>
+            <button
+              onClick={async () => {
+                const { supabase } = await import("@/integrations/supabase/client");
+                await supabase.auth.signOut();
+                window.location.href = "/auth";
+              }}
+              className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
+            >
+              <LogOut className="h-5 w-5" />
+              Sign Out
+            </button>
+          </div>
         </div>
       </div>
     </aside>
