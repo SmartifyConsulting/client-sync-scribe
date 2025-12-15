@@ -127,18 +127,19 @@ export function RecentActivity() {
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-foreground truncate">
                   {activity.title}
-                  {activity.patientId && activity.patientName && (
-                    <>
-                      {" · "}
-                      <Link
-                        to={`/patients/${activity.patientId}`}
-                        className="text-primary hover:underline"
-                      >
-                        {activity.patientName}
-                      </Link>
-                    </>
-                  )}
                 </p>
+                {activity.patientId && activity.patientName ? (
+                  <Link
+                    to={`/patients/${activity.patientId}`}
+                    className="text-xs text-primary hover:underline truncate block"
+                  >
+                    {activity.patientName}
+                  </Link>
+                ) : (
+                  <p className="text-xs text-muted-foreground truncate">
+                    {activity.description}
+                  </p>
+                )}
               </div>
               <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                 {activity.time}
