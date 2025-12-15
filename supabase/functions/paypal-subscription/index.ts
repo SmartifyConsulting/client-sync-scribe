@@ -122,7 +122,7 @@ async function sendSubscriptionEmail(email: string, subject: string, htmlContent
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "MedPad <onboarding@resend.dev>",
+        from: "mIRI360 <onboarding@resend.dev>",
         to: [email],
         subject,
         html: htmlContent,
