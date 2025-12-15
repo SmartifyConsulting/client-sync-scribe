@@ -1,5 +1,21 @@
 import { useState, useEffect } from "react";
-import { Calendar, Bell, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff, CreditCard, Receipt, Download, Check, ExternalLink, XCircle, RotateCcw } from "lucide-react";
+import {
+  Calendar,
+  Bell,
+  Shield,
+  Database,
+  CheckCircle,
+  Loader2,
+  ShieldCheck,
+  ShieldOff,
+  CreditCard,
+  Receipt,
+  Download,
+  Check,
+  ExternalLink,
+  XCircle,
+  RotateCcw,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
@@ -10,12 +26,28 @@ import { TwoFactorSetup } from "@/components/auth/TwoFactorSetup";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSearchParams } from "react-router-dom";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // Plan pricing will be loaded from database
 interface PlanConfig {
@@ -59,7 +91,7 @@ export default function Settings() {
   const { user } = useAuth();
   const { role } = useUserRole();
   const [searchParams] = useSearchParams();
-  
+
   const [googleConnected, setGoogleConnected] = useState(false);
   const [outlookConnected, setOutlookConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState<string | null>(null);
@@ -67,11 +99,11 @@ export default function Settings() {
   const [mfaFactors, setMfaFactors] = useState<any[]>([]);
   const [loadingMfa, setLoadingMfa] = useState(true);
   const [disablingMfa, setDisablingMfa] = useState(false);
-  
+
   // Billing state
   const [showManagePlan, setShowManagePlan] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [selectedBillingCycle, setSelectedBillingCycle] = useState<'monthly' | 'annual'>('monthly');
+  const [selectedBillingCycle, setSelectedBillingCycle] = useState<"monthly" | "annual">("monthly");
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [paymentHistory, setPaymentHistory] = useState<PaymentHistoryItem[]>([]);
   const [loadingSubscription, setLoadingSubscription] = useState(true);
@@ -80,13 +112,13 @@ export default function Settings() {
   const [cancellingSubscription, setCancellingSubscription] = useState(false);
   const [reactivatingSubscription, setReactivatingSubscription] = useState(false);
   const [plans, setPlans] = useState<PricingPlans>({
-    monthly: { price: 0, name: 'Loading...', period: 'month' },
-    annual: { price: 0, name: 'Loading...', period: 'year', savings: 0 }
+    monthly: { price: 0, name: "Loading...", period: "month" },
+    annual: { price: 0, name: "Loading...", period: "year", savings: 0 },
   });
   const [loadingPricing, setLoadingPricing] = useState(true);
 
   // Get the appropriate plan type based on user role
-  const planType = role === 'patient' ? 'patient' : 'doctor';
+  const planType = role === "patient" ? "patient" : "doctor";
 
   useEffect(() => {
     if (user) {
@@ -103,32 +135,29 @@ export default function Settings() {
   const fetchPricing = async () => {
     setLoadingPricing(true);
     try {
-      const roleType = role === 'patient' ? 'patient' : 'doctor';
-      const { data, error } = await supabase
-        .from('pricing_config')
-        .select('*')
-        .eq('role', roleType);
+      const roleType = role === "patient" ? "patient" : "doctor";
+      const { data, error } = await supabase.from("pricing_config").select("*").eq("role", roleType);
 
       if (!error && data && data.length > 0) {
-        const monthlyPlan = data.find(p => p.billing_cycle === 'monthly');
-        const annualPlan = data.find(p => p.billing_cycle === 'annual');
-        
+        const monthlyPlan = data.find((p) => p.billing_cycle === "monthly");
+        const annualPlan = data.find((p) => p.billing_cycle === "annual");
+
         setPlans({
           monthly: {
             price: monthlyPlan?.price || 0,
-            name: monthlyPlan?.name || 'Monthly',
-            period: 'month'
+            name: monthlyPlan?.name || "Monthly",
+            period: "month",
           },
           annual: {
             price: annualPlan?.price || 0,
-            name: annualPlan?.name || 'Annual',
-            period: 'year',
-            savings: annualPlan?.savings || 0
-          }
+            name: annualPlan?.name || "Annual",
+            period: "year",
+            savings: annualPlan?.savings || 0,
+          },
         });
       }
     } catch (error) {
-      console.error('Error fetching pricing:', error);
+      console.error("Error fetching pricing:", error);
     } finally {
       setLoadingPricing(false);
     }
@@ -136,21 +165,21 @@ export default function Settings() {
 
   // Handle payment result from URL params
   useEffect(() => {
-    const paymentResult = searchParams.get('payment');
-    if (paymentResult === 'success') {
+    const paymentResult = searchParams.get("payment");
+    if (paymentResult === "success") {
       toast({
         title: "Payment Successful",
         description: "Your subscription has been activated!",
       });
       fetchSubscription();
       fetchPaymentHistory();
-    } else if (paymentResult === 'failed') {
+    } else if (paymentResult === "failed") {
       toast({
         title: "Payment Failed",
         description: "There was an issue processing your payment. Please try again.",
         variant: "destructive",
       });
-    } else if (paymentResult === 'cancelled') {
+    } else if (paymentResult === "cancelled") {
       toast({
         title: "Payment Cancelled",
         description: "Your payment was cancelled.",
@@ -160,21 +189,17 @@ export default function Settings() {
 
   const fetchSubscription = async () => {
     if (!user) return;
-    
+
     setLoadingSubscription(true);
     try {
-      const { data, error } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      const { data, error } = await supabase.from("subscriptions").select("*").eq("user_id", user.id).maybeSingle();
 
       if (!error && data) {
         setSubscription(data as Subscription);
-        setSelectedBillingCycle(data.billing_cycle as 'monthly' | 'annual');
+        setSelectedBillingCycle(data.billing_cycle as "monthly" | "annual");
       }
     } catch (error) {
-      console.error('Error fetching subscription:', error);
+      console.error("Error fetching subscription:", error);
     } finally {
       setLoadingSubscription(false);
     }
@@ -182,20 +207,20 @@ export default function Settings() {
 
   const fetchPaymentHistory = async () => {
     if (!user) return;
-    
+
     setLoadingPaymentHistory(true);
     try {
       const { data, error } = await supabase
-        .from('payment_history')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .from("payment_history")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
 
       if (!error && data) {
         setPaymentHistory(data as PaymentHistoryItem[]);
       }
     } catch (error) {
-      console.error('Error fetching payment history:', error);
+      console.error("Error fetching payment history:", error);
     } finally {
       setLoadingPaymentHistory(false);
     }
@@ -206,10 +231,10 @@ export default function Settings() {
     try {
       const { data, error } = await supabase.auth.mfa.listFactors();
       if (!error && data) {
-        setMfaFactors(data.totp.filter(f => f.status === 'verified'));
+        setMfaFactors(data.totp.filter((f) => f.status === "verified"));
       }
     } catch (error) {
-      console.error('Error fetching MFA factors:', error);
+      console.error("Error fetching MFA factors:", error);
     } finally {
       setLoadingMfa(false);
     }
@@ -220,7 +245,7 @@ export default function Settings() {
     try {
       const { error } = await supabase.auth.mfa.unenroll({ factorId });
       if (error) throw error;
-      
+
       toast({
         title: "2FA Disabled",
         description: "Two-factor authentication has been disabled",
@@ -239,9 +264,9 @@ export default function Settings() {
 
   const handleConnect = async (provider: "google" | "outlook") => {
     setIsConnecting(provider);
-    
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
     if (provider === "google") {
       setGoogleConnected(true);
       toast({
@@ -251,11 +276,11 @@ export default function Settings() {
     } else {
       setOutlookConnected(true);
       toast({
-        title: "Outlook Calendar Connected", 
+        title: "Outlook Calendar Connected",
         description: "Your appointments will now sync with Outlook",
       });
     }
-    
+
     setIsConnecting(null);
   };
 
@@ -283,7 +308,7 @@ export default function Settings() {
 
     setProcessingPayment(true);
     try {
-      const response = await supabase.functions.invoke('paypal-subscription', {
+      const response = await supabase.functions.invoke("paypal-subscription", {
         body: {
           planType,
           billingCycle: selectedBillingCycle,
@@ -296,15 +321,15 @@ export default function Settings() {
       }
 
       const { approvalUrl } = response.data;
-      
+
       if (approvalUrl) {
         // Redirect to PayPal for payment
         window.location.href = approvalUrl;
       } else {
-        throw new Error('No approval URL received from PayPal');
+        throw new Error("No approval URL received from PayPal");
       }
     } catch (error: any) {
-      console.error('Subscription error:', error);
+      console.error("Subscription error:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to start subscription process",
@@ -319,9 +344,9 @@ export default function Settings() {
 
     setCancellingSubscription(true);
     try {
-      const response = await supabase.functions.invoke('paypal-subscription', {
+      const response = await supabase.functions.invoke("paypal-subscription", {
         body: {
-          action: 'cancel',
+          action: "cancel",
           userId: user.id,
         },
       });
@@ -332,13 +357,14 @@ export default function Settings() {
 
       toast({
         title: "Subscription Cancelled",
-        description: "Your subscription has been cancelled. You will retain access until the end of your billing period.",
+        description:
+          "Your subscription has been cancelled. You will retain access until the end of your billing period.",
       });
-      
+
       setShowCancelDialog(false);
       fetchSubscription();
     } catch (error: any) {
-      console.error('Cancel subscription error:', error);
+      console.error("Cancel subscription error:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to cancel subscription",
@@ -354,9 +380,9 @@ export default function Settings() {
 
     setReactivatingSubscription(true);
     try {
-      const response = await supabase.functions.invoke('paypal-subscription', {
+      const response = await supabase.functions.invoke("paypal-subscription", {
         body: {
-          action: 'reactivate',
+          action: "reactivate",
           planType: subscription.plan_type || planType,
           billingCycle: subscription.billing_cycle || selectedBillingCycle,
           userId: user.id,
@@ -368,14 +394,14 @@ export default function Settings() {
       }
 
       const { approvalUrl } = response.data;
-      
+
       if (approvalUrl) {
         window.location.href = approvalUrl;
       } else {
-        throw new Error('No approval URL received from PayPal');
+        throw new Error("No approval URL received from PayPal");
       }
     } catch (error: any) {
-      console.error('Reactivation error:', error);
+      console.error("Reactivation error:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to reactivate subscription",
@@ -390,19 +416,19 @@ export default function Settings() {
 PAYMENT RECEIPT
 ================
 
-Transaction ID: ${payment.paypal_transaction_id || 'N/A'}
+Transaction ID: ${payment.paypal_transaction_id || "N/A"}
 Date: ${format(new Date(payment.created_at), "MMMM d, yyyy 'at' h:mm a")}
 Description: ${payment.description}
 Amount: $${payment.amount.toFixed(2)} ${payment.currency}
 Status: ${payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
 
 Thank you for your payment!
-MedPad
+mIRI360
     `.trim();
 
-    const blob = new Blob([receiptContent], { type: 'text/plain' });
+    const blob = new Blob([receiptContent], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = `receipt-${format(new Date(payment.created_at), "yyyy-MM-dd")}.txt`;
     link.click();
@@ -415,29 +441,29 @@ MedPad
   };
 
   const getSubscriptionStatus = () => {
-    if (!subscription) return 'No active subscription';
-    
-    if (subscription.status === 'active') {
-      const endDate = subscription.current_period_end 
-        ? format(new Date(subscription.current_period_end), 'MMM d, yyyy')
-        : 'N/A';
+    if (!subscription) return "No active subscription";
+
+    if (subscription.status === "active") {
+      const endDate = subscription.current_period_end
+        ? format(new Date(subscription.current_period_end), "MMM d, yyyy")
+        : "N/A";
       return `Active until ${endDate}`;
     }
-    
-    if (subscription.status === 'cancelled') {
-      const endDate = subscription.current_period_end 
-        ? format(new Date(subscription.current_period_end), 'MMM d, yyyy')
-        : 'N/A';
+
+    if (subscription.status === "cancelled") {
+      const endDate = subscription.current_period_end
+        ? format(new Date(subscription.current_period_end), "MMM d, yyyy")
+        : "N/A";
       return `Cancelled - Access until ${endDate}`;
     }
-    
+
     return subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1);
   };
 
   const getCurrentPlanName = () => {
-    if (!subscription || (subscription.status !== 'active' && subscription.status !== 'cancelled')) return 'Free';
-    const cycle = subscription.billing_cycle as 'monthly' | 'annual';
-    return plans[cycle]?.name || 'Unknown';
+    if (!subscription || (subscription.status !== "active" && subscription.status !== "cancelled")) return "Free";
+    const cycle = subscription.billing_cycle as "monthly" | "annual";
+    return plans[cycle]?.name || "Unknown";
   };
 
   return (
@@ -445,9 +471,7 @@ MedPad
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-        <p className="mt-1 text-muted-foreground">
-          Manage your application preferences and account settings
-        </p>
+        <p className="mt-1 text-muted-foreground">Manage your application preferences and account settings</p>
       </div>
 
       {/* Calendar Integration */}
@@ -459,32 +483,24 @@ MedPad
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {googleConnected && (
-                <CheckCircle className="h-5 w-5 text-success" />
-              )}
+              {googleConnected && <CheckCircle className="h-5 w-5 text-success" />}
               <div>
                 <p className="font-medium text-foreground">Google Calendar</p>
                 <p className="text-sm text-muted-foreground">
-                  {googleConnected 
-                    ? "Connected - Appointments syncing" 
-                    : "Sync appointments with Google Calendar"}
+                  {googleConnected ? "Connected - Appointments syncing" : "Sync appointments with Google Calendar"}
                 </p>
               </div>
             </div>
             {googleConnected ? (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => handleDisconnect("google")}
                 className="text-destructive hover:text-destructive"
               >
                 Disconnect
               </Button>
             ) : (
-              <Button 
-                variant="outline" 
-                onClick={() => handleConnect("google")}
-                disabled={isConnecting === "google"}
-              >
+              <Button variant="outline" onClick={() => handleConnect("google")} disabled={isConnecting === "google"}>
                 {isConnecting === "google" ? "Connecting..." : "Connect"}
               </Button>
             )}
@@ -492,32 +508,24 @@ MedPad
           <Separator />
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {outlookConnected && (
-                <CheckCircle className="h-5 w-5 text-success" />
-              )}
+              {outlookConnected && <CheckCircle className="h-5 w-5 text-success" />}
               <div>
                 <p className="font-medium text-foreground">Outlook Calendar</p>
                 <p className="text-sm text-muted-foreground">
-                  {outlookConnected 
-                    ? "Connected - Appointments syncing" 
-                    : "Sync appointments with Outlook"}
+                  {outlookConnected ? "Connected - Appointments syncing" : "Sync appointments with Outlook"}
                 </p>
               </div>
             </div>
             {outlookConnected ? (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => handleDisconnect("outlook")}
                 className="text-destructive hover:text-destructive"
               >
                 Disconnect
               </Button>
             ) : (
-              <Button 
-                variant="outline" 
-                onClick={() => handleConnect("outlook")}
-                disabled={isConnecting === "outlook"}
-              >
+              <Button variant="outline" onClick={() => handleConnect("outlook")} disabled={isConnecting === "outlook"}>
                 {isConnecting === "outlook" ? "Connecting..." : "Connect"}
               </Button>
             )}
@@ -577,17 +585,17 @@ MedPad
               <div>
                 <p className="font-medium text-foreground">Two-Factor Authentication</p>
                 <p className="text-sm text-muted-foreground">
-                  {loadingMfa 
-                    ? "Checking status..." 
-                    : mfaFactors.length > 0 
-                      ? "Enabled - Your account is protected" 
+                  {loadingMfa
+                    ? "Checking status..."
+                    : mfaFactors.length > 0
+                      ? "Enabled - Your account is protected"
                       : "Add an extra layer of security"}
                 </p>
               </div>
             </div>
             {loadingMfa ? null : mfaFactors.length > 0 ? (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => disableMfa(mfaFactors[0].id)}
                 disabled={disablingMfa}
                 className="text-destructive hover:text-destructive"
@@ -602,7 +610,7 @@ MedPad
           </div>
           <Separator />
           <div>
-            <Button variant="outline" onClick={() => window.location.href = "/forgot-password"}>
+            <Button variant="outline" onClick={() => (window.location.href = "/forgot-password")}>
               Change Password
             </Button>
           </div>
@@ -623,10 +631,14 @@ MedPad
                 {loadingSubscription ? "Loading..." : getCurrentPlanName()}
               </p>
             </div>
-            {subscription?.status === 'active' ? (
-              <Badge variant="default" className="bg-green-600">Active</Badge>
-            ) : subscription?.status === 'cancelled' ? (
-              <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">Cancelled</Badge>
+            {subscription?.status === "active" ? (
+              <Badge variant="default" className="bg-green-600">
+                Active
+              </Badge>
+            ) : subscription?.status === "cancelled" ? (
+              <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">
+                Cancelled
+              </Badge>
             ) : (
               <Badge variant="secondary">Inactive</Badge>
             )}
@@ -640,18 +652,18 @@ MedPad
               </p>
             </div>
             <div className="flex gap-2">
-              {subscription?.status === 'active' && (
-                <Button 
-                  variant="outline" 
+              {subscription?.status === "active" && (
+                <Button
+                  variant="outline"
                   onClick={() => setShowCancelDialog(true)}
                   className="text-destructive hover:text-destructive"
                 >
                   Cancel
                 </Button>
               )}
-              {subscription?.status === 'cancelled' && (
-                <Button 
-                  variant="outline" 
+              {subscription?.status === "cancelled" && (
+                <Button
+                  variant="outline"
                   onClick={handleReactivateSubscription}
                   disabled={reactivatingSubscription}
                   className="text-green-600 hover:text-green-700"
@@ -670,7 +682,11 @@ MedPad
                 </Button>
               )}
               <Button variant="outline" onClick={() => setShowManagePlan(true)}>
-                {subscription?.status === 'active' ? "Change Plan" : subscription?.status === 'cancelled' ? "Change Plan" : "Subscribe"}
+                {subscription?.status === "active"
+                  ? "Change Plan"
+                  : subscription?.status === "cancelled"
+                    ? "Change Plan"
+                    : "Subscribe"}
               </Button>
             </div>
           </div>
@@ -704,13 +720,14 @@ MedPad
               <TableBody>
                 {paymentHistory.map((payment) => (
                   <TableRow key={payment.id}>
-                    <TableCell className="font-medium">
-                      {format(new Date(payment.created_at), "MMM d, yyyy")}
-                    </TableCell>
+                    <TableCell className="font-medium">{format(new Date(payment.created_at), "MMM d, yyyy")}</TableCell>
                     <TableCell>{payment.description}</TableCell>
                     <TableCell>${payment.amount.toFixed(2)}</TableCell>
                     <TableCell>
-                      <Badge variant={payment.status === "completed" ? "default" : "destructive"} className="capitalize">
+                      <Badge
+                        variant={payment.status === "completed" ? "default" : "destructive"}
+                        className="capitalize"
+                      >
                         {payment.status}
                       </Badge>
                     </TableCell>
@@ -736,18 +753,12 @@ MedPad
         </div>
         <div className="space-y-4">
           <Button variant="outline">Export All Data</Button>
-          <p className="text-sm text-muted-foreground">
-            Download all your client data, documents, and session records
-          </p>
+          <p className="text-sm text-muted-foreground">Download all your client data, documents, and session records</p>
         </div>
       </div>
 
       {/* 2FA Setup Dialog */}
-      <TwoFactorSetup 
-        open={show2FASetup} 
-        onOpenChange={setShow2FASetup}
-        onSuccess={fetchMfaFactors}
-      />
+      <TwoFactorSetup open={show2FASetup} onOpenChange={setShow2FASetup} onSuccess={fetchMfaFactors} />
 
       {/* Manage Plan Dialog */}
       <Dialog open={showManagePlan} onOpenChange={setShowManagePlan}>
@@ -758,23 +769,27 @@ MedPad
               Select a billing cycle for your {planType} subscription. Payment is processed securely via PayPal.
             </DialogDescription>
           </DialogHeader>
-          <RadioGroup 
-            value={selectedBillingCycle} 
-            onValueChange={(v) => setSelectedBillingCycle(v as 'monthly' | 'annual')} 
+          <RadioGroup
+            value={selectedBillingCycle}
+            onValueChange={(v) => setSelectedBillingCycle(v as "monthly" | "annual")}
             className="space-y-4 mt-4"
           >
             {/* Monthly Plan */}
             <div
               className={`relative flex items-start rounded-lg border p-4 cursor-pointer transition-colors ${
-                selectedBillingCycle === 'monthly' ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                selectedBillingCycle === "monthly"
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:border-primary/50"
               }`}
-              onClick={() => setSelectedBillingCycle('monthly')}
+              onClick={() => setSelectedBillingCycle("monthly")}
             >
               <RadioGroupItem value="monthly" id="monthly" className="mt-1" />
               <div className="ml-3 flex-1">
                 <Label htmlFor="monthly" className="font-semibold text-foreground cursor-pointer">
                   Monthly
-                  <span className="ml-2 text-primary">${plans.monthly.price}/{plans.monthly.period}</span>
+                  <span className="ml-2 text-primary">
+                    ${plans.monthly.price}/{plans.monthly.period}
+                  </span>
                 </Label>
                 <ul className="mt-2 text-sm text-muted-foreground space-y-1">
                   <li className="flex items-center gap-2">
@@ -796,15 +811,19 @@ MedPad
             {/* Annual Plan */}
             <div
               className={`relative flex items-start rounded-lg border p-4 cursor-pointer transition-colors ${
-                selectedBillingCycle === 'annual' ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                selectedBillingCycle === "annual"
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:border-primary/50"
               }`}
-              onClick={() => setSelectedBillingCycle('annual')}
+              onClick={() => setSelectedBillingCycle("annual")}
             >
               <RadioGroupItem value="annual" id="annual" className="mt-1" />
               <div className="ml-3 flex-1">
                 <Label htmlFor="annual" className="font-semibold text-foreground cursor-pointer">
                   Annual
-                  <span className="ml-2 text-primary">${plans.annual.price}/{plans.annual.period}</span>
+                  <span className="ml-2 text-primary">
+                    ${plans.annual.price}/{plans.annual.period}
+                  </span>
                   <Badge variant="secondary" className="ml-2 bg-green-100 text-green-700">
                     Save ${plans.annual.savings}
                   </Badge>
@@ -815,8 +834,7 @@ MedPad
                     Full access to all features
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="h-3 w-3 text-primary" />
-                    2 months free
+                    <Check className="h-3 w-3 text-primary" />2 months free
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-3 w-3 text-primary" />
@@ -853,10 +871,15 @@ MedPad
           <AlertDialogHeader>
             <AlertDialogTitle>Cancel Subscription?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to cancel your subscription? You will retain access to all features until the end of your current billing period
+              Are you sure you want to cancel your subscription? You will retain access to all features until the end of
+              your current billing period
               {subscription?.current_period_end && (
-                <span className="font-medium"> ({format(new Date(subscription.current_period_end), 'MMMM d, yyyy')})</span>
-              )}.
+                <span className="font-medium">
+                  {" "}
+                  ({format(new Date(subscription.current_period_end), "MMMM d, yyyy")})
+                </span>
+              )}
+              .
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
