@@ -119,12 +119,20 @@ export function HeaderFooterTemplateForm({
   };
 
   const replacePlaceholders = (text: string) => {
-    return text
+    let result = text
       .replace(/\[PracticeNumber\]/g, profile?.practice_number || "[PracticeNumber]")
       .replace(/\[DoctorNumber\]/g, profile?.doctor_number || "[DoctorNumber]")
       .replace(/\[PracticeAddress\]/g, (profile as any)?.practice_address || "[PracticeAddress]")
       .replace(/\[DoctorName\]/g, profile?.full_name || "[DoctorName]")
       .replace(/\[Date\]/g, new Date().toLocaleDateString());
+    
+    // Replace [DoctorSignature] with image tag if signature exists
+    const signatureUrl = (profile as any)?.signature_url;
+    if (signatureUrl) {
+      result = result.replace(/\[DoctorSignature\]/g, `<img src="${signatureUrl}" alt="Signature" style="max-height: 60px; display: inline-block;" />`);
+    }
+    
+    return result;
   };
 
   const renderFormattedContent = (content: string) => {
@@ -247,6 +255,7 @@ export function HeaderFooterTemplateForm({
         </p>
         <div className="flex flex-wrap gap-2">
           <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[DoctorName]</code>
+          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[DoctorSignature]</code>
           <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PracticeNumber]</code>
           <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[DoctorNumber]</code>
           <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PracticeAddress]</code>
