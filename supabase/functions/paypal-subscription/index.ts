@@ -123,6 +123,41 @@ serve(async (req) => {
 
     if (req.method === 'POST') {
       const body = await req.json();
+      
+      // Handle cancel subscription
+      if (body.action === 'cancel') {
+        const { userId } = body;
+        
+        if (!userId) {
+          return new Response(
+            JSON.stringify({ error: 'Missing userId' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        console.log('Cancelling subscription for user:', userId);
+
+        // Update subscription to cancelled
+        const { error: updateError } = await supabase
+          .from('subscriptions')
+          .update({
+            status: 'cancelled',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', userId);
+
+        if (updateError) {
+          console.error('Error cancelling subscription:', updateError);
+          throw new Error('Failed to cancel subscription');
+        }
+
+        return new Response(
+          JSON.stringify({ success: true, message: 'Subscription cancelled' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Handle new subscription
       const { planType, billingCycle, userId } = body;
 
       console.log('Creating PayPal order for:', { planType, billingCycle, userId });
@@ -182,8 +217,7 @@ serve(async (req) => {
       console.log('PayPal capture result:', captureResult.status);
 
       if (captureResult.status === 'COMPLETED') {
-        // Update subscription to active
-        const now = new Date();
+        // Get subscription details
         const { data: subscription } = await supabase
           .from('subscriptions')
           .select('*')
@@ -191,10 +225,12 @@ serve(async (req) => {
           .single();
 
         if (subscription) {
+          const now = new Date();
           const periodEnd = subscription.billing_cycle === 'annual'
             ? new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000)
             : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
+          // Update subscription to active
           await supabase
             .from('subscriptions')
             .update({
@@ -203,6 +239,27 @@ serve(async (req) => {
               current_period_end: periodEnd.toISOString(),
             })
             .eq('paypal_subscription_id', orderId);
+
+          // Get plan details for payment history
+          const plan = PLANS[subscription.plan_type as keyof typeof PLANS]?.[subscription.billing_cycle as 'monthly' | 'annual'];
+          
+          // Get transaction ID from capture result
+          const transactionId = captureResult.purchase_units?.[0]?.payments?.captures?.[0]?.id;
+
+          // Record payment in history
+          await supabase
+            .from('payment_history')
+            .insert({
+              user_id: subscription.user_id,
+              subscription_id: subscription.id,
+              paypal_transaction_id: transactionId || orderId,
+              amount: plan?.price || 0,
+              currency: 'USD',
+              description: plan?.name || 'Subscription Payment',
+              status: 'completed',
+            });
+
+          console.log('Payment recorded in history');
         }
 
         // Redirect to settings with success

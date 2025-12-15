@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, Bell, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff, CreditCard, Receipt, Download, Check, ExternalLink } from "lucide-react";
+import { Calendar, Bell, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff, CreditCard, Receipt, Download, Check, ExternalLink, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSearchParams } from "react-router-dom";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 // Plan pricing
 const DOCTOR_PLANS = {
@@ -39,6 +40,18 @@ interface Subscription {
   created_at: string;
 }
 
+interface PaymentHistoryItem {
+  id: string;
+  user_id: string;
+  subscription_id: string | null;
+  paypal_transaction_id: string | null;
+  amount: number;
+  currency: string;
+  description: string;
+  status: string;
+  created_at: string;
+}
+
 export default function Settings() {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -55,10 +68,14 @@ export default function Settings() {
   
   // Billing state
   const [showManagePlan, setShowManagePlan] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [selectedBillingCycle, setSelectedBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [paymentHistory, setPaymentHistory] = useState<PaymentHistoryItem[]>([]);
   const [loadingSubscription, setLoadingSubscription] = useState(true);
+  const [loadingPaymentHistory, setLoadingPaymentHistory] = useState(true);
   const [processingPayment, setProcessingPayment] = useState(false);
+  const [cancellingSubscription, setCancellingSubscription] = useState(false);
 
   // Get the appropriate plans based on user role
   const plans = role === 'patient' ? PATIENT_PLANS : DOCTOR_PLANS;
@@ -68,6 +85,7 @@ export default function Settings() {
     if (user) {
       fetchMfaFactors();
       fetchSubscription();
+      fetchPaymentHistory();
     }
   }, [user]);
 
@@ -80,6 +98,7 @@ export default function Settings() {
         description: "Your subscription has been activated!",
       });
       fetchSubscription();
+      fetchPaymentHistory();
     } else if (paymentResult === 'failed') {
       toast({
         title: "Payment Failed",
@@ -113,6 +132,27 @@ export default function Settings() {
       console.error('Error fetching subscription:', error);
     } finally {
       setLoadingSubscription(false);
+    }
+  };
+
+  const fetchPaymentHistory = async () => {
+    if (!user) return;
+    
+    setLoadingPaymentHistory(true);
+    try {
+      const { data, error } = await supabase
+        .from('payment_history')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        setPaymentHistory(data as PaymentHistoryItem[]);
+      }
+    } catch (error) {
+      console.error('Error fetching payment history:', error);
+    } finally {
+      setLoadingPaymentHistory(false);
     }
   };
 
@@ -229,6 +269,70 @@ export default function Settings() {
     }
   };
 
+  const handleCancelSubscription = async () => {
+    if (!user) return;
+
+    setCancellingSubscription(true);
+    try {
+      const response = await supabase.functions.invoke('paypal-subscription', {
+        body: {
+          action: 'cancel',
+          userId: user.id,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      toast({
+        title: "Subscription Cancelled",
+        description: "Your subscription has been cancelled. You will retain access until the end of your billing period.",
+      });
+      
+      setShowCancelDialog(false);
+      fetchSubscription();
+    } catch (error: any) {
+      console.error('Cancel subscription error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to cancel subscription",
+        variant: "destructive",
+      });
+    } finally {
+      setCancellingSubscription(false);
+    }
+  };
+
+  const handleDownloadReceipt = (payment: PaymentHistoryItem) => {
+    const receiptContent = `
+PAYMENT RECEIPT
+================
+
+Transaction ID: ${payment.paypal_transaction_id || 'N/A'}
+Date: ${format(new Date(payment.created_at), "MMMM d, yyyy 'at' h:mm a")}
+Description: ${payment.description}
+Amount: $${payment.amount.toFixed(2)} ${payment.currency}
+Status: ${payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+
+Thank you for your payment!
+MedPad
+    `.trim();
+
+    const blob = new Blob([receiptContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `receipt-${format(new Date(payment.created_at), "yyyy-MM-dd")}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Receipt Downloaded",
+      description: `Receipt for ${format(new Date(payment.created_at), "MMMM yyyy")} has been downloaded`,
+    });
+  };
+
   const getSubscriptionStatus = () => {
     if (!subscription) return 'No active subscription';
     
@@ -239,11 +343,18 @@ export default function Settings() {
       return `Active until ${endDate}`;
     }
     
+    if (subscription.status === 'cancelled') {
+      const endDate = subscription.current_period_end 
+        ? format(new Date(subscription.current_period_end), 'MMM d, yyyy')
+        : 'N/A';
+      return `Cancelled - Access until ${endDate}`;
+    }
+    
     return subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1);
   };
 
   const getCurrentPlanName = () => {
-    if (!subscription || subscription.status !== 'active') return 'Free';
+    if (!subscription || (subscription.status !== 'active' && subscription.status !== 'cancelled')) return 'Free';
     const cycle = subscription.billing_cycle as 'monthly' | 'annual';
     return plans[cycle]?.name || 'Unknown';
   };
@@ -433,6 +544,8 @@ export default function Settings() {
             </div>
             {subscription?.status === 'active' ? (
               <Badge variant="default" className="bg-green-600">Active</Badge>
+            ) : subscription?.status === 'cancelled' ? (
+              <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">Cancelled</Badge>
             ) : (
               <Badge variant="secondary">Inactive</Badge>
             )}
@@ -445,11 +558,73 @@ export default function Settings() {
                 {loadingSubscription ? "Loading..." : getSubscriptionStatus()}
               </p>
             </div>
-            <Button variant="outline" onClick={() => setShowManagePlan(true)}>
-              {subscription?.status === 'active' ? "Change Plan" : "Subscribe"}
-            </Button>
+            <div className="flex gap-2">
+              {subscription?.status === 'active' && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowCancelDialog(true)}
+                  className="text-destructive hover:text-destructive"
+                >
+                  Cancel
+                </Button>
+              )}
+              <Button variant="outline" onClick={() => setShowManagePlan(true)}>
+                {subscription?.status === 'active' ? "Change Plan" : "Subscribe"}
+              </Button>
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* Payment History */}
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+        <div className="flex items-center gap-3 mb-6">
+          <Receipt className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">Payment History</h2>
+        </div>
+        {loadingPaymentHistory ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : paymentHistory.length === 0 ? (
+          <p className="text-center text-muted-foreground py-8">No payment history yet</p>
+        ) : (
+          <div className="rounded-lg border border-border overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead>Date</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Receipt</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paymentHistory.map((payment) => (
+                  <TableRow key={payment.id}>
+                    <TableCell className="font-medium">
+                      {format(new Date(payment.created_at), "MMM d, yyyy")}
+                    </TableCell>
+                    <TableCell>{payment.description}</TableCell>
+                    <TableCell>${payment.amount.toFixed(2)}</TableCell>
+                    <TableCell>
+                      <Badge variant={payment.status === "completed" ? "default" : "destructive"} className="capitalize">
+                        {payment.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="sm" onClick={() => handleDownloadReceipt(payment)}>
+                        <Download className="h-4 w-4 mr-1" />
+                        Download
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </div>
 
       {/* Data */}
@@ -570,6 +745,41 @@ export default function Settings() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Cancel Subscription Dialog */}
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Subscription?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel your subscription? You will retain access to all features until the end of your current billing period
+              {subscription?.current_period_end && (
+                <span className="font-medium"> ({format(new Date(subscription.current_period_end), 'MMMM d, yyyy')})</span>
+              )}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Subscription</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCancelSubscription}
+              disabled={cancellingSubscription}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {cancellingSubscription ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Cancelling...
+                </>
+              ) : (
+                <>
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Cancel Subscription
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
