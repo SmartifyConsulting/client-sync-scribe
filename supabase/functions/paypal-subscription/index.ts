@@ -215,7 +215,7 @@ serve(async (req) => {
             `
               <h1>Subscription Cancelled</h1>
               <p>We're sorry to see you go!</p>
-              <p>Your MedPad subscription has been cancelled. You will continue to have access to all features until <strong>${endDate}</strong>.</p>
+              <p>Your mIRI360 subscription has been cancelled. You will continue to have access to all features until <strong>${endDate}</strong>.</p>
               <p>If you change your mind, you can reactivate your subscription at any time from your Settings page.</p>
               <p>Thank you for being a MedPad user.</p>
               <p>Best regards,<br>The MedPad Team</p>
