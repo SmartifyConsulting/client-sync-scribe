@@ -105,6 +105,52 @@ async function capturePayPalOrder(accessToken: string, orderId: string): Promise
   return await response.json();
 }
 
+async function sendSubscriptionEmail(
+  email: string,
+  subject: string,
+  htmlContent: string
+): Promise<void> {
+  const resendApiKey = Deno.env.get('RESEND_API_KEY');
+  if (!resendApiKey) {
+    console.log('RESEND_API_KEY not configured, skipping email notification');
+    return;
+  }
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${resendApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'MedPad <onboarding@resend.dev>',
+        to: [email],
+        subject,
+        html: htmlContent,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('Error sending email:', error);
+    } else {
+      console.log('Email sent successfully to:', email);
+    }
+  } catch (error) {
+    console.error('Failed to send email:', error);
+  }
+}
+
+async function getUserEmail(supabase: any, userId: string): Promise<string | null> {
+  const { data, error } = await supabase.auth.admin.getUserById(userId);
+  if (error || !data?.user?.email) {
+    console.error('Error getting user email:', error);
+    return null;
+  }
+  return data.user.email;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -137,6 +183,13 @@ serve(async (req) => {
 
         console.log('Cancelling subscription for user:', userId);
 
+        // Get subscription details before cancelling
+        const { data: subscription } = await supabase
+          .from('subscriptions')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
+
         // Update subscription to cancelled
         const { error: updateError } = await supabase
           .from('subscriptions')
@@ -151,8 +204,70 @@ serve(async (req) => {
           throw new Error('Failed to cancel subscription');
         }
 
+        // Send cancellation email
+        const userEmail = await getUserEmail(supabase, userId);
+        if (userEmail && subscription) {
+          const endDate = subscription.current_period_end 
+            ? new Date(subscription.current_period_end).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+            : 'the end of your billing period';
+          
+          await sendSubscriptionEmail(
+            userEmail,
+            'Your MedPad Subscription Has Been Cancelled',
+            `
+              <h1>Subscription Cancelled</h1>
+              <p>We're sorry to see you go!</p>
+              <p>Your MedPad subscription has been cancelled. You will continue to have access to all features until <strong>${endDate}</strong>.</p>
+              <p>If you change your mind, you can reactivate your subscription at any time from your Settings page.</p>
+              <p>Thank you for being a MedPad user.</p>
+              <p>Best regards,<br>The MedPad Team</p>
+            `
+          );
+        }
+
         return new Response(
           JSON.stringify({ success: true, message: 'Subscription cancelled' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Handle reactivate subscription (same as new subscription)
+      if (body.action === 'reactivate') {
+        const { planType, billingCycle, userId } = body;
+
+        console.log('Reactivating subscription for:', { planType, billingCycle, userId });
+
+        if (!planType || !billingCycle || !userId) {
+          return new Response(
+            JSON.stringify({ error: 'Missing required fields: planType, billingCycle, userId' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        const accessToken = await getPayPalAccessToken();
+        const order = await createPayPalOrder(accessToken, planType, billingCycle);
+
+        console.log('PayPal reactivation order created:', order.id);
+
+        // Update subscription with new PayPal order ID
+        await supabase
+          .from('subscriptions')
+          .update({
+            plan_type: planType,
+            billing_cycle: billingCycle,
+            paypal_subscription_id: order.id,
+            status: 'inactive',
+          })
+          .eq('user_id', userId);
+
+        const approvalUrl = order.links?.find((link: any) => link.rel === 'approve')?.href;
+
+        return new Response(
+          JSON.stringify({ 
+            orderId: order.id, 
+            approvalUrl,
+            status: order.status 
+          }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
@@ -260,6 +375,27 @@ serve(async (req) => {
             });
 
           console.log('Payment recorded in history');
+
+          // Send activation email
+          const userEmail = await getUserEmail(supabase, subscription.user_id);
+          if (userEmail) {
+            const endDate = periodEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            
+            await sendSubscriptionEmail(
+              userEmail,
+              'Welcome to MedPad - Subscription Activated!',
+              `
+                <h1>Your Subscription is Active!</h1>
+                <p>Thank you for subscribing to MedPad!</p>
+                <p><strong>Plan:</strong> ${plan?.name || 'Subscription'}</p>
+                <p><strong>Amount:</strong> $${plan?.price.toFixed(2) || '0.00'} USD</p>
+                <p><strong>Next billing date:</strong> ${endDate}</p>
+                <p>You now have full access to all MedPad features. Start managing your practice more efficiently today!</p>
+                <p>If you have any questions, feel free to reach out to our support team.</p>
+                <p>Best regards,<br>The MedPad Team</p>
+              `
+            );
+          }
         }
 
         // Redirect to settings with success
