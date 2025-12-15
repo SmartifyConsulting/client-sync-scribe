@@ -115,7 +115,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                     "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
                     isActive
                       ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-primary hover:bg-sidebar-accent hover:text-primary-foreground",
+                      : "text-foreground hover:bg-sidebar-accent hover:text-primary-foreground",
                   )
                 }
               >
@@ -142,7 +142,6 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             </Avatar>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium text-foreground truncate">{profile?.full_name || "User"}</p>
-              <p className="text-[10px] text-muted-foreground truncate">{profile?.specialty || profile?.role || "Account"}</p>
             </div>
           </div>
           <div className="px-3 pb-3 space-y-0.5">
