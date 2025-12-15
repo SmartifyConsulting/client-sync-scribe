@@ -105,35 +105,31 @@ export function RecentActivity() {
 
   return (
     <div className="rounded-xl border border-primary bg-card shadow-sm">
-      <div className="rounded-t-xl bg-primary p-5">
-        <h3 className="text-lg font-semibold text-primary-foreground">Recent Activity</h3>
-        <p className="text-sm text-primary-foreground/80">Your latest actions</p>
+      <div className="rounded-t-xl bg-primary px-4 py-3">
+        <h3 className="text-sm font-semibold text-primary-foreground">Recent Activity</h3>
       </div>
-      <div className="p-4 space-y-4">
+      <div className="p-3 space-y-2">
         {activities.map((activity) => {
           const Icon = activityIcons[activity.type];
           return (
             <div
               key={activity.id}
-              className="flex items-start gap-3 animate-fade-in"
+              className="flex items-center gap-2 animate-fade-in"
             >
               <div
                 className={cn(
-                  "flex h-9 w-9 items-center justify-center rounded-lg",
+                  "flex h-7 w-7 items-center justify-center rounded-md shrink-0",
                   activityColors[activity.type]
                 )}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-3.5 w-3.5" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-foreground text-sm">
+                <p className="text-xs text-foreground truncate">
                   {activity.title}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {activity.description}
                   {activity.patientId && activity.patientName && (
                     <>
-                      {" "}
+                      {" · "}
                       <Link
                         to={`/patients/${activity.patientId}`}
                         className="text-primary hover:underline"
@@ -144,7 +140,7 @@ export function RecentActivity() {
                   )}
                 </p>
               </div>
-              <span className="text-xs text-muted-foreground whitespace-nowrap">
+              <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                 {activity.time}
               </span>
             </div>
