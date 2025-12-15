@@ -11,6 +11,7 @@ import {
   Trash2,
   Phone,
   Stethoscope,
+  PenTool,
   UserCircle,
   Camera,
 } from "lucide-react";
@@ -85,6 +86,9 @@ export default function Auth() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [signatureFile, setSignatureFile] = useState<File | null>(null);
+  const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
+  const signatureInputRef = useRef<HTMLInputElement>(null);
   const [partners, setPartners] = useState<PartnerInput[]>([]);
   const [newPartner, setNewPartner] = useState<PartnerInput>({
     full_name: "",
@@ -169,6 +173,37 @@ export default function Auth() {
     return data.publicUrl;
   };
 
+  const handleSignatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSignatureFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSignaturePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadSignature = async (userId: string): Promise<string | null> => {
+    if (!signatureFile) return null;
+    
+    const fileExt = signatureFile.name.split('.').pop();
+    const fileName = `${userId}/signature.${fileExt}`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(fileName, signatureFile, { upsert: true });
+    
+    if (uploadError) {
+      console.error('Signature upload error:', uploadError);
+      return null;
+    }
+    
+    const { data } = supabase.storage.from('avatars').getPublicUrl(fileName);
+    return data.publicUrl;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -202,6 +237,12 @@ export default function Auth() {
               avatarUrl = await uploadAvatar(data.user.id);
             }
 
+            // Upload signature if provided
+            let signatureUrl: string | null = null;
+            if (signatureFile) {
+              signatureUrl = await uploadSignature(data.user.id);
+            }
+
             // Update profile with doctor info
             const { error: profileError } = await supabase
               .from("profiles")
@@ -212,6 +253,7 @@ export default function Auth() {
                 practice_address: practiceAddress,
                 specialty: specialty || null,
                 avatar_url: avatarUrl,
+                signature_url: signatureUrl,
                 role: userRole,
               })
               .eq("id", data.user.id);
@@ -461,6 +503,46 @@ export default function Auth() {
                           </Button>
                           <p className="text-xs text-muted-foreground mt-1">
                             JPG, PNG or GIF (max 2MB)
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Electronic Signature */}
+                    <div className="pt-4 border-t border-border">
+                      <h3 className="text-sm font-medium text-foreground mb-4">Electronic Signature</h3>
+                      <div className="flex items-center gap-4">
+                        <div className="h-20 w-40 border-2 border-dashed border-border rounded-lg flex items-center justify-center bg-muted/30 overflow-hidden">
+                          {signaturePreview ? (
+                            <img 
+                              src={signaturePreview} 
+                              alt="Signature preview" 
+                              className="max-h-full max-w-full object-contain"
+                            />
+                          ) : (
+                            <PenTool className="h-8 w-8 text-muted-foreground" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <input
+                            type="file"
+                            ref={signatureInputRef}
+                            accept="image/*"
+                            onChange={handleSignatureChange}
+                            className="hidden"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => signatureInputRef.current?.click()}
+                            className="gap-2"
+                          >
+                            <PenTool className="h-4 w-4" />
+                            {signaturePreview ? 'Change Signature' : 'Upload Signature'}
+                          </Button>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            PNG with transparent background recommended
                           </p>
                         </div>
                       </div>
