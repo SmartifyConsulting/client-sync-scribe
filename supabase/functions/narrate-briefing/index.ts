@@ -22,8 +22,9 @@ serve(async (req) => {
       throw new Error('OPENAI_API_KEY is not configured');
     }
 
-    console.log('Generating speech for text:', text.substring(0, 100) + '...');
+    console.log('Streaming speech for text:', text.substring(0, 100) + '...');
 
+    // Use streaming endpoint for faster time-to-first-byte
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
@@ -33,7 +34,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: 'tts-1',
         input: text,
-        voice: voice || 'alloy',
+        voice: voice || 'nova',
         response_format: 'mp3',
       }),
     });
@@ -44,26 +45,16 @@ serve(async (req) => {
       throw new Error(error.error?.message || 'Failed to generate speech');
     }
 
-    const arrayBuffer = await response.arrayBuffer();
-    const uint8Array = new Uint8Array(arrayBuffer);
-    
-    // Convert to base64 in chunks to avoid stack overflow
-    let binary = '';
-    const chunkSize = 8192;
-    for (let i = 0; i < uint8Array.length; i += chunkSize) {
-      const chunk = uint8Array.subarray(i, i + chunkSize);
-      binary += String.fromCharCode(...chunk);
-    }
-    const base64Audio = btoa(binary);
+    console.log('Streaming audio response to client');
 
-    console.log('Speech generated successfully');
-
-    return new Response(
-      JSON.stringify({ audioContent: base64Audio }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // Stream the audio directly to the client
+    return new Response(response.body, {
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'audio/mpeg',
+        'Transfer-Encoding': 'chunked',
       },
-    );
+    });
   } catch (error: unknown) {
     console.error('Error in narrate-briefing:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
