@@ -94,6 +94,12 @@ export function useTemplateWithHeaderFooter(templateName: string): CombinedTempl
         .replace(/\[DoctorNumber\]/g, profile.doctor_number || "[DoctorNumber]")
         .replace(/\[DoctorName\]/g, profile.full_name || "[DoctorName]")
         .replace(/\[PracticeAddress\]/g, profile.practice_address || "[PracticeAddress]");
+      
+      // Replace signature placeholder with image tag if signature exists
+      const signatureUrl = (profile as any)?.signature_url;
+      if (signatureUrl) {
+        formattedContent = formattedContent.replace(/\[DoctorSignature\]/g, `<img src="${signatureUrl}" alt="Signature" style="max-height: 60px;" />`);
+      }
     }
 
     return {

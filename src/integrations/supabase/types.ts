@@ -728,6 +728,7 @@ export type Database = {
           practice_address: string | null
           practice_number: string | null
           role: Database["public"]["Enums"]["user_role"] | null
+          signature_url: string | null
           specialty: string | null
           updated_at: string
         }
@@ -743,6 +744,7 @@ export type Database = {
           practice_address?: string | null
           practice_number?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
+          signature_url?: string | null
           specialty?: string | null
           updated_at?: string
         }
@@ -758,6 +760,7 @@ export type Database = {
           practice_address?: string | null
           practice_number?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
+          signature_url?: string | null
           specialty?: string | null
           updated_at?: string
         }

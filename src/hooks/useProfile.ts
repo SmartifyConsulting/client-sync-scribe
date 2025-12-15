@@ -10,6 +10,7 @@ export interface Profile {
   practice_address: string | null;
   logo_url: string | null;
   avatar_url: string | null;
+  signature_url: string | null;
   role: 'doctor' | 'patient' | null;
   specialty: string | null;
   mobile_number: string | null;
