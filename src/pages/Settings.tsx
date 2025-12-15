@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, Bell, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff, CreditCard, Receipt, Download, Check } from "lucide-react";
+import { Calendar, Bell, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff, CreditCard, Receipt, Download, Check, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
@@ -11,28 +11,40 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useSearchParams } from "react-router-dom";
 
-// Mock payment history data
-const paymentHistory = [
-  { id: "1", date: new Date(2024, 10, 1), description: "Professional Plan - Monthly", amount: 49.99, status: "paid" },
-  { id: "2", date: new Date(2024, 9, 1), description: "Professional Plan - Monthly", amount: 49.99, status: "paid" },
-  { id: "3", date: new Date(2024, 8, 1), description: "Professional Plan - Monthly", amount: 49.99, status: "paid" },
-  { id: "4", date: new Date(2024, 7, 1), description: "Professional Plan - Monthly", amount: 49.99, status: "paid" },
-  { id: "5", date: new Date(2024, 6, 1), description: "Professional Plan - Monthly", amount: 49.99, status: "paid" },
-];
+// Plan pricing
+const DOCTOR_PLANS = {
+  monthly: { price: 49.99, name: 'Doctor Monthly', period: 'month' },
+  annual: { price: 499.99, name: 'Doctor Annual', period: 'year', savings: 100 }
+};
 
-const plans = [
-  { id: "basic", name: "Basic", price: 19.99, features: ["Up to 50 patients", "Basic templates", "Email support"] },
-  { id: "professional", name: "Professional", price: 49.99, features: ["Unlimited patients", "All templates", "Priority support", "Calendar sync"] },
-  { id: "enterprise", name: "Enterprise", price: 99.99, features: ["Everything in Pro", "Custom branding", "API access", "Dedicated support"] },
-];
+const PATIENT_PLANS = {
+  monthly: { price: 9.99, name: 'Patient Monthly', period: 'month' },
+  annual: { price: 99.99, name: 'Patient Annual', period: 'year', savings: 20 }
+};
+
+interface Subscription {
+  id: string;
+  user_id: string;
+  plan_type: string;
+  billing_cycle: string;
+  status: string;
+  paypal_subscription_id: string | null;
+  current_period_start: string | null;
+  current_period_end: string | null;
+  created_at: string;
+}
 
 export default function Settings() {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { role } = useUserRole();
+  const [searchParams] = useSearchParams();
+  
   const [googleConnected, setGoogleConnected] = useState(false);
   const [outlookConnected, setOutlookConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState<string | null>(null);
@@ -43,21 +55,66 @@ export default function Settings() {
   
   // Billing state
   const [showManagePlan, setShowManagePlan] = useState(false);
-  const [showAddPayment, setShowAddPayment] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState("professional");
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardExpiry, setCardExpiry] = useState("");
-  const [cardCvc, setCardCvc] = useState("");
-  const [cardName, setCardName] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
-  const [isSavingPlan, setIsSavingPlan] = useState(false);
-  const [isSavingPayment, setIsSavingPayment] = useState(false);
+  const [selectedBillingCycle, setSelectedBillingCycle] = useState<'monthly' | 'annual'>('monthly');
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [loadingSubscription, setLoadingSubscription] = useState(true);
+  const [processingPayment, setProcessingPayment] = useState(false);
+
+  // Get the appropriate plans based on user role
+  const plans = role === 'patient' ? PATIENT_PLANS : DOCTOR_PLANS;
+  const planType = role === 'patient' ? 'patient' : 'doctor';
 
   useEffect(() => {
     if (user) {
       fetchMfaFactors();
+      fetchSubscription();
     }
   }, [user]);
+
+  // Handle payment result from URL params
+  useEffect(() => {
+    const paymentResult = searchParams.get('payment');
+    if (paymentResult === 'success') {
+      toast({
+        title: "Payment Successful",
+        description: "Your subscription has been activated!",
+      });
+      fetchSubscription();
+    } else if (paymentResult === 'failed') {
+      toast({
+        title: "Payment Failed",
+        description: "There was an issue processing your payment. Please try again.",
+        variant: "destructive",
+      });
+    } else if (paymentResult === 'cancelled') {
+      toast({
+        title: "Payment Cancelled",
+        description: "Your payment was cancelled.",
+      });
+    }
+  }, [searchParams]);
+
+  const fetchSubscription = async () => {
+    if (!user) return;
+    
+    setLoadingSubscription(true);
+    try {
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!error && data) {
+        setSubscription(data as Subscription);
+        setSelectedBillingCycle(data.billing_cycle as 'monthly' | 'annual');
+      }
+    } catch (error) {
+      console.error('Error fetching subscription:', error);
+    } finally {
+      setLoadingSubscription(false);
+    }
+  };
 
   const fetchMfaFactors = async () => {
     setLoadingMfa(true);
@@ -129,52 +186,66 @@ export default function Settings() {
     });
   };
 
-  const handleSavePlan = async () => {
-    setIsSavingPlan(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSavingPlan(false);
-    setShowManagePlan(false);
-    const plan = plans.find(p => p.id === selectedPlan);
-    toast({
-      title: "Plan Updated",
-      description: `You are now on the ${plan?.name} plan`,
-    });
-  };
-
-  const handleSavePayment = async () => {
-    if (!cardNumber || !cardExpiry || !cardCvc || !cardName) {
+  const handleSubscribe = async () => {
+    if (!user) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all card details",
+        title: "Error",
+        description: "You must be logged in to subscribe",
         variant: "destructive",
       });
       return;
     }
-    setIsSavingPayment(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setPaymentMethod(`•••• •••• •••• ${cardNumber.slice(-4)}`);
-    setIsSavingPayment(false);
-    setShowAddPayment(false);
-    setCardNumber("");
-    setCardExpiry("");
-    setCardCvc("");
-    setCardName("");
-    toast({
-      title: "Payment Method Added",
-      description: "Your card has been saved successfully",
-    });
+
+    setProcessingPayment(true);
+    try {
+      const response = await supabase.functions.invoke('paypal-subscription', {
+        body: {
+          planType,
+          billingCycle: selectedBillingCycle,
+          userId: user.id,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      const { approvalUrl } = response.data;
+      
+      if (approvalUrl) {
+        // Redirect to PayPal for payment
+        window.location.href = approvalUrl;
+      } else {
+        throw new Error('No approval URL received from PayPal');
+      }
+    } catch (error: any) {
+      console.error('Subscription error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to start subscription process",
+        variant: "destructive",
+      });
+      setProcessingPayment(false);
+    }
   };
 
-  const handleDownloadReceipt = (payment: typeof paymentHistory[0]) => {
-    toast({
-      title: "Downloading Receipt",
-      description: `Receipt for ${format(payment.date, "MMMM yyyy")} is being downloaded`,
-    });
-    // Simulate download
-    const link = document.createElement('a');
-    link.href = `data:text/plain;charset=utf-8,Receipt for ${payment.description}%0ADate: ${format(payment.date, "MMMM d, yyyy")}%0AAmount: $${payment.amount.toFixed(2)}%0AStatus: ${payment.status}`;
-    link.download = `receipt-${format(payment.date, "yyyy-MM")}.txt`;
-    link.click();
+  const getSubscriptionStatus = () => {
+    if (!subscription) return 'No active subscription';
+    
+    if (subscription.status === 'active') {
+      const endDate = subscription.current_period_end 
+        ? format(new Date(subscription.current_period_end), 'MMM d, yyyy')
+        : 'N/A';
+      return `Active until ${endDate}`;
+    }
+    
+    return subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1);
+  };
+
+  const getCurrentPlanName = () => {
+    if (!subscription || subscription.status !== 'active') return 'Free';
+    const cycle = subscription.billing_cycle as 'monthly' | 'annual';
+    return plans[cycle]?.name || 'Unknown';
   };
 
   return (
@@ -357,72 +428,28 @@ export default function Settings() {
             <div>
               <p className="font-medium text-foreground">Current Plan</p>
               <p className="text-sm text-muted-foreground">
-                {plans.find(p => p.id === selectedPlan)?.name} Plan - Active
+                {loadingSubscription ? "Loading..." : getCurrentPlanName()}
               </p>
             </div>
-            <Button variant="outline" onClick={() => setShowManagePlan(true)}>
-              Manage Plan
-            </Button>
+            {subscription?.status === 'active' ? (
+              <Badge variant="default" className="bg-green-600">Active</Badge>
+            ) : (
+              <Badge variant="secondary">Inactive</Badge>
+            )}
           </div>
           <Separator />
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium text-foreground">Payment Method</p>
+              <p className="font-medium text-foreground">Subscription Status</p>
               <p className="text-sm text-muted-foreground">
-                {paymentMethod || "No payment method added"}
+                {loadingSubscription ? "Loading..." : getSubscriptionStatus()}
               </p>
             </div>
-            <Button variant="outline" onClick={() => setShowAddPayment(true)}>
-              {paymentMethod ? "Update Payment" : "Add Payment"}
+            <Button variant="outline" onClick={() => setShowManagePlan(true)}>
+              {subscription?.status === 'active' ? "Change Plan" : "Subscribe"}
             </Button>
           </div>
         </div>
-      </div>
-
-      {/* Payment History */}
-      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <Receipt className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold text-foreground">Payment History</h2>
-        </div>
-        <div className="rounded-lg border border-border overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead>Date</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Receipt</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paymentHistory.map((payment) => (
-                <TableRow key={payment.id}>
-                  <TableCell className="font-medium">
-                    {format(payment.date, "MMM d, yyyy")}
-                  </TableCell>
-                  <TableCell>{payment.description}</TableCell>
-                  <TableCell>${payment.amount.toFixed(2)}</TableCell>
-                  <TableCell>
-                    <Badge variant={payment.status === "paid" ? "default" : "destructive"} className="capitalize">
-                      {payment.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" onClick={() => handleDownloadReceipt(payment)}>
-                      <Download className="h-4 w-4 mr-1" />
-                      Download
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        {paymentHistory.length === 0 && (
-          <p className="text-center text-muted-foreground py-8">No payment history yet</p>
-        )}
       </div>
 
       {/* Data */}
@@ -450,110 +477,95 @@ export default function Settings() {
       <Dialog open={showManagePlan} onOpenChange={setShowManagePlan}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Manage Your Plan</DialogTitle>
+            <DialogTitle>Choose Your Plan</DialogTitle>
             <DialogDescription>
-              Choose the plan that best fits your practice needs
+              Select a billing cycle for your {planType} subscription. Payment is processed securely via PayPal.
             </DialogDescription>
           </DialogHeader>
-          <RadioGroup value={selectedPlan} onValueChange={setSelectedPlan} className="space-y-4 mt-4">
-            {plans.map((plan) => (
-              <div
-                key={plan.id}
-                className={`relative flex items-start rounded-lg border p-4 cursor-pointer transition-colors ${
-                  selectedPlan === plan.id ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
-                }`}
-                onClick={() => setSelectedPlan(plan.id)}
-              >
-                <RadioGroupItem value={plan.id} id={plan.id} className="mt-1" />
-                <div className="ml-3 flex-1">
-                  <Label htmlFor={plan.id} className="font-semibold text-foreground cursor-pointer">
-                    {plan.name}
-                    <span className="ml-2 text-primary">${plan.price}/mo</span>
-                  </Label>
-                  <ul className="mt-2 text-sm text-muted-foreground space-y-1">
-                    {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        <Check className="h-3 w-3 text-primary" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+          <RadioGroup 
+            value={selectedBillingCycle} 
+            onValueChange={(v) => setSelectedBillingCycle(v as 'monthly' | 'annual')} 
+            className="space-y-4 mt-4"
+          >
+            {/* Monthly Plan */}
+            <div
+              className={`relative flex items-start rounded-lg border p-4 cursor-pointer transition-colors ${
+                selectedBillingCycle === 'monthly' ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+              }`}
+              onClick={() => setSelectedBillingCycle('monthly')}
+            >
+              <RadioGroupItem value="monthly" id="monthly" className="mt-1" />
+              <div className="ml-3 flex-1">
+                <Label htmlFor="monthly" className="font-semibold text-foreground cursor-pointer">
+                  Monthly
+                  <span className="ml-2 text-primary">${plans.monthly.price}/{plans.monthly.period}</span>
+                </Label>
+                <ul className="mt-2 text-sm text-muted-foreground space-y-1">
+                  <li className="flex items-center gap-2">
+                    <Check className="h-3 w-3 text-primary" />
+                    Full access to all features
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-3 w-3 text-primary" />
+                    Cancel anytime
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-3 w-3 text-primary" />
+                    Priority support
+                  </li>
+                </ul>
               </div>
-            ))}
+            </div>
+
+            {/* Annual Plan */}
+            <div
+              className={`relative flex items-start rounded-lg border p-4 cursor-pointer transition-colors ${
+                selectedBillingCycle === 'annual' ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+              }`}
+              onClick={() => setSelectedBillingCycle('annual')}
+            >
+              <RadioGroupItem value="annual" id="annual" className="mt-1" />
+              <div className="ml-3 flex-1">
+                <Label htmlFor="annual" className="font-semibold text-foreground cursor-pointer">
+                  Annual
+                  <span className="ml-2 text-primary">${plans.annual.price}/{plans.annual.period}</span>
+                  <Badge variant="secondary" className="ml-2 bg-green-100 text-green-700">
+                    Save ${plans.annual.savings}
+                  </Badge>
+                </Label>
+                <ul className="mt-2 text-sm text-muted-foreground space-y-1">
+                  <li className="flex items-center gap-2">
+                    <Check className="h-3 w-3 text-primary" />
+                    Full access to all features
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-3 w-3 text-primary" />
+                    2 months free
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-3 w-3 text-primary" />
+                    Priority support
+                  </li>
+                </ul>
+              </div>
+            </div>
           </RadioGroup>
           <DialogFooter className="mt-6">
             <Button variant="outline" onClick={() => setShowManagePlan(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSavePlan} disabled={isSavingPlan}>
-              {isSavingPlan ? "Saving..." : "Update Plan"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Add Payment Dialog */}
-      <Dialog open={showAddPayment} onOpenChange={setShowAddPayment}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{paymentMethod ? "Update Payment Method" : "Add Payment Method"}</DialogTitle>
-            <DialogDescription>
-              Enter your card details to {paymentMethod ? "update" : "add"} a payment method
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 mt-4">
-            <div className="space-y-2">
-              <Label htmlFor="cardName">Cardholder Name</Label>
-              <Input
-                id="cardName"
-                placeholder="John Doe"
-                value={cardName}
-                onChange={(e) => setCardName(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="cardNumber">Card Number</Label>
-              <Input
-                id="cardNumber"
-                placeholder="4242 4242 4242 4242"
-                value={cardNumber}
-                onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, "").slice(0, 16))}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="cardExpiry">Expiry Date</Label>
-                <Input
-                  id="cardExpiry"
-                  placeholder="MM/YY"
-                  value={cardExpiry}
-                  onChange={(e) => {
-                    let value = e.target.value.replace(/\D/g, "").slice(0, 4);
-                    if (value.length > 2) {
-                      value = value.slice(0, 2) + "/" + value.slice(2);
-                    }
-                    setCardExpiry(value);
-                  }}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cardCvc">CVC</Label>
-                <Input
-                  id="cardCvc"
-                  placeholder="123"
-                  value={cardCvc}
-                  onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, "").slice(0, 4))}
-                />
-              </div>
-            </div>
-          </div>
-          <DialogFooter className="mt-6">
-            <Button variant="outline" onClick={() => setShowAddPayment(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSavePayment} disabled={isSavingPayment}>
-              {isSavingPayment ? "Saving..." : "Save Card"}
+            <Button onClick={handleSubscribe} disabled={processingPayment}>
+              {processingPayment ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Pay with PayPal
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
