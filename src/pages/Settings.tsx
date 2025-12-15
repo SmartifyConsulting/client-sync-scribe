@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, Bell, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff, CreditCard, Receipt, Download, Check, ExternalLink, XCircle } from "lucide-react";
+import { Calendar, Bell, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff, CreditCard, Receipt, Download, Check, ExternalLink, XCircle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
@@ -76,6 +76,7 @@ export default function Settings() {
   const [loadingPaymentHistory, setLoadingPaymentHistory] = useState(true);
   const [processingPayment, setProcessingPayment] = useState(false);
   const [cancellingSubscription, setCancellingSubscription] = useState(false);
+  const [reactivatingSubscription, setReactivatingSubscription] = useState(false);
 
   // Get the appropriate plans based on user role
   const plans = role === 'patient' ? PATIENT_PLANS : DOCTOR_PLANS;
@@ -301,6 +302,42 @@ export default function Settings() {
       });
     } finally {
       setCancellingSubscription(false);
+    }
+  };
+
+  const handleReactivateSubscription = async () => {
+    if (!user || !subscription) return;
+
+    setReactivatingSubscription(true);
+    try {
+      const response = await supabase.functions.invoke('paypal-subscription', {
+        body: {
+          action: 'reactivate',
+          planType: subscription.plan_type || planType,
+          billingCycle: subscription.billing_cycle || selectedBillingCycle,
+          userId: user.id,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      const { approvalUrl } = response.data;
+      
+      if (approvalUrl) {
+        window.location.href = approvalUrl;
+      } else {
+        throw new Error('No approval URL received from PayPal');
+      }
+    } catch (error: any) {
+      console.error('Reactivation error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reactivate subscription",
+        variant: "destructive",
+      });
+      setReactivatingSubscription(false);
     }
   };
 
@@ -568,8 +605,28 @@ MedPad
                   Cancel
                 </Button>
               )}
+              {subscription?.status === 'cancelled' && (
+                <Button 
+                  variant="outline" 
+                  onClick={handleReactivateSubscription}
+                  disabled={reactivatingSubscription}
+                  className="text-green-600 hover:text-green-700"
+                >
+                  {reactivatingSubscription ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Reactivating...
+                    </>
+                  ) : (
+                    <>
+                      <RotateCcw className="h-4 w-4 mr-2" />
+                      Reactivate
+                    </>
+                  )}
+                </Button>
+              )}
               <Button variant="outline" onClick={() => setShowManagePlan(true)}>
-                {subscription?.status === 'active' ? "Change Plan" : "Subscribe"}
+                {subscription?.status === 'active' ? "Change Plan" : subscription?.status === 'cancelled' ? "Change Plan" : "Subscribe"}
               </Button>
             </div>
           </div>
