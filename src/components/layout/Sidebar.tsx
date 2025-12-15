@@ -16,6 +16,7 @@ import {
   Bell,
   User,
   LucideIcon,
+  DollarSign,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
@@ -48,14 +49,19 @@ const patientNavItems: NavItem[] = [
   { icon: Shield, label: "Access", to: "/patient/access" },
 ];
 
+const adminNavItems: NavItem[] = [
+  { icon: LayoutDashboard, label: "Dashboard", to: "/" },
+  { icon: DollarSign, label: "Pricing", to: "/admin/pricing" },
+];
+
 interface SidebarProps {
   onNavigate?: () => void;
 }
 
 export function Sidebar({ onNavigate }: SidebarProps) {
-  const { role, loading, isPatient } = useUserRole();
+  const { role, loading, isPatient, isAdmin } = useUserRole();
   const { profile } = useProfile();
-  const navItems = isPatient ? patientNavItems : doctorNavItems;
+  const navItems = isAdmin ? adminNavItems : isPatient ? patientNavItems : doctorNavItems;
 
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ["unread-notifications-count"],
