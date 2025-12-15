@@ -12,8 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
 export default function Dashboard() {
-  const { profile } = useProfile();
-  const { isDoctor } = useUserRole();
+  const { profile, loading: profileLoading } = useProfile();
+  const { isDoctor, loading: roleLoading } = useUserRole();
 
   // Query for unread messages count
   const { data: unreadMessagesCount = 0 } = useQuery({
@@ -53,9 +53,10 @@ export default function Dashboard() {
     refetchInterval: 30000,
   });
   
-  // Format display name based on role
+  // Format display name based on role - return empty string while loading
   const getDisplayName = () => {
-    if (!profile?.full_name) return isDoctor ? 'Doctor' : 'there';
+    if (profileLoading || roleLoading) return '';
+    if (!profile?.full_name) return isDoctor ? 'Doctor' : '';
     
     const nameParts = profile.full_name.split(' ');
     if (isDoctor) {
