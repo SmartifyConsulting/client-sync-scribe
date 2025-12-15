@@ -320,25 +320,84 @@ export function TodaysBriefing() {
     try {
       const briefingText = generateBriefingText();
       
-      const { data, error } = await supabase.functions.invoke('narrate-briefing', {
-        body: { text: briefingText, voice: 'nova' }
-      });
-
-      if (error) throw error;
-
-      if (data.audioContent) {
-        const audioBlob = new Blob(
-          [Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0))],
-          { type: 'audio/mp3' }
-        );
-        const audioUrl = URL.createObjectURL(audioBlob);
-        
-        if (audioRef.current) {
-          audioRef.current.src = audioUrl;
-          audioRef.current.play();
-          setIsPlaying(true);
-          setIsPaused(false);
+      // Use streaming fetch for faster playback start
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ text: briefingText, voice: 'nova' }),
         }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate speech');
+      }
+
+      // Create a MediaSource for streaming playback
+      const mediaSource = new MediaSource();
+      const audioUrl = URL.createObjectURL(mediaSource);
+      
+      if (audioRef.current) {
+        audioRef.current.src = audioUrl;
+        
+        mediaSource.addEventListener('sourceopen', async () => {
+          try {
+            const sourceBuffer = mediaSource.addSourceBuffer('audio/mpeg');
+            const reader = response.body?.getReader();
+            
+            if (!reader) throw new Error('No response body');
+
+            // Start playing as soon as we have some data
+            let hasStartedPlaying = false;
+            
+            const processChunk = async () => {
+              const { done, value } = await reader.read();
+              
+              if (done) {
+                if (mediaSource.readyState === 'open') {
+                  mediaSource.endOfStream();
+                }
+                return;
+              }
+              
+              // Wait for buffer to be ready
+              if (sourceBuffer.updating) {
+                await new Promise(resolve => {
+                  sourceBuffer.addEventListener('updateend', resolve, { once: true });
+                });
+              }
+              
+              sourceBuffer.appendBuffer(value);
+              
+              // Start playback after first chunk
+              if (!hasStartedPlaying && audioRef.current) {
+                await new Promise(resolve => {
+                  sourceBuffer.addEventListener('updateend', resolve, { once: true });
+                });
+                audioRef.current.play();
+                setIsPlaying(true);
+                setIsPaused(false);
+                setIsNarrating(false);
+                hasStartedPlaying = true;
+              }
+              
+              // Process next chunk
+              await processChunk();
+            };
+            
+            await processChunk();
+          } catch (err) {
+            console.error('Error streaming audio:', err);
+            if (mediaSource.readyState === 'open') {
+              mediaSource.endOfStream('decode');
+            }
+          }
+        });
       }
     } catch (error: any) {
       console.error('Error narrating briefing:', error);
@@ -347,7 +406,6 @@ export function TodaysBriefing() {
         description: error.message || "Could not generate audio briefing",
         variant: "destructive",
       });
-    } finally {
       setIsNarrating(false);
     }
   };
