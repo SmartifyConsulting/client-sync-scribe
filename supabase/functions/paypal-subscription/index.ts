@@ -217,8 +217,8 @@ serve(async (req) => {
               <p>We're sorry to see you go!</p>
               <p>Your mIRI360 subscription has been cancelled. You will continue to have access to all features until <strong>${endDate}</strong>.</p>
               <p>If you change your mind, you can reactivate your subscription at any time from your Settings page.</p>
-              <p>Thank you for being a MedPad user.</p>
-              <p>Best regards,<br>The MedPad Team</p>
+              <p>Thank you for being a mIRI360 user.</p>
+              <p>Best regards,<br>The mIRI360 Team</p>
             `,
           );
         }
@@ -381,16 +381,16 @@ serve(async (req) => {
 
             await sendSubscriptionEmail(
               userEmail,
-              "Welcome to MedPad - Subscription Activated!",
+              "Welcome to mIRI360 - Subscription Activated!",
               `
                 <h1>Your Subscription is Active!</h1>
-                <p>Thank you for subscribing to MedPad!</p>
+                <p>Thank you for subscribing to mIRI360!</p>
                 <p><strong>Plan:</strong> ${plan?.name || "Subscription"}</p>
                 <p><strong>Amount:</strong> $${plan?.price.toFixed(2) || "0.00"} USD</p>
                 <p><strong>Next billing date:</strong> ${endDate}</p>
-                <p>You now have full access to all MedPad features. Start managing your practice more efficiently today!</p>
+                <p>You now have full access to all mIRI360 features. Start managing your practice more efficiently today!</p>
                 <p>If you have any questions, feel free to reach out to our support team.</p>
-                <p>Best regards,<br>The MedPad Team</p>
+                <p>Best regards,<br>The mIRI360 Team</p>
               `,
             );
           }
