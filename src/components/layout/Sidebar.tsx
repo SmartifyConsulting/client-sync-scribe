@@ -129,8 +129,9 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         </nav>
 
         {/* Bottom Section - Account */}
-        <div className="border-t border-sidebar-border mt-auto">
-          <div className="p-3 space-y-0.5">
+        <div className="border-t border-sidebar-border mt-auto bg-sidebar-accent/30">
+          <p className="px-4 pt-3 pb-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Account</p>
+          <div className="px-3 pb-3 space-y-0.5">
             <NavLink
               to="/profile"
               onClick={onNavigate}
