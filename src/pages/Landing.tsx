@@ -146,9 +146,9 @@ export default function Landing() {
               <span className="block text-gradient">360° Healthcare & Practice Management.</span>
             </h1>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              mIRI360 isn't just another medical app—it's a revolutionary ecosystem that connects patients 
-              with their entire care team. Every session summary, prescription, and clinical note flows 
-              to the people who need it, when they need it.
+              Powerful practice management for providers. A complete 360° health profile for patients. 
+              One unified ecosystem where every consultation, prescription, and clinical note connects 
+              seamlessly—putting the patient at the center of their care.
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10 max-w-3xl mx-auto">
               {ecosystemFeatures.map((feature, index) => (
