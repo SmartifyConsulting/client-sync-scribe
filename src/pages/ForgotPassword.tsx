@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Footer } from "@/components/layout/Footer";
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
@@ -42,78 +43,81 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <button
-            type="button"
-            onClick={() => navigate("/")}
-            className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity"
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-              <span className="text-2xl font-bold text-primary-foreground">M</span>
-            </div>
-          </button>
-          <h1 className="text-2xl font-bold text-foreground">mIRI<span className="text-primary">360</span></h1>
-          <p className="text-muted-foreground mt-2">Reset your password</p>
-        </div>
-
-        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-          {emailSent ? (
-            <div className="text-center py-4">
-              <div className="flex justify-center mb-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                  <CheckCircle className="h-8 w-8 text-primary" />
-                </div>
+    <div className="min-h-screen flex flex-col bg-background">
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
+                <span className="text-2xl font-bold text-primary-foreground">M</span>
               </div>
-              <h2 className="text-lg font-semibold text-foreground mb-2">Check your email</h2>
-              <p className="text-muted-foreground mb-6">
-                We've sent a password reset link to <strong>{email}</strong>
-              </p>
-              <Button variant="outline" onClick={() => navigate("/auth")} className="w-full">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Sign In
-              </Button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
-                    required
-                  />
+            </button>
+            <h1 className="text-2xl font-bold text-foreground">mIRI<span className="text-primary">360</span></h1>
+            <p className="text-muted-foreground mt-2">Reset your password</p>
+          </div>
+
+          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            {emailSent ? (
+              <div className="text-center py-4">
+                <div className="flex justify-center mb-4">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                    <CheckCircle className="h-8 w-8 text-primary" />
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Enter the email address associated with your account
+                <h2 className="text-lg font-semibold text-foreground mb-2">Check your email</h2>
+                <p className="text-muted-foreground mb-6">
+                  We've sent a password reset link to <strong>{email}</strong>
                 </p>
+                <Button variant="outline" onClick={() => navigate("/auth")} className="w-full">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Sign In
+                </Button>
               </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Enter the email address associated with your account
+                  </p>
+                </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Send Reset Link
-              </Button>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Send Reset Link
+                </Button>
 
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => navigate("/auth")}
-                className="w-full"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Sign In
-              </Button>
-            </form>
-          )}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => navigate("/auth")}
+                  className="w-full"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Sign In
+                </Button>
+              </form>
+            )}
+          </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
