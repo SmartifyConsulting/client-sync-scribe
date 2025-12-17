@@ -77,7 +77,11 @@ export default function TermsAndConditions() {
 
           <h2>5. Healthcare Provider Responsibilities</h2>
           <p>
-            By creating a healthcare provider account and using the Platform, healthcare providers automatically agree to and accept the Healthcare Provider Agreement, and represent and warrant that they:
+            By creating a healthcare provider account and using the Platform, healthcare providers automatically agree to and accept the{" "}
+            <a href="/business-associate-agreement" target="_blank" rel="noopener noreferrer" className="text-primary underline hover:text-primary/80">
+              Healthcare Provider Agreement
+            </a>
+            , and represent and warrant that they:
           </p>
           <ul>
             <li>Maintain all required professional licenses and certifications in good standing</li>
