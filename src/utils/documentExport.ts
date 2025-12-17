@@ -107,6 +107,7 @@ export const printDocument = (content: string, title: string, logoUrl?: string, 
   }
 
   const fontFamilyCSS = getFontFamily(fontFamily);
+  const formattedContent = renderFormattedContentForPrint(content);
 
   printWindow.document.write(`
     <!DOCTYPE html>
@@ -135,7 +136,7 @@ export const printDocument = (content: string, title: string, logoUrl?: string, 
           max-height: 60px;
           margin-bottom: 20px;
         }
-        pre {
+        .document-content {
           white-space: pre-wrap;
           word-wrap: break-word;
           font-family: ${fontFamilyCSS};
@@ -151,7 +152,7 @@ export const printDocument = (content: string, title: string, logoUrl?: string, 
     </head>
     <body>
       ${logoUrl ? `<img src="${logoUrl}" class="logo" alt="Logo" />` : ''}
-      <pre>${escapeHtml(content)}</pre>
+      <div class="document-content">${formattedContent}</div>
       <script>
         window.onload = function() {
           setTimeout(function() {
@@ -164,6 +165,21 @@ export const printDocument = (content: string, title: string, logoUrl?: string, 
     </html>
   `);
   printWindow.document.close();
+};
+
+const renderFormattedContentForPrint = (content: string): string => {
+  // First escape HTML for safety, but preserve our formatting tags
+  const safeContent = content
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/&lt;b&gt;/g, "<b>")
+    .replace(/&lt;\/b&gt;/g, "</b>")
+    .replace(/&lt;i&gt;/g, "<i>")
+    .replace(/&lt;\/i&gt;/g, "</i>")
+    .replace(/&lt;u&gt;/g, "<u>")
+    .replace(/&lt;\/u&gt;/g, "</u>")
+    .replace(/\n/g, "<br/>");
+  return safeContent;
 };
 
 const loadImage = (url: string): Promise<HTMLImageElement> => {

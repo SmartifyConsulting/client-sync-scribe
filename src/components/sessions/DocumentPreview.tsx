@@ -8,6 +8,19 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { printDocument } from "@/utils/documentExport";
 
+const renderFormattedContent = (content: string): string => {
+  const safeContent = content
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/&lt;b&gt;/g, "<b>")
+    .replace(/&lt;\/b&gt;/g, "</b>")
+    .replace(/&lt;i&gt;/g, "<i>")
+    .replace(/&lt;\/i&gt;/g, "</i>")
+    .replace(/&lt;u&gt;/g, "<u>")
+    .replace(/&lt;\/u&gt;/g, "</u>")
+    .replace(/\n/g, "<br/>");
+  return safeContent;
+};
 interface DocumentPreviewProps {
   title: string;
   subtitle?: string;
@@ -119,15 +132,14 @@ export function DocumentPreview({
             )}
             
             {/* Document Content */}
-            <pre 
+            <div 
               className="whitespace-pre-wrap text-sm text-black leading-relaxed"
               style={{ 
                 fontFamily: fontFamily || "system-ui, -apple-system, sans-serif",
                 fontSize: "12pt",
               }}
-            >
-              {content}
-            </pre>
+              dangerouslySetInnerHTML={{ __html: renderFormattedContent(content) }}
+            />
           </div>
         </div>
 
