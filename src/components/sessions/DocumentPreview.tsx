@@ -16,10 +16,19 @@ const normalizeHeadingMarkup = (content: string): string => {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const nextLine = lines[i + 1];
+    const lineAfterNext = lines[i + 2];
 
+    // Check for: Heading followed directly by underline
     if (nextLine && (/^=+$/.test(nextLine.trim()) || /^-+$/.test(nextLine.trim()))) {
       out.push(`<u><b>${line}</b></u>`);
-      i++;
+      i++; // skip the underline line
+      continue;
+    }
+
+    // Check for: Heading followed by blank line then underline
+    if (nextLine?.trim() === '' && lineAfterNext && (/^=+$/.test(lineAfterNext.trim()) || /^-+$/.test(lineAfterNext.trim()))) {
+      out.push(`<u><b>${line}</b></u>`);
+      i += 2; // skip blank line and underline line
       continue;
     }
 
