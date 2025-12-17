@@ -143,7 +143,7 @@ export default function Landing() {
           >
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6">
               One Ecosystem.
-              <span className="block text-gradient">Infinite Possibilities.</span>
+              <span className="block text-gradient">360° Healthcare & Practice Management.</span>
             </h1>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
               mIRI360 isn't just another medical app—it's a revolutionary ecosystem that connects patients 
