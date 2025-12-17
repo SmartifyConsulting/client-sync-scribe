@@ -141,9 +141,9 @@ export default function Landing() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-8">
               One Ecosystem.
-              <span className="block text-gradient">360° Healthcare & Practice Management.</span>
+              <span className="block text-gradient pb-2">360° Healthcare & Practice Management.</span>
             </h1>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
               Powerful practice management for providers. A complete 360° health profile for patients. 
