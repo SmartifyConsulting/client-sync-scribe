@@ -93,7 +93,11 @@ export default function TermsAndConditions() {
 
           <h2>6. Patient Responsibilities</h2>
           <p>
-            By creating a patient account and using the Platform, patients automatically agree to and accept the Patient Consent and Authorization, and agree to:
+            By creating a patient account and using the Platform, patients automatically agree to and accept the{" "}
+            <a href="/patient-consent" target="_blank" rel="noopener noreferrer" className="text-primary underline hover:text-primary/80">
+              Patient Consent and Authorization
+            </a>
+            , and agree to:
           </p>
           <ul>
             <li>Provide accurate and complete health information</li>
@@ -124,7 +128,11 @@ export default function TermsAndConditions() {
 
           <h3>8.3 Business Associate Relationship</h3>
           <p>
-            Healthcare providers who are HIPAA Covered Entities acknowledge that by using the Platform, they automatically enter into and accept our Business Associate Agreement, which governs our handling of Protected Health Information.
+            Healthcare providers who are HIPAA Covered Entities acknowledge that by using the Platform, they automatically enter into and accept our{" "}
+            <a href="/business-associate-agreement" target="_blank" rel="noopener noreferrer" className="text-primary underline hover:text-primary/80">
+              Business Associate Agreement
+            </a>
+            , which governs our handling of Protected Health Information.
           </p>
 
           <h3>8.4 Data Security</h3>
