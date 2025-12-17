@@ -49,18 +49,15 @@ Patient: [PatientName]
 
 Of: [PatientAddress]
 
-
 Date of consultation: [ConsultationDate]
 
 Time of Consultation: [ConsultationTime]
-
 
 Nature of illness or injury: [NatureOfIllness]
 
 ..............................................................................................................
 
 ..............................................................................................................
-
 
 Recommended sick leave from: [SickLeaveFrom] until [SickLeaveUntil] [Inclusive]
 
@@ -72,12 +69,9 @@ Other information / recommendations: [OtherRecommendations]
 
 ..............................................................................................................
 
-
-[DoctorSignature]
-
 Doctor's Name: [DoctorName]
 
-Date: [SignatureDate]`,
+Doctor's Signature: ................................................ Date: [SignatureDate]`,
     logo_url: null,
     logo_position: null,
     font_family: "sans",
