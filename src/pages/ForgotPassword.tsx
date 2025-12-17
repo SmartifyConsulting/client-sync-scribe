@@ -54,7 +54,7 @@ export default function ForgotPassword() {
               <span className="text-2xl font-bold text-primary-foreground">M</span>
             </div>
           </button>
-          <h1 className="text-2xl font-bold text-foreground">mIRI</h1>
+          <h1 className="text-2xl font-bold text-foreground">mIRI360</h1>
           <p className="text-muted-foreground mt-2">Reset your password</p>
         </div>
 

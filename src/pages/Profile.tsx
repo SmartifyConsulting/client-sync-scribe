@@ -1058,7 +1058,7 @@ function MailboxSection({ userId }: { userId?: string }) {
         .single();
       
       if (profile?.mailbox_id) {
-        setMailboxEmail(`docs-${profile.mailbox_id.slice(0, 8)}@inbox.miri.health`);
+        setMailboxEmail(`docs-${profile.mailbox_id.slice(0, 8)}@inbox.miri360.health`);
       }
     };
     fetchMailboxId();
