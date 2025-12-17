@@ -4,6 +4,7 @@ import {
   Bell,
   Shield,
   Database,
+  FileText,
   CheckCircle,
   Loader2,
   ShieldCheck,
@@ -37,7 +38,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useUserRole } from "@/hooks/useUserRole";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -754,6 +755,40 @@ mIRI360
         <div className="space-y-4">
           <Button variant="outline">Export All Data</Button>
           <p className="text-sm text-muted-foreground">Download all your client data, documents, and session records</p>
+        </div>
+      </div>
+
+      {/* Legal Documents */}
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+        <div className="flex items-center gap-3 mb-6">
+          <FileText className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">Legal Documents</h2>
+        </div>
+        <div className="space-y-3">
+          <Link
+            to="/terms-and-conditions"
+            className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+          >
+            <span className="text-foreground">Terms and Conditions</span>
+            <ExternalLink className="h-4 w-4 text-muted-foreground" />
+          </Link>
+          {role === "doctor" ? (
+            <Link
+              to="/business-associate-agreement"
+              className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+            >
+              <span className="text-foreground">Business Associate Agreement (HIPAA)</span>
+              <ExternalLink className="h-4 w-4 text-muted-foreground" />
+            </Link>
+          ) : (
+            <Link
+              to="/patient-consent"
+              className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+            >
+              <span className="text-foreground">Patient Consent and Authorization</span>
+              <ExternalLink className="h-4 w-4 text-muted-foreground" />
+            </Link>
+          )}
         </div>
       </div>
 
