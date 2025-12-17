@@ -927,38 +927,47 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          accepted_terms_at: string | null
           billing_cycle: string
           created_at: string
           current_period_end: string | null
           current_period_start: string | null
           id: string
+          is_trial: boolean | null
           paypal_subscription_id: string | null
           plan_type: string
           status: string
+          trial_ends_at: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          accepted_terms_at?: string | null
           billing_cycle: string
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
           id?: string
+          is_trial?: boolean | null
           paypal_subscription_id?: string | null
           plan_type: string
           status?: string
+          trial_ends_at?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          accepted_terms_at?: string | null
           billing_cycle?: string
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
           id?: string
+          is_trial?: boolean | null
           paypal_subscription_id?: string | null
           plan_type?: string
           status?: string
+          trial_ends_at?: string | null
           updated_at?: string
           user_id?: string
         }

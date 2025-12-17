@@ -31,6 +31,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { TrialSignupSection } from "@/components/auth/TrialSignupSection";
 
 const DOCTOR_SPECIALTIES = [
   "General Practitioner",
@@ -114,6 +115,9 @@ export default function Auth() {
   const [generalPractitioner, setGeneralPractitioner] = useState("");
   const [allergies, setAllergies] = useState("");
   const [referredBy, setReferredBy] = useState("");
+
+  // Terms and trial acceptance
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   // Invitation token
   const inviteToken = searchParams.get("invite");
@@ -215,6 +219,17 @@ export default function Auth() {
         toast({ title: "Welcome back!", description: "Successfully signed in" });
         navigate("/dashboard");
       } else {
+        // Validate terms acceptance for signup
+        if (!acceptedTerms) {
+          toast({
+            title: "Terms Required",
+            description: "You must accept the Terms and Conditions to create an account",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+
         // Sign up with additional metadata
         const { data, error } = await signUp(email, password);
         if (error) throw error;
@@ -346,7 +361,56 @@ export default function Auth() {
           }
         }
 
-        toast({ title: "Account created!", description: "You can now sign in" });
+        // Create trial subscription entry
+        const trialEndsAt = new Date();
+        trialEndsAt.setDate(trialEndsAt.getDate() + 7);
+
+        if (data?.user) {
+          const { error: subError } = await supabase.from("subscriptions").upsert({
+            user_id: data.user.id,
+            plan_type: userRole,
+            billing_cycle: "monthly",
+            status: "trial_pending",
+            is_trial: true,
+            trial_ends_at: trialEndsAt.toISOString(),
+            accepted_terms_at: new Date().toISOString(),
+          }, { onConflict: "user_id" });
+
+          if (subError) {
+            console.error("Subscription creation error:", subError);
+          }
+
+          // Initiate PayPal subscription for trial
+          try {
+            const { data: paypalData, error: paypalError } = await supabase.functions.invoke(
+              "paypal-subscription",
+              {
+                body: {
+                  action: "create-trial",
+                  planType: userRole,
+                  billingCycle: "monthly",
+                  userId: data.user.id,
+                },
+              }
+            );
+
+            if (paypalError) throw paypalError;
+
+            if (paypalData?.approvalUrl) {
+              toast({ 
+                title: "Account created!", 
+                description: "Redirecting to PayPal to set up your free trial..." 
+              });
+              window.location.href = paypalData.approvalUrl;
+              return;
+            }
+          } catch (paypalErr) {
+            console.error("PayPal trial setup error:", paypalErr);
+            // Continue to dashboard even if PayPal fails - they can set it up later
+          }
+        }
+
+        toast({ title: "Account created!", description: "Welcome to mIRI360!" });
         navigate("/dashboard");
       }
     } catch (error: any) {
@@ -894,9 +958,22 @@ export default function Auth() {
               </>
             )}
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            {/* Trial Signup Section - only show for signup */}
+            {!isLogin && (
+              <TrialSignupSection
+                userRole={userRole}
+                acceptedTerms={acceptedTerms}
+                onAcceptedTermsChange={setAcceptedTerms}
+              />
+            )}
+
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={loading || (!isLogin && !acceptedTerms)}
+            >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLogin ? "Sign In" : "Create Account"}
+              {isLogin ? "Sign In" : "Start Free Trial"}
             </Button>
           </form>
 
