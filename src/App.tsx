@@ -23,6 +23,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import TermsAndConditions from "./pages/TermsAndConditions";
+import PatientConsent from "./pages/PatientConsent";
 
 // Patient pages
 import PatientDashboard from "./pages/patient/PatientDashboard";
@@ -78,6 +79,7 @@ const App = () => (
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+          <Route path="/patient-consent" element={<PatientConsent />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           
