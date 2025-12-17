@@ -8,11 +8,12 @@ import {
   FileText,
   Brain,
   Shield,
-  Clock,
+  Eye,
   Users,
-  Mic,
-  PillIcon,
+  Share2,
+  Heart,
   ArrowRight,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,47 +25,61 @@ import {
 } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 
-const benefits = [
+const patientBenefits = [
   {
-    icon: Brain,
-    title: "AI-Powered Summaries",
-    description: "Automatically generate professional session summaries and extract action points using advanced AI.",
-  },
-  {
-    icon: Mic,
-    title: "Voice-First Workflow",
-    description: "Dictate notes, prescriptions, and documents hands-free with real-time transcription.",
-  },
-  {
-    icon: Calendar,
-    title: "Smart Calendar Sync",
-    description: "Two-way sync with Google Calendar. Auto-schedule follow-ups and manage appointments seamlessly.",
-  },
-  {
-    icon: FileText,
-    title: "Document Templates",
-    description: "Create medical certificates, referral letters, and prescriptions with auto-populated patient data.",
-  },
-  {
-    icon: PillIcon,
-    title: "Prescription Management",
-    description: "AI-powered medication conflict checking and complete prescription history tracking.",
+    icon: Eye,
+    title: "Complete Health Picture",
+    description: "See your entire medical history, prescriptions, and care team in one unified view—no more scattered records.",
   },
   {
     icon: Users,
-    title: "Multi-Doctor Collaboration",
-    description: "Round Table notes for team communication and shared patient care coordination.",
+    title: "Connect Your Care Team",
+    description: "Invite specialists, GPs, and other providers to collaborate on your care with your full consent.",
   },
   {
     icon: Shield,
-    title: "Patient-Controlled Access",
-    description: "Patients decide which doctors can access their records with granular permission controls.",
+    title: "You're in Control",
+    description: "Decide exactly which doctors see your records. Grant or revoke access anytime with granular permissions.",
   },
   {
-    icon: Clock,
-    title: "Save Hours Daily",
-    description: "Automate administrative tasks so you can focus on what matters most—patient care.",
+    icon: Calendar,
+    title: "Unified Appointments",
+    description: "All your healthcare appointments from every provider in one calendar—never miss a follow-up.",
   },
+];
+
+const providerBenefits = [
+  {
+    icon: Brain,
+    title: "AI-Powered Insights",
+    description: "Get comprehensive patient history summaries and medication conflict alerts before every consultation.",
+  },
+  {
+    icon: Share2,
+    title: "Seamless Collaboration",
+    description: "Round Table notes enable real-time communication with other specialists caring for the same patient.",
+  },
+  {
+    icon: FileText,
+    title: "Automated Documentation",
+    description: "Voice-to-text notes, auto-populated templates, and AI summaries save hours of administrative work.",
+  },
+  {
+    icon: Heart,
+    title: "Better Patient Outcomes",
+    description: "Access complete patient history across all their providers—make informed decisions with the full picture.",
+  },
+];
+
+const ecosystemFeatures = [
+  "Patient-controlled access permissions",
+  "Multi-provider care coordination",
+  "Complete prescription history tracking",
+  "AI-powered medication conflict alerts",
+  "Unified appointment management",
+  "Secure document sharing",
+  "Real-time provider collaboration",
+  "Comprehensive health timeline",
 ];
 
 export default function Landing() {
@@ -128,12 +143,12 @@ export default function Landing() {
             className="text-center max-w-4xl mx-auto"
           >
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
-              Your Practice,{" "}
-              <span className="text-gradient">Reimagined</span>
+              Your Health,{" "}
+              <span className="text-gradient">Complete Picture</span>
             </h1>
-            <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              The intelligent medical practice management platform that automates documentation, 
-              streamlines workflows, and puts patient care first.
+            <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+              The first healthcare ecosystem where patients own their complete medical journey and providers 
+              collaborate seamlessly. One platform. Every provider. Your full story.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button
@@ -141,7 +156,7 @@ export default function Landing() {
                 onClick={() => setShowRoleDialog(true)}
                 className="btn-pill text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-shadow"
               >
-                Start Free Trial
+                Join the Ecosystem
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <div className="flex gap-3">
@@ -169,8 +184,31 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/30">
+      {/* The Problem Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-secondary/30">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">
+              Healthcare is Fragmented. Until Now.
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              Your cardiologist doesn't know what your GP prescribed. Your physio can't see your surgical history. 
+              You're the one who suffers—repeating your story, managing paper records, and hoping nothing falls through the cracks.
+              <span className="block mt-4 text-foreground font-medium">
+                mIRI360 changes everything.
+              </span>
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Patient Benefits Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -179,16 +217,20 @@ export default function Landing() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-4">
+              <UserCircle className="h-4 w-4" />
+              For Patients
+            </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Everything You Need to Modernize Your Practice
+              Own Your Health Journey
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Powerful features designed for healthcare professionals who want to spend less time on admin and more time with patients.
+              For the first time, see your complete health profile across every doctor, specialist, and provider—all in one place, all under your control.
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {benefits.map((benefit, index) => (
+            {patientBenefits.map((benefit, index) => (
               <motion.div
                 key={benefit.title}
                 initial={{ opacity: 0, y: 20 }}
@@ -212,8 +254,128 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Provider Benefits Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/30">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-4">
+              <Stethoscope className="h-4 w-4" />
+              For Healthcare Providers
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+              Practice with the Full Picture
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              When patients grant you access, you see everything—their complete history across all providers. Make better decisions with better information.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {providerBenefits.map((benefit, index) => (
+              <motion.div
+                key={benefit.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="card-modern p-6 hover-lift"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-4">
+                  <benefit.icon className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  {benefit.title}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {benefit.description}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Ecosystem Features */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-6">
+                One Ecosystem.
+                <span className="block text-gradient">Infinite Possibilities.</span>
+              </h2>
+              <p className="text-lg text-muted-foreground mb-8">
+                mIRI360 isn't just another medical app—it's a revolutionary ecosystem that connects patients 
+                with their entire care team. Every session summary, prescription, and clinical note flows 
+                to the people who need it, when they need it.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {ecosystemFeatures.map((feature, index) => (
+                  <motion.div
+                    key={feature}
+                    initial={{ opacity: 0, x: -10 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    viewport={{ once: true }}
+                    className="flex items-center gap-2"
+                  >
+                    <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
+                    <span className="text-sm text-foreground">{feature}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="card-modern p-8 bg-gradient-to-br from-primary/5 to-primary/10"
+            >
+              <div className="text-center">
+                <div className="flex justify-center mb-6">
+                  <div className="relative">
+                    <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/20">
+                      <UserCircle className="h-12 w-12 text-primary" />
+                    </div>
+                    <div className="absolute -top-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full bg-background border-2 border-primary">
+                      <Stethoscope className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="absolute -bottom-2 -left-2 flex h-10 w-10 items-center justify-center rounded-full bg-background border-2 border-primary">
+                      <Heart className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="absolute top-1/2 -right-6 flex h-10 w-10 items-center justify-center rounded-full bg-background border-2 border-primary">
+                      <Brain className="h-5 w-5 text-primary" />
+                    </div>
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-2">
+                  You at the Center
+                </h3>
+                <p className="text-muted-foreground">
+                  Your complete health profile, surrounded by your care team—GP, specialists, 
+                  therapists—all connected, all coordinated, all with your permission.
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/30">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -223,10 +385,10 @@ export default function Landing() {
             className="card-modern p-12 bg-gradient-to-br from-primary/5 to-primary/10"
           >
             <h2 className="text-3xl font-bold text-foreground mb-4">
-              Ready to Transform Your Practice?
+              Ready for Healthcare That Works Together?
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Join healthcare providers who are saving hours every day with mIRI360.
+              Join thousands of patients and providers building a better healthcare experience—one where your health story is complete, connected, and under your control.
             </p>
             <Button
               size="lg"
@@ -251,9 +413,9 @@ export default function Landing() {
       <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-center text-2xl">Welcome to mIRI360</DialogTitle>
+            <DialogTitle className="text-center text-2xl">Join mIRI360</DialogTitle>
             <DialogDescription className="text-center">
-              Select your role to get started
+              How will you use the platform?
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4 pt-4">
@@ -265,7 +427,7 @@ export default function Landing() {
                 <Stethoscope className="h-8 w-8 text-primary" />
               </div>
               <span className="text-lg font-semibold text-foreground">Healthcare Provider</span>
-              <span className="text-sm text-muted-foreground mt-1">Doctor, Specialist, etc.</span>
+              <span className="text-sm text-muted-foreground mt-1 text-center">Manage patients & collaborate</span>
             </button>
             <button
               onClick={() => handleRoleSelect("patient")}
@@ -275,7 +437,7 @@ export default function Landing() {
                 <UserCircle className="h-8 w-8 text-primary" />
               </div>
               <span className="text-lg font-semibold text-foreground">Patient</span>
-              <span className="text-sm text-muted-foreground mt-1">Manage your health</span>
+              <span className="text-sm text-muted-foreground mt-1 text-center">Own your health journey</span>
             </button>
           </div>
         </DialogContent>
