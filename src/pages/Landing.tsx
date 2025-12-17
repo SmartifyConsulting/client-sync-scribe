@@ -133,126 +133,67 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* Hero Section - Ecosystem Visual */}
+      {/* Hero Section */}
       <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              className="card-modern p-8 bg-gradient-to-br from-primary/5 to-primary/10 order-1 lg:order-1"
-            >
-              <div className="text-center">
-                <div className="flex justify-center mb-6">
-                  <div className="relative">
-                    <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/20">
-                      <UserCircle className="h-12 w-12 text-primary" />
-                    </div>
-                    <div className="absolute -top-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full bg-background border-2 border-primary">
-                      <Stethoscope className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="absolute -bottom-2 -left-2 flex h-10 w-10 items-center justify-center rounded-full bg-background border-2 border-primary">
-                      <Heart className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="absolute top-1/2 -right-6 flex h-10 w-10 items-center justify-center rounded-full bg-background border-2 border-primary">
-                      <Brain className="h-5 w-5 text-primary" />
-                    </div>
-                  </div>
-                </div>
-                <h3 className="text-xl font-bold text-foreground mb-2">
-                  You at the Center
-                </h3>
-                <p className="text-muted-foreground">
-                  Your complete health profile, surrounded by your care team—GP, specialists, 
-                  therapists—all connected, all coordinated, all with your permission.
-                </p>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="order-2 lg:order-2"
-            >
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-                One Ecosystem.
-                <span className="block text-gradient">Infinite Possibilities.</span>
-              </h1>
-              <p className="text-lg text-muted-foreground mb-8">
-                mIRI360 isn't just another medical app—it's a revolutionary ecosystem that connects patients 
-                with their entire care team. Every session summary, prescription, and clinical note flows 
-                to the people who need it, when they need it.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-                {ecosystemFeatures.map((feature, index) => (
-                  <motion.div
-                    key={feature}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: 0.4 + index * 0.05 }}
-                    className="flex items-center gap-2"
-                  >
-                    <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
-                    <span className="text-sm text-foreground">{feature}</span>
-                  </motion.div>
-                ))}
-              </div>
-              <div className="flex flex-col sm:flex-row items-start gap-4">
-                <Button
-                  size="lg"
-                  onClick={() => setShowRoleDialog(true)}
-                  className="btn-pill text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-shadow"
-                >
-                  Join the Ecosystem
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                <div className="flex gap-3">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    onClick={() => navigate("/auth?mode=login&role=doctor")}
-                    className="btn-pill"
-                  >
-                    <Stethoscope className="mr-2 h-5 w-5" />
-                    Doctors
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    onClick={() => navigate("/auth?mode=login&role=patient")}
-                    className="btn-pill"
-                  >
-                    <UserCircle className="mr-2 h-5 w-5" />
-                    Patients
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* The Problem Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-secondary/30">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">
-              Healthcare is Fragmented. Until Now.
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              Your cardiologist doesn't know what your GP prescribed. Your physio can't see your surgical history. 
-              You're the one who suffers—repeating your story, managing paper records, and hoping nothing falls through the cracks.
-              <span className="block mt-4 text-foreground font-medium">
-                mIRI360 changes everything.
-              </span>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6">
+              One Ecosystem.
+              <span className="block text-gradient">Infinite Possibilities.</span>
+            </h1>
+            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+              mIRI360 isn't just another medical app—it's a revolutionary ecosystem that connects patients 
+              with their entire care team. Every session summary, prescription, and clinical note flows 
+              to the people who need it, when they need it.
             </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10 max-w-3xl mx-auto">
+              {ecosystemFeatures.map((feature, index) => (
+                <motion.div
+                  key={feature}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.3 + index * 0.05 }}
+                  className="flex items-center gap-2 justify-center"
+                >
+                  <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                  <span className="text-xs text-foreground">{feature}</span>
+                </motion.div>
+              ))}
+            </div>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button
+                size="lg"
+                onClick={() => setShowRoleDialog(true)}
+                className="btn-pill text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-shadow"
+              >
+                Join the Ecosystem
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <div className="flex gap-3">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => navigate("/auth?mode=login&role=doctor")}
+                  className="btn-pill"
+                >
+                  <Stethoscope className="mr-2 h-5 w-5" />
+                  Doctors
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => navigate("/auth?mode=login&role=patient")}
+                  className="btn-pill"
+                >
+                  <UserCircle className="mr-2 h-5 w-5" />
+                  Patients
+                </Button>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
