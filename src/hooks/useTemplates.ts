@@ -199,10 +199,7 @@ Date: [Date]
 
 [Content]
 
-
-
-
-[DoctorSignature]
+Signature: ................................................
 
 [DoctorName]
 Date: [SignatureDate]`,
