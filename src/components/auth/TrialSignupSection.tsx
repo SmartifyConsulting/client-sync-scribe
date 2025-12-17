@@ -18,10 +18,10 @@ export function TrialSignupSection({
   const monthlyPrice = userRole === "doctor" ? "$49.99" : "$9.99";
   const annualPrice = userRole === "doctor" ? "$499.99" : "$99.99";
 
-  // Determine which consent document to show based on role
-  const consentDocument = userRole === "patient" 
+  // Determine which consent documents to show based on role
+  const primaryConsentDocument = userRole === "patient" 
     ? { name: "Patient Consent and Authorization", path: "/patient-consent" }
-    : { name: "Terms and Conditions", path: "/terms-and-conditions" };
+    : { name: "Business Associate Agreement", path: "/business-associate-agreement" };
 
   return (
     <div className="pt-4 border-t border-border space-y-4">
@@ -91,26 +91,22 @@ export function TrialSignupSection({
           <Label htmlFor="acceptTerms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
             I have read and agree to the{" "}
             <Link 
-              to={consentDocument.path}
+              to={primaryConsentDocument.path}
               target="_blank"
               className="text-primary hover:underline inline-flex items-center gap-1"
             >
-              {consentDocument.name}
+              {primaryConsentDocument.name}
               <ExternalLink className="h-3 w-3" />
             </Link>
-            {userRole === "patient" && (
-              <>
-                {" "}and the{" "}
-                <Link 
-                  to="/terms-and-conditions"
-                  target="_blank"
-                  className="text-primary hover:underline inline-flex items-center gap-1"
-                >
-                  Terms and Conditions
-                  <ExternalLink className="h-3 w-3" />
-                </Link>
-              </>
-            )}
+            {" "}and the{" "}
+            <Link 
+              to="/terms-and-conditions"
+              target="_blank"
+              className="text-primary hover:underline inline-flex items-center gap-1"
+            >
+              Terms and Conditions
+              <ExternalLink className="h-3 w-3" />
+            </Link>
             . I understand that my subscription will automatically renew at {monthlyPrice}/month after the 7-day free trial 
             unless I cancel before the trial period ends. I accept full responsibility for cancelling if I do not wish to continue.
           </Label>
