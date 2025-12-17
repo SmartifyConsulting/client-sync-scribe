@@ -93,7 +93,7 @@ export default function Landing() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
                 <span className="text-xl font-bold text-primary-foreground">M</span>
               </div>
-              <span className="text-xl font-bold text-foreground">mIRI360</span>
+              <span className="text-xl font-bold text-foreground">mIRI<span className="text-primary">360</span></span>
             </div>
             <div className="flex items-center gap-3">
               <Button
