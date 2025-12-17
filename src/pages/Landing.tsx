@@ -133,54 +133,104 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+      {/* Hero Section - Ecosystem Visual */}
+      <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center max-w-4xl mx-auto"
-          >
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
-              Your Health,{" "}
-              <span className="text-gradient">Complete Picture</span>
-            </h1>
-            <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-              The first healthcare ecosystem where patients own their complete medical journey and providers 
-              collaborate seamlessly. One platform. Every provider. Your full story.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button
-                size="lg"
-                onClick={() => setShowRoleDialog(true)}
-                className="btn-pill text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-shadow"
-              >
-                Join the Ecosystem
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <div className="flex gap-3">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={() => navigate("/auth?mode=login&role=doctor")}
-                  className="btn-pill"
-                >
-                  <Stethoscope className="mr-2 h-5 w-5" />
-                  Doctors Login
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={() => navigate("/auth?mode=login&role=patient")}
-                  className="btn-pill"
-                >
-                  <UserCircle className="mr-2 h-5 w-5" />
-                  Patients Login
-                </Button>
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              className="card-modern p-8 bg-gradient-to-br from-primary/5 to-primary/10 order-1 lg:order-1"
+            >
+              <div className="text-center">
+                <div className="flex justify-center mb-6">
+                  <div className="relative">
+                    <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/20">
+                      <UserCircle className="h-12 w-12 text-primary" />
+                    </div>
+                    <div className="absolute -top-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full bg-background border-2 border-primary">
+                      <Stethoscope className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="absolute -bottom-2 -left-2 flex h-10 w-10 items-center justify-center rounded-full bg-background border-2 border-primary">
+                      <Heart className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="absolute top-1/2 -right-6 flex h-10 w-10 items-center justify-center rounded-full bg-background border-2 border-primary">
+                      <Brain className="h-5 w-5 text-primary" />
+                    </div>
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-2">
+                  You at the Center
+                </h3>
+                <p className="text-muted-foreground">
+                  Your complete health profile, surrounded by your care team—GP, specialists, 
+                  therapists—all connected, all coordinated, all with your permission.
+                </p>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="order-2 lg:order-2"
+            >
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6">
+                One Ecosystem.
+                <span className="block text-gradient">Infinite Possibilities.</span>
+              </h1>
+              <p className="text-lg text-muted-foreground mb-8">
+                mIRI360 isn't just another medical app—it's a revolutionary ecosystem that connects patients 
+                with their entire care team. Every session summary, prescription, and clinical note flows 
+                to the people who need it, when they need it.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+                {ecosystemFeatures.map((feature, index) => (
+                  <motion.div
+                    key={feature}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: 0.4 + index * 0.05 }}
+                    className="flex items-center gap-2"
+                  >
+                    <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
+                    <span className="text-sm text-foreground">{feature}</span>
+                  </motion.div>
+                ))}
+              </div>
+              <div className="flex flex-col sm:flex-row items-start gap-4">
+                <Button
+                  size="lg"
+                  onClick={() => setShowRoleDialog(true)}
+                  className="btn-pill text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-shadow"
+                >
+                  Join the Ecosystem
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+                <div className="flex gap-3">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={() => navigate("/auth?mode=login&role=doctor")}
+                    className="btn-pill"
+                  >
+                    <Stethoscope className="mr-2 h-5 w-5" />
+                    Doctors
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={() => navigate("/auth?mode=login&role=patient")}
+                    className="btn-pill"
+                  >
+                    <UserCircle className="mr-2 h-5 w-5" />
+                    Patients
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
@@ -297,79 +347,6 @@ export default function Landing() {
                 </p>
               </motion.div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Ecosystem Features */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-6">
-                One Ecosystem.
-                <span className="block text-gradient">Infinite Possibilities.</span>
-              </h2>
-              <p className="text-lg text-muted-foreground mb-8">
-                mIRI360 isn't just another medical app—it's a revolutionary ecosystem that connects patients 
-                with their entire care team. Every session summary, prescription, and clinical note flows 
-                to the people who need it, when they need it.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {ecosystemFeatures.map((feature, index) => (
-                  <motion.div
-                    key={feature}
-                    initial={{ opacity: 0, x: -10 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                    viewport={{ once: true }}
-                    className="flex items-center gap-2"
-                  >
-                    <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
-                    <span className="text-sm text-foreground">{feature}</span>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="card-modern p-8 bg-gradient-to-br from-primary/5 to-primary/10"
-            >
-              <div className="text-center">
-                <div className="flex justify-center mb-6">
-                  <div className="relative">
-                    <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/20">
-                      <UserCircle className="h-12 w-12 text-primary" />
-                    </div>
-                    <div className="absolute -top-2 -right-2 flex h-10 w-10 items-center justify-center rounded-full bg-background border-2 border-primary">
-                      <Stethoscope className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="absolute -bottom-2 -left-2 flex h-10 w-10 items-center justify-center rounded-full bg-background border-2 border-primary">
-                      <Heart className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="absolute top-1/2 -right-6 flex h-10 w-10 items-center justify-center rounded-full bg-background border-2 border-primary">
-                      <Brain className="h-5 w-5 text-primary" />
-                    </div>
-                  </div>
-                </div>
-                <h3 className="text-xl font-bold text-foreground mb-2">
-                  You at the Center
-                </h3>
-                <p className="text-muted-foreground">
-                  Your complete health profile, surrounded by your care team—GP, specialists, 
-                  therapists—all connected, all coordinated, all with your permission.
-                </p>
-              </div>
-            </motion.div>
           </div>
         </div>
       </section>
