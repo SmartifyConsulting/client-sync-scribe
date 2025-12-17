@@ -64,7 +64,15 @@ export default function TermsAndConditions() {
 
           <h3>4.4 Account Creation Constitutes Agreement</h3>
           <p>
-            By completing the account registration process, you agree to comply with all applicable terms, including the Healthcare Provider Agreement (for providers) or Patient Consent and Authorization (for patients).
+            By completing the account registration process, you agree to comply with all applicable terms, including the{" "}
+            <a href="/business-associate-agreement" target="_blank" rel="noopener noreferrer" className="text-primary underline hover:text-primary/80">
+              Healthcare Provider Agreement
+            </a>{" "}
+            (for providers) or{" "}
+            <a href="/patient-consent" target="_blank" rel="noopener noreferrer" className="text-primary underline hover:text-primary/80">
+              Patient Consent and Authorization
+            </a>{" "}
+            (for patients).
           </p>
 
           <h2>5. Healthcare Provider Responsibilities</h2>
