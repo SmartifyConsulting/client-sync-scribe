@@ -8,8 +8,31 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { printDocument } from "@/utils/documentExport";
 
+const normalizeHeadingMarkup = (content: string): string => {
+  const normalized = content.replace(/\r\n/g, "\n");
+  const lines = normalized.split("\n");
+  const out: string[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const nextLine = lines[i + 1];
+
+    if (nextLine && (/^=+$/.test(nextLine.trim()) || /^-+$/.test(nextLine.trim()))) {
+      out.push(`<u><b>${line}</b></u>`);
+      i++;
+      continue;
+    }
+
+    out.push(line);
+  }
+
+  return out.join("\n");
+};
+
 const renderFormattedContent = (content: string): string => {
-  const safeContent = content
+  const withHeadings = normalizeHeadingMarkup(content);
+
+  const safeContent = withHeadings
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/&lt;b&gt;/g, "<b>")
@@ -19,6 +42,7 @@ const renderFormattedContent = (content: string): string => {
     .replace(/&lt;u&gt;/g, "<u>")
     .replace(/&lt;\/u&gt;/g, "</u>")
     .replace(/\n/g, "<br/>");
+
   return safeContent;
 };
 interface DocumentPreviewProps {

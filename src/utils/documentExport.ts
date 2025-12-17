@@ -168,8 +168,27 @@ export const printDocument = (content: string, title: string, logoUrl?: string, 
 };
 
 const renderFormattedContentForPrint = (content: string): string => {
-  // First escape HTML for safety, but preserve our formatting tags
-  const safeContent = content
+  const normalized = content.replace(/\r\n/g, "\n");
+  const lines = normalized.split("\n");
+  const out: string[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const nextLine = lines[i + 1];
+
+    if (nextLine && (/^=+$/.test(nextLine.trim()) || /^-+$/.test(nextLine.trim()))) {
+      out.push(`<u><b>${line}</b></u>`);
+      i++;
+      continue;
+    }
+
+    out.push(line);
+  }
+
+  const withHeadings = out.join("\n");
+
+  // Escape HTML for safety, but preserve our formatting tags
+  return withHeadings
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/&lt;b&gt;/g, "<b>")
@@ -179,7 +198,6 @@ const renderFormattedContentForPrint = (content: string): string => {
     .replace(/&lt;u&gt;/g, "<u>")
     .replace(/&lt;\/u&gt;/g, "</u>")
     .replace(/\n/g, "<br/>");
-  return safeContent;
 };
 
 const loadImage = (url: string): Promise<HTMLImageElement> => {
