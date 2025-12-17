@@ -36,11 +36,12 @@ const defaultTemplates: Omit<Template, "id" | "user_id">[] = [
     name: "Medical Certificate",
     description: "Certificate for patients to substantiate absence from work",
     category: "Certificate",
-    content: `MEDICAL CERTIFICATE
-===================
+    content: `<u><b>MEDICAL CERTIFICATE</b></u>
 
 Practice Number: [PracticeNumber]
+
 Doctor Registration Number: [DoctorNumber]
+
 Practice Address: [PracticeAddress]
 
 I have today examined:
@@ -82,8 +83,7 @@ Doctor's Signature: ................................................ Date: [Sign
     name: "Referral Letter",
     description: "Letter for referring patients to specialists",
     category: "Letter",
-    content: `REFERRAL LETTER
-===============
+    content: `<u><b>REFERRAL LETTER</b></u>
 
 Date: [ReferralDate]
 
@@ -101,8 +101,7 @@ Patient Details:
 
 I am writing to refer the above-named patient for your expert opinion and management.
 
-PRESENTING COMPLAINT
---------------------
+<u><b>PRESENTING COMPLAINT</b></u>
 [PresentingComplaint]
 
 I would be grateful if you could see this patient at your earliest convenience. Please do not hesitate to contact me if you require any further information.
@@ -124,33 +123,44 @@ Tel: [PracticePhone]`,
     name: "Prescription",
     description: "Template for medication prescriptions",
     category: "Prescription",
-    content: `PRESCRIPTION
-============
+    content: `<u><b>PRESCRIPTION</b></u>
 
 Date: [PrescriptionDate]
 
-PATIENT DETAILS
----------------
+<u><b>PATIENT DETAILS</b></u>
+
 Name: [PatientName]
+
 Medical Aid: [MedicalAid]
+
 Medical Aid Number: [MedicalAidNumber]
 
 Rx:
+
 ---
 
 1. [Medication1]
+
    Dosage: [Dosage1]
+
    Quantity: [Quantity1]
+
    Instructions: [Instructions1]
 
 2. [Medication2]
+
    Dosage: [Dosage2]
+
    Quantity: [Quantity2]
+
    Instructions: [Instructions2]
 
 3. [Medication3]
+
    Dosage: [Dosage3]
+
    Quantity: [Quantity3]
+
    Instructions: [Instructions3]
 
 Repeats: [NumberOfRepeats]
@@ -158,6 +168,7 @@ Repeats: [NumberOfRepeats]
 Special Instructions: [SpecialInstructions]
 
 Prescribing Doctor: [DoctorName]
+
 Registration Number: [DoctorNumber]
 
 Signature: ................................................
@@ -173,11 +184,12 @@ Date: [SignatureDate]`,
     name: "General Letterhead",
     description: "Blank letterhead template for custom documents",
     category: "General",
-    content: `[DOCUMENT TITLE]
-================
+    content: `<u><b>[DOCUMENT TITLE]</b></u>
 
 Practice Number: [PracticeNumber]
+
 Doctor Registration Number: [DoctorNumber]
+
 Practice Address: [PracticeAddress]
 
 Date: [Date]
@@ -187,6 +199,7 @@ Date: [Date]
 Signature: ................................................
 
 [DoctorName]
+
 Date: [SignatureDate]`,
     logo_url: null,
     logo_position: null,
@@ -198,16 +211,20 @@ Date: [SignatureDate]`,
     name: "Invoice",
     description: "Billing invoice for patient services",
     category: "Invoice",
-    content: `INVOICE
-=======
+    content: `<u><b>INVOICE</b></u>
 
 TAX Invoice Number: INV-[InvoiceNumber]
+
 Date: [InvoiceDate]
 
 BILL TO:
+
 Patient: [PatientName]
+
 Address: [PatientAddress]
+
 Medical Aid: [MedicalAid]
+
 Medical Aid Number: [MedicalAidNumber]
 
 SERVICES PROVIDED
@@ -219,11 +236,13 @@ AMOUNT DUE
 Total: [TotalAmount]
 
 Payment Terms: Due within 30 days
+
 Bank Details: [BankDetails]
 
 Thank you.
 
 [DoctorName]
+
 [PracticeNumber]`,
     logo_url: null,
     logo_position: null,
