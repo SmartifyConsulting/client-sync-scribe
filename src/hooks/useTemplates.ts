@@ -91,10 +91,6 @@ Date: [SignatureDate]`,
     content: `REFERRAL LETTER
 ===============
 
-Practice Number: [PracticeNumber]
-Doctor Registration Number: [DoctorNumber]
-Practice Address: [PracticeAddress]
-
 Date: [ReferralDate]
 
 To: [SpecialistName]
@@ -107,9 +103,7 @@ RE: REFERRAL OF PATIENT - [PatientName]
 
 Patient Details:
 - Name: [PatientName]
-- Date of Birth: [PatientDOB]
 - Contact: [PatientContact]
-- Address: [PatientAddress]
 
 I am writing to refer the above-named patient for your expert opinion and management.
 
@@ -117,26 +111,9 @@ PRESENTING COMPLAINT
 --------------------
 [PresentingComplaint]
 
-RELEVANT HISTORY
-----------------
-[RelevantHistory]
-
-CURRENT MEDICATIONS
--------------------
-[CurrentMedications]
-
-INVESTIGATIONS PERFORMED
-------------------------
-[Investigations]
-
-REASON FOR REFERRAL
--------------------
-[ReasonForReferral]
-
 I would be grateful if you could see this patient at your earliest convenience. Please do not hesitate to contact me if you require any further information.
 
 Yours sincerely,
-
 
 [DoctorSignature]
 
