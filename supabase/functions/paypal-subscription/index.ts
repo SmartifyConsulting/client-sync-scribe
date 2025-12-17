@@ -168,6 +168,52 @@ serve(async (req) => {
     if (req.method === "POST") {
       const body = await req.json();
 
+      // Handle trial subscription creation
+      if (body.action === "create-trial") {
+        const { planType, billingCycle, userId } = body;
+
+        console.log("Creating trial subscription for:", { planType, billingCycle, userId });
+
+        if (!planType || !billingCycle || !userId) {
+          return new Response(JSON.stringify({ error: "Missing required fields" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        const accessToken = await getPayPalAccessToken();
+        const order = await createPayPalOrder(accessToken, planType, billingCycle);
+
+        console.log("PayPal trial order created:", order.id);
+
+        // Calculate trial end date (7 days from now)
+        const trialEndsAt = new Date();
+        trialEndsAt.setDate(trialEndsAt.getDate() + 7);
+
+        // Update subscription with trial info
+        await supabase
+          .from("subscriptions")
+          .update({
+            paypal_subscription_id: order.id,
+            is_trial: true,
+            trial_ends_at: trialEndsAt.toISOString(),
+            status: "trial_pending",
+          })
+          .eq("user_id", userId);
+
+        const approvalUrl = order.links?.find((link: any) => link.rel === "approve")?.href;
+
+        return new Response(
+          JSON.stringify({
+            orderId: order.id,
+            approvalUrl,
+            status: order.status,
+            isTrial: true,
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
       // Handle cancel subscription
       if (body.action === "cancel") {
         const { userId } = body;
@@ -339,60 +385,77 @@ serve(async (req) => {
 
         if (subscription) {
           const now = new Date();
-          const periodEnd =
-            subscription.billing_cycle === "annual"
+          
+          // Check if this is a trial subscription
+          const isTrial = subscription.is_trial;
+          const trialEndsAt = isTrial ? new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) : null;
+          const periodEnd = isTrial 
+            ? trialEndsAt 
+            : subscription.billing_cycle === "annual"
               ? new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000)
               : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-          // Update subscription to active
+          // Update subscription to active (or trial_active)
           await supabase
             .from("subscriptions")
             .update({
-              status: "active",
+              status: isTrial ? "trial_active" : "active",
               current_period_start: now.toISOString(),
-              current_period_end: periodEnd.toISOString(),
+              current_period_end: periodEnd?.toISOString(),
+              trial_ends_at: trialEndsAt?.toISOString(),
             })
             .eq("paypal_subscription_id", orderId);
 
-          // Get plan details for payment history
+          // Get plan details for payment history (only record if not trial)
           const plan =
             PLANS[subscription.plan_type as keyof typeof PLANS]?.[subscription.billing_cycle as "monthly" | "annual"];
 
           // Get transaction ID from capture result
           const transactionId = captureResult.purchase_units?.[0]?.payments?.captures?.[0]?.id;
 
-          // Record payment in history
-          await supabase.from("payment_history").insert({
-            user_id: subscription.user_id,
-            subscription_id: subscription.id,
-            paypal_transaction_id: transactionId || orderId,
-            amount: plan?.price || 0,
-            currency: "USD",
-            description: plan?.name || "Subscription Payment",
-            status: "completed",
-          });
+          // Record payment in history (even for trial setup - amount will be captured later)
+          if (!isTrial) {
+            await supabase.from("payment_history").insert({
+              user_id: subscription.user_id,
+              subscription_id: subscription.id,
+              paypal_transaction_id: transactionId || orderId,
+              amount: plan?.price || 0,
+              currency: "USD",
+              description: plan?.name || "Subscription Payment",
+              status: "completed",
+            });
+          }
 
-          console.log("Payment recorded in history");
+          console.log("Subscription updated:", isTrial ? "trial_active" : "active");
 
           // Send activation email
           const userEmail = await getUserEmail(supabase, subscription.user_id);
           if (userEmail) {
-            const endDate = periodEnd.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+            const emailSubject = isTrial 
+              ? "Welcome to mIRI360 - Your 7-Day Free Trial Has Started!"
+              : "Welcome to mIRI360 - Subscription Activated!";
+            
+            const trialEndDate = trialEndsAt?.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+            const billingDate = periodEnd?.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
-            await sendSubscriptionEmail(
-              userEmail,
-              "Welcome to mIRI360 - Subscription Activated!",
-              `
-                <h1>Your Subscription is Active!</h1>
-                <p>Thank you for subscribing to mIRI360!</p>
-                <p><strong>Plan:</strong> ${plan?.name || "Subscription"}</p>
-                <p><strong>Amount:</strong> $${plan?.price.toFixed(2) || "0.00"} USD</p>
-                <p><strong>Next billing date:</strong> ${endDate}</p>
-                <p>You now have full access to all mIRI360 features. Start managing your practice more efficiently today!</p>
-                <p>If you have any questions, feel free to reach out to our support team.</p>
-                <p>Best regards,<br>The mIRI360 Team</p>
-              `,
-            );
+            const emailContent = isTrial ? `
+              <h1>Your Free Trial Has Started!</h1>
+              <p>Welcome to mIRI360! Your 7-day free trial is now active.</p>
+              <p><strong>Trial ends:</strong> ${trialEndDate}</p>
+              <p><strong>Plan:</strong> ${plan?.name || "Subscription"}</p>
+              <p><strong>After trial:</strong> $${plan?.price.toFixed(2) || "0.00"} USD/month</p>
+              <p>You have full access to all mIRI360 features during your trial. If you wish to cancel, please do so before ${trialEndDate} to avoid being charged.</p>
+              <p>Best regards,<br>The mIRI360 Team</p>
+            ` : `
+              <h1>Your Subscription is Active!</h1>
+              <p>Thank you for subscribing to mIRI360!</p>
+              <p><strong>Plan:</strong> ${plan?.name || "Subscription"}</p>
+              <p><strong>Amount:</strong> $${plan?.price.toFixed(2) || "0.00"} USD</p>
+              <p><strong>Next billing date:</strong> ${billingDate}</p>
+              <p>Best regards,<br>The mIRI360 Team</p>
+            `;
+
+            await sendSubscriptionEmail(userEmail, emailSubject, emailContent);
           }
         }
 
