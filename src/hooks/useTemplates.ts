@@ -127,18 +127,11 @@ Tel: [PracticePhone]`,
     content: `PRESCRIPTION
 ============
 
-Practice Number: [PracticeNumber]
-Doctor Registration Number: [DoctorNumber]
-Practice Address: [PracticeAddress]
-Tel: [PracticePhone]
-
 Date: [PrescriptionDate]
 
 PATIENT DETAILS
 ---------------
 Name: [PatientName]
-Date of Birth: [PatientDOB]
-Address: [PatientAddress]
 Medical Aid: [MedicalAid]
 Medical Aid Number: [MedicalAidNumber]
 
@@ -160,16 +153,14 @@ Rx:
    Quantity: [Quantity3]
    Instructions: [Instructions3]
 
-
 Repeats: [NumberOfRepeats]
 
 Special Instructions: [SpecialInstructions]
 
-
-[DoctorSignature]
-
 Prescribing Doctor: [DoctorName]
 Registration Number: [DoctorNumber]
+
+Signature: ................................................
 
 Date: [SignatureDate]`,
     logo_url: null,
