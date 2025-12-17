@@ -82,9 +82,9 @@ export function InvitePatientDialog({ patientId, patientName }: InvitePatientDia
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Invite Patient to mIRI</DialogTitle>
+          <DialogTitle>Invite Patient to mIRI360</DialogTitle>
           <DialogDescription>
-            Send an invitation email to {patientName} to create their own mIRI account. They will be able to view their
+            Send an invitation email to {patientName} to create their own mIRI360 account. They will be able to view their
             health information and manage appointments.
           </DialogDescription>
         </DialogHeader>

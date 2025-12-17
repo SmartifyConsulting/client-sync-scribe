@@ -39,7 +39,7 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
     try {
       const { data, error } = await supabase.auth.mfa.enroll({
         factorType: "totp",
-        friendlyName: "mIRI Authenticator",
+        friendlyName: "mIRI360 Authenticator",
       });
 
       if (error) throw error;

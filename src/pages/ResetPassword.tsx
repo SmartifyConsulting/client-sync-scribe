@@ -89,7 +89,7 @@ export default function ResetPassword() {
               <span className="text-2xl font-bold text-primary-foreground">M</span>
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">mIRI</h1>
+          <h1 className="text-2xl font-bold text-foreground">mIRI360</h1>
           <p className="text-muted-foreground mt-2">Set your new password</p>
         </div>
 

@@ -99,7 +99,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             <span className="text-xl font-bold text-primary-foreground">M</span>
           </div>
           <div>
-            <span className="text-xl font-semibold text-foreground tracking-tight">mIRI</span>
+            <span className="text-xl font-semibold text-foreground tracking-tight">mIRI360</span>
             <p className="text-xs text-muted-foreground">Medical Integrated Record Intelligence</p>
           </div>
         </div>

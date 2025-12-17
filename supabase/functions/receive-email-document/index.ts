@@ -39,7 +39,7 @@ serve(async (req) => {
     });
 
     // Extract the mailbox ID from the recipient email
-    // Format: docs-{mailbox_id}@inbox.miri.health
+    // Format: docs-{mailbox_id}@inbox.miri360.health
     const recipientEmail = payload.to?.toLowerCase();
     
     if (!recipientEmail) {
@@ -50,7 +50,7 @@ serve(async (req) => {
       );
     }
 
-    // Extract mailbox_id from email format: docs-{mailbox_id}@inbox.miri.health
+    // Extract mailbox_id from email format: docs-{mailbox_id}@inbox.miri360.health
     const mailboxMatch = recipientEmail.match(/^docs-([a-f0-9-]+)@/i);
     
     if (!mailboxMatch) {

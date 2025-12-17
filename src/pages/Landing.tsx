@@ -93,7 +93,7 @@ export default function Landing() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
                 <span className="text-xl font-bold text-primary-foreground">M</span>
               </div>
-              <span className="text-xl font-bold text-foreground">mIRI</span>
+              <span className="text-xl font-bold text-foreground">mIRI360</span>
             </div>
             <div className="flex items-center gap-3">
               <Button
@@ -226,7 +226,7 @@ export default function Landing() {
               Ready to Transform Your Practice?
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Join healthcare providers who are saving hours every day with mIRI.
+              Join healthcare providers who are saving hours every day with mIRI360.
             </p>
             <Button
               size="lg"
@@ -243,7 +243,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-border">
         <div className="max-w-7xl mx-auto text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} mIRI. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} mIRI360. All rights reserved.</p>
         </div>
       </footer>
 
@@ -251,7 +251,7 @@ export default function Landing() {
       <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-center text-2xl">Welcome to mIRI</DialogTitle>
+            <DialogTitle className="text-center text-2xl">Welcome to mIRI360</DialogTitle>
             <DialogDescription className="text-center">
               Select your role to get started
             </DialogDescription>
