@@ -201,11 +201,7 @@ Date: [SignatureDate]`,
     content: `INVOICE
 =======
 
-Practice Number: [PracticeNumber]
-Doctor Registration Number: [DoctorNumber]
-Practice Address: [PracticeAddress]
-
-Invoice Number: INV-[InvoiceNumber]
+TAX Invoice Number: INV-[InvoiceNumber]
 Date: [InvoiceDate]
 
 BILL TO:
@@ -225,7 +221,7 @@ Total: [TotalAmount]
 Payment Terms: Due within 30 days
 Bank Details: [BankDetails]
 
-Thank you for your patronage.
+Thank you.
 
 [DoctorName]
 [PracticeNumber]`,
