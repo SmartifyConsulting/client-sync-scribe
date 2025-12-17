@@ -213,10 +213,10 @@ export default function Landing() {
               For Patients
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Own Your Health Journey
+              Your Health. <span className="text-primary">360°</span> View.
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              For the first time, see your complete health profile across every doctor, specialist, and provider—all in one place, all under your control.
+              mIRI360 gives you a complete 360-degree view of your health profile—every consultation, prescription, and clinical note from every provider, unified in one place and entirely under your control.
             </p>
           </motion.div>
 
