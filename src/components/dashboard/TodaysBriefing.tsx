@@ -563,13 +563,13 @@ export function TodaysBriefing() {
                         {apt.patientId ? (
                           <Link
                             to={`/patients/${apt.patientId}`}
-                            className="font-medium text-foreground hover:text-primary hover:underline truncate text-sm"
+                            className="font-medium text-primary hover:text-primary/80 hover:underline truncate text-sm"
                             onClick={(e) => e.stopPropagation()}
                           >
                             {apt.patientName}
                           </Link>
                         ) : (
-                          <span className="font-medium text-foreground truncate text-sm">
+                          <span className="font-medium text-primary truncate text-sm">
                             {apt.patientName}
                           </span>
                         )}
