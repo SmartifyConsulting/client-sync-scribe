@@ -19,6 +19,8 @@ import { Badge } from "@/components/ui/badge";
 
 interface ParsedPatient {
   name: string;
+  first_name?: string;
+  last_name?: string;
   email?: string;
   phone?: string;
   dob?: string;
@@ -46,11 +48,21 @@ const COLUMN_MAPPINGS: Record<string, keyof ParsedPatient> = {
   "fullname": "name",
   "patient name": "name",
   "patient": "name",
-  "first name": "name",
-  "firstname": "name",
-  "surname": "name",
-  "last name": "name",
-  "lastname": "name",
+  
+  // First name variations
+  "first name": "first_name",
+  "firstname": "first_name",
+  "first": "first_name",
+  "given name": "first_name",
+  "givenname": "first_name",
+  
+  // Last name variations
+  "surname": "last_name",
+  "last name": "last_name",
+  "lastname": "last_name",
+  "last": "last_name",
+  "family name": "last_name",
+  "familyname": "last_name",
   
   // Email variations
   "email": "email",
@@ -139,8 +151,14 @@ const COLUMN_MAPPINGS: Record<string, keyof ParsedPatient> = {
   "nok": "next_of_kin_name",
   "nok name": "next_of_kin_name",
   "next of kin phone": "next_of_kin_phone",
+  "next of kin contact": "next_of_kin_phone",
+  "next of kin contact number": "next_of_kin_phone",
   "nok phone": "next_of_kin_phone",
+  "nok contact": "next_of_kin_phone",
+  "nok contact number": "next_of_kin_phone",
   "emergency phone": "next_of_kin_phone",
+  "emergency contact number": "next_of_kin_phone",
+  "emergency number": "next_of_kin_phone",
   "next of kin email": "next_of_kin_email",
   "nok email": "next_of_kin_email",
   "emergency email": "next_of_kin_email",
@@ -253,12 +271,15 @@ export function PatientImport() {
         }
       });
 
-      // Check if we have at least a name column
+      // Check if we have at least a name column or first/last name columns
       const hasNameColumn = Object.values(columnMap).includes("name");
-      if (!hasNameColumn) {
+      const hasFirstName = Object.values(columnMap).includes("first_name");
+      const hasLastName = Object.values(columnMap).includes("last_name");
+      
+      if (!hasNameColumn && !hasFirstName && !hasLastName) {
         toast({
           title: "Missing required column",
-          description: "Could not find a 'Name' or 'Patient Name' column in the spreadsheet",
+          description: "Could not find a 'Name', 'First Name', or 'Last Name' column in the spreadsheet",
           variant: "destructive",
         });
         setIsProcessing(false);
@@ -267,28 +288,12 @@ export function PatientImport() {
 
       // Parse data rows
       const patients: ParsedPatient[] = [];
-      const firstNameIndex = headers.findIndex(h => 
-        h && mapColumnName(String(h).toLowerCase()) === "name" && 
-        String(h).toLowerCase().includes("first")
-      );
-      const lastNameIndex = headers.findIndex(h => 
-        h && (String(h).toLowerCase().includes("surname") || 
-              String(h).toLowerCase().includes("last name") ||
-              String(h).toLowerCase() === "lastname")
-      );
 
       for (let i = 1; i < jsonData.length; i++) {
         const row = jsonData[i];
         if (!row || row.every(cell => !cell)) continue; // Skip empty rows
 
         const patient: ParsedPatient = { name: "" };
-
-        // Handle first name + last name combination
-        if (firstNameIndex >= 0 && lastNameIndex >= 0) {
-          const firstName = String(row[firstNameIndex] || "").trim();
-          const lastName = String(row[lastNameIndex] || "").trim();
-          patient.name = `${firstName} ${lastName}`.trim();
-        }
 
         Object.entries(columnMap).forEach(([indexStr, field]) => {
           const index = parseInt(indexStr);
@@ -297,13 +302,16 @@ export function PatientImport() {
           if (value !== undefined && value !== null && value !== "") {
             if (field === "dob") {
               patient.dob = parseExcelDate(value);
-            } else if (field === "name" && !patient.name) {
-              patient.name = String(value).trim();
-            } else if (field !== "name") {
+            } else {
               (patient as any)[field] = String(value).trim();
             }
           }
         });
+
+        // Combine first_name and last_name into name if no full name was provided
+        if (!patient.name && (patient.first_name || patient.last_name)) {
+          patient.name = `${patient.first_name || ""} ${patient.last_name || ""}`.trim();
+        }
 
         // Only add if we have a name
         if (patient.name) {
