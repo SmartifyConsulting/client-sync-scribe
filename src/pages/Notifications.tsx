@@ -15,6 +15,9 @@ import {
   Bell,
   FileText,
   CheckCircle2,
+  UserPlus,
+  UserCheck,
+  UserX,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -22,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { InviteUserDialog } from "@/components/InviteUserDialog";
 
 interface Message {
   id: string;
@@ -279,24 +283,28 @@ export default function Notifications() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Notifications</h1>
-        <p className="mt-1 text-muted-foreground">
-          Messages, documents, and alerts
-        </p>
-        {mailboxEmail && (
-          <div className="mt-3 p-3 rounded-lg bg-primary/5 border border-primary/20">
-            <div className="flex items-center gap-2 text-sm">
-              <Mail className="h-4 w-4 text-primary" />
-              <span className="text-muted-foreground">Document Mailbox:</span>
-              <code className="font-medium text-primary bg-primary/10 px-2 py-0.5 rounded">{mailboxEmail}</code>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1.5">
-              External parties can email documents to this address and you'll be notified here.
-            </p>
-          </div>
-        )}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Notifications</h1>
+          <p className="mt-1 text-muted-foreground">
+            Messages, documents, and alerts
+          </p>
+        </div>
+        <InviteUserDialog />
       </div>
+      
+      {mailboxEmail && (
+        <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+          <div className="flex items-center gap-2 text-sm">
+            <Mail className="h-4 w-4 text-primary" />
+            <span className="text-muted-foreground">Document Mailbox:</span>
+            <code className="font-medium text-primary bg-primary/10 px-2 py-0.5 rounded">{mailboxEmail}</code>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1.5">
+            External parties can email documents to this address and you'll be notified here.
+          </p>
+        </div>
+      )}
 
       {selectedMessage ? (
         <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
@@ -411,6 +419,7 @@ export default function Notifications() {
                   n.description?.toLowerCase().includes(searchQuery.toLowerCase())
                 )} 
                 onMarkAsRead={markNotificationAsRead}
+                onRefresh={fetchNotifications}
               />
             </TabsContent>
 
@@ -438,11 +447,83 @@ export default function Notifications() {
 
 function NotificationList({ 
   notifications, 
-  onMarkAsRead 
+  onMarkAsRead,
+  onRefresh,
 }: { 
   notifications: Notification[]; 
   onMarkAsRead: (id: string) => void;
+  onRefresh: () => void;
 }) {
+  const { toast } = useToast();
+  const [processingId, setProcessingId] = useState<string | null>(null);
+
+  const handleInvitationResponse = async (notification: Notification, accept: boolean) => {
+    if (!notification.reference_id) return;
+    
+    setProcessingId(notification.id);
+    
+    try {
+      // Update invitation status
+      const { error: inviteError } = await supabase
+        .from("user_invitations")
+        .update({ status: accept ? "accepted" : "rejected" })
+        .eq("id", notification.reference_id);
+
+      if (inviteError) throw inviteError;
+
+      // Mark notification as read
+      await supabase
+        .from("notifications")
+        .update({ is_read: true })
+        .eq("id", notification.id);
+
+      // If accepted, create notification for sender
+      if (accept) {
+        const { data: invitation } = await supabase
+          .from("user_invitations")
+          .select("sender_id")
+          .eq("id", notification.reference_id)
+          .single();
+
+        if (invitation) {
+          const { data: { user } } = await supabase.auth.getUser();
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", user?.id)
+            .single();
+
+          await supabase.from("notifications").insert({
+            user_id: invitation.sender_id,
+            type: "invitation_accepted",
+            title: "Invitation Accepted",
+            description: `${profile?.full_name || "A user"} has accepted your connection invitation`,
+            reference_id: notification.reference_id,
+            is_read: false,
+          });
+        }
+      }
+
+      toast({
+        title: accept ? "Invitation accepted" : "Invitation declined",
+        description: accept 
+          ? "You are now connected with this user" 
+          : "The invitation has been declined",
+      });
+
+      onRefresh();
+    } catch (error: any) {
+      console.error("Error responding to invitation:", error);
+      toast({
+        title: "Error",
+        description: "Failed to respond to invitation",
+        variant: "destructive",
+      });
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   if (notifications.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
@@ -457,6 +538,10 @@ function NotificationList({
     switch (type) {
       case 'document_received':
         return <FileText className="h-5 w-5 text-primary" />;
+      case 'invitation_received':
+        return <UserPlus className="h-5 w-5 text-primary" />;
+      case 'invitation_accepted':
+        return <UserCheck className="h-5 w-5 text-green-500" />;
       default:
         return <Bell className="h-5 w-5 text-primary" />;
     }
@@ -467,10 +552,15 @@ function NotificationList({
       {notifications.map((notification) => (
         <div
           key={notification.id}
-          onClick={() => !notification.is_read && onMarkAsRead(notification.id)}
+          onClick={() => {
+            if (!notification.is_read && notification.type !== 'invitation_received') {
+              onMarkAsRead(notification.id);
+            }
+          }}
           className={cn(
-            "flex items-start gap-4 p-4 cursor-pointer transition-colors hover:bg-accent/50",
-            !notification.is_read && "bg-primary/5"
+            "flex items-start gap-4 p-4 transition-colors",
+            !notification.is_read && "bg-primary/5",
+            notification.type !== 'invitation_received' && "cursor-pointer hover:bg-accent/50"
           )}
         >
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
@@ -490,14 +580,49 @@ function NotificationList({
             </div>
             {notification.description && (
               <p className={cn(
-                "text-sm truncate",
+                "text-sm",
                 !notification.is_read ? "text-foreground" : "text-muted-foreground"
               )}>
                 {notification.description}
               </p>
             )}
+            
+            {/* Invitation action buttons */}
+            {notification.type === 'invitation_received' && !notification.is_read && (
+              <div className="flex items-center gap-2 mt-3">
+                <Button
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleInvitationResponse(notification, true);
+                  }}
+                  disabled={processingId === notification.id}
+                  className="gap-1.5"
+                >
+                  {processingId === notification.id ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <UserCheck className="h-3.5 w-3.5" />
+                  )}
+                  Accept
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleInvitationResponse(notification, false);
+                  }}
+                  disabled={processingId === notification.id}
+                  className="gap-1.5"
+                >
+                  <UserX className="h-3.5 w-3.5" />
+                  Decline
+                </Button>
+              </div>
+            )}
           </div>
-          {!notification.is_read && (
+          {!notification.is_read && notification.type !== 'invitation_received' && (
             <div className="h-2 w-2 rounded-full bg-primary shrink-0 mt-2" />
           )}
         </div>
