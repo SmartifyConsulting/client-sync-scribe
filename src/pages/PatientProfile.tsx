@@ -279,11 +279,11 @@ export default function PatientProfile() {
               <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
             )}
           </TabsTrigger>
-          <TabsTrigger value="photos" className="rounded-lg px-4 py-2.5 gap-1.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
-            📸 Health Photos
+          <TabsTrigger value="photos" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            Photos
           </TabsTrigger>
-          <TabsTrigger value="lollipops" className="rounded-lg px-4 py-2.5 gap-1.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
-            🍭 Lollipops
+          <TabsTrigger value="lollipops" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            Lollipops
           </TabsTrigger>
         </TabsList>
 
