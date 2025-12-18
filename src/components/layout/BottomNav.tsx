@@ -8,7 +8,7 @@ import {
   Settings,
   Pill,
   Receipt,
-  Shield,
+  Camera,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 
@@ -22,10 +22,10 @@ const doctorNavItems = [
 
 const patientNavItems = [
   { icon: LayoutDashboard, label: "Home", to: "/dashboard" },
+  { icon: Camera, label: "Album", to: "/patient/health-album" },
   { icon: Calendar, label: "Calendar", to: "/patient/calendar" },
   { icon: Pill, label: "Rx", to: "/patient/prescriptions" },
   { icon: Receipt, label: "Invoices", to: "/patient/invoices" },
-  { icon: Shield, label: "Access", to: "/patient/access" },
 ];
 
 export function BottomNav() {

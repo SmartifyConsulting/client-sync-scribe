@@ -34,6 +34,7 @@ import PrescriptionHistory from "./pages/patient/PrescriptionHistory";
 import Invoices from "./pages/patient/Invoices";
 import PatientAccessManagement from "./pages/patient/PatientAccessManagement";
 import MyRewards from "./pages/patient/MyRewards";
+import HealthAlbum from "./pages/patient/HealthAlbum";
 import DoctorInvoices from "./pages/doctor/Invoices";
 import PricingAdmin from "./pages/admin/PricingAdmin";
 import GamificationAdmin from "./pages/admin/GamificationAdmin";
@@ -116,6 +117,7 @@ const App = () => (
             <Route path="/patient/invoices" element={<Invoices />} />
             <Route path="/patient/access" element={<PatientAccessManagement />} />
             <Route path="/patient/rewards" element={<MyRewards />} />
+            <Route path="/patient/health-album" element={<HealthAlbum />} />
             
             {/* Admin routes */}
             <Route path="/admin/pricing" element={<PricingAdmin />} />
