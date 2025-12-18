@@ -17,6 +17,7 @@ import {
   User,
   LucideIcon,
   DollarSign,
+  Users2,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
@@ -33,6 +34,7 @@ interface NavItem {
 const doctorNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/" },
   { icon: Bell, label: "Notifications", to: "/notifications" },
+  { icon: Users2, label: "Connections", to: "/connections" },
   { icon: CheckSquare, label: "To-Do List", to: "/todos" },
   { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: Users, label: "Patients", to: "/patients" },
@@ -43,6 +45,8 @@ const doctorNavItems: NavItem[] = [
 
 const patientNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/" },
+  { icon: Bell, label: "Notifications", to: "/notifications" },
+  { icon: Users2, label: "Connections", to: "/connections" },
   { icon: Calendar, label: "My Calendar", to: "/patient/calendar" },
   { icon: Pill, label: "Prescriptions", to: "/patient/prescriptions" },
   { icon: Receipt, label: "Invoices", to: "/patient/invoices" },
