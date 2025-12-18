@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Pencil, Check, X, Loader2, AlertCircle } from "lucide-react";
+import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
-import { Patient } from "@/hooks/usePatients";
+import { Patient, Surgery } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
 
 interface PatientDetailsEditorProps {
@@ -41,7 +41,12 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
     next_of_kin_name: "",
     next_of_kin_phone: "",
     next_of_kin_email: "",
+    height_cm: "",
+    weight_kg: "",
   });
+  const [surgeries, setSurgeries] = useState<Surgery[]>([]);
+  const [newSurgery, setNewSurgery] = useState({ name: "", date: "", notes: "" });
+  const [showAddSurgery, setShowAddSurgery] = useState(false);
 
   useEffect(() => {
     if (patient) {
@@ -57,23 +62,26 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         postal_address: patient.postal_address || "",
         same_as_physical: patient.same_as_physical || false,
         medical_aid: patient.medical_aid || "",
-        medical_insurance_product: (patient as any).medical_insurance_product || "",
+        medical_insurance_product: patient.medical_insurance_product || "",
         medical_aid_number: patient.medical_aid_number || "",
         primary_member: patient.primary_member || "",
-        claims_email: (patient as any).claims_email || "",
+        claims_email: patient.claims_email || "",
         general_practitioner: patient.general_practitioner || "",
-        allergies: (patient as any).allergies || "",
+        allergies: patient.allergies || "",
         next_of_kin_name: patient.next_of_kin_name || "",
         next_of_kin_phone: patient.next_of_kin_phone || "",
         next_of_kin_email: patient.next_of_kin_email || "",
+        height_cm: patient.height_cm?.toString() || "",
+        weight_kg: patient.weight_kg?.toString() || "",
       });
+      setSurgeries(patient.surgeries || []);
       setHasChanges(false);
     }
   }, [patient]);
 
   // Auto-save function
-  const performSave = useCallback(async (data: typeof formData) => {
-    if (!data.name.trim()) return; // Don't save if name is empty
+  const performSave = useCallback(async (data: typeof formData, surgeriesData: Surgery[]) => {
+    if (!data.name.trim()) return;
     
     setSaving(true);
     await onSave({
@@ -94,11 +102,12 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
       next_of_kin_name: data.next_of_kin_name || null,
       next_of_kin_phone: data.next_of_kin_phone || null,
       next_of_kin_email: data.next_of_kin_email || null,
-      ...({
-        medical_insurance_product: data.medical_insurance_product || null,
-        claims_email: data.claims_email || null,
-        allergies: data.allergies || null,
-      } as any),
+      medical_insurance_product: data.medical_insurance_product || null,
+      claims_email: data.claims_email || null,
+      allergies: data.allergies || null,
+      height_cm: data.height_cm ? parseFloat(data.height_cm) : null,
+      weight_kg: data.weight_kg ? parseFloat(data.weight_kg) : null,
+      surgeries: surgeriesData,
     });
     setSaving(false);
     setHasChanges(false);
@@ -113,24 +122,50 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
     }
 
     saveTimeoutRef.current = setTimeout(() => {
-      performSave(formData);
-    }, 1500); // Auto-save after 1.5 seconds of inactivity
+      performSave(formData, surgeries);
+    }, 1500);
 
     return () => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [formData, isEditing, hasChanges, performSave]);
+  }, [formData, surgeries, isEditing, hasChanges, performSave]);
 
-  // Update form data and mark as having changes
   const updateFormData = (updates: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
     setHasChanges(true);
   };
 
+  const handleAddSurgery = () => {
+    if (!newSurgery.name.trim() || !newSurgery.date) {
+      toast({
+        title: "Required Fields",
+        description: "Please enter surgery name and date",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const surgery: Surgery = {
+      id: crypto.randomUUID(),
+      name: newSurgery.name.trim(),
+      date: newSurgery.date,
+      notes: newSurgery.notes.trim() || undefined,
+    };
+
+    setSurgeries(prev => [...prev, surgery]);
+    setNewSurgery({ name: "", date: "", notes: "" });
+    setShowAddSurgery(false);
+    setHasChanges(true);
+  };
+
+  const handleRemoveSurgery = (id: string) => {
+    setSurgeries(prev => prev.filter(s => s.id !== id));
+    setHasChanges(true);
+  };
+
   const handleCancel = () => {
-    // Reset form data to patient values
     setFormData({
       name: patient.name || "",
       email: patient.email || "",
@@ -143,18 +178,35 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
       postal_address: patient.postal_address || "",
       same_as_physical: patient.same_as_physical || false,
       medical_aid: patient.medical_aid || "",
-      medical_insurance_product: (patient as any).medical_insurance_product || "",
+      medical_insurance_product: patient.medical_insurance_product || "",
       medical_aid_number: patient.medical_aid_number || "",
       primary_member: patient.primary_member || "",
-      claims_email: (patient as any).claims_email || "",
+      claims_email: patient.claims_email || "",
       general_practitioner: patient.general_practitioner || "",
-      allergies: (patient as any).allergies || "",
+      allergies: patient.allergies || "",
       next_of_kin_name: patient.next_of_kin_name || "",
       next_of_kin_phone: patient.next_of_kin_phone || "",
       next_of_kin_email: patient.next_of_kin_email || "",
+      height_cm: patient.height_cm?.toString() || "",
+      weight_kg: patient.weight_kg?.toString() || "",
     });
+    setSurgeries(patient.surgeries || []);
     setIsEditing(false);
   };
+
+  // Calculate BMI
+  const calculateBMI = () => {
+    const height = patient.height_cm;
+    const weight = patient.weight_kg;
+    if (height && weight && height > 0) {
+      const heightInMeters = height / 100;
+      const bmi = weight / (heightInMeters * heightInMeters);
+      return bmi.toFixed(1);
+    }
+    return null;
+  };
+
+  const bmi = calculateBMI();
 
   if (!isEditing) {
     return (
@@ -205,6 +257,80 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
           </div>
         </div>
 
+        {/* Physical Measurements */}
+        <div>
+          <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Physical Measurements</h3>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+              <Ruler className="h-5 w-5 text-primary" />
+              <div>
+                <p className="text-sm text-muted-foreground">Height</p>
+                <p className="font-medium text-foreground">
+                  {patient.height_cm ? `${patient.height_cm} cm` : "Not recorded"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+              <Scale className="h-5 w-5 text-primary" />
+              <div>
+                <p className="text-sm text-muted-foreground">Weight</p>
+                <p className="font-medium text-foreground">
+                  {patient.weight_kg ? `${patient.weight_kg} kg` : "Not recorded"}
+                </p>
+              </div>
+            </div>
+            {bmi && (
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 sm:col-span-2">
+                <div>
+                  <p className="text-sm text-muted-foreground">BMI</p>
+                  <p className="font-medium text-foreground">{bmi}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Surgery History */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">Surgery History</h3>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-1.5"
+              onClick={() => {
+                setIsEditing(true);
+                setShowAddSurgery(true);
+              }}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Surgery
+            </Button>
+          </div>
+          {surgeries.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No surgeries recorded</p>
+          ) : (
+            <div className="space-y-2">
+              {surgeries.map((surgery) => (
+                <div 
+                  key={surgery.id} 
+                  className="flex items-start justify-between p-3 rounded-lg bg-muted/30 border border-border/50"
+                >
+                  <div>
+                    <p className="font-medium text-foreground">{surgery.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {format(new Date(surgery.date), "MMMM d, yyyy")}
+                    </p>
+                    {surgery.notes && (
+                      <p className="text-sm text-muted-foreground mt-1">{surgery.notes}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Address Information */}
         <div>
           <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Address</h3>
@@ -232,7 +358,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Medical Insurance Product</p>
-              <p className="mt-1 text-foreground">{(patient as any).medical_insurance_product || "Not provided"}</p>
+              <p className="mt-1 text-foreground">{patient.medical_insurance_product || "Not provided"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Medical Insurance Number</p>
@@ -244,7 +370,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Claims Email</p>
-              <p className="mt-1 text-foreground">{(patient as any).claims_email || "Not provided"}</p>
+              <p className="mt-1 text-foreground">{patient.claims_email || "Not provided"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">General Practitioner</p>
@@ -255,7 +381,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
                 <AlertCircle className="h-3.5 w-3.5" />
                 Allergies
               </p>
-              <p className="mt-1 text-foreground">{(patient as any).allergies || "None recorded"}</p>
+              <p className="mt-1 text-foreground">{patient.allergies || "None recorded"}</p>
             </div>
           </div>
         </div>
@@ -377,6 +503,130 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             />
           </div>
         </div>
+      </div>
+
+      {/* Physical Measurements */}
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Physical Measurements</h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-2">
+            <Label htmlFor="height_cm">Height (cm)</Label>
+            <Input
+              id="height_cm"
+              type="number"
+              step="0.1"
+              value={formData.height_cm}
+              onChange={(e) => updateFormData({ height_cm: e.target.value })}
+              placeholder="e.g., 175"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="weight_kg">Weight (kg)</Label>
+            <Input
+              id="weight_kg"
+              type="number"
+              step="0.1"
+              value={formData.weight_kg}
+              onChange={(e) => updateFormData({ weight_kg: e.target.value })}
+              placeholder="e.g., 70"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Surgery History */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">Surgery History</h3>
+          {!showAddSurgery && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-1.5"
+              onClick={() => setShowAddSurgery(true)}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Surgery
+            </Button>
+          )}
+        </div>
+
+        {showAddSurgery && (
+          <div className="p-4 rounded-lg border border-primary/30 bg-primary/5 mb-4 space-y-3">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Surgery Name *</Label>
+                <Input
+                  value={newSurgery.name}
+                  onChange={(e) => setNewSurgery(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g., Appendectomy"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Date *</Label>
+                <Input
+                  type="date"
+                  value={newSurgery.date}
+                  onChange={(e) => setNewSurgery(prev => ({ ...prev, date: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Notes (optional)</Label>
+              <Input
+                value={newSurgery.notes}
+                onChange={(e) => setNewSurgery(prev => ({ ...prev, notes: e.target.value }))}
+                placeholder="Any additional notes about the surgery"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => {
+                  setShowAddSurgery(false);
+                  setNewSurgery({ name: "", date: "", notes: "" });
+                }}
+              >
+                Cancel
+              </Button>
+              <Button size="sm" onClick={handleAddSurgery}>
+                Add Surgery
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {surgeries.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No surgeries recorded</p>
+        ) : (
+          <div className="space-y-2">
+            {surgeries.map((surgery) => (
+              <div 
+                key={surgery.id} 
+                className="flex items-start justify-between p-3 rounded-lg bg-muted/30 border border-border/50"
+              >
+                <div>
+                  <p className="font-medium text-foreground">{surgery.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {format(new Date(surgery.date), "MMMM d, yyyy")}
+                  </p>
+                  {surgery.notes && (
+                    <p className="text-sm text-muted-foreground mt-1">{surgery.notes}</p>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-destructive hover:text-destructive"
+                  onClick={() => handleRemoveSurgery(surgery.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Address Information */}

@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { Json } from '@/integrations/supabase/types';
+
+export interface Surgery {
+  id: string;
+  name: string;
+  date: string;
+  notes?: string;
+}
 
 export interface Patient {
   id: string;
@@ -30,8 +38,36 @@ export interface Patient {
   allergies: string | null;
   claims_email: string | null;
   medical_insurance_product: string | null;
+  height_cm: number | null;
+  weight_kg: number | null;
+  surgeries: Surgery[] | null;
   last_visit?: string | null;
 }
+
+// Helper to parse surgeries from JSON
+const parseSurgeries = (surgeries: Json | null): Surgery[] | null => {
+  if (!surgeries) return null;
+  if (Array.isArray(surgeries)) {
+    return surgeries as unknown as Surgery[];
+  }
+  return null;
+};
+
+// Helper to convert patient from DB to typed Patient
+const toPatient = (data: any, lastVisit?: string | null): Patient => ({
+  ...data,
+  surgeries: parseSurgeries(data.surgeries),
+  last_visit: lastVisit ?? data.last_visit ?? null,
+});
+
+// Helper to prepare patient data for DB (convert surgeries to JSON)
+const toDbPatient = (updates: Partial<Patient>): Record<string, any> => {
+  const { surgeries, last_visit, ...rest } = updates;
+  return {
+    ...rest,
+    ...(surgeries !== undefined ? { surgeries: surgeries as unknown as Json } : {}),
+  };
+};
 
 export function usePatients() {
   const { toast } = useToast();
@@ -60,10 +96,7 @@ export function usePatients() {
             .limit(1)
             .maybeSingle();
           
-          return {
-            ...patient,
-            last_visit: sessionData?.started_at || null,
-          };
+          return toPatient(patient, sessionData?.started_at || null);
         })
       );
 
@@ -85,19 +118,23 @@ export function usePatients() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      const dbPatient = toDbPatient(patient as Partial<Patient>);
+
       const { data, error } = await supabase
         .from('patients')
         .insert({
-          ...patient,
+          name: patient.name,
+          ...dbPatient,
           user_id: user.id,
-        })
+        } as any)
         .select()
         .single();
 
       if (error) throw error;
-      setPatients((prev) => [data, ...prev]);
+      const typedPatient = toPatient(data);
+      setPatients((prev) => [typedPatient, ...prev]);
       toast({ title: 'Success', description: 'Patient added successfully' });
-      return data;
+      return typedPatient;
     } catch (error: any) {
       console.error('Error creating patient:', error);
       toast({
@@ -111,17 +148,20 @@ export function usePatients() {
 
   const updatePatient = async (id: string, updates: Partial<Patient>) => {
     try {
+      const dbUpdates = toDbPatient(updates);
+
       const { data, error } = await supabase
         .from('patients')
-        .update(updates)
+        .update(dbUpdates)
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
-      setPatients((prev) => prev.map((p) => (p.id === id ? data : p)));
+      const typedPatient = toPatient(data);
+      setPatients((prev) => prev.map((p) => (p.id === id ? typedPatient : p)));
       toast({ title: 'Success', description: 'Patient updated successfully' });
-      return data;
+      return typedPatient;
     } catch (error: any) {
       console.error('Error updating patient:', error);
       toast({
@@ -193,12 +233,9 @@ export function usePatient(id: string) {
           .limit(1)
           .maybeSingle();
         
-        setPatient({
-          ...data,
-          last_visit: sessionData?.started_at || null,
-        });
+        setPatient(toPatient(data, sessionData?.started_at || null));
       } else {
-        setPatient(data);
+        setPatient(null);
       }
     } catch (error: any) {
       console.error('Error fetching patient:', error);
@@ -214,17 +251,20 @@ export function usePatient(id: string) {
 
   const updatePatient = async (updates: Partial<Patient>) => {
     try {
+      const dbUpdates = toDbPatient(updates);
+
       const { data, error } = await supabase
         .from('patients')
-        .update(updates)
+        .update(dbUpdates)
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
-      setPatient(data);
+      const typedPatient = toPatient(data);
+      setPatient(typedPatient);
       toast({ title: 'Success', description: 'Patient updated successfully' });
-      return data;
+      return typedPatient;
     } catch (error: any) {
       console.error('Error updating patient:', error);
       toast({

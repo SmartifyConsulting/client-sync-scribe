@@ -459,6 +459,7 @@ export type Database = {
           email: string | null
           employer: string | null
           general_practitioner: string | null
+          height_cm: number | null
           id: string
           medical_aid: string | null
           medical_aid_number: string | null
@@ -477,8 +478,10 @@ export type Database = {
           referred_by: string | null
           same_as_physical: boolean | null
           status: string
+          surgeries: Json | null
           updated_at: string
           user_id: string
+          weight_kg: number | null
         }
         Insert: {
           address?: string | null
@@ -489,6 +492,7 @@ export type Database = {
           email?: string | null
           employer?: string | null
           general_practitioner?: string | null
+          height_cm?: number | null
           id?: string
           medical_aid?: string | null
           medical_aid_number?: string | null
@@ -507,8 +511,10 @@ export type Database = {
           referred_by?: string | null
           same_as_physical?: boolean | null
           status?: string
+          surgeries?: Json | null
           updated_at?: string
           user_id: string
+          weight_kg?: number | null
         }
         Update: {
           address?: string | null
@@ -519,6 +525,7 @@ export type Database = {
           email?: string | null
           employer?: string | null
           general_practitioner?: string | null
+          height_cm?: number | null
           id?: string
           medical_aid?: string | null
           medical_aid_number?: string | null
@@ -537,8 +544,10 @@ export type Database = {
           referred_by?: string | null
           same_as_physical?: boolean | null
           status?: string
+          surgeries?: Json | null
           updated_at?: string
           user_id?: string
+          weight_kg?: number | null
         }
         Relationships: []
       }
