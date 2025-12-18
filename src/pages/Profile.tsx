@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy } from "lucide-react";
+import { PatientImport } from "@/components/patients/PatientImport";
 import { useToast as useGlobalToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1029,6 +1030,9 @@ export default function Profile() {
           </Button>
         </div>
       </div>
+
+      {/* Patient Import */}
+      <PatientImport />
     </div>
   );
 }
