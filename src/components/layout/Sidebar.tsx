@@ -18,6 +18,7 @@ import {
   LucideIcon,
   DollarSign,
   Users2,
+  Gift,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
@@ -56,6 +57,7 @@ const patientNavItems: NavItem[] = [
 const adminNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/" },
   { icon: DollarSign, label: "Pricing", to: "/admin/pricing" },
+  { icon: Gift, label: "Gamification", to: "/admin/gamification" },
 ];
 
 interface SidebarProps {

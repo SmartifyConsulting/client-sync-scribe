@@ -204,23 +204,55 @@ const completeSession = async (id: string, content: string, additionalNotes?: st
       if (result && visitCategory && startedSession?.patient_id) {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          const { error: rewardError } = await supabase
+          // Get gamification config to determine lollipop count
+          const { data: configData } = await supabase
+            .from('gamification_config')
+            .select('lollipops_awarded')
+            .eq('visit_category', visitCategory)
+            .eq('is_active', true)
+            .maybeSingle();
+          
+          const lollipopsToAward = configData?.lollipops_awarded || 1;
+
+          // Get patient_user_id for notification
+          const { data: patientData } = await supabase
+            .from('patients')
+            .select('patient_user_id')
+            .eq('id', startedSession.patient_id)
+            .maybeSingle();
+
+          const { data: rewardData, error: rewardError } = await supabase
             .from('patient_rewards')
             .insert({
               patient_id: startedSession.patient_id,
               session_id: id,
               reward_type: 'lollipop',
               visit_category: visitCategory,
+              lollipops_count: lollipopsToAward,
               awarded_by: user.id,
-            });
+            })
+            .select()
+            .single();
 
           if (rewardError) {
             console.error('Error awarding lollipop:', rewardError);
           } else {
-            console.log('Lollipop awarded for:', visitCategory);
+            console.log('Lollipop awarded for:', visitCategory, 'count:', lollipopsToAward);
+            
+            // Create notification for patient if they have a user account
+            if (patientData?.patient_user_id) {
+              await supabase.from('notifications').insert({
+                user_id: patientData.patient_user_id,
+                title: `🍭 You earned ${lollipopsToAward} lollipop${lollipopsToAward > 1 ? 's' : ''}!`,
+                description: `Great job! You received ${lollipopsToAward} lollipop${lollipopsToAward > 1 ? 's' : ''} for your ${visitCategory}.`,
+                type: 'reward',
+                reference_id: rewardData.id,
+              });
+            }
+
             toast({ 
-              title: '🍭 Lollipop Awarded!', 
-              description: `Patient earned a lollipop for their ${visitCategory}` 
+              title: `🍭 ${lollipopsToAward} Lollipop${lollipopsToAward > 1 ? 's' : ''} Awarded!`, 
+              description: `Patient earned ${lollipopsToAward} lollipop${lollipopsToAward > 1 ? 's' : ''} for their ${visitCategory}` 
             });
           }
         }
