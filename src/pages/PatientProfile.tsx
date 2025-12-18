@@ -29,6 +29,7 @@ import { PatientOverview } from "@/components/patients/PatientOverview";
 import { InvitePatientDialog } from "@/components/patients/InvitePatientDialog";
 import { DoctorsOnProfile } from "@/components/patients/DoctorsOnProfile";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
+import { RequestConnectionButton } from "@/components/patients/RequestConnectionButton";
 import { RoundTable } from "@/components/patients/RoundTable";
 import { useTemplates } from "@/hooks/useTemplates";
 import { useDocuments } from "@/hooks/useDocuments";
@@ -188,6 +189,10 @@ export default function PatientProfile() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <RequestConnectionButton 
+              patientUserId={(patient as any).patient_user_id} 
+              patientName={patient.name} 
+            />
             <InvitePatientDialog patientId={patient.id} patientName={patient.name} />
             <Button variant="outline" size="sm" className="gap-1.5" onClick={handleScheduleAppointment}>
               <Calendar className="h-3.5 w-3.5" />
