@@ -640,6 +640,7 @@ export type Database = {
           general_practitioner: string | null
           height_cm: number | null
           id: string
+          marital_status: string | null
           medical_aid: string | null
           medical_aid_number: string | null
           medical_insurance_product: string | null
@@ -647,6 +648,7 @@ export type Database = {
           next_of_kin_email: string | null
           next_of_kin_name: string | null
           next_of_kin_phone: string | null
+          next_of_kin_relationship: string | null
           notes: string | null
           occupation: string | null
           patient_user_id: string | null
@@ -673,6 +675,7 @@ export type Database = {
           general_practitioner?: string | null
           height_cm?: number | null
           id?: string
+          marital_status?: string | null
           medical_aid?: string | null
           medical_aid_number?: string | null
           medical_insurance_product?: string | null
@@ -680,6 +683,7 @@ export type Database = {
           next_of_kin_email?: string | null
           next_of_kin_name?: string | null
           next_of_kin_phone?: string | null
+          next_of_kin_relationship?: string | null
           notes?: string | null
           occupation?: string | null
           patient_user_id?: string | null
@@ -706,6 +710,7 @@ export type Database = {
           general_practitioner?: string | null
           height_cm?: number | null
           id?: string
+          marital_status?: string | null
           medical_aid?: string | null
           medical_aid_number?: string | null
           medical_insurance_product?: string | null
@@ -713,6 +718,7 @@ export type Database = {
           next_of_kin_email?: string | null
           next_of_kin_name?: string | null
           next_of_kin_phone?: string | null
+          next_of_kin_relationship?: string | null
           notes?: string | null
           occupation?: string | null
           patient_user_id?: string | null

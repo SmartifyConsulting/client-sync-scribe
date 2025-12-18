@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { Patient, Surgery } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +29,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
     occupation: "",
     employer: "",
     referred_by: "",
+    marital_status: "",
     physical_address: "",
     postal_address: "",
     same_as_physical: false,
@@ -41,6 +43,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
     next_of_kin_name: "",
     next_of_kin_phone: "",
     next_of_kin_email: "",
+    next_of_kin_relationship: "",
     height_cm: "",
     weight_kg: "",
   });
@@ -58,6 +61,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         occupation: patient.occupation || "",
         employer: patient.employer || "",
         referred_by: patient.referred_by || "",
+        marital_status: patient.marital_status || "",
         physical_address: patient.physical_address || "",
         postal_address: patient.postal_address || "",
         same_as_physical: patient.same_as_physical || false,
@@ -71,6 +75,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         next_of_kin_name: patient.next_of_kin_name || "",
         next_of_kin_phone: patient.next_of_kin_phone || "",
         next_of_kin_email: patient.next_of_kin_email || "",
+        next_of_kin_relationship: patient.next_of_kin_relationship || "",
         height_cm: patient.height_cm?.toString() || "",
         weight_kg: patient.weight_kg?.toString() || "",
       });
@@ -92,6 +97,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
       occupation: data.occupation || null,
       employer: data.employer || null,
       referred_by: data.referred_by || null,
+      marital_status: data.marital_status || null,
       physical_address: data.physical_address || null,
       postal_address: data.same_as_physical ? data.physical_address : (data.postal_address || null),
       same_as_physical: data.same_as_physical,
@@ -102,6 +108,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
       next_of_kin_name: data.next_of_kin_name || null,
       next_of_kin_phone: data.next_of_kin_phone || null,
       next_of_kin_email: data.next_of_kin_email || null,
+      next_of_kin_relationship: data.next_of_kin_relationship || null,
       medical_insurance_product: data.medical_insurance_product || null,
       claims_email: data.claims_email || null,
       allergies: data.allergies || null,
@@ -174,6 +181,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
       occupation: patient.occupation || "",
       employer: patient.employer || "",
       referred_by: patient.referred_by || "",
+      marital_status: patient.marital_status || "",
       physical_address: patient.physical_address || "",
       postal_address: patient.postal_address || "",
       same_as_physical: patient.same_as_physical || false,
@@ -187,6 +195,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
       next_of_kin_name: patient.next_of_kin_name || "",
       next_of_kin_phone: patient.next_of_kin_phone || "",
       next_of_kin_email: patient.next_of_kin_email || "",
+      next_of_kin_relationship: patient.next_of_kin_relationship || "",
       height_cm: patient.height_cm?.toString() || "",
       weight_kg: patient.weight_kg?.toString() || "",
     });
@@ -253,6 +262,10 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             <div>
               <p className="text-sm text-muted-foreground">Referred By</p>
               <p className="mt-1 text-foreground">{patient.referred_by || "Not provided"}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Marital Status</p>
+              <p className="mt-1 text-foreground">{patient.marital_status || "Not provided"}</p>
             </div>
           </div>
         </div>
@@ -390,10 +403,14 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         {/* Next of Kin */}
         <div>
           <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Next of Kin</h3>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <p className="text-sm text-muted-foreground">Name</p>
               <p className="mt-1 text-foreground">{patient.next_of_kin_name || "Not provided"}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Relationship</p>
+              <p className="mt-1 text-foreground">{patient.next_of_kin_relationship || "Not provided"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Phone</p>
@@ -502,6 +519,23 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
               onChange={(e) => updateFormData({ referred_by: e.target.value })}
               placeholder="Referral source"
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="marital_status">Marital Status</Label>
+            <Select
+              value={formData.marital_status}
+              onValueChange={(value) => updateFormData({ marital_status: value })}
+            >
+              <SelectTrigger id="marital_status">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Single">Single</SelectItem>
+                <SelectItem value="Married">Married</SelectItem>
+                <SelectItem value="Divorced">Divorced</SelectItem>
+                <SelectItem value="Widowed">Widowed</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
@@ -746,7 +780,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
       {/* Next of Kin */}
       <div>
         <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Next of Kin</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-2">
             <Label htmlFor="next_of_kin_name">Name</Label>
             <Input
@@ -754,6 +788,15 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
               value={formData.next_of_kin_name}
               onChange={(e) => updateFormData({ next_of_kin_name: e.target.value })}
               placeholder="Full name"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="next_of_kin_relationship">Relationship</Label>
+            <Input
+              id="next_of_kin_relationship"
+              value={formData.next_of_kin_relationship}
+              onChange={(e) => updateFormData({ next_of_kin_relationship: e.target.value })}
+              placeholder="e.g. Spouse, Parent, Sibling"
             />
           </div>
           <div className="space-y-2">
