@@ -10,26 +10,12 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">
             © {currentYear} mIRI360. All rights reserved.
           </p>
-          <nav className="flex items-center gap-6">
-            <Link
-              to="/terms-and-conditions"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Terms & Conditions
-            </Link>
-            <Link
-              to="/patient-consent"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Patient Consent
-            </Link>
-            <Link
-              to="/business-associate-agreement"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              BAA (HIPAA)
-            </Link>
-          </nav>
+          <Link
+            to="/terms-and-conditions"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Terms & Conditions
+          </Link>
         </div>
       </div>
     </footer>
