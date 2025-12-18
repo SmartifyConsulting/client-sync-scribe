@@ -723,6 +723,7 @@ export type Database = {
           full_name: string | null
           id: string
           logo_url: string | null
+          mailbox_alias: string | null
           mailbox_id: string
           mobile_number: string | null
           practice_address: string | null
@@ -739,6 +740,7 @@ export type Database = {
           full_name?: string | null
           id: string
           logo_url?: string | null
+          mailbox_alias?: string | null
           mailbox_id?: string
           mobile_number?: string | null
           practice_address?: string | null
@@ -755,6 +757,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           logo_url?: string | null
+          mailbox_alias?: string | null
           mailbox_id?: string
           mobile_number?: string | null
           practice_address?: string | null
