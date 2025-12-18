@@ -3,6 +3,8 @@ import { Calendar, FileText, Receipt, Clock, User, Loader2 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useMyRewards } from "@/hooks/usePatientRewards";
+import { LollipopDisplay } from "@/components/gamification/LollipopDisplay";
 import { supabase } from "@/integrations/supabase/client";
 import { format, parseISO, isFuture } from "date-fns";
 import { Link } from "react-router-dom";
@@ -31,6 +33,7 @@ interface DoctorAccess {
 export default function PatientDashboard() {
   const { user } = useAuth();
   const { profile } = useProfile();
+  const { lollipopCount, rewards, loading: rewardsLoading } = useMyRewards();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
     upcomingAppointments: 0,
@@ -152,6 +155,11 @@ export default function PatientDashboard() {
           </p>
         </div>
       </div>
+
+      {/* Lollipop Rewards */}
+      {!rewardsLoading && lollipopCount > 0 && (
+        <LollipopDisplay count={lollipopCount} rewards={rewards} showHistory variant="card" />
+      )}
 
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

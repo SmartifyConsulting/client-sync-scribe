@@ -134,7 +134,7 @@ export function useSessions(patientId?: string) {
     }
   };
 
-const completeSession = async (id: string, content: string, additionalNotes?: string) => {
+const completeSession = async (id: string, content: string, additionalNotes?: string, visitCategory?: string) => {
     try {
       // Combine transcript and notes for AI analysis
       const fullContent = additionalNotes 
@@ -199,6 +199,33 @@ const completeSession = async (id: string, content: string, additionalNotes?: st
       }
 
       const result = await updateSession(id, updates);
+
+      // Award lollipop for qualifying visits
+      if (result && visitCategory && startedSession?.patient_id) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { error: rewardError } = await supabase
+            .from('patient_rewards')
+            .insert({
+              patient_id: startedSession.patient_id,
+              session_id: id,
+              reward_type: 'lollipop',
+              visit_category: visitCategory,
+              awarded_by: user.id,
+            });
+
+          if (rewardError) {
+            console.error('Error awarding lollipop:', rewardError);
+          } else {
+            console.log('Lollipop awarded for:', visitCategory);
+            toast({ 
+              title: '🍭 Lollipop Awarded!', 
+              description: `Patient earned a lollipop for their ${visitCategory}` 
+            });
+          }
+        }
+      }
+
       if (result) {
         toast({ title: 'Session Completed', description: 'Session saved with AI summary and action items added to to-do list' });
       }
