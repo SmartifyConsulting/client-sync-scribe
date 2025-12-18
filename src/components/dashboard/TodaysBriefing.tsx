@@ -560,9 +560,19 @@ export function TodaysBriefing() {
                     </div>
                     <div className="flex-1 min-w-0 text-left">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-foreground truncate text-sm">
-                          {apt.patientName}
-                        </span>
+                        {apt.patientId ? (
+                          <Link
+                            to={`/patients/${apt.patientId}`}
+                            className="font-medium text-foreground hover:text-primary hover:underline truncate text-sm"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {apt.patientName}
+                          </Link>
+                        ) : (
+                          <span className="font-medium text-foreground truncate text-sm">
+                            {apt.patientName}
+                          </span>
+                        )}
                         <span className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
                           <Clock className="h-3 w-3" />
                           {apt.formattedTime}
@@ -582,14 +592,6 @@ export function TodaysBriefing() {
                 </CollapsibleTrigger>
 
                 <CollapsibleContent className="mt-2 space-y-2 ml-11">
-                  {apt.patientId && (
-                    <Link
-                      to={`/patients/${apt.patientId}`}
-                      className="text-xs text-primary hover:underline"
-                    >
-                      View profile →
-                    </Link>
-                  )}
 
                   {apt.allergies && (
                     <div className="flex items-center gap-1 text-xs text-destructive">
