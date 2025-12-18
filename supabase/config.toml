@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.send-document-email]
 verify_jwt = true
+
+[functions.send-user-invitation]
+verify_jwt = true
