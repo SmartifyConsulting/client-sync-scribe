@@ -93,6 +93,44 @@ export default function Notifications() {
       } else {
         fetchMessages();
       }
+
+      // Subscribe to realtime notifications
+      const channel = supabase
+        .channel("notifications-realtime")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "notifications",
+            filter: `user_id=eq.${currentUserId}`,
+          },
+          (payload) => {
+            console.log("New notification:", payload);
+            setNotifications((prev) => [payload.new as Notification, ...prev]);
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "notifications",
+            filter: `user_id=eq.${currentUserId}`,
+          },
+          (payload) => {
+            setNotifications((prev) =>
+              prev.map((n) =>
+                n.id === (payload.new as Notification).id ? (payload.new as Notification) : n
+              )
+            );
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [currentUserId, activeTab]);
 
