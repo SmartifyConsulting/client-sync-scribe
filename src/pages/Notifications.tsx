@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
@@ -18,6 +18,8 @@ import {
   UserPlus,
   UserCheck,
   UserX,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -26,6 +28,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { InviteUserDialog } from "@/components/InviteUserDialog";
+import { 
+  triggerNotification, 
+  requestNotificationPermission, 
+  areNotificationsEnabled 
+} from "@/utils/notificationSound";
 
 interface Message {
   id: string;
@@ -62,6 +69,18 @@ export default function Notifications() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [mailboxEmail, setMailboxEmail] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(areNotificationsEnabled());
+
+  const handleEnableNotifications = async () => {
+    const granted = await requestNotificationPermission();
+    setNotificationsEnabled(granted);
+    if (granted) {
+      toast({
+        title: "Notifications Enabled",
+        description: "You'll receive browser notifications for new alerts",
+      });
+    }
+  };
 
   useEffect(() => {
     fetchCurrentUser();
@@ -105,9 +124,16 @@ export default function Notifications() {
             table: "notifications",
             filter: `user_id=eq.${currentUserId}`,
           },
-          (payload) => {
+          async (payload) => {
             console.log("New notification:", payload);
-            setNotifications((prev) => [payload.new as Notification, ...prev]);
+            const newNotification = payload.new as Notification;
+            setNotifications((prev) => [newNotification, ...prev]);
+            
+            // Trigger sound and browser notification
+            await triggerNotification(
+              newNotification.title,
+              newNotification.description || "You have a new notification"
+            );
           }
         )
         .on(
@@ -328,7 +354,20 @@ export default function Notifications() {
             Messages, documents, and alerts
           </p>
         </div>
-        <InviteUserDialog />
+        <div className="flex items-center gap-2">
+          {!notificationsEnabled ? (
+            <Button variant="outline" size="sm" onClick={handleEnableNotifications} className="gap-2">
+              <Volume2 className="h-4 w-4" />
+              Enable Alerts
+            </Button>
+          ) : (
+            <Badge variant="secondary" className="gap-1.5 py-1.5">
+              <Volume2 className="h-3.5 w-3.5" />
+              Alerts On
+            </Badge>
+          )}
+          <InviteUserDialog />
+        </div>
       </div>
       
       {mailboxEmail && (
