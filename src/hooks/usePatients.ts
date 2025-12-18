@@ -34,10 +34,12 @@ export interface Patient {
   next_of_kin_name: string | null;
   next_of_kin_phone: string | null;
   next_of_kin_email: string | null;
+  next_of_kin_relationship: string | null;
   general_practitioner: string | null;
   allergies: string | null;
   claims_email: string | null;
   medical_insurance_product: string | null;
+  marital_status: string | null;
   height_cm: number | null;
   weight_kg: number | null;
   surgeries: Surgery[] | null;
