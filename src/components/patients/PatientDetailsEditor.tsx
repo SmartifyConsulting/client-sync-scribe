@@ -290,46 +290,6 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
           </div>
         </div>
 
-        {/* Surgery History */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">Surgery History</h3>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="gap-1.5"
-              onClick={() => {
-                setIsEditing(true);
-                setShowAddSurgery(true);
-              }}
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Add Surgery
-            </Button>
-          </div>
-          {surgeries.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No surgeries recorded</p>
-          ) : (
-            <div className="space-y-2">
-              {surgeries.map((surgery) => (
-                <div 
-                  key={surgery.id} 
-                  className="flex items-start justify-between p-3 rounded-lg bg-muted/30 border border-border/50"
-                >
-                  <div>
-                    <p className="font-medium text-foreground">{surgery.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {format(new Date(surgery.date), "MMMM d, yyyy")}
-                    </p>
-                    {surgery.notes && (
-                      <p className="text-sm text-muted-foreground mt-1">{surgery.notes}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
 
         {/* Address Information */}
         <div>
@@ -348,9 +308,9 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
           </div>
         </div>
 
-        {/* Medical Insurance Information */}
+        {/* Medical Data */}
         <div>
-          <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Medical Insurance</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Medical Data</h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div>
               <p className="text-sm text-muted-foreground">Medical Insurance Provider</p>
@@ -383,6 +343,47 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
               </p>
               <p className="mt-1 text-foreground">{patient.allergies || "None recorded"}</p>
             </div>
+          </div>
+
+          {/* Surgery History */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-sm font-medium text-foreground">Surgery History</h4>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-1.5"
+                onClick={() => {
+                  setIsEditing(true);
+                  setShowAddSurgery(true);
+                }}
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add Surgery
+              </Button>
+            </div>
+            {surgeries.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No surgeries recorded</p>
+            ) : (
+              <div className="space-y-2">
+                {surgeries.map((surgery) => (
+                  <div 
+                    key={surgery.id} 
+                    className="flex items-start justify-between p-3 rounded-lg bg-muted/30 border border-border/50"
+                  >
+                    <div>
+                      <p className="font-medium text-foreground">{surgery.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(surgery.date), "MMMM d, yyyy")}
+                      </p>
+                      {surgery.notes && (
+                        <p className="text-sm text-muted-foreground mt-1">{surgery.notes}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -534,100 +535,6 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         </div>
       </div>
 
-      {/* Surgery History */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">Surgery History</h3>
-          {!showAddSurgery && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="gap-1.5"
-              onClick={() => setShowAddSurgery(true)}
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Add Surgery
-            </Button>
-          )}
-        </div>
-
-        {showAddSurgery && (
-          <div className="p-4 rounded-lg border border-primary/30 bg-primary/5 mb-4 space-y-3">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Surgery Name *</Label>
-                <Input
-                  value={newSurgery.name}
-                  onChange={(e) => setNewSurgery(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g., Appendectomy"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Date *</Label>
-                <Input
-                  type="date"
-                  value={newSurgery.date}
-                  onChange={(e) => setNewSurgery(prev => ({ ...prev, date: e.target.value }))}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Notes (optional)</Label>
-              <Input
-                value={newSurgery.notes}
-                onChange={(e) => setNewSurgery(prev => ({ ...prev, notes: e.target.value }))}
-                placeholder="Any additional notes about the surgery"
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => {
-                  setShowAddSurgery(false);
-                  setNewSurgery({ name: "", date: "", notes: "" });
-                }}
-              >
-                Cancel
-              </Button>
-              <Button size="sm" onClick={handleAddSurgery}>
-                Add Surgery
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {surgeries.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No surgeries recorded</p>
-        ) : (
-          <div className="space-y-2">
-            {surgeries.map((surgery) => (
-              <div 
-                key={surgery.id} 
-                className="flex items-start justify-between p-3 rounded-lg bg-muted/30 border border-border/50"
-              >
-                <div>
-                  <p className="font-medium text-foreground">{surgery.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {format(new Date(surgery.date), "MMMM d, yyyy")}
-                  </p>
-                  {surgery.notes && (
-                    <p className="text-sm text-muted-foreground mt-1">{surgery.notes}</p>
-                  )}
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-destructive hover:text-destructive"
-                  onClick={() => handleRemoveSurgery(surgery.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
       {/* Address Information */}
       <div>
@@ -666,9 +573,9 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         </div>
       </div>
 
-      {/* Medical Insurance Information */}
+      {/* Medical Data */}
       <div>
-        <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Medical Insurance</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Medical Data</h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-2">
             <Label htmlFor="medical_aid">Medical Insurance Provider</Label>
@@ -738,6 +645,101 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
               rows={2}
             />
           </div>
+        </div>
+
+        {/* Surgery History */}
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="text-sm font-medium text-foreground">Surgery History</h4>
+            {!showAddSurgery && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-1.5"
+                onClick={() => setShowAddSurgery(true)}
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add Surgery
+              </Button>
+            )}
+          </div>
+
+          {showAddSurgery && (
+            <div className="p-4 rounded-lg border border-primary/30 bg-primary/5 mb-4 space-y-3">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Surgery Name *</Label>
+                  <Input
+                    value={newSurgery.name}
+                    onChange={(e) => setNewSurgery(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="e.g., Appendectomy"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Date *</Label>
+                  <Input
+                    type="date"
+                    value={newSurgery.date}
+                    onChange={(e) => setNewSurgery(prev => ({ ...prev, date: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Notes (optional)</Label>
+                <Input
+                  value={newSurgery.notes}
+                  onChange={(e) => setNewSurgery(prev => ({ ...prev, notes: e.target.value }))}
+                  placeholder="Any additional notes about the surgery"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => {
+                    setShowAddSurgery(false);
+                    setNewSurgery({ name: "", date: "", notes: "" });
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button size="sm" onClick={handleAddSurgery}>
+                  Add Surgery
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {surgeries.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No surgeries recorded</p>
+          ) : (
+            <div className="space-y-2">
+              {surgeries.map((surgery) => (
+                <div 
+                  key={surgery.id} 
+                  className="flex items-start justify-between p-3 rounded-lg bg-muted/30 border border-border/50"
+                >
+                  <div>
+                    <p className="font-medium text-foreground">{surgery.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {format(new Date(surgery.date), "MMMM d, yyyy")}
+                    </p>
+                    {surgery.notes && (
+                      <p className="text-sm text-muted-foreground mt-1">{surgery.notes}</p>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive hover:text-destructive"
+                    onClick={() => handleRemoveSurgery(surgery.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
