@@ -298,6 +298,53 @@ export type Database = {
         }
         Relationships: []
       }
+      health_photos: {
+        Row: {
+          ai_validation_result: Json | null
+          captured_at: string
+          category: string
+          created_at: string
+          id: string
+          is_validated: boolean | null
+          lollipops_awarded: number | null
+          patient_id: string
+          photo_date: string
+          photo_url: string
+        }
+        Insert: {
+          ai_validation_result?: Json | null
+          captured_at?: string
+          category: string
+          created_at?: string
+          id?: string
+          is_validated?: boolean | null
+          lollipops_awarded?: number | null
+          patient_id: string
+          photo_date?: string
+          photo_url: string
+        }
+        Update: {
+          ai_validation_result?: Json | null
+          captured_at?: string
+          category?: string
+          created_at?: string
+          id?: string
+          is_validated?: boolean | null
+          lollipops_awarded?: number | null
+          patient_id?: string
+          photo_date?: string
+          photo_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_photos_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           amount: number

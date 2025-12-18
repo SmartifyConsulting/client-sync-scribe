@@ -47,3 +47,6 @@ verify_jwt = true
 
 [functions.send-user-invitation]
 verify_jwt = true
+
+[functions.validate-health-photo]
+verify_jwt = true

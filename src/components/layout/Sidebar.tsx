@@ -19,6 +19,7 @@ import {
   DollarSign,
   Users2,
   Gift,
+  Camera,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
@@ -49,6 +50,7 @@ const patientNavItems: NavItem[] = [
   { icon: Bell, label: "Notifications", to: "/notifications" },
   { icon: Users2, label: "Connections", to: "/connections" },
   { icon: Gift, label: "My Rewards", to: "/patient/rewards" },
+  { icon: Camera, label: "Health Album", to: "/patient/health-album" },
   { icon: Calendar, label: "My Calendar", to: "/patient/calendar" },
   { icon: Pill, label: "Prescriptions", to: "/patient/prescriptions" },
   { icon: Receipt, label: "Invoices", to: "/patient/invoices" },
