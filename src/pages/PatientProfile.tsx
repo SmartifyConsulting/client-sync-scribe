@@ -269,9 +269,6 @@ export default function PatientProfile() {
           <TabsTrigger value="details" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Details</TabsTrigger>
           <TabsTrigger value="overview" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Overview</TabsTrigger>
           <TabsTrigger value="sessions" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Session History</TabsTrigger>
-          <TabsTrigger value="lollipops" className="rounded-lg px-4 py-2.5 gap-1.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
-            🍭 Lollipops
-          </TabsTrigger>
           <TabsTrigger value="doctors" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Doctors</TabsTrigger>
           <TabsTrigger value="documents" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Documents</TabsTrigger>
           <TabsTrigger value="notes" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Notes</TabsTrigger>
@@ -280,6 +277,9 @@ export default function PatientProfile() {
             {unreadRoundTableCount > 0 && (
               <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
             )}
+          </TabsTrigger>
+          <TabsTrigger value="lollipops" className="rounded-lg px-4 py-2.5 gap-1.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            🍭 Lollipops
           </TabsTrigger>
         </TabsList>
 
