@@ -39,7 +39,7 @@ serve(async (req) => {
     });
 
     // Extract the mailbox ID from the recipient email
-    // Format: docs-{mailbox_id}@inbox.miri360.health
+    // Format: docs-{mailbox_id}@inbox.miri360.health OR {alias}@miri360.com
     const recipientEmail = payload.to?.toLowerCase();
     
     if (!recipientEmail) {
@@ -50,29 +50,51 @@ serve(async (req) => {
       );
     }
 
-    // Extract mailbox_id from email format: docs-{mailbox_id}@inbox.miri360.health
-    const mailboxMatch = recipientEmail.match(/^docs-([a-f0-9-]+)@/i);
+    let profile = null;
+    let profileError = null;
+
+    // Check if it's a custom alias format: {alias}@miri360.com
+    const aliasMatch = recipientEmail.match(/^([a-z0-9-]+)@miri360\.com$/i);
     
-    if (!mailboxMatch) {
-      console.error("Invalid mailbox email format:", recipientEmail);
-      return new Response(
-        JSON.stringify({ error: "Invalid mailbox email format" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    if (aliasMatch) {
+      const alias = aliasMatch[1];
+      console.log("Looking up user by mailbox_alias:", alias);
+      
+      const result = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .eq('mailbox_alias', alias)
+        .single();
+      
+      profile = result.data;
+      profileError = result.error;
+    } else {
+      // Try legacy format: docs-{mailbox_id}@inbox.miri360.health
+      const mailboxMatch = recipientEmail.match(/^docs-([a-f0-9-]+)@/i);
+      
+      if (!mailboxMatch) {
+        console.error("Invalid mailbox email format:", recipientEmail);
+        return new Response(
+          JSON.stringify({ error: "Invalid mailbox email format" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const mailboxIdPrefix = mailboxMatch[1];
+      console.log("Looking up user by mailbox_id prefix:", mailboxIdPrefix);
+
+      const result = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .ilike('mailbox_id', `${mailboxIdPrefix}%`)
+        .single();
+      
+      profile = result.data;
+      profileError = result.error;
     }
-
-    const mailboxIdPrefix = mailboxMatch[1];
-    console.log("Looking up user by mailbox_id prefix:", mailboxIdPrefix);
-
-    // Find the user by mailbox_id (starts with the prefix)
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, full_name')
-      .ilike('mailbox_id', `${mailboxIdPrefix}%`)
-      .single();
     
     if (profileError || !profile) {
-      console.error("User not found for mailbox:", mailboxIdPrefix, profileError);
+      console.error("User not found for mailbox:", recipientEmail, profileError);
       return new Response(
         JSON.stringify({ error: "User not found" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -80,7 +102,6 @@ serve(async (req) => {
     }
 
     console.log("Found user:", profile.id);
-
     // Create document content from email
     const documentContent = `
 # Document Received via Email

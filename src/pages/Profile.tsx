@@ -1043,36 +1043,101 @@ function formatPhoneNumber(value: string): string {
 
 // Mailbox Section Component
 function MailboxSection({ userId }: { userId?: string }) {
-  const [mailboxEmail, setMailboxEmail] = useState<string | null>(null);
+  const [mailboxId, setMailboxId] = useState<string | null>(null);
+  const [mailboxAlias, setMailboxAlias] = useState<string>("");
+  const [editingAlias, setEditingAlias] = useState(false);
+  const [aliasInput, setAliasInput] = useState("");
+  const [isSavingAlias, setIsSavingAlias] = useState(false);
   const [copied, setCopied] = useState(false);
   const { toast } = useGlobalToast();
 
   useEffect(() => {
-    const fetchMailboxId = async () => {
+    const fetchMailboxInfo = async () => {
       if (!userId) return;
       
       const { data: profile } = await supabase
         .from('profiles')
-        .select('mailbox_id')
+        .select('mailbox_id, mailbox_alias')
         .eq('id', userId)
         .single();
       
-      if (profile?.mailbox_id) {
-        setMailboxEmail(`docs-${profile.mailbox_id.slice(0, 8)}@inbox.miri360.health`);
+      if (profile) {
+        setMailboxId(profile.mailbox_id);
+        setMailboxAlias(profile.mailbox_alias || "");
       }
     };
-    fetchMailboxId();
+    fetchMailboxInfo();
   }, [userId]);
 
+  const displayEmail = mailboxAlias 
+    ? `${mailboxAlias}@miri360.com`
+    : mailboxId 
+      ? `docs-${mailboxId.slice(0, 8)}@inbox.miri360.health`
+      : null;
+
   const handleCopy = async () => {
-    if (!mailboxEmail) return;
-    await navigator.clipboard.writeText(mailboxEmail);
+    if (!displayEmail) return;
+    await navigator.clipboard.writeText(displayEmail);
     setCopied(true);
     toast({
       title: "Copied",
       description: "Mailbox email copied to clipboard",
     });
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSaveAlias = async () => {
+    if (!userId) return;
+    
+    // Validate alias format
+    const cleanAlias = aliasInput.toLowerCase().trim().replace(/[^a-z0-9-]/g, "");
+    if (cleanAlias.length < 3) {
+      toast({
+        title: "Invalid alias",
+        description: "Alias must be at least 3 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (cleanAlias.length > 30) {
+      toast({
+        title: "Invalid alias",
+        description: "Alias must be 30 characters or less",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSavingAlias(true);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ mailbox_alias: cleanAlias })
+      .eq('id', userId);
+
+    setIsSavingAlias(false);
+
+    if (error) {
+      if (error.code === '23505') {
+        toast({
+          title: "Alias taken",
+          description: "This alias is already in use. Please choose another.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to save alias",
+          variant: "destructive",
+        });
+      }
+    } else {
+      setMailboxAlias(cleanAlias);
+      setEditingAlias(false);
+      toast({
+        title: "Alias saved",
+        description: `Your mailbox email is now ${cleanAlias}@miri360.com`,
+      });
+    }
   };
 
   return (
@@ -1086,20 +1151,67 @@ function MailboxSection({ userId }: { userId?: string }) {
           <p className="text-sm text-muted-foreground mt-1">
             External parties (e.g., radiologists, labs) can email documents to this address and they will be saved under your Documents.
           </p>
-          {mailboxEmail ? (
-            <div className="flex items-center gap-2 mt-2">
-              <code className="inline-block text-sm font-medium text-primary bg-primary/10 px-3 py-1.5 rounded">
-                {mailboxEmail}
-              </code>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCopy}
-                className="gap-1.5 h-8"
-              >
-                {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                {copied ? "Copied" : "Copy"}
-              </Button>
+          
+          {displayEmail ? (
+            <div className="mt-3 space-y-3">
+              <div className="flex items-center gap-2">
+                <code className="inline-block text-sm font-medium text-primary bg-primary/10 px-3 py-1.5 rounded">
+                  {displayEmail}
+                </code>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCopy}
+                  className="gap-1.5 h-8"
+                >
+                  {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copied ? "Copied" : "Copy"}
+                </Button>
+              </div>
+              
+              {editingAlias ? (
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center border border-input rounded-md bg-background">
+                    <Input
+                      value={aliasInput}
+                      onChange={(e) => setAliasInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                      placeholder="dr-smith"
+                      className="border-0 w-32 h-8 text-sm"
+                      maxLength={30}
+                    />
+                    <span className="text-sm text-muted-foreground pr-2">@miri360.com</span>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={handleSaveAlias}
+                    disabled={isSavingAlias}
+                    className="h-8"
+                  >
+                    {isSavingAlias ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setEditingAlias(false)}
+                    className="h-8"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={() => {
+                    setAliasInput(mailboxAlias || "");
+                    setEditingAlias(true);
+                  }}
+                  className="h-auto p-0 text-primary"
+                >
+                  <Pencil className="h-3 w-3 mr-1" />
+                  {mailboxAlias ? "Change custom alias" : "Set custom alias"}
+                </Button>
+              )}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground mt-2">Loading...</p>
