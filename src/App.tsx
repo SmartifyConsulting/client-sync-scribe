@@ -35,6 +35,7 @@ import Invoices from "./pages/patient/Invoices";
 import PatientAccessManagement from "./pages/patient/PatientAccessManagement";
 import MyRewards from "./pages/patient/MyRewards";
 import HealthAlbum from "./pages/patient/HealthAlbum";
+import MyDoctors from "./pages/patient/MyDoctors";
 import DoctorInvoices from "./pages/doctor/Invoices";
 import PricingAdmin from "./pages/admin/PricingAdmin";
 import GamificationAdmin from "./pages/admin/GamificationAdmin";
@@ -112,6 +113,7 @@ const App = () => (
             <Route path="/connections" element={<Connections />} />
             
             {/* Patient routes */}
+            <Route path="/patient/doctors" element={<MyDoctors />} />
             <Route path="/patient/calendar" element={<PatientCalendar />} />
             <Route path="/patient/prescriptions" element={<PrescriptionHistory />} />
             <Route path="/patient/invoices" element={<Invoices />} />

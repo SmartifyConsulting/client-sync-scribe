@@ -43,6 +43,8 @@ export interface Patient {
   height_cm: number | null;
   weight_kg: number | null;
   surgeries: Surgery[] | null;
+  id_passport_number: string | null;
+  gender: string | null;
   last_visit?: string | null;
 }
 

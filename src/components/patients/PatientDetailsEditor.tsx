@@ -30,6 +30,8 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
     employer: "",
     referred_by: "",
     marital_status: "",
+    id_passport_number: "",
+    gender: "",
     physical_address: "",
     postal_address: "",
     same_as_physical: false,
@@ -62,6 +64,8 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         employer: patient.employer || "",
         referred_by: patient.referred_by || "",
         marital_status: patient.marital_status || "",
+        id_passport_number: patient.id_passport_number || "",
+        gender: patient.gender || "",
         physical_address: patient.physical_address || "",
         postal_address: patient.postal_address || "",
         same_as_physical: patient.same_as_physical || false,
@@ -98,6 +102,8 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
       employer: data.employer || null,
       referred_by: data.referred_by || null,
       marital_status: data.marital_status || null,
+      id_passport_number: data.id_passport_number || null,
+      gender: data.gender || null,
       physical_address: data.physical_address || null,
       postal_address: data.same_as_physical ? data.physical_address : (data.postal_address || null),
       same_as_physical: data.same_as_physical,
@@ -182,6 +188,8 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
       employer: patient.employer || "",
       referred_by: patient.referred_by || "",
       marital_status: patient.marital_status || "",
+      id_passport_number: patient.id_passport_number || "",
+      gender: patient.gender || "",
       physical_address: patient.physical_address || "",
       postal_address: patient.postal_address || "",
       same_as_physical: patient.same_as_physical || false,
@@ -236,6 +244,14 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             <div>
               <p className="text-sm text-muted-foreground">Full Name</p>
               <p className="mt-1 text-foreground">{patient.name}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">ID/Passport Number</p>
+              <p className="mt-1 text-foreground">{patient.id_passport_number || "Not provided"}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Gender</p>
+              <p className="mt-1 text-foreground">{patient.gender || "Not provided"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Date of Birth</p>
@@ -464,6 +480,31 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
               onChange={(e) => updateFormData({ name: e.target.value })}
               placeholder="Patient name"
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="id_passport_number">ID/Passport Number</Label>
+            <Input
+              id="id_passport_number"
+              value={formData.id_passport_number}
+              onChange={(e) => updateFormData({ id_passport_number: e.target.value })}
+              placeholder="ID or passport number"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="gender">Gender</Label>
+            <Select
+              value={formData.gender}
+              onValueChange={(value) => updateFormData({ gender: value })}
+            >
+              <SelectTrigger id="gender">
+                <SelectValue placeholder="Select gender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Male">Male</SelectItem>
+                <SelectItem value="Female">Female</SelectItem>
+                <SelectItem value="Other">Other</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="dob">Date of Birth</Label>
