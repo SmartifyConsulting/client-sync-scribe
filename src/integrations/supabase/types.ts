@@ -530,6 +530,57 @@ export type Database = {
           },
         ]
       }
+      patient_streaks: {
+        Row: {
+          created_at: string
+          current_streak: number
+          id: string
+          last_completed_at: string | null
+          longest_streak: number
+          next_due_at: string | null
+          patient_id: string
+          streak_config_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_completed_at?: string | null
+          longest_streak?: number
+          next_due_at?: string | null
+          patient_id: string
+          streak_config_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_completed_at?: string | null
+          longest_streak?: number
+          next_due_at?: string | null
+          patient_id?: string
+          streak_config_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_streaks_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_streaks_streak_config_id_fkey"
+            columns: ["streak_config_id"]
+            isOneToOne: false
+            referencedRelation: "streak_config"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patients: {
         Row: {
           address: string | null
@@ -1017,6 +1068,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      streak_config: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          lollipops_awarded: number
+          streak_interval_months: number
+          streak_name: string
+          updated_at: string
+          visit_category: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          lollipops_awarded?: number
+          streak_interval_months?: number
+          streak_name: string
+          updated_at?: string
+          visit_category: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          lollipops_awarded?: number
+          streak_interval_months?: number
+          streak_name?: string
+          updated_at?: string
+          visit_category?: string
+        }
+        Relationships: []
       }
       subscriptions: {
         Row: {

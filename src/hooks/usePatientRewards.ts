@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { addMonths } from 'date-fns';
 
 export interface PatientReward {
   id: string;
@@ -20,6 +21,31 @@ export interface GamificationConfig {
   lollipops_awarded: number;
   description: string | null;
   is_active: boolean;
+}
+
+export interface StreakConfig {
+  id: string;
+  streak_name: string;
+  visit_category: string;
+  streak_interval_months: number;
+  lollipops_awarded: number;
+  description: string | null;
+  is_active: boolean;
+}
+
+export interface PatientStreak {
+  id: string;
+  patient_id: string;
+  streak_config_id: string;
+  current_streak: number;
+  longest_streak: number;
+  last_completed_at: string | null;
+  next_due_at: string | null;
+  // Joined fields
+  streak_name?: string;
+  visit_category?: string;
+  lollipops_awarded?: number;
+  description?: string | null;
 }
 
 export function usePatientRewards(patientId?: string) {
@@ -60,7 +86,6 @@ export function usePatientRewards(patientId?: string) {
       if (error) throw error;
 
       setRewards(data || []);
-      // Sum up all lollipops_count
       const totalLollipops = (data || []).reduce((sum, r) => sum + (r.lollipops_count || 1), 0);
       setLollipopCount(totalLollipops);
     } catch (error: any) {
@@ -75,6 +100,90 @@ export function usePatientRewards(patientId?: string) {
       c => c.visit_category.toLowerCase() === category.toLowerCase()
     );
     return config?.lollipops_awarded || 1;
+  };
+
+  const updateStreak = async (
+    patientId: string,
+    visitCategory: string,
+    patientUserId?: string | null
+  ) => {
+    try {
+      // Find matching streak config
+      const { data: streakConfigs } = await supabase
+        .from('streak_config')
+        .select('*')
+        .eq('visit_category', visitCategory)
+        .eq('is_active', true);
+
+      if (!streakConfigs || streakConfigs.length === 0) return;
+
+      for (const config of streakConfigs) {
+        // Get or create patient streak
+        const { data: existingStreak } = await supabase
+          .from('patient_streaks')
+          .select('*')
+          .eq('patient_id', patientId)
+          .eq('streak_config_id', config.id)
+          .maybeSingle();
+
+        const now = new Date();
+        const nextDue = addMonths(now, config.streak_interval_months);
+
+        if (existingStreak) {
+          // Check if within streak window
+          const isWithinWindow = existingStreak.next_due_at 
+            ? new Date(existingStreak.next_due_at) >= now 
+            : true;
+
+          const newStreak = isWithinWindow ? existingStreak.current_streak + 1 : 1;
+          const longestStreak = Math.max(newStreak, existingStreak.longest_streak);
+
+          await supabase
+            .from('patient_streaks')
+            .update({
+              current_streak: newStreak,
+              longest_streak: longestStreak,
+              last_completed_at: now.toISOString(),
+              next_due_at: nextDue.toISOString(),
+              updated_at: now.toISOString(),
+            })
+            .eq('id', existingStreak.id);
+
+          // Award streak bonus if maintaining streak
+          if (newStreak > 1 && patientUserId) {
+            await supabase.from('notifications').insert({
+              user_id: patientUserId,
+              title: `🔥 ${newStreak} visit streak for ${config.streak_name}!`,
+              description: `Keep it up! You've maintained your ${config.streak_name} streak for ${newStreak} consecutive visits.`,
+              type: 'streak',
+            });
+          }
+        } else {
+          // Create new streak
+          await supabase
+            .from('patient_streaks')
+            .insert({
+              patient_id: patientId,
+              streak_config_id: config.id,
+              current_streak: 1,
+              longest_streak: 1,
+              last_completed_at: now.toISOString(),
+              next_due_at: nextDue.toISOString(),
+            });
+
+          if (patientUserId) {
+            await supabase.from('notifications').insert({
+              user_id: patientUserId,
+              title: `🔥 Started ${config.streak_name} streak!`,
+              description: `Great start! Complete your next ${config.visit_category} within ${config.streak_interval_months} months to maintain your streak.`,
+              type: 'streak',
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error updating streak:', error);
+    }
   };
 
   const awardLollipop = async (
@@ -109,6 +218,9 @@ export function usePatientRewards(patientId?: string) {
 
       setRewards((prev) => [data, ...prev]);
       setLollipopCount((prev) => prev + lollipopsToAward);
+
+      // Update streaks for this visit category
+      await updateStreak(patientId, visitCategory, patientUserId);
 
       // Create notification for the patient if they have a user account
       if (patientUserId) {
@@ -256,6 +368,79 @@ export function useMyRewards() {
   return { rewards, lollipopCount, loading };
 }
 
+// Hook for patients to view their streaks
+export function useMyStreaks() {
+  const [streaks, setStreaks] = useState<PatientStreak[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMyStreaks = async () => {
+      try {
+        setLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Find patient record linked to this user
+        const { data: patientData } = await supabase
+          .from('patients')
+          .select('id')
+          .eq('patient_user_id', user.id)
+          .maybeSingle();
+
+        if (!patientData) {
+          setLoading(false);
+          return;
+        }
+
+        // Get all streak configs
+        const { data: configs } = await supabase
+          .from('streak_config')
+          .select('*')
+          .eq('is_active', true);
+
+        if (!configs) {
+          setLoading(false);
+          return;
+        }
+
+        // Get patient's streaks
+        const { data: patientStreaks } = await supabase
+          .from('patient_streaks')
+          .select('*')
+          .eq('patient_id', patientData.id);
+
+        // Merge configs with patient data
+        const mergedStreaks: PatientStreak[] = configs.map(config => {
+          const existing = patientStreaks?.find(s => s.streak_config_id === config.id);
+          return {
+            id: existing?.id || config.id,
+            patient_id: patientData.id,
+            streak_config_id: config.id,
+            current_streak: existing?.current_streak || 0,
+            longest_streak: existing?.longest_streak || 0,
+            last_completed_at: existing?.last_completed_at || null,
+            next_due_at: existing?.next_due_at || null,
+            streak_name: config.streak_name,
+            visit_category: config.visit_category,
+            lollipops_awarded: config.lollipops_awarded,
+            description: config.description,
+          };
+        });
+
+        setStreaks(mergedStreaks);
+      } catch (error: any) {
+        console.error('Error fetching my streaks:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMyStreaks();
+  }, []);
+
+  return { streaks, loading };
+}
+
 // Hook for gamification admin
 export function useGamificationAdmin() {
   const { toast } = useToast();
@@ -345,5 +530,97 @@ export function useGamificationAdmin() {
     updateConfig,
     createConfig,
     deleteConfig,
+  };
+}
+
+// Hook for streak admin
+export function useStreakAdmin() {
+  const { toast } = useToast();
+  const [streakConfigs, setStreakConfigs] = useState<StreakConfig[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchStreakConfigs = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('streak_config')
+        .select('*')
+        .order('streak_name');
+
+      if (error) throw error;
+      setStreakConfigs(data || []);
+    } catch (error: any) {
+      console.error('Error fetching streak config:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateStreakConfig = async (id: string, updates: Partial<StreakConfig>) => {
+    try {
+      const { error } = await supabase
+        .from('streak_config')
+        .update(updates)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setStreakConfigs(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+      toast({ title: 'Updated', description: 'Streak config updated successfully' });
+      return true;
+    } catch (error: any) {
+      toast({ title: 'Error', description: 'Failed to update streak config', variant: 'destructive' });
+      return false;
+    }
+  };
+
+  const createStreakConfig = async (config: Omit<StreakConfig, 'id'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('streak_config')
+        .insert(config)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setStreakConfigs(prev => [...prev, data]);
+      toast({ title: 'Created', description: 'New streak category added' });
+      return data;
+    } catch (error: any) {
+      toast({ title: 'Error', description: 'Failed to create streak config', variant: 'destructive' });
+      return null;
+    }
+  };
+
+  const deleteStreakConfig = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('streak_config')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setStreakConfigs(prev => prev.filter(c => c.id !== id));
+      toast({ title: 'Deleted', description: 'Streak category removed' });
+      return true;
+    } catch (error: any) {
+      toast({ title: 'Error', description: 'Failed to delete streak config', variant: 'destructive' });
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    fetchStreakConfigs();
+  }, []);
+
+  return {
+    streakConfigs,
+    loading,
+    fetchStreakConfigs,
+    updateStreakConfig,
+    createStreakConfig,
+    deleteStreakConfig,
   };
 }
