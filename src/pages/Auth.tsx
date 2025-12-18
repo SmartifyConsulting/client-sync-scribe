@@ -357,6 +357,40 @@ export default function Auth() {
                   permissions: ["patient_info", "calendar", "session_summaries", "prescription_history"],
                   is_active: true,
                 });
+
+                // Award signup bonus lollipop
+                const { data: signupConfig } = await supabase
+                  .from("gamification_config")
+                  .select("lollipops_awarded")
+                  .eq("visit_category", "Signup Bonus")
+                  .eq("is_active", true)
+                  .maybeSingle();
+
+                const signupLollipops = signupConfig?.lollipops_awarded || 1;
+
+                const { data: rewardData } = await supabase
+                  .from("patient_rewards")
+                  .insert({
+                    patient_id: invitation.patient_id,
+                    session_id: null,
+                    reward_type: "lollipop",
+                    visit_category: "Signup Bonus",
+                    lollipops_count: signupLollipops,
+                    awarded_by: data.user.id,
+                  })
+                  .select()
+                  .single();
+
+                // Create welcome notification
+                if (rewardData) {
+                  await supabase.from("notifications").insert({
+                    user_id: data.user.id,
+                    title: `🍭 Welcome! You earned ${signupLollipops} lollipop${signupLollipops > 1 ? "s" : ""}!`,
+                    description: `Congratulations on signing up! You received ${signupLollipops} lollipop${signupLollipops > 1 ? "s" : ""} as a welcome bonus.`,
+                    type: "reward",
+                    reference_id: rewardData.id,
+                  });
+                }
               }
             }
           }

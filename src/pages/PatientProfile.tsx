@@ -33,6 +33,7 @@ import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor
 import { RequestConnectionButton } from "@/components/patients/RequestConnectionButton";
 import { RoundTable } from "@/components/patients/RoundTable";
 import { LollipopDisplay } from "@/components/gamification/LollipopDisplay";
+import { LollipopReport } from "@/components/gamification/LollipopReport";
 import { useTemplates } from "@/hooks/useTemplates";
 import { useDocuments } from "@/hooks/useDocuments";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
@@ -50,7 +51,7 @@ export default function PatientProfile() {
   const { toast } = useToast();
   const { patient, loading: patientLoading, updatePatient } = usePatient(id || "");
   const { sessions, loading: sessionsLoading } = useSessions(id);
-  const { lollipopCount, rewards: patientRewards } = usePatientRewards(id);
+  const { lollipopCount, rewards: patientRewards, loading: rewardsLoading } = usePatientRewards(id);
   const { templates, loading: templatesLoading } = useTemplates();
   const { documents, loading: documentsLoading, fetchDocuments } = useDocuments();
   
@@ -268,6 +269,9 @@ export default function PatientProfile() {
           <TabsTrigger value="details" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Details</TabsTrigger>
           <TabsTrigger value="overview" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Overview</TabsTrigger>
           <TabsTrigger value="sessions" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Session History</TabsTrigger>
+          <TabsTrigger value="lollipops" className="rounded-lg px-4 py-2.5 gap-1.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            🍭 Lollipops
+          </TabsTrigger>
           <TabsTrigger value="doctors" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Doctors</TabsTrigger>
           <TabsTrigger value="documents" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Documents</TabsTrigger>
           <TabsTrigger value="notes" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Notes</TabsTrigger>
@@ -278,6 +282,11 @@ export default function PatientProfile() {
             )}
           </TabsTrigger>
         </TabsList>
+
+        {/* Lollipops Tab - Reward Report */}
+        <TabsContent value="lollipops">
+          <LollipopReport rewards={patientRewards} loading={rewardsLoading} totalCount={lollipopCount} />
+        </TabsContent>
 
         {/* Overview Tab - AI Summary */}
         <TabsContent value="overview">

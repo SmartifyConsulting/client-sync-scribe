@@ -229,6 +229,36 @@ export type Database = {
           },
         ]
       }
+      gamification_config: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          lollipops_awarded: number
+          updated_at: string
+          visit_category: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          lollipops_awarded?: number
+          updated_at?: string
+          visit_category: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          lollipops_awarded?: number
+          updated_at?: string
+          visit_category?: string
+        }
+        Relationships: []
+      }
       header_footer_templates: {
         Row: {
           created_at: string
@@ -455,6 +485,7 @@ export type Database = {
           awarded_by: string
           created_at: string
           id: string
+          lollipops_count: number
           patient_id: string
           reward_type: string
           session_id: string | null
@@ -465,6 +496,7 @@ export type Database = {
           awarded_by: string
           created_at?: string
           id?: string
+          lollipops_count?: number
           patient_id: string
           reward_type?: string
           session_id?: string | null
@@ -475,6 +507,7 @@ export type Database = {
           awarded_by?: string
           created_at?: string
           id?: string
+          lollipops_count?: number
           patient_id?: string
           reward_type?: string
           session_id?: string | null

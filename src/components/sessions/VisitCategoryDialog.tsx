@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { QUALIFYING_VISIT_CATEGORIES } from "@/hooks/usePatientRewards";
 
 interface VisitCategoryDialogProps {
   open: boolean;
