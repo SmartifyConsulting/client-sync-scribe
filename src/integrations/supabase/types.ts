@@ -910,6 +910,7 @@ export type Database = {
           doctor_number: string | null
           full_name: string | null
           id: string
+          inactive_threshold_months: number | null
           logo_url: string | null
           mailbox_alias: string | null
           mailbox_id: string
@@ -927,6 +928,7 @@ export type Database = {
           doctor_number?: string | null
           full_name?: string | null
           id: string
+          inactive_threshold_months?: number | null
           logo_url?: string | null
           mailbox_alias?: string | null
           mailbox_id?: string
@@ -944,6 +946,7 @@ export type Database = {
           doctor_number?: string | null
           full_name?: string | null
           id?: string
+          inactive_threshold_months?: number | null
           logo_url?: string | null
           mailbox_alias?: string | null
           mailbox_id?: string
