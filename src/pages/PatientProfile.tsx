@@ -21,6 +21,7 @@ import { usePatient } from "@/hooks/usePatients";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSessions } from "@/hooks/useSessions";
+import { usePatientRewards } from "@/hooks/usePatientRewards";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCard } from "@/components/patients/SessionCard";
@@ -31,6 +32,7 @@ import { DoctorsOnProfile } from "@/components/patients/DoctorsOnProfile";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { RequestConnectionButton } from "@/components/patients/RequestConnectionButton";
 import { RoundTable } from "@/components/patients/RoundTable";
+import { LollipopDisplay } from "@/components/gamification/LollipopDisplay";
 import { useTemplates } from "@/hooks/useTemplates";
 import { useDocuments } from "@/hooks/useDocuments";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
@@ -48,6 +50,7 @@ export default function PatientProfile() {
   const { toast } = useToast();
   const { patient, loading: patientLoading, updatePatient } = usePatient(id || "");
   const { sessions, loading: sessionsLoading } = useSessions(id);
+  const { lollipopCount, rewards: patientRewards } = usePatientRewards(id);
   const { templates, loading: templatesLoading } = useTemplates();
   const { documents, loading: documentsLoading, fetchDocuments } = useDocuments();
   
@@ -207,7 +210,7 @@ export default function PatientProfile() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
         <div className="rounded-xl bg-card p-4 shadow-sm border border-border/50">
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-muted-foreground">Total Sessions</p>
@@ -245,6 +248,16 @@ export default function PatientProfile() {
           </div>
           <p className="mt-2 text-2xl font-bold text-foreground">
             {format(new Date(patient.created_at), "MMM yyyy")}
+          </p>
+        </div>
+        {/* Lollipop Rewards */}
+        <div className="rounded-xl bg-gradient-to-br from-pink-50 to-purple-50 dark:from-pink-950/20 dark:to-purple-950/20 p-4 shadow-sm border border-pink-200 dark:border-pink-800/30">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-muted-foreground">Lollipops</p>
+            <span className="text-lg">🍭</span>
+          </div>
+          <p className="mt-2 text-2xl font-bold text-pink-600 dark:text-pink-400">
+            {lollipopCount}
           </p>
         </div>
       </div>

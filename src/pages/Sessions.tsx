@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
+import { VisitCategoryDialog } from "@/components/sessions/VisitCategoryDialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -74,6 +75,8 @@ export default function Sessions() {
   const [aiDiagnosis, setAiDiagnosis] = useState<string | null>(null);
   const [isGeneratingDiagnosis, setIsGeneratingDiagnosis] = useState(false);
   const [pastPatientSessions, setPastPatientSessions] = useState<any[]>([]);
+  const [showVisitCategoryDialog, setShowVisitCategoryDialog] = useState(false);
+  const [pendingTranscript, setPendingTranscript] = useState<string>("");
   const pendingCompletionRef = useRef(false);
   const latestTranscriptRef = useRef<string>("");
   const currentSessionIdRef = useRef<string | null>(null);
@@ -192,10 +195,11 @@ export default function Sessions() {
   }, [notes]);
 
   // Callback to handle session completion after transcription
-  const handleSessionComplete = useCallback(async (transcriptText: string) => {
+  const handleSessionComplete = useCallback(async (transcriptText: string, visitCategory?: string | null) => {
     console.log("=== handleSessionComplete START ===");
     console.log("transcriptText length:", transcriptText?.length);
     console.log("sessionId:", currentSessionIdRef.current);
+    console.log("visitCategory:", visitCategory);
     
     setSessionState("processing");
     
@@ -209,7 +213,7 @@ export default function Sessions() {
       try {
         if (fullContent) {
           console.log("Calling completeSession with content...");
-          const result = await completeSession(sessionId, fullContent, currentNotes);
+          const result = await completeSession(sessionId, fullContent, currentNotes, visitCategory || undefined);
           console.log("completeSession result:", result);
           if (result) {
             setSummary(result.summary || "Session completed successfully.");
@@ -250,6 +254,13 @@ export default function Sessions() {
     console.log("=== handleSessionComplete END ===");
   }, [completeSession]);
 
+  // Handle visit category selection
+  const handleVisitCategoryConfirm = async (category: string | null) => {
+    setShowVisitCategoryDialog(false);
+    await handleSessionComplete(pendingTranscript, category);
+    setPendingTranscript("");
+  };
+
   const { 
     isRecording, 
     isTranscribing, 
@@ -273,10 +284,12 @@ export default function Sessions() {
       latestTranscriptRef.current = text;
       setNotes(prev => prev ? `${prev}\n\n${text}` : text);
       
-      // If pending completion, trigger it now with the transcript
+      // If pending completion, show visit category dialog
       if (pendingCompletionRef.current) {
-        console.log("Pending completion - triggering handleSessionComplete with transcript");
-        handleSessionComplete(text);
+        console.log("Pending completion - showing visit category dialog");
+        setPendingTranscript(text);
+        setShowVisitCategoryDialog(true);
+        pendingCompletionRef.current = false;
       }
     },
     onAudioSaved: async (audioStorageUrl) => {
@@ -355,7 +368,7 @@ export default function Sessions() {
     console.log("isRecording:", isRecording, "isTranscribing:", isTranscribing);
     
     if (isRecording || isTranscribing) {
-      // Set pending flag - onTranscriptionComplete will handle completion
+      // Set pending flag - onTranscriptionComplete will show dialog
       console.log("Recording/transcribing in progress, setting pending flag...");
       pendingCompletionRef.current = true;
       if (isRecording) {
@@ -364,14 +377,22 @@ export default function Sessions() {
       return;
     }
     
-    // No recording/transcription in progress - complete immediately
-    console.log("No recording in progress, completing immediately");
+    // No recording/transcription in progress - show visit category dialog
+    console.log("No recording in progress, showing visit category dialog");
     const fullContent = latestTranscriptRef.current || transcript || notes;
-    await handleSessionComplete(fullContent || '');
+    setPendingTranscript(fullContent || '');
+    setShowVisitCategoryDialog(true);
   };
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Visit Category Dialog */}
+      <VisitCategoryDialog
+        open={showVisitCategoryDialog}
+        onOpenChange={setShowVisitCategoryDialog}
+        onConfirm={handleVisitCategoryConfirm}
+        patientName={currentPatient?.name}
+      />
       {/* Header with Back Link */}
       <div className="flex items-center gap-4">
         {currentPatient && (

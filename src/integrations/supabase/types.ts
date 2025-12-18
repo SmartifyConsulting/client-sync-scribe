@@ -449,6 +449,54 @@ export type Database = {
           },
         ]
       }
+      patient_rewards: {
+        Row: {
+          awarded_at: string
+          awarded_by: string
+          created_at: string
+          id: string
+          patient_id: string
+          reward_type: string
+          session_id: string | null
+          visit_category: string
+        }
+        Insert: {
+          awarded_at?: string
+          awarded_by: string
+          created_at?: string
+          id?: string
+          patient_id: string
+          reward_type?: string
+          session_id?: string | null
+          visit_category: string
+        }
+        Update: {
+          awarded_at?: string
+          awarded_by?: string
+          created_at?: string
+          id?: string
+          patient_id?: string
+          reward_type?: string
+          session_id?: string | null
+          visit_category?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_rewards_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_rewards_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patients: {
         Row: {
           address: string | null
