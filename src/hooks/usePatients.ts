@@ -69,6 +69,15 @@ const toDbPatient = (updates: Partial<Patient>): Record<string, any> => {
   };
 };
 
+// Helper to determine if patient should be inactive based on last visit and threshold
+const shouldBeInactive = (lastVisit: string | null, thresholdMonths: number): boolean => {
+  if (!lastVisit) return false; // No visits yet, keep status as-is
+  const lastVisitDate = new Date(lastVisit);
+  const thresholdDate = new Date();
+  thresholdDate.setMonth(thresholdDate.getMonth() - thresholdMonths);
+  return lastVisitDate < thresholdDate;
+};
+
 export function usePatients() {
   const { toast } = useToast();
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -77,6 +86,23 @@ export function usePatients() {
   const fetchPatients = async () => {
     try {
       setLoading(true);
+      
+      // First get the user's inactive threshold setting
+      const { data: { user } } = await supabase.auth.getUser();
+      let inactiveThresholdMonths = 12; // Default to 12 months
+      
+      if (user) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('inactive_threshold_months')
+          .eq('id', user.id)
+          .single();
+        
+        if (profileData?.inactive_threshold_months) {
+          inactiveThresholdMonths = profileData.inactive_threshold_months;
+        }
+      }
+      
       const { data, error } = await supabase
         .from('patients')
         .select('*')
@@ -84,7 +110,7 @@ export function usePatients() {
 
       if (error) throw error;
 
-      // Fetch last visit for each patient
+      // Fetch last visit for each patient and update status if needed
       const patientsWithLastVisit = await Promise.all(
         (data || []).map(async (patient) => {
           const { data: sessionData } = await supabase
@@ -96,7 +122,28 @@ export function usePatients() {
             .limit(1)
             .maybeSingle();
           
-          return toPatient(patient, sessionData?.started_at || null);
+          const lastVisit = sessionData?.started_at || null;
+          const typedPatient = toPatient(patient, lastVisit);
+          
+          // Auto-update status based on last visit threshold
+          const shouldSetInactive = shouldBeInactive(lastVisit, inactiveThresholdMonths);
+          if (shouldSetInactive && typedPatient.status === 'active') {
+            // Update patient status to inactive in database
+            await supabase
+              .from('patients')
+              .update({ status: 'inactive' })
+              .eq('id', patient.id);
+            typedPatient.status = 'inactive';
+          } else if (!shouldSetInactive && lastVisit && typedPatient.status === 'inactive') {
+            // Reactivate if they visited recently (within threshold)
+            await supabase
+              .from('patients')
+              .update({ status: 'active' })
+              .eq('id', patient.id);
+            typedPatient.status = 'active';
+          }
+          
+          return typedPatient;
         })
       );
 

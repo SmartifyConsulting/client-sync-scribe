@@ -15,6 +15,7 @@ import {
   ExternalLink,
   XCircle,
   RotateCcw,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -48,6 +49,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Plan pricing will be loaded from database
 interface PlanConfig {
@@ -117,6 +125,10 @@ export default function Settings() {
   });
   const [loadingPricing, setLoadingPricing] = useState(true);
 
+  // Patient management state (doctors only)
+  const [inactiveThreshold, setInactiveThreshold] = useState<number>(12);
+  const [savingThreshold, setSavingThreshold] = useState(false);
+
   // Get the appropriate plan type based on user role
   const planType = role === "patient" ? "patient" : "doctor";
 
@@ -125,8 +137,11 @@ export default function Settings() {
       fetchMfaFactors();
       fetchSubscription();
       fetchPaymentHistory();
+      if (role === "doctor") {
+        fetchInactiveThreshold();
+      }
     }
-  }, [user]);
+  }, [user, role]);
 
   useEffect(() => {
     fetchPricing();
@@ -237,6 +252,50 @@ export default function Settings() {
       console.error("Error fetching MFA factors:", error);
     } finally {
       setLoadingMfa(false);
+    }
+  };
+
+  const fetchInactiveThreshold = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("inactive_threshold_months")
+        .eq("id", user.id)
+        .single();
+
+      if (!error && data?.inactive_threshold_months) {
+        setInactiveThreshold(data.inactive_threshold_months);
+      }
+    } catch (error) {
+      console.error("Error fetching inactive threshold:", error);
+    }
+  };
+
+  const saveInactiveThreshold = async (months: number) => {
+    if (!user) return;
+    setSavingThreshold(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ inactive_threshold_months: months })
+        .eq("id", user.id);
+
+      if (error) throw error;
+      
+      setInactiveThreshold(months);
+      toast({
+        title: "Setting saved",
+        description: `Patients will be marked inactive after ${months} months without a visit.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to save setting",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingThreshold(false);
     }
   };
 
@@ -565,6 +624,43 @@ mIRI360
           </div>
         </div>
       </div>
+
+      {/* Patient Management (Doctors only) */}
+      {role === "doctor" && (
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-6">
+            <Users className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold text-foreground">Patient Management</h2>
+          </div>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-foreground">Patient Inactivity Threshold</p>
+                <p className="text-sm text-muted-foreground">
+                  Automatically mark patients as inactive after this period without a visit
+                </p>
+              </div>
+              <Select
+                value={inactiveThreshold.toString()}
+                onValueChange={(value) => saveInactiveThreshold(parseInt(value))}
+                disabled={savingThreshold}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select period" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="3">3 months</SelectItem>
+                  <SelectItem value="6">6 months</SelectItem>
+                  <SelectItem value="9">9 months</SelectItem>
+                  <SelectItem value="12">12 months (default)</SelectItem>
+                  <SelectItem value="18">18 months</SelectItem>
+                  <SelectItem value="24">24 months</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Security */}
       <div className="rounded-xl border border-border bg-card p-6 shadow-sm">

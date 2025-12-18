@@ -14,6 +14,7 @@ export interface Profile {
   role: 'doctor' | 'patient' | null;
   specialty: string | null;
   mobile_number: string | null;
+  inactive_threshold_months: number | null;
   created_at: string;
   updated_at: string;
 }
