@@ -33,8 +33,6 @@ import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor
 import { RequestConnectionButton } from "@/components/patients/RequestConnectionButton";
 import { RoundTable } from "@/components/patients/RoundTable";
 import { LollipopDisplay } from "@/components/gamification/LollipopDisplay";
-import { LollipopReport } from "@/components/gamification/LollipopReport";
-import { PatientHealthPhotoStats } from "@/components/patients/PatientHealthPhotoStats";
 import { useTemplates } from "@/hooks/useTemplates";
 import { useDocuments } from "@/hooks/useDocuments";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
@@ -52,7 +50,7 @@ export default function PatientProfile() {
   const { toast } = useToast();
   const { patient, loading: patientLoading, updatePatient } = usePatient(id || "");
   const { sessions, loading: sessionsLoading } = useSessions(id);
-  const { lollipopCount, rewards: patientRewards, loading: rewardsLoading } = usePatientRewards(id);
+  const { lollipopCount } = usePatientRewards(id);
   const { templates, loading: templatesLoading } = useTemplates();
   const { documents, loading: documentsLoading, fetchDocuments } = useDocuments();
   
@@ -279,23 +277,7 @@ export default function PatientProfile() {
               <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
             )}
           </TabsTrigger>
-          <TabsTrigger value="photos" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
-            Photos
-          </TabsTrigger>
-          <TabsTrigger value="lollipops" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
-            Lollipops
-          </TabsTrigger>
         </TabsList>
-
-        {/* Health Photos Tab - Statistics Only (photos are private) */}
-        <TabsContent value="photos">
-          <PatientHealthPhotoStats patientId={patient.id} />
-        </TabsContent>
-
-        {/* Lollipops Tab - Reward Report */}
-        <TabsContent value="lollipops">
-          <LollipopReport rewards={patientRewards} loading={rewardsLoading} totalCount={lollipopCount} />
-        </TabsContent>
 
         {/* Overview Tab - AI Summary */}
         <TabsContent value="overview">
