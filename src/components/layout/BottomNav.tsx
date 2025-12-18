@@ -13,7 +13,7 @@ import {
 import { useUserRole } from "@/hooks/useUserRole";
 
 const doctorNavItems = [
-  { icon: LayoutDashboard, label: "Home", to: "/" },
+  { icon: LayoutDashboard, label: "Home", to: "/dashboard" },
   { icon: Users, label: "Patients", to: "/patients" },
   { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
@@ -21,7 +21,7 @@ const doctorNavItems = [
 ];
 
 const patientNavItems = [
-  { icon: LayoutDashboard, label: "Home", to: "/" },
+  { icon: LayoutDashboard, label: "Home", to: "/dashboard" },
   { icon: Calendar, label: "Calendar", to: "/patient/calendar" },
   { icon: Pill, label: "Rx", to: "/patient/prescriptions" },
   { icon: Receipt, label: "Invoices", to: "/patient/invoices" },

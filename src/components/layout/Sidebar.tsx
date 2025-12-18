@@ -33,7 +33,7 @@ interface NavItem {
 }
 
 const doctorNavItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Dashboard", to: "/" },
+  { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard" },
   { icon: Bell, label: "Notifications", to: "/notifications" },
   { icon: Users2, label: "Connections", to: "/connections" },
   { icon: CheckSquare, label: "To-Do List", to: "/todos" },
@@ -45,7 +45,7 @@ const doctorNavItems: NavItem[] = [
 ];
 
 const patientNavItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Dashboard", to: "/" },
+  { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard" },
   { icon: Bell, label: "Notifications", to: "/notifications" },
   { icon: Users2, label: "Connections", to: "/connections" },
   { icon: Gift, label: "My Rewards", to: "/patient/rewards" },
@@ -56,7 +56,7 @@ const patientNavItems: NavItem[] = [
 ];
 
 const adminNavItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Dashboard", to: "/" },
+  { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard" },
   { icon: DollarSign, label: "Pricing", to: "/admin/pricing" },
   { icon: Gift, label: "Gamification", to: "/admin/gamification" },
 ];
@@ -127,7 +127,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                     "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
                     isActive
                       ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-foreground hover:bg-sidebar-accent hover:text-primary-foreground",
+                      : "text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                   )
                 }
               >
@@ -165,7 +165,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                   "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
                   isActive
                     ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-primary hover:bg-sidebar-accent hover:text-primary-foreground",
+                    : "text-primary hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                 )
               }
             >
@@ -180,7 +180,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                   "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
                   isActive
                     ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-primary hover:bg-sidebar-accent hover:text-primary-foreground",
+                    : "text-primary hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                 )
               }
             >
