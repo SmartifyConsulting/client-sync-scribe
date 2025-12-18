@@ -8,7 +8,7 @@ import {
   Settings,
   Pill,
   Receipt,
-  Camera,
+  Stethoscope,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 
@@ -22,7 +22,7 @@ const doctorNavItems = [
 
 const patientNavItems = [
   { icon: LayoutDashboard, label: "Home", to: "/dashboard" },
-  { icon: Camera, label: "Album", to: "/patient/health-album" },
+  { icon: Stethoscope, label: "Doctors", to: "/patient/doctors" },
   { icon: Calendar, label: "Calendar", to: "/patient/calendar" },
   { icon: Pill, label: "Rx", to: "/patient/prescriptions" },
   { icon: Receipt, label: "Invoices", to: "/patient/invoices" },

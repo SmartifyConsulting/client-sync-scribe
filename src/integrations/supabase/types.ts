@@ -637,9 +637,11 @@ export type Database = {
           dob: string | null
           email: string | null
           employer: string | null
+          gender: string | null
           general_practitioner: string | null
           height_cm: number | null
           id: string
+          id_passport_number: string | null
           marital_status: string | null
           medical_aid: string | null
           medical_aid_number: string | null
@@ -672,9 +674,11 @@ export type Database = {
           dob?: string | null
           email?: string | null
           employer?: string | null
+          gender?: string | null
           general_practitioner?: string | null
           height_cm?: number | null
           id?: string
+          id_passport_number?: string | null
           marital_status?: string | null
           medical_aid?: string | null
           medical_aid_number?: string | null
@@ -707,9 +711,11 @@ export type Database = {
           dob?: string | null
           email?: string | null
           employer?: string | null
+          gender?: string | null
           general_practitioner?: string | null
           height_cm?: number | null
           id?: string
+          id_passport_number?: string | null
           marital_status?: string | null
           medical_aid?: string | null
           medical_aid_number?: string | null
