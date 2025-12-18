@@ -1124,7 +1124,7 @@ function MailboxSection({ userId }: { userId?: string }) {
       if (error.code === '23505') {
         toast({
           title: "Alias taken",
-          description: "This alias is already in use. Please choose another.",
+          description: `"${cleanAlias}@miri360.com" is already in use. Please choose a different alias.`,
           variant: "destructive",
         });
       } else {
