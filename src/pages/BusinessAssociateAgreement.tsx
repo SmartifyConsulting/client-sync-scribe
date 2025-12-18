@@ -10,7 +10,7 @@ const BusinessAssociateAgreement = () => {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <Button
           variant="ghost"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/")}
           className="mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
