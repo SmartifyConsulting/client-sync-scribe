@@ -69,7 +69,7 @@ export function SessionNotepad({
         {mode === "text" ? (
           <div className="p-3 h-full">
             <Textarea
-              placeholder="Type your notes here during the session. Voice transcriptions will be appended automatically..."
+              placeholder="Type your clinical notes here..."
               value={notes}
               onChange={(e) => onNotesChange(e.target.value)}
               className="min-h-full h-full resize-none border-0 focus-visible:ring-0 p-0"
