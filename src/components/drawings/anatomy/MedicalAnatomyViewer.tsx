@@ -40,6 +40,15 @@ import {
   ANATOMY_COLORS
 } from "./svg";
 
+// Import enhanced systems
+import {
+  NervousSystemSVG,
+  RespiratorySystemSVG,
+  DigestiveSystemSVG,
+  UrinarySystemSVG,
+  ReproductiveSystemSVG,
+} from "./svg/enhanced";
+
 // Import hierarchy for structure data
 import { 
   COMPLETE_ANATOMY_HIERARCHY, 
@@ -60,14 +69,21 @@ const HIGHLIGHT_PRESETS = [
   { name: "Lesion", color: "#DC143C", description: "Tissue lesion" },
 ];
 
-// System icons
-const SYSTEM_ICONS: Record<string, React.ReactNode> = {
-  skeletal: <Bone className="h-4 w-4" />,
-  muscular: <Activity className="h-4 w-4" />,
-  nervous: <Brain className="h-4 w-4" />,
-  cardiovascular: <Heart className="h-4 w-4" />,
-  respiratory: <Wind className="h-4 w-4" />,
-};
+// System icons and labels
+const ANATOMY_SYSTEMS = [
+  { id: "skeletal", label: "Skel", icon: <Bone className="h-4 w-4" /> },
+  { id: "muscular", label: "Musc", icon: <Activity className="h-4 w-4" /> },
+  { id: "cardiovascular", label: "Cardio", icon: <Heart className="h-4 w-4" /> },
+  { id: "nervous", label: "Nerv", icon: <Brain className="h-4 w-4" /> },
+  { id: "respiratory", label: "Resp", icon: <Wind className="h-4 w-4" /> },
+  { id: "digestive", label: "Dige", icon: <Activity className="h-4 w-4" /> },
+  { id: "urinary", label: "Urin", icon: <Activity className="h-4 w-4" /> },
+  { id: "reproductive", label: "Repr", icon: <Activity className="h-4 w-4" /> },
+];
+
+const SYSTEM_ICONS: Record<string, React.ReactNode> = Object.fromEntries(
+  ANATOMY_SYSTEMS.map(s => [s.id, s.icon])
+);
 
 interface MedicalAnatomyViewerProps {
   onStructureSelect?: (structure: AnatomyStructure | null) => void;
@@ -228,6 +244,16 @@ export function MedicalAnatomyViewer({
         return <MuscularSystemSVG {...props} />;
       case "cardiovascular":
         return <CardiovascularSystemSVG {...props} viewType="anterior" />;
+      case "nervous":
+        return <NervousSystemSVG {...props} />;
+      case "respiratory":
+        return <RespiratorySystemSVG {...props} />;
+      case "digestive":
+        return <DigestiveSystemSVG {...props} />;
+      case "urinary":
+        return <UrinarySystemSVG {...props} />;
+      case "reproductive":
+        return <ReproductiveSystemSVG {...props} sex="female" />;
       default:
         return <SkeletalSystemSVG {...props} />;
     }
@@ -253,16 +279,16 @@ export function MedicalAnatomyViewer({
         {/* System Tabs */}
         <div className="p-2 border-b border-border">
           <div className="flex flex-wrap gap-1">
-            {["skeletal", "muscular", "cardiovascular"].map(sys => (
+            {ANATOMY_SYSTEMS.map(sys => (
               <Button
-                key={sys}
+                key={sys.id}
                 size="sm"
-                variant={activeSystem === sys ? "default" : "outline"}
-                onClick={() => setActiveSystem(sys)}
+                variant={activeSystem === sys.id ? "default" : "outline"}
+                onClick={() => setActiveSystem(sys.id)}
                 className="h-7 px-2 text-xs"
               >
-                {SYSTEM_ICONS[sys]}
-                <span className="ml-1 capitalize">{sys.slice(0, 4)}</span>
+                {sys.icon}
+                <span className="ml-1">{sys.label}</span>
               </Button>
             ))}
           </div>
