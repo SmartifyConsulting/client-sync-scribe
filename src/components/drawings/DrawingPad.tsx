@@ -43,7 +43,14 @@ import {
 import { professionalAnatomyAssets, LayeredAnatomyAsset, AnatomyLayer } from "./MedicalAnatomyAssets";
 import { AnatomyBrowser, StructureMetadataPanel, AnatomyStructure, AnatomySystem } from "./AnatomyBrowser";
 import { CLINICAL_TAGS } from "./ClinicalNotesPanel";
-import { useSessionDrawings, CanvasData, CanvasElement } from "@/hooks/useSessionDrawings";
+import { useSessionDrawings, CanvasData, CanvasElement, CANVAS_SCHEMA_VERSION } from "@/hooks/useSessionDrawings";
+import { 
+  exportCanvasToPNG, 
+  exportDrawingToPDF, 
+  exportContainerToImage,
+  getDrawingStatistics,
+  DrawingExportMetadata 
+} from "@/utils/drawingExport";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -503,9 +510,11 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
   };
 
   const handleSave = async (createNewVersion = false) => {
-    const canvasData = { 
+    const canvasData: CanvasData = { 
       elements,
-    } as CanvasData;
+      schemaVersion: CANVAS_SCHEMA_VERSION,
+      lastModified: new Date().toISOString(),
+    };
     await saveDrawing(canvasData, createNewVersion);
   };
 
@@ -520,15 +529,49 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     setOffset({ x: 0, y: 0 });
   };
 
-  const exportImage = () => {
+  // Enhanced export - PNG image
+  const exportImage = async () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
-    const link = document.createElement("a");
-    link.download = `clinical-drawing-${patientName || "patient"}-${format(new Date(), "yyyy-MM-dd")}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
+    const filename = `clinical-drawing-${patientName || "patient"}-${format(new Date(), "yyyy-MM-dd")}.png`;
+    await exportCanvasToPNG(canvas, filename, 2);
   };
+
+  // Export to PDF with metadata
+  const exportPDF = async () => {
+    const canvas = canvasRef.current;
+    if (!canvas || !currentDrawing) return;
+    
+    const metadata: DrawingExportMetadata = {
+      patientId: patientId,
+      patientName: patientName,
+      sessionId: sessionId || undefined,
+      doctorId: currentDrawing.doctor_id,
+      exportedAt: new Date().toISOString(),
+      version: currentDrawing.version,
+      createdAt: currentDrawing.created_at,
+      updatedAt: currentDrawing.updated_at,
+    };
+    
+    await exportDrawingToPDF(canvas, metadata, {
+      includeMetadata: true,
+      orientation: 'landscape',
+      title: `Clinical Drawing - ${patientName || 'Patient'}`,
+    });
+  };
+
+  // Export complete view including anatomy overlays
+  const exportFullView = async () => {
+    const container = containerRef.current;
+    if (!container) return;
+    
+    const filename = `clinical-view-${patientName || "patient"}-${format(new Date(), "yyyy-MM-dd")}.png`;
+    await exportContainerToImage(container, filename, { scale: 2 });
+  };
+
+  // Get drawing statistics
+  const stats = getDrawingStatistics({ elements });
 
   // Element manipulation
   const handleElementMouseDown = (e: React.MouseEvent, elementId: string) => {
@@ -904,9 +947,61 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={clearCanvas} title="Clear All">
             <Trash2 className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={exportImage} title="Export Image">
-            <Download className="h-4 w-4" />
-          </Button>
+          
+          {/* Export Dropdown */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8" title="Export Options">
+                <Download className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-2" align="end">
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-muted-foreground px-2 py-1">Export Options</p>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full justify-start h-8 text-xs"
+                  onClick={exportImage}
+                >
+                  <Download className="h-3.5 w-3.5 mr-2" />
+                  Annotations (PNG)
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full justify-start h-8 text-xs"
+                  onClick={exportFullView}
+                >
+                  <Maximize2 className="h-3.5 w-3.5 mr-2" />
+                  Full View (PNG)
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full justify-start h-8 text-xs"
+                  onClick={exportPDF}
+                  disabled={!currentDrawing}
+                >
+                  <Save className="h-3.5 w-3.5 mr-2" />
+                  Clinical Report (PDF)
+                </Button>
+                
+                {stats.totalElements > 0 && (
+                  <div className="pt-2 mt-2 border-t">
+                    <p className="text-[10px] text-muted-foreground px-2 py-1">Statistics</p>
+                    <div className="px-2 text-[10px] space-y-0.5">
+                      {stats.anatomyDiagrams > 0 && <p>• {stats.anatomyDiagrams} anatomy diagrams</p>}
+                      {stats.freehandAnnotations > 0 && <p>• {stats.freehandAnnotations} annotations</p>}
+                      {stats.textLabels > 0 && <p>• {stats.textLabels} text labels</p>}
+                      {stats.shapes > 0 && <p>• {stats.shapes} shapes</p>}
+                      {stats.taggedElements > 0 && <p>• {stats.taggedElements} tagged elements</p>}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Save Actions */}
@@ -1069,7 +1164,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
               const asset = professionalAnatomyAssets.find((a) => a.id === el.data.assetId);
               if (!asset) return null;
               const isSelected = selectedElement === el.id;
-              const elementLayers = el.data.visibleLayers || DEFAULT_LAYERS;
+              const elementLayers = (el.data.visibleLayers || DEFAULT_LAYERS) as AnatomyLayer[];
               
               // Check if this element matches the selected structure
               const isStructureHighlighted = selectedStructure?.assetId === el.data.assetId;
@@ -1395,17 +1490,38 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
             })
           }
 
-          {/* Status indicator */}
-          <div className="absolute bottom-3 left-3 px-2 py-1 bg-background/80 rounded text-xs text-muted-foreground backdrop-blur-sm flex items-center gap-2">
-            <span>{Math.round(scale * 100)}%</span>
-            <span className="text-muted-foreground/50">•</span>
-            <span className="flex items-center gap-1">
-              {showAnnotations ? (
-                <><Eye className="h-3 w-3" /> Annotations visible</>
+          {/* Enhanced Status Bar */}
+          <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+            <div className="px-3 py-1.5 bg-background/90 rounded-md text-xs text-muted-foreground backdrop-blur-sm border border-border/50 flex items-center gap-3">
+              <span className="font-mono">{Math.round(scale * 100)}%</span>
+              <span className="text-muted-foreground/30">|</span>
+              <span className="flex items-center gap-1">
+                {showAnnotations ? (
+                  <><Eye className="h-3 w-3" /> Visible</>
+                ) : (
+                  <><EyeOff className="h-3 w-3" /> Hidden</>
+                )}
+              </span>
+              <span className="text-muted-foreground/30">|</span>
+              <span>{stats.totalElements} element{stats.totalElements !== 1 ? 's' : ''}</span>
+            </div>
+            
+            {/* Persistence Status */}
+            <div className="px-3 py-1.5 bg-background/90 rounded-md text-xs backdrop-blur-sm border border-border/50 flex items-center gap-2">
+              {saving ? (
+                <span className="flex items-center gap-1 text-muted-foreground">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Saving...
+                </span>
+              ) : currentDrawing ? (
+                <span className="flex items-center gap-1 text-green-600">
+                  <Check className="h-3 w-3" />
+                  v{currentDrawing.version} • Saved
+                </span>
               ) : (
-                <><EyeOff className="h-3 w-3" /> Annotations hidden</>
+                <span className="text-muted-foreground">Unsaved</span>
               )}
-            </span>
+            </div>
           </div>
         </div>
 
