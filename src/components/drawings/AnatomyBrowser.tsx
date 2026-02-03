@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import {
   ChevronRight,
   ChevronDown,
@@ -15,6 +18,8 @@ import {
   User,
   Hand,
   Footprints,
+  Palette,
+  Droplets,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LayeredAnatomyAsset, AnatomyLayer } from "./MedicalAnatomyAssets";
@@ -385,7 +390,9 @@ interface AnatomyBrowserProps {
   onSelectStructure: (structure: AnatomyStructure, system: AnatomySystem, highlightColor: string) => void;
   selectedStructureId: string | null;
   highlightColor: string;
+  highlightOpacity: number;
   onHighlightColorChange: (color: string) => void;
+  onHighlightOpacityChange: (opacity: number) => void;
   visibleLayers: AnatomyLayer[];
   anatomyAssets: LayeredAnatomyAsset[];
   onDragStart: (asset: LayeredAnatomyAsset) => void;
@@ -395,7 +402,9 @@ export function AnatomyBrowser({
   onSelectStructure,
   selectedStructureId,
   highlightColor,
+  highlightOpacity,
   onHighlightColorChange,
+  onHighlightOpacityChange,
   visibleLayers,
   anatomyAssets,
   onDragStart,
@@ -422,38 +431,100 @@ export function AnatomyBrowser({
     return undefined;
   };
 
-  const HIGHLIGHT_COLORS = [
-    { color: "#DC143C", name: "Crimson" },
-    { color: "#FF6B35", name: "Orange" },
-    { color: "#FFD700", name: "Gold" },
-    { color: "#00D4AA", name: "Teal" },
-    { color: "#0066CC", name: "Blue" },
-    { color: "#8B5CF6", name: "Purple" },
-    { color: "#FF1493", name: "Pink" },
-    { color: "#00FF00", name: "Lime" },
+  // Clinical-grade color presets with medical context
+  const CLINICAL_HIGHLIGHT_PRESETS = [
+    { color: "#DC143C", name: "Pathology", description: "Abnormality / Disease" },
+    { color: "#FF4500", name: "Lesion", description: "Tissue damage" },
+    { color: "#2563EB", name: "Inflammation", description: "Inflammatory process" },
+    { color: "#0EA5E9", name: "Edema", description: "Fluid accumulation" },
+    { color: "#22C55E", name: "Surgical Target", description: "Operative focus" },
+    { color: "#10B981", name: "Healthy", description: "Normal tissue" },
+    { color: "#F59E0B", name: "Caution", description: "Area of concern" },
+    { color: "#8B5CF6", name: "Nerve", description: "Neural involvement" },
+    { color: "#EC4899", name: "Vascular", description: "Blood vessel issue" },
+    { color: "#6B7280", name: "Neutral", description: "Reference marking" },
   ];
 
   return (
     <div className="flex flex-col h-full">
-      {/* Color Picker */}
-      <div className="p-2 border-b bg-muted/30">
-        <div className="flex items-center gap-1.5 mb-1">
-          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Highlight Color</span>
+      {/* Clinical Highlight Controls */}
+      <div className="p-2 border-b bg-muted/30 space-y-3">
+        {/* Color Presets with Clinical Context */}
+        <div>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <Palette className="h-3 w-3 text-muted-foreground" />
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Clinical Highlight</span>
+          </div>
+          <div className="grid grid-cols-5 gap-1">
+            {CLINICAL_HIGHLIGHT_PRESETS.map(({ color, name, description }) => (
+              <Popover key={color}>
+                <PopoverTrigger asChild>
+                  <button
+                    onClick={() => onHighlightColorChange(color)}
+                    className={cn(
+                      "w-6 h-6 rounded-md border-2 transition-all hover:scale-110 relative",
+                      highlightColor === color ? "border-foreground ring-2 ring-foreground/20 scale-110" : "border-transparent"
+                    )}
+                    style={{ backgroundColor: color }}
+                  >
+                    {highlightColor === color && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-2 h-2 bg-white rounded-full shadow" />
+                      </div>
+                    )}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent side="top" className="w-auto p-2 text-center">
+                  <p className="text-xs font-semibold">{name}</p>
+                  <p className="text-[10px] text-muted-foreground">{description}</p>
+                </PopoverContent>
+              </Popover>
+            ))}
+          </div>
         </div>
-        <div className="flex gap-1 flex-wrap">
-          {HIGHLIGHT_COLORS.map(({ color, name }) => (
-            <button
-              key={color}
-              onClick={() => onHighlightColorChange(color)}
-              className={cn(
-                "w-5 h-5 rounded-full border-2 transition-all hover:scale-110",
-                highlightColor === color ? "border-foreground ring-1 ring-foreground/30 scale-110" : "border-transparent"
-              )}
-              style={{ backgroundColor: color }}
-              title={name}
+
+        {/* Opacity Control */}
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-1.5">
+              <Droplets className="h-3 w-3 text-muted-foreground" />
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Opacity</span>
+            </div>
+            <span className="text-[10px] font-mono text-muted-foreground">{Math.round(highlightOpacity * 100)}%</span>
+          </div>
+          <Slider
+            value={[highlightOpacity * 100]}
+            onValueChange={(v) => onHighlightOpacityChange(v[0] / 100)}
+            min={20}
+            max={100}
+            step={5}
+            className="w-full"
+          />
+          <div className="flex justify-between mt-1">
+            <span className="text-[8px] text-muted-foreground">Subtle</span>
+            <span className="text-[8px] text-muted-foreground">Bold</span>
+          </div>
+        </div>
+
+        {/* Current Selection Preview */}
+        {selectedStructureId && (
+          <div 
+            className="flex items-center gap-2 p-2 rounded-lg border-2"
+            style={{ 
+              borderColor: highlightColor,
+              backgroundColor: `${highlightColor}${Math.round(highlightOpacity * 40).toString(16).padStart(2, '0')}`
+            }}
+          >
+            <div 
+              className="w-4 h-4 rounded-full shrink-0"
+              style={{ 
+                backgroundColor: highlightColor,
+                opacity: highlightOpacity
+              }}
             />
-          ))}
-        </div>
+            <span className="text-[10px] font-medium truncate">Active highlight preview</span>
+          </div>
+        )}
       </div>
 
       {/* Systems Tree */}
@@ -576,6 +647,7 @@ interface StructureMetadataPanelProps {
   structure: AnatomyStructure | null;
   system: AnatomySystem | null;
   highlightColor: string;
+  highlightOpacity: number;
   onClose: () => void;
 }
 
@@ -583,20 +655,34 @@ export function StructureMetadataPanel({
   structure,
   system,
   highlightColor,
+  highlightOpacity,
   onClose,
 }: StructureMetadataPanelProps) {
   if (!structure || !system) return null;
 
+  // Convert hex to rgba for opacity
+  const hexToRgba = (hex: string, alpha: number) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
   return (
     <div 
-      className="absolute bottom-4 left-4 right-4 bg-background/95 backdrop-blur-sm border rounded-xl shadow-xl p-4 max-w-md animate-in slide-in-from-bottom-4"
-      style={{ borderColor: highlightColor }}
+      className="absolute bottom-4 left-4 right-4 bg-background/95 backdrop-blur-sm border-2 rounded-xl shadow-xl p-4 max-w-md animate-in slide-in-from-bottom-4"
+      style={{ 
+        borderColor: hexToRgba(highlightColor, highlightOpacity),
+        boxShadow: `0 4px 20px ${hexToRgba(highlightColor, highlightOpacity * 0.3)}`
+      }}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
           <div
             className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-            style={{ backgroundColor: highlightColor }}
+            style={{ 
+              backgroundColor: hexToRgba(highlightColor, highlightOpacity),
+            }}
           >
             {React.cloneElement(system.icon as React.ReactElement, { className: "h-4 w-4 text-white" })}
           </div>
@@ -609,11 +695,19 @@ export function StructureMetadataPanel({
         </div>
         <button
           onClick={onClose}
-          className="text-muted-foreground hover:text-foreground transition-colors p-1"
+          className="text-muted-foreground hover:text-foreground transition-colors p-1 hover:bg-muted rounded"
         >
           ×
         </button>
       </div>
+
+      {/* Highlight indicator bar */}
+      <div 
+        className="mt-3 h-1 rounded-full"
+        style={{ 
+          backgroundColor: hexToRgba(highlightColor, highlightOpacity),
+        }}
+      />
 
       <div className="mt-3 space-y-2">
         {structure.description && (
@@ -645,10 +739,13 @@ export function StructureMetadataPanel({
         )}
       </div>
 
-      <div className="mt-3 pt-2 border-t flex items-center gap-2">
+      <div className="mt-3 pt-2 border-t flex items-center justify-between gap-2">
         <Badge variant="outline" style={{ borderColor: system.color, color: system.color }} className="text-[9px]">
           {system.name}
         </Badge>
+        <span className="text-[9px] text-muted-foreground">
+          Opacity: {Math.round(highlightOpacity * 100)}%
+        </span>
       </div>
     </div>
   );
