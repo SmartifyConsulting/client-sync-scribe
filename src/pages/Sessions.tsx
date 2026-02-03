@@ -24,10 +24,14 @@ import {
   Search,
   Brain,
   ShieldAlert,
+  PenTool,
+  FileText as FileTextIcon,
 } from "lucide-react";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
 import { VisitCategoryDialog } from "@/components/sessions/VisitCategoryDialog";
+import { SessionNotepad } from "@/components/sessions/SessionNotepad";
+import { Toggle } from "@/components/ui/toggle";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -522,100 +526,83 @@ export default function Sessions() {
       )}
 
       {sessionState === "active" && (
-        <div className="space-y-6">
-          {/* Recording Panel */}
-          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm max-w-2xl mx-auto">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                  <User className="h-5 w-5 text-accent-foreground" />
-                </div>
-                <div>
-                  <p className="font-medium text-foreground">
-                    {currentPatient?.name || "Current Session"}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {currentPatient ? "Recording session" : "Select a patient"}
-                  </p>
-                </div>
+        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
+          {/* Compact Recording Panel - Sidebar */}
+          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col">
+            {/* Patient Info */}
+            <div className="flex items-center gap-3 p-4 border-b">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
+                <User className="h-5 w-5 text-accent-foreground" />
               </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-mono text-foreground">
-                  {formatDuration(sessionDuration)}
-                </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-foreground truncate">
+                  {currentPatient?.name || "Current Session"}
+                </p>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  <span className="font-mono">{formatDuration(sessionDuration)}</span>
+                </div>
               </div>
             </div>
 
-            {/* Recording Controls */}
-            <div className="flex flex-col items-center gap-4 py-8">
-              <div className="flex items-center gap-4">
-                {/* Main Record Button */}
-                <button
-                  onClick={toggleRecording}
-                  disabled={isTranscribing}
-                  className={cn(
-                    "flex h-24 w-24 items-center justify-center rounded-full transition-all duration-300",
-                    isTranscribing && "opacity-50 cursor-not-allowed",
-                    isRecording
-                      ? "bg-destructive text-destructive-foreground animate-pulse-soft shadow-lg"
-                      : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-glow"
-                  )}
-                >
-                  {isTranscribing ? (
-                    <Loader2 className="h-10 w-10 animate-spin" />
-                  ) : isRecording ? (
-                    <Square className="h-10 w-10" />
-                  ) : (
-                    <Mic className="h-10 w-10" />
-                  )}
-                </button>
-              </div>
+            {/* Recording Controls - Compact */}
+            <div className="flex flex-col items-center gap-3 p-4">
+              <button
+                onClick={toggleRecording}
+                disabled={isTranscribing}
+                className={cn(
+                  "flex h-16 w-16 items-center justify-center rounded-full transition-all duration-300",
+                  isTranscribing && "opacity-50 cursor-not-allowed",
+                  isRecording
+                    ? "bg-destructive text-destructive-foreground animate-pulse-soft shadow-lg"
+                    : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-glow"
+                )}
+              >
+                {isTranscribing ? (
+                  <Loader2 className="h-7 w-7 animate-spin" />
+                ) : isRecording ? (
+                  <Square className="h-7 w-7" />
+                ) : (
+                  <Mic className="h-7 w-7" />
+                )}
+              </button>
               
-              <p className="text-sm text-muted-foreground text-center">
+              <p className="text-xs text-muted-foreground text-center">
                 {isTranscribing 
-                  ? "Transcribing audio..." 
+                  ? "Transcribing..." 
                   : isRecording 
-                    ? "Recording... Tap to stop and transcribe" 
-                    : "Tap to start recording"}
+                    ? "Recording... Tap to stop" 
+                    : "Tap to record"}
               </p>
               
-              {/* Audio Waveform Visualizer */}
+              {/* Compact Waveform */}
               {(isRecording || isTranscribing) && (
-                <div className="w-full max-w-xs mt-4">
+                <div className="w-full">
                   <AudioWaveform isRecording={isRecording} />
-                  {isTranscribing && (
-                    <p className="text-xs text-center text-muted-foreground mt-2">Processing audio...</p>
-                  )}
                 </div>
               )}
             </div>
 
-            {/* Live Transcript Preview */}
+            {/* Live Transcript Preview - Collapsible */}
             {(transcript || isTranscribing) && (
-              <div className="mt-4 p-4 rounded-lg bg-primary/5 border-2 border-primary/20">
+              <div className="border-t p-3">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-primary" />
-                    <p className="text-sm font-semibold text-primary">Voice Transcription</p>
+                  <div className="flex items-center gap-1.5">
+                    <FileText className="h-3.5 w-3.5 text-primary" />
+                    <p className="text-xs font-medium text-primary">Transcript</p>
                   </div>
                   {transcript && !isTranscribing && (
-                    <span className="text-xs bg-green-500/10 text-green-600 px-2 py-0.5 rounded-full">
-                      ✓ Transcribed
-                    </span>
+                    <span className="text-xs bg-success/15 text-success px-1.5 py-0.5 rounded">✓</span>
                   )}
                   {isTranscribing && (
-                    <span className="text-xs bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      Processing...
-                    </span>
+                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
                   )}
                 </div>
-                <div className="max-h-[200px] overflow-y-auto bg-background/50 rounded p-3">
+                <div className="max-h-[120px] overflow-y-auto bg-muted/30 rounded p-2">
                   {transcript ? (
-                    <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{transcript}</p>
+                    <p className="text-xs text-foreground whitespace-pre-wrap leading-relaxed">{transcript}</p>
                   ) : (
-                    <p className="text-sm text-muted-foreground italic">Transcribing audio...</p>
+                    <p className="text-xs text-muted-foreground italic">Transcribing...</p>
                   )}
                 </div>
               </div>
@@ -623,36 +610,40 @@ export default function Sessions() {
 
             {/* Audio Playback */}
             {audioUrl && !isRecording && (
-              <div className="mt-4 p-4 rounded-lg bg-muted/50 border border-border">
-                <div className="flex items-center gap-2 mb-2">
-                  <Volume2 className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-sm font-medium text-foreground">Recording Playback</p>
+              <div className="border-t p-3">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
+                  <p className="text-xs font-medium text-foreground">Playback</p>
                 </div>
-                <audio controls className="w-full" src={audioUrl}>
-                  Your browser does not support audio playback.
+                <audio controls className="w-full h-8" src={audioUrl}>
+                  Your browser does not support audio.
                 </audio>
               </div>
             )}
 
-            <div className="flex gap-3 pt-4 border-t border-border">
-              <Button variant="outline" className="flex-1" onClick={endSession} disabled={isTranscribing}>
-                <Square className="h-4 w-4 mr-2" />
+            {/* End Session Button */}
+            <div className="p-3 border-t mt-auto">
+              <Button 
+                variant="outline" 
+                className="w-full gap-2" 
+                onClick={endSession} 
+                disabled={isTranscribing}
+              >
+                <Square className="h-4 w-4" />
                 End Session
               </Button>
             </div>
           </div>
 
-          {/* Notes Panel - Below */}
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm max-w-2xl mx-auto">
-            <div className="flex items-center gap-3 mb-4">
-              <FileText className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold text-foreground">Session Notes</h3>
-            </div>
-            <Textarea
-              placeholder="Type your notes here during the session. Voice transcriptions will be appended automatically..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="min-h-[200px] resize-none"
+          {/* Notes/Drawing Panel - Main Content */}
+          <div className="min-h-[500px]">
+            <SessionNotepad
+              patientId={patientId || ""}
+              sessionId={currentSessionId}
+              patientName={currentPatient?.name}
+              notes={notes}
+              onNotesChange={setNotes}
+              isRecording={isRecording}
             />
           </div>
         </div>
