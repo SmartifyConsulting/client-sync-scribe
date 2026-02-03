@@ -39,10 +39,14 @@ import {
   EyeOff,
   Edit3,
   Check,
+  LayoutTemplate,
+  Search,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { professionalAnatomyAssets, LayeredAnatomyAsset, AnatomyLayer } from "./MedicalAnatomyAssets";
 import { AnatomyBrowser, StructureMetadataPanel, AnatomyStructure, AnatomySystem } from "./AnatomyBrowser";
 import { CLINICAL_TAGS } from "./ClinicalNotesPanel";
+import { DrawingTemplates, DrawingTemplate } from "./DrawingTemplates";
 import { useSessionDrawings, CanvasData, CanvasElement, CANVAS_SCHEMA_VERSION } from "@/hooks/useSessionDrawings";
 import { 
   exportCanvasToPNG, 
@@ -53,6 +57,7 @@ import {
 } from "@/utils/drawingExport";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface DrawingPadProps {
   patientId: string;
@@ -131,6 +136,10 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
   
   // Annotation tags for text elements
   const [annotationTags, setAnnotationTags] = useState<string[]>([]);
+  
+  // Template and sidebar state
+  const [sidebarTab, setSidebarTab] = useState<"templates" | "anatomy">("templates");
+  const [templateSearchQuery, setTemplateSearchQuery] = useState("");
 
   const { 
     drawings, 
@@ -529,6 +538,27 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     setOffset({ x: 0, y: 0 });
   };
 
+  // Load a template onto the canvas
+  const loadTemplate = (template: DrawingTemplate) => {
+    // Generate new unique IDs for template elements to avoid conflicts
+    const newElements = template.elements.map(el => ({
+      ...el,
+      id: crypto.randomUUID(),
+    }));
+    
+    // Add template elements to existing canvas (or replace if empty)
+    const updatedElements = elements.length === 0 
+      ? newElements 
+      : [...elements, ...newElements];
+    
+    setElements(updatedElements);
+    addToHistory(updatedElements);
+    setVisibleLayers(template.defaultLayers);
+    
+    // Switch to anatomy tab after loading template
+    setSidebarTab("anatomy");
+  };
+
   // Enhanced export - PNG image
   const exportImage = async () => {
     const canvas = canvasRef.current;
@@ -730,7 +760,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       onMouseLeave={handleElementMouseUp}
     >
       {/* Professional Toolbar - Clean clinical style */}
-      <div className="flex flex-wrap items-center gap-1.5 px-3 py-2 bg-slate-50 border-b border-slate-200">
+      <div className="flex flex-wrap items-center gap-1.5 px-3 py-2 bg-muted/50 border-b border-border">
         {/* Drawing Tools */}
         <div className="flex items-center gap-0.5 pr-2 border-r">
           <Button
@@ -1099,26 +1129,64 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
 
       {/* Main Content */}
       <div className="flex flex-1 min-h-0">
-        {/* Anatomy Browser Panel */}
-        <div className="w-56 border-r border-slate-200 bg-white flex flex-col">
-          <div className="p-2 border-b border-slate-200 bg-slate-50">
-            <h4 className="font-semibold text-xs uppercase tracking-wide text-slate-600">Anatomy Systems</h4>
-          </div>
-          <AnatomyBrowser
-            onSelectStructure={(structure, system, color) => {
-              setSelectedStructure(structure);
-              setSelectedSystem(system);
-              setHighlightColor(color);
-            }}
-            selectedStructureId={selectedStructure?.id || null}
-            highlightColor={highlightColor}
-            highlightOpacity={highlightOpacity}
-            onHighlightColorChange={setHighlightColor}
-            onHighlightOpacityChange={setHighlightOpacity}
-            visibleLayers={visibleLayers}
-            anatomyAssets={professionalAnatomyAssets}
-            onDragStart={handleDragStart}
-          />
+        {/* Sidebar Panel with Templates and Anatomy Browser */}
+        <div className="w-64 border-r border-border bg-background flex flex-col">
+          <Tabs value={sidebarTab} onValueChange={(v) => setSidebarTab(v as "templates" | "anatomy")} className="flex flex-col h-full">
+            <TabsList className="grid w-full grid-cols-2 rounded-none border-b border-border h-10">
+              <TabsTrigger value="templates" className="gap-1.5 text-xs rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
+                <LayoutTemplate className="h-3.5 w-3.5" />
+                Templates
+              </TabsTrigger>
+              <TabsTrigger value="anatomy" className="gap-1.5 text-xs rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
+                <Layers className="h-3.5 w-3.5" />
+                Anatomy
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="templates" className="flex-1 m-0 overflow-hidden flex flex-col">
+              {/* Template Search */}
+              <div className="p-2 border-b border-border">
+                <div className="relative">
+                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input
+                    placeholder="Search templates..."
+                    value={templateSearchQuery}
+                    onChange={(e) => setTemplateSearchQuery(e.target.value)}
+                    className="h-8 pl-8 text-xs"
+                  />
+                </div>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <DrawingTemplates
+                  onSelectTemplate={loadTemplate}
+                  searchQuery={templateSearchQuery}
+                />
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="anatomy" className="flex-1 m-0 overflow-hidden flex flex-col">
+              <div className="p-2 border-b border-border bg-muted/30">
+                <h4 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground">Anatomy Systems</h4>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <AnatomyBrowser
+                  onSelectStructure={(structure, system, color) => {
+                    setSelectedStructure(structure);
+                    setSelectedSystem(system);
+                    setHighlightColor(color);
+                  }}
+                  selectedStructureId={selectedStructure?.id || null}
+                  highlightColor={highlightColor}
+                  highlightOpacity={highlightOpacity}
+                  onHighlightColorChange={setHighlightColor}
+                  onHighlightOpacityChange={setHighlightOpacity}
+                  visibleLayers={visibleLayers}
+                  anatomyAssets={professionalAnatomyAssets}
+                  onDragStart={handleDragStart}
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Canvas Area */}
@@ -1514,7 +1582,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                   Saving...
                 </span>
               ) : currentDrawing ? (
-                <span className="flex items-center gap-1 text-green-600">
+                <span className="flex items-center gap-1 text-success">
                   <Check className="h-3 w-3" />
                   v{currentDrawing.version} • Saved
                 </span>
