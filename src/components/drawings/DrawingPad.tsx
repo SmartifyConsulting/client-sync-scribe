@@ -39,9 +39,11 @@ import {
   EyeOff,
   Edit3,
   Check,
+  FileText,
 } from "lucide-react";
 import { professionalAnatomyAssets, LayeredAnatomyAsset, AnatomyLayer } from "./MedicalAnatomyAssets";
 import { AnatomyBrowser, StructureMetadataPanel, AnatomyStructure, AnatomySystem } from "./AnatomyBrowser";
+import { ClinicalNotesPanel, ClinicalNote, AnnotationTimestamp, CLINICAL_TAGS } from "./ClinicalNotesPanel";
 import { useSessionDrawings, CanvasData, CanvasElement } from "@/hooks/useSessionDrawings";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -120,6 +122,12 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isResizing, setIsResizing] = useState(false);
   const [resizeCorner, setResizeCorner] = useState<string | null>(null);
+  
+  // Clinical Notes state
+  const [clinicalNotes, setClinicalNotes] = useState<ClinicalNote[]>([]);
+  const [annotationTimestamps, setAnnotationTimestamps] = useState<AnnotationTimestamp[]>([]);
+  const [showNotesPanel, setShowNotesPanel] = useState(true);
+  const [annotationTags, setAnnotationTags] = useState<string[]>([]);
 
   const { 
     drawings, 
@@ -137,7 +145,56 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       setHistory([currentDrawing.canvas_data.elements]);
       setHistoryIndex(0);
     }
+    // Load clinical notes from saved data
+    if (currentDrawing?.canvas_data) {
+      const data = currentDrawing.canvas_data as any;
+      if (data.clinicalNotes) {
+        setClinicalNotes(data.clinicalNotes);
+      }
+      if (data.annotationTimestamps) {
+        setAnnotationTimestamps(data.annotationTimestamps);
+      }
+    }
   }, [currentDrawing]);
+
+  // Clinical Notes handlers
+  const handleAddNote = (content: string, tags: string[]) => {
+    const newNote: ClinicalNote = {
+      id: crypto.randomUUID(),
+      content,
+      tags,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      linkedElementId: selectedElement || undefined,
+    };
+    setClinicalNotes(prev => [newNote, ...prev]);
+  };
+
+  const handleUpdateNote = (id: string, content: string, tags: string[]) => {
+    setClinicalNotes(prev =>
+      prev.map(note =>
+        note.id === id
+          ? { ...note, content, tags, updatedAt: new Date() }
+          : note
+      )
+    );
+  };
+
+  const handleDeleteNote = (id: string) => {
+    setClinicalNotes(prev => prev.filter(note => note.id !== id));
+  };
+
+  // Add annotation timestamp when creating annotations
+  const addAnnotationTimestamp = (elementId: string, text: string, tags: string[] = []) => {
+    const timestamp: AnnotationTimestamp = {
+      id: crypto.randomUUID(),
+      text,
+      timestamp: new Date(),
+      elementId,
+      tags,
+    };
+    setAnnotationTimestamps(prev => [...prev, timestamp]);
+  };
 
   // Render elements to canvas (only annotation elements, not anatomy)
   const renderCanvas = useCallback(() => {
@@ -420,13 +477,16 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
   const handleAddText = () => {
     if (!textInput || !textPosition) return;
     
+    const elementId = crypto.randomUUID();
     const newElement: CanvasElement = {
-      id: crypto.randomUUID(),
+      id: elementId,
       type: "text",
       data: { 
         text: textInput,
         fontWeight: "normal",
         fontFamily: "Arial, sans-serif",
+        tags: annotationTags,
+        createdAt: new Date().toISOString(),
       },
       x: textPosition.x,
       y: textPosition.y,
@@ -436,8 +496,13 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     const newElements = [...elements, newElement];
     setElements(newElements);
     addToHistory(newElements);
+    
+    // Add annotation timestamp
+    addAnnotationTimestamp(elementId, textInput, annotationTags);
+    
     setTextInput("");
     setTextPosition(null);
+    setAnnotationTags([]);
     setTool("select");
   };
 
@@ -494,7 +559,11 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
   };
 
   const handleSave = async (createNewVersion = false) => {
-    const canvasData: CanvasData = { elements };
+    const canvasData = { 
+      elements,
+      clinicalNotes,
+      annotationTimestamps,
+    } as CanvasData;
     await saveDrawing(canvasData, createNewVersion);
   };
 
@@ -901,6 +970,18 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
         {/* Save Actions */}
         <div className="flex items-center gap-1 ml-auto">
           <Button
+            variant={showNotesPanel ? "secondary" : "ghost"}
+            size="sm"
+            className="h-8 gap-1"
+            onClick={() => setShowNotesPanel(!showNotesPanel)}
+          >
+            <FileText className="h-4 w-4" />
+            <span className="hidden lg:inline">Notes</span>
+            {clinicalNotes.length > 0 && (
+              <Badge variant="secondary" className="h-5 px-1.5">{clinicalNotes.length}</Badge>
+            )}
+          </Button>
+          <Button
             variant="ghost"
             size="sm"
             className="h-8 gap-1"
@@ -993,6 +1074,18 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
 
       {/* Main Content */}
       <div className="flex flex-1 min-h-0">
+        {/* Clinical Notes Panel */}
+        <ClinicalNotesPanel
+          notes={clinicalNotes}
+          onAddNote={handleAddNote}
+          onUpdateNote={handleUpdateNote}
+          onDeleteNote={handleDeleteNote}
+          timestamps={annotationTimestamps}
+          selectedElementId={selectedElement}
+          isCollapsed={!showNotesPanel}
+          onToggleCollapse={() => setShowNotesPanel(!showNotesPanel)}
+        />
+
         {/* Anatomy Browser Panel */}
         <div className="w-56 border-r bg-muted/20 flex flex-col">
           <div className="p-2 border-b bg-muted/30">
@@ -1255,12 +1348,49 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                   </div>
                 </div>
                 
+                {/* Tag selector for annotation */}
+                <div className="space-y-1.5">
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    Tags (optional):
+                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {CLINICAL_TAGS.slice(0, 6).map(tag => (
+                      <button
+                        key={tag.id}
+                        className={cn(
+                          "px-1.5 py-0.5 rounded-full text-[9px] font-medium transition-all",
+                          annotationTags.includes(tag.id)
+                            ? "ring-1 ring-offset-1"
+                            : "opacity-50 hover:opacity-80"
+                        )}
+                        style={{
+                          backgroundColor: `${tag.color}20`,
+                          color: tag.color,
+                        }}
+                        onClick={() => {
+                          setAnnotationTags(prev =>
+                            prev.includes(tag.id)
+                              ? prev.filter(t => t !== tag.id)
+                              : [...prev, tag.id]
+                          );
+                        }}
+                      >
+                        {tag.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
                 <div className="flex gap-2 pt-1">
                   <Button size="sm" onClick={handleAddText} className="flex-1">
                     <Check className="h-3.5 w-3.5 mr-1" />
                     Add
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => { setTextPosition(null); setTextInput(""); }}>
+                  <Button size="sm" variant="ghost" onClick={() => { 
+                    setTextPosition(null); 
+                    setTextInput(""); 
+                    setAnnotationTags([]);
+                  }}>
                     Cancel
                   </Button>
                 </div>
