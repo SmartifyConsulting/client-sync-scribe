@@ -17,12 +17,14 @@ import {
   FileText,
   FileBadge,
   FileEdit,
+  PenTool,
 } from "lucide-react";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
 import { MedicalCertificateEditor } from "@/components/sessions/MedicalCertificateEditor";
 import { ReferralLetterEditor } from "@/components/sessions/ReferralLetterEditor";
 import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
+import { DrawingPad } from "@/components/drawings/DrawingPad";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/useSessions";
 import {
@@ -36,6 +38,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useSessions } from "@/hooks/useSessions";
 import { useToast } from "@/hooks/use-toast";
 
@@ -50,6 +58,7 @@ export default function SessionDetail() {
   const [showMedicalCertificateEditor, setShowMedicalCertificateEditor] = useState(false);
   const [showReferralLetterEditor, setShowReferralLetterEditor] = useState(false);
   const [showGeneralLetterEditor, setShowGeneralLetterEditor] = useState(false);
+  const [showDrawingPad, setShowDrawingPad] = useState(false);
 
   const handleDelete = async () => {
     if (!id) return;
@@ -169,7 +178,7 @@ export default function SessionDetail() {
       {session.status === "completed" && session.patient && (
         <div className="rounded-xl border border-border bg-card p-6">
           <h2 className="font-semibold text-foreground mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
             <Button
               className="gap-1.5 text-sm h-10 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowPrescriptionEditor(true)}
@@ -204,6 +213,13 @@ export default function SessionDetail() {
             >
               <FileEdit className="h-4 w-4 shrink-0" />
               <span className="truncate">General Letter</span>
+            </Button>
+            <Button
+              className="gap-1.5 text-sm h-10 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
+              onClick={() => setShowDrawingPad(true)}
+            >
+              <PenTool className="h-4 w-4 shrink-0" />
+              <span className="truncate">Drawing Pad</span>
             </Button>
           </div>
         </div>
@@ -406,6 +422,26 @@ export default function SessionDetail() {
           }}
         />
       )}
+
+      {/* Drawing Pad Modal */}
+      <Dialog open={showDrawingPad} onOpenChange={setShowDrawingPad}>
+        <DialogContent className="max-w-[95vw] w-full max-h-[90vh] h-[85vh] p-0">
+          <DialogHeader className="px-4 py-3 border-b">
+            <DialogTitle className="flex items-center gap-2">
+              <PenTool className="h-5 w-5 text-primary" />
+              Drawing Pad - {session.patient?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden h-full">
+            <DrawingPad
+              patientId={session.patient_id}
+              sessionId={id}
+              patientName={session.patient?.name}
+              isModal
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
