@@ -13,6 +13,7 @@ import {
   AlertCircle,
   Star,
   Plus,
+  PenTool,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -36,6 +37,7 @@ import { LollipopDisplay } from "@/components/gamification/LollipopDisplay";
 import { useTemplates } from "@/hooks/useTemplates";
 import { useDocuments } from "@/hooks/useDocuments";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
+import { DrawingPad } from "@/components/drawings/DrawingPad";
 import {
   Dialog,
   DialogContent,
@@ -271,6 +273,10 @@ export default function PatientProfile() {
           <TabsTrigger value="doctors" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Doctors</TabsTrigger>
           <TabsTrigger value="documents" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Documents</TabsTrigger>
           <TabsTrigger value="notes" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Notes</TabsTrigger>
+          <TabsTrigger value="drawings" className="rounded-lg px-4 py-2.5 gap-1.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            <PenTool className="h-3.5 w-3.5" />
+            Drawing Pad
+          </TabsTrigger>
           <TabsTrigger value="roundtable" className="rounded-lg px-4 py-2.5 gap-1.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
             Round Table
             {unreadRoundTableCount > 0 && (
@@ -472,6 +478,16 @@ export default function PatientProfile() {
               patientId={patient.id} 
               patientName={patient.name}
               onUnreadCountChange={setUnreadRoundTableCount}
+            />
+          </div>
+        </TabsContent>
+
+        {/* Drawing Pad Tab */}
+        <TabsContent value="drawings">
+          <div className="rounded-2xl bg-card shadow-card overflow-hidden h-[600px]">
+            <DrawingPad 
+              patientId={patient.id} 
+              patientName={patient.name}
             />
           </div>
         </TabsContent>

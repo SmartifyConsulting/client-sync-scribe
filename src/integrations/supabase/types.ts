@@ -1069,6 +1069,57 @@ export type Database = {
         }
         Relationships: []
       }
+      session_drawings: {
+        Row: {
+          canvas_data: Json
+          created_at: string
+          doctor_id: string
+          id: string
+          is_current: boolean
+          patient_id: string
+          session_id: string | null
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          canvas_data?: Json
+          created_at?: string
+          doctor_id: string
+          id?: string
+          is_current?: boolean
+          patient_id: string
+          session_id?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          canvas_data?: Json
+          created_at?: string
+          doctor_id?: string
+          id?: string
+          is_current?: boolean
+          patient_id?: string
+          session_id?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_drawings_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_drawings_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sessions: {
         Row: {
           action_points: Json | null
