@@ -2,10 +2,34 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+/**
+ * Canvas Element Types
+ * Structured for persistence and future export compatibility
+ */
 export interface CanvasElement {
   id: string;
   type: "path" | "anatomy" | "text" | "shape";
-  data: any;
+  data: {
+    // Path data
+    points?: { x: number; y: number }[];
+    isMarker?: boolean;
+    // Anatomy data
+    assetId?: string;
+    visibleLayers?: string[];
+    rotation?: number;
+    // Text data
+    text?: string;
+    fontWeight?: string;
+    fontFamily?: string;
+    tags?: string[];
+    createdAt?: string;
+    // Shape data
+    shapeType?: "line" | "arrow" | "circle" | "rectangle";
+    endX?: number;
+    endY?: number;
+    // Generic
+    [key: string]: any;
+  };
   x: number;
   y: number;
   width?: number;
@@ -14,11 +38,23 @@ export interface CanvasElement {
   strokeWidth?: number;
 }
 
+/**
+ * Canvas Data Structure
+ * Export-ready format with metadata support
+ */
 export interface CanvasData {
   elements: CanvasElement[];
   backgroundColor?: string;
+  /** Schema version for future migrations */
+  schemaVersion?: string;
+  /** Last modified timestamp */
+  lastModified?: string;
 }
 
+/**
+ * Session Drawing Record
+ * Represents a persisted drawing with versioning
+ */
 export interface SessionDrawing {
   id: string;
   session_id: string | null;
@@ -30,6 +66,9 @@ export interface SessionDrawing {
   created_at: string;
   updated_at: string;
 }
+
+/** Current schema version for data migrations */
+export const CANVAS_SCHEMA_VERSION = "1.0";
 
 export function useSessionDrawings(patientId: string, sessionId?: string | null) {
   const { toast } = useToast();
@@ -82,12 +121,19 @@ export function useSessionDrawings(patientId: string, sessionId?: string | null)
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Enrich canvas data with schema version and timestamp
+      const enrichedCanvasData: CanvasData = {
+        ...canvasData,
+        schemaVersion: CANVAS_SCHEMA_VERSION,
+        lastModified: new Date().toISOString(),
+      };
+
       if (currentDrawing && !createNewVersion) {
         // Update existing drawing
         const { data, error } = await supabase
           .from("session_drawings")
           .update({ 
-            canvas_data: JSON.parse(JSON.stringify(canvasData)),
+            canvas_data: JSON.parse(JSON.stringify(enrichedCanvasData)),
             updated_at: new Date().toISOString()
           })
           .eq("id", currentDrawing.id)
@@ -124,7 +170,7 @@ export function useSessionDrawings(patientId: string, sessionId?: string | null)
             patient_id: patientId,
             session_id: sessionId || null,
             doctor_id: user.id,
-            canvas_data: JSON.parse(JSON.stringify(canvasData)),
+            canvas_data: JSON.parse(JSON.stringify(enrichedCanvasData)),
             version: nextVersion,
             is_current: true,
           }])
