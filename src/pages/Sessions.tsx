@@ -26,14 +26,14 @@ import {
   ShieldAlert,
   PenTool,
   FileText as FileTextIcon,
-  X,
 } from "lucide-react";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
 import { VisitCategoryDialog } from "@/components/sessions/VisitCategoryDialog";
-import { RecordingBar } from "@/components/sessions/RecordingBar";
-import { DrawingPad } from "@/components/drawings/DrawingPad";
+import { SessionNotepad } from "@/components/sessions/SessionNotepad";
+import { Toggle } from "@/components/ui/toggle";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
 import { AudioWaveform } from "@/components/sessions/AudioWaveform";
@@ -53,16 +53,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 type SessionState = "idle" | "active" | "processing" | "completed";
 
@@ -90,7 +80,6 @@ export default function Sessions() {
   const [isGeneratingDiagnosis, setIsGeneratingDiagnosis] = useState(false);
   const [pastPatientSessions, setPastPatientSessions] = useState<any[]>([]);
   const [showVisitCategoryDialog, setShowVisitCategoryDialog] = useState(false);
-  const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [pendingTranscript, setPendingTranscript] = useState<string>("");
   const pendingCompletionRef = useRef(false);
   const latestTranscriptRef = useRef<string>("");
@@ -99,7 +88,7 @@ export default function Sessions() {
 
   const navigate = useNavigate();
   const { patients, loading: patientsLoading } = usePatients();
-  const { sessions, loading: sessionsLoading, createSession, completeSession, cancelSession } = useSessions();
+  const { sessions, loading: sessionsLoading, createSession, completeSession } = useSessions();
   
   const currentPatient = patients.find(p => p.id === patientId);
 
@@ -399,49 +388,8 @@ export default function Sessions() {
     setShowVisitCategoryDialog(true);
   };
 
-  const handleCancelSession = async () => {
-    if (isRecording) {
-      stopRecording();
-    }
-    
-    if (currentSessionId) {
-      await cancelSession(currentSessionId);
-    }
-    
-    // Reset state
-    setSessionState("idle");
-    setNotes("");
-    setSummary("");
-    setActionPoints([]);
-    setSessionDuration(0);
-    setCurrentSessionId(null);
-    setPrescription(null);
-    setInvoice(null);
-    setAiDiagnosis(null);
-    clearTranscript();
-    setShowCancelDialog(false);
-  };
-
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Cancel Session Dialog */}
-      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Cancel Session?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will discard all recordings and notes from this session. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Continue Session</AlertDialogCancel>
-            <AlertDialogAction onClick={handleCancelSession} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Cancel Session
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       {/* Visit Category Dialog */}
       <VisitCategoryDialog
         open={showVisitCategoryDialog}
@@ -578,27 +526,124 @@ export default function Sessions() {
       )}
 
       {sessionState === "active" && (
-        <div className="flex flex-col -mx-4 md:-mx-8 -my-6 md:-my-8 min-h-[calc(100vh-80px)]">
-          {/* Recording Bar - Fixed at top */}
-          <RecordingBar
-            patientName={currentPatient?.name}
-            sessionDuration={sessionDuration}
-            isRecording={isRecording}
-            isTranscribing={isTranscribing}
-            transcript={transcript}
-            audioUrl={audioUrl}
-            onToggleRecording={toggleRecording}
-            onCompleteSession={endSession}
-            onCancelSession={() => setShowCancelDialog(true)}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
+          {/* Compact Recording Panel - Sidebar */}
+          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col">
+            {/* Patient Info */}
+            <div className="flex items-center gap-3 p-4 border-b">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
+                <User className="h-5 w-5 text-accent-foreground" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-foreground truncate">
+                  {currentPatient?.name || "Current Session"}
+                </p>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  <span className="font-mono">{formatDuration(sessionDuration)}</span>
+                </div>
+              </div>
+            </div>
 
-          {/* Full-width DrawingPad - Takes remaining space */}
-          <div className="flex-1 min-h-0">
-            <DrawingPad
+            {/* Recording Controls - Compact */}
+            <div className="flex flex-col items-center gap-3 p-4">
+              <button
+                onClick={toggleRecording}
+                disabled={isTranscribing}
+                className={cn(
+                  "flex h-16 w-16 items-center justify-center rounded-full transition-all duration-300",
+                  isTranscribing && "opacity-50 cursor-not-allowed",
+                  isRecording
+                    ? "bg-destructive text-destructive-foreground animate-pulse-soft shadow-lg"
+                    : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-glow"
+                )}
+              >
+                {isTranscribing ? (
+                  <Loader2 className="h-7 w-7 animate-spin" />
+                ) : isRecording ? (
+                  <Square className="h-7 w-7" />
+                ) : (
+                  <Mic className="h-7 w-7" />
+                )}
+              </button>
+              
+              <p className="text-xs text-muted-foreground text-center">
+                {isTranscribing 
+                  ? "Transcribing..." 
+                  : isRecording 
+                    ? "Recording... Tap to stop" 
+                    : "Tap to record"}
+              </p>
+              
+              {/* Compact Waveform */}
+              {(isRecording || isTranscribing) && (
+                <div className="w-full">
+                  <AudioWaveform isRecording={isRecording} />
+                </div>
+              )}
+            </div>
+
+            {/* Live Transcript Preview - Collapsible */}
+            {(transcript || isTranscribing) && (
+              <div className="border-t p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <FileText className="h-3.5 w-3.5 text-primary" />
+                    <p className="text-xs font-medium text-primary">Transcript</p>
+                  </div>
+                  {transcript && !isTranscribing && (
+                    <span className="text-xs bg-success/15 text-success px-1.5 py-0.5 rounded">✓</span>
+                  )}
+                  {isTranscribing && (
+                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                  )}
+                </div>
+                <div className="max-h-[120px] overflow-y-auto bg-muted/30 rounded p-2">
+                  {transcript ? (
+                    <p className="text-xs text-foreground whitespace-pre-wrap leading-relaxed">{transcript}</p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground italic">Transcribing...</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Audio Playback */}
+            {audioUrl && !isRecording && (
+              <div className="border-t p-3">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
+                  <p className="text-xs font-medium text-foreground">Playback</p>
+                </div>
+                <audio controls className="w-full h-8" src={audioUrl}>
+                  Your browser does not support audio.
+                </audio>
+              </div>
+            )}
+
+            {/* End Session Button */}
+            <div className="p-3 border-t mt-auto">
+              <Button 
+                variant="outline" 
+                className="w-full gap-2" 
+                onClick={endSession} 
+                disabled={isTranscribing}
+              >
+                <Square className="h-4 w-4" />
+                End Session
+              </Button>
+            </div>
+          </div>
+
+          {/* Notes/Drawing Panel - Main Content */}
+          <div className="min-h-[500px]">
+            <SessionNotepad
               patientId={patientId || ""}
               sessionId={currentSessionId}
               patientName={currentPatient?.name}
-              isModal={false}
+              notes={notes}
+              onNotesChange={setNotes}
+              isRecording={isRecording}
             />
           </div>
         </div>

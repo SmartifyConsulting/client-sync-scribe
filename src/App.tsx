@@ -39,8 +39,6 @@ import MyDoctors from "./pages/patient/MyDoctors";
 import DoctorInvoices from "./pages/doctor/Invoices";
 import PricingAdmin from "./pages/admin/PricingAdmin";
 import GamificationAdmin from "./pages/admin/GamificationAdmin";
-import AnatomyDemo from "./pages/AnatomyDemo";
-
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -90,7 +88,6 @@ const App = () => (
           <Route path="/business-associate-agreement" element={<BusinessAssociateAgreement />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/anatomy-demo" element={<AnatomyDemo />} />
           
           {/* Protected routes */}
           <Route
