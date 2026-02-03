@@ -45,6 +45,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { professionalAnatomyAssets, LayeredAnatomyAsset, AnatomyLayer } from "./MedicalAnatomyAssets";
 import { AnatomyBrowser, StructureMetadataPanel, AnatomyStructure, AnatomySystem } from "./AnatomyBrowser";
+import { MedicalAnatomyViewer } from "./anatomy/MedicalAnatomyViewer";
 import { CLINICAL_TAGS } from "./ClinicalNotesPanel";
 import { DrawingTemplates, DrawingTemplate } from "./DrawingTemplates";
 import { useSessionDrawings, CanvasData, CanvasElement, CANVAS_SCHEMA_VERSION } from "@/hooks/useSessionDrawings";
@@ -1165,24 +1166,22 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
             </TabsContent>
             
             <TabsContent value="anatomy" className="flex-1 m-0 overflow-hidden flex flex-col">
-              <div className="p-2 border-b border-border bg-muted/30">
-                <h4 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground">Anatomy Systems</h4>
-              </div>
               <div className="flex-1 overflow-hidden">
-                <AnatomyBrowser
-                  onSelectStructure={(structure, system, color) => {
-                    setSelectedStructure(structure);
-                    setSelectedSystem(system);
-                    setHighlightColor(color);
+                <MedicalAnatomyViewer
+                  onStructureSelect={(structure) => {
+                    if (structure) {
+                      setSelectedStructure({
+                        id: structure.id,
+                        name: structure.name,
+                        latinName: structure.latinName,
+                        description: structure.description,
+                        assetId: structure.layerId,
+                      });
+                    } else {
+                      setSelectedStructure(null);
+                    }
                   }}
-                  selectedStructureId={selectedStructure?.id || null}
-                  highlightColor={highlightColor}
-                  highlightOpacity={highlightOpacity}
-                  onHighlightColorChange={setHighlightColor}
-                  onHighlightOpacityChange={setHighlightOpacity}
-                  visibleLayers={visibleLayers}
-                  anatomyAssets={professionalAnatomyAssets}
-                  onDragStart={handleDragStart}
+                  className="h-full"
                 />
               </div>
             </TabsContent>
