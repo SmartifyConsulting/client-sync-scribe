@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
@@ -35,9 +34,9 @@ import {
   Maximize2,
   Layers,
   Hand,
-  RefreshCw,
 } from "lucide-react";
 import { professionalAnatomyAssets, LayeredAnatomyAsset, AnatomyLayer } from "./MedicalAnatomyAssets";
+import { AnatomyBrowser, StructureMetadataPanel, AnatomyStructure, AnatomySystem } from "./AnatomyBrowser";
 import { useSessionDrawings, CanvasData, CanvasElement } from "@/hooks/useSessionDrawings";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -84,6 +83,11 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
   // Layer visibility
   const [visibleLayers, setVisibleLayers] = useState<AnatomyLayer[]>(DEFAULT_LAYERS);
   const [showLayerPanel, setShowLayerPanel] = useState(false);
+  
+  // Anatomy selection state
+  const [selectedStructure, setSelectedStructure] = useState<AnatomyStructure | null>(null);
+  const [selectedSystem, setSelectedSystem] = useState<AnatomySystem | null>(null);
+  const [highlightColor, setHighlightColor] = useState("#DC143C");
   
   // UI state
   const [draggedAnatomy, setDraggedAnatomy] = useState<LayeredAnatomyAsset | null>(null);
@@ -848,51 +852,24 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
 
       {/* Main Content */}
       <div className="flex flex-1 min-h-0">
-        {/* Anatomy Panel */}
-        <div className="w-48 border-r bg-muted/20 flex flex-col">
+        {/* Anatomy Browser Panel */}
+        <div className="w-56 border-r bg-muted/20 flex flex-col">
           <div className="p-2 border-b bg-muted/30">
-            <h4 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground">Anatomy Library</h4>
+            <h4 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground">Anatomy Systems</h4>
           </div>
-          <Tabs defaultValue="body" className="flex-1 flex flex-col">
-            <TabsList className="grid grid-cols-4 m-1 h-7">
-              <TabsTrigger value="body" className="text-[10px] h-6">Body</TabsTrigger>
-              <TabsTrigger value="head" className="text-[10px] h-6">Head</TabsTrigger>
-              <TabsTrigger value="torso" className="text-[10px] h-6">Torso</TabsTrigger>
-              <TabsTrigger value="other" className="text-[10px] h-6">Other</TabsTrigger>
-            </TabsList>
-            
-            {["body", "head", "torso", "spine", "joints", "dental"].map((category) => (
-              <TabsContent 
-                key={category} 
-                value={category === "spine" || category === "joints" || category === "dental" ? "other" : category} 
-                className="flex-1 m-0"
-              >
-                <ScrollArea className="h-full">
-                  <div className="p-2 space-y-2">
-                    {professionalAnatomyAssets
-                      .filter((a) => {
-                        if (category === "other") return ["spine", "joints", "dental"].includes(a.category);
-                        return a.category === category;
-                      })
-                      .map((asset) => (
-                        <div
-                          key={asset.id}
-                          className="group p-2 bg-background rounded-lg border cursor-grab hover:border-primary hover:shadow-md transition-all"
-                          draggable
-                          onDragStart={() => handleDragStart(asset)}
-                        >
-                          <div className="h-24 flex items-center justify-center text-foreground overflow-hidden">
-                            <asset.component visibleLayers={visibleLayers} />
-                          </div>
-                          <p className="text-[10px] text-center mt-1 font-medium">{asset.name}</p>
-                          <p className="text-[8px] text-center text-muted-foreground line-clamp-1">{asset.description}</p>
-                        </div>
-                      ))}
-                  </div>
-                </ScrollArea>
-              </TabsContent>
-            ))}
-          </Tabs>
+          <AnatomyBrowser
+            onSelectStructure={(structure, system, color) => {
+              setSelectedStructure(structure);
+              setSelectedSystem(system);
+              setHighlightColor(color);
+            }}
+            selectedStructureId={selectedStructure?.id || null}
+            highlightColor={highlightColor}
+            onHighlightColorChange={setHighlightColor}
+            visibleLayers={visibleLayers}
+            anatomyAssets={professionalAnatomyAssets}
+            onDragStart={handleDragStart}
+          />
         </div>
 
         {/* Canvas Area */}
@@ -931,7 +908,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
             onMouseLeave={handleMouseUp}
           />
           
-          {/* Anatomy Overlays */}
+          {/* Anatomy Overlays with selection highlighting */}
           {elements
             .filter((el) => el.type === "anatomy")
             .map((el) => {
@@ -940,12 +917,16 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
               const isSelected = selectedElement === el.id;
               const elementLayers = el.data.visibleLayers || DEFAULT_LAYERS;
               
+              // Check if this element matches the selected structure
+              const isStructureHighlighted = selectedStructure?.assetId === el.data.assetId;
+              const shouldDim = selectedStructure && !isStructureHighlighted;
+              
               return (
                 <div
                   key={el.id}
                   className={cn(
-                    "absolute transition-shadow",
-                    isSelected && "ring-2 ring-primary shadow-xl",
+                    "absolute transition-all duration-200",
+                    isSelected && "ring-2 shadow-xl",
                     tool === "select" && "cursor-move"
                   )}
                   style={{
@@ -955,23 +936,77 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                     height: (el.height || asset.defaultHeight) * scale,
                     transform: el.data.rotation ? `rotate(${el.data.rotation}deg)` : undefined,
                     transformOrigin: "center center",
+                    opacity: shouldDim ? 0.3 : 1,
+                    filter: shouldDim ? "grayscale(70%)" : "none",
+                    boxShadow: isStructureHighlighted ? `0 0 20px ${highlightColor}40, 0 0 0 2px ${highlightColor}` : (isSelected ? `0 0 0 2px hsl(var(--primary))` : undefined),
                   }}
                   onMouseDown={(e) => handleElementMouseDown(e, el.id)}
                 >
-                  <asset.component visibleLayers={elementLayers} />
+                  {/* Highlight border for selected structure */}
+                  {isStructureHighlighted && (
+                    <div 
+                      className="absolute inset-0 pointer-events-none rounded-lg"
+                      style={{ 
+                        border: `3px solid ${highlightColor}`,
+                        boxShadow: `inset 0 0 15px ${highlightColor}30`
+                      }}
+                    />
+                  )}
+                  
+                  <asset.component visibleLayers={elementLayers} color={isStructureHighlighted ? highlightColor : undefined} />
+                  
+                  {/* Structure name label when highlighted */}
+                  {isStructureHighlighted && selectedStructure && (
+                    <div 
+                      className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded-md text-xs font-semibold whitespace-nowrap shadow-lg"
+                      style={{ 
+                        backgroundColor: highlightColor,
+                        color: "#FFFFFF"
+                      }}
+                    >
+                      {selectedStructure.name}
+                    </div>
+                  )}
                   
                   {/* Resize Handles */}
                   {isSelected && (
                     <>
-                      <div className="absolute -top-2 -left-2 w-4 h-4 bg-primary rounded-full cursor-nw-resize border-2 border-background shadow" onMouseDown={(e) => handleResizeStart(e, "nw")} />
-                      <div className="absolute -top-2 -right-2 w-4 h-4 bg-primary rounded-full cursor-ne-resize border-2 border-background shadow" onMouseDown={(e) => handleResizeStart(e, "ne")} />
-                      <div className="absolute -bottom-2 -left-2 w-4 h-4 bg-primary rounded-full cursor-sw-resize border-2 border-background shadow" onMouseDown={(e) => handleResizeStart(e, "sw")} />
-                      <div className="absolute -bottom-2 -right-2 w-4 h-4 bg-primary rounded-full cursor-se-resize border-2 border-background shadow" onMouseDown={(e) => handleResizeStart(e, "se")} />
+                      <div 
+                        className="absolute -top-2 -left-2 w-4 h-4 rounded-full cursor-nw-resize border-2 border-background shadow" 
+                        style={{ backgroundColor: highlightColor }}
+                        onMouseDown={(e) => handleResizeStart(e, "nw")} 
+                      />
+                      <div 
+                        className="absolute -top-2 -right-2 w-4 h-4 rounded-full cursor-ne-resize border-2 border-background shadow" 
+                        style={{ backgroundColor: highlightColor }}
+                        onMouseDown={(e) => handleResizeStart(e, "ne")} 
+                      />
+                      <div 
+                        className="absolute -bottom-2 -left-2 w-4 h-4 rounded-full cursor-sw-resize border-2 border-background shadow" 
+                        style={{ backgroundColor: highlightColor }}
+                        onMouseDown={(e) => handleResizeStart(e, "sw")} 
+                      />
+                      <div 
+                        className="absolute -bottom-2 -right-2 w-4 h-4 rounded-full cursor-se-resize border-2 border-background shadow" 
+                        style={{ backgroundColor: highlightColor }}
+                        onMouseDown={(e) => handleResizeStart(e, "se")} 
+                      />
                     </>
                   )}
                 </div>
               );
             })}
+          
+          {/* Structure Metadata Panel */}
+          <StructureMetadataPanel
+            structure={selectedStructure}
+            system={selectedSystem}
+            highlightColor={highlightColor}
+            onClose={() => {
+              setSelectedStructure(null);
+              setSelectedSystem(null);
+            }}
+          />
 
           {/* Text Input */}
           {textPosition && (
