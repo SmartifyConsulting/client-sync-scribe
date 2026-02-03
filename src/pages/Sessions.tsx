@@ -26,6 +26,7 @@ import {
   ShieldAlert,
   PenTool,
   FileText as FileTextIcon,
+  X,
 } from "lucide-react";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
@@ -53,6 +54,16 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type SessionState = "idle" | "active" | "processing" | "completed";
 
@@ -80,6 +91,7 @@ export default function Sessions() {
   const [isGeneratingDiagnosis, setIsGeneratingDiagnosis] = useState(false);
   const [pastPatientSessions, setPastPatientSessions] = useState<any[]>([]);
   const [showVisitCategoryDialog, setShowVisitCategoryDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [pendingTranscript, setPendingTranscript] = useState<string>("");
   const pendingCompletionRef = useRef(false);
   const latestTranscriptRef = useRef<string>("");
@@ -88,7 +100,7 @@ export default function Sessions() {
 
   const navigate = useNavigate();
   const { patients, loading: patientsLoading } = usePatients();
-  const { sessions, loading: sessionsLoading, createSession, completeSession } = useSessions();
+  const { sessions, loading: sessionsLoading, createSession, completeSession, cancelSession } = useSessions();
   
   const currentPatient = patients.find(p => p.id === patientId);
 
@@ -388,8 +400,49 @@ export default function Sessions() {
     setShowVisitCategoryDialog(true);
   };
 
+  const handleCancelSession = async () => {
+    if (isRecording) {
+      stopRecording();
+    }
+    
+    if (currentSessionId) {
+      await cancelSession(currentSessionId);
+    }
+    
+    // Reset state
+    setSessionState("idle");
+    setNotes("");
+    setSummary("");
+    setActionPoints([]);
+    setSessionDuration(0);
+    setCurrentSessionId(null);
+    setPrescription(null);
+    setInvoice(null);
+    setAiDiagnosis(null);
+    clearTranscript();
+    setShowCancelDialog(false);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Cancel Session Dialog */}
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Session?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will discard all recordings and notes from this session. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Continue Session</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCancelSession} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Cancel Session
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Visit Category Dialog */}
       <VisitCategoryDialog
         open={showVisitCategoryDialog}
@@ -526,13 +579,13 @@ export default function Sessions() {
       )}
 
       {sessionState === "active" && (
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
-          {/* Compact Recording Panel - Sidebar */}
-          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col">
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4">
+          {/* Compact Recording Panel - Sidebar with clean clinical styling */}
+          <div className="rounded-lg border border-slate-200 bg-white shadow-sm flex flex-col">
             {/* Patient Info */}
-            <div className="flex items-center gap-3 p-4 border-b">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
-                <User className="h-5 w-5 text-accent-foreground" />
+            <div className="flex items-center gap-3 p-4 border-b border-slate-100">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 shrink-0">
+                <User className="h-5 w-5 text-slate-600" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="font-medium text-foreground truncate">
@@ -621,16 +674,25 @@ export default function Sessions() {
               </div>
             )}
 
-            {/* End Session Button */}
-            <div className="p-3 border-t mt-auto">
+            {/* Session Actions */}
+            <div className="p-3 border-t mt-auto space-y-2">
               <Button 
-                variant="outline" 
+                variant="default" 
                 className="w-full gap-2" 
                 onClick={endSession} 
                 disabled={isTranscribing}
               >
-                <Square className="h-4 w-4" />
-                End Session
+                <CheckCircle className="h-4 w-4" />
+                Complete Session
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10" 
+                onClick={() => setShowCancelDialog(true)}
+                disabled={isTranscribing}
+              >
+                <X className="h-4 w-4" />
+                Cancel Session
               </Button>
             </div>
           </div>

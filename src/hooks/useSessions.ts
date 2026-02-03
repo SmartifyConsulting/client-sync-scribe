@@ -273,6 +273,31 @@ const completeSession = async (id: string, content: string, additionalNotes?: st
     }
   };
 
+  const cancelSession = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('sessions')
+        .update({ 
+          status: 'cancelled',
+          ended_at: new Date().toISOString(),
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+      setSessions((prev) => prev.filter((s) => s.id !== id));
+      toast({ title: 'Session Cancelled', description: 'The session has been cancelled' });
+      return true;
+    } catch (error: any) {
+      console.error('Error cancelling session:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to cancel session',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
+
   const deleteSession = async (id: string) => {
     try {
       const { error } = await supabase.from('sessions').delete().eq('id', id);
@@ -303,6 +328,7 @@ const completeSession = async (id: string, content: string, additionalNotes?: st
     createSession,
     updateSession,
     completeSession,
+    cancelSession,
     deleteSession,
   };
 }
