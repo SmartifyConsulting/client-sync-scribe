@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock, X, CalendarIcon } from "lucide-react";
+import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock, X, CalendarIcon, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { PatientImportDialog } from "@/components/patients/PatientImport";
 import { usePatients } from "@/hooks/usePatients";
 import {
   Dialog,
@@ -43,7 +44,7 @@ import { Label } from "@/components/ui/label";
 export default function Patients() {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { patients, loading, createPatient, deletePatient } = usePatients();
+  const { patients, loading, createPatient, deletePatient, fetchPatients } = usePatients();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
@@ -181,13 +182,23 @@ export default function Patients() {
             Manage your patient profiles and history
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              Add Patient
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <PatientImportDialog 
+            trigger={
+              <Button variant="outline" className="gap-2">
+                <Upload className="h-4 w-4" />
+                Import
+              </Button>
+            }
+            onImportComplete={() => fetchPatients()}
+          />
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Patient
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh]">
             <DialogHeader>
               <DialogTitle>Add New Patient</DialogTitle>
@@ -407,6 +418,7 @@ export default function Patients() {
             </ScrollArea>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Search and Filters */}
