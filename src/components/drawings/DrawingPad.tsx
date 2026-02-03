@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
@@ -10,13 +9,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Pencil,
   Eraser,
@@ -31,9 +23,12 @@ import {
   Square,
   Minus,
   ArrowRight,
-  Palette,
   Download,
   Loader2,
+  ZoomIn,
+  ZoomOut,
+  RotateCw,
+  X,
 } from "lucide-react";
 import { anatomyAssets, AnatomyAsset } from "./AnatomyAssets";
 import { useSessionDrawings, CanvasData, CanvasElement } from "@/hooks/useSessionDrawings";
@@ -70,6 +65,10 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
   const [showVersions, setShowVersions] = useState(false);
   const [textInput, setTextInput] = useState("");
   const [textPosition, setTextPosition] = useState<{ x: number; y: number } | null>(null);
+  const [isDraggingElement, setIsDraggingElement] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeCorner, setResizeCorner] = useState<string | null>(null);
 
   const { 
     drawings, 
@@ -137,7 +136,6 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           ctx.stroke();
           
           if (element.data.shapeType === "arrow") {
-            // Draw arrowhead
             const angle = Math.atan2(element.data.endY - element.y, element.data.endX - element.x);
             const headLen = 15;
             ctx.beginPath();
@@ -252,7 +250,6 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     if (tool === "pen" || tool === "eraser") {
       setCurrentPath((prev) => [...prev, coords]);
       
-      // Real-time drawing
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d");
       if (ctx && currentPath.length > 0) {
@@ -284,13 +281,6 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       const newElements = [...elements, newElement];
       setElements(newElements);
       addToHistory(newElements);
-    } else if (shapeStart && ["line", "circle", "rectangle", "arrow"].includes(tool)) {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const rect = canvas.getBoundingClientRect();
-      // Get last mouse position from the canvas
-      // For simplicity, we'll use current path's last point or shapeStart
-      // This is a simplified implementation
     }
     
     setCurrentPath([]);
@@ -342,6 +332,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     setElements(newElements);
     addToHistory(newElements);
     setDraggedAnatomy(null);
+    setSelectedElement(newElement.id);
   };
 
   const handleSave = async (createNewVersion = false) => {
@@ -352,6 +343,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
   const clearCanvas = () => {
     setElements([]);
     addToHistory([]);
+    setSelectedElement(null);
   };
 
   const exportImage = () => {
@@ -364,6 +356,114 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     link.click();
   };
 
+  // Element manipulation functions
+  const handleElementMouseDown = (e: React.MouseEvent, elementId: string) => {
+    e.stopPropagation();
+    setSelectedElement(elementId);
+    
+    if (tool === "select") {
+      const element = elements.find(el => el.id === elementId);
+      if (element) {
+        const rect = (e.target as HTMLElement).getBoundingClientRect();
+        setDragOffset({
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        });
+        setIsDraggingElement(true);
+      }
+    }
+  };
+
+  const handleElementMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingElement || !selectedElement || !containerRef.current) return;
+    
+    const rect = containerRef.current.getBoundingClientRect();
+    const newX = e.clientX - rect.left - dragOffset.x;
+    const newY = e.clientY - rect.top - dragOffset.y;
+    
+    setElements(prev => prev.map(el => 
+      el.id === selectedElement 
+        ? { ...el, x: newX, y: newY }
+        : el
+    ));
+  };
+
+  const handleElementMouseUp = () => {
+    if (isDraggingElement && selectedElement) {
+      addToHistory(elements);
+    }
+    setIsDraggingElement(false);
+    setIsResizing(false);
+    setResizeCorner(null);
+  };
+
+  // Resize functions
+  const handleResizeStart = (e: React.MouseEvent, corner: string) => {
+    e.stopPropagation();
+    setIsResizing(true);
+    setResizeCorner(corner);
+  };
+
+  const handleResize = (e: React.MouseEvent) => {
+    if (!isResizing || !selectedElement || !containerRef.current || !resizeCorner) return;
+    
+    const rect = containerRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
+    setElements(prev => prev.map(el => {
+      if (el.id !== selectedElement) return el;
+      
+      let newWidth = el.width || 100;
+      let newHeight = el.height || 100;
+      let newX = el.x;
+      let newY = el.y;
+      
+      if (resizeCorner.includes("e")) {
+        newWidth = Math.max(40, mouseX - el.x);
+      }
+      if (resizeCorner.includes("w")) {
+        const widthDiff = el.x - mouseX;
+        newWidth = Math.max(40, (el.width || 100) + widthDiff);
+        newX = mouseX;
+      }
+      if (resizeCorner.includes("s")) {
+        newHeight = Math.max(40, mouseY - el.y);
+      }
+      if (resizeCorner.includes("n")) {
+        const heightDiff = el.y - mouseY;
+        newHeight = Math.max(40, (el.height || 100) + heightDiff);
+        newY = mouseY;
+      }
+      
+      return { ...el, x: newX, y: newY, width: newWidth, height: newHeight };
+    }));
+  };
+
+  // Scale element
+  const scaleElement = (scale: number) => {
+    if (!selectedElement) return;
+    
+    setElements(prev => prev.map(el => {
+      if (el.id !== selectedElement) return el;
+      return {
+        ...el,
+        width: (el.width || 100) * scale,
+        height: (el.height || 100) * scale
+      };
+    }));
+    addToHistory(elements);
+  };
+
+  // Delete selected element
+  const deleteSelectedElement = () => {
+    if (!selectedElement) return;
+    const newElements = elements.filter(el => el.id !== selectedElement);
+    setElements(newElements);
+    addToHistory(newElements);
+    setSelectedElement(null);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -372,14 +472,25 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     );
   }
 
+  const selectedEl = elements.find(el => el.id === selectedElement);
+
   return (
-    <div className={cn("flex flex-col h-full", isModal && "max-h-[80vh]")}>
+    <div 
+      className={cn("flex flex-col h-full", isModal && "max-h-[80vh]")}
+      onMouseMove={(e) => {
+        if (isDraggingElement) handleElementMouseMove(e);
+        if (isResizing) handleResize(e);
+      }}
+      onMouseUp={handleElementMouseUp}
+      onMouseLeave={handleElementMouseUp}
+    >
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-2 p-3 bg-muted/50 border-b">
-        <div className="flex items-center gap-1 border-r pr-2">
+      <div className="flex flex-wrap items-center gap-2 p-2 bg-muted/50 border-b">
+        <div className="flex items-center gap-0.5 border-r pr-2">
           <Button
             variant={tool === "pen" ? "default" : "ghost"}
             size="icon"
+            className="h-8 w-8"
             onClick={() => setTool("pen")}
             title="Pen"
           >
@@ -388,6 +499,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           <Button
             variant={tool === "eraser" ? "default" : "ghost"}
             size="icon"
+            className="h-8 w-8"
             onClick={() => setTool("eraser")}
             title="Eraser"
           >
@@ -396,6 +508,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           <Button
             variant={tool === "text" ? "default" : "ghost"}
             size="icon"
+            className="h-8 w-8"
             onClick={() => setTool("text")}
             title="Text"
           >
@@ -404,6 +517,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           <Button
             variant={tool === "select" ? "default" : "ghost"}
             size="icon"
+            className="h-8 w-8"
             onClick={() => setTool("select")}
             title="Select/Move"
           >
@@ -411,10 +525,11 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           </Button>
         </div>
 
-        <div className="flex items-center gap-1 border-r pr-2">
+        <div className="flex items-center gap-0.5 border-r pr-2">
           <Button
             variant={tool === "line" ? "default" : "ghost"}
             size="icon"
+            className="h-8 w-8"
             onClick={() => setTool("line")}
             title="Line"
           >
@@ -423,6 +538,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           <Button
             variant={tool === "arrow" ? "default" : "ghost"}
             size="icon"
+            className="h-8 w-8"
             onClick={() => setTool("arrow")}
             title="Arrow"
           >
@@ -431,6 +547,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           <Button
             variant={tool === "circle" ? "default" : "ghost"}
             size="icon"
+            className="h-8 w-8"
             onClick={() => setTool("circle")}
             title="Circle"
           >
@@ -439,6 +556,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           <Button
             variant={tool === "rectangle" ? "default" : "ghost"}
             size="icon"
+            className="h-8 w-8"
             onClick={() => setTool("rectangle")}
             title="Rectangle"
           >
@@ -448,7 +566,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
 
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon" title="Color">
+            <Button variant="ghost" size="icon" className="h-8 w-8" title="Color">
               <div 
                 className="h-5 w-5 rounded border"
                 style={{ backgroundColor: color }}
@@ -472,7 +590,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           </PopoverContent>
         </Popover>
 
-        <div className="flex items-center gap-2 w-32">
+        <div className="flex items-center gap-2 w-24">
           <span className="text-xs text-muted-foreground">Size:</span>
           <Slider
             value={[strokeWidth]}
@@ -484,10 +602,11 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           />
         </div>
 
-        <div className="flex items-center gap-1 border-l pl-2">
+        <div className="flex items-center gap-0.5 border-l pl-2">
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8"
             onClick={undo}
             disabled={historyIndex <= 0}
             title="Undo"
@@ -497,6 +616,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8"
             onClick={redo}
             disabled={historyIndex >= history.length - 1}
             title="Redo"
@@ -505,10 +625,11 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           </Button>
         </div>
 
-        <div className="flex items-center gap-1 border-l pl-2">
+        <div className="flex items-center gap-0.5 border-l pl-2">
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8"
             onClick={clearCanvas}
             title="Clear"
           >
@@ -517,6 +638,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8"
             onClick={exportImage}
             title="Export"
           >
@@ -528,12 +650,13 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           <Button
             variant="ghost"
             size="sm"
+            className="h-8"
             onClick={() => setShowVersions(!showVersions)}
           >
             <History className="h-4 w-4 mr-1" />
-            Versions
+            <span className="hidden sm:inline">Versions</span>
             {drawings.length > 0 && (
-              <Badge variant="secondary" className="ml-1">
+              <Badge variant="secondary" className="ml-1 h-5">
                 {drawings.length}
               </Badge>
             )}
@@ -541,38 +664,97 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           <Button
             variant="outline"
             size="sm"
+            className="h-8"
             onClick={() => handleSave(false)}
             disabled={saving}
           >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
-            Save
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4 sm:mr-1" />}
+            <span className="hidden sm:inline">Save</span>
           </Button>
           <Button
             variant="default"
             size="sm"
+            className="h-8"
             onClick={() => handleSave(true)}
             disabled={saving}
           >
-            Save New Version
+            <span className="hidden sm:inline">New Version</span>
+            <span className="sm:hidden">+</span>
           </Button>
         </div>
       </div>
 
+      {/* Selected element controls */}
+      {selectedElement && selectedEl?.type === "anatomy" && (
+        <div className="flex items-center gap-2 px-3 py-2 bg-primary/5 border-b">
+          <span className="text-sm font-medium">Selected: {anatomyAssets.find(a => a.id === selectedEl.data.assetId)?.name}</span>
+          <div className="flex items-center gap-1 ml-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7"
+              onClick={() => scaleElement(0.9)}
+              title="Shrink"
+            >
+              <ZoomOut className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7"
+              onClick={() => scaleElement(1.1)}
+              title="Enlarge"
+            >
+              <ZoomIn className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7"
+              onClick={() => {
+                setElements(prev => prev.map(el => 
+                  el.id === selectedElement 
+                    ? { ...el, data: { ...el.data, rotation: ((el.data.rotation || 0) + 90) % 360 } }
+                    : el
+                ));
+                addToHistory(elements);
+              }}
+              title="Rotate 90°"
+            >
+              <RotateCw className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="h-7"
+              onClick={deleteSelectedElement}
+              title="Delete"
+            >
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Main content */}
       <div className="flex flex-1 min-h-0">
         {/* Anatomy panel */}
-        <div className="w-48 border-r bg-muted/30 flex flex-col">
+        <div className="w-44 border-r bg-muted/30 flex flex-col">
           <div className="p-2 border-b">
-            <h4 className="font-medium text-sm">Anatomy</h4>
+            <h4 className="font-medium text-xs">Anatomy Diagrams</h4>
           </div>
           <Tabs defaultValue="body" className="flex-1 flex flex-col">
-            <TabsList className="grid grid-cols-4 m-1">
-              <TabsTrigger value="body" className="text-xs px-1">Body</TabsTrigger>
-              <TabsTrigger value="spine" className="text-xs px-1">Spine</TabsTrigger>
-              <TabsTrigger value="face" className="text-xs px-1">Face</TabsTrigger>
-              <TabsTrigger value="joints" className="text-xs px-1">Joints</TabsTrigger>
+            <TabsList className="grid grid-cols-3 m-1 h-7">
+              <TabsTrigger value="body" className="text-[10px] px-1 h-6">Body</TabsTrigger>
+              <TabsTrigger value="spine" className="text-[10px] px-1 h-6">Spine</TabsTrigger>
+              <TabsTrigger value="face" className="text-[10px] px-1 h-6">Face</TabsTrigger>
             </TabsList>
-            {["body", "spine", "face", "joints"].map((category) => (
+            <TabsList className="grid grid-cols-3 mx-1 mb-1 h-7">
+              <TabsTrigger value="joints" className="text-[10px] px-1 h-6">Joints</TabsTrigger>
+              <TabsTrigger value="cosmetic" className="text-[10px] px-1 h-6">Cosmetic</TabsTrigger>
+              <TabsTrigger value="dental" className="text-[10px] px-1 h-6">Dental</TabsTrigger>
+            </TabsList>
+            {["body", "spine", "face", "joints", "cosmetic", "dental"].map((category) => (
               <TabsContent key={category} value={category} className="flex-1 m-0">
                 <ScrollArea className="h-full">
                   <div className="p-2 space-y-2">
@@ -581,14 +763,14 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                       .map((asset) => (
                         <div
                           key={asset.id}
-                          className="p-2 bg-background rounded border cursor-grab hover:border-primary transition-colors"
+                          className="p-2 bg-background rounded border cursor-grab hover:border-primary hover:shadow-sm transition-all"
                           draggable
                           onDragStart={() => handleDragStart(asset)}
                         >
-                          <div className="h-16 flex items-center justify-center text-muted-foreground">
+                          <div className="h-14 flex items-center justify-center text-foreground">
                             <asset.component />
                           </div>
-                          <p className="text-xs text-center mt-1">{asset.name}</p>
+                          <p className="text-[10px] text-center mt-1 font-medium">{asset.name}</p>
                         </div>
                       ))}
                   </div>
@@ -604,6 +786,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           className="flex-1 relative bg-background overflow-hidden"
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDrop}
+          onClick={() => tool !== "select" && setSelectedElement(null)}
         >
           <canvas
             ref={canvasRef}
@@ -620,18 +803,64 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
             .map((el) => {
               const asset = anatomyAssets.find((a) => a.id === el.data.assetId);
               if (!asset) return null;
+              const isSelected = selectedElement === el.id;
               return (
                 <div
                   key={el.id}
-                  className="absolute cursor-move text-muted-foreground"
+                  className={cn(
+                    "absolute cursor-move text-foreground transition-shadow",
+                    isSelected && "ring-2 ring-primary ring-offset-2 shadow-lg"
+                  )}
                   style={{
                     left: el.x,
                     top: el.y,
                     width: el.width,
                     height: el.height,
+                    transform: el.data.rotation ? `rotate(${el.data.rotation}deg)` : undefined,
                   }}
+                  onMouseDown={(e) => handleElementMouseDown(e, el.id)}
                 >
                   <asset.component />
+                  
+                  {/* Resize handles */}
+                  {isSelected && (
+                    <>
+                      {/* Corner handles */}
+                      <div
+                        className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-primary rounded-full cursor-nw-resize border-2 border-background"
+                        onMouseDown={(e) => handleResizeStart(e, "nw")}
+                      />
+                      <div
+                        className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-primary rounded-full cursor-ne-resize border-2 border-background"
+                        onMouseDown={(e) => handleResizeStart(e, "ne")}
+                      />
+                      <div
+                        className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-primary rounded-full cursor-sw-resize border-2 border-background"
+                        onMouseDown={(e) => handleResizeStart(e, "sw")}
+                      />
+                      <div
+                        className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-primary rounded-full cursor-se-resize border-2 border-background"
+                        onMouseDown={(e) => handleResizeStart(e, "se")}
+                      />
+                      {/* Edge handles */}
+                      <div
+                        className="absolute -top-1 left-1/2 -translate-x-1/2 w-6 h-2 bg-primary/50 rounded cursor-n-resize"
+                        onMouseDown={(e) => handleResizeStart(e, "n")}
+                      />
+                      <div
+                        className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-6 h-2 bg-primary/50 rounded cursor-s-resize"
+                        onMouseDown={(e) => handleResizeStart(e, "s")}
+                      />
+                      <div
+                        className="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-6 bg-primary/50 rounded cursor-w-resize"
+                        onMouseDown={(e) => handleResizeStart(e, "w")}
+                      />
+                      <div
+                        className="absolute top-1/2 -right-1 -translate-y-1/2 w-2 h-6 bg-primary/50 rounded cursor-e-resize"
+                        onMouseDown={(e) => handleResizeStart(e, "e")}
+                      />
+                    </>
+                  )}
                 </div>
               );
             })}
@@ -639,12 +868,12 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           {/* Text input popover */}
           {textPosition && (
             <div
-              className="absolute bg-background border rounded-lg shadow-lg p-2"
+              className="absolute bg-background border rounded-lg shadow-lg p-2 z-10"
               style={{ left: textPosition.x, top: textPosition.y }}
             >
               <input
                 type="text"
-                className="border rounded px-2 py-1 text-sm w-40"
+                className="border rounded px-2 py-1 text-sm w-40 bg-background"
                 placeholder="Enter text..."
                 value={textInput}
                 onChange={(e) => setTextInput(e.target.value)}
@@ -678,12 +907,13 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
 
         {/* Version history panel */}
         {showVersions && (
-          <div className="w-56 border-l bg-muted/30">
+          <div className="w-48 border-l bg-muted/30">
             <div className="p-2 border-b flex items-center justify-between">
-              <h4 className="font-medium text-sm">Version History</h4>
+              <h4 className="font-medium text-xs">Version History</h4>
               <Button
                 variant="ghost"
                 size="sm"
+                className="h-6 w-6 p-0"
                 onClick={() => setShowVersions(false)}
               >
                 ×
@@ -706,16 +936,16 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                       onClick={() => loadVersion(drawing.version)}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-medium text-sm">
+                        <span className="font-medium text-xs">
                           Version {drawing.version}
                         </span>
                         {drawing.is_current && (
-                          <Badge variant="default" className="text-xs">
+                          <Badge variant="default" className="text-[10px] h-4">
                             Current
                           </Badge>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-[10px] text-muted-foreground mt-1">
                         {format(new Date(drawing.created_at), "MMM d, yyyy h:mm a")}
                       </p>
                     </div>
