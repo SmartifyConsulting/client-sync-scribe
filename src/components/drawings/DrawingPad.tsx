@@ -34,6 +34,11 @@ import {
   Maximize2,
   Layers,
   Hand,
+  Highlighter,
+  Eye,
+  EyeOff,
+  Edit3,
+  Check,
 } from "lucide-react";
 import { professionalAnatomyAssets, LayeredAnatomyAsset, AnatomyLayer } from "./MedicalAnatomyAssets";
 import { AnatomyBrowser, StructureMetadataPanel, AnatomyStructure, AnatomySystem } from "./AnatomyBrowser";
@@ -49,11 +54,19 @@ interface DrawingPadProps {
   isModal?: boolean;
 }
 
-type Tool = "pen" | "eraser" | "text" | "select" | "pan" | "line" | "circle" | "rectangle" | "arrow";
+type Tool = "pen" | "marker" | "eraser" | "text" | "select" | "pan" | "line" | "circle" | "rectangle" | "arrow";
 
 const COLORS = [
   "#000000", "#DC143C", "#FF4500", "#FFD700", "#228B22", 
   "#008B8B", "#0066CC", "#663399", "#C71585", "#4A4A4A"
+];
+
+const FONT_SIZES = [
+  { label: "XS", size: 10 },
+  { label: "S", size: 14 },
+  { label: "M", size: 18 },
+  { label: "L", size: 24 },
+  { label: "XL", size: 32 },
 ];
 
 const DEFAULT_LAYERS: AnatomyLayer[] = ["skin", "muscular", "skeletal", "labels"];
@@ -66,7 +79,15 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
   const [tool, setTool] = useState<Tool>("pen");
   const [color, setColor] = useState("#DC143C");
   const [strokeWidth, setStrokeWidth] = useState(2);
+  const [fontSize, setFontSize] = useState(18);
   const [isDrawing, setIsDrawing] = useState(false);
+  
+  // Annotation visibility
+  const [showAnnotations, setShowAnnotations] = useState(true);
+  
+  // Editing state
+  const [editingTextId, setEditingTextId] = useState<string | null>(null);
+  const [editingTextValue, setEditingTextValue] = useState("");
   
   // Canvas state
   const [elements, setElements] = useState<CanvasElement[]>([]);
@@ -118,7 +139,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     }
   }, [currentDrawing]);
 
-  // Render elements to canvas
+  // Render elements to canvas (only annotation elements, not anatomy)
   const renderCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -131,81 +152,99 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     ctx.fillStyle = "#FAFAFA";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
+    // Skip rendering annotations if hidden
+    if (!showAnnotations) return;
+    
     // Apply zoom and pan
     ctx.setTransform(scale, 0, 0, scale, offset.x, offset.y);
 
-    // Render each element
-    elements.forEach((element) => {
-      ctx.save();
-      
-      if (element.type === "path") {
-        ctx.strokeStyle = element.color || "#000000";
-        ctx.lineWidth = (element.strokeWidth || 2) / scale;
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
+    // Render annotation elements (paths, text, shapes)
+    elements
+      .filter(el => el.type !== "anatomy")
+      .forEach((element) => {
+        ctx.save();
         
-        const points = element.data.points as { x: number; y: number }[];
-        if (points && points.length > 1) {
-          ctx.beginPath();
-          ctx.moveTo(points[0].x, points[0].y);
-          for (let i = 1; i < points.length; i++) {
-            ctx.lineTo(points[i].x, points[i].y);
-          }
-          ctx.stroke();
-        }
-      } else if (element.type === "text") {
-        ctx.fillStyle = element.color || "#000000";
-        ctx.font = `${(element.strokeWidth || 16) / scale}px Arial, sans-serif`;
-        ctx.fillText(element.data.text, element.x, element.y);
-      } else if (element.type === "shape") {
-        ctx.strokeStyle = element.color || "#000000";
-        ctx.lineWidth = (element.strokeWidth || 2) / scale;
-        
-        if (element.data.shapeType === "line" || element.data.shapeType === "arrow") {
-          ctx.beginPath();
-          ctx.moveTo(element.x, element.y);
-          ctx.lineTo(element.data.endX, element.data.endY);
-          ctx.stroke();
+        if (element.type === "path") {
+          const isMarker = element.data.isMarker;
           
-          if (element.data.shapeType === "arrow") {
-            const angle = Math.atan2(element.data.endY - element.y, element.data.endX - element.x);
-            const headLen = 15 / scale;
+          if (isMarker) {
+            // Marker: semi-transparent, thicker stroke
+            ctx.globalAlpha = 0.4;
+            ctx.strokeStyle = element.color || "#FFD700";
+            ctx.lineWidth = ((element.strokeWidth || 8) * 3) / scale;
+          } else {
+            // Pen: solid stroke
+            ctx.strokeStyle = element.color || "#000000";
+            ctx.lineWidth = (element.strokeWidth || 2) / scale;
+          }
+          
+          ctx.lineCap = "round";
+          ctx.lineJoin = "round";
+          
+          const points = element.data.points as { x: number; y: number }[];
+          if (points && points.length > 1) {
             ctx.beginPath();
-            ctx.moveTo(element.data.endX, element.data.endY);
-            ctx.lineTo(
-              element.data.endX - headLen * Math.cos(angle - Math.PI / 6),
-              element.data.endY - headLen * Math.sin(angle - Math.PI / 6)
+            ctx.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < points.length; i++) {
+              ctx.lineTo(points[i].x, points[i].y);
+            }
+            ctx.stroke();
+          }
+        } else if (element.type === "text") {
+          ctx.fillStyle = element.color || "#000000";
+          const fontWeight = element.data.fontWeight || "normal";
+          const fontFamily = element.data.fontFamily || "Arial, sans-serif";
+          ctx.font = `${fontWeight} ${(element.strokeWidth || 16) / scale}px ${fontFamily}`;
+          ctx.fillText(element.data.text, element.x, element.y);
+        } else if (element.type === "shape") {
+          ctx.strokeStyle = element.color || "#000000";
+          ctx.lineWidth = (element.strokeWidth || 2) / scale;
+          
+          if (element.data.shapeType === "line" || element.data.shapeType === "arrow") {
+            ctx.beginPath();
+            ctx.moveTo(element.x, element.y);
+            ctx.lineTo(element.data.endX, element.data.endY);
+            ctx.stroke();
+            
+            if (element.data.shapeType === "arrow") {
+              const angle = Math.atan2(element.data.endY - element.y, element.data.endX - element.x);
+              const headLen = 15 / scale;
+              ctx.beginPath();
+              ctx.moveTo(element.data.endX, element.data.endY);
+              ctx.lineTo(
+                element.data.endX - headLen * Math.cos(angle - Math.PI / 6),
+                element.data.endY - headLen * Math.sin(angle - Math.PI / 6)
+              );
+              ctx.moveTo(element.data.endX, element.data.endY);
+              ctx.lineTo(
+                element.data.endX - headLen * Math.cos(angle + Math.PI / 6),
+                element.data.endY - headLen * Math.sin(angle + Math.PI / 6)
+              );
+              ctx.stroke();
+            }
+          } else if (element.data.shapeType === "circle") {
+            ctx.beginPath();
+            const radius = Math.sqrt(
+              Math.pow(element.data.endX - element.x, 2) + 
+              Math.pow(element.data.endY - element.y, 2)
             );
-            ctx.moveTo(element.data.endX, element.data.endY);
-            ctx.lineTo(
-              element.data.endX - headLen * Math.cos(angle + Math.PI / 6),
-              element.data.endY - headLen * Math.sin(angle + Math.PI / 6)
+            ctx.arc(element.x, element.y, radius, 0, 2 * Math.PI);
+            ctx.stroke();
+          } else if (element.data.shapeType === "rectangle") {
+            ctx.beginPath();
+            ctx.rect(
+              element.x, 
+              element.y, 
+              element.data.endX - element.x, 
+              element.data.endY - element.y
             );
             ctx.stroke();
           }
-        } else if (element.data.shapeType === "circle") {
-          ctx.beginPath();
-          const radius = Math.sqrt(
-            Math.pow(element.data.endX - element.x, 2) + 
-            Math.pow(element.data.endY - element.y, 2)
-          );
-          ctx.arc(element.x, element.y, radius, 0, 2 * Math.PI);
-          ctx.stroke();
-        } else if (element.data.shapeType === "rectangle") {
-          ctx.beginPath();
-          ctx.rect(
-            element.x, 
-            element.y, 
-            element.data.endX - element.x, 
-            element.data.endY - element.y
-          );
-          ctx.stroke();
         }
-      }
-      
-      ctx.restore();
-    });
-  }, [elements, scale, offset]);
+        
+        ctx.restore();
+      });
+  }, [elements, scale, offset, showAnnotations]);
 
   useEffect(() => {
     renderCanvas();
@@ -298,7 +337,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
 
     setIsDrawing(true);
 
-    if (tool === "pen" || tool === "eraser") {
+    if (tool === "pen" || tool === "marker" || tool === "eraser") {
       setCurrentPath([coords]);
     } else if (tool === "text") {
       setTextPosition(coords);
@@ -317,7 +356,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     if (!isDrawing) return;
     const coords = getCanvasCoords(e);
 
-    if (tool === "pen" || tool === "eraser") {
+    if (tool === "pen" || tool === "marker" || tool === "eraser") {
       setCurrentPath((prev) => [...prev, coords]);
       
       const canvas = canvasRef.current;
@@ -325,8 +364,19 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       if (ctx && currentPath.length > 0) {
         ctx.save();
         ctx.setTransform(scale, 0, 0, scale, offset.x, offset.y);
-        ctx.strokeStyle = tool === "eraser" ? "#FAFAFA" : color;
-        ctx.lineWidth = (tool === "eraser" ? strokeWidth * 3 : strokeWidth) / scale;
+        
+        if (tool === "marker") {
+          ctx.globalAlpha = 0.4;
+          ctx.strokeStyle = color;
+          ctx.lineWidth = (strokeWidth * 4) / scale;
+        } else if (tool === "eraser") {
+          ctx.strokeStyle = "#FAFAFA";
+          ctx.lineWidth = (strokeWidth * 3) / scale;
+        } else {
+          ctx.strokeStyle = color;
+          ctx.lineWidth = strokeWidth / scale;
+        }
+        
         ctx.lineCap = "round";
         ctx.beginPath();
         ctx.moveTo(currentPath[currentPath.length - 1].x, currentPath[currentPath.length - 1].y);
@@ -346,15 +396,18 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     if (!isDrawing) return;
     setIsDrawing(false);
 
-    if ((tool === "pen" || tool === "eraser") && currentPath.length > 1) {
+    if ((tool === "pen" || tool === "marker" || tool === "eraser") && currentPath.length > 1) {
       const newElement: CanvasElement = {
         id: crypto.randomUUID(),
         type: "path",
-        data: { points: currentPath },
+        data: { 
+          points: currentPath,
+          isMarker: tool === "marker",
+        },
         x: 0,
         y: 0,
         color: tool === "eraser" ? "#FAFAFA" : color,
-        strokeWidth: tool === "eraser" ? strokeWidth * 3 : strokeWidth,
+        strokeWidth: tool === "eraser" ? strokeWidth * 3 : (tool === "marker" ? strokeWidth * 4 : strokeWidth),
       };
       const newElements = [...elements, newElement];
       setElements(newElements);
@@ -370,18 +423,42 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     const newElement: CanvasElement = {
       id: crypto.randomUUID(),
       type: "text",
-      data: { text: textInput },
+      data: { 
+        text: textInput,
+        fontWeight: "normal",
+        fontFamily: "Arial, sans-serif",
+      },
       x: textPosition.x,
       y: textPosition.y,
       color,
-      strokeWidth: 16,
+      strokeWidth: fontSize,
     };
     const newElements = [...elements, newElement];
     setElements(newElements);
     addToHistory(newElements);
     setTextInput("");
     setTextPosition(null);
-    setTool("pen");
+    setTool("select");
+  };
+
+  // Update existing text element
+  const handleUpdateText = (elementId: string, newText: string) => {
+    setElements(prev => prev.map(el => 
+      el.id === elementId 
+        ? { ...el, data: { ...el.data, text: newText } }
+        : el
+    ));
+    addToHistory(elements);
+    setEditingTextId(null);
+    setEditingTextValue("");
+  };
+
+  // Start editing a text element
+  const startEditingText = (element: CanvasElement) => {
+    if (element.type !== "text") return;
+    setEditingTextId(element.id);
+    setEditingTextValue(element.data.text);
+    setSelectedElement(element.id);
   };
 
   const handleDragStart = (asset: LayeredAnatomyAsset) => {
@@ -625,9 +702,18 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
             size="icon"
             className="h-8 w-8"
             onClick={() => setTool("pen")}
-            title="Annotate (P)"
+            title="Pen (P)"
           >
             <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={tool === "marker" ? "secondary" : "ghost"}
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setTool("marker")}
+            title="Marker (M)"
+          >
+            <Highlighter className="h-4 w-4" />
           </Button>
           <Button
             variant={tool === "eraser" ? "secondary" : "ghost"}
@@ -696,25 +782,30 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
               <div className="h-5 w-5 rounded-full border-2 border-background shadow-sm" style={{ backgroundColor: color }} />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-2">
-            <div className="grid grid-cols-5 gap-1.5">
-              {COLORS.map((c) => (
-                <button
-                  key={c}
-                  className={cn(
-                    "h-7 w-7 rounded-full border-2 transition-transform hover:scale-110",
-                    color === c ? "border-primary ring-2 ring-primary/30" : "border-transparent"
-                  )}
-                  style={{ backgroundColor: c }}
-                  onClick={() => setColor(c)}
-                />
-              ))}
+          <PopoverContent className="w-auto p-3">
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs font-medium mb-2">Color</p>
+                <div className="grid grid-cols-5 gap-1.5">
+                  {COLORS.map((c) => (
+                    <button
+                      key={c}
+                      className={cn(
+                        "h-7 w-7 rounded-full border-2 transition-transform hover:scale-110",
+                        color === c ? "border-primary ring-2 ring-primary/30" : "border-transparent"
+                      )}
+                      style={{ backgroundColor: c }}
+                      onClick={() => setColor(c)}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
           </PopoverContent>
         </Popover>
 
-        <div className="flex items-center gap-2 w-24 px-2">
-          <span className="text-xs text-muted-foreground whitespace-nowrap">Stroke</span>
+        <div className="flex items-center gap-2 w-20 px-2">
+          <span className="text-xs text-muted-foreground whitespace-nowrap">Size</span>
           <Slider
             value={[strokeWidth]}
             onValueChange={(v) => setStrokeWidth(v[0])}
@@ -724,6 +815,55 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
             className="flex-1"
           />
         </div>
+
+        {/* Font Size (shown when text tool selected) */}
+        {tool === "text" && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 gap-1 px-2" title="Font Size">
+                <Type className="h-3.5 w-3.5" />
+                <span className="text-xs">{fontSize}px</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-2">
+              <div className="space-y-2">
+                <p className="text-xs font-medium">Font Size</p>
+                <div className="flex gap-1">
+                  {FONT_SIZES.map(({ label, size }) => (
+                    <Button
+                      key={size}
+                      variant={fontSize === size ? "secondary" : "outline"}
+                      size="sm"
+                      className="h-8 w-10"
+                      onClick={() => setFontSize(size)}
+                    >
+                      {label}
+                    </Button>
+                  ))}
+                </div>
+                <Slider
+                  value={[fontSize]}
+                  onValueChange={(v) => setFontSize(v[0])}
+                  min={8}
+                  max={48}
+                  step={2}
+                  className="w-full"
+                />
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+
+        {/* Toggle Annotations Visibility */}
+        <Button
+          variant={showAnnotations ? "ghost" : "secondary"}
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => setShowAnnotations(!showAnnotations)}
+          title={showAnnotations ? "Hide Annotations" : "Show Annotations"}
+        >
+          {showAnnotations ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+        </Button>
 
         {/* View Controls */}
         <div className="flex items-center gap-0.5 px-2 border-l border-r">
@@ -1047,40 +1187,177 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
             }}
           />
 
-          {/* Text Input */}
+          {/* Text Input Dialog */}
           {textPosition && (
             <div
-              className="absolute bg-background border rounded-lg shadow-lg p-3 z-20"
+              className="absolute bg-background border-2 rounded-xl shadow-xl p-4 z-20"
               style={{ 
                 left: textPosition.x * scale + offset.x, 
-                top: textPosition.y * scale + offset.y 
+                top: textPosition.y * scale + offset.y,
+                borderColor: color,
               }}
             >
-              <input
-                type="text"
-                className="border rounded px-2 py-1.5 text-sm w-48 bg-background"
-                placeholder="Enter annotation..."
-                value={textInput}
-                onChange={(e) => setTextInput(e.target.value)}
-                autoFocus
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleAddText();
-                  if (e.key === "Escape") {
-                    setTextPosition(null);
-                    setTextInput("");
-                  }
-                }}
-              />
-              <div className="flex gap-2 mt-2">
-                <Button size="sm" onClick={handleAddText}>Add</Button>
-                <Button size="sm" variant="ghost" onClick={() => { setTextPosition(null); setTextInput(""); }}>Cancel</Button>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Type className="h-4 w-4" style={{ color }} />
+                  <span className="text-xs font-medium">Add Text Label</span>
+                </div>
+                <input
+                  type="text"
+                  className="border rounded-lg px-3 py-2 text-sm w-56 bg-background"
+                  placeholder="Enter annotation text..."
+                  value={textInput}
+                  onChange={(e) => setTextInput(e.target.value)}
+                  style={{ fontSize: `${Math.min(fontSize, 20)}px` }}
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleAddText();
+                    if (e.key === "Escape") {
+                      setTextPosition(null);
+                      setTextInput("");
+                    }
+                  }}
+                />
+                
+                {/* Font size selector in text dialog */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">Size:</span>
+                  <div className="flex gap-1">
+                    {FONT_SIZES.map(({ label, size }) => (
+                      <Button
+                        key={size}
+                        variant={fontSize === size ? "secondary" : "ghost"}
+                        size="sm"
+                        className="h-6 w-8 text-xs p-0"
+                        onClick={() => setFontSize(size)}
+                      >
+                        {label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Color selector */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">Color:</span>
+                  <div className="flex gap-1">
+                    {COLORS.slice(0, 6).map((c) => (
+                      <button
+                        key={c}
+                        className={cn(
+                          "w-5 h-5 rounded-full border-2 transition-transform hover:scale-110",
+                          color === c ? "border-foreground scale-110" : "border-transparent"
+                        )}
+                        style={{ backgroundColor: c }}
+                        onClick={() => setColor(c)}
+                      />
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="flex gap-2 pt-1">
+                  <Button size="sm" onClick={handleAddText} className="flex-1">
+                    <Check className="h-3.5 w-3.5 mr-1" />
+                    Add
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => { setTextPosition(null); setTextInput(""); }}>
+                    Cancel
+                  </Button>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Zoom indicator */}
-          <div className="absolute bottom-3 left-3 px-2 py-1 bg-background/80 rounded text-xs text-muted-foreground backdrop-blur-sm">
-            {Math.round(scale * 100)}% — Scroll to zoom, drag to pan
+          {/* Editable Text Labels Overlay */}
+          {showAnnotations && elements
+            .filter(el => el.type === "text")
+            .map(el => {
+              const isEditing = editingTextId === el.id;
+              const isSelected = selectedElement === el.id;
+              
+              return (
+                <div
+                  key={`text-overlay-${el.id}`}
+                  className={cn(
+                    "absolute cursor-pointer transition-all group",
+                    isSelected && "ring-2 ring-primary rounded",
+                    tool === "select" && "hover:ring-2 hover:ring-primary/50 hover:rounded"
+                  )}
+                  style={{
+                    left: el.x * scale + offset.x,
+                    top: (el.y - (el.strokeWidth || 16)) * scale + offset.y,
+                    transform: `scale(${scale})`,
+                    transformOrigin: "top left",
+                  }}
+                  onClick={() => {
+                    if (tool === "select") {
+                      setSelectedElement(el.id);
+                    }
+                  }}
+                  onDoubleClick={() => startEditingText(el)}
+                >
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      className="bg-background border rounded px-1 min-w-[100px]"
+                      style={{
+                        color: el.color || "#000000",
+                        fontSize: `${el.strokeWidth || 16}px`,
+                        fontFamily: el.data.fontFamily || "Arial, sans-serif",
+                      }}
+                      value={editingTextValue}
+                      onChange={(e) => setEditingTextValue(e.target.value)}
+                      onBlur={() => handleUpdateText(el.id, editingTextValue)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleUpdateText(el.id, editingTextValue);
+                        if (e.key === "Escape") {
+                          setEditingTextId(null);
+                          setEditingTextValue("");
+                        }
+                      }}
+                      autoFocus
+                    />
+                  ) : (
+                    <div className="relative">
+                      <span
+                        style={{
+                          color: el.color || "#000000",
+                          fontSize: `${el.strokeWidth || 16}px`,
+                          fontFamily: el.data.fontFamily || "Arial, sans-serif",
+                          fontWeight: el.data.fontWeight || "normal",
+                        }}
+                      >
+                        {el.data.text}
+                      </span>
+                      {isSelected && (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="absolute -top-6 left-0 h-5 px-1.5 text-[10px] opacity-0 group-hover:opacity-100"
+                          onClick={() => startEditingText(el)}
+                        >
+                          <Edit3 className="h-3 w-3 mr-0.5" />
+                          Edit
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          }
+
+          {/* Status indicator */}
+          <div className="absolute bottom-3 left-3 px-2 py-1 bg-background/80 rounded text-xs text-muted-foreground backdrop-blur-sm flex items-center gap-2">
+            <span>{Math.round(scale * 100)}%</span>
+            <span className="text-muted-foreground/50">•</span>
+            <span className="flex items-center gap-1">
+              {showAnnotations ? (
+                <><Eye className="h-3 w-3" /> Annotations visible</>
+              ) : (
+                <><EyeOff className="h-3 w-3" /> Annotations hidden</>
+              )}
+            </span>
           </div>
         </div>
 
