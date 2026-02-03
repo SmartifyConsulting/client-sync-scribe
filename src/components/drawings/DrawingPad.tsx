@@ -4,6 +4,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
@@ -28,9 +30,14 @@ import {
   ZoomIn,
   ZoomOut,
   RotateCw,
+  RotateCcw,
   X,
+  Maximize2,
+  Layers,
+  Hand,
+  RefreshCw,
 } from "lucide-react";
-import { anatomyAssets, AnatomyAsset } from "./AnatomyAssets";
+import { professionalAnatomyAssets, LayeredAnatomyAsset, AnatomyLayer } from "./MedicalAnatomyAssets";
 import { useSessionDrawings, CanvasData, CanvasElement } from "@/hooks/useSessionDrawings";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -43,25 +50,43 @@ interface DrawingPadProps {
   isModal?: boolean;
 }
 
-type Tool = "pen" | "eraser" | "text" | "select" | "line" | "circle" | "rectangle" | "arrow";
+type Tool = "pen" | "eraser" | "text" | "select" | "pan" | "line" | "circle" | "rectangle" | "arrow";
 
 const COLORS = [
-  "#000000", "#EF4444", "#F97316", "#EAB308", "#22C55E", 
-  "#14B8A6", "#3B82F6", "#8B5CF6", "#EC4899", "#6B7280"
+  "#000000", "#DC143C", "#FF4500", "#FFD700", "#228B22", 
+  "#008B8B", "#0066CC", "#663399", "#C71585", "#4A4A4A"
 ];
+
+const DEFAULT_LAYERS: AnatomyLayer[] = ["skin", "muscular", "skeletal", "labels"];
 
 export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal = false }: DrawingPadProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Tool state
   const [tool, setTool] = useState<Tool>("pen");
-  const [color, setColor] = useState("#000000");
+  const [color, setColor] = useState("#DC143C");
   const [strokeWidth, setStrokeWidth] = useState(2);
   const [isDrawing, setIsDrawing] = useState(false);
+  
+  // Canvas state
   const [elements, setElements] = useState<CanvasElement[]>([]);
   const [history, setHistory] = useState<CanvasElement[][]>([[]]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
-  const [draggedAnatomy, setDraggedAnatomy] = useState<AnatomyAsset | null>(null);
+  
+  // Transform state (zoom, pan, rotate)
+  const [scale, setScale] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  
+  // Layer visibility
+  const [visibleLayers, setVisibleLayers] = useState<AnatomyLayer[]>(DEFAULT_LAYERS);
+  const [showLayerPanel, setShowLayerPanel] = useState(false);
+  
+  // UI state
+  const [draggedAnatomy, setDraggedAnatomy] = useState<LayeredAnatomyAsset | null>(null);
   const [showVersions, setShowVersions] = useState(false);
   const [textInput, setTextInput] = useState("");
   const [textPosition, setTextPosition] = useState<{ x: number; y: number } | null>(null);
@@ -96,9 +121,13 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Clear canvas
-    ctx.fillStyle = "#ffffff";
+    // Clear and apply transforms
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = "#FAFAFA";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Apply zoom and pan
+    ctx.setTransform(scale, 0, 0, scale, offset.x, offset.y);
 
     // Render each element
     elements.forEach((element) => {
@@ -106,7 +135,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       
       if (element.type === "path") {
         ctx.strokeStyle = element.color || "#000000";
-        ctx.lineWidth = element.strokeWidth || 2;
+        ctx.lineWidth = (element.strokeWidth || 2) / scale;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
         
@@ -121,13 +150,11 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
         }
       } else if (element.type === "text") {
         ctx.fillStyle = element.color || "#000000";
-        ctx.font = `${element.strokeWidth || 16}px sans-serif`;
+        ctx.font = `${(element.strokeWidth || 16) / scale}px Arial, sans-serif`;
         ctx.fillText(element.data.text, element.x, element.y);
-      } else if (element.type === "anatomy") {
-        // Anatomy elements are rendered as overlays in React
       } else if (element.type === "shape") {
         ctx.strokeStyle = element.color || "#000000";
-        ctx.lineWidth = element.strokeWidth || 2;
+        ctx.lineWidth = (element.strokeWidth || 2) / scale;
         
         if (element.data.shapeType === "line" || element.data.shapeType === "arrow") {
           ctx.beginPath();
@@ -137,7 +164,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           
           if (element.data.shapeType === "arrow") {
             const angle = Math.atan2(element.data.endY - element.y, element.data.endX - element.x);
-            const headLen = 15;
+            const headLen = 15 / scale;
             ctx.beginPath();
             ctx.moveTo(element.data.endX, element.data.endY);
             ctx.lineTo(
@@ -173,7 +200,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       
       ctx.restore();
     });
-  }, [elements]);
+  }, [elements, scale, offset]);
 
   useEffect(() => {
     renderCanvas();
@@ -195,6 +222,32 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     window.addEventListener("resize", resizeCanvas);
     return () => window.removeEventListener("resize", resizeCanvas);
   }, [renderCanvas]);
+
+  // Zoom handling with wheel
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+      const newScale = Math.max(0.25, Math.min(4, scale * delta));
+      
+      // Zoom toward mouse position
+      const rect = container.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      
+      const newOffsetX = mouseX - (mouseX - offset.x) * (newScale / scale);
+      const newOffsetY = mouseY - (mouseY - offset.y) * (newScale / scale);
+      
+      setScale(newScale);
+      setOffset({ x: newOffsetX, y: newOffsetY });
+    };
+
+    container.addEventListener("wheel", handleWheel, { passive: false });
+    return () => container.removeEventListener("wheel", handleWheel);
+  }, [scale, offset]);
 
   const addToHistory = (newElements: CanvasElement[]) => {
     const newHistory = history.slice(0, historyIndex + 1);
@@ -222,28 +275,40 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
     return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x: (e.clientX - rect.left - offset.x) / scale,
+      y: (e.clientY - rect.top - offset.y) / scale,
     };
   };
 
   const [currentPath, setCurrentPath] = useState<{ x: number; y: number }[]>([]);
-  const [shapeStart, setShapeStart] = useState<{ x: number; y: number } | null>(null);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const coords = getCanvasCoords(e);
+
+    if (tool === "pan") {
+      setIsPanning(true);
+      setPanStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
+      return;
+    }
+
     setIsDrawing(true);
 
     if (tool === "pen" || tool === "eraser") {
       setCurrentPath([coords]);
     } else if (tool === "text") {
       setTextPosition(coords);
-    } else if (["line", "circle", "rectangle", "arrow"].includes(tool)) {
-      setShapeStart(coords);
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (isPanning) {
+      setOffset({
+        x: e.clientX - panStart.x,
+        y: e.clientY - panStart.y,
+      });
+      return;
+    }
+
     if (!isDrawing) return;
     const coords = getCanvasCoords(e);
 
@@ -253,18 +318,26 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d");
       if (ctx && currentPath.length > 0) {
-        ctx.strokeStyle = tool === "eraser" ? "#ffffff" : color;
-        ctx.lineWidth = tool === "eraser" ? strokeWidth * 3 : strokeWidth;
+        ctx.save();
+        ctx.setTransform(scale, 0, 0, scale, offset.x, offset.y);
+        ctx.strokeStyle = tool === "eraser" ? "#FAFAFA" : color;
+        ctx.lineWidth = (tool === "eraser" ? strokeWidth * 3 : strokeWidth) / scale;
         ctx.lineCap = "round";
         ctx.beginPath();
         ctx.moveTo(currentPath[currentPath.length - 1].x, currentPath[currentPath.length - 1].y);
         ctx.lineTo(coords.x, coords.y);
         ctx.stroke();
+        ctx.restore();
       }
     }
   };
 
   const handleMouseUp = () => {
+    if (isPanning) {
+      setIsPanning(false);
+      return;
+    }
+
     if (!isDrawing) return;
     setIsDrawing(false);
 
@@ -275,7 +348,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
         data: { points: currentPath },
         x: 0,
         y: 0,
-        color: tool === "eraser" ? "#ffffff" : color,
+        color: tool === "eraser" ? "#FAFAFA" : color,
         strokeWidth: tool === "eraser" ? strokeWidth * 3 : strokeWidth,
       };
       const newElements = [...elements, newElement];
@@ -284,7 +357,6 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     }
     
     setCurrentPath([]);
-    setShapeStart(null);
   };
 
   const handleAddText = () => {
@@ -307,7 +379,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     setTool("pen");
   };
 
-  const handleDragStart = (asset: AnatomyAsset) => {
+  const handleDragStart = (asset: LayeredAnatomyAsset) => {
     setDraggedAnatomy(asset);
   };
 
@@ -316,17 +388,21 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     if (!draggedAnatomy || !containerRef.current) return;
 
     const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left - draggedAnatomy.width / 2;
-    const y = e.clientY - rect.top - draggedAnatomy.height / 2;
+    const x = (e.clientX - rect.left - offset.x) / scale - draggedAnatomy.defaultWidth / 2;
+    const y = (e.clientY - rect.top - offset.y) / scale - draggedAnatomy.defaultHeight / 2;
 
     const newElement: CanvasElement = {
       id: crypto.randomUUID(),
       type: "anatomy",
-      data: { assetId: draggedAnatomy.id },
+      data: { 
+        assetId: draggedAnatomy.id,
+        visibleLayers: [...visibleLayers],
+        rotation: 0,
+      },
       x,
       y,
-      width: draggedAnatomy.width,
-      height: draggedAnatomy.height,
+      width: draggedAnatomy.defaultWidth,
+      height: draggedAnatomy.defaultHeight,
     };
     const newElements = [...elements, newElement];
     setElements(newElements);
@@ -346,17 +422,22 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     setSelectedElement(null);
   };
 
+  const resetView = () => {
+    setScale(1);
+    setOffset({ x: 0, y: 0 });
+  };
+
   const exportImage = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
     const link = document.createElement("a");
-    link.download = `drawing-${patientName || "patient"}-${format(new Date(), "yyyy-MM-dd")}.png`;
+    link.download = `clinical-drawing-${patientName || "patient"}-${format(new Date(), "yyyy-MM-dd")}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
   };
 
-  // Element manipulation functions
+  // Element manipulation
   const handleElementMouseDown = (e: React.MouseEvent, elementId: string) => {
     e.stopPropagation();
     setSelectedElement(elementId);
@@ -378,8 +459,8 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     if (!isDraggingElement || !selectedElement || !containerRef.current) return;
     
     const rect = containerRef.current.getBoundingClientRect();
-    const newX = e.clientX - rect.left - dragOffset.x;
-    const newY = e.clientY - rect.top - dragOffset.y;
+    const newX = (e.clientX - rect.left - offset.x) / scale - dragOffset.x;
+    const newY = (e.clientY - rect.top - offset.y) / scale - dragOffset.y;
     
     setElements(prev => prev.map(el => 
       el.id === selectedElement 
@@ -397,7 +478,6 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     setResizeCorner(null);
   };
 
-  // Resize functions
   const handleResizeStart = (e: React.MouseEvent, corner: string) => {
     e.stopPropagation();
     setIsResizing(true);
@@ -408,8 +488,8 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     if (!isResizing || !selectedElement || !containerRef.current || !resizeCorner) return;
     
     const rect = containerRef.current.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
+    const mouseX = (e.clientX - rect.left - offset.x) / scale;
+    const mouseY = (e.clientY - rect.top - offset.y) / scale;
     
     setElements(prev => prev.map(el => {
       if (el.id !== selectedElement) return el;
@@ -419,20 +499,16 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       let newX = el.x;
       let newY = el.y;
       
-      if (resizeCorner.includes("e")) {
-        newWidth = Math.max(40, mouseX - el.x);
-      }
+      if (resizeCorner.includes("e")) newWidth = Math.max(60, mouseX - el.x);
       if (resizeCorner.includes("w")) {
         const widthDiff = el.x - mouseX;
-        newWidth = Math.max(40, (el.width || 100) + widthDiff);
+        newWidth = Math.max(60, (el.width || 100) + widthDiff);
         newX = mouseX;
       }
-      if (resizeCorner.includes("s")) {
-        newHeight = Math.max(40, mouseY - el.y);
-      }
+      if (resizeCorner.includes("s")) newHeight = Math.max(60, mouseY - el.y);
       if (resizeCorner.includes("n")) {
         const heightDiff = el.y - mouseY;
-        newHeight = Math.max(40, (el.height || 100) + heightDiff);
+        newHeight = Math.max(60, (el.height || 100) + heightDiff);
         newY = mouseY;
       }
       
@@ -440,28 +516,58 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     }));
   };
 
-  // Scale element
-  const scaleElement = (scale: number) => {
+  const scaleElement = (factor: number) => {
     if (!selectedElement) return;
-    
     setElements(prev => prev.map(el => {
       if (el.id !== selectedElement) return el;
       return {
         ...el,
-        width: (el.width || 100) * scale,
-        height: (el.height || 100) * scale
+        width: (el.width || 100) * factor,
+        height: (el.height || 100) * factor
       };
     }));
     addToHistory(elements);
   };
 
-  // Delete selected element
+  const rotateElement = (degrees: number) => {
+    if (!selectedElement) return;
+    setElements(prev => prev.map(el => {
+      if (el.id !== selectedElement) return el;
+      return {
+        ...el,
+        data: { ...el.data, rotation: ((el.data.rotation || 0) + degrees) % 360 }
+      };
+    }));
+    addToHistory(elements);
+  };
+
   const deleteSelectedElement = () => {
     if (!selectedElement) return;
     const newElements = elements.filter(el => el.id !== selectedElement);
     setElements(newElements);
     addToHistory(newElements);
     setSelectedElement(null);
+  };
+
+  const toggleLayer = (layer: AnatomyLayer) => {
+    setVisibleLayers(prev => 
+      prev.includes(layer) 
+        ? prev.filter(l => l !== layer)
+        : [...prev, layer]
+    );
+  };
+
+  // Update selected element's visible layers
+  const updateElementLayers = (layer: AnatomyLayer) => {
+    if (!selectedElement) return;
+    setElements(prev => prev.map(el => {
+      if (el.id !== selectedElement || el.type !== "anatomy") return el;
+      const currentLayers = el.data.visibleLayers || DEFAULT_LAYERS;
+      const newLayers = currentLayers.includes(layer)
+        ? currentLayers.filter((l: AnatomyLayer) => l !== layer)
+        : [...currentLayers, layer];
+      return { ...el, data: { ...el.data, visibleLayers: newLayers } };
+    }));
   };
 
   if (loading) {
@@ -473,10 +579,13 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
   }
 
   const selectedEl = elements.find(el => el.id === selectedElement);
+  const selectedAsset = selectedEl?.type === "anatomy" 
+    ? professionalAnatomyAssets.find(a => a.id === selectedEl.data.assetId)
+    : null;
 
   return (
     <div 
-      className={cn("flex flex-col h-full", isModal && "max-h-[80vh]")}
+      className={cn("flex flex-col h-full bg-background", isModal && "max-h-[85vh]")}
       onMouseMove={(e) => {
         if (isDraggingElement) handleElementMouseMove(e);
         if (isResizing) handleResize(e);
@@ -484,50 +593,61 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       onMouseUp={handleElementMouseUp}
       onMouseLeave={handleElementMouseUp}
     >
-      {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-2 p-2 bg-muted/50 border-b">
-        <div className="flex items-center gap-0.5 border-r pr-2">
+      {/* Professional Toolbar */}
+      <div className="flex flex-wrap items-center gap-1.5 px-3 py-2 bg-muted/30 border-b">
+        {/* Drawing Tools */}
+        <div className="flex items-center gap-0.5 pr-2 border-r">
           <Button
-            variant={tool === "pen" ? "default" : "ghost"}
+            variant={tool === "select" ? "secondary" : "ghost"}
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setTool("select")}
+            title="Select (V)"
+          >
+            <Move className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={tool === "pan" ? "secondary" : "ghost"}
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setTool("pan")}
+            title="Pan (Space+Drag)"
+          >
+            <Hand className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={tool === "pen" ? "secondary" : "ghost"}
             size="icon"
             className="h-8 w-8"
             onClick={() => setTool("pen")}
-            title="Pen"
+            title="Annotate (P)"
           >
             <Pencil className="h-4 w-4" />
           </Button>
           <Button
-            variant={tool === "eraser" ? "default" : "ghost"}
+            variant={tool === "eraser" ? "secondary" : "ghost"}
             size="icon"
             className="h-8 w-8"
             onClick={() => setTool("eraser")}
-            title="Eraser"
+            title="Eraser (E)"
           >
             <Eraser className="h-4 w-4" />
           </Button>
           <Button
-            variant={tool === "text" ? "default" : "ghost"}
+            variant={tool === "text" ? "secondary" : "ghost"}
             size="icon"
             className="h-8 w-8"
             onClick={() => setTool("text")}
-            title="Text"
+            title="Text (T)"
           >
             <Type className="h-4 w-4" />
           </Button>
-          <Button
-            variant={tool === "select" ? "default" : "ghost"}
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => setTool("select")}
-            title="Select/Move"
-          >
-            <Move className="h-4 w-4" />
-          </Button>
         </div>
 
-        <div className="flex items-center gap-0.5 border-r pr-2">
+        {/* Shape Tools */}
+        <div className="flex items-center gap-0.5 pr-2 border-r">
           <Button
-            variant={tool === "line" ? "default" : "ghost"}
+            variant={tool === "line" ? "secondary" : "ghost"}
             size="icon"
             className="h-8 w-8"
             onClick={() => setTool("line")}
@@ -536,7 +656,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
             <Minus className="h-4 w-4" />
           </Button>
           <Button
-            variant={tool === "arrow" ? "default" : "ghost"}
+            variant={tool === "arrow" ? "secondary" : "ghost"}
             size="icon"
             className="h-8 w-8"
             onClick={() => setTool("arrow")}
@@ -545,7 +665,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
             <ArrowRight className="h-4 w-4" />
           </Button>
           <Button
-            variant={tool === "circle" ? "default" : "ghost"}
+            variant={tool === "circle" ? "secondary" : "ghost"}
             size="icon"
             className="h-8 w-8"
             onClick={() => setTool("circle")}
@@ -554,7 +674,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
             <Circle className="h-4 w-4" />
           </Button>
           <Button
-            variant={tool === "rectangle" ? "default" : "ghost"}
+            variant={tool === "rectangle" ? "secondary" : "ghost"}
             size="icon"
             className="h-8 w-8"
             onClick={() => setTool("rectangle")}
@@ -564,23 +684,21 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           </Button>
         </div>
 
+        {/* Color & Stroke */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8" title="Color">
-              <div 
-                className="h-5 w-5 rounded border"
-                style={{ backgroundColor: color }}
-              />
+            <Button variant="ghost" size="icon" className="h-8 w-8" title="Annotation Color">
+              <div className="h-5 w-5 rounded-full border-2 border-background shadow-sm" style={{ backgroundColor: color }} />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-2">
-            <div className="grid grid-cols-5 gap-1">
+            <div className="grid grid-cols-5 gap-1.5">
               {COLORS.map((c) => (
                 <button
                   key={c}
                   className={cn(
-                    "h-6 w-6 rounded border-2",
-                    color === c ? "border-primary" : "border-transparent"
+                    "h-7 w-7 rounded-full border-2 transition-transform hover:scale-110",
+                    color === c ? "border-primary ring-2 ring-primary/30" : "border-transparent"
                   )}
                   style={{ backgroundColor: c }}
                   onClick={() => setColor(c)}
@@ -590,76 +708,70 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           </PopoverContent>
         </Popover>
 
-        <div className="flex items-center gap-2 w-24">
-          <span className="text-xs text-muted-foreground">Size:</span>
+        <div className="flex items-center gap-2 w-24 px-2">
+          <span className="text-xs text-muted-foreground whitespace-nowrap">Stroke</span>
           <Slider
             value={[strokeWidth]}
             onValueChange={(v) => setStrokeWidth(v[0])}
             min={1}
-            max={20}
+            max={10}
             step={1}
             className="flex-1"
           />
         </div>
 
-        <div className="flex items-center gap-0.5 border-l pl-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={undo}
-            disabled={historyIndex <= 0}
-            title="Undo"
-          >
+        {/* View Controls */}
+        <div className="flex items-center gap-0.5 px-2 border-l border-r">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setScale(s => Math.max(0.25, s * 0.8))} title="Zoom Out">
+            <ZoomOut className="h-4 w-4" />
+          </Button>
+          <span className="text-xs text-muted-foreground w-12 text-center">{Math.round(scale * 100)}%</span>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setScale(s => Math.min(4, s * 1.25))} title="Zoom In">
+            <ZoomIn className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={resetView} title="Reset View">
+            <Maximize2 className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* History & Actions */}
+        <div className="flex items-center gap-0.5 pr-2 border-r">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={undo} disabled={historyIndex <= 0} title="Undo">
             <Undo className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={redo}
-            disabled={historyIndex >= history.length - 1}
-            title="Redo"
-          >
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={redo} disabled={historyIndex >= history.length - 1} title="Redo">
             <Redo className="h-4 w-4" />
           </Button>
         </div>
 
-        <div className="flex items-center gap-0.5 border-l pl-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={clearCanvas}
-            title="Clear"
-          >
+        <div className="flex items-center gap-0.5">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={clearCanvas} title="Clear All">
             <Trash2 className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={exportImage}
-            title="Export"
-          >
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={exportImage} title="Export Image">
             <Download className="h-4 w-4" />
           </Button>
         </div>
 
+        {/* Save Actions */}
         <div className="flex items-center gap-1 ml-auto">
           <Button
             variant="ghost"
             size="sm"
-            className="h-8"
+            className="h-8 gap-1"
+            onClick={() => setShowLayerPanel(!showLayerPanel)}
+          >
+            <Layers className="h-4 w-4" />
+            <span className="hidden lg:inline">Layers</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 gap-1"
             onClick={() => setShowVersions(!showVersions)}
           >
-            <History className="h-4 w-4 mr-1" />
-            <span className="hidden sm:inline">Versions</span>
-            {drawings.length > 0 && (
-              <Badge variant="secondary" className="ml-1 h-5">
-                {drawings.length}
-              </Badge>
-            )}
+            <History className="h-4 w-4" />
+            {drawings.length > 0 && <Badge variant="secondary" className="h-5 px-1.5">{drawings.length}</Badge>}
           </Button>
           <Button
             variant="outline"
@@ -684,93 +796,96 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
         </div>
       </div>
 
-      {/* Selected element controls */}
-      {selectedElement && selectedEl?.type === "anatomy" && (
-        <div className="flex items-center gap-2 px-3 py-2 bg-primary/5 border-b">
-          <span className="text-sm font-medium">Selected: {anatomyAssets.find(a => a.id === selectedEl.data.assetId)?.name}</span>
+      {/* Element Control Bar */}
+      {selectedElement && selectedEl?.type === "anatomy" && selectedAsset && (
+        <div className="flex items-center gap-3 px-3 py-2 bg-primary/5 border-b">
+          <span className="text-sm font-medium">{selectedAsset.name}</span>
+          <span className="text-xs text-muted-foreground">{selectedAsset.description}</span>
+          
           <div className="flex items-center gap-1 ml-auto">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7"
-              onClick={() => scaleElement(0.9)}
-              title="Shrink"
-            >
+            <Button variant="outline" size="sm" className="h-7 gap-1" onClick={() => scaleElement(0.9)} title="Shrink">
               <ZoomOut className="h-3.5 w-3.5" />
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7"
-              onClick={() => scaleElement(1.1)}
-              title="Enlarge"
-            >
+            <Button variant="outline" size="sm" className="h-7 gap-1" onClick={() => scaleElement(1.1)} title="Enlarge">
               <ZoomIn className="h-3.5 w-3.5" />
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7"
-              onClick={() => {
-                setElements(prev => prev.map(el => 
-                  el.id === selectedElement 
-                    ? { ...el, data: { ...el.data, rotation: ((el.data.rotation || 0) + 90) % 360 } }
-                    : el
-                ));
-                addToHistory(elements);
-              }}
-              title="Rotate 90°"
-            >
+            <Button variant="outline" size="sm" className="h-7 gap-1" onClick={() => rotateElement(-90)} title="Rotate Left">
+              <RotateCcw className="h-3.5 w-3.5" />
+            </Button>
+            <Button variant="outline" size="sm" className="h-7 gap-1" onClick={() => rotateElement(90)} title="Rotate Right">
               <RotateCw className="h-3.5 w-3.5" />
             </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              className="h-7"
-              onClick={deleteSelectedElement}
-              title="Delete"
-            >
+            
+            {/* Layer toggles for selected element */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-7 gap-1">
+                  <Layers className="h-3.5 w-3.5" />
+                  <span className="text-xs">Systems</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-2">
+                <div className="space-y-2">
+                  {selectedAsset.availableLayers.map(layer => (
+                    <div key={layer} className="flex items-center justify-between">
+                      <Label className="text-xs capitalize">{layer}</Label>
+                      <Switch
+                        checked={(selectedEl.data.visibleLayers || DEFAULT_LAYERS).includes(layer)}
+                        onCheckedChange={() => updateElementLayers(layer)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+            
+            <Button variant="destructive" size="sm" className="h-7" onClick={deleteSelectedElement} title="Delete">
               <X className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
       )}
 
-      {/* Main content */}
+      {/* Main Content */}
       <div className="flex flex-1 min-h-0">
-        {/* Anatomy panel */}
-        <div className="w-44 border-r bg-muted/30 flex flex-col">
-          <div className="p-2 border-b">
-            <h4 className="font-medium text-xs">Anatomy Diagrams</h4>
+        {/* Anatomy Panel */}
+        <div className="w-48 border-r bg-muted/20 flex flex-col">
+          <div className="p-2 border-b bg-muted/30">
+            <h4 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground">Anatomy Library</h4>
           </div>
           <Tabs defaultValue="body" className="flex-1 flex flex-col">
-            <TabsList className="grid grid-cols-3 m-1 h-7">
-              <TabsTrigger value="body" className="text-[10px] px-1 h-6">Body</TabsTrigger>
-              <TabsTrigger value="spine" className="text-[10px] px-1 h-6">Spine</TabsTrigger>
-              <TabsTrigger value="face" className="text-[10px] px-1 h-6">Face</TabsTrigger>
+            <TabsList className="grid grid-cols-4 m-1 h-7">
+              <TabsTrigger value="body" className="text-[10px] h-6">Body</TabsTrigger>
+              <TabsTrigger value="head" className="text-[10px] h-6">Head</TabsTrigger>
+              <TabsTrigger value="torso" className="text-[10px] h-6">Torso</TabsTrigger>
+              <TabsTrigger value="other" className="text-[10px] h-6">Other</TabsTrigger>
             </TabsList>
-            <TabsList className="grid grid-cols-3 mx-1 mb-1 h-7">
-              <TabsTrigger value="joints" className="text-[10px] px-1 h-6">Joints</TabsTrigger>
-              <TabsTrigger value="cosmetic" className="text-[10px] px-1 h-6">Cosmetic</TabsTrigger>
-              <TabsTrigger value="dental" className="text-[10px] px-1 h-6">Dental</TabsTrigger>
-            </TabsList>
-            {["body", "spine", "face", "joints", "cosmetic", "dental"].map((category) => (
-              <TabsContent key={category} value={category} className="flex-1 m-0">
+            
+            {["body", "head", "torso", "spine", "joints", "dental"].map((category) => (
+              <TabsContent 
+                key={category} 
+                value={category === "spine" || category === "joints" || category === "dental" ? "other" : category} 
+                className="flex-1 m-0"
+              >
                 <ScrollArea className="h-full">
                   <div className="p-2 space-y-2">
-                    {anatomyAssets
-                      .filter((a) => a.category === category)
+                    {professionalAnatomyAssets
+                      .filter((a) => {
+                        if (category === "other") return ["spine", "joints", "dental"].includes(a.category);
+                        return a.category === category;
+                      })
                       .map((asset) => (
                         <div
                           key={asset.id}
-                          className="p-2 bg-background rounded border cursor-grab hover:border-primary hover:shadow-sm transition-all"
+                          className="group p-2 bg-background rounded-lg border cursor-grab hover:border-primary hover:shadow-md transition-all"
                           draggable
                           onDragStart={() => handleDragStart(asset)}
                         >
-                          <div className="h-14 flex items-center justify-center text-foreground">
-                            <asset.component />
+                          <div className="h-24 flex items-center justify-center text-foreground overflow-hidden">
+                            <asset.component visibleLayers={visibleLayers} />
                           </div>
                           <p className="text-[10px] text-center mt-1 font-medium">{asset.name}</p>
+                          <p className="text-[8px] text-center text-muted-foreground line-clamp-1">{asset.description}</p>
                         </div>
                       ))}
                   </div>
@@ -780,101 +895,97 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           </Tabs>
         </div>
 
-        {/* Canvas area */}
+        {/* Canvas Area */}
         <div 
           ref={containerRef}
-          className="flex-1 relative bg-background overflow-hidden"
+          className={cn(
+            "flex-1 relative overflow-hidden",
+            tool === "pan" && "cursor-grab",
+            isPanning && "cursor-grabbing"
+          )}
+          style={{ backgroundColor: "#F5F5F5" }}
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDrop}
           onClick={() => tool !== "select" && setSelectedElement(null)}
         >
+          {/* Grid background */}
+          <div 
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage: `
+                linear-gradient(to right, #E0E0E0 1px, transparent 1px),
+                linear-gradient(to bottom, #E0E0E0 1px, transparent 1px)
+              `,
+              backgroundSize: `${20 * scale}px ${20 * scale}px`,
+              backgroundPosition: `${offset.x}px ${offset.y}px`,
+            }}
+          />
+          
           <canvas
             ref={canvasRef}
-            className="absolute inset-0 bg-background"
+            className="absolute inset-0"
+            style={{ cursor: tool === "pen" ? "crosshair" : tool === "pan" ? (isPanning ? "grabbing" : "grab") : "default" }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
           />
           
-          {/* Anatomy overlays */}
+          {/* Anatomy Overlays */}
           {elements
             .filter((el) => el.type === "anatomy")
             .map((el) => {
-              const asset = anatomyAssets.find((a) => a.id === el.data.assetId);
+              const asset = professionalAnatomyAssets.find((a) => a.id === el.data.assetId);
               if (!asset) return null;
               const isSelected = selectedElement === el.id;
+              const elementLayers = el.data.visibleLayers || DEFAULT_LAYERS;
+              
               return (
                 <div
                   key={el.id}
                   className={cn(
-                    "absolute cursor-move text-foreground transition-shadow",
-                    isSelected && "ring-2 ring-primary ring-offset-2 shadow-lg"
+                    "absolute transition-shadow",
+                    isSelected && "ring-2 ring-primary shadow-xl",
+                    tool === "select" && "cursor-move"
                   )}
                   style={{
-                    left: el.x,
-                    top: el.y,
-                    width: el.width,
-                    height: el.height,
+                    left: el.x * scale + offset.x,
+                    top: el.y * scale + offset.y,
+                    width: (el.width || asset.defaultWidth) * scale,
+                    height: (el.height || asset.defaultHeight) * scale,
                     transform: el.data.rotation ? `rotate(${el.data.rotation}deg)` : undefined,
+                    transformOrigin: "center center",
                   }}
                   onMouseDown={(e) => handleElementMouseDown(e, el.id)}
                 >
-                  <asset.component />
+                  <asset.component visibleLayers={elementLayers} />
                   
-                  {/* Resize handles */}
+                  {/* Resize Handles */}
                   {isSelected && (
                     <>
-                      {/* Corner handles */}
-                      <div
-                        className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-primary rounded-full cursor-nw-resize border-2 border-background"
-                        onMouseDown={(e) => handleResizeStart(e, "nw")}
-                      />
-                      <div
-                        className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-primary rounded-full cursor-ne-resize border-2 border-background"
-                        onMouseDown={(e) => handleResizeStart(e, "ne")}
-                      />
-                      <div
-                        className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-primary rounded-full cursor-sw-resize border-2 border-background"
-                        onMouseDown={(e) => handleResizeStart(e, "sw")}
-                      />
-                      <div
-                        className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-primary rounded-full cursor-se-resize border-2 border-background"
-                        onMouseDown={(e) => handleResizeStart(e, "se")}
-                      />
-                      {/* Edge handles */}
-                      <div
-                        className="absolute -top-1 left-1/2 -translate-x-1/2 w-6 h-2 bg-primary/50 rounded cursor-n-resize"
-                        onMouseDown={(e) => handleResizeStart(e, "n")}
-                      />
-                      <div
-                        className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-6 h-2 bg-primary/50 rounded cursor-s-resize"
-                        onMouseDown={(e) => handleResizeStart(e, "s")}
-                      />
-                      <div
-                        className="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-6 bg-primary/50 rounded cursor-w-resize"
-                        onMouseDown={(e) => handleResizeStart(e, "w")}
-                      />
-                      <div
-                        className="absolute top-1/2 -right-1 -translate-y-1/2 w-2 h-6 bg-primary/50 rounded cursor-e-resize"
-                        onMouseDown={(e) => handleResizeStart(e, "e")}
-                      />
+                      <div className="absolute -top-2 -left-2 w-4 h-4 bg-primary rounded-full cursor-nw-resize border-2 border-background shadow" onMouseDown={(e) => handleResizeStart(e, "nw")} />
+                      <div className="absolute -top-2 -right-2 w-4 h-4 bg-primary rounded-full cursor-ne-resize border-2 border-background shadow" onMouseDown={(e) => handleResizeStart(e, "ne")} />
+                      <div className="absolute -bottom-2 -left-2 w-4 h-4 bg-primary rounded-full cursor-sw-resize border-2 border-background shadow" onMouseDown={(e) => handleResizeStart(e, "sw")} />
+                      <div className="absolute -bottom-2 -right-2 w-4 h-4 bg-primary rounded-full cursor-se-resize border-2 border-background shadow" onMouseDown={(e) => handleResizeStart(e, "se")} />
                     </>
                   )}
                 </div>
               );
             })}
 
-          {/* Text input popover */}
+          {/* Text Input */}
           {textPosition && (
             <div
-              className="absolute bg-background border rounded-lg shadow-lg p-2 z-10"
-              style={{ left: textPosition.x, top: textPosition.y }}
+              className="absolute bg-background border rounded-lg shadow-lg p-3 z-20"
+              style={{ 
+                left: textPosition.x * scale + offset.x, 
+                top: textPosition.y * scale + offset.y 
+              }}
             >
               <input
                 type="text"
-                className="border rounded px-2 py-1 text-sm w-40 bg-background"
-                placeholder="Enter text..."
+                className="border rounded px-2 py-1.5 text-sm w-48 bg-background"
+                placeholder="Enter annotation..."
                 value={textInput}
                 onChange={(e) => setTextInput(e.target.value)}
                 autoFocus
@@ -886,67 +997,68 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                   }
                 }}
               />
-              <div className="flex gap-1 mt-1">
-                <Button size="sm" variant="default" onClick={handleAddText}>
-                  Add
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
-                  onClick={() => {
-                    setTextPosition(null);
-                    setTextInput("");
-                  }}
-                >
-                  Cancel
-                </Button>
+              <div className="flex gap-2 mt-2">
+                <Button size="sm" onClick={handleAddText}>Add</Button>
+                <Button size="sm" variant="ghost" onClick={() => { setTextPosition(null); setTextInput(""); }}>Cancel</Button>
               </div>
             </div>
           )}
+
+          {/* Zoom indicator */}
+          <div className="absolute bottom-3 left-3 px-2 py-1 bg-background/80 rounded text-xs text-muted-foreground backdrop-blur-sm">
+            {Math.round(scale * 100)}% — Scroll to zoom, drag to pan
+          </div>
         </div>
 
-        {/* Version history panel */}
+        {/* Layer Panel */}
+        {showLayerPanel && (
+          <div className="w-48 border-l bg-muted/20">
+            <div className="p-2 border-b flex items-center justify-between bg-muted/30">
+              <h4 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground">Default Layers</h4>
+              <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setShowLayerPanel(false)}>×</Button>
+            </div>
+            <div className="p-3 space-y-3">
+              <p className="text-[10px] text-muted-foreground">Layers for new anatomy diagrams:</p>
+              {(["skin", "muscular", "skeletal", "vascular", "nervous", "organs", "labels"] as AnatomyLayer[]).map(layer => (
+                <div key={layer} className="flex items-center justify-between">
+                  <Label className="text-xs capitalize">{layer}</Label>
+                  <Switch
+                    checked={visibleLayers.includes(layer)}
+                    onCheckedChange={() => toggleLayer(layer)}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Version History Panel */}
         {showVersions && (
-          <div className="w-48 border-l bg-muted/30">
-            <div className="p-2 border-b flex items-center justify-between">
-              <h4 className="font-medium text-xs">Version History</h4>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0"
-                onClick={() => setShowVersions(false)}
-              >
-                ×
-              </Button>
+          <div className="w-52 border-l bg-muted/20">
+            <div className="p-2 border-b flex items-center justify-between bg-muted/30">
+              <h4 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground">Versions</h4>
+              <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setShowVersions(false)}>×</Button>
             </div>
             <ScrollArea className="h-full">
               <div className="p-2 space-y-2">
                 {drawings.length === 0 ? (
-                  <p className="text-xs text-muted-foreground text-center py-4">
-                    No versions saved yet
-                  </p>
+                  <p className="text-xs text-muted-foreground text-center py-6">No versions saved yet</p>
                 ) : (
                   drawings.map((drawing) => (
                     <div
                       key={drawing.id}
                       className={cn(
-                        "p-2 rounded border cursor-pointer hover:bg-accent transition-colors",
+                        "p-2 rounded-lg border cursor-pointer hover:bg-accent transition-colors",
                         currentDrawing?.id === drawing.id && "border-primary bg-primary/5"
                       )}
                       onClick={() => loadVersion(drawing.version)}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-medium text-xs">
-                          Version {drawing.version}
-                        </span>
-                        {drawing.is_current && (
-                          <Badge variant="default" className="text-[10px] h-4">
-                            Current
-                          </Badge>
-                        )}
+                        <span className="font-medium text-xs">v{drawing.version}</span>
+                        {drawing.is_current && <Badge variant="default" className="text-[10px] h-4">Current</Badge>}
                       </div>
                       <p className="text-[10px] text-muted-foreground mt-1">
-                        {format(new Date(drawing.created_at), "MMM d, yyyy h:mm a")}
+                        {format(new Date(drawing.created_at), "MMM d, yyyy HH:mm")}
                       </p>
                     </div>
                   ))
