@@ -88,6 +88,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
   const [selectedStructure, setSelectedStructure] = useState<AnatomyStructure | null>(null);
   const [selectedSystem, setSelectedSystem] = useState<AnatomySystem | null>(null);
   const [highlightColor, setHighlightColor] = useState("#DC143C");
+  const [highlightOpacity, setHighlightOpacity] = useState(0.7);
   
   // UI state
   const [draggedAnatomy, setDraggedAnatomy] = useState<LayeredAnatomyAsset | null>(null);
@@ -865,7 +866,9 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
             }}
             selectedStructureId={selectedStructure?.id || null}
             highlightColor={highlightColor}
+            highlightOpacity={highlightOpacity}
             onHighlightColorChange={setHighlightColor}
+            onHighlightOpacityChange={setHighlightOpacity}
             visibleLayers={visibleLayers}
             anatomyAssets={professionalAnatomyAssets}
             onDragStart={handleDragStart}
@@ -908,7 +911,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
             onMouseLeave={handleMouseUp}
           />
           
-          {/* Anatomy Overlays with selection highlighting */}
+          {/* Anatomy Overlays with clinical highlighting */}
           {elements
             .filter((el) => el.type === "anatomy")
             .map((el) => {
@@ -920,6 +923,14 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
               // Check if this element matches the selected structure
               const isStructureHighlighted = selectedStructure?.assetId === el.data.assetId;
               const shouldDim = selectedStructure && !isStructureHighlighted;
+              
+              // Convert hex color to rgba for opacity control
+              const hexToRgba = (hex: string, alpha: number) => {
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+              };
               
               return (
                 <div
@@ -938,33 +949,60 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                     transformOrigin: "center center",
                     opacity: shouldDim ? 0.3 : 1,
                     filter: shouldDim ? "grayscale(70%)" : "none",
-                    boxShadow: isStructureHighlighted ? `0 0 20px ${highlightColor}40, 0 0 0 2px ${highlightColor}` : (isSelected ? `0 0 0 2px hsl(var(--primary))` : undefined),
+                    boxShadow: isSelected 
+                      ? `0 0 0 2px hsl(var(--primary))` 
+                      : undefined,
                   }}
                   onMouseDown={(e) => handleElementMouseDown(e, el.id)}
                 >
-                  {/* Highlight border for selected structure */}
-                  {isStructureHighlighted && (
-                    <div 
-                      className="absolute inset-0 pointer-events-none rounded-lg"
-                      style={{ 
-                        border: `3px solid ${highlightColor}`,
-                        boxShadow: `inset 0 0 15px ${highlightColor}30`
-                      }}
-                    />
-                  )}
+                  {/* Base anatomy rendering - always at full fidelity */}
+                  <asset.component visibleLayers={elementLayers} color={undefined} />
                   
-                  <asset.component visibleLayers={elementLayers} color={isStructureHighlighted ? highlightColor : undefined} />
+                  {/* Clinical highlight overlay - separate layer to preserve anatomical accuracy */}
+                  {isStructureHighlighted && (
+                    <>
+                      {/* Non-distorting color overlay with adjustable opacity */}
+                      <div 
+                        className="absolute inset-0 pointer-events-none rounded-lg mix-blend-multiply"
+                        style={{ 
+                          backgroundColor: hexToRgba(highlightColor, highlightOpacity * 0.35),
+                        }}
+                      />
+                      
+                      {/* Highlight border with glow effect */}
+                      <div 
+                        className="absolute inset-0 pointer-events-none rounded-lg"
+                        style={{ 
+                          border: `3px solid ${hexToRgba(highlightColor, highlightOpacity)}`,
+                          boxShadow: `
+                            inset 0 0 ${20 * highlightOpacity}px ${hexToRgba(highlightColor, highlightOpacity * 0.3)},
+                            0 0 ${15 * highlightOpacity}px ${hexToRgba(highlightColor, highlightOpacity * 0.5)}
+                          `,
+                        }}
+                      />
+                      
+                      {/* Corner indicators for clinical marking */}
+                      <div className="absolute top-0 left-0 w-4 h-4 pointer-events-none" style={{ borderTop: `3px solid ${highlightColor}`, borderLeft: `3px solid ${highlightColor}`, opacity: highlightOpacity }} />
+                      <div className="absolute top-0 right-0 w-4 h-4 pointer-events-none" style={{ borderTop: `3px solid ${highlightColor}`, borderRight: `3px solid ${highlightColor}`, opacity: highlightOpacity }} />
+                      <div className="absolute bottom-0 left-0 w-4 h-4 pointer-events-none" style={{ borderBottom: `3px solid ${highlightColor}`, borderLeft: `3px solid ${highlightColor}`, opacity: highlightOpacity }} />
+                      <div className="absolute bottom-0 right-0 w-4 h-4 pointer-events-none" style={{ borderBottom: `3px solid ${highlightColor}`, borderRight: `3px solid ${highlightColor}`, opacity: highlightOpacity }} />
+                    </>
+                  )}
                   
                   {/* Structure name label when highlighted */}
                   {isStructureHighlighted && selectedStructure && (
                     <div 
-                      className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded-md text-xs font-semibold whitespace-nowrap shadow-lg"
+                      className="absolute -top-8 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap shadow-lg backdrop-blur-sm"
                       style={{ 
-                        backgroundColor: highlightColor,
-                        color: "#FFFFFF"
+                        backgroundColor: hexToRgba(highlightColor, highlightOpacity),
+                        color: "#FFFFFF",
+                        boxShadow: `0 2px 8px ${hexToRgba(highlightColor, 0.4)}`
                       }}
                     >
-                      {selectedStructure.name}
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 rounded-full bg-white/80" />
+                        {selectedStructure.name}
+                      </div>
                     </div>
                   )}
                   
@@ -972,23 +1010,23 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                   {isSelected && (
                     <>
                       <div 
-                        className="absolute -top-2 -left-2 w-4 h-4 rounded-full cursor-nw-resize border-2 border-background shadow" 
-                        style={{ backgroundColor: highlightColor }}
+                        className="absolute -top-2 -left-2 w-4 h-4 rounded-full cursor-nw-resize border-2 border-background shadow-lg" 
+                        style={{ backgroundColor: "hsl(var(--primary))" }}
                         onMouseDown={(e) => handleResizeStart(e, "nw")} 
                       />
                       <div 
-                        className="absolute -top-2 -right-2 w-4 h-4 rounded-full cursor-ne-resize border-2 border-background shadow" 
-                        style={{ backgroundColor: highlightColor }}
+                        className="absolute -top-2 -right-2 w-4 h-4 rounded-full cursor-ne-resize border-2 border-background shadow-lg" 
+                        style={{ backgroundColor: "hsl(var(--primary))" }}
                         onMouseDown={(e) => handleResizeStart(e, "ne")} 
                       />
                       <div 
-                        className="absolute -bottom-2 -left-2 w-4 h-4 rounded-full cursor-sw-resize border-2 border-background shadow" 
-                        style={{ backgroundColor: highlightColor }}
+                        className="absolute -bottom-2 -left-2 w-4 h-4 rounded-full cursor-sw-resize border-2 border-background shadow-lg" 
+                        style={{ backgroundColor: "hsl(var(--primary))" }}
                         onMouseDown={(e) => handleResizeStart(e, "sw")} 
                       />
                       <div 
-                        className="absolute -bottom-2 -right-2 w-4 h-4 rounded-full cursor-se-resize border-2 border-background shadow" 
-                        style={{ backgroundColor: highlightColor }}
+                        className="absolute -bottom-2 -right-2 w-4 h-4 rounded-full cursor-se-resize border-2 border-background shadow-lg" 
+                        style={{ backgroundColor: "hsl(var(--primary))" }}
                         onMouseDown={(e) => handleResizeStart(e, "se")} 
                       />
                     </>
@@ -1002,6 +1040,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
             structure={selectedStructure}
             system={selectedSystem}
             highlightColor={highlightColor}
+            highlightOpacity={highlightOpacity}
             onClose={() => {
               setSelectedStructure(null);
               setSelectedSystem(null);
