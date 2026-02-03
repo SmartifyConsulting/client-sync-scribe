@@ -31,10 +31,9 @@ import {
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
 import { VisitCategoryDialog } from "@/components/sessions/VisitCategoryDialog";
-import { SessionNotepad } from "@/components/sessions/SessionNotepad";
-import { Toggle } from "@/components/ui/toggle";
+import { RecordingBar } from "@/components/sessions/RecordingBar";
+import { DrawingPad } from "@/components/drawings/DrawingPad";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
 import { AudioWaveform } from "@/components/sessions/AudioWaveform";
@@ -579,133 +578,27 @@ export default function Sessions() {
       )}
 
       {sessionState === "active" && (
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4">
-          {/* Compact Recording Panel - Sidebar with clean clinical styling */}
-          <div className="rounded-lg border border-slate-200 bg-white shadow-sm flex flex-col">
-            {/* Patient Info */}
-            <div className="flex items-center gap-3 p-4 border-b border-slate-100">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 shrink-0">
-                <User className="h-5 w-5 text-slate-600" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="font-medium text-foreground truncate">
-                  {currentPatient?.name || "Current Session"}
-                </p>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  <span className="font-mono">{formatDuration(sessionDuration)}</span>
-                </div>
-              </div>
-            </div>
+        <div className="flex flex-col -mx-4 md:-mx-8 -my-6 md:-my-8 min-h-[calc(100vh-80px)]">
+          {/* Recording Bar - Fixed at top */}
+          <RecordingBar
+            patientName={currentPatient?.name}
+            sessionDuration={sessionDuration}
+            isRecording={isRecording}
+            isTranscribing={isTranscribing}
+            transcript={transcript}
+            audioUrl={audioUrl}
+            onToggleRecording={toggleRecording}
+            onCompleteSession={endSession}
+            onCancelSession={() => setShowCancelDialog(true)}
+          />
 
-            {/* Recording Controls - Compact */}
-            <div className="flex flex-col items-center gap-3 p-4">
-              <button
-                onClick={toggleRecording}
-                disabled={isTranscribing}
-                className={cn(
-                  "flex h-16 w-16 items-center justify-center rounded-full transition-all duration-300",
-                  isTranscribing && "opacity-50 cursor-not-allowed",
-                  isRecording
-                    ? "bg-destructive text-destructive-foreground animate-pulse-soft shadow-lg"
-                    : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-glow"
-                )}
-              >
-                {isTranscribing ? (
-                  <Loader2 className="h-7 w-7 animate-spin" />
-                ) : isRecording ? (
-                  <Square className="h-7 w-7" />
-                ) : (
-                  <Mic className="h-7 w-7" />
-                )}
-              </button>
-              
-              <p className="text-xs text-muted-foreground text-center">
-                {isTranscribing 
-                  ? "Transcribing..." 
-                  : isRecording 
-                    ? "Recording... Tap to stop" 
-                    : "Tap to record"}
-              </p>
-              
-              {/* Compact Waveform */}
-              {(isRecording || isTranscribing) && (
-                <div className="w-full">
-                  <AudioWaveform isRecording={isRecording} />
-                </div>
-              )}
-            </div>
-
-            {/* Live Transcript Preview - Collapsible */}
-            {(transcript || isTranscribing) && (
-              <div className="border-t p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <FileText className="h-3.5 w-3.5 text-primary" />
-                    <p className="text-xs font-medium text-primary">Transcript</p>
-                  </div>
-                  {transcript && !isTranscribing && (
-                    <span className="text-xs bg-success/15 text-success px-1.5 py-0.5 rounded">✓</span>
-                  )}
-                  {isTranscribing && (
-                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-                  )}
-                </div>
-                <div className="max-h-[120px] overflow-y-auto bg-muted/30 rounded p-2">
-                  {transcript ? (
-                    <p className="text-xs text-foreground whitespace-pre-wrap leading-relaxed">{transcript}</p>
-                  ) : (
-                    <p className="text-xs text-muted-foreground italic">Transcribing...</p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Audio Playback */}
-            {audioUrl && !isRecording && (
-              <div className="border-t p-3">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
-                  <p className="text-xs font-medium text-foreground">Playback</p>
-                </div>
-                <audio controls className="w-full h-8" src={audioUrl}>
-                  Your browser does not support audio.
-                </audio>
-              </div>
-            )}
-
-            {/* Session Actions */}
-            <div className="p-3 border-t mt-auto space-y-2">
-              <Button 
-                variant="default" 
-                className="w-full gap-2" 
-                onClick={endSession} 
-                disabled={isTranscribing}
-              >
-                <CheckCircle className="h-4 w-4" />
-                Complete Session
-              </Button>
-              <Button 
-                variant="ghost" 
-                className="w-full gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10" 
-                onClick={() => setShowCancelDialog(true)}
-                disabled={isTranscribing}
-              >
-                <X className="h-4 w-4" />
-                Cancel Session
-              </Button>
-            </div>
-          </div>
-
-          {/* Notes/Drawing Panel - Main Content */}
-          <div className="min-h-[500px]">
-            <SessionNotepad
+          {/* Full-width DrawingPad - Takes remaining space */}
+          <div className="flex-1 min-h-0">
+            <DrawingPad
               patientId={patientId || ""}
               sessionId={currentSessionId}
               patientName={currentPatient?.name}
-              notes={notes}
-              onNotesChange={setNotes}
-              isRecording={isRecording}
+              isModal={false}
             />
           </div>
         </div>
