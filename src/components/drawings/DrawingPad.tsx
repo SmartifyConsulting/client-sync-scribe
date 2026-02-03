@@ -39,11 +39,10 @@ import {
   EyeOff,
   Edit3,
   Check,
-  FileText,
 } from "lucide-react";
 import { professionalAnatomyAssets, LayeredAnatomyAsset, AnatomyLayer } from "./MedicalAnatomyAssets";
 import { AnatomyBrowser, StructureMetadataPanel, AnatomyStructure, AnatomySystem } from "./AnatomyBrowser";
-import { ClinicalNotesPanel, ClinicalNote, AnnotationTimestamp, CLINICAL_TAGS } from "./ClinicalNotesPanel";
+import { CLINICAL_TAGS } from "./ClinicalNotesPanel";
 import { useSessionDrawings, CanvasData, CanvasElement } from "@/hooks/useSessionDrawings";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -123,10 +122,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
   const [isResizing, setIsResizing] = useState(false);
   const [resizeCorner, setResizeCorner] = useState<string | null>(null);
   
-  // Clinical Notes state
-  const [clinicalNotes, setClinicalNotes] = useState<ClinicalNote[]>([]);
-  const [annotationTimestamps, setAnnotationTimestamps] = useState<AnnotationTimestamp[]>([]);
-  const [showNotesPanel, setShowNotesPanel] = useState(true);
+  // Annotation tags for text elements
   const [annotationTags, setAnnotationTags] = useState<string[]>([]);
 
   const { 
@@ -145,56 +141,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       setHistory([currentDrawing.canvas_data.elements]);
       setHistoryIndex(0);
     }
-    // Load clinical notes from saved data
-    if (currentDrawing?.canvas_data) {
-      const data = currentDrawing.canvas_data as any;
-      if (data.clinicalNotes) {
-        setClinicalNotes(data.clinicalNotes);
-      }
-      if (data.annotationTimestamps) {
-        setAnnotationTimestamps(data.annotationTimestamps);
-      }
-    }
   }, [currentDrawing]);
-
-  // Clinical Notes handlers
-  const handleAddNote = (content: string, tags: string[]) => {
-    const newNote: ClinicalNote = {
-      id: crypto.randomUUID(),
-      content,
-      tags,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      linkedElementId: selectedElement || undefined,
-    };
-    setClinicalNotes(prev => [newNote, ...prev]);
-  };
-
-  const handleUpdateNote = (id: string, content: string, tags: string[]) => {
-    setClinicalNotes(prev =>
-      prev.map(note =>
-        note.id === id
-          ? { ...note, content, tags, updatedAt: new Date() }
-          : note
-      )
-    );
-  };
-
-  const handleDeleteNote = (id: string) => {
-    setClinicalNotes(prev => prev.filter(note => note.id !== id));
-  };
-
-  // Add annotation timestamp when creating annotations
-  const addAnnotationTimestamp = (elementId: string, text: string, tags: string[] = []) => {
-    const timestamp: AnnotationTimestamp = {
-      id: crypto.randomUUID(),
-      text,
-      timestamp: new Date(),
-      elementId,
-      tags,
-    };
-    setAnnotationTimestamps(prev => [...prev, timestamp]);
-  };
 
   // Render elements to canvas (only annotation elements, not anatomy)
   const renderCanvas = useCallback(() => {
@@ -497,9 +444,6 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     setElements(newElements);
     addToHistory(newElements);
     
-    // Add annotation timestamp
-    addAnnotationTimestamp(elementId, textInput, annotationTags);
-    
     setTextInput("");
     setTextPosition(null);
     setAnnotationTags([]);
@@ -561,8 +505,6 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
   const handleSave = async (createNewVersion = false) => {
     const canvasData = { 
       elements,
-      clinicalNotes,
-      annotationTimestamps,
     } as CanvasData;
     await saveDrawing(canvasData, createNewVersion);
   };
@@ -736,7 +678,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
 
   return (
     <div 
-      className={cn("flex flex-col h-full bg-background", isModal && "max-h-[85vh]")}
+      className={cn("flex flex-col h-full bg-white", isModal && "max-h-[85vh]")}
       onMouseMove={(e) => {
         if (isDraggingElement) handleElementMouseMove(e);
         if (isResizing) handleResize(e);
@@ -744,8 +686,8 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       onMouseUp={handleElementMouseUp}
       onMouseLeave={handleElementMouseUp}
     >
-      {/* Professional Toolbar */}
-      <div className="flex flex-wrap items-center gap-1.5 px-3 py-2 bg-muted/30 border-b">
+      {/* Professional Toolbar - Clean clinical style */}
+      <div className="flex flex-wrap items-center gap-1.5 px-3 py-2 bg-slate-50 border-b border-slate-200">
         {/* Drawing Tools */}
         <div className="flex items-center gap-0.5 pr-2 border-r">
           <Button
@@ -970,18 +912,6 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
         {/* Save Actions */}
         <div className="flex items-center gap-1 ml-auto">
           <Button
-            variant={showNotesPanel ? "secondary" : "ghost"}
-            size="sm"
-            className="h-8 gap-1"
-            onClick={() => setShowNotesPanel(!showNotesPanel)}
-          >
-            <FileText className="h-4 w-4" />
-            <span className="hidden lg:inline">Notes</span>
-            {clinicalNotes.length > 0 && (
-              <Badge variant="secondary" className="h-5 px-1.5">{clinicalNotes.length}</Badge>
-            )}
-          </Button>
-          <Button
             variant="ghost"
             size="sm"
             className="h-8 gap-1"
@@ -1074,22 +1004,10 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
 
       {/* Main Content */}
       <div className="flex flex-1 min-h-0">
-        {/* Clinical Notes Panel */}
-        <ClinicalNotesPanel
-          notes={clinicalNotes}
-          onAddNote={handleAddNote}
-          onUpdateNote={handleUpdateNote}
-          onDeleteNote={handleDeleteNote}
-          timestamps={annotationTimestamps}
-          selectedElementId={selectedElement}
-          isCollapsed={!showNotesPanel}
-          onToggleCollapse={() => setShowNotesPanel(!showNotesPanel)}
-        />
-
         {/* Anatomy Browser Panel */}
-        <div className="w-56 border-r bg-muted/20 flex flex-col">
-          <div className="p-2 border-b bg-muted/30">
-            <h4 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground">Anatomy Systems</h4>
+        <div className="w-56 border-r border-slate-200 bg-white flex flex-col">
+          <div className="p-2 border-b border-slate-200 bg-slate-50">
+            <h4 className="font-semibold text-xs uppercase tracking-wide text-slate-600">Anatomy Systems</h4>
           </div>
           <AnatomyBrowser
             onSelectStructure={(structure, system, color) => {
@@ -1116,7 +1034,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
             tool === "pan" && "cursor-grab",
             isPanning && "cursor-grabbing"
           )}
-          style={{ backgroundColor: "#F5F5F5" }}
+          style={{ backgroundColor: "#FAFAFA" }}
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDrop}
           onClick={() => tool !== "select" && setSelectedElement(null)}
