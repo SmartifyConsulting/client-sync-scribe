@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Upload, FileSpreadsheet, Check, AlertCircle, Loader2, X } from "lucide-react";
+import { Upload, FileSpreadsheet, Check, AlertCircle, Loader2, X, Sparkles, FileText } from "lucide-react";
 import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +16,14 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface ParsedPatient {
   name: string;
@@ -38,6 +46,9 @@ interface ParsedPatient {
   next_of_kin_phone?: string;
   next_of_kin_email?: string;
   notes?: string;
+  id_passport_number?: string;
+  gender?: string;
+  marital_status?: string;
 }
 
 // Common column name mappings
@@ -168,6 +179,23 @@ const COLUMN_MAPPINGS: Record<string, keyof ParsedPatient> = {
   "comments": "notes",
   "remarks": "notes",
   "additional info": "notes",
+
+  // ID/Passport
+  "id": "id_passport_number",
+  "id number": "id_passport_number",
+  "id/passport": "id_passport_number",
+  "passport": "id_passport_number",
+  "passport number": "id_passport_number",
+  "id_passport_number": "id_passport_number",
+
+  // Gender
+  "gender": "gender",
+  "sex": "gender",
+
+  // Marital status
+  "marital status": "marital_status",
+  "marital": "marital_status",
+  "status": "marital_status",
 };
 
 function mapColumnName(header: string): keyof ParsedPatient | null {
@@ -217,26 +245,57 @@ function parseExcelDate(value: any): string | undefined {
   return undefined;
 }
 
-export function PatientImport() {
+interface PatientImportProps {
+  onImportComplete?: () => void;
+}
+
+export function PatientImport({ onImportComplete }: PatientImportProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isAiProcessing, setIsAiProcessing] = useState(false);
   const [parsedPatients, setParsedPatients] = useState<ParsedPatient[]>([]);
   const [importProgress, setImportProgress] = useState(0);
   const [isImporting, setIsImporting] = useState(false);
   const [importResults, setImportResults] = useState<{ success: number; failed: number } | null>(null);
 
-  const processFile = useCallback(async (file: File) => {
-    if (!file.name.match(/\.(xlsx?|csv)$/i)) {
+  const processWithAI = useCallback(async (content: string, fileType: string) => {
+    setIsAiProcessing(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('parse-patient-import', {
+        body: { content, fileType }
+      });
+
+      if (error) throw error;
+      
+      if (data?.patients && data.patients.length > 0) {
+        setParsedPatients(data.patients);
+        toast({
+          title: "AI Processing Complete",
+          description: `Found ${data.patients.length} patient${data.patients.length === 1 ? "" : "s"} to import`,
+        });
+      } else {
+        toast({
+          title: "No patients found",
+          description: "AI could not extract any valid patient records from the content",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error("AI processing error:", error);
       toast({
-        title: "Invalid file type",
-        description: "Please upload an Excel (.xlsx, .xls) or CSV file",
+        title: "AI Processing Failed",
+        description: error.message || "Could not process the file with AI",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsAiProcessing(false);
     }
+  }, [toast]);
 
+  const processSpreadsheet = useCallback(async (file: File) => {
     setIsProcessing(true);
     setParsedPatients([]);
     setImportResults(null);
@@ -248,12 +307,10 @@ export function PatientImport() {
       const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 }) as any[][];
 
       if (jsonData.length < 2) {
-        toast({
-          title: "Empty file",
-          description: "The file appears to be empty or has no data rows",
-          variant: "destructive",
-        });
+        // Try AI parsing for sparse/unusual formats
+        const textContent = XLSX.utils.sheet_to_csv(firstSheet);
         setIsProcessing(false);
+        await processWithAI(textContent, 'csv');
         return;
       }
 
@@ -277,12 +334,10 @@ export function PatientImport() {
       const hasLastName = Object.values(columnMap).includes("last_name");
       
       if (!hasNameColumn && !hasFirstName && !hasLastName) {
-        toast({
-          title: "Missing required column",
-          description: "Could not find a 'Name', 'First Name', or 'Last Name' column in the spreadsheet",
-          variant: "destructive",
-        });
+        // Try AI parsing when columns can't be mapped
+        const textContent = XLSX.utils.sheet_to_csv(firstSheet);
         setIsProcessing(false);
+        await processWithAI(textContent, 'csv');
         return;
       }
 
@@ -342,7 +397,40 @@ export function PatientImport() {
     }
 
     setIsProcessing(false);
-  }, [toast]);
+  }, [toast, processWithAI]);
+
+  const processFile = useCallback(async (file: File) => {
+    const extension = file.name.split('.').pop()?.toLowerCase();
+    
+    if (extension === 'txt') {
+      // Text/Notepad file - use AI parsing
+      setIsProcessing(true);
+      setParsedPatients([]);
+      setImportResults(null);
+      
+      try {
+        const content = await file.text();
+        setIsProcessing(false);
+        await processWithAI(content, 'txt');
+      } catch (error) {
+        console.error("Error reading text file:", error);
+        toast({
+          title: "Error reading file",
+          description: "Could not read the text file",
+          variant: "destructive",
+        });
+        setIsProcessing(false);
+      }
+    } else if (['xlsx', 'xls', 'csv'].includes(extension || '')) {
+      await processSpreadsheet(file);
+    } else {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a text (.txt), Excel (.xlsx, .xls) or CSV file",
+        variant: "destructive",
+      });
+    }
+  }, [toast, processWithAI, processSpreadsheet]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -388,6 +476,9 @@ export function PatientImport() {
           next_of_kin_phone: patient.next_of_kin_phone || null,
           next_of_kin_email: patient.next_of_kin_email || null,
           notes: patient.notes || null,
+          id_passport_number: patient.id_passport_number || null,
+          gender: patient.gender || null,
+          marital_status: patient.marital_status || null,
           status: "active",
         });
 
@@ -413,6 +504,7 @@ export function PatientImport() {
         title: "Import completed",
         description: `Successfully imported ${successCount} patient${successCount === 1 ? "" : "s"}${failedCount > 0 ? `. ${failedCount} failed.` : ""}`,
       });
+      onImportComplete?.();
     } else {
       toast({
         title: "Import failed",
@@ -428,44 +520,54 @@ export function PatientImport() {
     setImportProgress(0);
   };
 
-  return (
-    <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-      <div className="flex items-center gap-3 mb-6">
-        <FileSpreadsheet className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold text-foreground">Import Patients</h2>
-      </div>
-      <p className="text-sm text-muted-foreground mb-6">
-        Import existing patients from an Excel spreadsheet (.xlsx, .xls) or CSV file. 
-        Column names are automatically matched to patient fields.
-      </p>
+  const isLoading = isProcessing || isAiProcessing;
 
+  return (
+    <div className="space-y-6">
       {/* Upload area */}
       {parsedPatients.length === 0 && (
         <div
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+          className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
             isDragging ? "border-primary bg-primary/5" : "border-border"
           }`}
           onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
         >
-          {isProcessing ? (
+          {isLoading ? (
             <div className="flex flex-col items-center gap-3">
-              <Loader2 className="h-10 w-10 text-primary animate-spin" />
-              <p className="text-muted-foreground">Processing file...</p>
+              {isAiProcessing ? (
+                <>
+                  <Sparkles className="h-10 w-10 text-primary animate-pulse" />
+                  <p className="text-foreground font-medium">AI is analyzing your data...</p>
+                  <p className="text-sm text-muted-foreground">This may take a moment</p>
+                </>
+              ) : (
+                <>
+                  <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                  <p className="text-muted-foreground">Processing file...</p>
+                </>
+              )}
             </div>
           ) : (
             <>
-              <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+              <div className="flex justify-center gap-3 mb-4">
+                <FileSpreadsheet className="h-10 w-10 text-muted-foreground" />
+                <FileText className="h-10 w-10 text-muted-foreground" />
+              </div>
               <p className="text-foreground font-medium mb-1">
-                Drag & drop your spreadsheet here
+                Drag & drop your file here
               </p>
-              <p className="text-sm text-muted-foreground mb-4">
-                or click to browse
+              <p className="text-sm text-muted-foreground mb-2">
+                Supports Excel, CSV, and text/notepad files
               </p>
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <span className="text-sm text-primary font-medium">AI-powered field detection</span>
+              </div>
               <input
                 type="file"
-                accept=".xlsx,.xls,.csv"
+                accept=".xlsx,.xls,.csv,.txt"
                 onChange={handleFileChange}
                 className="hidden"
                 id="patient-import-file"
@@ -474,6 +576,7 @@ export function PatientImport() {
                 variant="outline"
                 onClick={() => document.getElementById("patient-import-file")?.click()}
               >
+                <Upload className="h-4 w-4 mr-2" />
                 Select File
               </Button>
             </>
@@ -485,9 +588,12 @@ export function PatientImport() {
       {parsedPatients.length > 0 && !importResults && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-foreground">
-              Preview ({parsedPatients.length} patient{parsedPatients.length === 1 ? "" : "s"})
-            </p>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <p className="text-sm font-medium text-foreground">
+                Preview ({parsedPatients.length} patient{parsedPatients.length === 1 ? "" : "s"})
+              </p>
+            </div>
             <Button variant="ghost" size="sm" onClick={clearData}>
               <X className="h-4 w-4 mr-1" /> Clear
             </Button>
@@ -501,6 +607,7 @@ export function PatientImport() {
                   <TableHead className="sticky top-0 bg-card">Email</TableHead>
                   <TableHead className="sticky top-0 bg-card">Phone</TableHead>
                   <TableHead className="sticky top-0 bg-card">DOB</TableHead>
+                  <TableHead className="sticky top-0 bg-card">Gender</TableHead>
                   <TableHead className="sticky top-0 bg-card">Medical Aid</TableHead>
                 </TableRow>
               </TableHeader>
@@ -511,6 +618,7 @@ export function PatientImport() {
                     <TableCell>{patient.email || "-"}</TableCell>
                     <TableCell>{patient.phone || "-"}</TableCell>
                     <TableCell>{patient.dob || "-"}</TableCell>
+                    <TableCell>{patient.gender || "-"}</TableCell>
                     <TableCell>{patient.medical_aid || "-"}</TableCell>
                   </TableRow>
                 ))}
@@ -564,20 +672,67 @@ export function PatientImport() {
         </div>
       )}
 
-      {/* Supported columns hint */}
-      <div className="mt-6 p-4 rounded-lg bg-muted/30">
-        <p className="text-sm font-medium text-foreground mb-2">Supported Columns</p>
-        <div className="flex flex-wrap gap-2">
-          {["Name", "Email", "Phone", "Date of Birth", "Address", "Medical Aid", "Medical Aid Number", "Allergies", "Employer", "Occupation", "Referred By", "GP", "Next of Kin"].map((col) => (
-            <Badge key={col} variant="secondary" className="text-xs">
-              {col}
-            </Badge>
-          ))}
+      {/* Supported formats hint */}
+      {parsedPatients.length === 0 && !isLoading && (
+        <div className="p-4 rounded-lg bg-muted/30">
+          <p className="text-sm font-medium text-foreground mb-2">Supported Formats</p>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <Badge variant="secondary" className="text-xs">.xlsx</Badge>
+            <Badge variant="secondary" className="text-xs">.xls</Badge>
+            <Badge variant="secondary" className="text-xs">.csv</Badge>
+            <Badge variant="secondary" className="text-xs">.txt</Badge>
+          </div>
+          <p className="text-sm font-medium text-foreground mb-2">Auto-detected Fields</p>
+          <div className="flex flex-wrap gap-2">
+            {["Name", "Email", "Phone", "DOB", "Gender", "ID/Passport", "Address", "Medical Aid", "Allergies", "Employer", "Occupation", "GP", "Next of Kin"].map((col) => (
+              <Badge key={col} variant="outline" className="text-xs">
+                {col}
+              </Badge>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground mt-3">
+            <Sparkles className="h-3 w-3 inline mr-1" />
+            AI automatically detects and maps fields from any format, including unstructured text notes.
+          </p>
         </div>
-        <p className="text-xs text-muted-foreground mt-2">
-          Column names are flexible - e.g., "Phone", "Tel", "Mobile", "Cell" all map to the phone field.
-        </p>
-      </div>
+      )}
     </div>
+  );
+}
+
+// Dialog wrapper for use in other components
+interface PatientImportDialogProps {
+  trigger: React.ReactNode;
+  onImportComplete?: () => void;
+}
+
+export function PatientImportDialog({ trigger, onImportComplete }: PatientImportDialogProps) {
+  const [open, setOpen] = useState(false);
+
+  const handleComplete = () => {
+    onImportComplete?.();
+    setOpen(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {trigger}
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl max-h-[90vh]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            Import Patients
+          </DialogTitle>
+          <DialogDescription>
+            Import patients from spreadsheets or text notes using AI-powered field detection
+          </DialogDescription>
+        </DialogHeader>
+        <ScrollArea className="max-h-[70vh]">
+          <PatientImport onImportComplete={handleComplete} />
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
   );
 }
