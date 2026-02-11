@@ -266,11 +266,16 @@ import BreastAugmentationImg from "@/assets/anatomy/Breast_Augmentation.png";
 import InjectiblesAndFillersImg from "@/assets/anatomy/Injectibles_and_Fillers.png";
 import BodyContouringImg from "@/assets/anatomy/Body_Controuring.png";
 import FacialImg from "@/assets/anatomy/Facial.png";
+import HandsWristsImg from "@/assets/anatomy/Hands_and_Wrists.png";
+import HipImg from "@/assets/anatomy/Hip.png";
+import ShoulderOrthoImg from "@/assets/anatomy/Shoulder_Ortho.png";
+import SynovialJointsImg from "@/assets/anatomy/Synovial_Joints.png";
+import KneeOrthoImg from "@/assets/anatomy/Knee_Ortho.png";
 
 export interface AnatomyAsset {
   id: string;
   name: string;
-  category: "body" | "spine" | "face" | "joints" | "systems" | "plastic-surgery";
+  category: "body" | "spine" | "face" | "joints" | "systems" | "plastic-surgery" | "orthopedic";
   component: React.FC;
   width: number;
   height: number;
@@ -300,4 +305,10 @@ export const anatomyAssets: AnatomyAsset[] = [
   { id: "ps-injectibles", name: "Injectibles & Fillers", category: "plastic-surgery", component: () => null, width: 200, height: 300, imageSrc: InjectiblesAndFillersImg },
   { id: "ps-body", name: "Body Contouring", category: "plastic-surgery", component: () => null, width: 200, height: 300, imageSrc: BodyContouringImg },
   { id: "ps-facial", name: "Facial", category: "plastic-surgery", component: () => null, width: 200, height: 300, imageSrc: FacialImg },
+  // Orthopedic (image-based)
+  { id: "ortho-hands", name: "Hands & Wrists", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: HandsWristsImg },
+  { id: "ortho-hip", name: "Hip", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: HipImg },
+  { id: "ortho-shoulder", name: "Shoulder", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: ShoulderOrthoImg },
+  { id: "ortho-synovial", name: "Synovial Joints", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: SynovialJointsImg },
+  { id: "ortho-knee", name: "Knee", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: KneeOrthoImg },
 ];

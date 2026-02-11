@@ -809,15 +809,16 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
             <h4 className="font-medium text-sm">Anatomy</h4>
           </div>
           <Tabs defaultValue="body" className="flex-1 flex flex-col">
-            <TabsList className="grid grid-cols-3 m-1 h-auto">
+            <TabsList className="grid grid-cols-4 m-1 h-auto">
               <TabsTrigger value="body" className="text-xs px-1">Body</TabsTrigger>
               <TabsTrigger value="spine" className="text-xs px-1">Spine</TabsTrigger>
               <TabsTrigger value="face" className="text-xs px-1">Face</TabsTrigger>
               <TabsTrigger value="joints" className="text-xs px-1">Joints</TabsTrigger>
               <TabsTrigger value="systems" className="text-xs px-1">Systems</TabsTrigger>
               <TabsTrigger value="plastic-surgery" className="text-xs px-1">Plastic</TabsTrigger>
+              <TabsTrigger value="orthopedic" className="text-xs px-1">Ortho</TabsTrigger>
             </TabsList>
-            {["body", "spine", "face", "joints", "systems", "plastic-surgery"].map((category) => (
+            {["body", "spine", "face", "joints", "systems", "plastic-surgery", "orthopedic"].map((category) => (
               <TabsContent key={category} value={category} className="flex-1 m-0">
                 <ScrollArea className="h-full">
                   <div className="p-2 space-y-2">
