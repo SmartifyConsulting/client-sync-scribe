@@ -566,13 +566,14 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
             <h4 className="font-medium text-sm">Anatomy</h4>
           </div>
           <Tabs defaultValue="body" className="flex-1 flex flex-col">
-            <TabsList className="grid grid-cols-4 m-1">
+            <TabsList className="grid grid-cols-5 m-1">
               <TabsTrigger value="body" className="text-xs px-1">Body</TabsTrigger>
               <TabsTrigger value="spine" className="text-xs px-1">Spine</TabsTrigger>
               <TabsTrigger value="face" className="text-xs px-1">Face</TabsTrigger>
               <TabsTrigger value="joints" className="text-xs px-1">Joints</TabsTrigger>
+              <TabsTrigger value="systems" className="text-xs px-1">Systems</TabsTrigger>
             </TabsList>
-            {["body", "spine", "face", "joints"].map((category) => (
+            {["body", "spine", "face", "joints", "systems"].map((category) => (
               <TabsContent key={category} value={category} className="flex-1 m-0">
                 <ScrollArea className="h-full">
                   <div className="p-2 space-y-2">
@@ -586,7 +587,11 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                           onDragStart={() => handleDragStart(asset)}
                         >
                           <div className="h-16 flex items-center justify-center text-muted-foreground">
-                            <asset.component />
+                            {asset.imageSrc ? (
+                              <img src={asset.imageSrc} alt={asset.name} className="h-full w-auto object-contain" />
+                            ) : (
+                              <asset.component />
+                            )}
                           </div>
                           <p className="text-xs text-center mt-1">{asset.name}</p>
                         </div>
@@ -631,7 +636,11 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                     height: el.height,
                   }}
                 >
-                  <asset.component />
+                  {asset.imageSrc ? (
+                    <img src={asset.imageSrc} alt={asset.name} className="w-full h-full object-contain" />
+                  ) : (
+                    <asset.component />
+                  )}
                 </div>
               );
             })}

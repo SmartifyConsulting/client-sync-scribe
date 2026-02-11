@@ -255,13 +255,22 @@ export const FootSVG = () => (
   </svg>
 );
 
+// Image imports for Primary Anatomical Systems
+import SkeletalSystemImg from "@/assets/anatomy/Skeletal_System.png";
+import DigestiveImg from "@/assets/anatomy/Digestive.png";
+import RespiratoryImg from "@/assets/anatomy/Respiratory.png";
+import NeurologicalImg from "@/assets/anatomy/Neurological.png";
+import CardiovascularImg from "@/assets/anatomy/Cardiovascular.png";
+import MuscularImg from "@/assets/anatomy/Muscular.png";
+
 export interface AnatomyAsset {
   id: string;
   name: string;
-  category: "body" | "spine" | "face" | "joints";
+  category: "body" | "spine" | "face" | "joints" | "systems";
   component: React.FC;
   width: number;
   height: number;
+  imageSrc?: string;
 }
 
 export const anatomyAssets: AnatomyAsset[] = [
@@ -275,4 +284,11 @@ export const anatomyAssets: AnatomyAsset[] = [
   { id: "knee", name: "Knee", category: "joints", component: KneeSVG, width: 80, height: 120 },
   { id: "hand", name: "Hand", category: "joints", component: HandSVG, width: 80, height: 110 },
   { id: "foot", name: "Foot", category: "joints", component: FootSVG, width: 70, height: 120 },
+  // Primary Anatomical Systems (image-based)
+  { id: "sys-skeletal", name: "Skeletal", category: "systems", component: () => null, width: 200, height: 300, imageSrc: SkeletalSystemImg },
+  { id: "sys-muscular", name: "Muscular", category: "systems", component: () => null, width: 200, height: 300, imageSrc: MuscularImg },
+  { id: "sys-neurological", name: "Neurological", category: "systems", component: () => null, width: 200, height: 300, imageSrc: NeurologicalImg },
+  { id: "sys-cardiovascular", name: "Cardiovascular", category: "systems", component: () => null, width: 200, height: 300, imageSrc: CardiovascularImg },
+  { id: "sys-respiratory", name: "Respiratory", category: "systems", component: () => null, width: 200, height: 300, imageSrc: RespiratoryImg },
+  { id: "sys-digestive", name: "Digestive", category: "systems", component: () => null, width: 200, height: 300, imageSrc: DigestiveImg },
 ];
