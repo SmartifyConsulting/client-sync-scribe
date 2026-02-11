@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Stethoscope, MapPin, Phone } from "lucide-react";
+import { Loader2, Stethoscope, MapPin, Phone, UserPlus } from "lucide-react";
+import { InviteDoctorDialog } from "@/components/patient/InviteDoctorDialog";
 
 interface DoctorProfile {
   id: string;
@@ -61,11 +62,14 @@ export default function MyDoctors() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">My Doctors</h1>
-        <p className="text-muted-foreground mt-1">
-          Healthcare providers with access to your profile
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">My Doctors</h1>
+          <p className="text-muted-foreground mt-1">
+            Healthcare providers with access to your profile
+          </p>
+        </div>
+        <InviteDoctorDialog />
       </div>
 
         {isLoading ? (
