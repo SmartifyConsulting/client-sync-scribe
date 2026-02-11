@@ -279,6 +279,13 @@ import OBGYNImg from "@/assets/anatomy/OBGYN.png";
 import PainPointsImg from "@/assets/anatomy/Pain_Points.png";
 import UrologyImg from "@/assets/anatomy/Urology_and_Nephrology.png";
 import EndocrinologyImg from "@/assets/anatomy/Endocrinology.png";
+import AdvancedCardiologyImg from "@/assets/anatomy/Advanced_Cardiology.png";
+import PodiatryImg from "@/assets/anatomy/Podiatry.png";
+import EyeImg from "@/assets/anatomy/Eye.png";
+import BrainImg from "@/assets/anatomy/Brain.png";
+import SpinalCordImg from "@/assets/anatomy/Spinal_Cord_CX.png";
+import PelvicFloorImg from "@/assets/anatomy/Pelvic_Floor.png";
+import KidneyImg from "@/assets/anatomy/Kidney.png";
 
 export interface AnatomyAsset {
   id: string;
@@ -314,6 +321,12 @@ export const anatomyAssets: AnatomyAsset[] = [
   { id: "sys-obgyn", name: "OB/GYN", category: "systems", component: () => null, width: 200, height: 300, imageSrc: OBGYNImg },
   { id: "sys-urology", name: "Urology & Nephrology", category: "systems", component: () => null, width: 200, height: 300, imageSrc: UrologyImg },
   { id: "sys-endocrinology", name: "Endocrinology", category: "systems", component: () => null, width: 200, height: 300, imageSrc: EndocrinologyImg },
+  { id: "sys-adv-cardiology", name: "Advanced Cardiology", category: "systems", component: () => null, width: 200, height: 300, imageSrc: AdvancedCardiologyImg },
+  { id: "sys-eye", name: "Eye", category: "systems", component: () => null, width: 200, height: 300, imageSrc: EyeImg },
+  { id: "sys-brain", name: "Brain", category: "systems", component: () => null, width: 200, height: 300, imageSrc: BrainImg },
+  { id: "sys-spinal-cord", name: "Spinal Cord", category: "systems", component: () => null, width: 200, height: 300, imageSrc: SpinalCordImg },
+  { id: "sys-pelvic-floor", name: "Pelvic Floor", category: "systems", component: () => null, width: 200, height: 300, imageSrc: PelvicFloorImg },
+  { id: "sys-kidney", name: "Kidney", category: "systems", component: () => null, width: 200, height: 300, imageSrc: KidneyImg },
   // Plastic Surgery (image-based)
   { id: "ps-breast", name: "Breast Augmentation", category: "plastic-surgery", component: () => null, width: 200, height: 300, imageSrc: BreastAugmentationImg },
   { id: "ps-injectibles", name: "Injectibles & Fillers", category: "plastic-surgery", component: () => null, width: 200, height: 300, imageSrc: InjectiblesAndFillersImg },
@@ -327,4 +340,5 @@ export const anatomyAssets: AnatomyAsset[] = [
   { id: "ortho-knee", name: "Knee", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: KneeOrthoImg },
   { id: "ortho-elbow", name: "Elbow", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: ElbowImg },
   { id: "ortho-ankles", name: "Ankles", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: AnklesImg },
+  { id: "ortho-podiatry", name: "Podiatry", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: PodiatryImg },
 ];
