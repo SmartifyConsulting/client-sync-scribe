@@ -290,7 +290,7 @@ import KidneyImg from "@/assets/anatomy/Kidney.png";
 export interface AnatomyAsset {
   id: string;
   name: string;
-  category: "body" | "spine" | "face" | "joints" | "systems" | "plastic-surgery" | "neuro";
+  category: "face" | "joints" | "systems" | "plastic-surgery" | "neuro";
   component: React.FC;
   width: number;
   height: number;
@@ -298,17 +298,7 @@ export interface AnatomyAsset {
 }
 
 export const anatomyAssets: AnatomyAsset[] = [
-  { id: "body-front", name: "Body (Front)", category: "body", component: FullBodyFrontSVG, width: 120, height: 240 },
-  { id: "body-back", name: "Body (Back)", category: "body", component: FullBodyBackSVG, width: 120, height: 240 },
-  { id: "body-pain", name: "Pain Points", category: "body", component: () => null, width: 200, height: 300, imageSrc: PainPointsImg },
-  { id: "spine", name: "Spine", category: "neuro", component: SpineSVG, width: 80, height: 200 },
-  { id: "pelvis", name: "Pelvis", category: "neuro", component: () => null, width: 200, height: 300, imageSrc: PelvicFloorImg },
-  { id: "face-front", name: "Face (Front)", category: "face", component: FaceFrontSVG, width: 120, height: 150 },
-  { id: "face-side", name: "Face (Side)", category: "face", component: FaceSideSVG, width: 120, height: 150 },
-  { id: "shoulder", name: "Shoulder", category: "joints", component: ShoulderSVG, width: 120, height: 100 },
-  { id: "knee", name: "Knee", category: "joints", component: KneeSVG, width: 80, height: 120 },
-  { id: "hand", name: "Hand", category: "joints", component: HandSVG, width: 80, height: 110 },
-  { id: "foot", name: "Foot", category: "joints", component: FootSVG, width: 70, height: 120 },
+  { id: "body-pain", name: "Pain Points", category: "systems", component: () => null, width: 200, height: 300, imageSrc: PainPointsImg },
   { id: "ortho-hands", name: "Hands & Wrists", category: "joints", component: () => null, width: 200, height: 300, imageSrc: HandsWristsImg },
   { id: "ortho-hip", name: "Hip", category: "joints", component: () => null, width: 200, height: 300, imageSrc: HipImg },
   { id: "ortho-shoulder", name: "Shoulder (Detail)", category: "joints", component: () => null, width: 200, height: 300, imageSrc: ShoulderOrthoImg },
