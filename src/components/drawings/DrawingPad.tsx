@@ -71,6 +71,11 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
   const [textInput, setTextInput] = useState("");
   const [textPosition, setTextPosition] = useState<{ x: number; y: number } | null>(null);
 
+  // Resize state
+  const [resizing, setResizing] = useState<{ elementId: string; startX: number; startY: number; startW: number; startH: number } | null>(null);
+  // Track last mouse position for shapes
+  const lastMousePos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
   const { 
     drawings, 
     currentDrawing, 
@@ -137,7 +142,6 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           ctx.stroke();
           
           if (element.data.shapeType === "arrow") {
-            // Draw arrowhead
             const angle = Math.atan2(element.data.endY - element.y, element.data.endX - element.x);
             const headLen = 15;
             ctx.beginPath();
@@ -229,6 +233,16 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     };
   };
 
+  const getTouchCanvasCoords = (touch: React.Touch) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top,
+    };
+  };
+
   const [currentPath, setCurrentPath] = useState<{ x: number; y: number }[]>([]);
   const [shapeStart, setShapeStart] = useState<{ x: number; y: number } | null>(null);
 
@@ -242,12 +256,14 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       setTextPosition(coords);
     } else if (["line", "circle", "rectangle", "arrow"].includes(tool)) {
       setShapeStart(coords);
+      lastMousePos.current = coords;
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isDrawing) return;
     const coords = getCanvasCoords(e);
+    lastMousePos.current = coords;
 
     if (tool === "pen" || tool === "eraser") {
       setCurrentPath((prev) => [...prev, coords]);
@@ -264,12 +280,51 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
         ctx.lineTo(coords.x, coords.y);
         ctx.stroke();
       }
+    } else if (shapeStart && ["line", "circle", "rectangle", "arrow"].includes(tool)) {
+      // Real-time shape preview
+      renderCanvas();
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext("2d");
+      if (ctx) {
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = strokeWidth;
+        ctx.setLineDash([5, 5]);
+
+        if (tool === "line" || tool === "arrow") {
+          ctx.beginPath();
+          ctx.moveTo(shapeStart.x, shapeStart.y);
+          ctx.lineTo(coords.x, coords.y);
+          ctx.stroke();
+          if (tool === "arrow") {
+            const angle = Math.atan2(coords.y - shapeStart.y, coords.x - shapeStart.x);
+            const headLen = 15;
+            ctx.beginPath();
+            ctx.moveTo(coords.x, coords.y);
+            ctx.lineTo(coords.x - headLen * Math.cos(angle - Math.PI / 6), coords.y - headLen * Math.sin(angle - Math.PI / 6));
+            ctx.moveTo(coords.x, coords.y);
+            ctx.lineTo(coords.x - headLen * Math.cos(angle + Math.PI / 6), coords.y - headLen * Math.sin(angle + Math.PI / 6));
+            ctx.stroke();
+          }
+        } else if (tool === "circle") {
+          const radius = Math.sqrt(Math.pow(coords.x - shapeStart.x, 2) + Math.pow(coords.y - shapeStart.y, 2));
+          ctx.beginPath();
+          ctx.arc(shapeStart.x, shapeStart.y, radius, 0, 2 * Math.PI);
+          ctx.stroke();
+        } else if (tool === "rectangle") {
+          ctx.beginPath();
+          ctx.rect(shapeStart.x, shapeStart.y, coords.x - shapeStart.x, coords.y - shapeStart.y);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
     }
   };
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isDrawing) return;
     setIsDrawing(false);
+    const coords = getCanvasCoords(e);
 
     if ((tool === "pen" || tool === "eraser") && currentPath.length > 1) {
       const newElement: CanvasElement = {
@@ -285,17 +340,205 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       setElements(newElements);
       addToHistory(newElements);
     } else if (shapeStart && ["line", "circle", "rectangle", "arrow"].includes(tool)) {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const rect = canvas.getBoundingClientRect();
-      // Get last mouse position from the canvas
-      // For simplicity, we'll use current path's last point or shapeStart
-      // This is a simplified implementation
+      const endX = coords.x;
+      const endY = coords.y;
+      // Only create if moved at least a few pixels
+      const dist = Math.sqrt(Math.pow(endX - shapeStart.x, 2) + Math.pow(endY - shapeStart.y, 2));
+      if (dist > 3) {
+        const newElement: CanvasElement = {
+          id: crypto.randomUUID(),
+          type: "shape",
+          data: { shapeType: tool, endX, endY },
+          x: shapeStart.x,
+          y: shapeStart.y,
+          color,
+          strokeWidth,
+        };
+        const newElements = [...elements, newElement];
+        setElements(newElements);
+        addToHistory(newElements);
+      }
     }
     
     setCurrentPath([]);
     setShapeStart(null);
   };
+
+  // Touch handlers for iPad drawing support
+  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length === 1) {
+      e.preventDefault();
+      const coords = getTouchCanvasCoords(e.touches[0]);
+      setIsDrawing(true);
+      if (tool === "pen" || tool === "eraser") {
+        setCurrentPath([coords]);
+      } else if (tool === "text") {
+        setTextPosition(coords);
+      } else if (["line", "circle", "rectangle", "arrow"].includes(tool)) {
+        setShapeStart(coords);
+        lastMousePos.current = coords;
+      }
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length === 1 && isDrawing) {
+      e.preventDefault();
+      const coords = getTouchCanvasCoords(e.touches[0]);
+      lastMousePos.current = coords;
+
+      if (tool === "pen" || tool === "eraser") {
+        setCurrentPath((prev) => [...prev, coords]);
+        const canvas = canvasRef.current;
+        const ctx = canvas?.getContext("2d");
+        if (ctx && currentPath.length > 0) {
+          ctx.strokeStyle = tool === "eraser" ? "#ffffff" : color;
+          ctx.lineWidth = tool === "eraser" ? strokeWidth * 3 : strokeWidth;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(currentPath[currentPath.length - 1].x, currentPath[currentPath.length - 1].y);
+          ctx.lineTo(coords.x, coords.y);
+          ctx.stroke();
+        }
+      } else if (shapeStart && ["line", "circle", "rectangle", "arrow"].includes(tool)) {
+        renderCanvas();
+        const canvas = canvasRef.current;
+        const ctx = canvas?.getContext("2d");
+        if (ctx) {
+          ctx.save();
+          ctx.strokeStyle = color;
+          ctx.lineWidth = strokeWidth;
+          ctx.setLineDash([5, 5]);
+          if (tool === "line" || tool === "arrow") {
+            ctx.beginPath();
+            ctx.moveTo(shapeStart.x, shapeStart.y);
+            ctx.lineTo(coords.x, coords.y);
+            ctx.stroke();
+          } else if (tool === "circle") {
+            const radius = Math.sqrt(Math.pow(coords.x - shapeStart.x, 2) + Math.pow(coords.y - shapeStart.y, 2));
+            ctx.beginPath();
+            ctx.arc(shapeStart.x, shapeStart.y, radius, 0, 2 * Math.PI);
+            ctx.stroke();
+          } else if (tool === "rectangle") {
+            ctx.beginPath();
+            ctx.rect(shapeStart.x, shapeStart.y, coords.x - shapeStart.x, coords.y - shapeStart.y);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+      }
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return;
+    setIsDrawing(false);
+    const coords = lastMousePos.current;
+
+    if ((tool === "pen" || tool === "eraser") && currentPath.length > 1) {
+      const newElement: CanvasElement = {
+        id: crypto.randomUUID(),
+        type: "path",
+        data: { points: currentPath },
+        x: 0,
+        y: 0,
+        color: tool === "eraser" ? "#ffffff" : color,
+        strokeWidth: tool === "eraser" ? strokeWidth * 3 : strokeWidth,
+      };
+      const newElements = [...elements, newElement];
+      setElements(newElements);
+      addToHistory(newElements);
+    } else if (shapeStart && ["line", "circle", "rectangle", "arrow"].includes(tool)) {
+      const dist = Math.sqrt(Math.pow(coords.x - shapeStart.x, 2) + Math.pow(coords.y - shapeStart.y, 2));
+      if (dist > 3) {
+        const newElement: CanvasElement = {
+          id: crypto.randomUUID(),
+          type: "shape",
+          data: { shapeType: tool, endX: coords.x, endY: coords.y },
+          x: shapeStart.x,
+          y: shapeStart.y,
+          color,
+          strokeWidth,
+        };
+        const newElements = [...elements, newElement];
+        setElements(newElements);
+        addToHistory(newElements);
+      }
+    }
+
+    setCurrentPath([]);
+    setShapeStart(null);
+  };
+
+  // Resize handlers for anatomy overlays
+  const handleResizeStart = (e: React.MouseEvent | React.TouchEvent, elementId: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const el = elements.find((el) => el.id === elementId);
+    if (!el) return;
+
+    let clientX: number, clientY: number;
+    if ("touches" in e) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+
+    setResizing({
+      elementId,
+      startX: clientX,
+      startY: clientY,
+      startW: el.width || 120,
+      startH: el.height || 120,
+    });
+  };
+
+  useEffect(() => {
+    if (!resizing) return;
+
+    const handleMove = (e: MouseEvent | TouchEvent) => {
+      let clientX: number, clientY: number;
+      if ("touches" in e) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+
+      const dx = clientX - resizing.startX;
+      const dy = clientY - resizing.startY;
+      // Maintain aspect ratio: use the larger delta
+      const aspectRatio = resizing.startW / resizing.startH;
+      const delta = Math.abs(dx) > Math.abs(dy) ? dx : dy * aspectRatio;
+      const newW = Math.max(40, resizing.startW + delta);
+      const newH = newW / aspectRatio;
+
+      setElements((prev) =>
+        prev.map((el) =>
+          el.id === resizing.elementId ? { ...el, width: newW, height: newH } : el
+        )
+      );
+    };
+
+    const handleEnd = () => {
+      addToHistory(elements);
+      setResizing(null);
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleEnd);
+    window.addEventListener("touchmove", handleMove);
+    window.addEventListener("touchend", handleEnd);
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleEnd);
+      window.removeEventListener("touchmove", handleMove);
+      window.removeEventListener("touchend", handleEnd);
+    };
+  }, [resizing, elements]);
 
   const handleAddText = () => {
     if (!textInput || !textPosition) return;
@@ -566,14 +809,15 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
             <h4 className="font-medium text-sm">Anatomy</h4>
           </div>
           <Tabs defaultValue="body" className="flex-1 flex flex-col">
-            <TabsList className="grid grid-cols-5 m-1">
+            <TabsList className="grid grid-cols-3 m-1 h-auto">
               <TabsTrigger value="body" className="text-xs px-1">Body</TabsTrigger>
               <TabsTrigger value="spine" className="text-xs px-1">Spine</TabsTrigger>
               <TabsTrigger value="face" className="text-xs px-1">Face</TabsTrigger>
               <TabsTrigger value="joints" className="text-xs px-1">Joints</TabsTrigger>
               <TabsTrigger value="systems" className="text-xs px-1">Systems</TabsTrigger>
+              <TabsTrigger value="plastic-surgery" className="text-xs px-1">Plastic</TabsTrigger>
             </TabsList>
-            {["body", "spine", "face", "joints", "systems"].map((category) => (
+            {["body", "spine", "face", "joints", "systems", "plastic-surgery"].map((category) => (
               <TabsContent key={category} value={category} className="flex-1 m-0">
                 <ScrollArea className="h-full">
                   <div className="p-2 space-y-2">
@@ -612,14 +856,17 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
         >
           <canvas
             ref={canvasRef}
-            className="absolute inset-0 bg-background"
+            className="absolute inset-0 bg-background touch-none"
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
+            onMouseLeave={() => { if (isDrawing) { setIsDrawing(false); setCurrentPath([]); setShapeStart(null); } }}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
           />
           
-          {/* Anatomy overlays */}
+          {/* Anatomy overlays with resize handles */}
           {elements
             .filter((el) => el.type === "anatomy")
             .map((el) => {
@@ -628,7 +875,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
               return (
                 <div
                   key={el.id}
-                  className="absolute cursor-move text-muted-foreground"
+                  className="absolute cursor-move text-muted-foreground group"
                   style={{
                     left: el.x,
                     top: el.y,
@@ -637,10 +884,22 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                   }}
                 >
                   {asset.imageSrc ? (
-                    <img src={asset.imageSrc} alt={asset.name} className="w-full h-full object-contain" />
+                    <img src={asset.imageSrc} alt={asset.name} className="w-full h-full object-contain pointer-events-none" />
                   ) : (
                     <asset.component />
                   )}
+                  {/* Resize handle - bottom right corner */}
+                  <div
+                    className="absolute bottom-0 right-0 w-4 h-4 bg-primary/80 border border-primary-foreground rounded-sm cursor-se-resize opacity-0 group-hover:opacity-100 transition-opacity touch-none"
+                    onMouseDown={(e) => handleResizeStart(e, el.id)}
+                    onTouchStart={(e) => handleResizeStart(e, el.id)}
+                  />
+                  {/* Resize handle - bottom left corner */}
+                  <div
+                    className="absolute bottom-0 left-0 w-4 h-4 bg-primary/80 border border-primary-foreground rounded-sm cursor-sw-resize opacity-0 group-hover:opacity-100 transition-opacity touch-none"
+                    onMouseDown={(e) => handleResizeStart(e, el.id)}
+                    onTouchStart={(e) => handleResizeStart(e, el.id)}
+                  />
                 </div>
               );
             })}
