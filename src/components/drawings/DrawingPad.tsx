@@ -48,7 +48,7 @@ interface DrawingPadProps {
   isModal?: boolean;
 }
 
-type Tool = "pen" | "eraser" | "text" | "select" | "line" | "circle" | "rectangle" | "arrow";
+type Tool = "pen" | "eraser" | "text" | "select" | "circle" | "rectangle" | "arrow";
 
 const COLORS = [
   "#000000", "#EF4444", "#F97316", "#EAB308", "#22C55E", 
@@ -256,7 +256,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       setCurrentPath([coords]);
     } else if (tool === "text") {
       setTextPosition(coords);
-    } else if (["line", "circle", "rectangle", "arrow"].includes(tool)) {
+    } else if (["circle", "rectangle", "arrow"].includes(tool)) {
       setShapeStart(coords);
       lastMousePos.current = coords;
     }
@@ -282,7 +282,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
         ctx.lineTo(coords.x, coords.y);
         ctx.stroke();
       }
-    } else if (shapeStart && ["line", "circle", "rectangle", "arrow"].includes(tool)) {
+    } else if (shapeStart && ["circle", "rectangle", "arrow"].includes(tool)) {
       // Real-time shape preview
       renderCanvas();
       const canvas = canvasRef.current;
@@ -293,7 +293,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
         ctx.lineWidth = strokeWidth;
         ctx.setLineDash([5, 5]);
 
-        if (tool === "line" || tool === "arrow") {
+        if (tool === "arrow") {
           ctx.beginPath();
           ctx.moveTo(shapeStart.x, shapeStart.y);
           ctx.lineTo(coords.x, coords.y);
@@ -341,7 +341,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       const newElements = [...elements, newElement];
       setElements(newElements);
       addToHistory(newElements);
-    } else if (shapeStart && ["line", "circle", "rectangle", "arrow"].includes(tool)) {
+    } else if (shapeStart && ["circle", "rectangle", "arrow"].includes(tool)) {
       const endX = coords.x;
       const endY = coords.y;
       // Only create if moved at least a few pixels
@@ -376,7 +376,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
         setCurrentPath([coords]);
       } else if (tool === "text") {
         setTextPosition(coords);
-      } else if (["line", "circle", "rectangle", "arrow"].includes(tool)) {
+      } else if (["circle", "rectangle", "arrow"].includes(tool)) {
         setShapeStart(coords);
         lastMousePos.current = coords;
       }
@@ -402,7 +402,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           ctx.lineTo(coords.x, coords.y);
           ctx.stroke();
         }
-      } else if (shapeStart && ["line", "circle", "rectangle", "arrow"].includes(tool)) {
+      } else if (shapeStart && ["circle", "rectangle", "arrow"].includes(tool)) {
         renderCanvas();
         const canvas = canvasRef.current;
         const ctx = canvas?.getContext("2d");
@@ -411,7 +411,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           ctx.strokeStyle = color;
           ctx.lineWidth = strokeWidth;
           ctx.setLineDash([5, 5]);
-          if (tool === "line" || tool === "arrow") {
+          if (tool === "arrow") {
             ctx.beginPath();
             ctx.moveTo(shapeStart.x, shapeStart.y);
             ctx.lineTo(coords.x, coords.y);
@@ -450,7 +450,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       const newElements = [...elements, newElement];
       setElements(newElements);
       addToHistory(newElements);
-    } else if (shapeStart && ["line", "circle", "rectangle", "arrow"].includes(tool)) {
+    } else if (shapeStart && ["circle", "rectangle", "arrow"].includes(tool)) {
       const dist = Math.sqrt(Math.pow(coords.x - shapeStart.x, 2) + Math.pow(coords.y - shapeStart.y, 2));
       if (dist > 3) {
         const newElement: CanvasElement = {
@@ -725,14 +725,6 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
 
         <div className="flex items-center gap-1 border-r pr-2">
           <Button
-            variant={tool === "line" ? "default" : "ghost"}
-            size="icon"
-            onClick={() => setTool("line")}
-            title="Line"
-          >
-            <Minus className="h-4 w-4" />
-          </Button>
-          <Button
             variant={tool === "arrow" ? "default" : "ghost"}
             size="icon"
             onClick={() => setTool("arrow")}
@@ -880,14 +872,13 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           <Tabs defaultValue="body" className="flex-1 flex flex-col">
             <TabsList className="grid grid-cols-4 m-1 h-auto">
               <TabsTrigger value="body" className="text-xs px-1">Body</TabsTrigger>
-              <TabsTrigger value="spine" className="text-xs px-1">Spine</TabsTrigger>
               <TabsTrigger value="face" className="text-xs px-1">Face</TabsTrigger>
               <TabsTrigger value="joints" className="text-xs px-1">Joints</TabsTrigger>
               <TabsTrigger value="systems" className="text-xs px-1">Systems</TabsTrigger>
               <TabsTrigger value="neuro" className="text-xs px-1">Neuro</TabsTrigger>
               <TabsTrigger value="plastic-surgery" className="text-xs px-1">Plastic</TabsTrigger>
             </TabsList>
-            {["body", "spine", "face", "joints", "systems", "neuro", "plastic-surgery"].map((category) => (
+            {["body", "face", "joints", "systems", "neuro", "plastic-surgery"].map((category) => (
               <TabsContent key={category} value={category} className="flex-1 m-0">
                 <ScrollArea className="h-full">
                   <div className="p-2 space-y-2">

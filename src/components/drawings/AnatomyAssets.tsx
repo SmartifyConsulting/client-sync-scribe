@@ -257,8 +257,8 @@ export const FootSVG = () => (
 
 // Image imports for Primary Anatomical Systems
 import SkeletalSystemImg from "@/assets/anatomy/Skeletal_System.png";
-import DigestiveImg from "@/assets/anatomy/Digestive.png";
-import RespiratoryImg from "@/assets/anatomy/Respiratory.png";
+import DigestiveImg from "@/assets/anatomy/Digestive-2.png";
+import RespiratoryImg from "@/assets/anatomy/Respiratory-2.png";
 import NeurologicalImg from "@/assets/anatomy/Neurological.png";
 import CardiovascularImg from "@/assets/anatomy/Cardiovascular.png";
 import MuscularImg from "@/assets/anatomy/Muscular.png";
@@ -301,8 +301,8 @@ export const anatomyAssets: AnatomyAsset[] = [
   { id: "body-front", name: "Body (Front)", category: "body", component: FullBodyFrontSVG, width: 120, height: 240 },
   { id: "body-back", name: "Body (Back)", category: "body", component: FullBodyBackSVG, width: 120, height: 240 },
   { id: "body-pain", name: "Pain Points", category: "body", component: () => null, width: 200, height: 300, imageSrc: PainPointsImg },
-  { id: "spine", name: "Spine", category: "spine", component: SpineSVG, width: 80, height: 200 },
-  { id: "pelvis", name: "Pelvis", category: "spine", component: PelvisSVG, width: 140, height: 100 },
+  { id: "spine", name: "Spine", category: "neuro", component: SpineSVG, width: 80, height: 200 },
+  { id: "pelvis", name: "Pelvis", category: "neuro", component: () => null, width: 200, height: 300, imageSrc: PelvicFloorImg },
   { id: "face-front", name: "Face (Front)", category: "face", component: FaceFrontSVG, width: 120, height: 150 },
   { id: "face-side", name: "Face (Side)", category: "face", component: FaceSideSVG, width: 120, height: 150 },
   { id: "shoulder", name: "Shoulder", category: "joints", component: ShoulderSVG, width: 120, height: 100 },
@@ -331,7 +331,7 @@ export const anatomyAssets: AnatomyAsset[] = [
   { id: "sys-urology", name: "Urology & Nephrology", category: "systems", component: () => null, width: 200, height: 300, imageSrc: UrologyImg },
   { id: "sys-endocrinology", name: "Endocrinology", category: "systems", component: () => null, width: 200, height: 300, imageSrc: EndocrinologyImg },
   { id: "sys-adv-cardiology", name: "Advanced Cardiology", category: "systems", component: () => null, width: 200, height: 300, imageSrc: AdvancedCardiologyImg },
-  { id: "sys-pelvic-floor", name: "Pelvic Floor", category: "systems", component: () => null, width: 200, height: 300, imageSrc: PelvicFloorImg },
+  // Pelvic Floor removed from systems - moved to neuro as Pelvis
   { id: "sys-kidney", name: "Kidney", category: "systems", component: () => null, width: 200, height: 300, imageSrc: KidneyImg },
   // Neuro
   { id: "neuro-neurological", name: "Neurological", category: "neuro", component: () => null, width: 200, height: 300, imageSrc: NeurologicalImg },
