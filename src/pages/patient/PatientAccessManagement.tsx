@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   User, 
   Mail, 
   Loader2, 
   CheckCircle, 
-  Clock, 
   UserCheck,
   UserX,
   EyeOff,
@@ -20,12 +20,28 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
+type AccessPermission = "patient_info" | "calendar" | "session_summaries" | "prescription_history";
+
+interface PermissionOption {
+  id: AccessPermission;
+  label: string;
+  description: string;
+}
+
+const permissionOptions: PermissionOption[] = [
+  { id: "patient_info", label: "Patient Information", description: "View your personal and medical details" },
+  { id: "calendar", label: "Calendar", description: "View and manage your appointments" },
+  { id: "session_summaries", label: "Session Summaries", description: "View summaries from your consultations" },
+  { id: "prescription_history", label: "Prescription History", description: "View your prescription records" },
+];
+
 interface ApprovedInvite {
   id: string;
   doctor_practice_number: string;
   doctor_registration_number: string;
   created_at: string;
   doctor_name?: string;
+  permissions?: AccessPermission[];
 }
 
 interface IncomingInvitation {
@@ -46,6 +62,7 @@ export default function PatientAccessManagement() {
   const [incomingInvitations, setIncomingInvitations] = useState<IncomingInvitation[]>([]);
   const [roundTableEnabled, setRoundTableEnabled] = useState(false);
   const [updatingRoundTable, setUpdatingRoundTable] = useState(false);
+  const [permissionsPerInvitation, setPermissionsPerInvitation] = useState<Record<string, AccessPermission[]>>({});
 
   useEffect(() => {
     if (user) {
@@ -53,12 +70,25 @@ export default function PatientAccessManagement() {
     }
   }, [user]);
 
+  // Initialize permissions for new incoming invitations
+  useEffect(() => {
+    const newPerms: Record<string, AccessPermission[]> = { ...permissionsPerInvitation };
+    let changed = false;
+    for (const inv of incomingInvitations) {
+      if (!newPerms[inv.id]) {
+        newPerms[inv.id] = ["patient_info", "calendar", "session_summaries", "prescription_history"];
+        changed = true;
+      }
+    }
+    if (changed) setPermissionsPerInvitation(newPerms);
+  }, [incomingInvitations]);
+
   const fetchData = async () => {
     if (!user) return;
     setLoading(true);
 
     try {
-      // Fetch outgoing invites that were accepted (approved only)
+      // Fetch outgoing invites that were accepted
       const { data: acceptedRequests, error: reqError } = await supabase
         .from("doctor_access_requests")
         .select("*")
@@ -68,24 +98,38 @@ export default function PatientAccessManagement() {
 
       if (reqError) throw reqError;
 
-      // Get doctor names for accepted requests
+      // Get doctor names and permissions for accepted requests
       const approvedWithNames: ApprovedInvite[] = [];
       for (const req of acceptedRequests || []) {
         const { data: profile } = await supabase
           .from("profiles")
-          .select("full_name")
+          .select("full_name, id")
           .eq("practice_number", req.doctor_practice_number)
           .eq("doctor_number", req.doctor_registration_number)
           .maybeSingle();
 
+        // Fetch granted permissions from doctor_patient_access
+        let permissions: AccessPermission[] | undefined;
+        if (profile?.id) {
+          const { data: access } = await supabase
+            .from("doctor_patient_access")
+            .select("permissions")
+            .eq("doctor_id", profile.id)
+            .eq("patient_user_id", user.id)
+            .eq("is_active", true)
+            .maybeSingle();
+          permissions = access?.permissions as AccessPermission[] | undefined;
+        }
+
         approvedWithNames.push({
           ...req,
           doctor_name: profile?.full_name || undefined,
+          permissions,
         });
       }
       setApprovedInvites(approvedWithNames);
 
-      // Fetch incoming invitations (from doctors to this patient) that are pending
+      // Fetch incoming invitations (pending only)
       const { data: incoming, error: incomingError } = await supabase
         .from("user_invitations")
         .select("*")
@@ -95,7 +139,6 @@ export default function PatientAccessManagement() {
 
       if (incomingError) throw incomingError;
 
-      // Get sender names
       const incomingWithNames: IncomingInvitation[] = [];
       for (const inv of incoming || []) {
         const { data: profile } = await supabase
@@ -131,10 +174,30 @@ export default function PatientAccessManagement() {
     }
   };
 
+  const handlePermissionToggle = (invitationId: string, permission: AccessPermission) => {
+    setPermissionsPerInvitation((prev) => {
+      const current = prev[invitationId] || [];
+      const updated = current.includes(permission)
+        ? current.filter((p) => p !== permission)
+        : [...current, permission];
+      return { ...prev, [invitationId]: updated };
+    });
+  };
+
   const handleInvitationAction = async (invitationId: string, action: "accepted" | "declined" | "ignored") => {
+    if (action === "accepted") {
+      const perms = permissionsPerInvitation[invitationId] || [];
+      if (perms.length === 0) {
+        toast({
+          title: "No permissions selected",
+          description: "Please select at least one permission to grant before accepting.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     try {
-      // For "ignored", we store it as "declined" but with a flag or just use "declined"
-      // Doctors only see pending invitations, so they won't see declined/ignored
       const newStatus = action === "ignored" ? "declined" : action;
       
       const { error } = await supabase
@@ -152,14 +215,13 @@ export default function PatientAccessManagement() {
           : `The invitation has been ${actionLabel}.`,
       });
 
-      // If accepted, also create the doctor_patient_access record
       if (action === "accepted") {
         const invitation = incomingInvitations.find(i => i.id === invitationId);
         if (invitation) {
           await supabase.from("doctor_patient_access").insert({
             doctor_id: invitation.sender_id,
             patient_user_id: user!.id,
-            permissions: ["patient_info", "calendar", "session_summaries", "prescription_history"],
+            permissions: permissionsPerInvitation[invitationId] || [],
             is_active: true,
           });
         }
@@ -202,6 +264,11 @@ export default function PatientAccessManagement() {
     } finally {
       setUpdatingRoundTable(false);
     }
+  };
+
+  const permissionLabel = (p: string) => {
+    const found = permissionOptions.find((o) => o.id === p);
+    return found ? found.label : p;
   };
 
   if (loading) {
@@ -263,29 +330,64 @@ export default function PatientAccessManagement() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-6">
               {incomingInvitations.map((invitation) => (
                 <div
                   key={invitation.id}
-                  className="flex items-center gap-4 p-4 rounded-lg border border-border bg-amber-50/50 dark:bg-amber-900/10"
+                  className="rounded-lg border border-border bg-amber-50/50 dark:bg-amber-900/10"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                    <User className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium">
-                      {invitation.sender_name || "Unknown Doctor"}
-                    </p>
-                    {invitation.message && (
-                      <p className="text-sm text-muted-foreground truncate">
-                        {invitation.message}
+                  {/* Doctor info row */}
+                  <div className="flex items-center gap-4 p-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                      <User className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium">
+                        {invitation.sender_name || "Unknown Doctor"}
                       </p>
-                    )}
-                    <p className="text-xs text-muted-foreground">
-                      Received {format(new Date(invitation.created_at), "MMM d, yyyy")}
-                    </p>
+                      {invitation.message && (
+                        <p className="text-sm text-muted-foreground truncate">
+                          {invitation.message}
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        Received {format(new Date(invitation.created_at), "MMM d, yyyy")}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex gap-2 flex-shrink-0">
+
+                  {/* Permission checkboxes */}
+                  <div className="px-4 pb-2">
+                    <Label className="text-sm font-medium">Grant access to:</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                      {permissionOptions.map((perm) => (
+                        <div
+                          key={perm.id}
+                          className="flex items-start space-x-3 rounded-lg border border-border p-3 hover:bg-muted/50 transition-colors"
+                        >
+                          <Checkbox
+                            id={`${invitation.id}-${perm.id}`}
+                            checked={(permissionsPerInvitation[invitation.id] || []).includes(perm.id)}
+                            onCheckedChange={() => handlePermissionToggle(invitation.id, perm.id)}
+                          />
+                          <div className="flex-1">
+                            <Label
+                              htmlFor={`${invitation.id}-${perm.id}`}
+                              className="text-sm font-medium cursor-pointer"
+                            >
+                              {perm.label}
+                            </Label>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {perm.description}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex justify-end gap-2 px-4 pb-4 pt-2">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -339,25 +441,36 @@ export default function PatientAccessManagement() {
               {approvedInvites.map((invite) => (
                 <div
                   key={invite.id}
-                  className="flex items-center gap-4 p-4 rounded-lg border border-border"
+                  className="flex flex-col gap-3 p-4 rounded-lg border border-border"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium">
+                        {invite.doctor_name || `Practice: ${invite.doctor_practice_number}`}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Registration: {invite.doctor_registration_number}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Approved {format(new Date(invite.created_at), "MMM d, yyyy")}
+                      </p>
+                    </div>
+                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                      Approved
+                    </Badge>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-medium">
-                      {invite.doctor_name || `Practice: ${invite.doctor_practice_number}`}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Registration: {invite.doctor_registration_number}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Approved {format(new Date(invite.created_at), "MMM d, yyyy")}
-                    </p>
-                  </div>
-                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                    Approved
-                  </Badge>
+                  {invite.permissions && invite.permissions.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 pl-14">
+                      {invite.permissions.map((p) => (
+                        <Badge key={p} variant="secondary" className="text-xs">
+                          {permissionLabel(p)}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
