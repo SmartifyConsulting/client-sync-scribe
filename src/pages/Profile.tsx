@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy, Clock, Mail } from "lucide-react";
 import { PatientImport } from "@/components/patients/PatientImport";
 import { useToast as useGlobalToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -95,14 +95,17 @@ interface ServicePrice {
 export default function Profile() {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { profile, loading, updateProfile, uploadLogo } = useProfile();
-  const [isSaving, setIsSaving] = useState(false);
+  const { profile, loading, fetchProfile, updateProfile, uploadLogo } = useProfile();
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-  const [isUploadingSignature, setIsUploadingSignature] = useState(false);
   const [partners, setPartners] = useState<Partner[]>([]);
-  const [newPartner, setNewPartner] = useState({ full_name: "", registration_number: "", mobile_number: "" });
+  const [newPartner, setNewPartner] = useState({ full_name: "", registration_number: "", mobile_number: "", email: "" });
   const [isAddingPartner, setIsAddingPartner] = useState(false);
+  
+  // Autosave state
+  const [savedStatus, setSavedStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const hasInitialized = useRef(false);
   
   // Pricing state
   const [servicePrices, setServicePrices] = useState<ServicePrice[]>([]);
@@ -144,8 +147,57 @@ export default function Profile() {
         mobile_number: mobileNumber,
         country_code: countryCode,
       });
+      
+      // Mark as initialized after profile loads
+      setTimeout(() => {
+        hasInitialized.current = true;
+      }, 100);
     }
   }, [profile]);
+
+  // Autosave effect
+  useEffect(() => {
+    if (!hasInitialized.current || !user) return;
+
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    debounceTimer.current = setTimeout(async () => {
+      setSavedStatus('saving');
+      
+      const fullMobileNumber = formData.mobile_number 
+        ? `${formData.country_code}${formData.mobile_number.replace(/^0+/, '')}` 
+        : "";
+      
+      const { error } = await updateProfile({
+        full_name: formData.full_name,
+        practice_number: formData.practice_number,
+        doctor_number: formData.doctor_number,
+        practice_address: formData.practice_address,
+        specialty: formData.specialty,
+        mobile_number: fullMobileNumber,
+      });
+
+      if (error) {
+        setSavedStatus('idle');
+        toast({
+          title: "Error",
+          description: "Failed to save profile changes",
+          variant: "destructive",
+        });
+      } else {
+        setSavedStatus('saved');
+        setTimeout(() => setSavedStatus('idle'), 2000);
+      }
+    }, 1500);
+
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, [formData]);
 
   useEffect(() => {
     if (user) {
@@ -349,11 +401,35 @@ export default function Profile() {
       });
     } else {
       setPartners([...partners, data]);
-      setNewPartner({ full_name: "", registration_number: "", mobile_number: "" });
-      toast({
-        title: "Partner added",
-        description: `${newPartner.full_name} has been added`,
-      });
+      
+      // Send invitation if email is provided
+      if (newPartner.email.trim()) {
+        try {
+          await supabase.functions.invoke('send-user-invitation', {
+            body: {
+              recipientEmail: newPartner.email.trim(),
+              senderName: profile?.full_name || 'A colleague',
+              message: `You have been added as a practice partner. Join the platform to collaborate.`,
+            },
+          });
+          toast({
+            title: "Partner added & invited",
+            description: `${newPartner.full_name} has been added and an invitation was sent to ${newPartner.email}`,
+          });
+        } catch {
+          toast({
+            title: "Partner added",
+            description: `${newPartner.full_name} has been added, but the invitation email could not be sent`,
+          });
+        }
+      } else {
+        toast({
+          title: "Partner added",
+          description: `${newPartner.full_name} has been added`,
+        });
+      }
+      
+      setNewPartner({ full_name: "", registration_number: "", mobile_number: "", email: "" });
     }
     setIsAddingPartner(false);
   };
@@ -369,38 +445,6 @@ export default function Profile() {
       toast({
         title: "Partner removed",
         description: "Partner has been removed from your practice",
-      });
-    }
-  };
-
-  const handleSaveProfile = async () => {
-    setIsSaving(true);
-    
-    // Combine country code with mobile number
-    const fullMobileNumber = formData.mobile_number 
-      ? `${formData.country_code}${formData.mobile_number.replace(/^0+/, '')}` 
-      : "";
-    
-    const { error } = await updateProfile({
-      full_name: formData.full_name,
-      practice_number: formData.practice_number,
-      doctor_number: formData.doctor_number,
-      practice_address: formData.practice_address,
-      specialty: formData.specialty,
-      mobile_number: fullMobileNumber,
-    });
-    setIsSaving(false);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save profile changes",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Profile Updated",
-        description: "Your profile changes have been saved",
       });
     }
   };
@@ -433,6 +477,7 @@ export default function Profile() {
         title: "Logo uploaded",
         description: "Your practice logo has been updated",
       });
+      fetchProfile();
     }
   };
 
@@ -490,65 +535,7 @@ export default function Profile() {
         title: "Profile picture updated",
         description: "Your profile picture has been changed",
       });
-      window.location.reload();
-    }
-  };
-
-  const handleSignatureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload an image file (PNG with transparent background recommended)",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsUploadingSignature(true);
-    
-    const fileExt = file.name.split('.').pop();
-    const filePath = `${user.id}/signature.${fileExt}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(filePath, file, { upsert: true });
-
-    if (uploadError) {
-      toast({
-        title: "Upload failed",
-        description: "Failed to upload signature",
-        variant: "destructive",
-      });
-      setIsUploadingSignature(false);
-      return;
-    }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(filePath);
-
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ signature_url: `${publicUrl}?t=${Date.now()}` })
-      .eq('id', user.id);
-
-    setIsUploadingSignature(false);
-
-    if (updateError) {
-      toast({
-        title: "Error",
-        description: "Failed to update signature",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Signature uploaded",
-        description: "Your electronic signature has been saved",
-      });
-      window.location.reload();
+      fetchProfile();
     }
   };
 
@@ -564,11 +551,28 @@ export default function Profile() {
   return (
     <div className="space-y-8 animate-fade-in max-w-3xl">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Profile</h1>
-        <p className="mt-1 text-muted-foreground">
-          Manage your personal and practice information
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Profile</h1>
+          <p className="mt-1 text-muted-foreground">
+            Manage your personal and practice information
+          </p>
+        </div>
+        {/* Autosave indicator */}
+        <div className="text-sm text-muted-foreground flex items-center gap-1.5">
+          {savedStatus === 'saving' && (
+            <>
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <span>Saving...</span>
+            </>
+          )}
+          {savedStatus === 'saved' && (
+            <>
+              <Check className="h-3.5 w-3.5 text-success" />
+              <span className="text-success">All changes saved</span>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Profile Section */}
@@ -603,7 +607,9 @@ export default function Profile() {
             />
           </div>
           <div>
-            <p className="font-medium text-foreground">Profile Picture</p>
+            <p className="font-medium text-foreground">
+              {formData.full_name || profile?.full_name || "Profile Picture"}
+            </p>
             <p className="text-sm text-muted-foreground">
               {isUploadingAvatar ? "Uploading..." : "Hover over image to change"}
             </p>
@@ -667,9 +673,6 @@ export default function Profile() {
 
         {/* Mailbox Email */}
         <MailboxSection userId={user?.id} />
-        <Button className="mt-6" onClick={handleSaveProfile} disabled={isSaving}>
-          {isSaving ? "Saving..." : "Save Changes"}
-        </Button>
       </div>
 
       {/* Practice Information */}
@@ -767,44 +770,16 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Signature Upload */}
+        {/* Digital Signature - Timestamp based */}
         <div className="mt-6 space-y-2">
-          <Label>Electronic Signature</Label>
-          <p className="text-sm text-muted-foreground mb-3">
-            Upload your signature for documents. Use [DoctorSignature] placeholder in templates.
-          </p>
-          <div className="flex items-center gap-4">
-            {(profile as any)?.signature_url && (
-              <img 
-                src={(profile as any).signature_url} 
-                alt="Doctor signature" 
-                className="h-16 w-auto object-contain rounded border border-border p-1 bg-white"
-              />
-            )}
-            <div>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleSignatureUpload}
-                className="hidden"
-                id="signature-upload"
-              />
-              <Button 
-                variant="outline" 
-                onClick={() => document.getElementById('signature-upload')?.click()}
-                disabled={isUploadingSignature}
-                className="gap-2"
-              >
-                <Upload className="h-4 w-4" />
-                {isUploadingSignature ? "Uploading..." : (profile as any)?.signature_url ? "Change Signature" : "Upload Signature"}
-              </Button>
-            </div>
+          <Label>Digital Signature</Label>
+          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border border-border">
+            <Clock className="h-5 w-5 text-muted-foreground shrink-0" />
+            <p className="text-sm text-muted-foreground">
+              Documents will be digitally signed with your name and a timestamp when generated.
+            </p>
           </div>
         </div>
-
-        <Button className="mt-6" onClick={handleSaveProfile} disabled={isSaving}>
-          {isSaving ? "Saving..." : "Save Practice Info"}
-        </Button>
       </div>
 
       {/* Practice Partners */}
@@ -845,7 +820,7 @@ export default function Profile() {
         {/* Add New Partner */}
         <div className="space-y-4 p-4 border border-dashed border-border rounded-lg">
           <p className="text-sm font-medium text-foreground">Add New Partner</p>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="partner_name">Full Name *</Label>
               <Input 
@@ -871,6 +846,16 @@ export default function Profile() {
                 value={newPartner.mobile_number}
                 onChange={(e) => setNewPartner({ ...newPartner, mobile_number: e.target.value })}
                 placeholder="e.g., 082 123 4567"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="partner_email">Email (for invitation)</Label>
+              <Input 
+                id="partner_email" 
+                type="email"
+                value={newPartner.email}
+                onChange={(e) => setNewPartner({ ...newPartner, email: e.target.value })}
+                placeholder="partner@example.com"
               />
             </div>
           </div>
@@ -953,7 +938,7 @@ export default function Profile() {
                         size="icon" 
                         onClick={saveEditingService}
                         disabled={isSavingService}
-                        className="h-8 w-8 text-green-600 hover:text-green-600"
+                        className="h-8 w-8 text-success hover:text-success"
                       >
                         {isSavingService ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                       </Button>
@@ -1093,7 +1078,6 @@ function MailboxSection({ userId }: { userId?: string }) {
   const handleSaveAlias = async () => {
     if (!userId) return;
     
-    // Validate alias format
     const cleanAlias = aliasInput.toLowerCase().trim().replace(/[^a-z0-9-]/g, "");
     if (cleanAlias.length < 3) {
       toast({
