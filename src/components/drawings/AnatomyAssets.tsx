@@ -273,6 +273,12 @@ import SynovialJointsImg from "@/assets/anatomy/Synovial_Joints.png";
 import KneeOrthoImg from "@/assets/anatomy/Knee_Ortho.png";
 import ElbowImg from "@/assets/anatomy/Elbow.png";
 import AnklesImg from "@/assets/anatomy/Ankles.png";
+import ENTImg from "@/assets/anatomy/ENT.png";
+import TeethImg from "@/assets/anatomy/Teeth.png";
+import OBGYNImg from "@/assets/anatomy/OBGYN.png";
+import PainPointsImg from "@/assets/anatomy/Pain_Points.png";
+import UrologyImg from "@/assets/anatomy/Urology_and_Nephrology.png";
+import EndocrinologyImg from "@/assets/anatomy/Endocrinology.png";
 
 export interface AnatomyAsset {
   id: string;
@@ -287,6 +293,7 @@ export interface AnatomyAsset {
 export const anatomyAssets: AnatomyAsset[] = [
   { id: "body-front", name: "Body (Front)", category: "body", component: FullBodyFrontSVG, width: 120, height: 240 },
   { id: "body-back", name: "Body (Back)", category: "body", component: FullBodyBackSVG, width: 120, height: 240 },
+  { id: "body-pain", name: "Pain Points", category: "body", component: () => null, width: 200, height: 300, imageSrc: PainPointsImg },
   { id: "spine", name: "Spine", category: "spine", component: SpineSVG, width: 80, height: 200 },
   { id: "pelvis", name: "Pelvis", category: "spine", component: PelvisSVG, width: 140, height: 100 },
   { id: "face-front", name: "Face (Front)", category: "face", component: FaceFrontSVG, width: 120, height: 150 },
@@ -302,6 +309,11 @@ export const anatomyAssets: AnatomyAsset[] = [
   { id: "sys-cardiovascular", name: "Cardiovascular", category: "systems", component: () => null, width: 200, height: 300, imageSrc: CardiovascularImg },
   { id: "sys-respiratory", name: "Respiratory", category: "systems", component: () => null, width: 200, height: 300, imageSrc: RespiratoryImg },
   { id: "sys-digestive", name: "Digestive", category: "systems", component: () => null, width: 200, height: 300, imageSrc: DigestiveImg },
+  { id: "sys-ent", name: "ENT", category: "systems", component: () => null, width: 200, height: 300, imageSrc: ENTImg },
+  { id: "sys-teeth", name: "Teeth", category: "systems", component: () => null, width: 200, height: 300, imageSrc: TeethImg },
+  { id: "sys-obgyn", name: "OB/GYN", category: "systems", component: () => null, width: 200, height: 300, imageSrc: OBGYNImg },
+  { id: "sys-urology", name: "Urology & Nephrology", category: "systems", component: () => null, width: 200, height: 300, imageSrc: UrologyImg },
+  { id: "sys-endocrinology", name: "Endocrinology", category: "systems", component: () => null, width: 200, height: 300, imageSrc: EndocrinologyImg },
   // Plastic Surgery (image-based)
   { id: "ps-breast", name: "Breast Augmentation", category: "plastic-surgery", component: () => null, width: 200, height: 300, imageSrc: BreastAugmentationImg },
   { id: "ps-injectibles", name: "Injectibles & Fillers", category: "plastic-surgery", component: () => null, width: 200, height: 300, imageSrc: InjectiblesAndFillersImg },
