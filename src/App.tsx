@@ -39,6 +39,7 @@ import MyDoctors from "./pages/patient/MyDoctors";
 import DoctorInvoices from "./pages/doctor/Invoices";
 import PricingAdmin from "./pages/admin/PricingAdmin";
 import GamificationAdmin from "./pages/admin/GamificationAdmin";
+import UserManagement from "./pages/admin/UserManagement";
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -124,6 +125,7 @@ const App = () => (
             {/* Admin routes */}
             <Route path="/admin/pricing" element={<PricingAdmin />} />
             <Route path="/admin/gamification" element={<GamificationAdmin />} />
+            <Route path="/admin/users" element={<UserManagement />} />
             
             {/* Common routes */}
             <Route path="/settings" element={<Settings />} />
