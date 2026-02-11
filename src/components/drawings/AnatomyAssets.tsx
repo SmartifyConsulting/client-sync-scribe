@@ -290,7 +290,7 @@ import KidneyImg from "@/assets/anatomy/Kidney.png";
 export interface AnatomyAsset {
   id: string;
   name: string;
-  category: "body" | "spine" | "face" | "joints" | "systems" | "plastic-surgery" | "orthopedic";
+  category: "body" | "spine" | "face" | "joints" | "systems" | "plastic-surgery" | "neuro";
   component: React.FC;
   width: number;
   height: number;
@@ -309,36 +309,37 @@ export const anatomyAssets: AnatomyAsset[] = [
   { id: "knee", name: "Knee", category: "joints", component: KneeSVG, width: 80, height: 120 },
   { id: "hand", name: "Hand", category: "joints", component: HandSVG, width: 80, height: 110 },
   { id: "foot", name: "Foot", category: "joints", component: FootSVG, width: 70, height: 120 },
+  { id: "ortho-hands", name: "Hands & Wrists", category: "joints", component: () => null, width: 200, height: 300, imageSrc: HandsWristsImg },
+  { id: "ortho-hip", name: "Hip", category: "joints", component: () => null, width: 200, height: 300, imageSrc: HipImg },
+  { id: "ortho-shoulder", name: "Shoulder (Detail)", category: "joints", component: () => null, width: 200, height: 300, imageSrc: ShoulderOrthoImg },
+  { id: "ortho-synovial", name: "Synovial Joints", category: "joints", component: () => null, width: 200, height: 300, imageSrc: SynovialJointsImg },
+  { id: "ortho-knee", name: "Knee (Detail)", category: "joints", component: () => null, width: 200, height: 300, imageSrc: KneeOrthoImg },
+  { id: "ortho-elbow", name: "Elbow", category: "joints", component: () => null, width: 200, height: 300, imageSrc: ElbowImg },
+  { id: "ortho-ankles", name: "Ankles", category: "joints", component: () => null, width: 200, height: 300, imageSrc: AnklesImg },
+  { id: "ortho-podiatry", name: "Podiatry", category: "joints", component: () => null, width: 200, height: 300, imageSrc: PodiatryImg },
+  // Face
+  { id: "face-ent", name: "ENT", category: "face", component: () => null, width: 200, height: 300, imageSrc: ENTImg },
+  { id: "face-eye", name: "Eye", category: "face", component: () => null, width: 200, height: 300, imageSrc: EyeImg },
+  { id: "face-teeth", name: "Teeth", category: "face", component: () => null, width: 200, height: 300, imageSrc: TeethImg },
   // Primary Anatomical Systems (image-based)
   { id: "sys-skeletal", name: "Skeletal", category: "systems", component: () => null, width: 200, height: 300, imageSrc: SkeletalSystemImg },
   { id: "sys-muscular", name: "Muscular", category: "systems", component: () => null, width: 200, height: 300, imageSrc: MuscularImg },
-  { id: "sys-neurological", name: "Neurological", category: "systems", component: () => null, width: 200, height: 300, imageSrc: NeurologicalImg },
   { id: "sys-cardiovascular", name: "Cardiovascular", category: "systems", component: () => null, width: 200, height: 300, imageSrc: CardiovascularImg },
   { id: "sys-respiratory", name: "Respiratory", category: "systems", component: () => null, width: 200, height: 300, imageSrc: RespiratoryImg },
   { id: "sys-digestive", name: "Digestive", category: "systems", component: () => null, width: 200, height: 300, imageSrc: DigestiveImg },
-  { id: "sys-ent", name: "ENT", category: "systems", component: () => null, width: 200, height: 300, imageSrc: ENTImg },
-  { id: "sys-teeth", name: "Teeth", category: "systems", component: () => null, width: 200, height: 300, imageSrc: TeethImg },
   { id: "sys-obgyn", name: "OB/GYN", category: "systems", component: () => null, width: 200, height: 300, imageSrc: OBGYNImg },
   { id: "sys-urology", name: "Urology & Nephrology", category: "systems", component: () => null, width: 200, height: 300, imageSrc: UrologyImg },
   { id: "sys-endocrinology", name: "Endocrinology", category: "systems", component: () => null, width: 200, height: 300, imageSrc: EndocrinologyImg },
   { id: "sys-adv-cardiology", name: "Advanced Cardiology", category: "systems", component: () => null, width: 200, height: 300, imageSrc: AdvancedCardiologyImg },
-  { id: "sys-eye", name: "Eye", category: "systems", component: () => null, width: 200, height: 300, imageSrc: EyeImg },
-  { id: "sys-brain", name: "Brain", category: "systems", component: () => null, width: 200, height: 300, imageSrc: BrainImg },
-  { id: "sys-spinal-cord", name: "Spinal Cord", category: "systems", component: () => null, width: 200, height: 300, imageSrc: SpinalCordImg },
   { id: "sys-pelvic-floor", name: "Pelvic Floor", category: "systems", component: () => null, width: 200, height: 300, imageSrc: PelvicFloorImg },
   { id: "sys-kidney", name: "Kidney", category: "systems", component: () => null, width: 200, height: 300, imageSrc: KidneyImg },
+  // Neuro
+  { id: "neuro-neurological", name: "Neurological", category: "neuro", component: () => null, width: 200, height: 300, imageSrc: NeurologicalImg },
+  { id: "neuro-brain", name: "Brain", category: "neuro", component: () => null, width: 200, height: 300, imageSrc: BrainImg },
+  { id: "neuro-spinal-cord", name: "Spinal Cord", category: "neuro", component: () => null, width: 200, height: 300, imageSrc: SpinalCordImg },
   // Plastic Surgery (image-based)
   { id: "ps-breast", name: "Breast Augmentation", category: "plastic-surgery", component: () => null, width: 200, height: 300, imageSrc: BreastAugmentationImg },
   { id: "ps-injectibles", name: "Injectibles & Fillers", category: "plastic-surgery", component: () => null, width: 200, height: 300, imageSrc: InjectiblesAndFillersImg },
   { id: "ps-body", name: "Body Contouring", category: "plastic-surgery", component: () => null, width: 200, height: 300, imageSrc: BodyContouringImg },
   { id: "ps-facial", name: "Facial", category: "plastic-surgery", component: () => null, width: 200, height: 300, imageSrc: FacialImg },
-  // Orthopedic (image-based)
-  { id: "ortho-hands", name: "Hands & Wrists", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: HandsWristsImg },
-  { id: "ortho-hip", name: "Hip", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: HipImg },
-  { id: "ortho-shoulder", name: "Shoulder", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: ShoulderOrthoImg },
-  { id: "ortho-synovial", name: "Synovial Joints", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: SynovialJointsImg },
-  { id: "ortho-knee", name: "Knee", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: KneeOrthoImg },
-  { id: "ortho-elbow", name: "Elbow", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: ElbowImg },
-  { id: "ortho-ankles", name: "Ankles", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: AnklesImg },
-  { id: "ortho-podiatry", name: "Podiatry", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: PodiatryImg },
 ];

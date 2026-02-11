@@ -73,6 +73,8 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
 
   // Resize state
   const [resizing, setResizing] = useState<{ elementId: string; startX: number; startY: number; startW: number; startH: number } | null>(null);
+  // Drag/move state for anatomy overlays
+  const [draggingElement, setDraggingElement] = useState<{ elementId: string; startX: number; startY: number; elStartX: number; elStartY: number } | null>(null);
   // Track last mouse position for shapes
   const lastMousePos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
@@ -540,6 +542,73 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     };
   }, [resizing, elements]);
 
+  // Drag/move handlers for anatomy overlays
+  const handleElementDragStart = (e: React.MouseEvent | React.TouchEvent, elementId: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const el = elements.find((el) => el.id === elementId);
+    if (!el) return;
+
+    let clientX: number, clientY: number;
+    if ("touches" in e) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+
+    setDraggingElement({
+      elementId,
+      startX: clientX,
+      startY: clientY,
+      elStartX: el.x,
+      elStartY: el.y,
+    });
+  };
+
+  useEffect(() => {
+    if (!draggingElement) return;
+
+    const handleMove = (e: MouseEvent | TouchEvent) => {
+      let clientX: number, clientY: number;
+      if ("touches" in e) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+
+      const dx = clientX - draggingElement.startX;
+      const dy = clientY - draggingElement.startY;
+
+      setElements((prev) =>
+        prev.map((el) =>
+          el.id === draggingElement.elementId
+            ? { ...el, x: draggingElement.elStartX + dx, y: draggingElement.elStartY + dy }
+            : el
+        )
+      );
+    };
+
+    const handleEnd = () => {
+      addToHistory(elements);
+      setDraggingElement(null);
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleEnd);
+    window.addEventListener("touchmove", handleMove);
+    window.addEventListener("touchend", handleEnd);
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleEnd);
+      window.removeEventListener("touchmove", handleMove);
+      window.removeEventListener("touchend", handleEnd);
+    };
+  }, [draggingElement, elements]);
+
   const handleAddText = () => {
     if (!textInput || !textPosition) return;
     
@@ -815,10 +884,10 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
               <TabsTrigger value="face" className="text-xs px-1">Face</TabsTrigger>
               <TabsTrigger value="joints" className="text-xs px-1">Joints</TabsTrigger>
               <TabsTrigger value="systems" className="text-xs px-1">Systems</TabsTrigger>
+              <TabsTrigger value="neuro" className="text-xs px-1">Neuro</TabsTrigger>
               <TabsTrigger value="plastic-surgery" className="text-xs px-1">Plastic</TabsTrigger>
-              <TabsTrigger value="orthopedic" className="text-xs px-1">Ortho</TabsTrigger>
             </TabsList>
-            {["body", "spine", "face", "joints", "systems", "plastic-surgery", "orthopedic"].map((category) => (
+            {["body", "spine", "face", "joints", "systems", "neuro", "plastic-surgery"].map((category) => (
               <TabsContent key={category} value={category} className="flex-1 m-0">
                 <ScrollArea className="h-full">
                   <div className="p-2 space-y-2">
@@ -883,6 +952,8 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                     width: el.width,
                     height: el.height,
                   }}
+                  onMouseDown={(e) => handleElementDragStart(e, el.id)}
+                  onTouchStart={(e) => handleElementDragStart(e, el.id)}
                 >
                   {asset.imageSrc ? (
                     <img src={asset.imageSrc} alt={asset.name} className="w-full h-full object-contain pointer-events-none" />
