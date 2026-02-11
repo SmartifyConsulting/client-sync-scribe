@@ -1,72 +1,74 @@
 
-
-# Add Plastic Surgery Images, Fix Shapes, and Add Resize Support
+# Grant Admin Rights and Add User Management Page
 
 ## Overview
-Three changes: add a new "Plastic Surgery" category with 4 uploaded images, fix the broken shape tools, and add touch/mouse resizing for anatomy elements on the canvas.
+Grant admin role to info@georgiaadams.co.za and create a new "User Management" admin page where you can see all registered users, their roles (doctor/patient), and basic info.
 
-## 1. Add Plastic Surgery Category
+## Step 1: Grant Admin Role (Database)
+Insert an admin role for user `9ceb1207-472c-447c-878c-17cd321b61b7` (info@georgiaadams.co.za) into the `user_roles` table.
 
-Copy the 4 uploaded images to `src/assets/anatomy/`:
-- Breast_Augmentation.png
-- Injectibles_and_Fillers.png
-- Body_Controuring.png
-- Facial.png
+## Step 2: Create User Management Admin Page
+Create `src/pages/admin/UserManagement.tsx` that:
+- Checks admin access (same pattern as PricingAdmin)
+- Fetches all profiles joined with user_roles to show each user's email, name, and role
+- Displays a table with columns: Name, Email, Role, Joined Date
+- Shows role as a badge (Doctor / Patient / Admin)
 
-**AnatomyAssets.tsx changes:**
-- Add `"plastic-surgery"` to the category union type
-- Import the 4 new PNGs
-- Add 4 new entries to `anatomyAssets` array with category `"plastic-surgery"`
+## Step 3: Add Database Function for Admin User Listing
+Create a security definer function `get_all_users_with_roles()` that returns profiles + roles data. This avoids RLS restrictions since the profiles table is user-scoped for updates but readable by authenticated users.
 
-**DrawingPad.tsx changes:**
-- Add a 6th tab called "Plastic Surgery" (or abbreviated "Plastic" to fit)
-- Update TabsList grid from 5 to 6 columns
-- Add `"plastic-surgery"` to the categories loop
+We also need to query `auth.users` for email addresses (not stored in profiles). A security definer function will handle this safely.
 
-## 2. Fix Shape Tools (Line, Arrow, Circle, Rectangle)
-
-The shape tools are broken because the `handleMouseUp` function (lines 287-294) has incomplete logic -- it detects the shape tool but never creates the shape element.
-
-**Fix in handleMouseUp:**
-- Track the mouse position at mouseUp to get `endX`/`endY`
-- Create a proper `CanvasElement` of type `"shape"` with the correct `shapeType`, start coordinates, and end coordinates
-- Add it to elements and history
-
-**Fix in handleMouseMove:**
-- Add real-time preview for shapes while dragging (draw temporary shape on canvas during drag)
-
-## 3. Add Resizable Anatomy Elements (Touch + Mouse)
-
-Add resize handles to anatomy overlay elements so doctors can resize images on both iPad (pinch/drag) and laptop (corner drag handles).
-
-**Implementation:**
-- Add visible corner resize handles (small squares) on each anatomy overlay element when hovered or selected
-- On mouse drag of a handle, update the element's `width`/`height` proportionally
-- Add touch event handlers (`onTouchStart`, `onTouchMove`, `onTouchEnd`) on the canvas for drawing support
-- Add pinch-to-zoom gesture detection on anatomy elements for iPad resizing
-- Maintain aspect ratio during resize by default
+## Step 4: Update Navigation
+- Add a "Users" item to `adminNavItems` in `Sidebar.tsx` (using the `Users` icon)
+- Add the route `/admin/users` in `App.tsx`
 
 ## Technical Details
 
-### AnatomyAssets.tsx
-- Extend category type: `"body" | "spine" | "face" | "joints" | "systems" | "plastic-surgery"`
-- Import 4 images from `@/assets/anatomy/`
-- Add entries: `{ id: "ps-breast", name: "Breast Augmentation", category: "plastic-surgery", ... }` etc.
+### Database Migration
+```sql
+-- Security definer function to get users with roles (admin only)
+CREATE OR REPLACE FUNCTION public.get_users_admin()
+RETURNS TABLE(
+  user_id uuid,
+  email text,
+  full_name text,
+  role text,
+  created_at timestamptz
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT 
+    p.id as user_id,
+    u.email::text,
+    p.full_name,
+    COALESCE(ur.role::text, 'none') as role,
+    p.created_at
+  FROM public.profiles p
+  JOIN auth.users u ON u.id = p.id
+  LEFT JOIN public.user_roles ur ON ur.user_id = p.id
+  ORDER BY p.created_at DESC
+$$;
+```
 
-### DrawingPad.tsx - Shape Fix
-The current `handleMouseUp` at line 287 checks for shape tools but does nothing. Replace with:
-- Store the final mouse position when mouseUp fires
-- Create a new `CanvasElement` with `type: "shape"`, `data: { shapeType, endX, endY }`, positioned at `shapeStart`
-- Push to elements array and history
+### Data Insert
+Insert admin role for info@georgiaadams.co.za:
+```sql
+INSERT INTO user_roles (user_id, role) 
+VALUES ('9ceb1207-472c-447c-878c-17cd321b61b7', 'admin');
+```
 
-### DrawingPad.tsx - Resize Handles
-- Track a `resizingElement` state with the element ID and which handle is being dragged
-- Render small drag handles at corners of anatomy overlays
-- On handle mousedown/touchstart, enter resize mode
-- On mousemove/touchmove, calculate new dimensions maintaining aspect ratio
-- On mouseup/touchend, commit the resize to elements array
-- Add `onTouchStart`/`onTouchMove`/`onTouchEnd` to the canvas element mirroring the mouse handlers for iPad drawing support
+### New File: `src/pages/admin/UserManagement.tsx`
+- Admin guard check (same as PricingAdmin)
+- Call `supabase.rpc('get_users_admin')` to fetch all users
+- Render a table with Name, Email, Role badge, and Join Date
+- Color-coded role badges: blue for doctor, green for patient, red for admin
 
-### No Database Changes Required
-The existing `session_drawings` table stores element dimensions (`width`, `height`) already, so resized elements will persist correctly.
+### Sidebar Update
+Add `{ icon: Users, label: "Users", to: "/admin/users" }` to `adminNavItems`.
 
+### Route Update
+Add `<Route path="/admin/users" element={<UserManagement />} />` under admin routes in App.tsx.
