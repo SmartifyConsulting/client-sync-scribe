@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy, Clock, Mail } from "lucide-react";
+import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy, Clock, Mail, Save } from "lucide-react";
 import { PatientImport } from "@/components/patients/PatientImport";
 import { useToast as useGlobalToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -95,6 +96,7 @@ interface ServicePrice {
 export default function Profile() {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { isAdmin } = useUserRole();
   const { profile, loading, fetchProfile, updateProfile, uploadLogo } = useProfile();
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -102,10 +104,21 @@ export default function Profile() {
   const [newPartner, setNewPartner] = useState({ full_name: "", registration_number: "", mobile_number: "", email: "" });
   const [isAddingPartner, setIsAddingPartner] = useState(false);
   
+  // Partner editing state
+  const [editingPartnerId, setEditingPartnerId] = useState<string | null>(null);
+  const [editingPartner, setEditingPartner] = useState({ full_name: "", registration_number: "", mobile_number: "" });
+  const [isSavingPartner, setIsSavingPartner] = useState(false);
+  
   // Autosave state
   const [savedStatus, setSavedStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
   const hasInitialized = useRef(false);
+  const isSettingFromProfile = useRef(false);
+  
+  // Admin email editing
+  const [editEmail, setEditEmail] = useState("");
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [isSavingEmail, setIsSavingEmail] = useState(false);
   
   // Pricing state
   const [servicePrices, setServicePrices] = useState<ServicePrice[]>([]);
@@ -138,6 +151,7 @@ export default function Profile() {
         mobileNumber = mobileNumber.replace(matchedCode.code, "").trim();
       }
       
+      isSettingFromProfile.current = true;
       setFormData({
         full_name: profile.full_name || "",
         practice_number: profile.practice_number || "",
@@ -151,13 +165,14 @@ export default function Profile() {
       // Mark as initialized after profile loads
       setTimeout(() => {
         hasInitialized.current = true;
+        isSettingFromProfile.current = false;
       }, 100);
     }
   }, [profile]);
 
   // Autosave effect
   useEffect(() => {
-    if (!hasInitialized.current || !user) return;
+    if (!hasInitialized.current || !user || isSettingFromProfile.current) return;
 
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
@@ -449,6 +464,62 @@ export default function Profile() {
     }
   };
 
+  const startEditingPartner = (partner: Partner) => {
+    setEditingPartnerId(partner.id);
+    setEditingPartner({
+      full_name: partner.full_name,
+      registration_number: partner.registration_number,
+      mobile_number: partner.mobile_number || "",
+    });
+  };
+
+  const cancelEditingPartner = () => {
+    setEditingPartnerId(null);
+    setEditingPartner({ full_name: "", registration_number: "", mobile_number: "" });
+  };
+
+  const saveEditingPartner = async () => {
+    if (!editingPartnerId || !editingPartner.full_name.trim() || !editingPartner.registration_number.trim()) {
+      toast({
+        title: "Missing fields",
+        description: "Partner name and registration number are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSavingPartner(true);
+    const { error } = await supabase
+      .from('practice_partners')
+      .update({
+        full_name: editingPartner.full_name,
+        registration_number: editingPartner.registration_number,
+        mobile_number: editingPartner.mobile_number || null,
+      })
+      .eq('id', editingPartnerId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update partner",
+        variant: "destructive",
+      });
+    } else {
+      setPartners(partners.map(p =>
+        p.id === editingPartnerId
+          ? { ...p, full_name: editingPartner.full_name, registration_number: editingPartner.registration_number, mobile_number: editingPartner.mobile_number || "" }
+          : p
+      ));
+      setEditingPartnerId(null);
+      setEditingPartner({ full_name: "", registration_number: "", mobile_number: "" });
+      toast({
+        title: "Partner updated",
+        description: "Partner details have been updated",
+      });
+    }
+    setIsSavingPartner(false);
+  };
+
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -477,7 +548,9 @@ export default function Profile() {
         title: "Logo uploaded",
         description: "Your practice logo has been updated",
       });
-      fetchProfile();
+      isSettingFromProfile.current = true;
+      await fetchProfile();
+      setTimeout(() => { isSettingFromProfile.current = false; }, 200);
     }
   };
 
@@ -535,7 +608,31 @@ export default function Profile() {
         title: "Profile picture updated",
         description: "Your profile picture has been changed",
       });
-      fetchProfile();
+      isSettingFromProfile.current = true;
+      await fetchProfile();
+      setTimeout(() => { isSettingFromProfile.current = false; }, 200);
+    }
+  };
+
+  const handleSaveEmail = async () => {
+    if (!user || !editEmail.trim()) return;
+    
+    setIsSavingEmail(true);
+    const { error } = await supabase.auth.updateUser({ email: editEmail.trim() });
+    setIsSavingEmail(false);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Email updated",
+        description: "A confirmation email has been sent to the new address",
+      });
+      setIsEditingEmail(false);
     }
   };
 
@@ -628,13 +725,45 @@ export default function Profile() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input 
-              id="email" 
-              type="email" 
-              value={user?.email || ""} 
-              disabled 
-              className="bg-muted"
-            />
+            {isAdmin && isEditingEmail ? (
+              <div className="flex gap-2">
+                <Input 
+                  id="email" 
+                  type="email" 
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  placeholder="user@example.com"
+                />
+                <Button size="icon" variant="ghost" onClick={handleSaveEmail} disabled={isSavingEmail}>
+                  {isSavingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                </Button>
+                <Button size="icon" variant="ghost" onClick={() => setIsEditingEmail(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Input 
+                  id="email" 
+                  type="email" 
+                  value={user?.email || ""} 
+                  disabled 
+                  className="bg-muted"
+                />
+                {isAdmin && (
+                  <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    onClick={() => {
+                      setEditEmail(user?.email || "");
+                      setIsEditingEmail(true);
+                    }}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -797,21 +926,75 @@ export default function Profile() {
           <div className="space-y-3 mb-6">
             {partners.map((partner) => (
               <div key={partner.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
-                <div>
-                  <p className="font-medium text-foreground">{partner.full_name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Reg: {partner.registration_number}
-                    {partner.mobile_number && ` · Mobile: ${partner.mobile_number}`}
-                  </p>
+                {editingPartnerId === partner.id ? (
+                  <div className="flex-1 grid gap-3 sm:grid-cols-3 mr-4">
+                    <Input 
+                      value={editingPartner.full_name}
+                      onChange={(e) => setEditingPartner({ ...editingPartner, full_name: e.target.value })}
+                      placeholder="Full name"
+                    />
+                    <Input 
+                      value={editingPartner.registration_number}
+                      onChange={(e) => setEditingPartner({ ...editingPartner, registration_number: e.target.value })}
+                      placeholder="Registration number"
+                    />
+                    <Input 
+                      value={editingPartner.mobile_number}
+                      onChange={(e) => setEditingPartner({ ...editingPartner, mobile_number: e.target.value })}
+                      placeholder="Mobile (optional)"
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <p className="font-medium text-foreground">{partner.full_name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Reg: {partner.registration_number}
+                      {partner.mobile_number && ` · Mobile: ${partner.mobile_number}`}
+                    </p>
+                  </div>
+                )}
+                <div className="flex items-center gap-1">
+                  {editingPartnerId === partner.id ? (
+                    <>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={saveEditingPartner}
+                        disabled={isSavingPartner}
+                        className="h-8 w-8 text-success hover:text-success"
+                      >
+                        {isSavingPartner ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={cancelEditingPartner}
+                        className="h-8 w-8 text-muted-foreground"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => startEditingPartner(partner)}
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => removePartner(partner.id)}
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => removePartner(partner.id)}
-                  className="h-8 w-8 text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
               </div>
             ))}
           </div>

@@ -99,8 +99,8 @@ export function useProfile() {
       .from('logos')
       .getPublicUrl(fileName);
 
-    // Update profile with logo URL
-    await updateProfile({ logo_url: data.publicUrl });
+    // Update profile with logo URL (cache-busted)
+    await updateProfile({ logo_url: `${data.publicUrl}?t=${Date.now()}` });
 
     return { url: data.publicUrl, error: null };
   };
