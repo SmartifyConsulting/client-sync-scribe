@@ -1,53 +1,72 @@
 
-# Add Clinical Anatomy Images to Drawing Pad
+
+# Add Plastic Surgery Images, Fix Shapes, and Add Resize Support
 
 ## Overview
-Replace/augment the current SVG line drawings with your uploaded clinical-grade anatomy images, organized under a new "Primary Anatomical Systems" category in the drawing pad's anatomy panel.
+Three changes: add a new "Plastic Surgery" category with 4 uploaded images, fix the broken shape tools, and add touch/mouse resizing for anatomy elements on the canvas.
 
-## What Will Change
+## 1. Add Plastic Surgery Category
 
-### 1. Copy Images to Project
-The 6 uploaded images will be copied into `src/assets/anatomy/`:
-- Skeletal_System.png
-- Digestive.png
-- Respiratory.png
-- Neurological.png
-- Cardiovascular.png
-- Muscular.png
+Copy the 4 uploaded images to `src/assets/anatomy/`:
+- Breast_Augmentation.png
+- Injectibles_and_Fillers.png
+- Body_Controuring.png
+- Facial.png
 
-### 2. Update Anatomy Assets (AnatomyAssets.tsx)
-- Add a new category: `"systems"` for Primary Anatomical Systems
-- Add 6 new image-based anatomy assets that reference the imported PNGs instead of SVG components
-- Each asset will use `type: "image"` with an `imageSrc` property pointing to the imported image
-- Keep existing SVG assets in their current categories (body, spine, face, joints) so doctors still have access to them
+**AnatomyAssets.tsx changes:**
+- Add `"plastic-surgery"` to the category union type
+- Import the 4 new PNGs
+- Add 4 new entries to `anatomyAssets` array with category `"plastic-surgery"`
 
-### 3. Update Drawing Pad (DrawingPad.tsx)
-- Add a 5th tab called "Systems" to the anatomy panel tabs
-- Update the anatomy overlay rendering to handle image-based assets (render as `<img>` tags instead of SVG components)
-- Image assets will be draggable onto the canvas just like the existing SVG assets, and doctors can draw/annotate on top of them
+**DrawingPad.tsx changes:**
+- Add a 6th tab called "Plastic Surgery" (or abbreviated "Plastic" to fit)
+- Update TabsList grid from 5 to 6 columns
+- Add `"plastic-surgery"` to the categories loop
 
-### 4. Result
-The anatomy panel will have 5 tabs:
-- **Body** -- existing SVG outlines (front/back)
-- **Spine** -- existing SVG spine/pelvis
-- **Face** -- existing SVG face views
-- **Joints** -- existing SVG joint diagrams
-- **Systems** -- NEW: 6 clinical-grade images (Skeletal, Muscular, Neurological, Cardiovascular, Respiratory, Digestive)
+## 2. Fix Shape Tools (Line, Arrow, Circle, Rectangle)
 
-Doctors can drag any system image onto the canvas, resize/position it, and draw annotations on top.
+The shape tools are broken because the `handleMouseUp` function (lines 287-294) has incomplete logic -- it detects the shape tool but never creates the shape element.
+
+**Fix in handleMouseUp:**
+- Track the mouse position at mouseUp to get `endX`/`endY`
+- Create a proper `CanvasElement` of type `"shape"` with the correct `shapeType`, start coordinates, and end coordinates
+- Add it to elements and history
+
+**Fix in handleMouseMove:**
+- Add real-time preview for shapes while dragging (draw temporary shape on canvas during drag)
+
+## 3. Add Resizable Anatomy Elements (Touch + Mouse)
+
+Add resize handles to anatomy overlay elements so doctors can resize images on both iPad (pinch/drag) and laptop (corner drag handles).
+
+**Implementation:**
+- Add visible corner resize handles (small squares) on each anatomy overlay element when hovered or selected
+- On mouse drag of a handle, update the element's `width`/`height` proportionally
+- Add touch event handlers (`onTouchStart`, `onTouchMove`, `onTouchEnd`) on the canvas for drawing support
+- Add pinch-to-zoom gesture detection on anatomy elements for iPad resizing
+- Maintain aspect ratio during resize by default
 
 ## Technical Details
 
-### AnatomyAssets.tsx Changes
-- Import all 6 images as ES6 modules from `@/assets/anatomy/`
-- Extend the `AnatomyAsset` interface to support an optional `imageSrc: string` field alongside the existing `component` field
-- Add 6 new entries to the `anatomyAssets` array with `category: "systems"`
+### AnatomyAssets.tsx
+- Extend category type: `"body" | "spine" | "face" | "joints" | "systems" | "plastic-surgery"`
+- Import 4 images from `@/assets/anatomy/`
+- Add entries: `{ id: "ps-breast", name: "Breast Augmentation", category: "plastic-surgery", ... }` etc.
 
-### DrawingPad.tsx Changes
-- Add `"systems"` to the tab categories array
-- Update the `TabsList` grid from 4 to 5 columns
-- In the anatomy overlay renderer, check if the asset has `imageSrc` -- if so, render an `<img>` element; otherwise render the SVG component as before
-- Thumbnail previews in the panel will show scaled-down versions of the images
+### DrawingPad.tsx - Shape Fix
+The current `handleMouseUp` at line 287 checks for shape tools but does nothing. Replace with:
+- Store the final mouse position when mouseUp fires
+- Create a new `CanvasElement` with `type: "shape"`, `data: { shapeType, endX, endY }`, positioned at `shapeStart`
+- Push to elements array and history
+
+### DrawingPad.tsx - Resize Handles
+- Track a `resizingElement` state with the element ID and which handle is being dragged
+- Render small drag handles at corners of anatomy overlays
+- On handle mousedown/touchstart, enter resize mode
+- On mousemove/touchmove, calculate new dimensions maintaining aspect ratio
+- On mouseup/touchend, commit the resize to elements array
+- Add `onTouchStart`/`onTouchMove`/`onTouchEnd` to the canvas element mirroring the mouse handlers for iPad drawing support
 
 ### No Database Changes Required
-The drawing pad already stores anatomy elements by `assetId` in the `session_drawings` table. The new image-based assets will work with the same storage mechanism.
+The existing `session_drawings` table stores element dimensions (`width`, `height`) already, so resized elements will persist correctly.
+
