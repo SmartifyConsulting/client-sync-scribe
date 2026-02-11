@@ -271,6 +271,8 @@ import HipImg from "@/assets/anatomy/Hip.png";
 import ShoulderOrthoImg from "@/assets/anatomy/Shoulder_Ortho.png";
 import SynovialJointsImg from "@/assets/anatomy/Synovial_Joints.png";
 import KneeOrthoImg from "@/assets/anatomy/Knee_Ortho.png";
+import ElbowImg from "@/assets/anatomy/Elbow.png";
+import AnklesImg from "@/assets/anatomy/Ankles.png";
 
 export interface AnatomyAsset {
   id: string;
@@ -311,4 +313,6 @@ export const anatomyAssets: AnatomyAsset[] = [
   { id: "ortho-shoulder", name: "Shoulder", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: ShoulderOrthoImg },
   { id: "ortho-synovial", name: "Synovial Joints", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: SynovialJointsImg },
   { id: "ortho-knee", name: "Knee", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: KneeOrthoImg },
+  { id: "ortho-elbow", name: "Elbow", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: ElbowImg },
+  { id: "ortho-ankles", name: "Ankles", category: "orthopedic", component: () => null, width: 200, height: 300, imageSrc: AnklesImg },
 ];
