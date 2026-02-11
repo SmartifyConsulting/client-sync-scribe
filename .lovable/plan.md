@@ -1,74 +1,60 @@
 
-# Grant Admin Rights and Add User Management Page
 
-## Overview
-Grant admin role to info@georgiaadams.co.za and create a new "User Management" admin page where you can see all registered users, their roles (doctor/patient), and basic info.
+# Restore Line Tool and Remove SVG Figurines
 
-## Step 1: Grant Admin Role (Database)
-Insert an admin role for user `9ceb1207-472c-447c-878c-17cd321b61b7` (info@georgiaadams.co.za) into the `user_roles` table.
+## What happened
+The previous edit mistakenly removed the **Line drawing tool** from the toolbar instead of removing the **SVG stick-figure anatomy drawings**. This plan fixes both issues.
 
-## Step 2: Create User Management Admin Page
-Create `src/pages/admin/UserManagement.tsx` that:
-- Checks admin access (same pattern as PricingAdmin)
-- Fetches all profiles joined with user_roles to show each user's email, name, and role
-- Displays a table with columns: Name, Email, Role, Joined Date
-- Shows role as a badge (Doctor / Patient / Admin)
+## Changes
 
-## Step 3: Add Database Function for Admin User Listing
-Create a security definer function `get_all_users_with_roles()` that returns profiles + roles data. This avoids RLS restrictions since the profiles table is user-scoped for updates but readable by authenticated users.
+### 1. Restore the Line Drawing Tool
+- Add `"line"` back to the `Tool` type union
+- Add the Line tool button (using the `Minus` icon) back to the toolbar
+- Restore line drawing logic in mouse/touch event handlers and canvas rendering
 
-We also need to query `auth.users` for email addresses (not stored in profiles). A security definer function will handle this safely.
+### 2. Remove SVG Figurine Anatomy Assets
+Remove these SVG-based line-drawing assets from the `anatomyAssets` array since they are basic stick figures, not clinical-grade:
+- **Body (Front)** - `FullBodyFrontSVG`
+- **Body (Back)** - `FullBodyBackSVG`
+- **Face (Front)** - `FaceFrontSVG`
+- **Face (Side)** - `FaceSideSVG`
+- **Spine** - `SpineSVG`
+- **Shoulder** - `ShoulderSVG`
+- **Knee** - `KneeSVG`
+- **Hand** - `HandSVG`
+- **Foot** - `FootSVG`
+- **Pelvis** - `PelvisSVG`
 
-## Step 4: Update Navigation
-- Add a "Users" item to `adminNavItems` in `Sidebar.tsx` (using the `Users` icon)
-- Add the route `/admin/users` in `App.tsx`
+These will be removed from `AnatomyAssets.tsx`. The image-based versions (Shoulder Detail, Knee Detail, Hands and Wrists, Ankles, Podiatry, etc.) already exist and will remain.
+
+The SVG component code can be left in the file for now (dead code) or cleaned up -- it won't affect anything since nothing references them from the assets array.
+
+### 3. Remove the "Body" Tab
+With Body Front and Body Back removed, the only remaining "body" category item is Pain Points. This will be moved to the **Systems** category so the Body tab can be removed entirely.
 
 ## Technical Details
 
-### Database Migration
-```sql
--- Security definer function to get users with roles (admin only)
-CREATE OR REPLACE FUNCTION public.get_users_admin()
-RETURNS TABLE(
-  user_id uuid,
-  email text,
-  full_name text,
-  role text,
-  created_at timestamptz
-)
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT 
-    p.id as user_id,
-    u.email::text,
-    p.full_name,
-    COALESCE(ur.role::text, 'none') as role,
-    p.created_at
-  FROM public.profiles p
-  JOIN auth.users u ON u.id = p.id
-  LEFT JOIN public.user_roles ur ON ur.user_id = p.id
-  ORDER BY p.created_at DESC
-$$;
-```
+### `src/components/drawings/DrawingPad.tsx`
+- Add `"line"` back to `type Tool`
+- Add Line button (`<Minus />` icon) to toolbar between Arrow and Circle (or similar position)
+- Restore line handling in `handleCanvasMouseDown`, `handleCanvasMouseMove`, `handleCanvasMouseUp` and `drawElement` -- treat line as a shape tool that draws from start point to end point
+- Restore line rendering in the canvas draw function
 
-### Data Insert
-Insert admin role for info@georgiaadams.co.za:
-```sql
-INSERT INTO user_roles (user_id, role) 
-VALUES ('9ceb1207-472c-447c-878c-17cd321b61b7', 'admin');
-```
+### `src/components/drawings/AnatomyAssets.tsx`
+- Remove these entries from `anatomyAssets[]`:
+  - `body-front` (FullBodyFrontSVG)
+  - `body-back` (FullBodyBackSVG)
+  - `face-front` (FaceFrontSVG)
+  - `face-side` (FaceSideSVG)
+  - `spine` (SpineSVG) -- keep `neuro-spinal-cord` (image-based)
+  - `shoulder` (ShoulderSVG) -- keep `ortho-shoulder` (image-based)
+  - `knee` (KneeSVG) -- keep `ortho-knee` (image-based)
+  - `hand` (HandSVG) -- keep `ortho-hands` (image-based)
+  - `foot` (FootSVG) -- keep `ortho-podiatry` and `ortho-ankles`
+- Move `body-pain` (Pain Points) to `"systems"` category
+- Remove `"body"` and `"spine"` from the category union type (no longer needed)
 
-### New File: `src/pages/admin/UserManagement.tsx`
-- Admin guard check (same as PricingAdmin)
-- Call `supabase.rpc('get_users_admin')` to fetch all users
-- Render a table with Name, Email, Role badge, and Join Date
-- Color-coded role badges: blue for doctor, green for patient, red for admin
+### `src/components/drawings/DrawingPad.tsx` (tabs)
+- Remove the "Body" tab from the TabsList
+- Ensure remaining tabs: Face, Joints, Systems, Neuro, Plastic Surgery
 
-### Sidebar Update
-Add `{ icon: Users, label: "Users", to: "/admin/users" }` to `adminNavItems`.
-
-### Route Update
-Add `<Route path="/admin/users" element={<UserManagement />} />` under admin routes in App.tsx.
