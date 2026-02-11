@@ -2,136 +2,125 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { 
   User, 
-  Shield, 
-  Trash2, 
+  Mail, 
   Loader2, 
   CheckCircle, 
   Clock, 
-  XCircle,
-  Settings2
+  UserCheck,
+  UserX,
+  EyeOff,
+  MessageSquare
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { InviteDoctorDialog } from "@/components/patient/InviteDoctorDialog";
 import { format } from "date-fns";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
-type AccessPermission = "patient_info" | "calendar" | "session_summaries" | "prescription_history";
-
-interface DoctorAccess {
-  id: string;
-  doctor_id: string;
-  permissions: AccessPermission[];
-  granted_at: string;
-  is_active: boolean;
-  doctor_profile?: {
-    full_name: string | null;
-    practice_number: string | null;
-    doctor_number: string | null;
-  };
-}
-
-interface AccessRequest {
+interface ApprovedInvite {
   id: string;
   doctor_practice_number: string;
   doctor_registration_number: string;
-  status: string;
   created_at: string;
+  doctor_name?: string;
 }
 
-const permissionLabels: Record<AccessPermission, string> = {
-  patient_info: "Patient Information",
-  calendar: "Calendar",
-  session_summaries: "Session Summaries",
-  prescription_history: "Prescription History",
-};
-
-const statusConfig = {
-  pending: { color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400", icon: Clock },
-  accepted: { color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400", icon: CheckCircle },
-  declined: { color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400", icon: XCircle },
-};
+interface IncomingInvitation {
+  id: string;
+  sender_id: string;
+  recipient_email: string;
+  message: string | null;
+  status: string;
+  created_at: string;
+  sender_name?: string;
+}
 
 export default function PatientAccessManagement() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  const [grantedAccess, setGrantedAccess] = useState<DoctorAccess[]>([]);
-  const [pendingRequests, setPendingRequests] = useState<AccessRequest[]>([]);
-  const [editingAccess, setEditingAccess] = useState<DoctorAccess | null>(null);
-  const [editPermissions, setEditPermissions] = useState<AccessPermission[]>([]);
+  const [approvedInvites, setApprovedInvites] = useState<ApprovedInvite[]>([]);
+  const [incomingInvitations, setIncomingInvitations] = useState<IncomingInvitation[]>([]);
+  const [roundTableEnabled, setRoundTableEnabled] = useState(false);
+  const [updatingRoundTable, setUpdatingRoundTable] = useState(false);
 
   useEffect(() => {
     if (user) {
-      fetchAccessData();
+      fetchData();
     }
   }, [user]);
 
-  const fetchAccessData = async () => {
+  const fetchData = async () => {
     if (!user) return;
     setLoading(true);
 
     try {
-      // Fetch granted access
-      const { data: accessData, error: accessError } = await supabase
-        .from("doctor_patient_access")
-        .select("*")
-        .eq("patient_user_id", user.id)
-        .eq("is_active", true);
-
-      if (accessError) throw accessError;
-
-      // Fetch doctor profiles for granted access
-      const accessWithProfiles: DoctorAccess[] = [];
-      for (const access of accessData || []) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("full_name, practice_number, doctor_number")
-          .eq("id", access.doctor_id)
-          .single();
-
-        accessWithProfiles.push({
-          ...access,
-          permissions: access.permissions as AccessPermission[],
-          doctor_profile: profile || undefined,
-        });
-      }
-      setGrantedAccess(accessWithProfiles);
-
-      // Fetch pending requests
-      const { data: requestData, error: requestError } = await supabase
+      // Fetch outgoing invites that were accepted (approved only)
+      const { data: acceptedRequests, error: reqError } = await supabase
         .from("doctor_access_requests")
         .select("*")
         .eq("patient_user_id", user.id)
+        .eq("status", "accepted")
         .order("created_at", { ascending: false });
 
-      if (requestError) throw requestError;
-      setPendingRequests(requestData || []);
+      if (reqError) throw reqError;
+
+      // Get doctor names for accepted requests
+      const approvedWithNames: ApprovedInvite[] = [];
+      for (const req of acceptedRequests || []) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("practice_number", req.doctor_practice_number)
+          .eq("doctor_number", req.doctor_registration_number)
+          .maybeSingle();
+
+        approvedWithNames.push({
+          ...req,
+          doctor_name: profile?.full_name || undefined,
+        });
+      }
+      setApprovedInvites(approvedWithNames);
+
+      // Fetch incoming invitations (from doctors to this patient) that are pending
+      const { data: incoming, error: incomingError } = await supabase
+        .from("user_invitations")
+        .select("*")
+        .eq("recipient_id", user.id)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+
+      if (incomingError) throw incomingError;
+
+      // Get sender names
+      const incomingWithNames: IncomingInvitation[] = [];
+      for (const inv of incoming || []) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", inv.sender_id)
+          .maybeSingle();
+
+        incomingWithNames.push({
+          ...inv,
+          sender_name: profile?.full_name || undefined,
+        });
+      }
+      setIncomingInvitations(incomingWithNames);
+
+      // Fetch round table preference
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("round_table_enabled")
+        .eq("id", user.id)
+        .single();
+
+      setRoundTableEnabled(profileData?.round_table_enabled || false);
     } catch (error: any) {
-      console.error("Error fetching access data:", error);
+      console.error("Error fetching invite data:", error);
       toast({
         title: "Error loading data",
         description: error.message,
@@ -142,92 +131,77 @@ export default function PatientAccessManagement() {
     }
   };
 
-  const handleRevokeAccess = async (accessId: string) => {
+  const handleInvitationAction = async (invitationId: string, action: "accepted" | "declined" | "ignored") => {
     try {
+      // For "ignored", we store it as "declined" but with a flag or just use "declined"
+      // Doctors only see pending invitations, so they won't see declined/ignored
+      const newStatus = action === "ignored" ? "declined" : action;
+      
       const { error } = await supabase
-        .from("doctor_patient_access")
-        .update({ is_active: false, revoked_at: new Date().toISOString() })
-        .eq("id", accessId);
+        .from("user_invitations")
+        .update({ status: newStatus })
+        .eq("id", invitationId);
 
       if (error) throw error;
 
+      const actionLabel = action === "accepted" ? "accepted" : action === "declined" ? "declined" : "ignored";
       toast({
-        title: "Access revoked",
-        description: "The doctor no longer has access to your information.",
+        title: `Invitation ${actionLabel}`,
+        description: action === "accepted" 
+          ? "The doctor now has access to your profile." 
+          : `The invitation has been ${actionLabel}.`,
       });
 
-      fetchAccessData();
+      // If accepted, also create the doctor_patient_access record
+      if (action === "accepted") {
+        const invitation = incomingInvitations.find(i => i.id === invitationId);
+        if (invitation) {
+          await supabase.from("doctor_patient_access").insert({
+            doctor_id: invitation.sender_id,
+            patient_user_id: user!.id,
+            permissions: ["patient_info", "calendar", "session_summaries", "prescription_history"],
+            is_active: true,
+          });
+        }
+      }
+
+      fetchData();
     } catch (error: any) {
       toast({
-        title: "Error revoking access",
+        title: "Error",
         description: error.message,
         variant: "destructive",
       });
     }
   };
 
-  const handleCancelRequest = async (requestId: string) => {
+  const handleRoundTableToggle = async (enabled: boolean) => {
+    if (!user) return;
+    setUpdatingRoundTable(true);
     try {
       const { error } = await supabase
-        .from("doctor_access_requests")
-        .delete()
-        .eq("id", requestId);
+        .from("profiles")
+        .update({ round_table_enabled: enabled })
+        .eq("id", user.id);
 
       if (error) throw error;
 
+      setRoundTableEnabled(enabled);
       toast({
-        title: "Request cancelled",
-        description: "The access request has been cancelled.",
+        title: enabled ? "Round Table enabled" : "Round Table disabled",
+        description: enabled 
+          ? "All your doctors can now exchange thoughts about your care."
+          : "Doctors can no longer see the Round Table for your profile.",
       });
-
-      fetchAccessData();
     } catch (error: any) {
       toast({
-        title: "Error cancelling request",
+        title: "Error",
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setUpdatingRoundTable(false);
     }
-  };
-
-  const handleEditPermissions = (access: DoctorAccess) => {
-    setEditingAccess(access);
-    setEditPermissions([...access.permissions]);
-  };
-
-  const handleSavePermissions = async () => {
-    if (!editingAccess) return;
-
-    try {
-      const { error } = await supabase
-        .from("doctor_patient_access")
-        .update({ permissions: editPermissions })
-        .eq("id", editingAccess.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Permissions updated",
-        description: "Doctor access permissions have been updated.",
-      });
-
-      setEditingAccess(null);
-      fetchAccessData();
-    } catch (error: any) {
-      toast({
-        title: "Error updating permissions",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const togglePermission = (permission: AccessPermission) => {
-    setEditPermissions((prev) =>
-      prev.includes(permission)
-        ? prev.filter((p) => p !== permission)
-        : [...prev, permission]
-    );
   };
 
   if (loading) {
@@ -240,198 +214,156 @@ export default function PatientAccessManagement() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Access Management</h1>
-          <p className="text-muted-foreground">Manage who can access your health information</p>
-        </div>
-        <InviteDoctorDialog />
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Invites</h1>
+        <p className="text-muted-foreground">Manage your doctor invitations and preferences</p>
       </div>
 
-      {/* Active Access */}
+      {/* Round Table Access */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            Doctors with Access
+            <MessageSquare className="h-5 w-5" />
+            Round Table Access
           </CardTitle>
           <CardDescription>
-            Healthcare providers who currently have access to your information
+            Allow all your doctors to exchange thoughts and collaborate on your care
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {grantedAccess.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
-              No doctors currently have access to your information.
-            </p>
-          ) : (
+          <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+            <div className="space-y-1">
+              <Label htmlFor="round-table-toggle" className="font-medium">
+                Enable Round Table
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                When enabled, all doctors on your profile can view and contribute to your Round Table discussions.
+              </p>
+            </div>
+            <Switch
+              id="round-table-toggle"
+              checked={roundTableEnabled}
+              onCheckedChange={handleRoundTableToggle}
+              disabled={updatingRoundTable}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Incoming Invitations */}
+      {incomingInvitations.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5" />
+              Pending Invitations
+            </CardTitle>
+            <CardDescription>
+              Invitations from doctors requesting to connect with you
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
             <div className="space-y-4">
-              {grantedAccess.map((access) => (
+              {incomingInvitations.map((invitation) => (
                 <div
-                  key={access.id}
-                  className="flex items-start gap-4 p-4 rounded-lg border border-border"
+                  key={invitation.id}
+                  className="flex items-center gap-4 p-4 rounded-lg border border-border bg-amber-50/50 dark:bg-amber-900/10"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                    <User className="h-6 w-6 text-primary" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                    <User className="h-5 w-5 text-primary" />
                   </div>
-                  <div className="flex-1 space-y-2">
-                    <div>
-                      <p className="font-semibold">
-                        {access.doctor_profile?.full_name || "Unknown Doctor"}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium">
+                      {invitation.sender_name || "Unknown Doctor"}
+                    </p>
+                    {invitation.message && (
+                      <p className="text-sm text-muted-foreground truncate">
+                        {invitation.message}
                       </p>
-                      <p className="text-sm text-muted-foreground">
-                        Practice: {access.doctor_profile?.practice_number || "N/A"} • 
-                        Reg: {access.doctor_profile?.doctor_number || "N/A"}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {access.permissions.map((perm) => (
-                        <Badge key={perm} variant="secondary" className="text-xs">
-                          {permissionLabels[perm]}
-                        </Badge>
-                      ))}
-                    </div>
+                    )}
                     <p className="text-xs text-muted-foreground">
-                      Connected since {format(new Date(access.granted_at), "MMM d, yyyy")}
+                      Received {format(new Date(invitation.created_at), "MMM d, yyyy")}
                     </p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleInvitationAction(invitation.id, "ignored")}
+                      title="Ignore"
+                    >
+                      <EyeOff className="h-4 w-4 mr-1" />
+                      Ignore
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleEditPermissions(access)}
+                      onClick={() => handleInvitationAction(invitation.id, "declined")}
                     >
-                      <Settings2 className="h-4 w-4" />
+                      <UserX className="h-4 w-4 mr-1" />
+                      Decline
                     </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Revoke Access?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will remove {access.doctor_profile?.full_name || "this doctor"}'s 
-                            access to your health information. They will no longer be able to view 
-                            your data. You can always invite them again later.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleRevokeAccess(access.id)}>
-                            Revoke Access
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    <Button
+                      size="sm"
+                      onClick={() => handleInvitationAction(invitation.id, "accepted")}
+                    >
+                      <UserCheck className="h-4 w-4 mr-1" />
+                      Accept
+                    </Button>
                   </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Approved Invitations */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5" />
+            Approved Invitations
+          </CardTitle>
+          <CardDescription>
+            Invitations you sent that have been approved by doctors
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {approvedInvites.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">
+              No approved invitations yet.
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {approvedInvites.map((invite) => (
+                <div
+                  key={invite.id}
+                  className="flex items-center gap-4 p-4 rounded-lg border border-border"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">
+                      {invite.doctor_name || `Practice: ${invite.doctor_practice_number}`}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Registration: {invite.doctor_registration_number}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Approved {format(new Date(invite.created_at), "MMM d, yyyy")}
+                    </p>
+                  </div>
+                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                    Approved
+                  </Badge>
                 </div>
               ))}
             </div>
           )}
         </CardContent>
       </Card>
-
-      {/* Pending Requests */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Pending Requests
-          </CardTitle>
-          <CardDescription>
-            Access requests waiting for doctor approval
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {pendingRequests.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
-              No pending access requests.
-            </p>
-          ) : (
-            <div className="space-y-4">
-              {pendingRequests.map((request) => {
-                const config = statusConfig[request.status as keyof typeof statusConfig] || statusConfig.pending;
-                const StatusIcon = config.icon;
-                
-                return (
-                  <div
-                    key={request.id}
-                    className="flex items-center gap-4 p-4 rounded-lg border border-border"
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                      <User className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium">
-                        Practice: {request.doctor_practice_number}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Registration: {request.doctor_registration_number}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Sent {format(new Date(request.created_at), "MMM d, yyyy")}
-                      </p>
-                    </div>
-                    <Badge className={config.color}>
-                      <StatusIcon className="h-3 w-3 mr-1" />
-                      {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                    </Badge>
-                    {request.status === "pending" && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleCancelRequest(request.id)}
-                      >
-                        Cancel
-                      </Button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Edit Permissions Dialog */}
-      <Dialog open={!!editingAccess} onOpenChange={() => setEditingAccess(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Permissions</DialogTitle>
-            <DialogDescription>
-              Update the access permissions for {editingAccess?.doctor_profile?.full_name || "this doctor"}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3 py-4">
-            {(Object.keys(permissionLabels) as AccessPermission[]).map((permission) => (
-              <div
-                key={permission}
-                className="flex items-center space-x-3 rounded-lg border border-border p-3"
-              >
-                <Checkbox
-                  id={`edit-${permission}`}
-                  checked={editPermissions.includes(permission)}
-                  onCheckedChange={() => togglePermission(permission)}
-                />
-                <Label htmlFor={`edit-${permission}`} className="flex-1 cursor-pointer">
-                  {permissionLabels[permission]}
-                </Label>
-              </div>
-            ))}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingAccess(null)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSavePermissions} disabled={editPermissions.length === 0}>
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
