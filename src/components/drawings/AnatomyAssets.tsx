@@ -262,11 +262,15 @@ import RespiratoryImg from "@/assets/anatomy/Respiratory.png";
 import NeurologicalImg from "@/assets/anatomy/Neurological.png";
 import CardiovascularImg from "@/assets/anatomy/Cardiovascular.png";
 import MuscularImg from "@/assets/anatomy/Muscular.png";
+import BreastAugmentationImg from "@/assets/anatomy/Breast_Augmentation.png";
+import InjectiblesAndFillersImg from "@/assets/anatomy/Injectibles_and_Fillers.png";
+import BodyContouringImg from "@/assets/anatomy/Body_Controuring.png";
+import FacialImg from "@/assets/anatomy/Facial.png";
 
 export interface AnatomyAsset {
   id: string;
   name: string;
-  category: "body" | "spine" | "face" | "joints" | "systems";
+  category: "body" | "spine" | "face" | "joints" | "systems" | "plastic-surgery";
   component: React.FC;
   width: number;
   height: number;
@@ -291,4 +295,9 @@ export const anatomyAssets: AnatomyAsset[] = [
   { id: "sys-cardiovascular", name: "Cardiovascular", category: "systems", component: () => null, width: 200, height: 300, imageSrc: CardiovascularImg },
   { id: "sys-respiratory", name: "Respiratory", category: "systems", component: () => null, width: 200, height: 300, imageSrc: RespiratoryImg },
   { id: "sys-digestive", name: "Digestive", category: "systems", component: () => null, width: 200, height: 300, imageSrc: DigestiveImg },
+  // Plastic Surgery (image-based)
+  { id: "ps-breast", name: "Breast Augmentation", category: "plastic-surgery", component: () => null, width: 200, height: 300, imageSrc: BreastAugmentationImg },
+  { id: "ps-injectibles", name: "Injectibles & Fillers", category: "plastic-surgery", component: () => null, width: 200, height: 300, imageSrc: InjectiblesAndFillersImg },
+  { id: "ps-body", name: "Body Contouring", category: "plastic-surgery", component: () => null, width: 200, height: 300, imageSrc: BodyContouringImg },
+  { id: "ps-facial", name: "Facial", category: "plastic-surgery", component: () => null, width: 200, height: 300, imageSrc: FacialImg },
 ];
