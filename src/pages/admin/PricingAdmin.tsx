@@ -18,6 +18,17 @@ interface PricingConfig {
   savings: number;
 }
 
+// Auto-calculate annual savings: (monthly * 12) - annual
+const calculateSavings = <T extends PricingConfig>(pricing: T[], role: string): T[] => {
+  const monthly = pricing.find(p => p.role === role && p.billing_cycle === 'monthly');
+  const annual = pricing.find(p => p.role === role && p.billing_cycle === 'annual');
+  if (!monthly || !annual) return pricing;
+  const calculatedSavings = parseFloat(((monthly.price * 12) - annual.price).toFixed(2));
+  return pricing.map(p =>
+    p.id === annual.id ? { ...p, savings: calculatedSavings } : p
+  );
+};
+
 export default function PricingAdmin() {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -39,8 +50,10 @@ export default function PricingAdmin() {
         .order('role')
         .order('billing_cycle');
 
-      if (error) throw error;
-      setPricing(data || []);
+      let result = data || [];
+      result = calculateSavings(result, 'doctor');
+      result = calculateSavings(result, 'patient');
+      setPricing(result);
     } catch (error) {
       console.error('Error fetching pricing:', error);
       toast({
@@ -54,9 +67,19 @@ export default function PricingAdmin() {
   };
 
   const handlePriceChange = (id: string, field: keyof PricingConfig, value: string | number) => {
-    setPricing(prev => prev.map(p => 
-      p.id === id ? { ...p, [field]: field === 'price' || field === 'savings' ? parseFloat(value as string) || 0 : value } : p
-    ));
+    setPricing(prev => {
+      const updated = prev.map(p => 
+        p.id === id ? { ...p, [field]: field === 'price' || field === 'savings' ? parseFloat(value as string) || 0 : value } : p
+      );
+      // Recalculate savings for the role when price changes
+      if (field === 'price') {
+        const changedItem = prev.find(p => p.id === id);
+        if (changedItem) {
+          return calculateSavings(updated, changedItem.role);
+        }
+      }
+      return updated;
+    });
   };
 
   const handleSave = async () => {
@@ -160,8 +183,6 @@ export default function PricingAdmin() {
               <div className="space-y-2">
                 <Label>Price ($)</Label>
                 <Input
-                  type="number"
-                  step="0.01"
                   value={config.price}
                   onChange={(e) => handlePriceChange(config.id, 'price', e.target.value)}
                 />
@@ -169,10 +190,9 @@ export default function PricingAdmin() {
               <div className="space-y-2">
                 <Label>Savings ($)</Label>
                 <Input
-                  type="number"
-                  step="0.01"
-                  value={config.savings}
-                  onChange={(e) => handlePriceChange(config.id, 'savings', e.target.value)}
+                  value={config.billing_cycle === 'annual' ? config.savings : 'N/A'}
+                  disabled
+                  className="bg-muted"
                 />
               </div>
             </div>
@@ -206,8 +226,6 @@ export default function PricingAdmin() {
               <div className="space-y-2">
                 <Label>Price ($)</Label>
                 <Input
-                  type="number"
-                  step="0.01"
                   value={config.price}
                   onChange={(e) => handlePriceChange(config.id, 'price', e.target.value)}
                 />
@@ -215,10 +233,9 @@ export default function PricingAdmin() {
               <div className="space-y-2">
                 <Label>Savings ($)</Label>
                 <Input
-                  type="number"
-                  step="0.01"
-                  value={config.savings}
-                  onChange={(e) => handlePriceChange(config.id, 'savings', e.target.value)}
+                  value={config.billing_cycle === 'annual' ? config.savings : 'N/A'}
+                  disabled
+                  className="bg-muted"
                 />
               </div>
             </div>
