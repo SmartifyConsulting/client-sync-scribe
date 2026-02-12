@@ -80,11 +80,11 @@ const CURRENCIES = [
 ];
 
 const SIGNATURE_FONTS = [
-  { value: "great-vibes", label: "Great Vibes", fontFamily: "'Great Vibes', cursive" },
-  { value: "dancing-script", label: "Dancing Script", fontFamily: "'Dancing Script', cursive" },
-  { value: "edwardian-script", label: "Edwardian Script", fontFamily: "'Edwardian Script ITC', 'Segoe Script', cursive" },
-  { value: "rock-salt", label: "Rock Salt", fontFamily: "'Rock Salt', cursive" },
-  { value: "alex-brush", label: "Alex Brush", fontFamily: "'Alex Brush', cursive" },
+  { value: "fave-script", label: "Fave Script Bold", fontFamily: "'Fave Script', 'Segoe Script', cursive", fontSize: "25px", fontWeight: "bold" },
+  { value: "lucida-calligraphy", label: "Lucida Calligraphy", fontFamily: "'Lucida Calligraphy', 'Lucida Handwriting', 'Apple Chancery', cursive", fontSize: "16px", fontWeight: "normal" },
+  { value: "rastanty-cortez", label: "Rastanty Cortez", fontFamily: "'Rastanty Cortez', 'Brush Script MT', cursive", fontSize: "28px", fontWeight: "bold" },
+  { value: "rochester", label: "Rochester", fontFamily: "'Rochester', cursive", fontSize: "18px", fontWeight: "normal" },
+  { value: "edwardian-script", label: "Edwardian Script", fontFamily: "'Edwardian Script ITC', 'Segoe Script', cursive", fontSize: "26px", fontWeight: "bold" },
 ];
 
 interface Partner {
@@ -147,7 +147,7 @@ export default function Profile() {
     specialty: "",
     mobile_number: "",
     country_code: "+27",
-    signature_font: "great-vibes",
+    signature_font: "fave-script",
     signature_color: "black",
   });
 
@@ -179,8 +179,8 @@ export default function Profile() {
         specialty: (profile as any).specialty || "",
         mobile_number: mobileNumber,
         country_code: countryCode,
-        signature_font: (profile as any).signature_font || "great-vibes",
-        signature_color: (profile as any).signature_color || "black",
+        signature_font: (profile as any).signature_font || "fave-script",
+        signature_color: ((profile as any).signature_color === 'navy' ? 'teal' : (profile as any).signature_color) || "black",
       });
       
       // Mark as initialized after profile loads
@@ -508,6 +508,14 @@ export default function Profile() {
     return SIGNATURE_FONTS.find(f => f.value === fontValue)?.fontFamily || SIGNATURE_FONTS[0].fontFamily;
   };
 
+  const getSignatureFontSize = (fontValue: string) => {
+    return SIGNATURE_FONTS.find(f => f.value === fontValue)?.fontSize || '20px';
+  };
+
+  const getSignatureFontWeight = (fontValue: string) => {
+    return SIGNATURE_FONTS.find(f => f.value === fontValue)?.fontWeight || 'normal';
+  };
+
   return (
     <div className="space-y-8 animate-fade-in max-w-3xl">
       {/* Header */}
@@ -671,8 +679,9 @@ export default function Profile() {
             <p
               style={{
                 fontFamily: getSignatureFontFamily(formData.signature_font),
-                color: formData.signature_color === 'navy' ? '#001f5c' : '#000000',
-                fontSize: '1.25rem',
+                color: formData.signature_color === 'teal' ? '#104861' : '#000000',
+                fontSize: getSignatureFontSize(formData.signature_font),
+                fontWeight: getSignatureFontWeight(formData.signature_font),
               }}
             >
               {combinedFullName || "Your Name"}
@@ -690,7 +699,7 @@ export default function Profile() {
                 <SelectContent>
                   {SIGNATURE_FONTS.map((font) => (
                     <SelectItem key={font.value} value={font.value}>
-                      <span style={{ fontFamily: font.fontFamily }}>{font.label}</span>
+                      <span style={{ fontFamily: font.fontFamily, fontSize: font.fontSize, fontWeight: font.fontWeight as any }}>{font.label}</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -707,10 +716,10 @@ export default function Profile() {
                       Black
                     </span>
                   </SelectItem>
-                  <SelectItem value="navy">
+                  <SelectItem value="teal">
                     <span className="flex items-center gap-2">
-                      <span className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: '#001f5c' }} />
-                      Navy Blue
+                      <span className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: '#104861' }} />
+                      Teal (#104861)
                     </span>
                   </SelectItem>
                 </SelectContent>
