@@ -7,7 +7,7 @@
 @import "@fontsource/inter/600.css";
 @import "@fontsource/inter/700.css";
 
-/* mIRI - Clean Modern Design inspired by Airbnb */
+/* MediPad - Clean Modern Design inspired by Airbnb */
 
 @layer base {
   :root {
@@ -47,6 +47,12 @@
 
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
+
+    /* Terracotta secondary accent */
+    --terracotta: 16 76% 52%;
+    --terracotta-foreground: 0 0% 100%;
+    --terracotta-light: 16 76% 62%;
+    --terracotta-dark: 16 76% 42%;
 
     /* Borders - very subtle */
     --border: 220 13% 91%;
@@ -108,6 +114,12 @@
 
     --warning: 38 80% 55%;
     --warning-foreground: 0 0% 100%;
+
+    /* Terracotta secondary accent */
+    --terracotta: 16 70% 58%;
+    --terracotta-foreground: 0 0% 100%;
+    --terracotta-light: 16 70% 68%;
+    --terracotta-dark: 16 70% 48%;
 
     --border: 0 0% 18%;
     --input: 0 0% 18%;

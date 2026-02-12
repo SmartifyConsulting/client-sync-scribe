@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Sidebar } from "./Sidebar";
+import medipadLogo from "@/assets/medipad-logo.jpg";
 
 export function MobileHeader() {
   const [open, setOpen] = useState(false);
@@ -10,10 +11,7 @@ export function MobileHeader() {
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-background/95 backdrop-blur-sm border-b border-border md:hidden">
       <div className="flex items-center gap-2">
-        <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-          <span className="text-primary-foreground font-bold text-sm">M</span>
-        </div>
-        <span className="font-semibold text-lg text-foreground">mIRI<span className="text-primary">360</span></span>
+        <img src={medipadLogo} alt="MediPad" className="h-8 w-auto" />
       </div>
 
       <Sheet open={open} onOpenChange={setOpen}>

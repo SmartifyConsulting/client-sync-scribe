@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import medipadLogo from "@/assets/medipad-logo.jpg";
 import {
   Mail,
   Lock,
@@ -445,7 +446,7 @@ export default function Auth() {
           }
         }
 
-        toast({ title: "Account created!", description: "Welcome to mIRI360!" });
+        toast({ title: "Account created!", description: "Welcome to MediPad!" });
         navigate("/dashboard");
       }
     } catch (error: any) {
@@ -469,11 +470,9 @@ export default function Auth() {
             onClick={() => navigate("/")}
             className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-              <span className="text-2xl font-bold text-primary-foreground">M</span>
-            </div>
+            <img src={medipadLogo} alt="MediPad" className="h-12 w-auto" />
           </button>
-          <h1 className="text-2xl font-bold text-foreground">mIRI<span className="text-primary">360</span></h1>
+          <h1 className="text-2xl font-bold text-foreground">MediPad</h1>
           <p className="text-muted-foreground mt-2">
             {isLogin 
               ? `${userRole === "doctor" ? "Doctor" : "Patient"} Sign In` 

@@ -32,7 +32,7 @@ const BusinessAssociateAgreement = () => {
           <p>By using the Platform as a HIPAA Covered Entity, you acknowledge that:</p>
           <ul>
             <li>You are a healthcare provider or covered entity as defined under the Health Insurance Portability and Accountability Act of 1996 ("HIPAA") and its implementing regulations</li>
-            <li>Business Associate provides technology services through the mIRI360 platform that involve the creation, receipt, maintenance, or transmission of Protected Health Information ("PHI") on your behalf</li>
+            <li>Business Associate provides technology services through the MediPad platform that involve the creation, receipt, maintenance, or transmission of Protected Health Information ("PHI") on your behalf</li>
             <li>HIPAA requires a Business Associate Agreement between Covered Entities and Business Associates</li>
             <li>Your use of the Platform constitutes your acceptance of this BAA</li>
             <li>This BAA satisfies the requirements of HIPAA, the Health Information Technology for Economic and Clinical Health Act ("HITECH Act"), and their implementing regulations, including the Privacy, Security, and Breach Notification Rules (collectively, the "HIPAA Rules")</li>

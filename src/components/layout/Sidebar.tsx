@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
+import medipadLogo from "@/assets/medipad-logo.jpg";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -104,13 +105,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     <aside className="fixed left-0 top-0 z-40 h-screen w-[210px] bg-sidebar border-r border-sidebar-border">
       <div className="flex h-full flex-col">
         <div className="flex h-20 items-center gap-3 px-6">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary shadow-md">
-            <span className="text-xl font-bold text-primary-foreground">M</span>
-          </div>
-          <div>
-            <span className="text-xl font-semibold text-foreground tracking-tight">mIRI<span className="text-primary">360</span></span>
-            <p className="text-xs text-muted-foreground">Medical Integrated Record Intelligence</p>
-          </div>
+          <img src={medipadLogo} alt="MediPad" className="h-10 w-auto" />
         </div>
 
         {/* Navigation */}

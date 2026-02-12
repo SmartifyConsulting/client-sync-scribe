@@ -252,7 +252,7 @@ export function InviteUserDialog() {
                 <p className="text-sm font-medium">User not found on platform</p>
               </div>
               <p className="text-sm text-muted-foreground mb-3">
-                Send an email invitation to invite them to join mIRI360.
+                Send an email invitation to invite them to join MediPad.
               </p>
               <Input
                 type="email"

@@ -944,7 +944,7 @@ function MailboxSection({ userId }: { userId?: string }) {
     fetchMailboxInfo();
   }, [userId]);
 
-  const displayEmail = mailboxAlias ? `${mailboxAlias}@miri360.com` : mailboxId ? `docs-${mailboxId.slice(0, 8)}@inbox.miri360.health` : null;
+  const displayEmail = mailboxAlias ? `${mailboxAlias}@medipad.com` : mailboxId ? `docs-${mailboxId.slice(0, 8)}@inbox.medipad.health` : null;
 
   const handleCopy = async () => {
     if (!displayEmail) return;
@@ -970,14 +970,14 @@ function MailboxSection({ userId }: { userId?: string }) {
     setIsSavingAlias(false);
     if (error) {
       if (error.code === '23505') {
-        toast({ title: "Alias taken", description: `"${cleanAlias}@miri360.com" is already in use. Please choose a different alias.`, variant: "destructive" });
+        toast({ title: "Alias taken", description: `"${cleanAlias}@medipad.com" is already in use. Please choose a different alias.`, variant: "destructive" });
       } else {
         toast({ title: "Error", description: "Failed to save alias", variant: "destructive" });
       }
     } else {
       setMailboxAlias(cleanAlias);
       setEditingAlias(false);
-      toast({ title: "Alias saved", description: `Your mailbox email is now ${cleanAlias}@miri360.com` });
+      toast({ title: "Alias saved", description: `Your mailbox email is now ${cleanAlias}@medipad.com` });
     }
   };
 
@@ -1009,7 +1009,7 @@ function MailboxSection({ userId }: { userId?: string }) {
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-0 flex-1">
                       <Input value={aliasInput} onChange={(e) => setAliasInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} placeholder="your-name" className="rounded-r-none max-w-[200px]" />
-                      <span className="px-3 py-2.5 border border-l-0 border-border rounded-r-xl bg-muted text-sm text-muted-foreground whitespace-nowrap">@miri360.com</span>
+                      <span className="px-3 py-2.5 border border-l-0 border-border rounded-r-xl bg-muted text-sm text-muted-foreground whitespace-nowrap">@medipad.com</span>
                     </div>
                     <Button size="sm" onClick={handleSaveAlias} disabled={isSavingAlias}>
                       {isSavingAlias ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
