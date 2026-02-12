@@ -1,0 +1,1 @@
+ALTER TABLE public.practice_partners ADD COLUMN email text;
