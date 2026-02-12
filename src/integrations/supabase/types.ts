@@ -931,8 +931,11 @@ export type Database = {
           practice_number: string | null
           role: Database["public"]["Enums"]["user_role"] | null
           round_table_enabled: boolean | null
+          signature_color: string | null
+          signature_font: string | null
           signature_url: string | null
           specialty: string | null
+          status: string | null
           updated_at: string
         }
         Insert: {
@@ -950,8 +953,11 @@ export type Database = {
           practice_number?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           round_table_enabled?: boolean | null
+          signature_color?: string | null
+          signature_font?: string | null
           signature_url?: string | null
           specialty?: string | null
+          status?: string | null
           updated_at?: string
         }
         Update: {
@@ -969,8 +975,11 @@ export type Database = {
           practice_number?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           round_table_enabled?: boolean | null
+          signature_color?: string | null
+          signature_font?: string | null
           signature_url?: string | null
           specialty?: string | null
+          status?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1458,6 +1467,7 @@ export type Database = {
           email: string
           full_name: string
           role: string
+          status: string
           user_id: string
         }[]
       }

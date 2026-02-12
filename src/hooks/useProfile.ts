@@ -15,6 +15,8 @@ export interface Profile {
   specialty: string | null;
   mobile_number: string | null;
   inactive_threshold_months: number | null;
+  signature_font: string | null;
+  signature_color: string | null;
   created_at: string;
   updated_at: string;
 }
