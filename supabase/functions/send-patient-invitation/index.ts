@@ -90,9 +90,9 @@ const handler = async (req: Request): Promise<Response> => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "mIRI360 <onboarding@resend.dev>",
+        from: "MediPad <onboarding@resend.dev>",
         to: [patientEmail],
-        subject: `${doctorName} has invited you to join mIRI360`,
+        subject: `${doctorName} has invited you to join MediPad`,
         html: `
           <!DOCTYPE html>
           <html>
@@ -102,15 +102,15 @@ const handler = async (req: Request): Promise<Response> => {
           </head>
           <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to mIRI360</h1>
+              <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to MediPad</h1>
             </div>
             
             <div style="background: #f8fafc; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
               <p style="font-size: 18px; margin-top: 0;">Hello ${patientName},</p>
               
-              <p><strong>${doctorName}</strong> from <strong>${practiceName}</strong> has invited you to join mIRI360 - a secure platform for managing your healthcare journey.</p>
+              <p><strong>${doctorName}</strong> from <strong>${practiceName}</strong> has invited you to join MediPad - a secure platform for managing your healthcare journey.</p>
               
-              <p>With mIRI360, you can:</p>
+              <p>With MediPad, you can:</p>
               <ul style="padding-left: 20px;">
                 <li>View your appointment calendar</li>
                 <li>Access your prescription history</li>
@@ -129,7 +129,7 @@ const handler = async (req: Request): Promise<Response> => {
               <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
               
               <p style="color: #94a3b8; font-size: 12px; margin-bottom: 0;">
-                mIRI360 - Secure Healthcare Management<br>
+                MediPad - Secure Healthcare Management<br>
                 This is an automated message, please do not reply directly to this email.
               </p>
             </div>

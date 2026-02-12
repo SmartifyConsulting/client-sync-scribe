@@ -146,7 +146,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <p>Thank you for your assistance.</p>
               </div>
               <div class="footer">
-                <p>This claim was submitted via mIRI360 Healthcare Management System</p>
+                <p>This claim was submitted via MediPad Healthcare Management System</p>
               </div>
             </div>
           </body>

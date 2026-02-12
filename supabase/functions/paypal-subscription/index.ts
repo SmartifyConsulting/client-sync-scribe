@@ -71,7 +71,7 @@ async function createPayPalOrder(accessToken: string, planType: string, billingC
         },
       ],
       application_context: {
-        brand_name: "mIRI360",
+        brand_name: "MediPad",
         landing_page: "NO_PREFERENCE",
         user_action: "PAY_NOW",
         return_url: `${Deno.env.get("SUPABASE_URL")}/functions/v1/paypal-subscription?action=capture`,
@@ -122,7 +122,7 @@ async function sendSubscriptionEmail(email: string, subject: string, htmlContent
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "mIRI360 <onboarding@resend.dev>",
+        from: "MediPad <onboarding@resend.dev>",
         to: [email],
         subject,
         html: htmlContent,
@@ -257,14 +257,14 @@ serve(async (req) => {
 
           await sendSubscriptionEmail(
             userEmail,
-            "Your mIRI360 Subscription Has Been Cancelled",
+            "Your MediPad Subscription Has Been Cancelled",
             `
               <h1>Subscription Cancelled</h1>
               <p>We're sorry to see you go!</p>
-              <p>Your mIRI360 subscription has been cancelled. You will continue to have access to all features until <strong>${endDate}</strong>.</p>
+              <p>Your MediPad subscription has been cancelled. You will continue to have access to all features until <strong>${endDate}</strong>.</p>
               <p>If you change your mind, you can reactivate your subscription at any time from your Settings page.</p>
-              <p>Thank you for being a mIRI360 user.</p>
-              <p>Best regards,<br>The mIRI360 Team</p>
+              <p>Thank you for being a MediPad user.</p>
+              <p>Best regards,<br>The MediPad Team</p>
             `,
           );
         }
@@ -432,27 +432,27 @@ serve(async (req) => {
           const userEmail = await getUserEmail(supabase, subscription.user_id);
           if (userEmail) {
             const emailSubject = isTrial 
-              ? "Welcome to mIRI360 - Your 7-Day Free Trial Has Started!"
-              : "Welcome to mIRI360 - Subscription Activated!";
+              ? "Welcome to MediPad - Your 7-Day Free Trial Has Started!"
+              : "Welcome to MediPad - Subscription Activated!";
             
             const trialEndDate = trialEndsAt?.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
             const billingDate = periodEnd?.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
             const emailContent = isTrial ? `
               <h1>Your Free Trial Has Started!</h1>
-              <p>Welcome to mIRI360! Your 7-day free trial is now active.</p>
+              <p>Welcome to MediPad! Your 7-day free trial is now active.</p>
               <p><strong>Trial ends:</strong> ${trialEndDate}</p>
               <p><strong>Plan:</strong> ${plan?.name || "Subscription"}</p>
               <p><strong>After trial:</strong> $${plan?.price.toFixed(2) || "0.00"} USD/month</p>
-              <p>You have full access to all mIRI360 features during your trial. If you wish to cancel, please do so before ${trialEndDate} to avoid being charged.</p>
-              <p>Best regards,<br>The mIRI360 Team</p>
+              <p>You have full access to all MediPad features during your trial. If you wish to cancel, please do so before ${trialEndDate} to avoid being charged.</p>
+              <p>Best regards,<br>The MediPad Team</p>
             ` : `
               <h1>Your Subscription is Active!</h1>
-              <p>Thank you for subscribing to mIRI360!</p>
+              <p>Thank you for subscribing to MediPad!</p>
               <p><strong>Plan:</strong> ${plan?.name || "Subscription"}</p>
               <p><strong>Amount:</strong> $${plan?.price.toFixed(2) || "0.00"} USD</p>
               <p><strong>Next billing date:</strong> ${billingDate}</p>
-              <p>Best regards,<br>The mIRI360 Team</p>
+              <p>Best regards,<br>The MediPad Team</p>
             `;
 
             await sendSubscriptionEmail(userEmail, emailSubject, emailContent);

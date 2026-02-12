@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import medipadLogo from "@/assets/medipad-logo.jpg";
 import { Lock, Loader2, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -87,11 +88,9 @@ export default function ResetPassword() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-                <span className="text-2xl font-bold text-primary-foreground">M</span>
-              </div>
+              <img src={medipadLogo} alt="MediPad" className="h-12 w-auto" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">mIRI<span className="text-primary">360</span></h1>
+            <h1 className="text-2xl font-bold text-foreground">MediPad</h1>
             <p className="text-muted-foreground mt-2">Set your new password</p>
           </div>
 

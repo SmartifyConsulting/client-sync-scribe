@@ -482,7 +482,7 @@ Amount: $${payment.amount.toFixed(2)} ${payment.currency}
 Status: ${payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
 
 Thank you for your payment!
-mIRI360
+MediPad
     `.trim();
 
     const blob = new Blob([receiptContent], { type: "text/plain" });

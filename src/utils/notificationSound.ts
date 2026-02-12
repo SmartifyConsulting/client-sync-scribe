@@ -78,7 +78,7 @@ export const showBrowserNotification = (title: string, body: string, icon?: stri
       body,
       icon: icon || '/favicon.ico',
       badge: '/favicon.ico',
-      tag: 'miri360-notification',
+      tag: 'medipad-notification',
     });
     
     // Auto close after 5 seconds

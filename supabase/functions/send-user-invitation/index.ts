@@ -165,8 +165,8 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Send email
-    const appUrl = Deno.env.get("APP_URL") || "https://miri360.health";
-    const senderName = senderProfile?.full_name || "A mIRI360 user";
+    const appUrl = Deno.env.get("APP_URL") || "https://medipad.health";
+    const senderName = senderProfile?.full_name || "A MediPad user";
     const senderRole = senderProfile?.role === "doctor" ? "healthcare provider" : "user";
 
     const emailHtml = finalRecipientId && !isPracticePartner ? `
@@ -177,29 +177,29 @@ const handler = async (req: Request): Promise<Response> => {
         </div>
         <div style="background: #f8fafc; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
           <p style="font-size: 18px; margin-top: 0;">Hello,</p>
-          <p><strong>${senderName}</strong>${senderProfile?.specialty ? ` (${senderProfile.specialty})` : ""} would like to connect with you on mIRI360.</p>
+          <p><strong>${senderName}</strong>${senderProfile?.specialty ? ` (${senderProfile.specialty})` : ""} would like to connect with you on MediPad.</p>
           ${message ? `<div style="background: white; border-left: 4px solid #0ea5e9; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0;"><p style="margin: 0; color: #64748b; font-size: 14px;">Personal message:</p><p style="margin: 10px 0 0 0;">"${message}"</p></div>` : ""}
           <div style="text-align: center; margin: 30px 0;"><a href="${appUrl}/notifications" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block; font-size: 16px;">View Invitation</a></div>
-          <p style="color: #64748b; font-size: 14px;">Log in to mIRI360 to accept or decline this invitation.</p>
+          <p style="color: #64748b; font-size: 14px;">Log in to MediPad to accept or decline this invitation.</p>
           <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
-          <p style="color: #94a3b8; font-size: 12px; margin-bottom: 0;">mIRI360 - Secure Healthcare Management</p>
+          <p style="color: #94a3b8; font-size: 12px; margin-bottom: 0;">MediPad - Secure Healthcare Management</p>
         </div>
       </body></html>
     ` : `
       <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
       <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
-          <h1 style="color: white; margin: 0; font-size: 28px;">${isPracticePartner ? "You've Been Added as a Practice Partner" : "You're Invited to mIRI360"}</h1>
+          <h1 style="color: white; margin: 0; font-size: 28px;">${isPracticePartner ? "You've Been Added as a Practice Partner" : "You're Invited to MediPad"}</h1>
         </div>
         <div style="background: #f8fafc; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
           <p style="font-size: 18px; margin-top: 0;">Hello${partnerName ? ` ${partnerName}` : ""},</p>
-          <p><strong>${senderName}</strong>, a ${senderRole} on mIRI360, has ${isPracticePartner ? "added you as a practice partner" : "invited you to join the platform"}.</p>
+          <p><strong>${senderName}</strong>, a ${senderRole} on MediPad, has ${isPracticePartner ? "added you as a practice partner" : "invited you to join the platform"}.</p>
           ${isPracticePartner ? `<p>Your account has been created. Please log in and update your password to activate your account.</p>` : ""}
           ${message ? `<div style="background: white; border-left: 4px solid #0ea5e9; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0;"><p style="margin: 0; color: #64748b; font-size: 14px;">Personal message:</p><p style="margin: 10px 0 0 0;">"${message}"</p></div>` : ""}
-          <div style="text-align: center; margin: 30px 0;"><a href="${appUrl}" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block; font-size: 16px;">${isPracticePartner ? "Log In & Set Password" : "Join mIRI360 Now"}</a></div>
+          <div style="text-align: center; margin: 30px 0;"><a href="${appUrl}" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block; font-size: 16px;">${isPracticePartner ? "Log In & Set Password" : "Join MediPad Now"}</a></div>
           <p style="color: #64748b; font-size: 14px;">This invitation expires in 7 days.</p>
           <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
-          <p style="color: #94a3b8; font-size: 12px; margin-bottom: 0;">mIRI360 - Secure Healthcare Management</p>
+          <p style="color: #94a3b8; font-size: 12px; margin-bottom: 0;">MediPad - Secure Healthcare Management</p>
         </div>
       </body></html>
     `;
@@ -210,13 +210,13 @@ const handler = async (req: Request): Promise<Response> => {
           method: "POST",
           headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            from: "mIRI360 <onboarding@resend.dev>",
+            from: "MediPad <onboarding@resend.dev>",
             to: [finalRecipientEmail || recipientEmail],
             subject: isPracticePartner
-              ? `${senderName} added you as a practice partner on mIRI360`
+              ? `${senderName} added you as a practice partner on MediPad`
               : finalRecipientId
-                ? `${senderName} wants to connect with you on mIRI360`
-                : `${senderName} has invited you to join mIRI360`,
+                ? `${senderName} wants to connect with you on MediPad`
+                : `${senderName} has invited you to join MediPad`,
             html: emailHtml,
           }),
         });

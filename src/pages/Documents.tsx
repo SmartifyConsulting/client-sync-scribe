@@ -284,7 +284,7 @@ export default function Documents() {
           subject: shareDocument.name,
           documentName: shareDocument.name,
           documentContent: shareDocument.content,
-          senderName: profile?.full_name || "mIRI360 User",
+          senderName: profile?.full_name || "MediPad User",
           practiceName: profile?.practice_address ? `Practice #${profile.practice_number}` : undefined,
         },
       });

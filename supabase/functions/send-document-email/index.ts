@@ -84,7 +84,7 @@ serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "mIRI360 <noreply@resend.dev>",
+        from: "MediPad <noreply@resend.dev>",
         to: [to],
         subject: subject,
         html: htmlContent,

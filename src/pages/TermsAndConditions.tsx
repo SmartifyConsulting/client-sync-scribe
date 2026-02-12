@@ -27,7 +27,7 @@ export default function TermsAndConditions() {
 
           <h2>1. Acceptance of Terms</h2>
           <p>
-            By creating an account, accessing, or using mIRI360 (the "Platform"), you agree to be bound by these Terms and Conditions ("Terms"). Your use of the Platform constitutes your acceptance of these Terms. If you do not agree to these Terms, you must not access or use the Platform.
+            By creating an account, accessing, or using MediPad (the "Platform"), you agree to be bound by these Terms and Conditions ("Terms"). Your use of the Platform constitutes your acceptance of these Terms. If you do not agree to these Terms, you must not access or use the Platform.
           </p>
           <p>
             <strong>By clicking "I Accept," "Sign Up," "Create Account," or by accessing or using the Platform, you acknowledge that you have read, understood, and agree to be bound by these Terms.</strong>
@@ -35,7 +35,7 @@ export default function TermsAndConditions() {
 
           <h2>2. Description of Service</h2>
           <p>
-            mIRI360 is a healthcare communication platform that enables doctors and patients to interact through a unified patient profile. The Platform facilitates information sharing, communication, and healthcare coordination but does not provide medical advice, diagnosis, or treatment.
+            MediPad is a healthcare communication platform that enables doctors and patients to interact through a unified patient profile. The Platform facilitates information sharing, communication, and healthcare coordination but does not provide medical advice, diagnosis, or treatment.
           </p>
 
           <h2>3. Not a Medical Service Provider</h2>
@@ -349,7 +349,7 @@ export default function TermsAndConditions() {
           <p>For questions about these Terms, please contact us at:</p>
           <p>
             <strong>Smartify Solutions</strong><br />
-            Email: support@miri360.com
+            Email: support@medipad.com
           </p>
 
           <h2>28. Special Provisions for Specific Jurisdictions</h2>
