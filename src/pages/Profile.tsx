@@ -80,11 +80,11 @@ const CURRENCIES = [
 ];
 
 const SIGNATURE_FONTS = [
-  { value: "sans", label: "Sans", fontFamily: "system-ui, -apple-system, sans-serif" },
-  { value: "serif", label: "Serif", fontFamily: "Georgia, 'Times New Roman', serif" },
-  { value: "cursive", label: "Cursive", fontFamily: "'Brush Script MT', 'Segoe Script', cursive" },
-  { value: "monospace", label: "Monospace", fontFamily: "'Courier New', Courier, monospace" },
-  { value: "handwriting", label: "Handwriting", fontFamily: "'Comic Sans MS', 'Chalkboard SE', cursive" },
+  { value: "great-vibes", label: "Great Vibes", fontFamily: "'Great Vibes', cursive" },
+  { value: "dancing-script", label: "Dancing Script", fontFamily: "'Dancing Script', cursive" },
+  { value: "edwardian-script", label: "Edwardian Script", fontFamily: "'Edwardian Script ITC', 'Segoe Script', cursive" },
+  { value: "rock-salt", label: "Rock Salt", fontFamily: "'Rock Salt', cursive" },
+  { value: "alex-brush", label: "Alex Brush", fontFamily: "'Alex Brush', cursive" },
 ];
 
 interface Partner {
@@ -147,7 +147,7 @@ export default function Profile() {
     specialty: "",
     mobile_number: "",
     country_code: "+27",
-    signature_font: "sans",
+    signature_font: "great-vibes",
     signature_color: "black",
   });
 
@@ -179,7 +179,7 @@ export default function Profile() {
         specialty: (profile as any).specialty || "",
         mobile_number: mobileNumber,
         country_code: countryCode,
-        signature_font: (profile as any).signature_font || "sans",
+        signature_font: (profile as any).signature_font || "great-vibes",
         signature_color: (profile as any).signature_color || "black",
       });
       

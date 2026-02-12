@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Loader2, ShieldAlert, Users, Pencil, Save, X } from "lucide-react";
+import { InviteUserDialog } from "@/components/InviteUserDialog";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -145,12 +146,15 @@ export default function UserManagement() {
 
   return (
     <div className="space-y-6 animate-fade-in max-w-5xl">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
-          <Users className="h-7 w-7 text-primary" />
-          User Management
-        </h1>
-        <p className="mt-1 text-muted-foreground">View and edit registered users and their roles</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+            <Users className="h-7 w-7 text-primary" />
+            User Management
+          </h1>
+          <p className="mt-1 text-muted-foreground">View and edit registered users and their roles</p>
+        </div>
+        <InviteUserDialog />
       </div>
 
       <div className="rounded-lg border border-border bg-card">
