@@ -470,7 +470,7 @@ export default function Auth() {
             onClick={() => navigate("/")}
             className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity"
           >
-            <img src={medipadLogo} alt="MediPad" className="h-12 w-auto" />
+            <img src={medipadLogo} alt="MediPad" className="h-[62px] w-auto" />
           </button>
           <h1 className="text-2xl font-bold text-foreground">MediPad</h1>
           <p className="text-muted-foreground mt-2">

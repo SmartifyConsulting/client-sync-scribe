@@ -123,6 +123,7 @@ export default function Profile() {
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
   const hasInitialized = useRef(false);
   const isSettingFromProfile = useRef(false);
+  const profileLoadedData = useRef<typeof formData | null>(null);
   
   // Admin email editing
   const [editEmail, setEditEmail] = useState("");
@@ -169,8 +170,7 @@ export default function Profile() {
       const firstName = spaceIdx > -1 ? fullName.slice(0, spaceIdx) : fullName;
       const lastName = spaceIdx > -1 ? fullName.slice(spaceIdx + 1) : "";
       
-      isSettingFromProfile.current = true;
-      setFormData({
+      const newFormData = {
         first_name: firstName,
         last_name: lastName,
         practice_number: profile.practice_number || "",
@@ -181,13 +181,17 @@ export default function Profile() {
         country_code: countryCode,
         signature_font: (profile as any).signature_font || "fave-script",
         signature_color: ((profile as any).signature_color === 'navy' ? 'teal' : (profile as any).signature_color) || "black",
-      });
+      };
+      
+      isSettingFromProfile.current = true;
+      profileLoadedData.current = newFormData;
+      setFormData(newFormData);
       
       // Mark as initialized after profile loads
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         hasInitialized.current = true;
         isSettingFromProfile.current = false;
-      }, 100);
+      });
     }
   }, [profile]);
 
@@ -196,6 +200,13 @@ export default function Profile() {
   // Autosave effect
   useEffect(() => {
     if (!hasInitialized.current || !user || isSettingFromProfile.current) return;
+    
+    // Skip autosave if formData matches the profile-loaded snapshot
+    if (profileLoadedData.current && JSON.stringify(formData) === JSON.stringify(profileLoadedData.current)) {
+      profileLoadedData.current = null;
+      return;
+    }
+    profileLoadedData.current = null;
 
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
@@ -349,8 +360,8 @@ export default function Profile() {
   };
 
   const addPartner = async () => {
-    if (!user || !newPartner.full_name.trim() || !newPartner.registration_number.trim()) {
-      toast({ title: "Missing fields", description: "Partner name and registration number are required", variant: "destructive" });
+    if (!user || !newPartner.full_name.trim() || !newPartner.registration_number.trim() || !newPartner.email.trim()) {
+      toast({ title: "Missing fields", description: "Partner name, registration number, and email are required", variant: "destructive" });
       return;
     }
 
@@ -362,7 +373,8 @@ export default function Profile() {
         full_name: newPartner.full_name,
         registration_number: newPartner.registration_number,
         mobile_number: newPartner.mobile_number || null,
-      })
+        email: newPartner.email.trim(),
+      } as any)
       .select()
       .single();
 
@@ -371,24 +383,20 @@ export default function Profile() {
     } else {
       setPartners([...partners, data]);
       
-      // Send invitation if email is provided - also create pending user
-      if (newPartner.email.trim()) {
-        try {
-          await supabase.functions.invoke('send-user-invitation', {
-            body: {
-              recipientEmail: newPartner.email.trim(),
-              senderName: profile?.full_name || 'A colleague',
-              message: `You have been added as a practice partner. Join the platform to collaborate.`,
-              isPracticePartner: true,
-              partnerName: newPartner.full_name,
-            },
-          });
-          toast({ title: "Partner added & invited", description: `${newPartner.full_name} has been added and an invitation was sent to ${newPartner.email}` });
-        } catch {
-          toast({ title: "Partner added", description: `${newPartner.full_name} has been added, but the invitation email could not be sent` });
-        }
-      } else {
-        toast({ title: "Partner added", description: `${newPartner.full_name} has been added` });
+      // Send invitation and create pending user (email is now required)
+      try {
+        await supabase.functions.invoke('send-user-invitation', {
+          body: {
+            recipientEmail: newPartner.email.trim(),
+            senderName: profile?.full_name || 'A colleague',
+            message: `You have been added as a practice partner. Join the platform to collaborate.`,
+            isPracticePartner: true,
+            partnerName: newPartner.full_name,
+          },
+        });
+        toast({ title: "Partner added & invited", description: `${newPartner.full_name} has been added and an invitation was sent to ${newPartner.email}` });
+      } catch {
+        toast({ title: "Partner added", description: `${newPartner.full_name} has been added, but the invitation email could not be sent` });
       }
       
       setNewPartner({ full_name: "", registration_number: "", mobile_number: "", email: "" });
@@ -806,8 +814,8 @@ export default function Profile() {
                 <Input id="partner_mobile" value={newPartner.mobile_number} onChange={(e) => setNewPartner({ ...newPartner, mobile_number: e.target.value })} placeholder="e.g., 082 123 4567" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="partner_email">Email (for invitation)</Label>
-                <Input id="partner_email" type="email" value={newPartner.email} onChange={(e) => setNewPartner({ ...newPartner, email: e.target.value })} placeholder="partner@example.com" />
+                <Label htmlFor="partner_email">Email <span className="text-destructive">*</span></Label>
+                <Input id="partner_email" type="email" value={newPartner.email} onChange={(e) => setNewPartner({ ...newPartner, email: e.target.value })} placeholder="partner@example.com" required />
               </div>
             </div>
             <div className="flex gap-2">
