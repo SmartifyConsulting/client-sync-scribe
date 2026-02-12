@@ -79,6 +79,14 @@ const CURRENCIES = [
   { code: "LSL", symbol: "M", name: "Lesotho Loti" },
 ];
 
+const SIGNATURE_FONTS = [
+  { value: "sans", label: "Sans", fontFamily: "system-ui, -apple-system, sans-serif" },
+  { value: "serif", label: "Serif", fontFamily: "Georgia, 'Times New Roman', serif" },
+  { value: "cursive", label: "Cursive", fontFamily: "'Brush Script MT', 'Segoe Script', cursive" },
+  { value: "monospace", label: "Monospace", fontFamily: "'Courier New', Courier, monospace" },
+  { value: "handwriting", label: "Handwriting", fontFamily: "'Comic Sans MS', 'Chalkboard SE', cursive" },
+];
+
 interface Partner {
   id: string;
   full_name: string;
@@ -103,6 +111,7 @@ export default function Profile() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [newPartner, setNewPartner] = useState({ full_name: "", registration_number: "", mobile_number: "", email: "" });
   const [isAddingPartner, setIsAddingPartner] = useState(false);
+  const [showAddPartnerForm, setShowAddPartnerForm] = useState(false);
   
   // Partner editing state
   const [editingPartnerId, setEditingPartnerId] = useState<string | null>(null);
@@ -130,13 +139,16 @@ export default function Profile() {
   const [isSavingService, setIsSavingService] = useState(false);
   
   const [formData, setFormData] = useState({
-    full_name: "",
+    first_name: "",
+    last_name: "",
     practice_number: "",
     doctor_number: "",
     practice_address: "",
     specialty: "",
     mobile_number: "",
     country_code: "+27",
+    signature_font: "sans",
+    signature_color: "black",
   });
 
   useEffect(() => {
@@ -150,16 +162,25 @@ export default function Profile() {
         countryCode = matchedCode.code;
         mobileNumber = mobileNumber.replace(matchedCode.code, "").trim();
       }
+
+      // Split full_name into first and last
+      const fullName = profile.full_name || "";
+      const spaceIdx = fullName.indexOf(" ");
+      const firstName = spaceIdx > -1 ? fullName.slice(0, spaceIdx) : fullName;
+      const lastName = spaceIdx > -1 ? fullName.slice(spaceIdx + 1) : "";
       
       isSettingFromProfile.current = true;
       setFormData({
-        full_name: profile.full_name || "",
+        first_name: firstName,
+        last_name: lastName,
         practice_number: profile.practice_number || "",
         doctor_number: profile.doctor_number || "",
         practice_address: profile.practice_address || "",
         specialty: (profile as any).specialty || "",
         mobile_number: mobileNumber,
         country_code: countryCode,
+        signature_font: (profile as any).signature_font || "sans",
+        signature_color: (profile as any).signature_color || "black",
       });
       
       // Mark as initialized after profile loads
@@ -169,6 +190,8 @@ export default function Profile() {
       }, 100);
     }
   }, [profile]);
+
+  const combinedFullName = `${formData.first_name} ${formData.last_name}`.trim();
 
   // Autosave effect
   useEffect(() => {
@@ -186,13 +209,15 @@ export default function Profile() {
         : "";
       
       const { error } = await updateProfile({
-        full_name: formData.full_name,
+        full_name: combinedFullName,
         practice_number: formData.practice_number,
         doctor_number: formData.doctor_number,
         practice_address: formData.practice_address,
         specialty: formData.specialty,
         mobile_number: fullMobileNumber,
-      });
+        signature_font: formData.signature_font,
+        signature_color: formData.signature_color,
+      } as any);
 
       if (error) {
         setSavedStatus('idle');
@@ -240,64 +265,35 @@ export default function Profile() {
 
   const addServicePrice = async () => {
     if (!user || !newService.service_name.trim() || !newService.default_price) {
-      toast({
-        title: "Missing fields",
-        description: "Service name and price are required",
-        variant: "destructive",
-      });
+      toast({ title: "Missing fields", description: "Service name and price are required", variant: "destructive" });
       return;
     }
-
     setIsAddingService(true);
     const { data, error } = await supabase
       .from('service_prices')
-      .insert({
-        user_id: user.id,
-        service_name: newService.service_name,
-        default_price: parseFloat(newService.default_price),
-        currency: selectedCurrency,
-      })
-      .select()
-      .single();
-
+      .insert({ user_id: user.id, service_name: newService.service_name, default_price: parseFloat(newService.default_price), currency: selectedCurrency })
+      .select().single();
     if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add service",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to add service", variant: "destructive" });
     } else {
       setServicePrices([...servicePrices, data]);
       setNewService({ service_name: "", default_price: "", currency: selectedCurrency });
-      toast({
-        title: "Service added",
-        description: `${newService.service_name} has been added`,
-      });
+      toast({ title: "Service added", description: `${newService.service_name} has been added` });
     }
     setIsAddingService(false);
   };
 
   const removeServicePrice = async (id: string) => {
-    const { error } = await supabase
-      .from('service_prices')
-      .delete()
-      .eq('id', id);
-
+    const { error } = await supabase.from('service_prices').delete().eq('id', id);
     if (!error) {
       setServicePrices(servicePrices.filter(s => s.id !== id));
-      toast({
-        title: "Service removed",
-        description: "Service has been removed from your pricing list",
-      });
+      toast({ title: "Service removed", description: "Service has been removed from your pricing list" });
     }
   };
 
   const startEditingService = (service: ServicePrice) => {
     setEditingServiceId(service.id);
-    setEditingService({
-      service_name: service.service_name,
-      default_price: String(service.default_price),
-    });
+    setEditingService({ service_name: service.service_name, default_price: String(service.default_price) });
   };
 
   const cancelEditingService = () => {
@@ -307,41 +303,18 @@ export default function Profile() {
 
   const saveEditingService = async () => {
     if (!editingServiceId || !editingService.service_name.trim() || !editingService.default_price) {
-      toast({
-        title: "Missing fields",
-        description: "Service name and price are required",
-        variant: "destructive",
-      });
+      toast({ title: "Missing fields", description: "Service name and price are required", variant: "destructive" });
       return;
     }
-
     setIsSavingService(true);
-    const { error } = await supabase
-      .from('service_prices')
-      .update({
-        service_name: editingService.service_name,
-        default_price: parseFloat(editingService.default_price),
-      })
-      .eq('id', editingServiceId);
-
+    const { error } = await supabase.from('service_prices').update({ service_name: editingService.service_name, default_price: parseFloat(editingService.default_price) }).eq('id', editingServiceId);
     if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update service",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to update service", variant: "destructive" });
     } else {
-      setServicePrices(servicePrices.map(s => 
-        s.id === editingServiceId 
-          ? { ...s, service_name: editingService.service_name, default_price: parseFloat(editingService.default_price) }
-          : s
-      ));
+      setServicePrices(servicePrices.map(s => s.id === editingServiceId ? { ...s, service_name: editingService.service_name, default_price: parseFloat(editingService.default_price) } : s));
       setEditingServiceId(null);
       setEditingService({ service_name: "", default_price: "" });
-      toast({
-        title: "Service updated",
-        description: "Service has been updated",
-      });
+      toast({ title: "Service updated", description: "Service has been updated" });
     }
     setIsSavingService(false);
   };
@@ -352,20 +325,12 @@ export default function Profile() {
       setNewService(prev => ({ ...prev, currency: newCurrency }));
       return;
     }
-
-    const { error } = await supabase
-      .from('service_prices')
-      .update({ currency: newCurrency })
-      .eq('user_id', user.id);
-
+    const { error } = await supabase.from('service_prices').update({ currency: newCurrency }).eq('user_id', user.id);
     if (!error) {
       setServicePrices(servicePrices.map(s => ({ ...s, currency: newCurrency })));
       setSelectedCurrency(newCurrency);
       setNewService(prev => ({ ...prev, currency: newCurrency }));
-      toast({
-        title: "Currency updated",
-        description: `All services updated to ${newCurrency}`,
-      });
+      toast({ title: "Currency updated", description: `All services updated to ${newCurrency}` });
     }
   };
 
@@ -380,19 +345,12 @@ export default function Profile() {
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: true });
-    
-    if (!error && data) {
-      setPartners(data);
-    }
+    if (!error && data) setPartners(data);
   };
 
   const addPartner = async () => {
     if (!user || !newPartner.full_name.trim() || !newPartner.registration_number.trim()) {
-      toast({
-        title: "Missing fields",
-        description: "Partner name and registration number are required",
-        variant: "destructive",
-      });
+      toast({ title: "Missing fields", description: "Partner name and registration number are required", variant: "destructive" });
       return;
     }
 
@@ -409,15 +367,11 @@ export default function Profile() {
       .single();
 
     if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add partner",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to add partner", variant: "destructive" });
     } else {
       setPartners([...partners, data]);
       
-      // Send invitation if email is provided
+      // Send invitation if email is provided - also create pending user
       if (newPartner.email.trim()) {
         try {
           await supabase.functions.invoke('send-user-invitation', {
@@ -425,52 +379,35 @@ export default function Profile() {
               recipientEmail: newPartner.email.trim(),
               senderName: profile?.full_name || 'A colleague',
               message: `You have been added as a practice partner. Join the platform to collaborate.`,
+              isPracticePartner: true,
+              partnerName: newPartner.full_name,
             },
           });
-          toast({
-            title: "Partner added & invited",
-            description: `${newPartner.full_name} has been added and an invitation was sent to ${newPartner.email}`,
-          });
+          toast({ title: "Partner added & invited", description: `${newPartner.full_name} has been added and an invitation was sent to ${newPartner.email}` });
         } catch {
-          toast({
-            title: "Partner added",
-            description: `${newPartner.full_name} has been added, but the invitation email could not be sent`,
-          });
+          toast({ title: "Partner added", description: `${newPartner.full_name} has been added, but the invitation email could not be sent` });
         }
       } else {
-        toast({
-          title: "Partner added",
-          description: `${newPartner.full_name} has been added`,
-        });
+        toast({ title: "Partner added", description: `${newPartner.full_name} has been added` });
       }
       
       setNewPartner({ full_name: "", registration_number: "", mobile_number: "", email: "" });
+      setShowAddPartnerForm(false);
     }
     setIsAddingPartner(false);
   };
 
   const removePartner = async (id: string) => {
-    const { error } = await supabase
-      .from('practice_partners')
-      .delete()
-      .eq('id', id);
-
+    const { error } = await supabase.from('practice_partners').delete().eq('id', id);
     if (!error) {
       setPartners(partners.filter(p => p.id !== id));
-      toast({
-        title: "Partner removed",
-        description: "Partner has been removed from your practice",
-      });
+      toast({ title: "Partner removed", description: "Partner has been removed from your practice" });
     }
   };
 
   const startEditingPartner = (partner: Partner) => {
     setEditingPartnerId(partner.id);
-    setEditingPartner({
-      full_name: partner.full_name,
-      registration_number: partner.registration_number,
-      mobile_number: partner.mobile_number || "",
-    });
+    setEditingPartner({ full_name: partner.full_name, registration_number: partner.registration_number, mobile_number: partner.mobile_number || "" });
   };
 
   const cancelEditingPartner = () => {
@@ -480,42 +417,23 @@ export default function Profile() {
 
   const saveEditingPartner = async () => {
     if (!editingPartnerId || !editingPartner.full_name.trim() || !editingPartner.registration_number.trim()) {
-      toast({
-        title: "Missing fields",
-        description: "Partner name and registration number are required",
-        variant: "destructive",
-      });
+      toast({ title: "Missing fields", description: "Partner name and registration number are required", variant: "destructive" });
       return;
     }
-
     setIsSavingPartner(true);
-    const { error } = await supabase
-      .from('practice_partners')
-      .update({
-        full_name: editingPartner.full_name,
-        registration_number: editingPartner.registration_number,
-        mobile_number: editingPartner.mobile_number || null,
-      })
-      .eq('id', editingPartnerId);
+    const { error } = await supabase.from('practice_partners').update({
+      full_name: editingPartner.full_name,
+      registration_number: editingPartner.registration_number,
+      mobile_number: editingPartner.mobile_number || null,
+    }).eq('id', editingPartnerId);
 
     if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update partner",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to update partner", variant: "destructive" });
     } else {
-      setPartners(partners.map(p =>
-        p.id === editingPartnerId
-          ? { ...p, full_name: editingPartner.full_name, registration_number: editingPartner.registration_number, mobile_number: editingPartner.mobile_number || "" }
-          : p
-      ));
+      setPartners(partners.map(p => p.id === editingPartnerId ? { ...p, ...editingPartner } : p));
       setEditingPartnerId(null);
       setEditingPartner({ full_name: "", registration_number: "", mobile_number: "" });
-      toast({
-        title: "Partner updated",
-        description: "Partner details have been updated",
-      });
+      toast({ title: "Partner updated", description: "Partner details have been updated" });
     }
     setIsSavingPartner(false);
   };
@@ -523,31 +441,17 @@ export default function Profile() {
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     if (!file.type.startsWith('image/')) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload an image file",
-        variant: "destructive",
-      });
+      toast({ title: "Invalid file type", description: "Please upload an image file", variant: "destructive" });
       return;
     }
-
     setIsUploadingLogo(true);
     const { error } = await uploadLogo(file);
     setIsUploadingLogo(false);
-
     if (error) {
-      toast({
-        title: "Upload failed",
-        description: "Failed to upload logo",
-        variant: "destructive",
-      });
+      toast({ title: "Upload failed", description: "Failed to upload logo", variant: "destructive" });
     } else {
-      toast({
-        title: "Logo uploaded",
-        description: "Your practice logo has been updated",
-      });
+      toast({ title: "Logo uploaded", description: "Your practice logo has been updated" });
       isSettingFromProfile.current = true;
       await fetchProfile();
       setTimeout(() => { isSettingFromProfile.current = false; }, 200);
@@ -557,57 +461,26 @@ export default function Profile() {
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
-
     if (!file.type.startsWith('image/')) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload an image file",
-        variant: "destructive",
-      });
+      toast({ title: "Invalid file type", description: "Please upload an image file", variant: "destructive" });
       return;
     }
-
     setIsUploadingAvatar(true);
-    
     const fileExt = file.name.split('.').pop();
     const filePath = `${user.id}/avatar.${fileExt}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(filePath, file, { upsert: true });
-
+    const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
     if (uploadError) {
-      toast({
-        title: "Upload failed",
-        description: "Failed to upload profile picture",
-        variant: "destructive",
-      });
+      toast({ title: "Upload failed", description: "Failed to upload profile picture", variant: "destructive" });
       setIsUploadingAvatar(false);
       return;
     }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(filePath);
-
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ avatar_url: `${publicUrl}?t=${Date.now()}` })
-      .eq('id', user.id);
-
+    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
+    const { error: updateError } = await supabase.from('profiles').update({ avatar_url: `${publicUrl}?t=${Date.now()}` }).eq('id', user.id);
     setIsUploadingAvatar(false);
-
     if (updateError) {
-      toast({
-        title: "Error",
-        description: "Failed to update profile picture",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to update profile picture", variant: "destructive" });
     } else {
-      toast({
-        title: "Profile picture updated",
-        description: "Your profile picture has been changed",
-      });
+      toast({ title: "Profile picture updated", description: "Your profile picture has been changed" });
       isSettingFromProfile.current = true;
       await fetchProfile();
       setTimeout(() => { isSettingFromProfile.current = false; }, 200);
@@ -616,33 +489,23 @@ export default function Profile() {
 
   const handleSaveEmail = async () => {
     if (!user || !editEmail.trim()) return;
-    
     setIsSavingEmail(true);
     const { error } = await supabase.auth.updateUser({ email: editEmail.trim() });
     setIsSavingEmail(false);
-
     if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      toast({
-        title: "Email updated",
-        description: "A confirmation email has been sent to the new address",
-      });
+      toast({ title: "Email updated", description: "A confirmation email has been sent to the new address" });
       setIsEditingEmail(false);
     }
   };
 
   const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const getSignatureFontFamily = (fontValue: string) => {
+    return SIGNATURE_FONTS.find(f => f.value === fontValue)?.fontFamily || SIGNATURE_FONTS[0].fontFamily;
   };
 
   return (
@@ -651,23 +514,14 @@ export default function Profile() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Profile</h1>
-          <p className="mt-1 text-muted-foreground">
-            Manage your personal and practice information
-          </p>
+          <p className="mt-1 text-muted-foreground">Manage your personal and practice information</p>
         </div>
-        {/* Autosave indicator */}
         <div className="text-sm text-muted-foreground flex items-center gap-1.5">
           {savedStatus === 'saving' && (
-            <>
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              <span>Saving...</span>
-            </>
+            <><Loader2 className="h-3.5 w-3.5 animate-spin" /><span>Saving...</span></>
           )}
           {savedStatus === 'saved' && (
-            <>
-              <Check className="h-3.5 w-3.5 text-success" />
-              <span className="text-success">All changes saved</span>
-            </>
+            <><Check className="h-3.5 w-3.5 text-success" /><span className="text-success">All changes saved</span></>
           )}
         </div>
       </div>
@@ -683,57 +537,36 @@ export default function Profile() {
         <div className="flex items-center gap-6 mb-6">
           <div className="relative group">
             <Avatar className="h-20 w-20 border-2 border-border">
-              <AvatarImage src={(profile as any)?.avatar_url} alt={profile?.full_name || "Profile"} />
+              <AvatarImage src={(profile as any)?.avatar_url} alt={combinedFullName || "Profile"} />
               <AvatarFallback className="text-lg bg-primary/10 text-primary">
-                {profile?.full_name ? getInitials(profile.full_name) : "U"}
+                {combinedFullName ? getInitials(combinedFullName) : "U"}
               </AvatarFallback>
             </Avatar>
-            <label 
-              htmlFor="avatar-upload"
-              className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-            >
+            <label htmlFor="avatar-upload" className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
               <Camera className="h-6 w-6 text-white" />
             </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarUpload}
-              className="hidden"
-              id="avatar-upload"
-              disabled={isUploadingAvatar}
-            />
+            <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" id="avatar-upload" disabled={isUploadingAvatar} />
           </div>
           <div>
-            <p className="font-medium text-foreground">
-              {formData.full_name || profile?.full_name || "Profile Picture"}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              {isUploadingAvatar ? "Uploading..." : "Hover over image to change"}
-            </p>
+            <p className="font-medium text-foreground">{combinedFullName || "Profile Picture"}</p>
+            <p className="text-sm text-muted-foreground">{isUploadingAvatar ? "Uploading..." : "Hover over image to change"}</p>
           </div>
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input 
-              id="name" 
-              value={formData.full_name}
-              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-              placeholder="Dr. John Smith"
-            />
+            <Label htmlFor="first_name">First Name</Label>
+            <Input id="first_name" value={formData.first_name} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} placeholder="John" />
           </div>
           <div className="space-y-2">
+            <Label htmlFor="last_name">Last Name</Label>
+            <Input id="last_name" value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} placeholder="Smith" />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="email">Email</Label>
             {isAdmin && isEditingEmail ? (
               <div className="flex gap-2">
-                <Input 
-                  id="email" 
-                  type="email" 
-                  value={editEmail}
-                  onChange={(e) => setEditEmail(e.target.value)}
-                  placeholder="user@example.com"
-                />
+                <Input id="email" type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} placeholder="user@example.com" />
                 <Button size="icon" variant="ghost" onClick={handleSaveEmail} disabled={isSavingEmail}>
                   {isSavingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                 </Button>
@@ -743,22 +576,9 @@ export default function Profile() {
               </div>
             ) : (
               <div className="flex gap-2">
-                <Input 
-                  id="email" 
-                  type="email" 
-                  value={user?.email || ""} 
-                  disabled 
-                  className="bg-muted"
-                />
+                <Input id="email" type="email" value={user?.email || ""} disabled className="bg-muted" />
                 {isAdmin && (
-                  <Button 
-                    size="icon" 
-                    variant="ghost" 
-                    onClick={() => {
-                      setEditEmail(user?.email || "");
-                      setIsEditingEmail(true);
-                    }}
-                  >
+                  <Button size="icon" variant="ghost" onClick={() => { setEditEmail(user?.email || ""); setIsEditingEmail(true); }}>
                     <Pencil className="h-4 w-4" />
                   </Button>
                 )}
@@ -771,32 +591,17 @@ export default function Profile() {
         <div className="mt-6 space-y-2">
           <Label htmlFor="mobile">Mobile Number</Label>
           <div className="flex gap-2">
-            <Select 
-              value={formData.country_code} 
-              onValueChange={(value) => setFormData({ ...formData, country_code: value })}
-            >
-              <SelectTrigger className="w-[140px]">
-                <SelectValue />
-              </SelectTrigger>
+            <Select value={formData.country_code} onValueChange={(value) => setFormData({ ...formData, country_code: value })}>
+              <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {COUNTRY_CODES.map((country) => (
                   <SelectItem key={country.code} value={country.code}>
-                    <span className="flex items-center gap-2">
-                      <span>{country.flag}</span>
-                      <span>{country.code}</span>
-                    </span>
+                    <span className="flex items-center gap-2"><span>{country.flag}</span><span>{country.code}</span></span>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Input 
-              id="mobile" 
-              type="tel"
-              value={formatPhoneNumber(formData.mobile_number)}
-              onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value.replace(/[^0-9]/g, '') })}
-              placeholder="82 123 4567"
-              className="flex-1"
-            />
+            <Input id="mobile" type="tel" value={formatPhoneNumber(formData.mobile_number)} onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value.replace(/[^0-9]/g, '') })} placeholder="82 123 4567" className="flex-1" />
           </div>
         </div>
 
@@ -810,88 +615,45 @@ export default function Profile() {
           <Building2 className="h-5 w-5 text-primary" />
           <h2 className="text-lg font-semibold text-foreground">Practice Information</h2>
         </div>
-        <p className="text-sm text-muted-foreground mb-6">
-          This information will appear on your document templates and letterheads.
-        </p>
+        <p className="text-sm text-muted-foreground mb-6">This information will appear on your document templates and letterheads.</p>
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="practice_number">Practice Number</Label>
-            <Input 
-              id="practice_number" 
-              value={formData.practice_number}
-              onChange={(e) => setFormData({ ...formData, practice_number: e.target.value })}
-              placeholder="e.g., PR123456"
-            />
+            <Input id="practice_number" value={formData.practice_number} onChange={(e) => setFormData({ ...formData, practice_number: e.target.value })} placeholder="e.g., PR123456" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="doctor_number">Doctor Registration Number</Label>
-            <Input 
-              id="doctor_number" 
-              value={formData.doctor_number}
-              onChange={(e) => setFormData({ ...formData, doctor_number: e.target.value })}
-              placeholder="e.g., MP123456"
-            />
+            <Input id="doctor_number" value={formData.doctor_number} onChange={(e) => setFormData({ ...formData, doctor_number: e.target.value })} placeholder="e.g., MP123456" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="specialty">Specialty</Label>
-            <Select 
-              value={formData.specialty} 
-              onValueChange={(value) => setFormData({ ...formData, specialty: value })}
-            >
-              <SelectTrigger id="specialty">
-                <SelectValue placeholder="Select your specialty" />
-              </SelectTrigger>
+            <Select value={formData.specialty} onValueChange={(value) => setFormData({ ...formData, specialty: value })}>
+              <SelectTrigger id="specialty"><SelectValue placeholder="Select your specialty" /></SelectTrigger>
               <SelectContent>
                 {DOCTOR_SPECIALTIES.map((specialty) => (
-                  <SelectItem key={specialty} value={specialty}>
-                    {specialty}
-                  </SelectItem>
+                  <SelectItem key={specialty} value={specialty}>{specialty}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
         </div>
 
-        {/* Practice Address */}
         <div className="mt-6 space-y-2">
           <Label htmlFor="practice_address">Address of Doctor's Rooms</Label>
-          <Textarea 
-            id="practice_address" 
-            value={formData.practice_address}
-            onChange={(e) => setFormData({ ...formData, practice_address: e.target.value })}
-            placeholder="e.g., 123 Medical Centre, Suite 4, Cape Town, 8001"
-            rows={3}
-          />
+          <Textarea id="practice_address" value={formData.practice_address} onChange={(e) => setFormData({ ...formData, practice_address: e.target.value })} placeholder="e.g., 123 Medical Centre, Suite 4, Cape Town, 8001" rows={3} />
         </div>
 
         {/* Logo Upload */}
         <div className="mt-6 space-y-2">
           <Label>Practice Logo</Label>
-          <p className="text-sm text-muted-foreground mb-3">
-            Upload your practice logo for letterheads and documents
-          </p>
+          <p className="text-sm text-muted-foreground mb-3">Upload your practice logo for letterheads and documents</p>
           <div className="flex items-center gap-4">
             {profile?.logo_url && (
-              <img 
-                src={profile.logo_url} 
-                alt="Practice logo" 
-                className="h-16 w-auto object-contain rounded border border-border p-1"
-              />
+              <img src={profile.logo_url} alt="Practice logo" className="h-16 w-auto object-contain rounded border border-border p-1" />
             )}
             <div>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleLogoUpload}
-                className="hidden"
-                id="logo-upload-profile"
-              />
-              <Button 
-                variant="outline" 
-                onClick={() => document.getElementById('logo-upload-profile')?.click()}
-                disabled={isUploadingLogo}
-                className="gap-2"
-              >
+              <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" id="logo-upload-profile" />
+              <Button variant="outline" onClick={() => document.getElementById('logo-upload-profile')?.click()} disabled={isUploadingLogo} className="gap-2">
                 <Upload className="h-4 w-4" />
                 {isUploadingLogo ? "Uploading..." : profile?.logo_url ? "Change Logo" : "Upload Logo"}
               </Button>
@@ -899,27 +661,80 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Digital Signature - Timestamp based */}
-        <div className="mt-6 space-y-2">
+        {/* Digital Signature Preview */}
+        <div className="mt-6 space-y-4">
           <Label>Digital Signature</Label>
-          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border border-border">
-            <Clock className="h-5 w-5 text-muted-foreground shrink-0" />
-            <p className="text-sm text-muted-foreground">
-              Documents will be digitally signed with your name and a timestamp when generated.
+          <p className="text-sm text-muted-foreground">Preview how your signature will appear on documents.</p>
+          
+          {/* Signature Preview Box */}
+          <div className="p-4 border border-border rounded-lg bg-background">
+            <p
+              style={{
+                fontFamily: getSignatureFontFamily(formData.signature_font),
+                color: formData.signature_color === 'navy' ? '#001f5c' : '#000000',
+                fontSize: '1.25rem',
+              }}
+            >
+              {combinedFullName || "Your Name"}
             </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {new Date().toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })} · {new Date().toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' })}
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>Font</Label>
+              <Select value={formData.signature_font} onValueChange={(value) => setFormData({ ...formData, signature_font: value })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {SIGNATURE_FONTS.map((font) => (
+                    <SelectItem key={font.value} value={font.value}>
+                      <span style={{ fontFamily: font.fontFamily }}>{font.label}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Color</Label>
+              <Select value={formData.signature_color} onValueChange={(value) => setFormData({ ...formData, signature_color: value })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="black">
+                    <span className="flex items-center gap-2">
+                      <span className="h-3 w-3 rounded-full bg-black border border-border" />
+                      Black
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="navy">
+                    <span className="flex items-center gap-2">
+                      <span className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: '#001f5c' }} />
+                      Navy Blue
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Practice Partners */}
       <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <Users className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold text-foreground">Practice Partners</h2>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <Users className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold text-foreground">Practice Partners</h2>
+          </div>
+          {!showAddPartnerForm && (
+            <Button variant="outline" size="sm" onClick={() => setShowAddPartnerForm(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Add New Partner
+            </Button>
+          )}
         </div>
-        <p className="text-sm text-muted-foreground mb-6">
-          Add partners of the same practice. Their information will be available on documents.
-        </p>
+        <p className="text-sm text-muted-foreground mb-6">Add partners of the same practice. Their information will be available on documents.</p>
 
         {/* Existing Partners */}
         {partners.length > 0 && (
@@ -928,68 +743,32 @@ export default function Profile() {
               <div key={partner.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
                 {editingPartnerId === partner.id ? (
                   <div className="flex-1 grid gap-3 sm:grid-cols-3 mr-4">
-                    <Input 
-                      value={editingPartner.full_name}
-                      onChange={(e) => setEditingPartner({ ...editingPartner, full_name: e.target.value })}
-                      placeholder="Full name"
-                    />
-                    <Input 
-                      value={editingPartner.registration_number}
-                      onChange={(e) => setEditingPartner({ ...editingPartner, registration_number: e.target.value })}
-                      placeholder="Registration number"
-                    />
-                    <Input 
-                      value={editingPartner.mobile_number}
-                      onChange={(e) => setEditingPartner({ ...editingPartner, mobile_number: e.target.value })}
-                      placeholder="Mobile (optional)"
-                    />
+                    <Input value={editingPartner.full_name} onChange={(e) => setEditingPartner({ ...editingPartner, full_name: e.target.value })} placeholder="Full name" />
+                    <Input value={editingPartner.registration_number} onChange={(e) => setEditingPartner({ ...editingPartner, registration_number: e.target.value })} placeholder="Registration number" />
+                    <Input value={editingPartner.mobile_number} onChange={(e) => setEditingPartner({ ...editingPartner, mobile_number: e.target.value })} placeholder="Mobile (optional)" />
                   </div>
                 ) : (
                   <div>
                     <p className="font-medium text-foreground">{partner.full_name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Reg: {partner.registration_number}
-                      {partner.mobile_number && ` · Mobile: ${partner.mobile_number}`}
-                    </p>
+                    <p className="text-sm text-muted-foreground">Reg: {partner.registration_number}{partner.mobile_number && ` · Mobile: ${partner.mobile_number}`}</p>
                   </div>
                 )}
                 <div className="flex items-center gap-1">
                   {editingPartnerId === partner.id ? (
                     <>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={saveEditingPartner}
-                        disabled={isSavingPartner}
-                        className="h-8 w-8 text-success hover:text-success"
-                      >
+                      <Button variant="ghost" size="icon" onClick={saveEditingPartner} disabled={isSavingPartner} className="h-8 w-8 text-success hover:text-success">
                         {isSavingPartner ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={cancelEditingPartner}
-                        className="h-8 w-8 text-muted-foreground"
-                      >
+                      <Button variant="ghost" size="icon" onClick={cancelEditingPartner} className="h-8 w-8 text-muted-foreground">
                         <X className="h-4 w-4" />
                       </Button>
                     </>
                   ) : (
                     <>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => startEditingPartner(partner)}
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                      >
+                      <Button variant="ghost" size="icon" onClick={() => startEditingPartner(partner)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => removePartner(partner.id)}
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                      >
+                      <Button variant="ghost" size="icon" onClick={() => removePartner(partner.id)} className="h-8 w-8 text-destructive hover:text-destructive">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </>
@@ -1000,53 +779,39 @@ export default function Profile() {
           </div>
         )}
 
-        {/* Add New Partner */}
-        <div className="space-y-4 p-4 border border-dashed border-border rounded-lg">
-          <p className="text-sm font-medium text-foreground">Add New Partner</p>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="partner_name">Full Name *</Label>
-              <Input 
-                id="partner_name" 
-                value={newPartner.full_name}
-                onChange={(e) => setNewPartner({ ...newPartner, full_name: e.target.value })}
-                placeholder="Dr. Jane Doe"
-              />
+        {/* Add New Partner Form - toggled */}
+        {showAddPartnerForm && (
+          <div className="space-y-4 p-4 border border-dashed border-border rounded-lg">
+            <p className="text-sm font-medium text-foreground">Add New Partner</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="partner_name">Full Name *</Label>
+                <Input id="partner_name" value={newPartner.full_name} onChange={(e) => setNewPartner({ ...newPartner, full_name: e.target.value })} placeholder="Dr. Jane Doe" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="partner_reg">Registration Number *</Label>
+                <Input id="partner_reg" value={newPartner.registration_number} onChange={(e) => setNewPartner({ ...newPartner, registration_number: e.target.value })} placeholder="e.g., MP654321" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="partner_mobile">Mobile Number (Optional)</Label>
+                <Input id="partner_mobile" value={newPartner.mobile_number} onChange={(e) => setNewPartner({ ...newPartner, mobile_number: e.target.value })} placeholder="e.g., 082 123 4567" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="partner_email">Email (for invitation)</Label>
+                <Input id="partner_email" type="email" value={newPartner.email} onChange={(e) => setNewPartner({ ...newPartner, email: e.target.value })} placeholder="partner@example.com" />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="partner_reg">Registration Number *</Label>
-              <Input 
-                id="partner_reg" 
-                value={newPartner.registration_number}
-                onChange={(e) => setNewPartner({ ...newPartner, registration_number: e.target.value })}
-                placeholder="e.g., MP654321"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="partner_mobile">Mobile Number (Optional)</Label>
-              <Input 
-                id="partner_mobile" 
-                value={newPartner.mobile_number}
-                onChange={(e) => setNewPartner({ ...newPartner, mobile_number: e.target.value })}
-                placeholder="e.g., 082 123 4567"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="partner_email">Email (for invitation)</Label>
-              <Input 
-                id="partner_email" 
-                type="email"
-                value={newPartner.email}
-                onChange={(e) => setNewPartner({ ...newPartner, email: e.target.value })}
-                placeholder="partner@example.com"
-              />
+            <div className="flex gap-2">
+              <Button onClick={addPartner} disabled={isAddingPartner} className="gap-2">
+                <Save className="h-4 w-4" />
+                {isAddingPartner ? "Saving..." : "Save Partner"}
+              </Button>
+              <Button variant="outline" onClick={() => { setShowAddPartnerForm(false); setNewPartner({ full_name: "", registration_number: "", mobile_number: "", email: "" }); }}>
+                Cancel
+              </Button>
             </div>
           </div>
-          <Button onClick={addPartner} disabled={isAddingPartner} className="gap-2">
-            <Plus className="h-4 w-4" />
-            {isAddingPartner ? "Adding..." : "Add Partner"}
-          </Button>
-        </div>
+        )}
       </div>
 
       {/* Pricing */}
@@ -1055,101 +820,56 @@ export default function Profile() {
           <DollarSign className="h-5 w-5 text-primary" />
           <h2 className="text-lg font-semibold text-foreground">Pricing</h2>
         </div>
-        <p className="text-sm text-muted-foreground mb-6">
-          Define your service types and default prices. These will appear when creating invoices.
-        </p>
+        <p className="text-sm text-muted-foreground mb-6">Define your service types and default prices. These will appear when creating invoices.</p>
 
-        {/* Currency Selection */}
         <div className="mb-6">
           <Label htmlFor="currency">Currency</Label>
           <Select value={selectedCurrency} onValueChange={updateAllServicesCurrency}>
-            <SelectTrigger id="currency" className="w-[280px] mt-2">
-              <SelectValue placeholder="Select currency" />
-            </SelectTrigger>
+            <SelectTrigger id="currency" className="w-[280px] mt-2"><SelectValue placeholder="Select currency" /></SelectTrigger>
             <SelectContent>
               {CURRENCIES.map((currency) => (
-                <SelectItem key={currency.code} value={currency.code}>
-                  {currency.symbol} - {currency.name} ({currency.code})
-                </SelectItem>
+                <SelectItem key={currency.code} value={currency.code}>{currency.symbol} - {currency.name} ({currency.code})</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
-        {/* Existing Services */}
         {servicePrices.length > 0 && (
           <div className="space-y-3 mb-6">
             {servicePrices.map((service) => (
               <div key={service.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
                 {editingServiceId === service.id ? (
                   <div className="flex-1 grid gap-3 sm:grid-cols-2 mr-4">
-                    <Input 
-                      value={editingService.service_name}
-                      onChange={(e) => setEditingService({ ...editingService, service_name: e.target.value })}
-                      placeholder="Service name"
-                    />
+                    <Input value={editingService.service_name} onChange={(e) => setEditingService({ ...editingService, service_name: e.target.value })} placeholder="Service name" />
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-                        {getCurrencySymbol(selectedCurrency)}
-                      </span>
-                      <Input 
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={editingService.default_price}
-                        onChange={(e) => setEditingService({ ...editingService, default_price: e.target.value })}
-                        placeholder="0.00"
-                        className="pl-8"
-                      />
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{getCurrencySymbol(selectedCurrency)}</span>
+                      <Input type="number" step="0.01" min="0" value={editingService.default_price} onChange={(e) => setEditingService({ ...editingService, default_price: e.target.value })} placeholder="0.00" className="pl-8" />
                     </div>
                   </div>
                 ) : (
                   <div className="flex items-center gap-4">
                     <div>
                       <p className="font-medium text-foreground">{service.service_name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Default: {getCurrencySymbol(service.currency)} {Number(service.default_price).toFixed(2)}
-                      </p>
+                      <p className="text-sm text-muted-foreground">Default: {getCurrencySymbol(service.currency)} {Number(service.default_price).toFixed(2)}</p>
                     </div>
                   </div>
                 )}
                 <div className="flex items-center gap-1">
                   {editingServiceId === service.id ? (
                     <>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={saveEditingService}
-                        disabled={isSavingService}
-                        className="h-8 w-8 text-success hover:text-success"
-                      >
+                      <Button variant="ghost" size="icon" onClick={saveEditingService} disabled={isSavingService} className="h-8 w-8 text-success hover:text-success">
                         {isSavingService ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={cancelEditingService}
-                        className="h-8 w-8 text-muted-foreground"
-                      >
+                      <Button variant="ghost" size="icon" onClick={cancelEditingService} className="h-8 w-8 text-muted-foreground">
                         <X className="h-4 w-4" />
                       </Button>
                     </>
                   ) : (
                     <>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => startEditingService(service)}
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                      >
+                      <Button variant="ghost" size="icon" onClick={() => startEditingService(service)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => removeServicePrice(service.id)}
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                      >
+                      <Button variant="ghost" size="icon" onClick={() => removeServicePrice(service.id)} className="h-8 w-8 text-destructive hover:text-destructive">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </>
@@ -1160,35 +880,18 @@ export default function Profile() {
           </div>
         )}
 
-        {/* Add New Service */}
         <div className="space-y-4 p-4 border border-dashed border-border rounded-lg">
           <p className="text-sm font-medium text-foreground">Add New Service</p>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="service_name">Service Name *</Label>
-              <Input 
-                id="service_name" 
-                value={newService.service_name}
-                onChange={(e) => setNewService({ ...newService, service_name: e.target.value })}
-                placeholder="e.g., Consultation, Follow-up, Procedure"
-              />
+              <Input id="service_name" value={newService.service_name} onChange={(e) => setNewService({ ...newService, service_name: e.target.value })} placeholder="e.g., Consultation, Follow-up, Procedure" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="service_price">Default Price ({getCurrencySymbol(selectedCurrency)}) *</Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  {getCurrencySymbol(selectedCurrency)}
-                </span>
-                <Input 
-                  id="service_price" 
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={newService.default_price}
-                  onChange={(e) => setNewService({ ...newService, default_price: e.target.value })}
-                  placeholder="0.00"
-                  className="pl-8"
-                />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{getCurrencySymbol(selectedCurrency)}</span>
+                <Input id="service_price" type="number" step="0.01" min="0" value={newService.default_price} onChange={(e) => setNewService({ ...newService, default_price: e.target.value })} placeholder="0.00" className="pl-8" />
               </div>
             </div>
           </div>
@@ -1199,13 +902,11 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Patient Import */}
       <PatientImport />
     </div>
   );
 }
 
-// Format phone number with spaces
 function formatPhoneNumber(value: string): string {
   const digits = value.replace(/\D/g, '');
   if (digits.length <= 2) return digits;
@@ -1213,7 +914,6 @@ function formatPhoneNumber(value: string): string {
   return `${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5, 9)}`;
 }
 
-// Mailbox Section Component
 function MailboxSection({ userId }: { userId?: string }) {
   const [mailboxId, setMailboxId] = useState<string | null>(null);
   const [mailboxAlias, setMailboxAlias] = useState<string>("");
@@ -1226,13 +926,7 @@ function MailboxSection({ userId }: { userId?: string }) {
   useEffect(() => {
     const fetchMailboxInfo = async () => {
       if (!userId) return;
-      
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('mailbox_id, mailbox_alias')
-        .eq('id', userId)
-        .single();
-      
+      const { data: profile } = await supabase.from('profiles').select('mailbox_id, mailbox_alias').eq('id', userId).single();
       if (profile) {
         setMailboxId(profile.mailbox_id);
         setMailboxAlias(profile.mailbox_alias || "");
@@ -1241,73 +935,40 @@ function MailboxSection({ userId }: { userId?: string }) {
     fetchMailboxInfo();
   }, [userId]);
 
-  const displayEmail = mailboxAlias 
-    ? `${mailboxAlias}@miri360.com`
-    : mailboxId 
-      ? `docs-${mailboxId.slice(0, 8)}@inbox.miri360.health`
-      : null;
+  const displayEmail = mailboxAlias ? `${mailboxAlias}@miri360.com` : mailboxId ? `docs-${mailboxId.slice(0, 8)}@inbox.miri360.health` : null;
 
   const handleCopy = async () => {
     if (!displayEmail) return;
     await navigator.clipboard.writeText(displayEmail);
     setCopied(true);
-    toast({
-      title: "Copied",
-      description: "Mailbox email copied to clipboard",
-    });
+    toast({ title: "Copied", description: "Mailbox email copied to clipboard" });
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleSaveAlias = async () => {
     if (!userId) return;
-    
     const cleanAlias = aliasInput.toLowerCase().trim().replace(/[^a-z0-9-]/g, "");
     if (cleanAlias.length < 3) {
-      toast({
-        title: "Invalid alias",
-        description: "Alias must be at least 3 characters",
-        variant: "destructive",
-      });
+      toast({ title: "Invalid alias", description: "Alias must be at least 3 characters", variant: "destructive" });
       return;
     }
     if (cleanAlias.length > 30) {
-      toast({
-        title: "Invalid alias",
-        description: "Alias must be 30 characters or less",
-        variant: "destructive",
-      });
+      toast({ title: "Invalid alias", description: "Alias must be 30 characters or less", variant: "destructive" });
       return;
     }
-
     setIsSavingAlias(true);
-    const { error } = await supabase
-      .from('profiles')
-      .update({ mailbox_alias: cleanAlias })
-      .eq('id', userId);
-
+    const { error } = await supabase.from('profiles').update({ mailbox_alias: cleanAlias }).eq('id', userId);
     setIsSavingAlias(false);
-
     if (error) {
       if (error.code === '23505') {
-        toast({
-          title: "Alias taken",
-          description: `"${cleanAlias}@miri360.com" is already in use. Please choose a different alias.`,
-          variant: "destructive",
-        });
+        toast({ title: "Alias taken", description: `"${cleanAlias}@miri360.com" is already in use. Please choose a different alias.`, variant: "destructive" });
       } else {
-        toast({
-          title: "Error",
-          description: "Failed to save alias",
-          variant: "destructive",
-        });
+        toast({ title: "Error", description: "Failed to save alias", variant: "destructive" });
       }
     } else {
       setMailboxAlias(cleanAlias);
       setEditingAlias(false);
-      toast({
-        title: "Alias saved",
-        description: `Your mailbox email is now ${cleanAlias}@miri360.com`,
-      });
+      toast({ title: "Alias saved", description: `Your mailbox email is now ${cleanAlias}@miri360.com` });
     }
   };
 
@@ -1326,66 +987,35 @@ function MailboxSection({ userId }: { userId?: string }) {
           {displayEmail ? (
             <div className="mt-3 space-y-3">
               <div className="flex items-center gap-2">
-                <code className="inline-block text-sm font-medium text-primary bg-primary/10 px-3 py-1.5 rounded">
+                <code className="text-sm bg-muted px-3 py-1.5 rounded-md font-mono text-foreground border border-border">
                   {displayEmail}
                 </code>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCopy}
-                  className="gap-1.5 h-8"
-                >
-                  {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                  {copied ? "Copied" : "Copy"}
+                <Button variant="ghost" size="icon" onClick={handleCopy} className="h-8 w-8 shrink-0">
+                  {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
                 </Button>
               </div>
-              
-              {editingAlias ? (
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center border border-input rounded-md bg-background">
-                    <Input
-                      value={aliasInput}
-                      onChange={(e) => setAliasInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                      placeholder="dr-smith"
-                      className="border-0 w-32 h-8 text-sm"
-                      maxLength={30}
-                    />
-                    <span className="text-sm text-muted-foreground pr-2">@miri360.com</span>
+
+              {!mailboxAlias && (
+                editingAlias ? (
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-0 flex-1">
+                      <Input value={aliasInput} onChange={(e) => setAliasInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} placeholder="your-name" className="rounded-r-none max-w-[200px]" />
+                      <span className="px-3 py-2.5 border border-l-0 border-border rounded-r-xl bg-muted text-sm text-muted-foreground whitespace-nowrap">@miri360.com</span>
+                    </div>
+                    <Button size="sm" onClick={handleSaveAlias} disabled={isSavingAlias}>
+                      {isSavingAlias ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setEditingAlias(false)}>Cancel</Button>
                   </div>
-                  <Button
-                    size="sm"
-                    onClick={handleSaveAlias}
-                    disabled={isSavingAlias}
-                    className="h-8"
-                  >
-                    {isSavingAlias ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                ) : (
+                  <Button variant="outline" size="sm" onClick={() => { setEditingAlias(true); setAliasInput(""); }}>
+                    Set custom alias
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setEditingAlias(false)}
-                    className="h-8"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              ) : (
-                <Button
-                  variant="link"
-                  size="sm"
-                  onClick={() => {
-                    setAliasInput(mailboxAlias || "");
-                    setEditingAlias(true);
-                  }}
-                  className="h-auto p-0 text-primary"
-                >
-                  <Pencil className="h-3 w-3 mr-1" />
-                  {mailboxAlias ? "Change custom alias" : "Set custom alias"}
-                </Button>
+                )
               )}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground mt-2">Loading...</p>
+            <p className="text-sm text-muted-foreground mt-2">Loading mailbox info...</p>
           )}
         </div>
       </div>
