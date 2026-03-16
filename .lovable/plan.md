@@ -1,59 +1,82 @@
 
 
-# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
+# Plan: Profile Label, Greeting Fix, and Moola Transfer System
 
-## 1. Increase Logo Size by 130%
+## 1. Sidebar Profile Link — "My Profile" instead of full name
 
-Scale all logo instances by 130%:
+**File:** `src/components/layout/Sidebar.tsx` (line 157)
 
-| Location | Current | New (130%) |
-|---|---|---|
-| Sidebar | h-10 (40px) | h-[52px] |
-| Mobile Header | h-8 (32px) | h-[42px] |
-| Auth page | h-12 (48px) | h-[62px] |
-| Forgot/Reset Password | h-12 (48px) | h-[62px] |
-| Landing page | h-10 (40px) | h-[52px] |
+Change `{profile?.full_name || "User"} Profile` to just `My Profile`.
 
-**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
+## 2. Patient Dashboard Greeting — First Name Only
 
-## 2. Fix Practice Number Not Persisting
+**File:** `src/pages/patient/PatientDashboard.tsx` (line 211)
 
-**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
+Change `Welcome back, {profile?.full_name || "Patient"}` to use only the first name:
+```
+Welcome back, {profile?.full_name?.split(" ")[0] || "Patient"}
+```
 
-**Fix in `src/pages/Profile.tsx`:**
-- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
-- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
-- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
-- This prevents the race condition where autosave fires with stale/initial data
+The doctor Dashboard (`src/pages/Dashboard.tsx`) already uses `getDisplayName()` which formats as "Dr. Surname" — no change needed there.
 
-## 3. Make Partner Email Required and Create Pending Users
+## 3. Moola Transfer System
 
-**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+### Database Changes (migration)
 
-**Fix:**
-- Add an `email` column to the `practice_partners` table via migration
-- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
-- Ensure the `addPartner` function validates email is provided before saving
-- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+**New table: `moola_partner_apps`** — admin-managed list of apps that accept Moolas
+- `id`, `name`, `logo_url`, `is_active`, `created_at`
+- RLS: anyone authenticated can SELECT; only admins can INSERT/UPDATE/DELETE
 
-**Database Migration:**
-- `ALTER TABLE practice_partners ADD COLUMN email text;`
+**New table: `moola_transfers`** — transfer history
+- `id`, `user_id` (sender), `partner_app_id`, `amount`, `created_at`
+- RLS: users can SELECT/INSERT their own records
 
-**Changes in `src/pages/Profile.tsx`:**
-- Make email field required in validation (alongside name and registration number)
-- Show validation error if email is missing
+```sql
+CREATE TABLE public.moola_partner_apps (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  logo_url text,
+  is_active boolean NOT NULL DEFAULT true,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE public.moola_partner_apps ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can view active partner apps" ON public.moola_partner_apps FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Admins can manage partner apps" ON public.moola_partner_apps FOR ALL TO authenticated USING (has_role(auth.uid(), 'admin')) WITH CHECK (has_role(auth.uid(), 'admin'));
 
-## Technical Summary
+CREATE TABLE public.moola_transfers (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  partner_app_id uuid NOT NULL REFERENCES public.moola_partner_apps(id),
+  amount integer NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE public.moola_transfers ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view their own transfers" ON public.moola_transfers FOR SELECT TO authenticated USING (auth.uid() = user_id);
+CREATE POLICY "Users can create transfers" ON public.moola_transfers FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
+```
 
-### Database Migration
-- Add `email text` column to `practice_partners` table
+### UI: Transfer Moolas in My Rewards
 
-### Files Modified
-- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
-- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
-- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
-- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
+**File:** `src/pages/patient/MyRewards.tsx`
+
+- Add a "Transfer Moolas" button next to the Total Moolas card
+- Clicking opens a dialog where the patient selects a partner app and enters an amount
+- On submit: insert into `moola_transfers`, and insert a negative `patient_rewards` entry (or a dedicated deduction) to reduce the Moola balance
+- Add a "Transfer History" tab showing past transfers with date, app, and amount
+
+### Admin: Manage Partner Apps
+
+**File:** `src/pages/admin/GamificationAdmin.tsx`
+
+- Add a "Partner Apps" section where admins can add/edit/deactivate apps that accept Moolas
+
+## Files Modified
+
+| File | Change |
+|------|--------|
+| `src/components/layout/Sidebar.tsx` | Change profile link text to "My Profile" |
+| `src/pages/patient/PatientDashboard.tsx` | Use first name only in greeting |
+| `src/pages/patient/MyRewards.tsx` | Add Transfer Moolas button, dialog, and Transfer History tab |
+| `src/pages/admin/GamificationAdmin.tsx` | Add Partner Apps management section |
+| Database migration | Create `moola_partner_apps` and `moola_transfers` tables with RLS |
 
