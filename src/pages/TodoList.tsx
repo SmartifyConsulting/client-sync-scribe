@@ -617,7 +617,7 @@ export default function TodoList() {
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-2">
-        {(["all", "active", "completed"] as const).map((f) => (
+        {(["active", "completed", "all"] as const).map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}

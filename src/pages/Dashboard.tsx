@@ -178,6 +178,19 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {/* Record a Task Shortcut */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link to="/todos">
+                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/10">
+                    <Mic className="h-5 w-5" />
+                  </Button>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>Record a Task</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           {/* Notification Bell */}
           <Popover>
             <PopoverTrigger asChild>
