@@ -686,7 +686,7 @@ export default function Patients() {
                           <div className="flex h-10 w-10 items-center justify-center rounded-full font-medium bg-terracotta text-terracotta-foreground">
                             ME
                           </div>
-                          <span className="font-medium text-foreground group-hover:text-secondary transition-colors">
+                          <span className="font-medium text-foreground group-hover:text-terracotta transition-colors">
                             {(() => {
                               const parts = mePatient.name.trim().split(/\s+/);
                               if (parts.length <= 1) return mePatient.name;
