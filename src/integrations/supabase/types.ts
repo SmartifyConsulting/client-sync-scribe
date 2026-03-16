@@ -705,6 +705,7 @@ export type Database = {
           postal_address: string | null
           primary_member: string | null
           referred_by: string | null
+          reporting_to_email: string | null
           same_as_physical: boolean | null
           status: string
           surgeries: Json | null
@@ -746,6 +747,7 @@ export type Database = {
           postal_address?: string | null
           primary_member?: string | null
           referred_by?: string | null
+          reporting_to_email?: string | null
           same_as_physical?: boolean | null
           status?: string
           surgeries?: Json | null
@@ -787,6 +789,7 @@ export type Database = {
           postal_address?: string | null
           primary_member?: string | null
           referred_by?: string | null
+          reporting_to_email?: string | null
           same_as_physical?: boolean | null
           status?: string
           surgeries?: Json | null
@@ -974,6 +977,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          auto_email_certificate_to_employer: boolean | null
+          auto_email_invoice_to_insurance: boolean | null
+          auto_email_prescription_to_pharmacy: boolean | null
           avatar_url: string | null
           created_at: string
           doctor_number: string | null
@@ -998,6 +1004,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          auto_email_certificate_to_employer?: boolean | null
+          auto_email_invoice_to_insurance?: boolean | null
+          auto_email_prescription_to_pharmacy?: boolean | null
           avatar_url?: string | null
           created_at?: string
           doctor_number?: string | null
@@ -1022,6 +1031,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          auto_email_certificate_to_employer?: boolean | null
+          auto_email_invoice_to_insurance?: boolean | null
+          auto_email_prescription_to_pharmacy?: boolean | null
           avatar_url?: string | null
           created_at?: string
           doctor_number?: string | null
