@@ -118,10 +118,13 @@ export default function Patients() {
     return sorted;
   }, [filteredPatients, user?.id]);
 
-  // Group by first letter of surname (skip "ME" patient for grouping)
+  // Extract ME patient before grouping
+  const mePatient = sortedPatients.find(p => p.patient_user_id === user?.id) || null;
+  const patientsForGrouping = mePatient ? sortedPatients.filter(p => p.id !== mePatient.id) : sortedPatients;
+
+  // Group by first letter of surname
   const groupedPatients: Record<string, typeof filteredPatients> = {};
-  sortedPatients.forEach((patient, index) => {
-    // First patient might be "ME" — still group by their surname letter
+  patientsForGrouping.forEach((patient) => {
     const letter = getSurname(patient.name)[0] || '#';
     if (!groupedPatients[letter]) groupedPatients[letter] = [];
     groupedPatients[letter].push(patient);
@@ -609,6 +612,68 @@ export default function Patients() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
+                {/* ME patient row - always at top */}
+                {mePatient && (
+                  <>
+                    <tr>
+                      <td colSpan={6} className="px-6 py-2 bg-secondary/30 sticky top-0">
+                        <span className="text-sm font-bold text-secondary">MY RECORD</span>
+                      </td>
+                    </tr>
+                    <tr className="group transition-colors bg-secondary/5 hover:bg-secondary/10 border-l-2 border-secondary">
+                      <td className="px-6 py-4">
+                        <Link to={`/patients/${mePatient.id}`} className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full font-medium bg-secondary text-secondary-foreground">
+                            ME
+                          </div>
+                          <span className="font-medium text-foreground group-hover:text-secondary transition-colors">
+                            {(() => {
+                              const parts = mePatient.name.trim().split(/\s+/);
+                              if (parts.length <= 1) return mePatient.name;
+                              const lastName = parts[parts.length - 1];
+                              const firstNames = parts.slice(0, -1).join(" ");
+                              return `${lastName}, ${firstNames}`;
+                            })()}
+                            <span className="ml-2 inline-flex items-center rounded-full bg-secondary/10 px-2 py-0.5 text-[10px] font-bold text-secondary">ME</span>
+                          </span>
+                        </Link>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="space-y-1">
+                          {mePatient.email && (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Mail className="h-3.5 w-3.5" /> {mePatient.email}
+                            </div>
+                          )}
+                          {mePatient.phone && (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Phone className="h-3.5 w-3.5" /> {mePatient.phone}
+                            </div>
+                          )}
+                          {!mePatient.email && !mePatient.phone && (
+                            <span className="text-sm text-muted-foreground">No contact info</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-muted-foreground">
+                        {mePatient.last_visit ? new Date(mePatient.last_visit).toLocaleDateString() : <span className="text-muted-foreground/50">No visits yet</span>}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-muted-foreground">
+                        {new Date(mePatient.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={cn("inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium", mePatient.status === "active" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>
+                          {mePatient.status === "active" ? "Active" : "Inactive"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/patients/${mePatient.id}`)}>
+                          <Edit3 className="h-4 w-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  </>
+                )}
                 {availableLetters.sort().map((letter) => (
                   <React.Fragment key={letter}>
                     <tr id={`patient-group-${letter}`}>
@@ -616,7 +681,7 @@ export default function Patients() {
                         <span className="text-sm font-bold text-primary">{letter}</span>
                       </td>
                     </tr>
-                    {groupedPatients[letter].map((patient, index) => (
+                    {groupedPatients[letter].map((patient) => (
                       <tr
                         key={patient.id}
                         className="group transition-colors hover:bg-muted/30"
@@ -626,8 +691,8 @@ export default function Patients() {
                             to={`/patients/${patient.id}`}
                             className="flex items-center gap-3"
                           >
-                            <div className={cn("flex h-10 w-10 items-center justify-center rounded-full font-medium", patient.patient_user_id === user?.id ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground")}>
-                              {patient.patient_user_id === user?.id ? "ME" : patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full font-medium bg-accent text-accent-foreground">
+                              {patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                             </div>
                             <span className="font-medium text-foreground group-hover:text-primary transition-colors">
                               {(() => {
@@ -637,9 +702,6 @@ export default function Patients() {
                                 const firstNames = parts.slice(0, -1).join(" ");
                                 return `${lastName}, ${firstNames}`;
                               })()}
-                              {patient.patient_user_id === user?.id && (
-                                <span className="ml-2 inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">ME</span>
-                              )}
                             </span>
                           </Link>
                         </td>
