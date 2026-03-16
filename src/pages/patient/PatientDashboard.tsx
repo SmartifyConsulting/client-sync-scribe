@@ -266,27 +266,6 @@ export default function PatientDashboard() {
         </div>
       )}
 
-      {/* Lollipop Rewards */}
-      {!rewardsLoading && lollipopCount > 0 && (
-        <LollipopDisplay count={lollipopCount} rewards={rewards} showHistory variant="card" />
-      )}
-
-      {/* Rewards Stat Card */}
-      <Link to="/patient/rewards">
-        <Card className="cursor-pointer hover:bg-muted/50 transition-colors border-secondary/30">
-          <CardContent className="flex items-center gap-4 py-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10">
-              <Award className="h-6 w-6 text-secondary" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-muted-foreground">My Moolas</p>
-              <p className="text-2xl font-bold text-foreground">{lollipopCount} Ⓜ️</p>
-            </div>
-            <p className="text-sm text-primary">View details →</p>
-          </CardContent>
-        </Card>
-      </Link>
-
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>

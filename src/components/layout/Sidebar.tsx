@@ -57,8 +57,6 @@ const patientNavItems: NavItem[] = [
   { icon: FileText, label: "My Documents", to: "/patient/documents" },
   { icon: MessageSquare, label: "Round Table", to: "/patient/round-table" },
   { icon: Gift, label: "My Rewards", to: "/patient/rewards" },
-  { icon: Pill, label: "Prescriptions", to: "/patient/prescriptions" },
-  { icon: Receipt, label: "Invoices", to: "/patient/invoices" },
 ];
 
 const adminNavItems: NavItem[] = [
