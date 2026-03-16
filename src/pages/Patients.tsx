@@ -302,6 +302,7 @@ export default function Patients() {
       next_of_kin_email: newPatient.next_of_kin_email || null,
       general_practitioner: newPatient.general_practitioner || null,
       claims_email: newPatient.claims_email || null,
+      patient_user_id: selectedPatientUserId || null,
     } as any);
 
     if (result) {
