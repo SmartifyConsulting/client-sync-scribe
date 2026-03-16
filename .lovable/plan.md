@@ -1,84 +1,59 @@
 
 
-# Plan: Enhanced Hospital Admission Form with Dynamic Code Lookup
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## Overview
-Upgrade the existing `HospitalAdmissionEditor.tsx` to support dynamic ICD-10, NHRPL, and custom code systems with live search against public APIs. Add a country field to the doctor's profile so the system knows which code tables to query. Create an edge function to proxy code lookups.
+## 1. Increase Logo Size by 130%
 
-## 1. Add Country to Doctor Profile
+Scale all logo instances by 130%:
 
-**Database migration**: Add `country` column to `profiles` table.
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-```sql
-ALTER TABLE public.profiles ADD COLUMN country text DEFAULT 'ZA';
-```
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-**Profile.tsx**: Add a country selector dropdown (South Africa, United States, United Kingdom, Australia, etc.) in the doctor's profile settings.
+## 2. Fix Practice Number Not Persisting
 
-## 2. Create Edge Function for Code Lookup
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-**`supabase/functions/lookup-medical-codes/index.ts`**
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
 
-This edge function uses Lovable AI (Gemini Flash) to look up medical codes based on the user's typed query and country. The function:
-- Accepts `{ query, codeSystem, country }` (e.g., `{ query: "hypert", codeSystem: "ICD-10", country: "ZA" }`)
-- Uses Gemini to return matching codes with descriptions from the relevant country's standard
-- Returns `[{ code: "I10", description: "Essential (primary) hypertension" }, ...]`
+## 3. Make Partner Email Required and Create Pending Users
 
-This approach avoids needing to maintain full code databases while still providing accurate, country-specific results. The AI model has comprehensive knowledge of ICD-10, CPT, NHRPL (South Africa), OPCS (UK), and MBS (Australia) codes.
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
 
-## 3. Rewrite HospitalAdmissionEditor with Autosearch
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
 
-**`src/components/sessions/HospitalAdmissionEditor.tsx`** -- Major rewrite:
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
 
-### Code Entry System
-Each code section (ICD-10, NHRPL, and custom) gets an autosearch input:
-- As the doctor types (debounced 400ms), call the edge function
-- Show a dropdown of matching codes with code + description
-- On select, populate both code and description fields automatically
-- Allow manual entry as fallback
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
 
-### Dynamic Code Systems
-- Add a "Code Systems" section with ICD-10 and NHRPL pre-configured
-- Add "Add Code System" button allowing doctors to add custom systems (e.g., CPT, OPCS, MBS)
-- Each code system has its own section with add/remove entries
-- The country from the doctor's profile determines which variant of codes to search
+## Technical Summary
 
-### NHRPL Section Upgrade
-- Change from a single text input to a dynamic list (like ICD-10) with autosearch
-- Each NHRPL entry gets code + description with search
+### Database Migration
+- Add `email text` column to `practice_partners` table
 
-### UI Structure
-```
-[Admission Details]  (unchanged)
-[Diagnosis - ICD-10 Codes]  (with autosearch)
-[Procedure Details]
-  - Date, Description (unchanged)
-  - NHRPL Codes (dynamic list with autosearch)
-[Additional Code Systems]  (dynamic, user-added)
-[Special Instructions]  (unchanged)
-```
-
-## 4. Profile Country Selector
-
-In `src/pages/Profile.tsx`, add a country select field in the practice info section. Countries: South Africa (ZA), United States (US), United Kingdom (GB), Australia (AU), Canada (CA), India (IN), plus an "Other" option with manual text entry.
-
-## Files to Modify/Create
-
-| File | Change |
-|------|--------|
-| SQL Migration | Add `country` column to `profiles` |
-| `supabase/functions/lookup-medical-codes/index.ts` | New edge function for AI-powered code lookup |
-| `src/components/sessions/HospitalAdmissionEditor.tsx` | Add autosearch for ICD-10, NHRPL, and custom code systems |
-| `src/pages/Profile.tsx` | Add country selector |
-
-## Edge Function Detail
-
-The edge function calls Lovable AI with a structured prompt:
-```
-Given the medical code system "{codeSystem}" for country "{country}",
-return the top 8 matching codes for the search query "{query}".
-Return as JSON array: [{ "code": "...", "description": "..." }]
-```
-
-This leverages the AI's training data which includes comprehensive medical coding standards globally.
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 
