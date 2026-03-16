@@ -63,6 +63,74 @@ export default function GamificationAdmin() {
     is_active: true,
   });
 
+  // Partner Apps state
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [showAddAppDialog, setShowAddAppDialog] = useState(false);
+  const [newAppName, setNewAppName] = useState("");
+  const [newAppLogoUrl, setNewAppLogoUrl] = useState("");
+
+  const { data: partnerApps = [], isLoading: appsLoading } = useQuery({
+    queryKey: ["admin-partner-apps"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("moola_partner_apps")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data || []) as PartnerApp[];
+    },
+  });
+
+  const addAppMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("moola_partner_apps")
+        .insert({ name: newAppName, logo_url: newAppLogoUrl || null });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-partner-apps"] });
+      setShowAddAppDialog(false);
+      setNewAppName("");
+      setNewAppLogoUrl("");
+      toast({ title: "Partner app added" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const toggleAppMutation = useMutation({
+    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
+      const { error } = await supabase
+        .from("moola_partner_apps")
+        .update({ is_active })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-partner-apps"] });
+    },
+  });
+
+  const deleteAppMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("moola_partner_apps")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-partner-apps"] });
+      toast({ title: "Partner app removed" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
   const handleEdit = (config: GamificationConfig) => {
     setEditingId(config.id);
     setEditValues({
