@@ -441,8 +441,8 @@ export default function GamificationAdmin() {
                     <TableHead>Streak Name</TableHead>
                     <TableHead>Visit Category</TableHead>
                     <TableHead>Interval</TableHead>
-                    <TableHead>Lollipops</TableHead>
-                    <TableHead>Status</TableHead>
+                     <TableHead>Moolas</TableHead>
+                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
