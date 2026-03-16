@@ -1,59 +1,53 @@
 
 
-# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
+# Plan: AI-Validated Medication Adherence with Auto-Deletion
 
-## 1. Increase Logo Size by 130%
+## Overview
 
-Scale all logo instances by 130%:
+Enhance the medication adherence video flow to:
+1. Upload video temporarily to storage
+2. Send a frame/thumbnail to AI vision (Lovable AI gateway) for ingestion detection — verifying a person is visibly taking medication
+3. If validated: mark adherence as completed, award Moolas, then **delete the video** from storage
+4. If rejected: notify the patient the proof was insufficient, delete the video, allow retry
 
-| Location | Current | New (130%) |
-|---|---|---|
-| Sidebar | h-10 (40px) | h-[52px] |
-| Mobile Header | h-8 (32px) | h-[42px] |
-| Auth page | h-12 (48px) | h-[62px] |
-| Forgot/Reset Password | h-12 (48px) | h-[62px] |
-| Landing page | h-10 (40px) | h-[52px] |
+## Approach
 
-**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
+### New Edge Function: `validate-medication-video`
 
-## 2. Fix Practice Number Not Persisting
+Similar to the existing `validate-health-photo` function but with a medication ingestion-specific prompt. The function will:
+- Accept: `videoUrl`, `prescriptionId`, `patientId`
+- Use Lovable AI (gemini-2.5-flash with vision) to analyze the video thumbnail/frame
+- Prompt AI to detect: person visible, medication/pill visible, ingestion action (putting pill in mouth, drinking water with pill, etc.)
+- Return: `{ isValid, confidence, description }`
+- If valid: update `medication_adherence` to completed, award Moolas, send streak notifications
+- **Delete the video file** from storage using the service role client regardless of validation outcome
+- Store only the validation result (not the video) in the adherence record
 
-**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
+### Client Changes: `MedicationAdherenceTab.tsx`
 
-**Fix in `src/pages/Profile.tsx`:**
-- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
-- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
-- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
-- This prevents the race condition where autosave fires with stale/initial data
+Update `handleSubmitProof`:
+1. Upload video to `patient-media` bucket (temporary)
+2. Call `validate-medication-video` edge function with the public URL
+3. Show validation result to user (success or retry prompt)
+4. No `proof_url` stored permanently — the edge function handles everything server-side and deletes the file
 
-## 3. Make Partner Email Required and Create Pending Users
+### Key AI Prompt
 
-**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+The prompt will ask the model to detect:
+- A human face/person visible in frame
+- Medication (pills, capsules, liquid medicine, inhaler, etc.) visible
+- Evidence of ingestion (hand-to-mouth action, swallowing, drinking)
+- Confidence score for the overall medication-taking activity
 
-**Fix:**
-- Add an `email` column to the `practice_partners` table via migration
-- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
-- Ensure the `addPartner` function validates email is provided before saving
-- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+### Privacy Benefit
 
-**Database Migration:**
-- `ALTER TABLE practice_partners ADD COLUMN email text;`
+Since the video is deleted immediately after AI validation, no sensitive video data persists in storage. Only the AI's validation result (text description + confidence) is stored.
 
-**Changes in `src/pages/Profile.tsx`:**
-- Make email field required in validation (alongside name and registration number)
-- Show validation error if email is missing
+## Files
 
-## Technical Summary
-
-### Database Migration
-- Add `email text` column to `practice_partners` table
-
-### Files Modified
-- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
-- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
-- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
-- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
+| File | Change |
+|------|--------|
+| `supabase/functions/validate-medication-video/index.ts` | New edge function — AI validation + storage cleanup |
+| `src/components/rewards/MedicationAdherenceTab.tsx` | Call validation function instead of directly marking complete; handle validation response |
+| `supabase/config.toml` | Register new function |
 
