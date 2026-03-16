@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { Calendar, Clock, MapPin, User, Loader2 } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, MapPin, Loader2, Plus } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isToday, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { BookAppointmentDialog } from "@/components/appointments/BookAppointmentDialog";
+import { PatientRequestsBadge } from "@/components/appointments/PatientRequestsBadge";
 
 interface Appointment {
   id: string;
@@ -23,24 +25,20 @@ export default function PatientCalendar() {
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [bookDialogOpen, setBookDialogOpen] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      fetchAppointments();
-    }
+    if (user) fetchAppointments();
   }, [user]);
 
   const fetchAppointments = async () => {
     if (!user) return;
     setLoading(true);
-
     try {
-      // Get appointments where the patient_user_id matches the current user
       const { data, error } = await supabase
         .from("appointments")
         .select("*")
         .order("start_time", { ascending: true });
-
       if (error) throw error;
       setAppointments(data || []);
     } catch (error) {
@@ -73,10 +71,19 @@ export default function PatientCalendar() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">My Calendar</h1>
-        <p className="text-muted-foreground">View and manage your appointments</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">My Calendar</h1>
+          <p className="text-muted-foreground">View and manage your appointments</p>
+        </div>
+        <Button onClick={() => setBookDialogOpen(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Book Appointment
+        </Button>
       </div>
+
+      {/* Pending / Proposed Requests */}
+      <PatientRequestsBadge />
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Week View */}
@@ -88,62 +95,30 @@ export default function PatientCalendar() {
                   {format(currentWeekStart, "MMMM yyyy")}
                 </CardTitle>
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}
-                  >
-                    Today
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))}
-                  >
-                    Next
-                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))}>Previous</Button>
+                  <Button variant="outline" size="sm" onClick={() => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}>Today</Button>
+                  <Button variant="outline" size="sm" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))}>Next</Button>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-7 gap-2">
                 {weekDays.map((day) => {
-                  const dayAppointments = appointments.filter((apt) =>
-                    isSameDay(parseISO(apt.start_time), day)
-                  );
+                  const dayAppointments = appointments.filter((apt) => isSameDay(parseISO(apt.start_time), day));
                   const isSelected = isSameDay(day, selectedDate);
-
                   return (
                     <button
                       key={day.toISOString()}
                       onClick={() => setSelectedDate(day)}
                       className={cn(
                         "flex flex-col items-center p-3 rounded-lg transition-colors",
-                        isSelected
-                          ? "bg-primary text-primary-foreground"
-                          : isToday(day)
-                          ? "bg-primary/10 text-primary"
-                          : "hover:bg-muted"
+                        isSelected ? "bg-primary text-primary-foreground" : isToday(day) ? "bg-primary/10 text-primary" : "hover:bg-muted"
                       )}
                     >
-                      <span className="text-xs font-medium">
-                        {format(day, "EEE")}
-                      </span>
-                      <span className="text-lg font-semibold">
-                        {format(day, "d")}
-                      </span>
+                      <span className="text-xs font-medium">{format(day, "EEE")}</span>
+                      <span className="text-lg font-semibold">{format(day, "d")}</span>
                       {dayAppointments.length > 0 && (
-                        <div className={cn(
-                          "mt-1 h-1.5 w-1.5 rounded-full",
-                          isSelected ? "bg-primary-foreground" : "bg-primary"
-                        )} />
+                        <div className={cn("mt-1 h-1.5 w-1.5 rounded-full", isSelected ? "bg-primary-foreground" : "bg-primary")} />
                       )}
                     </button>
                   );
@@ -152,30 +127,20 @@ export default function PatientCalendar() {
             </CardContent>
           </Card>
 
-          {/* Selected Day Appointments */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">
-                {format(selectedDate, "EEEE, MMMM d")}
-              </CardTitle>
-              <CardDescription>
-                {selectedDayAppointments.length} appointment(s)
-              </CardDescription>
+              <CardTitle className="text-lg">{format(selectedDate, "EEEE, MMMM d")}</CardTitle>
+              <CardDescription>{selectedDayAppointments.length} appointment(s)</CardDescription>
             </CardHeader>
             <CardContent>
               {selectedDayAppointments.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">
-                  No appointments scheduled for this day
-                </p>
+                <p className="text-center text-muted-foreground py-8">No appointments scheduled for this day</p>
               ) : (
                 <div className="space-y-3">
                   {selectedDayAppointments.map((apt) => (
-                    <div
-                      key={apt.id}
-                      className="flex items-start gap-4 p-4 rounded-lg border border-border"
-                    >
+                    <div key={apt.id} className="flex items-start gap-4 p-4 rounded-lg border border-border">
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                        <Calendar className="h-5 w-5 text-primary" />
+                        <CalendarIcon className="h-5 w-5 text-primary" />
                       </div>
                       <div className="flex-1">
                         <p className="font-medium">{apt.title}</p>
@@ -185,15 +150,10 @@ export default function PatientCalendar() {
                             {format(parseISO(apt.start_time), "h:mm a")} - {format(parseISO(apt.end_time), "h:mm a")}
                           </span>
                           {apt.location && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {apt.location}
-                            </span>
+                            <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{apt.location}</span>
                           )}
                         </div>
-                        {apt.description && (
-                          <p className="mt-2 text-sm text-muted-foreground">{apt.description}</p>
-                        )}
+                        {apt.description && <p className="mt-2 text-sm text-muted-foreground">{apt.description}</p>}
                       </div>
                     </div>
                   ))}
@@ -211,19 +171,14 @@ export default function PatientCalendar() {
           </CardHeader>
           <CardContent>
             {upcomingAppointments.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                No upcoming appointments
-              </p>
+              <p className="text-center text-muted-foreground py-8">No upcoming appointments</p>
             ) : (
               <div className="space-y-4">
                 {upcomingAppointments.map((apt) => (
-                  <div
-                    key={apt.id}
-                    className="p-3 rounded-lg bg-muted/50 space-y-2"
-                  >
+                  <div key={apt.id} className="p-3 rounded-lg bg-muted/50 space-y-2">
                     <p className="font-medium text-sm">{apt.title}</p>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Calendar className="h-3 w-3" />
+                      <CalendarIcon className="h-3 w-3" />
                       {format(parseISO(apt.start_time), "MMM d, yyyy")}
                     </div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -243,6 +198,8 @@ export default function PatientCalendar() {
           </CardContent>
         </Card>
       </div>
+
+      <BookAppointmentDialog open={bookDialogOpen} onOpenChange={setBookDialogOpen} onBooked={fetchAppointments} />
     </div>
   );
 }
