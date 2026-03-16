@@ -85,7 +85,21 @@ export default function MyRewards() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: tasks = [], isLoading: tasksLoading, refetch: refetchTasks } = useQuery({
+  // Get patient record for chronic meds tab
+  const { data: patientRecord } = useQuery({
+    queryKey: ["my-patient-record"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data } = await supabase
+        .from("patients")
+        .select("id, is_chronic")
+        .eq("patient_user_id", user.id)
+        .maybeSingle();
+      return data;
+    },
+  });
+
     queryKey: ["patient-assigned-tasks"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
