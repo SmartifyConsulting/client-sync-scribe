@@ -168,12 +168,6 @@ export function CompactTodoList() {
     setIsProcessing(true);
     try {
       const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
-
-      // Skip transcription for silent/empty recordings (< 5KB is just headers)
-      if (audioBlob.size < 5000) {
-        setIsProcessing(false);
-        return;
-      }
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve, reject) => {
         reader.onloadend = () => resolve((reader.result as string).split(",")[1]);
@@ -281,7 +275,7 @@ export function CompactTodoList() {
   const completedCount = todos.filter((t) => t.completed).length;
 
   return (
-    <div className="rounded-xl border border-primary bg-card shadow-sm">
+    <div className="rounded-xl border border-primary bg-card shadow-sm mt-4">
       {/* Header */}
       <div className="rounded-t-xl bg-primary px-4 py-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-primary-foreground">To-Do List</h3>

@@ -173,9 +173,7 @@ export default function Dashboard() {
       {/* Header with Profile */}
       <div className="flex items-start justify-between pb-2">
         <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">
-            {greeting}, <Link to="/profile" className="text-primary hover:underline">{profile?.full_name || getDisplayName()} Profile</Link>
-          </h1>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">{greeting}, {getDisplayName()}</h1>
           <p className="mt-2 text-muted-foreground text-[12px]">
             Here's what's happening with your practice today, {formattedDate}
           </p>
@@ -252,6 +250,9 @@ export default function Dashboard() {
                 <p className="text-sm font-semibold text-foreground">{profile?.full_name || "User"}</p>
                 <p className="text-xs text-muted-foreground capitalize">{isDoctor ? "Doctor" : "Patient"}</p>
               </div>
+              <Link to="/profile" className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors">
+                <User className="h-4 w-4" /> View Profile
+              </Link>
               <Link to="/settings" className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors">
                 <Settings className="h-4 w-4" /> Settings
               </Link>
@@ -296,9 +297,9 @@ export default function Dashboard() {
         <div className="lg:col-span-2">
           <TodaysBriefing />
         </div>
-        <div className="space-y-4">
-          {isDoctor && <CompactTodoList />}
+        <div>
           <RecentActivity />
+          {isDoctor && <CompactTodoList />}
         </div>
       </div>
     </div>
