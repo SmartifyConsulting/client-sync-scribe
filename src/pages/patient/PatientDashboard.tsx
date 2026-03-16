@@ -214,6 +214,11 @@ export default function PatientDashboard() {
             </p>
           </div>
         </div>
+        {/* Moolas Badge */}
+        <Link to="/patient/rewards" className="flex items-center gap-1.5 rounded-full bg-secondary/10 px-3 py-1.5 text-sm font-semibold text-secondary hover:bg-secondary/20 transition-colors">
+          <Award className="h-4 w-4" />
+          <span>{lollipopCount} Ⓜ️</span>
+        </Link>
         {/* Notification Bell */}
         <Popover>
           <PopoverTrigger asChild>
