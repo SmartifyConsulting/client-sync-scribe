@@ -225,7 +225,7 @@ export default function GamificationAdmin() {
                   <DialogHeader>
                     <DialogTitle>Add New Reward Category</DialogTitle>
                     <DialogDescription>
-                      Create a new visit type that awards lollipops to patients
+                      Create a new visit type that awards Moolas to patients
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
