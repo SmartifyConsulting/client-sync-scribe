@@ -326,24 +326,42 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
               </div>
             ) : (
               <>
-                {services.map((svc) => (
-                  <button
-                    key={svc.id}
-                    onClick={() => handleSelectService(svc)}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors text-left"
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent">
-                      <DollarSign className="h-5 w-5 text-accent-foreground" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-foreground">{svc.service_name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {svc.currency} {svc.default_price.toFixed(2)}
-                      </p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  </button>
-                ))}
+                {isFirstVisit && selectedService?.is_first_consultation && (
+                  <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-sm text-primary mb-2">
+                    As this is your first visit, the first consultation fee has been pre-selected.
+                  </div>
+                )}
+                {services.map((svc) => {
+                  const isSelected = selectedService?.id === svc.id;
+                  return (
+                    <button
+                      key={svc.id}
+                      onClick={() => handleSelectService(svc)}
+                      className={cn(
+                        "w-full flex items-center gap-3 p-3 rounded-lg border transition-colors text-left",
+                        isSelected
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:bg-muted/50"
+                      )}
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent">
+                        <DollarSign className="h-5 w-5 text-accent-foreground" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-foreground">{svc.service_name}</p>
+                          {(svc as any).is_first_consultation && (
+                            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">First Visit</span>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {svc.currency} {svc.default_price.toFixed(2)}
+                        </p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  );
+                })}
                 <Button variant="ghost" size="sm" onClick={() => { setSelectedService(null); setStep(3); }} className="w-full mt-2">
                   Skip — no specific service
                 </Button>
