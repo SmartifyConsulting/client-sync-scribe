@@ -45,7 +45,6 @@ const doctorNavItems: NavItem[] = [
   { icon: Mic, label: "Sessions", to: "/sessions" },
   { icon: Receipt, label: "Invoices", to: "/invoices" },
   { icon: UserPlus, label: "Referrals", to: "/referral-doctors" },
-  { icon: Award, label: "Certificates", to: "/cpd-certificates" },
   { icon: FileText, label: "Templates", to: "/documents" },
 ];
 
