@@ -28,6 +28,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
     dob: "",
     occupation: "",
     employer: "",
+    reporting_to_email: "",
     referred_by: "",
     marital_status: "",
     id_passport_number: "",
@@ -68,6 +69,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         dob: patient.dob || "",
         occupation: patient.occupation || "",
         employer: patient.employer || "",
+        reporting_to_email: patient.reporting_to_email || "",
         referred_by: patient.referred_by || "",
         marital_status: patient.marital_status || "",
         id_passport_number: patient.id_passport_number || "",
@@ -115,6 +117,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
       dob: data.dob || null,
       occupation: data.occupation || null,
       employer: data.employer || null,
+      reporting_to_email: data.reporting_to_email || null,
       referred_by: data.referred_by || null,
       marital_status: data.marital_status || null,
       id_passport_number: data.id_passport_number || null,
@@ -213,6 +216,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
     setFormData({
       name: patient.name || "", email: patient.email || "", phone: patient.phone || "",
       dob: patient.dob || "", occupation: patient.occupation || "", employer: patient.employer || "",
+      reporting_to_email: patient.reporting_to_email || "",
       referred_by: patient.referred_by || "", marital_status: patient.marital_status || "",
       id_passport_number: patient.id_passport_number || "", gender: patient.gender || "",
       physical_address: patient.physical_address || "", postal_address: patient.postal_address || "",
@@ -313,9 +317,10 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             </div>
             <h3 className="font-semibold text-foreground">Employer</h3>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div><p className="text-sm text-muted-foreground">Employer</p><p className="mt-1 text-foreground">{patient.employer || "Not provided"}</p></div>
             <div><p className="text-sm text-muted-foreground">Occupation</p><p className="mt-1 text-foreground">{patient.occupation || "Not provided"}</p></div>
+            <div><p className="text-sm text-muted-foreground">Reporting To (Email)</p><p className="mt-1 text-foreground">{patient.reporting_to_email || "Not provided"}</p></div>
           </div>
         </div>
 
@@ -526,9 +531,10 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
       {/* 4. Employer */}
       <div>
         <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Employer</h3>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-2"><Label htmlFor="employer">Employer</Label><Input id="employer" value={formData.employer} onChange={(e) => updateFormData({ employer: e.target.value })} placeholder="Company name" /></div>
           <div className="space-y-2"><Label htmlFor="occupation">Occupation</Label><Input id="occupation" value={formData.occupation} onChange={(e) => updateFormData({ occupation: e.target.value })} placeholder="Job title" /></div>
+          <div className="space-y-2"><Label htmlFor="reporting_to_email">Reporting To (Email)</Label><Input id="reporting_to_email" type="email" value={formData.reporting_to_email} onChange={(e) => updateFormData({ reporting_to_email: e.target.value })} placeholder="manager@company.com" /></div>
         </div>
       </div>
 

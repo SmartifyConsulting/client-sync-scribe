@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy, Clock, Mail, Save, Award, Volume2, UserPlus } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { PatientImport } from "@/components/patients/PatientImport";
 import { useToast as useGlobalToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -1099,7 +1100,61 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* Auto-Email Preferences (Patient only) */}
+      {profile?.role === 'patient' && (
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-6">
+            <Mail className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold text-foreground">Auto-Email Preferences</h2>
+          </div>
+          <p className="text-sm text-muted-foreground mb-6">
+            Control what your doctors can automatically email on your behalf.
+          </p>
+          <div className="space-y-4">
+            <AutoEmailToggle
+              label="Auto-email invoice to medical aid when marked as paid"
+              description="When your doctor marks an invoice as paid, it will be sent to your insurance claims email."
+              checked={(profile as any)?.auto_email_invoice_to_insurance || false}
+              onCheckedChange={async (checked) => {
+                await updateProfile({ auto_email_invoice_to_insurance: checked } as any);
+                toast({ title: "Preference updated" });
+              }}
+            />
+            <AutoEmailToggle
+              label="Auto-email prescription to main pharmacy"
+              description="When your doctor saves a prescription, it will be sent to your primary pharmacy."
+              checked={(profile as any)?.auto_email_prescription_to_pharmacy || false}
+              onCheckedChange={async (checked) => {
+                await updateProfile({ auto_email_prescription_to_pharmacy: checked } as any);
+                toast({ title: "Preference updated" });
+              }}
+            />
+            <AutoEmailToggle
+              label="Auto-email medical certificate to employer"
+              description="When your doctor saves a medical certificate, it will be sent to your employer's reporting email."
+              checked={(profile as any)?.auto_email_certificate_to_employer || false}
+              onCheckedChange={async (checked) => {
+                await updateProfile({ auto_email_certificate_to_employer: checked } as any);
+                toast({ title: "Preference updated" });
+              }}
+            />
+          </div>
+        </div>
+      )}
+
       <PatientImport />
+    </div>
+  );
+}
+
+function AutoEmailToggle({ label, description, checked, onCheckedChange }: { label: string; description: string; checked: boolean; onCheckedChange: (checked: boolean) => void }) {
+  return (
+    <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/20">
+      <div className="flex-1 mr-4">
+        <p className="text-sm font-medium text-foreground">{label}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+      </div>
+      <Switch checked={checked} onCheckedChange={onCheckedChange} />
     </div>
   );
 }

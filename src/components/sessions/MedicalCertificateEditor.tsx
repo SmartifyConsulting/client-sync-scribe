@@ -120,6 +120,42 @@ export function MedicalCertificateEditor({
         title: "Certificate Saved",
         description: "The medical certificate has been saved",
       });
+
+      // Auto-email to employer if patient allows
+      try {
+        const { data: patientData } = await supabase
+          .from('patients')
+          .select('reporting_to_email, patient_user_id')
+          .eq('id', patientId)
+          .maybeSingle();
+
+        if (patientData?.patient_user_id && patientData?.reporting_to_email) {
+          const { data: patientProfile } = await supabase
+            .from('profiles')
+            .select('auto_email_certificate_to_employer')
+            .eq('id', patientData.patient_user_id)
+            .maybeSingle();
+
+          if (patientProfile?.auto_email_certificate_to_employer) {
+            await supabase.functions.invoke('send-document-email', {
+              body: {
+                to: patientData.reporting_to_email,
+                subject: `Medical Certificate - ${patientName}`,
+                documentName: `Medical Certificate - ${patientName}`,
+                documentContent: content,
+                senderName: profile?.full_name || 'Doctor',
+              },
+            });
+            toast({
+              title: "Certificate Auto-Sent",
+              description: `Automatically emailed to employer`,
+            });
+          }
+        }
+      } catch (autoErr) {
+        console.error("Auto-email certificate error:", autoErr);
+      }
+
       onClose();
     } catch (error: any) {
       console.error("Error saving certificate:", error);

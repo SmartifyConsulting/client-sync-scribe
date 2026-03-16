@@ -205,6 +205,52 @@ Signature: ___________________
         title: "Prescription Saved",
         description: "The prescription has been saved to the session",
       });
+
+      // Auto-email to pharmacy if patient allows
+      try {
+        const { data: patientData } = await supabase
+          .from('patients')
+          .select('pharmacy_email, pharmacy_name, patient_user_id, pharmacies')
+          .eq('id', patientId)
+          .maybeSingle();
+
+        if (patientData?.patient_user_id) {
+          const { data: patientProfile } = await supabase
+            .from('profiles')
+            .select('auto_email_prescription_to_pharmacy')
+            .eq('id', patientData.patient_user_id)
+            .maybeSingle();
+
+          if (patientProfile?.auto_email_prescription_to_pharmacy) {
+            // Find primary pharmacy email
+            let pharmacyEmail = patientData.pharmacy_email;
+            if (!pharmacyEmail && patientData.pharmacies) {
+              const pharmacies = patientData.pharmacies as any[];
+              const primary = pharmacies.find((p: any) => p.is_primary) || pharmacies[0];
+              pharmacyEmail = primary?.email;
+            }
+
+            if (pharmacyEmail) {
+              await supabase.functions.invoke('send-document-email', {
+                body: {
+                  to: pharmacyEmail,
+                  subject: `Prescription for ${patientName}`,
+                  documentName: `Prescription - ${patientName}`,
+                  documentContent: content,
+                  senderName: doctorName,
+                },
+              });
+              toast({
+                title: "Prescription Auto-Sent",
+                description: `Automatically emailed to pharmacy`,
+              });
+            }
+          }
+        }
+      } catch (autoErr) {
+        console.error("Auto-email prescription error:", autoErr);
+      }
+
       onClose();
     } finally {
       setIsSaving(false);
