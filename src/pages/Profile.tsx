@@ -120,7 +120,7 @@ export default function Profile() {
   
   // Autosave state
   const [savedStatus, setSavedStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
-  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasInitialized = useRef(false);
   const isSettingFromProfile = useRef(false);
   const profileLoadedData = useRef<typeof formData | null>(null);
