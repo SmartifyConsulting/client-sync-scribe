@@ -1,59 +1,38 @@
 
 
-# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
+# Four Changes: "ME" Patient, Partner Invite Icon, To-Do Tab Order, Dashboard Record Shortcut
 
-## 1. Increase Logo Size by 130%
+## 1. Add "ME" as first patient in the list
 
-Scale all logo instances by 130%:
+**File:** `src/pages/Patients.tsx` (lines 104-114)
 
-| Location | Current | New (130%) |
-|---|---|---|
-| Sidebar | h-10 (40px) | h-[52px] |
-| Mobile Header | h-8 (32px) | h-[42px] |
-| Auth page | h-12 (48px) | h-[62px] |
-| Forgot/Reset Password | h-12 (48px) | h-[62px] |
-| Landing page | h-10 (40px) | h-[52px] |
+After sorting patients alphabetically, check if any patient has the same `patient_user_id` as the current user (or same email). If not found among existing patients, create a synthetic "ME" entry. Either way, move the doctor's own record to the top of the list before grouping.
 
-**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
+- Import `useAuth` to get the current user ID
+- In the sorting logic, partition: extract the "self" patient (where `patient_user_id === user.id`), then prepend it before the alphabetically sorted list
+- Display the name as the patient name but with a "ME" badge next to it
 
-## 2. Fix Practice Number Not Persisting
+## 2. Change partner "Invite to App" icon from Mail to a different icon
 
-**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
+**File:** `src/pages/Profile.tsx` (line 966)
 
-**Fix in `src/pages/Profile.tsx`:**
-- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
-- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
-- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
-- This prevents the race condition where autosave fires with stale/initial data
+Replace `<Mail className="h-4 w-4" />` with `<Users className="h-4 w-4" />` (or `UserPlus` from lucide-react) to differentiate the "Invite to App" action from a regular email action. `UserPlus` is the most semantically appropriate icon.
 
-## 3. Make Partner Email Required and Create Pending Users
+- Import `UserPlus` from lucide-react (line 2)
+- Replace `<Mail>` with `<UserPlus>` on line 966
 
-**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+## 3. Reorder To-Do filter tabs: Active → Completed → All
 
-**Fix:**
-- Add an `email` column to the `practice_partners` table via migration
-- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
-- Ensure the `addPartner` function validates email is provided before saving
-- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+**File:** `src/pages/TodoList.tsx` (line 620)
 
-**Database Migration:**
-- `ALTER TABLE practice_partners ADD COLUMN email text;`
+Change the array from `["all", "active", "completed"]` to `["active", "completed", "all"]` and set default `filter` state to `"active"` (line 76).
 
-**Changes in `src/pages/Profile.tsx`:**
-- Make email field required in validation (alongside name and registration number)
-- Show validation error if email is missing
+## 4. Add "Record a Task" shortcut icon on Dashboard
 
-## Technical Summary
+**File:** `src/pages/Dashboard.tsx`
 
-### Database Migration
-- Add `email text` column to `practice_partners` table
+Add a microphone button in the header area (near the notification bell) that links to `/todos` with a query param or simply navigates to the To-Do page. Use a `Mic` icon from lucide-react with a tooltip "Record a Task".
 
-### Files Modified
-- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
-- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
-- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
-- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
+- Import `Mic` from lucide-react
+- Add a `<Link to="/todos">` button with `<Mic>` icon next to the notification bell (before line 181)
 
