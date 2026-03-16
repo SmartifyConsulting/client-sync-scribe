@@ -1,14 +1,52 @@
 import { useState, useEffect } from "react";
-import { Plus, Trash2, Pencil, Check, X, Loader2, UserPlus, Search } from "lucide-react";
+import { Plus, Trash2, Pencil, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+
+const SPECIALTIES = [
+  "General Practitioner",
+  "Allergist/Immunologist",
+  "Anesthesiologist",
+  "Cardiologist",
+  "Dermatologist",
+  "Emergency Medicine Physician",
+  "Endocrinologist",
+  "Family Medicine Physician",
+  "Gastroenterologist",
+  "Geriatrician",
+  "Hematologist",
+  "Infectious Disease Specialist",
+  "Internist",
+  "Nephrologist",
+  "Neurologist",
+  "Obstetrician/Gynecologist",
+  "Oncologist",
+  "Ophthalmologist",
+  "Orthopedic Surgeon",
+  "Otolaryngologist (ENT)",
+  "Pathologist",
+  "Pediatrician",
+  "Physiatrist",
+  "Plastic Surgeon",
+  "Podiatrist",
+  "Psychiatrist",
+  "Psychologist",
+  "Pulmonologist",
+  "Radiologist",
+  "Rheumatologist",
+  "Sports Medicine Physician",
+  "Surgeon (General)",
+  "Urologist",
+  "Vascular Surgeon",
+];
 
 interface ReferralDoctor {
   id: string;
@@ -19,6 +57,7 @@ interface ReferralDoctor {
   email: string | null;
   phone: string | null;
   referral_count: number;
+  specialty: string | null;
 }
 
 export default function ReferralDoctors() {
@@ -30,8 +69,9 @@ export default function ReferralDoctors() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [customSpecialty, setCustomSpecialty] = useState("");
   const [form, setForm] = useState({
-    first_name: "", last_name: "", practice_number: "", address: "", email: "", phone: "",
+    first_name: "", last_name: "", practice_number: "", address: "", email: "", phone: "", specialty: "",
   });
 
   useEffect(() => {
@@ -54,37 +94,39 @@ export default function ReferralDoctors() {
       return;
     }
     setSaving(true);
+    const specialty = form.specialty === "__other__" ? customSpecialty : (form.specialty || null);
+    const record = {
+      first_name: form.first_name, last_name: form.last_name,
+      practice_number: form.practice_number || null, address: form.address || null,
+      email: form.email || null, phone: form.phone || null, specialty,
+    };
     if (editingId) {
-      const { error } = await supabase.from("referral_doctors").update({
-        first_name: form.first_name, last_name: form.last_name,
-        practice_number: form.practice_number || null, address: form.address || null,
-        email: form.email || null, phone: form.phone || null,
-      }).eq("id", editingId);
+      const { error } = await supabase.from("referral_doctors").update(record).eq("id", editingId);
       if (error) toast({ title: "Error", description: "Failed to update", variant: "destructive" });
       else toast({ title: "Updated", description: "Referral doctor updated" });
     } else {
-      const { error } = await supabase.from("referral_doctors").insert({
-        user_id: user.id, first_name: form.first_name, last_name: form.last_name,
-        practice_number: form.practice_number || null, address: form.address || null,
-        email: form.email || null, phone: form.phone || null,
-      });
+      const { error } = await supabase.from("referral_doctors").insert({ ...record, user_id: user.id });
       if (error) toast({ title: "Error", description: "Failed to add", variant: "destructive" });
       else toast({ title: "Added", description: "Referral doctor added" });
     }
     setSaving(false);
     setShowForm(false);
     setEditingId(null);
-    setForm({ first_name: "", last_name: "", practice_number: "", address: "", email: "", phone: "" });
+    setForm({ first_name: "", last_name: "", practice_number: "", address: "", email: "", phone: "", specialty: "" });
+    setCustomSpecialty("");
     fetchDoctors();
   };
 
   const handleEdit = (doc: ReferralDoctor) => {
     setEditingId(doc.id);
+    const isCustom = doc.specialty && !SPECIALTIES.includes(doc.specialty);
     setForm({
       first_name: doc.first_name, last_name: doc.last_name,
       practice_number: doc.practice_number || "", address: doc.address || "",
       email: doc.email || "", phone: doc.phone || "",
+      specialty: isCustom ? "__other__" : (doc.specialty || ""),
     });
+    if (isCustom) setCustomSpecialty(doc.specialty || "");
     setShowForm(true);
   };
 
@@ -107,7 +149,7 @@ export default function ReferralDoctors() {
           <h1 className="text-3xl font-bold text-foreground">Referral Doctors</h1>
           <p className="mt-1 text-muted-foreground">Manage doctors you refer patients to</p>
         </div>
-        <Button onClick={() => { setShowForm(true); setEditingId(null); setForm({ first_name: "", last_name: "", practice_number: "", address: "", email: "", phone: "" }); }} className="gap-2">
+        <Button onClick={() => { setShowForm(true); setEditingId(null); setForm({ first_name: "", last_name: "", practice_number: "", address: "", email: "", phone: "", specialty: "" }); setCustomSpecialty(""); }} className="gap-2">
           <Plus className="h-4 w-4" /> Add Doctor
         </Button>
       </div>
@@ -118,6 +160,19 @@ export default function ReferralDoctors() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-2"><Label>First Name *</Label><Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} /></div>
             <div className="space-y-2"><Label>Last Name *</Label><Input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} /></div>
+            <div className="space-y-2">
+              <Label>Specialty</Label>
+              <Select value={form.specialty} onValueChange={(v) => { setForm({ ...form, specialty: v }); if (v !== "__other__") setCustomSpecialty(""); }}>
+                <SelectTrigger><SelectValue placeholder="Select specialty" /></SelectTrigger>
+                <SelectContent>
+                  {SPECIALTIES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  <SelectItem value="__other__">Other...</SelectItem>
+                </SelectContent>
+              </Select>
+              {form.specialty === "__other__" && (
+                <Input value={customSpecialty} onChange={(e) => setCustomSpecialty(e.target.value)} placeholder="Enter specialty" className="mt-2" />
+              )}
+            </div>
             <div className="space-y-2"><Label>Practice Number</Label><Input value={form.practice_number} onChange={(e) => setForm({ ...form, practice_number: e.target.value })} /></div>
             <div className="space-y-2"><Label>Address</Label><Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
             <div className="space-y-2"><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
@@ -145,6 +200,7 @@ export default function ReferralDoctors() {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
+                <TableHead>Specialty</TableHead>
                 <TableHead>Practice Number</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead>
@@ -156,6 +212,7 @@ export default function ReferralDoctors() {
               {filtered.map((doc) => (
                 <TableRow key={doc.id}>
                   <TableCell className="font-medium">{doc.first_name} {doc.last_name}</TableCell>
+                  <TableCell>{doc.specialty || "-"}</TableCell>
                   <TableCell>{doc.practice_number || "-"}</TableCell>
                   <TableCell>{doc.email || "-"}</TableCell>
                   <TableCell>{doc.phone || "-"}</TableCell>
