@@ -38,15 +38,14 @@ interface NavItem {
 
 const doctorNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard" },
-  { icon: Bell, label: "Notifications", to: "/notifications" },
   { icon: Users2, label: "Connections", to: "/connections" },
   { icon: CheckSquare, label: "To-Do List", to: "/todos" },
   { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: Users, label: "Patients", to: "/patients" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
   { icon: Receipt, label: "Invoices", to: "/invoices" },
-  { icon: UserPlus, label: "Referral Doctors", to: "/referral-doctors" },
-  { icon: Award, label: "CPD", to: "/cpd-certificates" },
+  { icon: UserPlus, label: "Referrals", to: "/referral-doctors" },
+  { icon: Award, label: "Certificates", to: "/cpd-certificates" },
   { icon: FileText, label: "Templates", to: "/documents" },
 ];
 
