@@ -1240,6 +1240,7 @@ export type Database = {
           currency: string
           default_price: number
           id: string
+          is_first_consultation: boolean
           service_name: string
           updated_at: string
           user_id: string
@@ -1249,6 +1250,7 @@ export type Database = {
           currency?: string
           default_price?: number
           id?: string
+          is_first_consultation?: boolean
           service_name: string
           updated_at?: string
           user_id: string
@@ -1258,6 +1260,7 @@ export type Database = {
           currency?: string
           default_price?: number
           id?: string
+          is_first_consultation?: boolean
           service_name?: string
           updated_at?: string
           user_id?: string
