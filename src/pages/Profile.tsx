@@ -873,15 +873,29 @@ export default function Profile() {
                 try {
                   const langCode = profile?.preferred_language || "en";
                   const sampleText = SAMPLE_TEXTS[langCode] || SAMPLE_TEXTS.en;
-                  const response = await supabase.functions.invoke('narrate-briefing', {
-                    body: { text: sampleText, voice },
-                  });
-                  if (response.error) throw response.error;
-                  // response.data is a Blob for audio
-                  const blob = response.data;
+                  
+                  // Create Audio element immediately for mobile gesture unlock
+                  const audio = new Audio();
+                  audio.play().catch(() => {});
+                  
+                  const { data: { session } } = await supabase.auth.getSession();
+                  const response = await fetch(
+                    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`,
+                    {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session?.access_token}`,
+                        'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                      },
+                      body: JSON.stringify({ text: sampleText, voice }),
+                    }
+                  );
+                  if (!response.ok) throw new Error('Failed to generate preview');
+                  const blob = await response.blob();
                   const url = URL.createObjectURL(blob);
-                  const audio = new Audio(url);
-                  audio.play();
+                  audio.src = url;
+                  await audio.play();
                   audio.onended = () => URL.revokeObjectURL(url);
                 } catch (err: any) {
                   toast({ title: "Preview failed", description: err.message || "Could not generate voice preview", variant: "destructive" });
