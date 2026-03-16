@@ -180,6 +180,8 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          media_type: string | null
+          media_url: string | null
           name: string
           patient_id: string | null
           patient_name: string | null
@@ -192,6 +194,8 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          media_type?: string | null
+          media_url?: string | null
           name: string
           patient_id?: string | null
           patient_name?: string | null
@@ -204,6 +208,8 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          media_type?: string | null
+          media_url?: string | null
           name?: string
           patient_id?: string | null
           patient_name?: string | null
@@ -654,6 +660,8 @@ export type Database = {
           notes: string | null
           occupation: string | null
           patient_user_id: string | null
+          pharmacy_email: string | null
+          pharmacy_name: string | null
           phone: string | null
           physical_address: string | null
           postal_address: string | null
@@ -691,6 +699,8 @@ export type Database = {
           notes?: string | null
           occupation?: string | null
           patient_user_id?: string | null
+          pharmacy_email?: string | null
+          pharmacy_name?: string | null
           phone?: string | null
           physical_address?: string | null
           postal_address?: string | null
@@ -728,6 +738,8 @@ export type Database = {
           notes?: string | null
           occupation?: string | null
           patient_user_id?: string | null
+          pharmacy_email?: string | null
+          pharmacy_name?: string | null
           phone?: string | null
           physical_address?: string | null
           postal_address?: string | null
