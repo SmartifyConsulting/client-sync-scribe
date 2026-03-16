@@ -33,7 +33,7 @@ import { DoctorsOnProfile } from "@/components/patients/DoctorsOnProfile";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { RequestConnectionButton } from "@/components/patients/RequestConnectionButton";
 import { RoundTable } from "@/components/patients/RoundTable";
-import { LollipopDisplay } from "@/components/gamification/LollipopDisplay";
+import { LollipopDisplay } from "@/components/gamification/LollipopDisplay"; // Moola display
 import { useTemplates } from "@/hooks/useTemplates";
 import { useDocuments } from "@/hooks/useDocuments";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
