@@ -1,59 +1,34 @@
 
 
-# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
+# Fix "ME" Patient Visibility with Terracotta Styling
 
-## 1. Increase Logo Size by 130%
+## Problems Found
 
-Scale all logo instances by 130%:
+1. **ME patient doesn't appear at top**: The `sortedPatients` array correctly moves ME to index 0, but the rendering loops through `availableLetters.sort()` and renders patients grouped by surname letter. So ME still appears buried under its surname letter (e.g., under "S" for Smith), not at the top.
 
-| Location | Current | New (130%) |
-|---|---|---|
-| Sidebar | h-10 (40px) | h-[52px] |
-| Mobile Header | h-8 (32px) | h-[42px] |
-| Auth page | h-12 (48px) | h-[62px] |
-| Forgot/Reset Password | h-12 (48px) | h-[62px] |
-| Landing page | h-10 (40px) | h-[52px] |
+2. **Colors**: The ME badge/avatar uses teal (`bg-primary`) instead of terracotta.
 
-**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
+## Fix: `src/pages/Patients.tsx`
 
-## 2. Fix Practice Number Not Persisting
+### Rendering: Show ME patient as a separate row before the alphabet groups
 
-**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
+- Extract the ME patient from `sortedPatients` before grouping
+- Render ME as a standalone highlighted row at the very top of the table body (before the letter groups)
+- Remove ME from the grouped patients so they don't appear twice
+- Style the ME row with terracotta background accent: `bg-terracotta/5` border, `bg-terracotta text-terracotta-foreground` avatar, `bg-terracotta/10 text-terracotta` badge
 
-**Fix in `src/pages/Profile.tsx`:**
-- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
-- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
-- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
-- This prevents the race condition where autosave fires with stale/initial data
+### Grouping logic change (lines 121-128):
+- Check if first patient in `sortedPatients` is ME (`patient_user_id === user?.id`)
+- If so, skip it when building `groupedPatients`
+- Store reference to ME patient separately
 
-## 3. Make Partner Email Required and Create Pending Users
+### Render change (lines 611-619):
+- Before the letter group loop, render the ME patient row with terracotta styling
+- Add a subtle "MY RECORD" section header instead of a letter
 
-**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+### Avatar & badge styling (lines 629-641):
+- Change from `bg-primary` to `bg-terracotta` for avatar
+- Change badge from `bg-primary/10 text-primary` to `bg-terracotta/10 text-terracotta`
 
-**Fix:**
-- Add an `email` column to the `practice_partners` table via migration
-- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
-- Ensure the `addPartner` function validates email is provided before saving
-- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
-
-**Database Migration:**
-- `ALTER TABLE practice_partners ADD COLUMN email text;`
-
-**Changes in `src/pages/Profile.tsx`:**
-- Make email field required in validation (alongside name and registration number)
-- Show validation error if email is missing
-
-## Technical Summary
-
-### Database Migration
-- Add `email text` column to `practice_partners` table
-
-### Files Modified
-- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
-- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
-- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
-- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
+**Single file:** `src/pages/Patients.tsx`
 
