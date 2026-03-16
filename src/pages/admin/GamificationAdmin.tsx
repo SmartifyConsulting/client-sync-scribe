@@ -25,6 +25,17 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useGamificationAdmin, useStreakAdmin, GamificationConfig, StreakConfig } from "@/hooks/usePatientRewards";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+interface PartnerApp {
+  id: string;
+  name: string;
+  logo_url: string | null;
+  is_active: boolean;
+  created_at: string;
+}
 
 export default function GamificationAdmin() {
   const { configs, loading, updateConfig, createConfig, deleteConfig } = useGamificationAdmin();
