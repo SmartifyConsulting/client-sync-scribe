@@ -17,6 +17,7 @@ export interface Profile {
   inactive_threshold_months: number | null;
   signature_font: string | null;
   signature_color: string | null;
+  preferred_language: string | null;
   created_at: string;
   updated_at: string;
 }

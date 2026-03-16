@@ -68,6 +68,37 @@ const DOCTOR_SPECIALTIES = [
   "Vascular Surgeon",
 ];
 
+const LANGUAGES = [
+  { code: "en", name: "English" },
+  { code: "af", name: "Afrikaans" },
+  { code: "zu", name: "Zulu" },
+  { code: "xh", name: "Xhosa" },
+  { code: "st", name: "Sotho" },
+  { code: "tn", name: "Tswana" },
+  { code: "fr", name: "French" },
+  { code: "de", name: "German" },
+  { code: "el", name: "Greek" },
+  { code: "es", name: "Spanish" },
+  { code: "pt", name: "Portuguese" },
+  { code: "it", name: "Italian" },
+  { code: "nl", name: "Dutch" },
+  { code: "ar", name: "Arabic" },
+  { code: "hi", name: "Hindi" },
+  { code: "zh", name: "Mandarin Chinese" },
+  { code: "ja", name: "Japanese" },
+  { code: "ko", name: "Korean" },
+  { code: "ru", name: "Russian" },
+  { code: "tr", name: "Turkish" },
+  { code: "sw", name: "Swahili" },
+  { code: "he", name: "Hebrew" },
+  { code: "pl", name: "Polish" },
+  { code: "uk", name: "Ukrainian" },
+  { code: "th", name: "Thai" },
+  { code: "vi", name: "Vietnamese" },
+  { code: "id", name: "Indonesian" },
+  { code: "ms", name: "Malay" },
+];
+
 const CURRENCIES = [
   { code: "ZAR", symbol: "R", name: "South African Rand" },
   { code: "USD", symbol: "$", name: "US Dollar" },

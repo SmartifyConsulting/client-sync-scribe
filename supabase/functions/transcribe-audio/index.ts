@@ -144,6 +144,10 @@ serve(async (req) => {
     formData.append('model', 'whisper-1');
     formData.append('response_format', 'verbose_json');
     formData.append('timestamp_granularities[]', 'segment');
+    if (language) {
+      formData.append('language', language);
+      console.log('Using language:', language);
+    }
 
     console.log('Sending to OpenAI Whisper API...');
 
