@@ -532,9 +532,40 @@ export default function Patients() {
         </Popover>
       </div>
 
+      {/* Alphabet Jump Bar */}
+      {sortedPatients.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {alphabet.map((letter) => {
+            const hasPatients = availableLetters.includes(letter);
+            return (
+              <button
+                key={letter}
+                onClick={() => {
+                  if (hasPatients) {
+                    setSelectedLetter(letter);
+                    const el = document.getElementById(`patient-group-${letter}`);
+                    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
+                className={cn(
+                  "w-8 h-8 rounded-lg text-xs font-semibold transition-colors",
+                  hasPatients
+                    ? selectedLetter === letter
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-foreground hover:bg-primary/20"
+                    : "bg-muted/30 text-muted-foreground/40 cursor-default"
+                )}
+              >
+                {letter}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {/* Patient List */}
       <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
-        {filteredPatients.length === 0 ? (
+        {sortedPatients.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
             {searchQuery ? "No patients found matching your search" : "No patients yet. Add your first patient!"}
           </div>
@@ -564,93 +595,101 @@ export default function Patients() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredPatients.map((patient, index) => (
-                  <tr
-                    key={patient.id}
-                    className="group transition-colors hover:bg-muted/30"
-                    style={{ animationDelay: `${index * 50}ms` }}
-                  >
-                    <td className="px-6 py-4">
-                      <Link
-                        to={`/patients/${patient.id}`}
-                        className="flex items-center gap-3"
+                {availableLetters.sort().map((letter) => (
+                  <React.Fragment key={letter}>
+                    <tr id={`patient-group-${letter}`}>
+                      <td colSpan={6} className="px-6 py-2 bg-muted/50 sticky top-0">
+                        <span className="text-sm font-bold text-primary">{letter}</span>
+                      </td>
+                    </tr>
+                    {groupedPatients[letter].map((patient, index) => (
+                      <tr
+                        key={patient.id}
+                        className="group transition-colors hover:bg-muted/30"
                       >
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-accent-foreground font-medium">
-                          {patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                        </div>
-                        <span className="font-medium text-foreground group-hover:text-primary transition-colors">
-                          {patient.name}
-                        </span>
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="space-y-1">
-                        {patient.email && (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Mail className="h-3.5 w-3.5" />
-                            {patient.email}
-                          </div>
-                        )}
-                        {patient.phone && (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Phone className="h-3.5 w-3.5" />
-                            {patient.phone}
-                          </div>
-                        )}
-                        {!patient.email && !patient.phone && (
-                          <span className="text-sm text-muted-foreground">No contact info</span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
-                      {patient.last_visit 
-                        ? new Date(patient.last_visit).toLocaleDateString() 
-                        : <span className="text-muted-foreground/50">No visits yet</span>
-                      }
-                    </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
-                      {new Date(patient.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={cn(
-                          "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
-                          patient.status === "active"
-                            ? "bg-success/10 text-success"
-                            : "bg-muted text-muted-foreground"
-                        )}
-                      >
-                        {patient.status === "active" ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleStartSession(patient.id)}>
-                            <Clock className="mr-2 h-4 w-4" />
-                            Start Session
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => navigate(`/patients/${patient.id}`)}>
-                            <Edit3 className="mr-2 h-4 w-4" />
-                            View Profile
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem 
-                            onClick={() => handleDeletePatient(patient.id, patient.name)}
-                            className="text-destructive focus:text-destructive"
+                        <td className="px-6 py-4">
+                          <Link
+                            to={`/patients/${patient.id}`}
+                            className="flex items-center gap-3"
                           >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete Patient
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-accent-foreground font-medium">
+                              {patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                            </div>
+                            <span className="font-medium text-foreground group-hover:text-primary transition-colors">
+                              {patient.name}
+                            </span>
+                          </Link>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="space-y-1">
+                            {patient.email && (
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Mail className="h-3.5 w-3.5" />
+                                {patient.email}
+                              </div>
+                            )}
+                            {patient.phone && (
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Phone className="h-3.5 w-3.5" />
+                                {patient.phone}
+                              </div>
+                            )}
+                            {!patient.email && !patient.phone && (
+                              <span className="text-sm text-muted-foreground">No contact info</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-muted-foreground">
+                          {patient.last_visit 
+                            ? new Date(patient.last_visit).toLocaleDateString() 
+                            : <span className="text-muted-foreground/50">No visits yet</span>
+                          }
+                        </td>
+                        <td className="px-6 py-4 text-sm text-muted-foreground">
+                          {new Date(patient.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={cn(
+                              "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
+                              patient.status === "active"
+                                ? "bg-success/10 text-success"
+                                : "bg-muted text-muted-foreground"
+                            )}
+                          >
+                            {patient.status === "active" ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleStartSession(patient.id)}>
+                                <Clock className="mr-2 h-4 w-4" />
+                                Start Session
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => navigate(`/patients/${patient.id}`)}>
+                                <Edit3 className="mr-2 h-4 w-4" />
+                                View Profile
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                onClick={() => handleDeletePatient(patient.id, patient.name)}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Patient
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </td>
+                      </tr>
+                    ))}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>
