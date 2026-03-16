@@ -62,7 +62,7 @@ export function useProfile() {
         }
       }
     } else {
-      setProfile(data as Profile);
+      setProfile(data as unknown as Profile);
     }
     setLoading(false);
   };
