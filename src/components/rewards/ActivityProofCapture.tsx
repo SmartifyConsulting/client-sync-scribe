@@ -11,6 +11,7 @@ interface Task {
   title: string;
   moolas_reward: number;
   patient_id: string | null;
+  task_type: string;
 }
 
 interface ActivityProofCaptureProps {
