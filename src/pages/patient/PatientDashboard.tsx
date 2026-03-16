@@ -7,7 +7,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useMyRewards } from "@/hooks/usePatientRewards";
-import { LollipopDisplay } from "@/components/gamification/LollipopDisplay";
 import { supabase } from "@/integrations/supabase/client";
 import { format, parseISO, isFuture } from "date-fns";
 import { Link } from "react-router-dom";
@@ -215,6 +214,11 @@ export default function PatientDashboard() {
             </p>
           </div>
         </div>
+        {/* Moolas Badge */}
+        <Link to="/patient/rewards" className="flex items-center gap-1.5 rounded-full bg-secondary/10 px-3 py-1.5 text-sm font-semibold text-secondary hover:bg-secondary/20 transition-colors">
+          <Award className="h-4 w-4" />
+          <span>{lollipopCount} Ⓜ️</span>
+        </Link>
         {/* Notification Bell */}
         <Popover>
           <PopoverTrigger asChild>
@@ -266,27 +270,6 @@ export default function PatientDashboard() {
           </Badge>
         </div>
       )}
-
-      {/* Lollipop Rewards */}
-      {!rewardsLoading && lollipopCount > 0 && (
-        <LollipopDisplay count={lollipopCount} rewards={rewards} showHistory variant="card" />
-      )}
-
-      {/* Rewards Stat Card */}
-      <Link to="/patient/rewards">
-        <Card className="cursor-pointer hover:bg-muted/50 transition-colors border-secondary/30">
-          <CardContent className="flex items-center gap-4 py-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10">
-              <Award className="h-6 w-6 text-secondary" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-muted-foreground">My Moolas</p>
-              <p className="text-2xl font-bold text-foreground">{lollipopCount} Ⓜ️</p>
-            </div>
-            <p className="text-sm text-primary">View details →</p>
-          </CardContent>
-        </Card>
-      </Link>
 
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
