@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Calendar, FileText, Receipt, Clock, User, Loader2, Bell, Pill, Award } from "lucide-react";
+import { Calendar, FileText, Receipt, Clock, User, Loader2, Bell, Pill, Award, LogOut, Settings } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format, parseISO, isFuture } from "date-fns";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface DashboardStats {
   upcomingAppointments: number;
@@ -214,45 +215,75 @@ export default function PatientDashboard() {
             </p>
           </div>
         </div>
-        {/* Moolas Badge */}
-        <Link to="/patient/rewards" className="flex items-center gap-1.5 rounded-full bg-secondary px-4 py-2 text-sm font-bold text-white hover:bg-secondary/90 transition-colors shadow-md">
-          <Award className="h-5 w-5" />
-          <span className="text-base">{lollipopCount} Ⓜ️</span>
-        </Link>
-        {/* Notification Bell */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <button className="relative h-10 w-10 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/90 transition-colors">
-              <Bell className="h-5 w-5 text-white stroke-white fill-none" />
-              {unreadNotifCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-white">
-                  {unreadNotifCount > 99 ? "99+" : unreadNotifCount}
-                </span>
-              )}
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80 p-0" align="end">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-              <p className="text-sm font-semibold">Notifications</p>
-              {unreadNotifCount > 0 && (
-                <Button variant="ghost" size="sm" className="text-xs h-7" onClick={markAllRead}>Mark all read</Button>
-              )}
-            </div>
-            <div className="max-h-64 overflow-y-auto">
-              {recentNotifications.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-6">No notifications</p>
-              ) : (
-                recentNotifications.map((n: any) => (
-                  <div key={n.id} className={`px-4 py-3 border-b border-border/50 text-sm ${!n.is_read ? 'bg-primary/5' : ''}`}>
-                    <p className="font-medium text-foreground">{n.title}</p>
-                    {n.description && <p className="text-xs text-muted-foreground mt-0.5">{n.description}</p>}
-                    <p className="text-xs text-muted-foreground mt-1">{new Date(n.created_at).toLocaleDateString()}</p>
-                  </div>
-                ))
-              )}
-            </div>
-          </PopoverContent>
-        </Popover>
+        <div className="flex items-center gap-3">
+          {/* Moolas Badge */}
+          <Link to="/patient/rewards" className="flex items-center gap-1.5 rounded-full bg-secondary px-4 py-2 text-sm font-bold text-white hover:bg-secondary/90 transition-colors shadow-md">
+            <Award className="h-5 w-5" />
+            <span className="text-base">{lollipopCount} Ⓜ️</span>
+          </Link>
+          {/* Notification Bell */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className="relative h-10 w-10 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/90 transition-colors">
+                <Bell className="h-5 w-5 text-white stroke-white fill-none" />
+                {unreadNotifCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-white">
+                    {unreadNotifCount > 99 ? "99+" : unreadNotifCount}
+                  </span>
+                )}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-0" align="end">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                <p className="text-sm font-semibold">Notifications</p>
+                {unreadNotifCount > 0 && (
+                  <Button variant="ghost" size="sm" className="text-xs h-7" onClick={markAllRead}>Mark all read</Button>
+                )}
+              </div>
+              <div className="max-h-64 overflow-y-auto">
+                {recentNotifications.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-6">No notifications</p>
+                ) : (
+                  recentNotifications.map((n: any) => (
+                    <div key={n.id} className={`px-4 py-3 border-b border-border/50 text-sm ${!n.is_read ? 'bg-primary/5' : ''}`}>
+                      <p className="font-medium text-foreground">{n.title}</p>
+                      {n.description && <p className="text-xs text-muted-foreground mt-0.5">{n.description}</p>}
+                      <p className="text-xs text-muted-foreground mt-1">{new Date(n.created_at).toLocaleDateString()}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
+          {/* Avatar Profile Popover */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className="rounded-xl p-2 hover:bg-accent transition-colors relative">
+                <Avatar className="h-10 w-10 border-2 border-primary/20">
+                  <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} className="object-cover" />
+                  <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                    {profile?.full_name ? profile.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) : "U"}
+                  </AvatarFallback>
+                </Avatar>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-2" align="end">
+              <div className="px-3 py-2 border-b border-border mb-1">
+                <p className="text-sm font-semibold text-foreground">{profile?.full_name || "User"}</p>
+                <p className="text-xs text-muted-foreground">Patient</p>
+              </div>
+              <Link to="/profile" className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors">
+                <User className="h-4 w-4" /> View Profile
+              </Link>
+              <Link to="/settings" className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors">
+                <Settings className="h-4 w-4" /> Settings
+              </Link>
+              <button onClick={async () => { await supabase.auth.signOut(); window.location.href = "/auth"; }} className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-destructive/10 text-destructive transition-colors w-full">
+                <LogOut className="h-4 w-4" /> Sign Out
+              </button>
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
 
       {/* Chronic Medication Badge */}
