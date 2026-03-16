@@ -103,13 +103,25 @@ export default function Patients() {
     return parts[parts.length - 1].toUpperCase();
   };
 
-  const sortedPatients = [...filteredPatients].sort((a, b) => 
-    getSurname(a.name).localeCompare(getSurname(b.name))
-  );
+  const sortedPatients = useMemo(() => {
+    const sorted = [...filteredPatients].sort((a, b) => 
+      getSurname(a.name).localeCompare(getSurname(b.name))
+    );
+    // Move "ME" (doctor's own patient record) to top
+    if (user?.id) {
+      const meIndex = sorted.findIndex(p => p.patient_user_id === user.id);
+      if (meIndex > 0) {
+        const [me] = sorted.splice(meIndex, 1);
+        sorted.unshift(me);
+      }
+    }
+    return sorted;
+  }, [filteredPatients, user?.id]);
 
-  // Group by first letter of surname
+  // Group by first letter of surname (skip "ME" patient for grouping)
   const groupedPatients: Record<string, typeof filteredPatients> = {};
-  sortedPatients.forEach((patient) => {
+  sortedPatients.forEach((patient, index) => {
+    // First patient might be "ME" — still group by their surname letter
     const letter = getSurname(patient.name)[0] || '#';
     if (!groupedPatients[letter]) groupedPatients[letter] = [];
     groupedPatients[letter].push(patient);
