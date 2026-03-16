@@ -874,45 +874,44 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       <div className="flex flex-1 min-h-0">
         {/* Anatomy panel */}
         <div className="w-48 border-r bg-muted/30 flex flex-col">
-          <div className="p-2 border-b">
+          <div className="p-2 border-b space-y-2">
             <h4 className="font-medium text-sm">Anatomy</h4>
+            <Select defaultValue="face" onValueChange={(val) => setAnatomyCategory(val)}>
+              <SelectTrigger className="w-full h-8 text-xs">
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="face">Face</SelectItem>
+                <SelectItem value="joints">Joints</SelectItem>
+                <SelectItem value="systems">Systems</SelectItem>
+                <SelectItem value="neuro">Neuro</SelectItem>
+                <SelectItem value="plastic-surgery">Plastic Surgery</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          <Tabs defaultValue="face" className="flex-1 flex flex-col">
-            <TabsList className="grid grid-cols-5 m-1 h-auto">
-              <TabsTrigger value="face" className="text-xs px-1">Face</TabsTrigger>
-              <TabsTrigger value="joints" className="text-xs px-1">Joints</TabsTrigger>
-              <TabsTrigger value="systems" className="text-xs px-1">Systems</TabsTrigger>
-              <TabsTrigger value="neuro" className="text-xs px-1">Neuro</TabsTrigger>
-              <TabsTrigger value="plastic-surgery" className="text-xs px-1">Plastic</TabsTrigger>
-            </TabsList>
-            {["face", "joints", "systems", "neuro", "plastic-surgery"].map((category) => (
-              <TabsContent key={category} value={category} className="flex-1 m-0">
-                <ScrollArea className="h-full">
-                  <div className="p-2 space-y-2">
-                    {anatomyAssets
-                      .filter((a) => a.category === category)
-                      .map((asset) => (
-                        <div
-                          key={asset.id}
-                          className="p-2 bg-background rounded border cursor-grab hover:border-primary transition-colors"
-                          draggable
-                          onDragStart={() => handleDragStart(asset)}
-                        >
-                          <div className="h-16 flex items-center justify-center text-muted-foreground">
-                            {asset.imageSrc ? (
-                              <img src={asset.imageSrc} alt={asset.name} className="h-full w-auto object-contain" />
-                            ) : (
-                              <asset.component />
-                            )}
-                          </div>
-                          <p className="text-xs text-center mt-1">{asset.name}</p>
-                        </div>
-                      ))}
+          <ScrollArea className="flex-1">
+            <div className="p-2 space-y-2">
+              {anatomyAssets
+                .filter((a) => a.category === anatomyCategory)
+                .map((asset) => (
+                  <div
+                    key={asset.id}
+                    className="p-2 bg-background rounded border cursor-grab hover:border-primary transition-colors"
+                    draggable
+                    onDragStart={() => handleDragStart(asset)}
+                  >
+                    <div className="h-16 flex items-center justify-center text-muted-foreground overflow-hidden">
+                      {asset.imageSrc ? (
+                        <img src={asset.imageSrc} alt={asset.name} className="h-full w-auto object-cover" />
+                      ) : (
+                        <asset.component />
+                      )}
+                    </div>
+                    <p className="text-xs text-center mt-1">{asset.name}</p>
                   </div>
-                </ScrollArea>
-              </TabsContent>
-            ))}
-          </Tabs>
+                ))}
+            </div>
+          </ScrollArea>
         </div>
 
         {/* Canvas area */}
