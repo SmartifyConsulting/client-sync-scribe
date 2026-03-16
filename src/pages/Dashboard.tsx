@@ -53,6 +53,24 @@ export default function Dashboard() {
     },
     refetchInterval: 30000,
   });
+
+  // Query for total CPD points
+  const { data: totalCpdPoints = 0 } = useQuery({
+    queryKey: ["cpd-points-dashboard"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return 0;
+
+      const { data, error } = await supabase
+        .from("cpd_certificates")
+        .select("cpd_points")
+        .eq("user_id", user.id);
+
+      if (error) return 0;
+      return data.reduce((sum, cert) => sum + (cert.cpd_points || 0), 0);
+    },
+    refetchInterval: 60000,
+  });
   
   // Format display name based on role - return empty string while loading
   const getDisplayName = () => {
