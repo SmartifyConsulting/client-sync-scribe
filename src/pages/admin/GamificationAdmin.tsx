@@ -211,7 +211,7 @@ export default function GamificationAdmin() {
                   Reward Categories
                 </CardTitle>
                 <CardDescription>
-                  Configure how many lollipops patients earn for each type of visit
+                  Configure how many Moolas patients earn for each type of visit
                 </CardDescription>
               </div>
               <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
