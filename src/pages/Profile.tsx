@@ -250,10 +250,20 @@ export default function Profile() {
     };
   }, [formData]);
 
+  // CPD Points
+  const [cpdPoints, setCpdPoints] = useState(0);
+  
+  const fetchCpdPoints = async () => {
+    if (!user) return;
+    const { data } = await supabase.from('cpd_certificates').select('cpd_points').eq('user_id', user.id);
+    if (data) setCpdPoints(data.reduce((sum, c) => sum + (c.cpd_points || 0), 0));
+  };
+
   useEffect(() => {
     if (user) {
       fetchPartners();
       fetchServicePrices();
+      fetchCpdPoints();
     }
   }, [user]);
 
