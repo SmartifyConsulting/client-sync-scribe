@@ -150,30 +150,15 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 {profile?.full_name?.split(" ").map(n => n[0]).join("").toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1 min-w-0">
+            <NavLink to="/profile" onClick={onNavigate} className="flex-1 min-w-0">
               {loading ? (
                 <div className="h-3 w-20 rounded bg-muted animate-pulse" />
               ) : (
-                <p className="text-xs font-medium text-foreground truncate">{profile?.full_name || "User"}</p>
+                <p className="text-xs font-medium text-primary truncate hover:underline">{profile?.full_name || "User"} Profile</p>
               )}
-            </div>
+            </NavLink>
           </div>
           <div className="px-3 pb-3 space-y-0.5">
-            <NavLink
-              to="/profile"
-              onClick={onNavigate}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
-                  isActive
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-primary hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                )
-              }
-            >
-              <User className="h-5 w-5" />
-              Profile
-            </NavLink>
             <NavLink
               to="/settings"
               onClick={onNavigate}

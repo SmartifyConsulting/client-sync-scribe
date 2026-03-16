@@ -250,9 +250,6 @@ export default function Dashboard() {
                 <p className="text-sm font-semibold text-foreground">{profile?.full_name || "User"}</p>
                 <p className="text-xs text-muted-foreground capitalize">{isDoctor ? "Doctor" : "Patient"}</p>
               </div>
-              <Link to="/profile" className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors">
-                <User className="h-4 w-4" /> View Profile
-              </Link>
               <Link to="/settings" className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors">
                 <Settings className="h-4 w-4" /> Settings
               </Link>
@@ -298,8 +295,8 @@ export default function Dashboard() {
           <TodaysBriefing />
         </div>
         <div>
-          <RecentActivity />
           {isDoctor && <CompactTodoList />}
+          <div className="mt-4"><RecentActivity /></div>
         </div>
       </div>
     </div>
