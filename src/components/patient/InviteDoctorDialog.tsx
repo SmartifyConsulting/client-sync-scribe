@@ -246,6 +246,7 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
                     <p className="text-xs text-muted-foreground">
                       {doc.specialty && `${doc.specialty} · `}
                       {doc.practice_number && `PR: ${doc.practice_number}`}
+                      {doc.cpd_points > 0 && ` · ${doc.cpd_points} CPD Points`}
                     </p>
                   </button>
                 ))}
