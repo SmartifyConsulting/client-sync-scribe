@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Calendar, FileText, Receipt, Clock, User, Loader2, Bell } from "lucide-react";
+import { Calendar, FileText, Receipt, Clock, User, Loader2, Bell, Pill, Award } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
