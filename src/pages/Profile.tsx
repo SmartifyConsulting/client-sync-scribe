@@ -356,7 +356,7 @@ export default function Profile() {
     setIsAddingService(true);
     const { data, error } = await supabase
       .from('service_prices')
-      .insert({ user_id: user.id, service_name: newService.service_name, default_price: parseFloat(newService.default_price), currency: selectedCurrency })
+      .insert({ user_id: user.id, service_name: newService.service_name, default_price: parseFloat(newService.default_price), currency: selectedCurrency, is_first_consultation: false } as any)
       .select().single();
     if (error) {
       toast({ title: "Error", description: "Failed to add service", variant: "destructive" });
