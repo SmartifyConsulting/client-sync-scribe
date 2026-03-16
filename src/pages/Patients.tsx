@@ -109,7 +109,7 @@ export default function Patients() {
     );
     // Move "ME" (doctor's own patient record) to top
     if (user?.id) {
-      const meIndex = sorted.findIndex(p => p.patient_user_id === user.id);
+      const meIndex = sorted.findIndex(p => p.email?.toLowerCase() === user.email?.toLowerCase());
       if (meIndex > 0) {
         const [me] = sorted.splice(meIndex, 1);
         sorted.unshift(me);
