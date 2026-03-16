@@ -313,9 +313,10 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             </div>
             <h3 className="font-semibold text-foreground">Employer</h3>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div><p className="text-sm text-muted-foreground">Employer</p><p className="mt-1 text-foreground">{patient.employer || "Not provided"}</p></div>
             <div><p className="text-sm text-muted-foreground">Occupation</p><p className="mt-1 text-foreground">{patient.occupation || "Not provided"}</p></div>
+            <div><p className="text-sm text-muted-foreground">Reporting To (Email)</p><p className="mt-1 text-foreground">{patient.reporting_to_email || "Not provided"}</p></div>
           </div>
         </div>
 
