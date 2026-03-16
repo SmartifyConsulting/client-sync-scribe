@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Loader2, ShieldAlert, Users, Pencil, Save, X } from "lucide-react";
+import { Loader2, ShieldAlert, Users, Pencil, Save, X, KeyRound } from "lucide-react";
 import { InviteUserDialog } from "@/components/InviteUserDialog";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,6 +39,7 @@ export default function UserManagement() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editState, setEditState] = useState<EditState>({ first_name: "", last_name: "", email: "", role: "" });
   const [saving, setSaving] = useState(false);
+  const [resettingPasswords, setResettingPasswords] = useState(false);
 
   useEffect(() => {
     if (isAdmin) fetchUsers();
@@ -154,7 +155,29 @@ export default function UserManagement() {
           </h1>
           <p className="mt-1 text-muted-foreground">View and edit registered users and their roles</p>
         </div>
-        <InviteUserDialog />
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={async () => {
+              setResettingPasswords(true);
+              try {
+                const { data, error } = await supabase.functions.invoke('admin-reset-passwords');
+                if (error) throw error;
+                if (data?.error) throw new Error(data.error);
+                toast({ title: "Passwords reset", description: `Updated ${data.updated}/${data.total} users to Password123.` });
+              } catch (err: any) {
+                toast({ title: "Error", description: err.message, variant: "destructive" });
+              } finally {
+                setResettingPasswords(false);
+              }
+            }}
+            disabled={resettingPasswords}
+          >
+            {resettingPasswords ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <KeyRound className="h-4 w-4 mr-1" />}
+            Reset All Passwords
+          </Button>
+          <InviteUserDialog />
+        </div>
       </div>
 
       <div className="rounded-lg border border-border bg-card">

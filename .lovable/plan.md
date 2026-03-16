@@ -1,29 +1,59 @@
 
 
-# Reset All User Passwords to "Password123"
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## Approach
+## 1. Increase Logo Size by 130%
 
-Create a new edge function `admin-reset-passwords` that:
-1. Verifies the caller is an admin (same pattern as `admin-update-email`)
-2. Lists all users via `supabase.auth.admin.listUsers()`
-3. Loops through each user and calls `supabase.auth.admin.updateUserById(userId, { password: "Password123" })`
-4. Returns a summary of how many users were updated
+Scale all logo instances by 130%:
 
-Then invoke it from the User Management page (or directly after deploy).
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-## Files
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-### New: `supabase/functions/admin-reset-passwords/index.ts`
-- Same auth/admin verification pattern as `admin-update-email`
-- Fetches all users, updates each password to "Password123"
-- Returns count of updated users
+## 2. Fix Practice Number Not Persisting
 
-### Modified: `src/pages/admin/UserManagement.tsx`
-- Add a "Reset All Passwords" button (for testing convenience)
-- Calls `supabase.functions.invoke('admin-reset-passwords')`
-- Shows toast with result
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-## Security Note
-This is a testing-only function. It should be removed or disabled before production use.
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
+
+## 3. Make Partner Email Required and Create Pending Users
+
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
+
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
+
+## Technical Summary
+
+### Database Migration
+- Add `email text` column to `practice_partners` table
+
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 
