@@ -1,4 +1,4 @@
-import { Users, Calendar, TrendingUp, LogOut, Award } from "lucide-react";
+import { Users, Calendar, TrendingUp, LogOut, Award, Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { TodaysBriefing } from "@/components/dashboard/TodaysBriefing";
@@ -9,8 +9,10 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 export default function Dashboard() {
   const { profile, loading: profileLoading } = useProfile();
