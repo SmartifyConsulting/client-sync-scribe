@@ -1,59 +1,73 @@
 
 
-# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
+# Plan: Employer Reporting Email, Patient Auto-Email Settings, Dashboard Enhancements
 
-## 1. Increase Logo Size by 130%
+## 1. Add "Reporting To" Email to Patient Details
 
-Scale all logo instances by 130%:
+**Database**: Add `reporting_to_email` column to `patients` table.
 
-| Location | Current | New (130%) |
-|---|---|---|
-| Sidebar | h-10 (40px) | h-[52px] |
-| Mobile Header | h-8 (32px) | h-[42px] |
-| Auth page | h-12 (48px) | h-[62px] |
-| Forgot/Reset Password | h-12 (48px) | h-[62px] |
-| Landing page | h-10 (40px) | h-[52px] |
+**Files**:
+- `src/hooks/usePatients.ts` — Add `reporting_to_email` to the `Patient` interface and `formData`.
+- `src/components/patients/PatientDetailsEditor.tsx` — Add "Reporting To Email" field in the Employer section (both view and edit modes), alongside Employer and Occupation.
 
-**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
+## 2. Patient Auto-Email Preferences (Profile Settings)
 
-## 2. Fix Practice Number Not Persisting
+**Database**: Add 3 boolean columns to `profiles` table:
+- `auto_email_invoice_to_insurance` (default false)
+- `auto_email_prescription_to_pharmacy` (default false)
+- `auto_email_certificate_to_employer` (default false)
 
-**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
+**Files**:
+- `src/hooks/useProfile.ts` — Add the 3 new fields to the `Profile` interface.
+- `src/pages/Profile.tsx` — For patient role, add an "Auto-Email Preferences" settings section with 3 toggle switches:
+  - "Allow doctor to auto-email invoice to medical aid when marked as paid"
+  - "Allow doctor to auto-email prescription to main pharmacy"
+  - "Allow doctor to auto-email medical certificate to employer"
 
-**Fix in `src/pages/Profile.tsx`:**
-- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
-- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
-- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
-- This prevents the race condition where autosave fires with stale/initial data
+## 3. Action Auto-Emails Based on Patient Settings
 
-## 3. Make Partner Email Required and Create Pending Users
+When a doctor performs an action, the system checks if the patient (via `patient_user_id` → `profiles`) has the relevant setting enabled, and if the required email address exists on the patient record.
 
-**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+**Invoice → Insurance** (`src/pages/doctor/Invoices.tsx`, `markAsPaid`):
+- Currently already auto-forwards to `claims_email`. Modify to first check patient's `auto_email_invoice_to_insurance` profile setting. Only send if the setting is `true` AND `claims_email` exists.
 
-**Fix:**
-- Add an `email` column to the `practice_partners` table via migration
-- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
-- Ensure the `addPartner` function validates email is provided before saving
-- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+**Prescription → Pharmacy** (`src/components/sessions/PrescriptionEditor.tsx`):
+- After saving a prescription, check patient's `auto_email_prescription_to_pharmacy` setting. If `true` and a primary pharmacy email exists in `pharmacies` array, auto-send the prescription via `send-document-email`.
 
-**Database Migration:**
-- `ALTER TABLE practice_partners ADD COLUMN email text;`
+**Medical Certificate → Employer** (`src/components/sessions/MedicalCertificateEditor.tsx`):
+- After saving a medical certificate, check patient's `auto_email_certificate_to_employer` setting. If `true` and `reporting_to_email` exists on the patient record, auto-send the certificate via `send-document-email`.
 
-**Changes in `src/pages/Profile.tsx`:**
-- Make email field required in validation (alongside name and registration number)
-- Show validation error if email is missing
+## 4. Patient Dashboard: Chronic Badge & Rewards Count
 
-## Technical Summary
+**File**: `src/pages/patient/PatientDashboard.tsx`
 
-### Database Migration
-- Add `email text` column to `practice_partners` table
+- Fetch the patient record linked to the current user (`patient_user_id = auth.uid()`) to get `is_chronic` status.
+- Show a "Chronic Medication" badge (terracotta-styled, with Pill icon) prominently near the welcome header if `is_chronic` is true.
+- Add a rewards stat card showing `lollipopCount` (Moolas count) that links to `/patient/rewards` for drill-down. The data is already fetched via `useMyRewards`.
 
-### Files Modified
-- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
-- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
-- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
-- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
+## Database Migration
+
+```sql
+-- Add reporting_to_email to patients
+ALTER TABLE public.patients ADD COLUMN IF NOT EXISTS reporting_to_email text;
+
+-- Add auto-email preference columns to profiles
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS auto_email_invoice_to_insurance boolean DEFAULT false;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS auto_email_prescription_to_pharmacy boolean DEFAULT false;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS auto_email_certificate_to_employer boolean DEFAULT false;
+```
+
+## Files to Create/Modify
+
+| File | Action |
+|------|--------|
+| SQL Migration | Add columns to `patients` and `profiles` |
+| `src/hooks/usePatients.ts` | Add `reporting_to_email` to Patient interface |
+| `src/hooks/useProfile.ts` | Add 3 auto-email booleans to Profile interface |
+| `src/components/patients/PatientDetailsEditor.tsx` | Add Reporting To Email field in Employer section |
+| `src/pages/Profile.tsx` | Add auto-email preferences section for patients |
+| `src/pages/doctor/Invoices.tsx` | Gate auto-forward on patient's preference setting |
+| `src/components/sessions/PrescriptionEditor.tsx` | Add auto-email to pharmacy logic |
+| `src/components/sessions/MedicalCertificateEditor.tsx` | Add auto-email to employer logic |
+| `src/pages/patient/PatientDashboard.tsx` | Add chronic badge and rewards count card |
 
