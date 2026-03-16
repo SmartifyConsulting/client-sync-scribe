@@ -1046,9 +1046,14 @@ export default function Profile() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <p className="font-medium text-foreground">{service.service_name}</p>
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-foreground">{service.service_name}</p>
+                        {(service as any).is_first_consultation && (
+                          <Badge variant="secondary" className="text-xs">First Consultation</Badge>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground">Default: {getCurrencySymbol(service.currency)} {Number(service.default_price).toFixed(2)}</p>
                     </div>
                   </div>
