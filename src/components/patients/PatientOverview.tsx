@@ -19,6 +19,7 @@ interface PatientOverviewProps {
     occupation?: string | null;
     notes?: string | null;
     allergies?: string | null;
+    is_chronic?: boolean | null;
   };
   sessions: Session[];
 }
