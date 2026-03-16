@@ -683,7 +683,7 @@ export default function Patients() {
                     <tr className="group transition-colors bg-secondary/5 hover:bg-secondary/10 border-l-2 border-secondary">
                       <td className="px-6 py-4">
                         <Link to={`/patients/${mePatient.id}`} className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full font-medium bg-secondary text-secondary-foreground">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full font-medium bg-terracotta text-terracotta-foreground">
                             ME
                           </div>
                           <span className="font-medium text-foreground group-hover:text-secondary transition-colors">
