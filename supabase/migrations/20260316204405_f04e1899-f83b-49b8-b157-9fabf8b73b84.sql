@@ -1,0 +1,1 @@
+ALTER TABLE public.service_prices ADD COLUMN is_first_consultation boolean NOT NULL DEFAULT false;

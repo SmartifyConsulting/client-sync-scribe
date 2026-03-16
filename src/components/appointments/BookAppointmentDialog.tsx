@@ -24,6 +24,7 @@ interface ServicePrice {
   service_name: string;
   default_price: number;
   currency: string;
+  is_first_consultation?: boolean;
 }
 
 interface BookAppointmentDialogProps {
@@ -66,6 +67,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
   // Step 2: Services
   const [services, setServices] = useState<ServicePrice[]>([]);
   const [selectedService, setSelectedService] = useState<ServicePrice | null>(null);
+  const [isFirstVisit, setIsFirstVisit] = useState(false);
 
   // Step 3: Date & time
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
@@ -140,7 +142,28 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
         .from("service_prices")
         .select("*")
         .eq("user_id", doctorId);
-      setServices(data || []);
+      const serviceList = (data || []) as ServicePrice[];
+      setServices(serviceList);
+
+      // Check if this is the patient's first appointment with this doctor
+      if (user && patientId) {
+        const { count } = await supabase
+          .from("appointment_requests")
+          .select("id", { count: "exact", head: true })
+          .eq("patient_user_id", user.id)
+          .eq("doctor_id", doctorId);
+
+        const firstVisit = (count || 0) === 0;
+        setIsFirstVisit(firstVisit);
+
+        // Auto-select first consultation service if it's the first visit
+        if (firstVisit) {
+          const firstConsultService = serviceList.find((s: any) => s.is_first_consultation);
+          if (firstConsultService) {
+            setSelectedService(firstConsultService);
+          }
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -303,24 +326,42 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
               </div>
             ) : (
               <>
-                {services.map((svc) => (
-                  <button
-                    key={svc.id}
-                    onClick={() => handleSelectService(svc)}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors text-left"
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent">
-                      <DollarSign className="h-5 w-5 text-accent-foreground" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-foreground">{svc.service_name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {svc.currency} {svc.default_price.toFixed(2)}
-                      </p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  </button>
-                ))}
+                {isFirstVisit && selectedService?.is_first_consultation && (
+                  <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-sm text-primary mb-2">
+                    As this is your first visit, the first consultation fee has been pre-selected.
+                  </div>
+                )}
+                {services.map((svc) => {
+                  const isSelected = selectedService?.id === svc.id;
+                  return (
+                    <button
+                      key={svc.id}
+                      onClick={() => handleSelectService(svc)}
+                      className={cn(
+                        "w-full flex items-center gap-3 p-3 rounded-lg border transition-colors text-left",
+                        isSelected
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:bg-muted/50"
+                      )}
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent">
+                        <DollarSign className="h-5 w-5 text-accent-foreground" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-foreground">{svc.service_name}</p>
+                          {(svc as any).is_first_consultation && (
+                            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">First Visit</span>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {svc.currency} {svc.default_price.toFixed(2)}
+                        </p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  );
+                })}
                 <Button variant="ghost" size="sm" onClick={() => { setSelectedService(null); setStep(3); }} className="w-full mt-2">
                   Skip — no specific service
                 </Button>

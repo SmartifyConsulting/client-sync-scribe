@@ -14,6 +14,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const COUNTRY_CODES = [
   { code: "+27", country: "South Africa", flag: "🇿🇦" },
@@ -162,6 +164,7 @@ interface ServicePrice {
   service_name: string;
   default_price: number;
   currency: string;
+  is_first_consultation?: boolean;
 }
 
 export default function Profile() {
@@ -355,7 +358,7 @@ export default function Profile() {
     setIsAddingService(true);
     const { data, error } = await supabase
       .from('service_prices')
-      .insert({ user_id: user.id, service_name: newService.service_name, default_price: parseFloat(newService.default_price), currency: selectedCurrency })
+      .insert({ user_id: user.id, service_name: newService.service_name, default_price: parseFloat(newService.default_price), currency: selectedCurrency, is_first_consultation: false } as any)
       .select().single();
     if (error) {
       toast({ title: "Error", description: "Failed to add service", variant: "destructive" });
@@ -1045,9 +1048,14 @@ export default function Profile() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <p className="font-medium text-foreground">{service.service_name}</p>
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-foreground">{service.service_name}</p>
+                        {(service as any).is_first_consultation && (
+                          <Badge variant="secondary" className="text-xs">First Consultation</Badge>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground">Default: {getCurrencySymbol(service.currency)} {Number(service.default_price).toFixed(2)}</p>
                     </div>
                   </div>
@@ -1064,6 +1072,30 @@ export default function Profile() {
                     </>
                   ) : (
                     <>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title={(service as any).is_first_consultation ? "Remove as first consultation fee" : "Set as first consultation fee"}
+                        onClick={async () => {
+                          // If toggling ON, first clear any existing first consultation flag
+                          if (!(service as any).is_first_consultation) {
+                            const currentFirst = servicePrices.find((s: any) => s.is_first_consultation);
+                            if (currentFirst) {
+                              await supabase.from('service_prices').update({ is_first_consultation: false } as any).eq('id', currentFirst.id);
+                            }
+                          }
+                          const newVal = !(service as any).is_first_consultation;
+                          await supabase.from('service_prices').update({ is_first_consultation: newVal } as any).eq('id', service.id);
+                          setServicePrices(servicePrices.map(s => ({
+                            ...s,
+                            is_first_consultation: s.id === service.id ? newVal : (newVal ? false : (s as any).is_first_consultation),
+                          })));
+                          toast({ title: newVal ? "First consultation fee set" : "First consultation fee removed" });
+                        }}
+                        className={cn("h-8 w-8", (service as any).is_first_consultation ? "text-primary hover:text-primary" : "text-muted-foreground hover:text-foreground")}
+                      >
+                        <Award className="h-4 w-4" />
+                      </Button>
                       <Button variant="ghost" size="icon" onClick={() => startEditingService(service)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
                         <Pencil className="h-4 w-4" />
                       </Button>
