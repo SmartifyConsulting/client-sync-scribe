@@ -206,6 +206,12 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const coords = getCanvasCoords(e);
+
+    if (tool === "select") {
+      setSelectedElement(null);
+      return;
+    }
+
     setIsDrawing(true);
 
     if (tool === "pen" || tool === "eraser") {
