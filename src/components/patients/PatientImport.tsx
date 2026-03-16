@@ -485,7 +485,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
           id_passport_number: patient.id_passport_number || null,
           gender: patient.gender || null,
           marital_status: patient.marital_status || null,
-          status: "active",
+          status: patient.status || "active",
         });
 
         if (error) {
