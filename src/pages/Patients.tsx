@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock, X, CalendarIcon, Upload, Pill } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -79,6 +80,69 @@ export default function Patients() {
   });
   const [creating, setCreating] = useState(false);
   const meAutoCreated = useRef(false);
+
+  // Autofind patient state
+  const [patientSuggestions, setPatientSuggestions] = useState<Array<{ id: string; full_name: string | null; mobile_number: string | null }>>([]);
+  const [showPatientSuggestions, setShowPatientSuggestions] = useState(false);
+  const [searchingPatients, setSearchingPatients] = useState(false);
+  const [selectedPatientUserId, setSelectedPatientUserId] = useState<string | null>(null);
+
+  // Debounced patient name search
+  useEffect(() => {
+    if (newPatient.name.length < 2) {
+      setPatientSuggestions([]);
+      setShowPatientSuggestions(false);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setSearchingPatients(true);
+      try {
+        const { data: patientRoles } = await supabase
+          .from("user_roles")
+          .select("user_id")
+          .eq("role", "patient");
+        const patientIds = (patientRoles || []).map(r => r.user_id);
+        if (patientIds.length === 0) {
+          setPatientSuggestions([]);
+          setShowPatientSuggestions(false);
+          setSearchingPatients(false);
+          return;
+        }
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, mobile_number")
+          .ilike("full_name", `%${newPatient.name}%`)
+          .in("id", patientIds)
+          .limit(5);
+        setPatientSuggestions(profiles || []);
+        setShowPatientSuggestions(true);
+      } catch (e) {
+        console.error("Patient search error:", e);
+      } finally {
+        setSearchingPatients(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [newPatient.name]);
+
+  const handleSelectPatientSuggestion = (suggestion: { id: string; full_name: string | null; mobile_number: string | null }) => {
+    const name = suggestion.full_name || "";
+    // Format as "Surname, FirstNames"
+    const parts = name.trim().split(/\s+/);
+    let formatted = name;
+    if (parts.length > 1) {
+      const surname = parts[parts.length - 1];
+      const firstNames = parts.slice(0, -1).join(" ");
+      formatted = `${surname}, ${firstNames}`;
+    }
+    setNewPatient(prev => ({
+      ...prev,
+      name: formatted,
+      phone: suggestion.mobile_number || prev.phone,
+    }));
+    setSelectedPatientUserId(suggestion.id);
+    setShowPatientSuggestions(false);
+  };
 
   // Auto-create "ME" patient record for doctors who don't have one
   useEffect(() => {
@@ -238,6 +302,7 @@ export default function Patients() {
       next_of_kin_email: newPatient.next_of_kin_email || null,
       general_practitioner: newPatient.general_practitioner || null,
       claims_email: newPatient.claims_email || null,
+      patient_user_id: selectedPatientUserId || null,
     } as any);
 
     if (result) {
@@ -310,13 +375,34 @@ export default function Patients() {
                 <div className="space-y-4">
                   <h3 className="text-sm font-semibold text-foreground border-b pb-2">Basic Information</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="col-span-2">
+                    <div className="col-span-2 relative">
                       <label className="text-sm font-medium text-foreground">Name *</label>
-                      <Input
-                        placeholder="Patient name"
-                        value={newPatient.name}
-                        onChange={(e) => setNewPatient({ ...newPatient, name: e.target.value })}
-                      />
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          placeholder="Type patient name to search..."
+                          value={newPatient.name}
+                          onChange={(e) => { setNewPatient({ ...newPatient, name: e.target.value }); setSelectedPatientUserId(null); }}
+                          onFocus={() => patientSuggestions.length > 0 && setShowPatientSuggestions(true)}
+                          className="pl-10"
+                        />
+                        {searchingPatients && <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />}
+                      </div>
+                      {showPatientSuggestions && patientSuggestions.length > 0 && (
+                        <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                          {patientSuggestions.map((s) => (
+                            <button
+                              key={s.id}
+                              type="button"
+                              className="w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors border-b border-border/50 last:border-0"
+                              onClick={() => handleSelectPatientSuggestion(s)}
+                            >
+                              <p className="font-medium text-foreground text-sm">{s.full_name}</p>
+                              {s.mobile_number && <p className="text-xs text-muted-foreground">{s.mobile_number}</p>}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div>
                       <label className="text-sm font-medium text-foreground">Email</label>
@@ -612,7 +698,7 @@ export default function Patients() {
 
       {/* Alphabet Jump Bar */}
       {sortedPatients.length > 0 && (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex gap-0.5 overflow-x-auto pb-1">
           {alphabet.map((letter) => {
             const hasPatients = availableLetters.includes(letter);
             return (
@@ -626,7 +712,7 @@ export default function Patients() {
                   }
                 }}
                 className={cn(
-                  "w-8 h-8 rounded-lg text-xs font-semibold transition-colors",
+                  "w-7 h-7 flex-shrink-0 rounded-lg text-[11px] font-semibold transition-colors",
                   hasPatients
                     ? selectedLetter === letter
                       ? "bg-primary text-primary-foreground"
@@ -738,7 +824,18 @@ export default function Patients() {
                 {availableLetters.sort().map((letter) => (
                   <React.Fragment key={letter}>
                     <tr id={`patient-group-${letter}`}>
-                      <td colSpan={6} className="px-6 py-2 bg-muted/50 sticky top-0">
+                      <td colSpan={6} className={cn(
+                        "px-6 py-2 sticky top-0",
+                        (() => {
+                          const idx = availableLetters.indexOf(letter);
+                          const colors = [
+                            "bg-teal-50/60 dark:bg-teal-950/30",
+                            "bg-amber-50/60 dark:bg-amber-950/30",
+                            "bg-orange-50/60 dark:bg-orange-950/30",
+                          ];
+                          return colors[idx % 3];
+                        })()
+                      )}>
                         <span className="text-sm font-bold text-primary">{letter}</span>
                       </td>
                     </tr>
@@ -752,7 +849,18 @@ export default function Patients() {
                             to={`/patients/${patient.id}`}
                             className="flex items-center gap-3"
                           >
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full font-medium bg-accent text-accent-foreground">
+                            <div className={cn(
+                              "flex h-10 w-10 items-center justify-center rounded-full font-medium",
+                              (() => {
+                                const letterIdx = availableLetters.indexOf(letter);
+                                const avatarColors = [
+                                  "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300",
+                                  "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+                                  "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
+                                ];
+                                return avatarColors[letterIdx % 3];
+                              })()
+                            )}>
                               {patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                             </div>
                             <span className="font-medium text-foreground group-hover:text-primary transition-colors">

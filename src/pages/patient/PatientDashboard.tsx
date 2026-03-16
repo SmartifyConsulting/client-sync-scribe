@@ -215,15 +215,15 @@ export default function PatientDashboard() {
           </div>
         </div>
         {/* Moolas Badge */}
-        <Link to="/patient/rewards" className="flex items-center gap-1.5 rounded-full bg-secondary/10 px-3 py-1.5 text-sm font-semibold text-secondary hover:bg-secondary/20 transition-colors">
-          <Award className="h-4 w-4" />
-          <span>{lollipopCount} Ⓜ️</span>
+        <Link to="/patient/rewards" className="flex items-center gap-1.5 rounded-full bg-secondary px-4 py-2 text-sm font-bold text-white hover:bg-secondary/90 transition-colors shadow-md">
+          <Award className="h-5 w-5" />
+          <span className="text-base">{lollipopCount} Ⓜ️</span>
         </Link>
         {/* Notification Bell */}
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
+              <Bell className="h-5 w-5 fill-secondary text-secondary" />
               {unreadNotifCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
                   {unreadNotifCount > 99 ? "99+" : unreadNotifCount}

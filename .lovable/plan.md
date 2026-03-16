@@ -1,56 +1,59 @@
 
 
-# Plan: Autofind, Moola Styling, and Patient List Color Updates
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## 1. Autofind for Patient/Doctor Name Input
+## 1. Increase Logo Size by 130%
 
-**Where**: `InviteDoctorDialog.tsx` (patient adding doctor) and `InvitePatientDialog.tsx` / Add Patient dialog in `Patients.tsx` (doctor adding patient)
+Scale all logo instances by 130%:
 
-**How**:
-- In `InviteDoctorDialog.tsx`: As the user types a doctor's name (new field), query `profiles` table filtering by `full_name` (ilike) where role = 'doctor'. Show dropdown suggestions with name, specialty, practice number. On select, auto-fill practice_number and doctor_number fields.
-- In `Patients.tsx` Add Patient dialog: As user types the patient name, query `profiles` table filtering by `full_name` (ilike) where role = 'patient'. Show dropdown suggestions. On select, auto-fill name, email, phone from the profile and set `patient_user_id`.
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-**RLS note**: Need a new SELECT policy on `profiles` so authenticated users can search other profiles by name. Will add a limited policy for this.
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-**Database migration**:
-```sql
-CREATE POLICY "Authenticated users can search profiles by name"
-ON public.profiles FOR SELECT
-TO authenticated
-USING (true);
-```
+## 2. Fix Practice Number Not Persisting
 
-## 2. Moola Gamification Icon & Notification - More Prolific, Terracotta Style
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-**Doctor Dashboard** (`Dashboard.tsx`):
-- Add a Moola rewards summary card/badge in the header area showing total Moolas across all patients (or a link to rewards). Style with terracotta background (`bg-secondary`) and white text.
-- Style the notification bell with terracotta fill (already partially done with `fill-secondary text-secondary`, but make the badge count terracotta too).
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
 
-**Patient Dashboard** (`PatientDashboard.tsx`):
-- Restyle the Moola badge from `bg-secondary/10 text-secondary` to a solid terracotta background with white text: `bg-secondary text-white`.
-- Make the notification bell icon terracotta-filled.
-- Add a larger Moola reward card in the stats grid area.
+## 3. Make Partner Email Required and Create Pending Users
 
-**LollipopDisplay** (`LollipopDisplay.tsx`):
-- Update badge variant colors from emerald to terracotta (`bg-secondary text-white`).
-- Update card gradient from emerald to terracotta tones.
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
 
-## 3. Patient List Color & Alphabet Bar Updates
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
 
-**Patients.tsx**:
-- **Alphabet bar**: Change from `flex-wrap gap-1` to `flex gap-0.5 overflow-x-auto` with smaller button sizes to fit all 26 letters in one line. Reduce `w-8 h-8` to `w-7 h-7 text-[11px]`.
-- **Remove pastel pinks**: Replace any pink/rose-tinted backgrounds in the alphabetical group headers and patient avatars.
-- **New palette**: Use pastel teal (`bg-teal-50`), pastel yellow (`bg-amber-50`), and pastel orange (`bg-orange-50`) cycling through letter groups. Avatar circles get a rotating teal/yellow/orange background based on letter index.
-- Group header rows: cycle between `bg-teal-50/60`, `bg-amber-50/60`, `bg-orange-50/60` (dark mode variants too).
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
 
-## Files to Modify
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
 
-| File | Change |
-|------|--------|
-| SQL Migration | Add profiles SELECT policy for authenticated users |
-| `src/components/patient/InviteDoctorDialog.tsx` | Add name search field with autofind dropdown |
-| `src/pages/Patients.tsx` | Add autofind to Add Patient dialog; fix alphabet bar to single line; replace pink with teal/yellow/orange palette |
-| `src/pages/Dashboard.tsx` | Add prominent terracotta Moola badge; style notification bell terracotta |
-| `src/pages/patient/PatientDashboard.tsx` | Restyle Moola badge solid terracotta white; bigger reward display |
-| `src/components/gamification/LollipopDisplay.tsx` | Replace emerald with terracotta/secondary colors throughout |
+## Technical Summary
+
+### Database Migration
+- Add `email text` column to `practice_partners` table
+
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 

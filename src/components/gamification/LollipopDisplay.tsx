@@ -22,7 +22,7 @@ export function LollipopDisplay({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Badge variant="secondary" className="gap-1.5 px-3 py-1.5 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-500/20">
+            <Badge variant="secondary" className="gap-1.5 px-3 py-1.5 bg-secondary text-white hover:bg-secondary/90 border-secondary/20">
               <span className="text-lg font-bold">Ⓜ</span>
               <span className="font-bold">{count}</span>
             </Badge>
@@ -38,7 +38,7 @@ export function LollipopDisplay({
   if (variant === "compact") {
     return (
       <div className="flex items-center gap-2 text-sm">
-        <span className="text-xl font-bold text-emerald-600">Ⓜ</span>
+        <span className="text-xl font-bold text-secondary">Ⓜ</span>
         <span className="font-semibold text-foreground">{count}</span>
         <span className="text-muted-foreground">Moola{count !== 1 ? 's' : ''}</span>
       </div>
@@ -46,16 +46,16 @@ export function LollipopDisplay({
   }
 
   return (
-    <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 border-emerald-200 dark:border-emerald-800/30">
+    <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 dark:from-secondary/20 dark:to-secondary/10 border-secondary/30">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <span className="text-2xl font-bold text-emerald-600">Ⓜ</span>
+          <span className="text-2xl font-bold text-secondary">Ⓜ</span>
           Moola Rewards
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex items-center gap-4 mb-3">
-          <div className="text-4xl font-bold text-emerald-600 dark:text-emerald-400">
+          <div className="text-4xl font-bold text-secondary">
             {count}
           </div>
           <div className="text-sm text-muted-foreground">
@@ -65,7 +65,7 @@ export function LollipopDisplay({
         </div>
         
         {showHistory && rewards.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-emerald-200 dark:border-emerald-800/30">
+          <div className="mt-4 pt-4 border-t border-secondary/20">
             <p className="text-xs font-medium text-muted-foreground mb-2">Recent rewards:</p>
             <div className="space-y-2 max-h-32 overflow-y-auto">
               {rewards.slice(0, 5).map((reward) => (
