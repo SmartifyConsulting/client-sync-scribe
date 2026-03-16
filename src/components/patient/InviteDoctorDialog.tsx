@@ -48,10 +48,15 @@ const permissionOptions: PermissionOption[] = [
   },
 ];
 
-export function InviteDoctorDialog() {
+interface InviteDoctorDialogProps {
+  prefillPracticeNumber?: string;
+  prefillRegistrationNumber?: string;
+}
+
+export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationNumber }: InviteDoctorDialogProps = {}) {
   const [open, setOpen] = useState(false);
-  const [practiceNumber, setPracticeNumber] = useState("");
-  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [practiceNumber, setPracticeNumber] = useState(prefillPracticeNumber || "");
+  const [registrationNumber, setRegistrationNumber] = useState(prefillRegistrationNumber || "");
   const [selectedPermissions, setSelectedPermissions] = useState<AccessPermission[]>([
     "patient_info",
     "calendar",

@@ -207,7 +207,7 @@ export default function MyDoctors() {
               ) : (
                 <div className="grid gap-3 md:grid-cols-2">
                   {searchResults.map((doctor) => (
-                    <DoctorCard key={doctor.id} doctor={doctor} />
+                    <DoctorCard key={doctor.id} doctor={doctor} isSearchResult />
                   ))}
                 </div>
               )}
