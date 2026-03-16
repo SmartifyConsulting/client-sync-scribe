@@ -182,7 +182,7 @@ export default function Dashboard() {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link to="/todos">
+                <Link to="/todos?autoRecord=true">
                   <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/10">
                     <Mic className="h-5 w-5" />
                   </Button>

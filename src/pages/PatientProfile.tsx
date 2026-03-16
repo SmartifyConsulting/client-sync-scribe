@@ -507,6 +507,10 @@ export default function PatientProfile() {
                 input.onchange = async (e) => {
                   const file = (e.target as HTMLInputElement).files?.[0];
                   if (!file) return;
+                  if ((file.type.startsWith("audio/") || file.type.startsWith("video/")) && file.size > 5 * 1024 * 1024) {
+                    toast({ title: "File too large", description: "Audio/video files must be under 5MB", variant: "destructive" });
+                    return;
+                  }
                   try {
                     const fileName = `${patient.id}/${Date.now()}-${file.name}`;
                     const { error: uploadError } = await supabase.storage.from("patient-media").upload(fileName, file);

@@ -90,6 +90,10 @@ export function MediaCapture({ patientId, patientName, onSaved }: MediaCapturePr
       toast({ title: "Invalid File", description: "Please select an audio or video file", variant: "destructive" });
       return;
     }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Audio/video files must be under 5MB", variant: "destructive" });
+      return;
+    }
     setMediaType(isVideo ? "video" : "audio");
     setRecordedBlob(file);
     setRecordedUrl(URL.createObjectURL(file));
