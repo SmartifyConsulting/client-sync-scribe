@@ -181,7 +181,7 @@ export default function SessionDetail() {
       {session.status === "completed" && session.patient && (
         <div className="rounded-xl border border-border bg-card p-6">
           <h2 className="font-semibold text-foreground mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2">
             <Button
               className="gap-1.5 text-sm h-10 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowPrescriptionEditor(true)}
