@@ -523,6 +523,46 @@ export default function Sessions() {
         onConfirm={handleVisitCategoryConfirm}
         patientName={currentPatient?.name}
       />
+
+      {/* AI-Extracted Document Review Dialogs */}
+      {extractedMedCert && (
+        <MedCertReviewDialog
+          open={showMedCertReview}
+          onOpenChange={setShowMedCertReview}
+          data={extractedMedCert}
+          patientName={currentPatient?.name || ""}
+          onApprove={handleApproveMedCert}
+          loading={reviewLoading}
+        />
+      )}
+      {extractedPrescription && (
+        <PrescriptionReviewDialog
+          open={showPrescriptionReview}
+          onOpenChange={setShowPrescriptionReview}
+          data={extractedPrescription}
+          onApprove={handleApprovePrescription}
+          loading={reviewLoading}
+        />
+      )}
+      {extractedInvoice && (
+        <InvoiceReviewDialog
+          open={showInvoiceReview}
+          onOpenChange={setShowInvoiceReview}
+          data={extractedInvoice}
+          onApprove={handleApproveInvoice}
+          loading={reviewLoading}
+        />
+      )}
+      {extractedReferral && (
+        <ReferralReviewDialog
+          open={showReferralReview}
+          onOpenChange={setShowReferralReview}
+          data={extractedReferral}
+          onApprove={handleApproveReferral}
+          loading={reviewLoading}
+        />
+      )}
+
       {/* Header with Back Link */}
       <div className="flex items-center gap-4">
         {currentPatient && (
