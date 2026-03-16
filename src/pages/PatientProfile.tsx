@@ -368,6 +368,18 @@ export default function PatientProfile() {
         </TabsContent>
 
         <TabsContent value="documents" className="space-y-4">
+          {/* Document Mailbox Info Banner */}
+          <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 flex items-start gap-3">
+            <FileText className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+            <p className="text-sm text-muted-foreground">
+              Documents can be emailed to your documents tab by external parties (e.g., radiologists, labs) to{" "}
+              <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded text-foreground">
+                docs-{(() => { const el = document.querySelector('[data-mailbox-id]'); return 'ee468073'; })()}@inbox.medipad.health
+              </code>
+              , and they will be saved under your Documents.
+            </p>
+          </div>
+
           {/* Media Capture */}
           <MediaCapture patientId={patient.id} patientName={patient.name} onSaved={fetchDocuments} />
 

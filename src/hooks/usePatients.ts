@@ -10,6 +10,13 @@ export interface Surgery {
   notes?: string;
 }
 
+export interface Pharmacy {
+  id: string;
+  name: string;
+  email: string;
+  is_primary: boolean;
+}
+
 export interface Patient {
   id: string;
   user_id: string;
@@ -47,6 +54,7 @@ export interface Patient {
   gender: string | null;
   pharmacy_name: string | null;
   pharmacy_email: string | null;
+  pharmacies: Pharmacy[] | null;
   last_visit?: string | null;
 }
 
@@ -59,19 +67,30 @@ const parseSurgeries = (surgeries: Json | null): Surgery[] | null => {
   return null;
 };
 
+// Helper to parse pharmacies from JSON
+const parsePharmacies = (pharmacies: Json | null): Pharmacy[] | null => {
+  if (!pharmacies) return null;
+  if (Array.isArray(pharmacies)) {
+    return pharmacies as unknown as Pharmacy[];
+  }
+  return null;
+};
+
 // Helper to convert patient from DB to typed Patient
 const toPatient = (data: any, lastVisit?: string | null): Patient => ({
   ...data,
   surgeries: parseSurgeries(data.surgeries),
+  pharmacies: parsePharmacies(data.pharmacies),
   last_visit: lastVisit ?? data.last_visit ?? null,
 });
 
-// Helper to prepare patient data for DB (convert surgeries to JSON)
+// Helper to prepare patient data for DB (convert surgeries/pharmacies to JSON)
 const toDbPatient = (updates: Partial<Patient>): Record<string, any> => {
-  const { surgeries, last_visit, ...rest } = updates;
+  const { surgeries, pharmacies, last_visit, ...rest } = updates;
   return {
     ...rest,
     ...(surgeries !== undefined ? { surgeries: surgeries as unknown as Json } : {}),
+    ...(pharmacies !== undefined ? { pharmacies: pharmacies as unknown as Json } : {}),
   };
 };
 

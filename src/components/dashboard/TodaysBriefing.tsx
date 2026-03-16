@@ -322,6 +322,13 @@ export function TodaysBriefing() {
       const briefingText = generateBriefingText();
       
       // Use streaming fetch for faster playback start
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('narration_voice')
+        .eq('id', (await supabase.auth.getUser()).data.user?.id || '')
+        .single();
+      const selectedVoice = (profileData as any)?.narration_voice || 'nova';
+
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`,
         {
@@ -330,7 +337,7 @@ export function TodaysBriefing() {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ text: briefingText, voice: 'nova' }),
+          body: JSON.stringify({ text: briefingText, voice: selectedVoice }),
         }
       );
 

@@ -735,9 +735,27 @@ export default function Profile() {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Practice Partners */}
+        {/* Narration Voice */}
+        <div className="mt-6 space-y-2">
+          <Label>Narration Voice</Label>
+          <p className="text-sm text-muted-foreground mb-2">Select the voice used for briefing narration</p>
+          <Select value={(profile as any)?.narration_voice || "nova"} onValueChange={async (value) => {
+            await updateProfile({ narration_voice: value } as any);
+            toast({ title: "Voice updated", description: `Narration voice set to ${value}` });
+          }}>
+            <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="alloy">Alloy</SelectItem>
+              <SelectItem value="echo">Echo</SelectItem>
+              <SelectItem value="fable">Fable</SelectItem>
+              <SelectItem value="nova">Nova</SelectItem>
+              <SelectItem value="onyx">Onyx</SelectItem>
+              <SelectItem value="shimmer">Shimmer</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
       <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -784,6 +802,16 @@ export default function Profile() {
                     <>
                       <Button variant="ghost" size="icon" onClick={() => startEditingPartner(partner)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
                         <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" title="Invite to app" onClick={async () => {
+                        const partnerEmail = (partner as any).email;
+                        if (!partnerEmail) { toast({ title: "No email", description: "This partner has no email address", variant: "destructive" }); return; }
+                        try {
+                          await supabase.functions.invoke('send-user-invitation', { body: { recipientEmail: partnerEmail, senderName: profile?.full_name || 'A colleague', message: 'You have been invited to join MediPad as a practice partner.', isPracticePartner: true, partnerName: partner.full_name } });
+                          toast({ title: "Invitation sent", description: `Invitation sent to ${partnerEmail}` });
+                        } catch { toast({ title: "Error", description: "Failed to send invitation", variant: "destructive" }); }
+                      }} className="h-8 w-8 text-primary hover:text-primary">
+                        <Mail className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="icon" onClick={() => removePartner(partner.id)} className="h-8 w-8 text-destructive hover:text-destructive">
                         <Trash2 className="h-4 w-4" />
