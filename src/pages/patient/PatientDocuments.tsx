@@ -123,6 +123,7 @@ function deriveDocType(
   const lower = (templateName || "").toLowerCase();
   if (lower.includes("prescription")) return "prescription";
   if (lower.includes("invoice")) return "invoice";
+  if (lower.includes("hospital admission")) return "hospital_admission";
   if (lower.includes("medical certificate") || lower.includes("certificate"))
     return "medical_certificate";
   if (lower.includes("referral")) return "referral_letter";

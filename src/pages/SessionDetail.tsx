@@ -433,6 +433,22 @@ export default function SessionDetail() {
         />
       )}
 
+      {/* Hospital Admission Editor Modal */}
+      {showHospitalAdmissionEditor && session.patient && (
+        <HospitalAdmissionEditor
+          patientId={session.patient_id}
+          patientName={session.patient.name}
+          sessionId={id}
+          onClose={() => setShowHospitalAdmissionEditor(false)}
+          onSave={() => {
+            toast({
+              title: "Hospital Admission Form created",
+              description: "The form has been saved.",
+            });
+          }}
+        />
+      )}
+
       {/* Drawing Pad Modal */}
       <Dialog open={showDrawingPad} onOpenChange={setShowDrawingPad}>
         <DialogContent className="max-w-[95vw] w-full max-h-[90vh] h-[85vh] p-0">
