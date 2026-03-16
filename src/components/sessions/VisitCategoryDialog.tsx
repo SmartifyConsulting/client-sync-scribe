@@ -55,11 +55,11 @@ export function VisitCategoryDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <span className="text-2xl">🍭</span>
-            Award Lollipop?
+            <span className="text-2xl">Ⓜ️</span>
+            Award Moola?
           </DialogTitle>
           <DialogDescription>
-            Select the visit type to award {patientName || "the patient"} a lollipop for attending a healthy visit.
+            Select the visit type to award {patientName || "the patient"} moola for attending a healthy visit.
           </DialogDescription>
         </DialogHeader>
         
