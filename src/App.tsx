@@ -40,6 +40,8 @@ import DoctorInvoices from "./pages/doctor/Invoices";
 import PricingAdmin from "./pages/admin/PricingAdmin";
 import GamificationAdmin from "./pages/admin/GamificationAdmin";
 import UserManagement from "./pages/admin/UserManagement";
+import ReferralDoctors from "./pages/ReferralDoctors";
+import CPDCertificates from "./pages/CPDCertificates";
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
