@@ -114,6 +114,19 @@ export default function TodoList() {
     fetchTodos();
   }, []);
 
+  const cleanupSilenceDetection = () => {
+    if (silenceIntervalRef.current) {
+      clearInterval(silenceIntervalRef.current);
+      silenceIntervalRef.current = null;
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => {});
+      audioContextRef.current = null;
+    }
+    analyserRef.current = null;
+    silenceTimerRef.current = 0;
+  };
+
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -129,15 +142,48 @@ export default function TodoList() {
 
       mediaRecorder.onstop = async () => {
         stream.getTracks().forEach((track) => track.stop());
+        cleanupSilenceDetection();
         await processAudio();
       };
 
       mediaRecorder.start();
       setIsRecording(true);
 
+      // Setup silence detection
+      const audioContext = new AudioContext();
+      const source = audioContext.createMediaStreamSource(stream);
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 512;
+      source.connect(analyser);
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
+      silenceTimerRef.current = 0;
+
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const SILENCE_THRESHOLD = 10;
+      const SILENCE_DURATION_MS = 3000;
+      const POLL_INTERVAL_MS = 200;
+
+      silenceIntervalRef.current = setInterval(() => {
+        if (!analyserRef.current) return;
+        analyserRef.current.getByteFrequencyData(dataArray);
+        const average = dataArray.reduce((sum, v) => sum + v, 0) / dataArray.length;
+
+        if (average < SILENCE_THRESHOLD) {
+          silenceTimerRef.current += POLL_INTERVAL_MS;
+          if (silenceTimerRef.current >= SILENCE_DURATION_MS && mediaRecorderRef.current?.state === 'recording') {
+            // Auto-stop after 3s silence
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+          }
+        } else {
+          silenceTimerRef.current = 0;
+        }
+      }, POLL_INTERVAL_MS);
+
       toast({
-        title: "Recording started",
-        description: "Speak your task clearly",
+        title: "Listening...",
+        description: "Speak your task — recording stops automatically after a pause",
       });
     } catch (error) {
       toast({
@@ -186,10 +232,10 @@ export default function TodoList() {
 
       if (data?.text) {
         setNewTaskText(data.text);
-        toast({
-          title: "Transcription complete",
-          description: "Your voice has been converted to text. Click 'AI Process' to auto-execute tasks.",
-        });
+        // Auto-trigger AI processing immediately
+        setIsProcessing(false);
+        await handleAiProcess(data.text);
+        return;
       } else {
         throw new Error('No transcription returned');
       }
@@ -205,15 +251,16 @@ export default function TodoList() {
     }
   };
 
-  const handleAiProcess = async () => {
-    if (!newTaskText.trim()) return;
+  const handleAiProcess = async (textOverride?: string) => {
+    const text = textOverride || newTaskText.trim();
+    if (!text) return;
 
     setIsAiProcessing(true);
     setAiResults(null);
 
     try {
       const { data, error } = await supabase.functions.invoke('process-todo-actions', {
-        body: { text: newTaskText.trim() }
+        body: { text }
       });
 
       if (error) throw new Error(error.message || 'AI processing failed');
@@ -223,10 +270,14 @@ export default function TodoList() {
         setNewTaskText("");
         await fetchTodos();
 
-        toast({
-          title: "AI Processing Complete",
-          description: data.summary,
-        });
+        // Show individual toast per action
+        for (const result of data.results) {
+          const label = actionTypeLabels[result.action_type] || result.action_type;
+          toast({
+            title: label,
+            description: result.description,
+          });
+        }
       } else if (data?.error) {
         throw new Error(data.error);
       }
