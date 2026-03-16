@@ -10,6 +10,13 @@ export interface Surgery {
   notes?: string;
 }
 
+export interface Pharmacy {
+  id: string;
+  name: string;
+  email: string;
+  is_primary: boolean;
+}
+
 export interface Patient {
   id: string;
   user_id: string;
@@ -47,6 +54,7 @@ export interface Patient {
   gender: string | null;
   pharmacy_name: string | null;
   pharmacy_email: string | null;
+  pharmacies: Pharmacy[] | null;
   last_visit?: string | null;
 }
 
