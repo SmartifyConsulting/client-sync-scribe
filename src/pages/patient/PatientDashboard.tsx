@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { Calendar, FileText, Receipt, Clock, User, Loader2 } from "lucide-react";
+import { Calendar, FileText, Receipt, Clock, User, Loader2, Bell } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useMyRewards } from "@/hooks/usePatientRewards";
@@ -8,6 +10,7 @@ import { LollipopDisplay } from "@/components/gamification/LollipopDisplay";
 import { supabase } from "@/integrations/supabase/client";
 import { format, parseISO, isFuture } from "date-fns";
 import { Link } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface DashboardStats {
   upcomingAppointments: number;
