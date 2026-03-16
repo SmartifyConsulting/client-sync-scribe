@@ -765,6 +765,23 @@ export default function Profile() {
           </div>
         </div>
 
+        {/* Preferred Language */}
+        <div className="mt-6 space-y-2">
+          <Label>Preferred Language</Label>
+          <p className="text-sm text-muted-foreground mb-2">Select your preferred language for audio transcription</p>
+          <Select value={(profile as any)?.preferred_language || "en"} onValueChange={async (value) => {
+            await updateProfile({ preferred_language: value } as any);
+            toast({ title: "Language updated", description: `Preferred language set to ${LANGUAGES.find(l => l.code === value)?.name || value}` });
+          }}>
+            <SelectTrigger className="w-[280px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {LANGUAGES.map(lang => (
+                <SelectItem key={lang.code} value={lang.code}>{lang.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Narration Voice */}
         <div className="mt-6 space-y-2">
           <Label>Narration Voice</Label>
