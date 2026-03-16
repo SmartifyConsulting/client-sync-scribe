@@ -374,13 +374,34 @@ export default function Patients() {
                 <div className="space-y-4">
                   <h3 className="text-sm font-semibold text-foreground border-b pb-2">Basic Information</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="col-span-2">
+                    <div className="col-span-2 relative">
                       <label className="text-sm font-medium text-foreground">Name *</label>
-                      <Input
-                        placeholder="Patient name"
-                        value={newPatient.name}
-                        onChange={(e) => setNewPatient({ ...newPatient, name: e.target.value })}
-                      />
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          placeholder="Type patient name to search..."
+                          value={newPatient.name}
+                          onChange={(e) => { setNewPatient({ ...newPatient, name: e.target.value }); setSelectedPatientUserId(null); }}
+                          onFocus={() => patientSuggestions.length > 0 && setShowPatientSuggestions(true)}
+                          className="pl-10"
+                        />
+                        {searchingPatients && <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />}
+                      </div>
+                      {showPatientSuggestions && patientSuggestions.length > 0 && (
+                        <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                          {patientSuggestions.map((s) => (
+                            <button
+                              key={s.id}
+                              type="button"
+                              className="w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors border-b border-border/50 last:border-0"
+                              onClick={() => handleSelectPatientSuggestion(s)}
+                            >
+                              <p className="font-medium text-foreground text-sm">{s.full_name}</p>
+                              {s.mobile_number && <p className="text-xs text-muted-foreground">{s.mobile_number}</p>}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div>
                       <label className="text-sm font-medium text-foreground">Email</label>
