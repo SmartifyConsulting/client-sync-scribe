@@ -364,6 +364,12 @@ export default function MyRewards() {
               </Badge>
             )}
           </TabsTrigger>
+          {patientRecord?.is_chronic && (
+            <TabsTrigger value="chronic-meds" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+              <Pill className="h-4 w-4 mr-1" />
+              Chronic Meds
+            </TabsTrigger>
+          )}
           <TabsTrigger value="milestones" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
             Milestones
           </TabsTrigger>
@@ -377,6 +383,12 @@ export default function MyRewards() {
             History
           </TabsTrigger>
         </TabsList>
+
+        {patientRecord?.is_chronic && patientRecord?.id && (
+          <TabsContent value="chronic-meds" className="space-y-6">
+            <MedicationAdherenceTab patientId={patientRecord.id} />
+          </TabsContent>
+        )}
 
         <TabsContent value="overview" className="space-y-6">
           {nextMilestone && (
