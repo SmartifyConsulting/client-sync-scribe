@@ -90,7 +90,7 @@ export default function MyDoctors() {
     }
   };
 
-  const DoctorCard = ({ doctor, permissions }: { doctor: DoctorProfile; permissions?: string[] }) => (
+  const DoctorCard = ({ doctor, permissions, isSearchResult }: { doctor: DoctorProfile; permissions?: string[]; isSearchResult?: boolean }) => (
     <Card className="overflow-hidden">
       <CardHeader className="pb-3">
         <div className="flex items-start gap-4">
@@ -134,6 +134,11 @@ export default function MyDoctors() {
             Practice #: {doctor.practice_number}
           </div>
         )}
+        {doctor.doctor_number && (
+          <div className="text-xs text-muted-foreground">
+            Registration #: {doctor.doctor_number}
+          </div>
+        )}
         
         {permissions ? (
           <div className="pt-2 border-t border-border">
@@ -146,13 +151,14 @@ export default function MyDoctors() {
               ))}
             </div>
           </div>
-        ) : (
-          <div className="pt-2 border-t border-border">
-            <p className="text-xs text-muted-foreground">
-              Use the "Request Access" button above to connect with this doctor.
-            </p>
+        ) : isSearchResult ? (
+          <div className="pt-3 border-t border-border">
+            <InviteDoctorDialog
+              prefillPracticeNumber={doctor.practice_number || ""}
+              prefillRegistrationNumber={doctor.doctor_number || ""}
+            />
           </div>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );
