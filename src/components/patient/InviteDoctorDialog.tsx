@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -48,10 +48,15 @@ const permissionOptions: PermissionOption[] = [
   },
 ];
 
-export function InviteDoctorDialog() {
+interface InviteDoctorDialogProps {
+  prefillPracticeNumber?: string;
+  prefillRegistrationNumber?: string;
+}
+
+export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationNumber }: InviteDoctorDialogProps = {}) {
   const [open, setOpen] = useState(false);
-  const [practiceNumber, setPracticeNumber] = useState("");
-  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [practiceNumber, setPracticeNumber] = useState(prefillPracticeNumber || "");
+  const [registrationNumber, setRegistrationNumber] = useState(prefillRegistrationNumber || "");
   const [selectedPermissions, setSelectedPermissions] = useState<AccessPermission[]>([
     "patient_info",
     "calendar",
@@ -61,6 +66,13 @@ export function InviteDoctorDialog() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+
+  useEffect(() => {
+    if (open) {
+      if (prefillPracticeNumber) setPracticeNumber(prefillPracticeNumber);
+      if (prefillRegistrationNumber) setRegistrationNumber(prefillRegistrationNumber);
+    }
+  }, [open, prefillPracticeNumber, prefillRegistrationNumber]);
 
   const handlePermissionToggle = (permission: AccessPermission) => {
     setSelectedPermissions((prev) =>
