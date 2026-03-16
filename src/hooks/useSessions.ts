@@ -178,6 +178,7 @@ const completeSession = async (
         started_at: startedAt,
         ended_at: now,
         duration_minutes: durationMinutes,
+        audio_url: creationData?.audio_url || null,
       };
 
       if (summaryData && !summaryData.error) {
