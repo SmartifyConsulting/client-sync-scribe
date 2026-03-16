@@ -296,7 +296,7 @@ export default function Dashboard() {
         <div className="lg:col-span-2">
           <TodaysBriefing />
         </div>
-        <div>
+        <div className="space-y-4">
           {isDoctor && <CompactTodoList />}
           <RecentActivity />
         </div>
