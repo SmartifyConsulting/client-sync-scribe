@@ -104,8 +104,8 @@ export default function PrescriptionHistory() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Prescription History</h1>
-        <p className="text-muted-foreground">View and manage your prescriptions</p>
+        <h1 className="text-2xl font-bold text-foreground">Documentation</h1>
+        <p className="text-muted-foreground">View and manage your documents</p>
       </div>
 
       {/* Stats */}
@@ -141,8 +141,8 @@ export default function PrescriptionHistory() {
         <CardHeader>
           <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
             <div>
-              <CardTitle>All Prescriptions</CardTitle>
-              <CardDescription>Your complete prescription history</CardDescription>
+              <CardTitle>All Documents</CardTitle>
+              <CardDescription>Your complete documentation history</CardDescription>
             </div>
             <div className="flex gap-2">
               <Input

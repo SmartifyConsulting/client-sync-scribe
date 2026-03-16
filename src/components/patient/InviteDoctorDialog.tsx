@@ -43,8 +43,8 @@ const permissionOptions: PermissionOption[] = [
   },
   {
     id: "prescription_history",
-    label: "Prescription History",
-    description: "View your prescription records",
+    label: "Documentation",
+    description: "View your documents and records",
   },
 ];
 

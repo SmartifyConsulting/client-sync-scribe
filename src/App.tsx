@@ -30,7 +30,7 @@ import BusinessAssociateAgreement from "./pages/BusinessAssociateAgreement";
 // Patient pages
 import PatientDashboard from "./pages/patient/PatientDashboard";
 import PatientCalendar from "./pages/patient/PatientCalendar";
-import PrescriptionHistory from "./pages/patient/PrescriptionHistory";
+import Documentation from "./pages/patient/PrescriptionHistory";
 import Invoices from "./pages/patient/Invoices";
 import PatientAccessManagement from "./pages/patient/PatientAccessManagement";
 import MyRewards from "./pages/patient/MyRewards";
@@ -123,7 +123,7 @@ const App = () => (
             {/* Patient routes */}
             <Route path="/patient/doctors" element={<MyDoctors />} />
             <Route path="/patient/calendar" element={<PatientCalendar />} />
-            <Route path="/patient/prescriptions" element={<PrescriptionHistory />} />
+            <Route path="/patient/documentation" element={<Documentation />} />
             <Route path="/patient/invoices" element={<Invoices />} />
             <Route path="/patient/invites" element={<PatientAccessManagement />} />
             <Route path="/patient/rewards" element={<MyRewards />} />

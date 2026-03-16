@@ -46,7 +46,7 @@ const permissionLabels: Record<AccessPermission, string> = {
   patient_info: "Patient Information",
   calendar: "Calendar",
   session_summaries: "Session Summaries",
-  prescription_history: "Prescription History",
+  prescription_history: "Documentation",
 };
 
 export function DoctorAccessRequests() {
