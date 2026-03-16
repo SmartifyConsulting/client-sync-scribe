@@ -78,7 +78,7 @@ export function useProfile() {
       .single();
 
     if (!error && data) {
-      setProfile(data as Profile);
+      setProfile(data as unknown as Profile);
     }
 
     return { data, error };
