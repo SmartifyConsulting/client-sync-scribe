@@ -498,9 +498,34 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       const newH = newW / aspectRatio;
 
       setElements((prev) =>
-        prev.map((el) =>
-          el.id === resizing.elementId ? { ...el, width: newW, height: newH } : el
-        )
+        prev.map((el) => {
+          if (el.id !== resizing.elementId) return el;
+          const updated = { ...el, width: newW, height: newH };
+          // For shapes, scale endX/endY proportionally
+          if (el.type === "shape") {
+            const scale = newW / resizing.startW;
+            const { shapeType, endX, endY } = el.data;
+            if (shapeType === "circle") {
+              const newRadius = newW / 2;
+              updated.data = { ...el.data, endX: el.x + newRadius, endY: el.y };
+            } else if (shapeType === "rectangle") {
+              const dirX = endX >= el.x ? 1 : -1;
+              const dirY = endY >= el.y ? 1 : -1;
+              updated.data = { ...el.data, endX: el.x + dirX * newW, endY: el.y + dirY * newH };
+            } else {
+              // line / arrow
+              const dx = endX - el.x;
+              const dy = endY - el.y;
+              updated.data = { ...el.data, endX: el.x + dx * scale, endY: el.y + dy * scale };
+            }
+          } else if (el.type === "text") {
+            // Scale font size
+            const origFontSize = el.strokeWidth || 16;
+            const scale = newW / resizing.startW;
+            updated.strokeWidth = Math.max(8, Math.round(origFontSize * scale));
+          }
+          return updated;
+        })
       );
     };
 
