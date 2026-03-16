@@ -289,8 +289,8 @@ export default function GamificationAdmin() {
                             onChange={(e) => setEditValues({ ...editValues, lollipops_awarded: parseInt(e.target.value) || 1 })}
                           />
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-pink-600 font-semibold">
-                            {config.lollipops_awarded} 🍭
+                          <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold">
+                            {config.lollipops_awarded} Ⓜ
                           </span>
                         )}
                       </TableCell>
