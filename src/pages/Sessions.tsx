@@ -332,6 +332,9 @@ export default function Sessions() {
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Track session start time locally - no DB insert until completion
+  const sessionStartTimeRef = useRef<Date | null>(null);
+
   const startSession = async () => {
     setSessionState("active");
     setNotes("");
@@ -341,14 +344,9 @@ export default function Sessions() {
     setPrescription(null);
     setInvoice(null);
     setAiDiagnosis(null);
+    setCurrentSessionId(null);
     clearTranscript();
-    
-    if (patientId) {
-      const session = await createSession(patientId, `Session - ${new Date().toLocaleDateString()}`);
-      if (session) {
-        setCurrentSessionId(session.id);
-      }
-    }
+    sessionStartTimeRef.current = new Date();
   };
 
   const handleSavePrescription = (prescriptionData: { content: string; rawTranscript: string }) => {
