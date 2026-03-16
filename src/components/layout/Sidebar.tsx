@@ -154,7 +154,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               {loading ? (
                 <div className="h-3 w-20 rounded bg-muted animate-pulse" />
               ) : (
-                <p className="text-xs font-medium text-primary truncate hover:underline">{profile?.full_name || "User"} Profile</p>
+                <p className="text-xs font-medium text-primary truncate hover:underline">My Profile</p>
               )}
             </NavLink>
           </div>
