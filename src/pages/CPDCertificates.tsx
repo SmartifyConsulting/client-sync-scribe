@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Plus, Trash2, Pencil, Loader2, Award, Upload } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Plus, Trash2, Pencil, Loader2, Award, Upload, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,6 +29,9 @@ export default function CPDCertificates() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [certificateFile, setCertificateFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     certificate_name: "", issuing_body: "", date_earned: "", cpd_points: "",
   });
@@ -49,18 +52,41 @@ export default function CPDCertificates() {
 
   const totalPoints = certs.reduce((sum, c) => sum + (c.cpd_points || 0), 0);
 
+  const uploadCertificateFile = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+    const ext = file.name.split('.').pop();
+    const filePath = `${user.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("cpd-certificates").upload(filePath, file);
+    if (error) {
+      toast({ title: "Upload Error", description: error.message, variant: "destructive" });
+      return null;
+    }
+    const { data: urlData } = supabase.storage.from("cpd-certificates").getPublicUrl(filePath);
+    return urlData.publicUrl;
+  };
+
   const handleSave = async () => {
     if (!user || !form.certificate_name.trim() || !form.date_earned) {
       toast({ title: "Required", description: "Certificate name and date are required", variant: "destructive" });
       return;
     }
     setSaving(true);
-    const record = {
+
+    let certificateUrl: string | null = null;
+    if (certificateFile) {
+      setUploading(true);
+      certificateUrl = await uploadCertificateFile(certificateFile);
+      setUploading(false);
+    }
+
+    const record: any = {
       certificate_name: form.certificate_name,
       issuing_body: form.issuing_body || null,
       date_earned: form.date_earned,
       cpd_points: parseInt(form.cpd_points) || 0,
     };
+    if (certificateUrl) record.certificate_url = certificateUrl;
+
     if (editingId) {
       const { error } = await supabase.from("cpd_certificates").update(record).eq("id", editingId);
       if (error) toast({ title: "Error", description: "Failed to update", variant: "destructive" });
@@ -74,6 +100,7 @@ export default function CPDCertificates() {
     setShowForm(false);
     setEditingId(null);
     setForm({ certificate_name: "", issuing_body: "", date_earned: "", cpd_points: "" });
+    setCertificateFile(null);
     fetchCerts();
   };
 
@@ -85,6 +112,7 @@ export default function CPDCertificates() {
       date_earned: cert.date_earned,
       cpd_points: String(cert.cpd_points),
     });
+    setCertificateFile(null);
     setShowForm(true);
   };
 
@@ -108,7 +136,7 @@ export default function CPDCertificates() {
             <Award className="h-4 w-4 text-primary" />
             {totalPoints} CPD Points
           </Badge>
-          <Button onClick={() => { setShowForm(true); setEditingId(null); setForm({ certificate_name: "", issuing_body: "", date_earned: "", cpd_points: "" }); }} className="gap-2">
+          <Button onClick={() => { setShowForm(true); setEditingId(null); setForm({ certificate_name: "", issuing_body: "", date_earned: "", cpd_points: "" }); setCertificateFile(null); }} className="gap-2">
             <Plus className="h-4 w-4" /> Add Certificate
           </Button>
         </div>
@@ -123,9 +151,31 @@ export default function CPDCertificates() {
             <div className="space-y-2"><Label>Date Earned *</Label><Input type="date" value={form.date_earned} onChange={(e) => setForm({ ...form, date_earned: e.target.value })} /></div>
             <div className="space-y-2"><Label>CPD Points</Label><Input type="number" min="0" value={form.cpd_points} onChange={(e) => setForm({ ...form, cpd_points: e.target.value })} placeholder="0" /></div>
           </div>
+          <div className="space-y-2">
+            <Label>Attach Certificate (PDF/Image)</Label>
+            <div className="flex items-center gap-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.webp"
+                className="hidden"
+                onChange={(e) => setCertificateFile(e.target.files?.[0] || null)}
+              />
+              <Button type="button" variant="outline" size="sm" className="gap-2" onClick={() => fileInputRef.current?.click()}>
+                <Upload className="h-4 w-4" />
+                {certificateFile ? certificateFile.name : "Choose File"}
+              </Button>
+              {certificateFile && (
+                <Button type="button" variant="ghost" size="sm" onClick={() => setCertificateFile(null)}>Remove</Button>
+              )}
+            </div>
+          </div>
           <div className="flex gap-2">
-            <Button onClick={handleSave} disabled={saving}>{saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}{editingId ? "Update" : "Save"}</Button>
-            <Button variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancel</Button>
+            <Button onClick={handleSave} disabled={saving || uploading}>
+              {(saving || uploading) ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {uploading ? "Uploading..." : editingId ? "Update" : "Save"}
+            </Button>
+            <Button variant="outline" onClick={() => { setShowForm(false); setEditingId(null); setCertificateFile(null); }}>Cancel</Button>
           </div>
         </div>
       )}
@@ -143,6 +193,7 @@ export default function CPDCertificates() {
                 <TableHead>Issuing Body</TableHead>
                 <TableHead>Date Earned</TableHead>
                 <TableHead className="text-center">Points</TableHead>
+                <TableHead>File</TableHead>
                 <TableHead className="w-[100px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -154,6 +205,15 @@ export default function CPDCertificates() {
                   <TableCell>{format(new Date(cert.date_earned), "MMM d, yyyy")}</TableCell>
                   <TableCell className="text-center">
                     <Badge variant="outline">{cert.cpd_points}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    {cert.certificate_url ? (
+                      <a href={cert.certificate_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
+                        <ExternalLink className="h-3.5 w-3.5" /> View
+                      </a>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">-</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">

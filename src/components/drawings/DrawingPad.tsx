@@ -902,7 +902,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                   >
                     <div className="h-16 flex items-center justify-center text-muted-foreground overflow-hidden">
                       {asset.imageSrc ? (
-                        <img src={asset.imageSrc} alt={asset.name} className="h-full w-auto object-cover" />
+                        <img src={asset.imageSrc} alt={asset.name} className="h-full w-auto object-contain" />
                       ) : (
                         <asset.component />
                       )}
@@ -953,7 +953,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                   onTouchStart={(e) => handleElementDragStart(e, el.id)}
                 >
                   {asset.imageSrc ? (
-                    <img src={asset.imageSrc} alt={asset.name} className="w-full h-full object-cover pointer-events-none" />
+                    <img src={asset.imageSrc} alt={asset.name} className="w-full h-full object-contain pointer-events-none" />
                   ) : (
                     <asset.component />
                   )}

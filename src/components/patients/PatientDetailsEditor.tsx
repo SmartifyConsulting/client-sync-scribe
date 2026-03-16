@@ -256,8 +256,13 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         </div>
 
         {/* 1. Personal Information */}
-        <div>
-          <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Personal Information</h3>
+        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <Pencil className="h-4 w-4 text-primary" />
+            </div>
+            <h3 className="font-semibold text-foreground">Personal Information</h3>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div><p className="text-sm text-muted-foreground">Full Name</p><p className="mt-1 text-foreground">{patient.name}</p></div>
             <div><p className="text-sm text-muted-foreground">ID/Passport Number</p><p className="mt-1 text-foreground">{patient.id_passport_number || "Not provided"}</p></div>
@@ -271,8 +276,13 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         </div>
 
         {/* 2. Addresses */}
-        <div>
-          <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Addresses</h3>
+        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <StickyNote className="h-4 w-4 text-primary" />
+            </div>
+            <h3 className="font-semibold text-foreground">Addresses</h3>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div><p className="text-sm text-muted-foreground">Physical Address</p><p className="mt-1 text-foreground">{patient.physical_address || patient.address || "Not provided"}</p></div>
             <div><p className="text-sm text-muted-foreground">Postal Address</p><p className="mt-1 text-foreground">{patient.same_as_physical ? "Same as physical address" : (patient.postal_address || "Not provided")}</p></div>
@@ -280,8 +290,13 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         </div>
 
         {/* 3. Next of Kin */}
-        <div>
-          <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Next of Kin</h3>
+        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <Pencil className="h-4 w-4 text-primary" />
+            </div>
+            <h3 className="font-semibold text-foreground">Next of Kin</h3>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div><p className="text-sm text-muted-foreground">Name</p><p className="mt-1 text-foreground">{patient.next_of_kin_name || "Not provided"}</p></div>
             <div><p className="text-sm text-muted-foreground">Relationship</p><p className="mt-1 text-foreground">{patient.next_of_kin_relationship || "Not provided"}</p></div>
@@ -291,8 +306,13 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         </div>
 
         {/* 4. Employer */}
-        <div>
-          <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Employer</h3>
+        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <Pencil className="h-4 w-4 text-primary" />
+            </div>
+            <h3 className="font-semibold text-foreground">Employer</h3>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div><p className="text-sm text-muted-foreground">Employer</p><p className="mt-1 text-foreground">{patient.employer || "Not provided"}</p></div>
             <div><p className="text-sm text-muted-foreground">Occupation</p><p className="mt-1 text-foreground">{patient.occupation || "Not provided"}</p></div>
@@ -300,8 +320,13 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         </div>
 
         {/* 5. Medical Insurance */}
-        <div>
-          <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Medical Insurance</h3>
+        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <Pencil className="h-4 w-4 text-primary" />
+            </div>
+            <h3 className="font-semibold text-foreground">Medical Insurance</h3>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div><p className="text-sm text-muted-foreground">Insurance Provider</p><p className="mt-1 text-foreground">{patient.medical_aid || "Not provided"}</p></div>
             <div><p className="text-sm text-muted-foreground">Insurance Product</p><p className="mt-1 text-foreground">{patient.medical_insurance_product || "Not provided"}</p></div>
@@ -313,8 +338,13 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         </div>
 
         {/* 6. Pharmacies */}
-        <div>
-          <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Pharmacies</h3>
+        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <Pencil className="h-4 w-4 text-primary" />
+            </div>
+            <h3 className="font-semibold text-foreground">Pharmacies</h3>
+          </div>
           {pharmacies.length === 0 ? (
             <p className="text-sm text-muted-foreground">No pharmacies recorded</p>
           ) : (
@@ -335,8 +365,13 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         </div>
 
         {/* 7. Physical Measurements */}
-        <div>
-          <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Physical Measurements</h3>
+        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <Ruler className="h-4 w-4 text-primary" />
+            </div>
+            <h3 className="font-semibold text-foreground">Physical Measurements</h3>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
               <Ruler className="h-5 w-5 text-primary" />
@@ -355,19 +390,27 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         </div>
 
         {/* 8. Allergies */}
-        <div>
-          <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide flex items-center gap-1.5">
-            <AlertCircle className="h-4 w-4" /> Allergies
-          </h3>
+        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <AlertCircle className="h-4 w-4 text-primary" />
+            </div>
+            <h3 className="font-semibold text-foreground">Allergies</h3>
+          </div>
           <div className="rounded-lg bg-muted/30 p-4 border border-border/50">
             <p className="text-foreground">{patient.allergies || "None recorded"}</p>
           </div>
         </div>
 
         {/* 9. Surgeries and Dates */}
-        <div>
+        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">Surgeries and Dates</h3>
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                <Pencil className="h-4 w-4 text-primary" />
+              </div>
+              <h3 className="font-semibold text-foreground">Surgeries and Dates</h3>
+            </div>
             <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { setIsEditing(true); setShowAddSurgery(true); }}>
               <Plus className="h-3.5 w-3.5" /> Add Surgery
             </Button>
@@ -390,10 +433,13 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         </div>
 
         {/* 10. General Notes */}
-        <div>
-          <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide flex items-center gap-2">
-            <StickyNote className="h-4 w-4" /> General Notes
-          </h3>
+        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <StickyNote className="h-4 w-4 text-primary" />
+            </div>
+            <h3 className="font-semibold text-foreground">General Notes</h3>
+          </div>
           <div className="rounded-lg bg-muted/30 p-4 border border-border/50 min-h-[80px]">
             <p className="text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
           </div>

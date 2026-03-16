@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy, Clock, Mail, Save } from "lucide-react";
+import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy, Clock, Mail, Save, Award } from "lucide-react";
 import { PatientImport } from "@/components/patients/PatientImport";
 import { useToast as useGlobalToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -250,10 +250,20 @@ export default function Profile() {
     };
   }, [formData]);
 
+  // CPD Points
+  const [cpdPoints, setCpdPoints] = useState(0);
+  
+  const fetchCpdPoints = async () => {
+    if (!user) return;
+    const { data } = await supabase.from('cpd_certificates').select('cpd_points').eq('user_id', user.id);
+    if (data) setCpdPoints(data.reduce((sum, c) => sum + (c.cpd_points || 0), 0));
+  };
+
   useEffect(() => {
     if (user) {
       fetchPartners();
       fetchServicePrices();
+      fetchCpdPoints();
     }
   }, [user]);
 
@@ -541,6 +551,25 @@ export default function Profile() {
           )}
         </div>
       </div>
+
+      {/* CPD Points Badge */}
+      {!isAdmin && (
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10">
+              <Award className="h-5 w-5 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground">CPD Points</p>
+              <p className="text-2xl font-bold text-foreground">{cpdPoints}</p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => window.location.href = '/cpd-certificates'}>
+            <Plus className="h-4 w-4" />
+            Add CPD Training
+          </Button>
+        </div>
+      )}
 
       {/* Profile Section */}
       <div className="rounded-xl border border-border bg-card p-6 shadow-sm">

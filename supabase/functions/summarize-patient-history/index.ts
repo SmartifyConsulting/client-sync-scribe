@@ -89,8 +89,10 @@ IMPORTANT FORMATTING RULES:
 - If no specific date is available, use "Date unknown"
 - ALWAYS check for medication conflicts, especially between currently active medications
 
+IMPORTANT: In the summary text, prefix EACH timeline point with a date (e.g., "Jan 15, 2025 - Patient presented with..."). Every bullet/sentence should start with a date. If no specific date is available, use "Date unknown -".
+
 Example summary format:
-"The patient presented with <symptom>chronic back pain</symptom> in November 2024 and was diagnosed with <condition>lumbar disc herniation</condition>. They were prescribed <med>ibuprofen</med> for pain management..."
+"Nov 12, 2024 - The patient presented with <symptom>chronic back pain</symptom> and was diagnosed with <condition>lumbar disc herniation</condition>. Nov 20, 2024 - They were prescribed <med>ibuprofen</med> for pain management..."
 
 Respond in JSON format with the structure defined in the function parameters.`,
           },
