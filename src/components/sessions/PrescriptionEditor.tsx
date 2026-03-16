@@ -404,6 +404,53 @@ Signature: ___________________
               <Eye className="h-4 w-4" />
               Preview
             </Button>
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={async () => {
+                try {
+                  const { data: patientData } = await supabase
+                    .from('patients')
+                    .select('pharmacy_email, pharmacy_name')
+                    .eq('id', patientId)
+                    .maybeSingle();
+
+                  if (!patientData?.pharmacy_email) {
+                    toast({
+                      title: "No Pharmacy Email",
+                      description: "This patient has no pharmacy email configured. Please add one in the patient details.",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+
+                  const content = generateContent();
+                  const { error } = await supabase.functions.invoke('send-document-email', {
+                    body: {
+                      to: patientData.pharmacy_email,
+                      subject: `Prescription for ${patientName}`,
+                      documentName: `Prescription - ${patientName}`,
+                      documentContent: content,
+                      senderName: doctorName,
+                    },
+                  });
+                  if (error) throw error;
+                  toast({
+                    title: "Prescription Sent",
+                    description: `Sent to ${patientData.pharmacy_name || patientData.pharmacy_email}`,
+                  });
+                } catch (err: any) {
+                  toast({
+                    title: "Error",
+                    description: err.message || "Failed to email prescription",
+                    variant: "destructive",
+                  });
+                }
+              }}
+            >
+              <Send className="h-4 w-4" />
+              Email to Pharmacy
+            </Button>
             <Button onClick={handleSave} className="gap-2" disabled={isSaving}>
               {isSaving ? (
                 <>
