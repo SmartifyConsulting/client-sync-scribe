@@ -95,6 +95,17 @@ export default function Sessions() {
   const notesRef = useRef<string>("");
   const sessionStartTimeRef = useRef<Date | null>(null);
 
+  // AI-extracted document review state
+  const [showMedCertReview, setShowMedCertReview] = useState(false);
+  const [showPrescriptionReview, setShowPrescriptionReview] = useState(false);
+  const [showInvoiceReview, setShowInvoiceReview] = useState(false);
+  const [showReferralReview, setShowReferralReview] = useState(false);
+  const [extractedMedCert, setExtractedMedCert] = useState<MedCertData | null>(null);
+  const [extractedPrescription, setExtractedPrescription] = useState<PrescriptionData | null>(null);
+  const [extractedInvoice, setExtractedInvoice] = useState<InvoiceData | null>(null);
+  const [extractedReferral, setExtractedReferral] = useState<ReferralData | null>(null);
+  const [reviewLoading, setReviewLoading] = useState(false);
+
   const navigate = useNavigate();
   const { patients, loading: patientsLoading } = usePatients();
   const { sessions, loading: sessionsLoading, createSession, completeSession } = useSessions();
