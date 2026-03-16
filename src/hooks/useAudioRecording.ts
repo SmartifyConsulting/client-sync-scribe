@@ -8,6 +8,7 @@ interface UseAudioRecordingOptions {
   patientName?: string;
   doctorName?: string;
   sessionId?: string;
+  language?: string;
 }
 
 export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
