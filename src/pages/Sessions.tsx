@@ -323,6 +323,7 @@ export default function Sessions() {
     setCurrentSessionId(null);
     clearTranscript();
     sessionStartTimeRef.current = new Date();
+    savedAudioUrlRef.current = null;
   };
 
   const handleSavePrescription = (prescriptionData: { content: string; rawTranscript: string }) => {
