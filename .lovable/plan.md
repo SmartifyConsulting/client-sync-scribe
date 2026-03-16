@@ -1,46 +1,59 @@
 
 
-# Plan: Add Patient Self-Service Profile with All Captured Fields
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## Problem
-When a patient logs in and visits `/profile`, they see the doctor-oriented Profile page (practice number, specialty, partners, pricing). Patients have no way to view or edit their own medical details — the fields captured by doctors (addresses, next of kin, employer, medical insurance, pharmacies, allergies, surgeries, physical measurements, etc.) are invisible to patients.
+## 1. Increase Logo Size by 130%
 
-## Solution
-Create a patient-specific "My Details" page that reuses the existing `PatientDetailsEditor` component, allowing patients to view and edit all 10 clinical frames of their own patient record.
+Scale all logo instances by 130%:
 
-## Changes
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-### 1. New Page: `src/pages/patient/MyDetails.tsx`
-- Fetch the patient's own record from `patients` table using `patient_user_id = auth.uid()`
-- Render `PatientDetailsEditor` with the patient's data
-- Include an update function that writes back to the `patients` table
-- Show a loading state while fetching
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-### 2. Add RLS Policy for Patient Self-Update
-Patients can currently only SELECT their own patient record. They need UPDATE permission to edit their own details.
+## 2. Fix Practice Number Not Persisting
 
-```sql
-CREATE POLICY "Patients can update their own patient record"
-ON public.patients FOR UPDATE TO authenticated
-USING (patient_user_id = auth.uid())
-WITH CHECK (patient_user_id = auth.uid());
-```
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-### 3. Add Navigation: `src/components/layout/Sidebar.tsx`
-Add a "My Details" nav item to `patientNavItems` array (using `User` icon, route `/patient/details`).
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
 
-### 4. Add Route: `src/App.tsx`
-Add route `/patient/details` pointing to the new `MyDetails` page.
+## 3. Make Partner Email Required and Create Pending Users
 
-### 5. Conditionally Render Profile Page
-On `src/pages/Profile.tsx`, the patient already sees the generic profile page. The new "My Details" page is separate and specific to patient medical data. No changes needed to Profile.tsx.
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
 
-## Files
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
 
-| File | Change |
-|------|--------|
-| `src/pages/patient/MyDetails.tsx` | New page — fetches patient record, renders `PatientDetailsEditor` |
-| `src/components/layout/Sidebar.tsx` | Add "My Details" to patient nav |
-| `src/App.tsx` | Add `/patient/details` route |
-| Database migration | Add patient self-update RLS policy |
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
+
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
+
+## Technical Summary
+
+### Database Migration
+- Add `email text` column to `practice_partners` table
+
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 
