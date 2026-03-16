@@ -100,6 +100,7 @@ export default function MyRewards() {
     },
   });
 
+  const { data: tasks = [], isLoading: tasksLoading, refetch: refetchTasks } = useQuery({
     queryKey: ["patient-assigned-tasks"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
