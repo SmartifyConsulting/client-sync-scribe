@@ -238,6 +238,33 @@ export type Database = {
         }
         Relationships: []
       }
+      doctor_congratulations: {
+        Row: {
+          created_at: string
+          doctor_id: string
+          id: string
+          patient_id: string
+          streak_count: number
+          streak_type: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_id: string
+          id?: string
+          patient_id: string
+          streak_count: number
+          streak_type: string
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string
+          id?: string
+          patient_id?: string
+          streak_count?: number
+          streak_type?: string
+        }
+        Relationships: []
+      }
       doctor_patient_access: {
         Row: {
           created_at: string
@@ -506,6 +533,47 @@ export type Database = {
             columns: ["session_id"]
             isOneToOne: false
             referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medication_adherence: {
+        Row: {
+          created_at: string
+          id: string
+          patient_id: string
+          prescription_id: string
+          proof_url: string | null
+          scheduled_date: string
+          status: string
+          taken_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          patient_id: string
+          prescription_id: string
+          proof_url?: string | null
+          scheduled_date: string
+          status?: string
+          taken_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          patient_id?: string
+          prescription_id?: string
+          proof_url?: string | null
+          scheduled_date?: string
+          status?: string
+          taken_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medication_adherence_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
             referencedColumns: ["id"]
           },
         ]

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, Trophy, Target, Flame, Gift, Star, Calendar, CheckSquare, Clock, AlertCircle, Video, Send, ArrowRightLeft } from "lucide-react";
+import { Loader2, Trophy, Target, Flame, Gift, Star, Calendar, CheckSquare, Clock, AlertCircle, Video, Send, ArrowRightLeft, Pill } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,7 @@ import { useMyRewards, useMyStreaks } from "@/hooks/usePatientRewards";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ActivityProofCapture } from "@/components/rewards/ActivityProofCapture";
+import { MedicationAdherenceTab } from "@/components/rewards/MedicationAdherenceTab";
 import { useToast } from "@/hooks/use-toast";
 
 const MILESTONES = [
@@ -83,6 +84,21 @@ export default function MyRewards() {
   const [transferAmount, setTransferAmount] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Get patient record for chronic meds tab
+  const { data: patientRecord } = useQuery({
+    queryKey: ["my-patient-record"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data } = await supabase
+        .from("patients")
+        .select("id, is_chronic")
+        .eq("patient_user_id", user.id)
+        .maybeSingle();
+      return data;
+    },
+  });
 
   const { data: tasks = [], isLoading: tasksLoading, refetch: refetchTasks } = useQuery({
     queryKey: ["patient-assigned-tasks"],
@@ -348,6 +364,12 @@ export default function MyRewards() {
               </Badge>
             )}
           </TabsTrigger>
+          {patientRecord?.is_chronic && (
+            <TabsTrigger value="chronic-meds" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+              <Pill className="h-4 w-4 mr-1" />
+              Chronic Meds
+            </TabsTrigger>
+          )}
           <TabsTrigger value="milestones" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
             Milestones
           </TabsTrigger>
@@ -361,6 +383,12 @@ export default function MyRewards() {
             History
           </TabsTrigger>
         </TabsList>
+
+        {patientRecord?.is_chronic && patientRecord?.id && (
+          <TabsContent value="chronic-meds" className="space-y-6">
+            <MedicationAdherenceTab patientId={patientRecord.id} />
+          </TabsContent>
+        )}
 
         <TabsContent value="overview" className="space-y-6">
           {nextMilestone && (

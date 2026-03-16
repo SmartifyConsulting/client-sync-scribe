@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Loader2, Sparkles, Pill, HeartPulse, RefreshCw, Activity, AlertTriangle, Check, X, ChevronDown, ChevronRight } from "lucide-react";
+import { Loader2, Sparkles, Pill, HeartPulse, RefreshCw, Activity, AlertTriangle, Check, X, ChevronDown, ChevronRight, Flame, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,6 +53,147 @@ interface SummaryData {
   conditions: ConditionItem[];
   allergies: AllergyItem[];
   conflicts: MedicationConflict[];
+}
+
+function ChronicAdherenceSection({ patientId, patientName }: { patientId: string; patientName: string }) {
+  const { toast } = useToast();
+  const [adherenceData, setAdherenceData] = useState<{ prescription: string; streak: number }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [congratulating, setCongratulating] = useState(false);
+
+  useEffect(() => {
+    const fetchAdherence = async () => {
+      try {
+        const { data: prescriptions } = await supabase
+          .from("prescriptions")
+          .select("id, medication")
+          .eq("patient_id", patientId)
+          .eq("status", "active");
+        if (!prescriptions || prescriptions.length === 0) { setLoading(false); return; }
+
+        const { data: adherence } = await supabase
+          .from("medication_adherence")
+          .select("prescription_id, scheduled_date, status")
+          .eq("patient_id", patientId)
+          .eq("status", "completed")
+          .order("scheduled_date", { ascending: false });
+
+        const streaks = prescriptions.map((rx) => {
+          const records = (adherence || [])
+            .filter((a) => a.prescription_id === rx.id)
+            .sort((a, b) => b.scheduled_date.localeCompare(a.scheduled_date));
+          let streak = 0;
+          const today = new Date();
+          let checkDate = today;
+          for (let i = 0; i < 365; i++) {
+            const dateStr = checkDate.toISOString().split("T")[0];
+            if (records.some((r) => r.scheduled_date === dateStr)) {
+              streak++;
+              checkDate = new Date(checkDate.getTime() - 86400000);
+            } else break;
+          }
+          return { prescription: rx.medication, streak };
+        });
+        setAdherenceData(streaks);
+      } catch (err) {
+        console.error(err);
+      }
+      setLoading(false);
+    };
+    fetchAdherence();
+  }, [patientId]);
+
+  const maxStreak = Math.max(0, ...adherenceData.map((d) => d.streak));
+
+  const handleCongratulate = async () => {
+    setCongratulating(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      // Insert congratulation record
+      await supabase.from("doctor_congratulations").insert({
+        doctor_id: user.id,
+        patient_id: patientId,
+        streak_type: "medication_adherence",
+        streak_count: maxStreak,
+      });
+
+      // Award 250 Moolas to patient
+      await supabase.from("patient_rewards").insert({
+        patient_id: patientId,
+        awarded_by: user.id,
+        lollipops_count: 250,
+        visit_category: "Acknowledgement of Achievement",
+        reward_type: "congratulation",
+      });
+
+      // Notify patient
+      const { data: patientData } = await supabase
+        .from("patients")
+        .select("patient_user_id")
+        .eq("id", patientId)
+        .maybeSingle();
+      if (patientData?.patient_user_id) {
+        await supabase.from("notifications").insert({
+          user_id: patientData.patient_user_id,
+          title: "🎉 Your Doctor Congratulated You!",
+          description: `Your doctor congratulated you on your ${maxStreak}-day medication streak! You earned 250 Moolas!`,
+          type: "congratulation",
+          reference_id: patientId,
+        });
+      }
+
+      toast({
+        title: "🎉 Congratulations Sent!",
+        description: `${patientName} received 250 Moolas for their ${maxStreak}-day streak. You also earned 250 Moolas!`,
+      });
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+    setCongratulating(false);
+  };
+
+  return (
+    <div className="rounded-xl border border-terracotta/30 bg-terracotta/5 p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Pill className="h-5 w-5 text-terracotta" />
+          <span className="font-semibold text-foreground">Chronic Medication Patient</span>
+          <Badge className="bg-terracotta/10 text-terracotta border-terracotta/30">Chronic</Badge>
+        </div>
+        {maxStreak >= 7 && (
+          <Button
+            onClick={handleCongratulate}
+            disabled={congratulating}
+            size="sm"
+            className="gap-2 bg-emerald-600 hover:bg-emerald-700"
+          >
+            {congratulating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <PartyPopper className="h-4 w-4" />
+            )}
+            Congratulate (+250 Ⓜ each)
+          </Button>
+        )}
+      </div>
+      <p className="text-xs text-muted-foreground">
+        This patient is on chronic medication and can earn adherence rewards for daily medication logging.
+      </p>
+      {!loading && adherenceData.length > 0 && (
+        <div className="flex flex-wrap gap-3 pt-1">
+          {adherenceData.map((d, i) => (
+            <div key={i} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card border border-border">
+              <Flame className={`h-4 w-4 ${d.streak >= 7 ? "text-orange-500" : "text-muted-foreground"}`} />
+              <span className="text-sm font-medium">{d.prescription}</span>
+              <span className="text-sm font-bold text-foreground">{d.streak}d</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
@@ -386,18 +527,9 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
         </div>
       </div>
 
-      {/* Chronic Medication Badge */}
+      {/* Chronic Medication Badge + Adherence Streak */}
       {patient.is_chronic && (
-        <div className="rounded-xl border border-terracotta/30 bg-terracotta/5 p-4">
-          <div className="flex items-center gap-2">
-            <Pill className="h-5 w-5 text-terracotta" />
-            <span className="font-semibold text-foreground">Chronic Medication Patient</span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-terracotta/10 px-2.5 py-1 text-xs font-bold text-terracotta">
-              Chronic
-            </span>
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">This patient is on chronic medication and can earn adherence rewards (moolas) for daily medication logging.</p>
-        </div>
+        <ChronicAdherenceSection patientId={patient.id} patientName={patient.name} />
       )}
 
       {/* Conflicting Medication Alert */}
