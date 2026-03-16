@@ -73,7 +73,7 @@ export default function TodoList() {
   const [aiResults, setAiResults] = useState<Array<{ action_type: string; description: string; auto_executed: boolean }> | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
-  const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
+  const [filter, setFilter] = useState<"all" | "active" | "completed">("active");
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
