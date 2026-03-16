@@ -119,7 +119,7 @@ export default function Patients() {
   }, [filteredPatients, user?.id]);
 
   // Extract ME patient before grouping
-  const mePatient = sortedPatients.find(p => p.patient_user_id === user?.id) || null;
+  const mePatient = sortedPatients.find(p => p.email?.toLowerCase() === user?.email?.toLowerCase()) || null;
   const patientsForGrouping = mePatient ? sortedPatients.filter(p => p.id !== mePatient.id) : sortedPatients;
 
   // Group by first letter of surname
