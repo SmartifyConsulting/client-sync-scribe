@@ -1,59 +1,98 @@
 
 
-# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
+# Multi-Feature Update Plan
 
-## 1. Increase Logo Size by 130%
+## 1. Rename Navigation Items
+**Files: `Sidebar.tsx`, `ReferralDoctors.tsx`, `CPDCertificates.tsx`**
+- Sidebar: "Referral Doctors" → "Referrals", "CPD" → "Certificates"
+- Update page titles in `ReferralDoctors.tsx` and `CPDCertificates.tsx` to match
 
-Scale all logo instances by 130%:
+## 2. Display Patient Names as "Last Name, First Name"
+**File: `Patients.tsx`**
+- In the patient table rows (line 619), format display as `Surname, FirstName(s)` by splitting name and rearranging
+- Keep sorting logic as-is (already sorts by surname)
 
-| Location | Current | New (130%) |
-|---|---|---|
-| Sidebar | h-10 (40px) | h-[52px] |
-| Mobile Header | h-8 (32px) | h-[42px] |
-| Auth page | h-12 (48px) | h-[62px] |
-| Forgot/Reset Password | h-12 (48px) | h-[62px] |
-| Landing page | h-10 (40px) | h-[52px] |
+## 3. Collapsible Year Groups in AI Timeline
+**File: `PatientOverview.tsx`**
+- Parse year from each timeline item's date
+- Group items by year
+- Current year: expanded by default; previous years: collapsed with a clickable year header
+- Assign distinct colors per year (e.g., primary, blue, amber, emerald, violet rotating)
+- Use Collapsible component for expand/collapse
 
-**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
+## 4. Narration Voice Preview
+**File: `Profile.tsx`**
+- Add a "Preview" button next to the voice selector
+- On click, call the `narrate-briefing` edge function (or OpenAI TTS directly via a small edge function) with a short sample sentence like "Hello, this is your MediPad briefing voice."
+- Play the returned audio in an `<audio>` element
 
-## 2. Fix Practice Number Not Persisting
+**New edge function: `supabase/functions/preview-voice/index.ts`** — accepts `{ voice: string, text: string }`, calls OpenAI TTS, returns audio
 
-**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
+## 5. Move Upload File Outside MediaCapture Frame
+**File: `PatientProfile.tsx`, `MediaCapture.tsx`**
+- Extract "Upload File" button from MediaCapture's Card into PatientProfile directly
+- In PatientProfile, place buttons on same row centered: `Record Media` | `Upload File` | `Create New Document`
+- All buttons middle-aligned with `justify-center`
 
-**Fix in `src/pages/Profile.tsx`:**
-- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
-- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
-- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
-- This prevents the race condition where autosave fires with stale/initial data
+## 6. Notifications → Dashboard Badge (Not Menu Item)
+**Files: `Sidebar.tsx`, `Dashboard.tsx`, `PatientDashboard.tsx`, `App.tsx`**
+- Remove "Notifications" from both `doctorNavItems` and `patientNavItems`
+- Remove `/notifications` route from App.tsx
+- Add a Bell icon with unread count badge to the Dashboard header (both doctor and patient)
+- Clicking the bell opens a dropdown/popover showing recent notifications (invitations, document receipts only — no email)
+- Mark as read on view
+- Scope notifications to: invitations and document-received only
 
-## 3. Make Partner Email Required and Create Pending Users
+## 7. Rename Lollipops → Moolas Throughout
+**Files: `usePatientRewards.ts`, `LollipopDisplay.tsx`, `GamificationAdmin.tsx`, `PatientDashboard.tsx`, `PatientOverview.tsx`, `LollipopReport.tsx`**
+- Already renamed in display text to "Moola" in `LollipopDisplay.tsx`
+- Rename variable names `lollipopCount` → keep as-is internally (DB columns unchanged), but ensure ALL user-facing text says "Moola(s)" instead of "Lollipop(s)"
+- Update GamificationAdmin labels: "Lollipops Awarded" → "Moolas Awarded"
 
-**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+## 8. AI Action Items: Doctor vs Patient + Auto-Send
+**File: `Sessions.tsx`, `summarize-session/index.ts`**
+- Update AI prompt to tag each action item as `for: "doctor"` or `for: "patient"`
+- For doctor action items that match auto-generated documents (prescription, med cert, invoice, referral), mark them as "draft ready" with a "Send" button
+- Clicking "Send" marks the todo as done and sends/finalizes the draft document
+- For patient action items, create todos assigned conceptually to the patient
 
-**Fix:**
-- Add an `email` column to the `practice_partners` table via migration
-- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
-- Ensure the `addPartner` function validates email is provided before saving
-- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+## 9. Auto-Generated Documents Filed Under Patient Profile
+**File: `Sessions.tsx`**
+- When auto-generated prescription/invoice/med cert/referral is approved, ensure `patient_id` is set on the document record
+- Add color-coded document type badges in patient Documents tab:
+  - Prescription: blue, Invoice: amber, Medical Certificate: green, Referral: purple, General: gray
+- Add a document type filter dropdown above the documents list
 
-**Database Migration:**
-- `ALTER TABLE practice_partners ADD COLUMN email text;`
+**File: `PatientProfile.tsx`** — Add filter select and color badges to document list
 
-**Changes in `src/pages/Profile.tsx`:**
-- Make email field required in validation (alongside name and registration number)
-- Show validation error if email is missing
+## 10. Fix Patient Import Horizontal Scrolling + Status Field
+**File: `PatientImport.tsx`**
+- The preview table container uses `overflow-auto` but may not scroll horizontally if content doesn't overflow. Wrap the `<Table>` in a `<div>` with `overflow-x-auto` and set `min-width` on the table
+- Add a "Status" column to the preview table with default "active"
+- Add `status` field to `ParsedPatient` interface, default to `"active"`
+- Include `status` in the import insert (line 483 already hardcodes "active" — use `patient.status || "active"` instead)
+- Add Status to column mappings and AI prompt
 
-## Technical Summary
+## 11. Reward Admin Page (Moola Allocation)
+**File: `GamificationAdmin.tsx`**
+- This page already exists at `/admin/gamification` — rename it to "Reward Admin" or "Moola Admin"
+- Update all "Lollipop" labels to "Moola"
+- Rename sidebar item from "Gamification" to "Rewards" in admin nav
+- Ensure the page lets admins set Moola amounts per visit/interaction type (already functional)
 
-### Database Migration
-- Add `email text` column to `practice_partners` table
+## Summary of Files
 
-### Files Modified
-- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
-- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
-- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
-- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
+| # | Change | Files |
+|---|--------|-------|
+| 1 | Nav renames | `Sidebar.tsx`, `ReferralDoctors.tsx`, `CPDCertificates.tsx` |
+| 2 | Name display | `Patients.tsx` |
+| 3 | Collapsible timeline | `PatientOverview.tsx` |
+| 4 | Voice preview | `Profile.tsx`, new `preview-voice/index.ts` |
+| 5 | Upload button move | `PatientProfile.tsx`, `MediaCapture.tsx` |
+| 6 | Notifications badge | `Sidebar.tsx`, `Dashboard.tsx`, `PatientDashboard.tsx`, `App.tsx` |
+| 7 | Moola rename | `GamificationAdmin.tsx`, `LollipopDisplay.tsx`, `PatientDashboard.tsx`, `usePatientRewards.ts` |
+| 8 | Action item roles | `summarize-session/index.ts`, `Sessions.tsx` |
+| 9 | Doc filing + badges | `Sessions.tsx`, `PatientProfile.tsx` |
+| 10 | Import scroll + status | `PatientImport.tsx` |
+| 11 | Reward admin | `GamificationAdmin.tsx`, `Sidebar.tsx` |
 
