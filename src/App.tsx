@@ -30,7 +30,7 @@ import BusinessAssociateAgreement from "./pages/BusinessAssociateAgreement";
 // Patient pages
 import PatientDashboard from "./pages/patient/PatientDashboard";
 import PatientCalendar from "./pages/patient/PatientCalendar";
-import PrescriptionHistory from "./pages/patient/PrescriptionHistory";
+import Documentation from "./pages/patient/PrescriptionHistory";
 import Invoices from "./pages/patient/Invoices";
 import PatientAccessManagement from "./pages/patient/PatientAccessManagement";
 import MyRewards from "./pages/patient/MyRewards";
