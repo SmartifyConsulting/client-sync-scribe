@@ -344,6 +344,122 @@ export default function Sessions() {
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Handlers for AI-extracted document approvals
+  const handleApproveMedCert = async (data: MedCertData) => {
+    if (!patientId || !currentSessionId) return;
+    setReviewLoading(true);
+    try {
+      const content = `<b>MEDICAL CERTIFICATE</b>\n\nPatient: ${data.patient_name || currentPatient?.name}\nDiagnosis: ${data.diagnosis}\nLeave Period: ${data.start_date} to ${data.end_date}${data.notes ? `\nNotes: ${data.notes}` : ''}`;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from('documents').insert({
+          user_id: user.id,
+          patient_id: patientId,
+          patient_name: currentPatient?.name || null,
+          name: `Medical Certificate - ${new Date().toLocaleDateString()}`,
+          content,
+          template_name: 'Medical Certificate',
+        });
+      }
+      toast({ title: "Medical Certificate Created", description: "Document saved and ready for sending." });
+    } catch (e) { console.error(e); }
+    setReviewLoading(false);
+    setShowMedCertReview(false);
+    // Show next dialog if available
+    if (extractedPrescription) setShowPrescriptionReview(true);
+    else if (extractedInvoice) setShowInvoiceReview(true);
+    else if (extractedReferral) setShowReferralReview(true);
+  };
+
+  const handleApprovePrescription = async (data: PrescriptionData) => {
+    if (!patientId || !currentSessionId) return;
+    setReviewLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        for (const med of data.medications) {
+          await supabase.from('prescriptions').insert({
+            patient_id: patientId,
+            doctor_id: user.id,
+            session_id: currentSessionId,
+            medication: med.medication,
+            dosage: med.dosage,
+            frequency: med.frequency,
+            instructions: [med.duration, med.instructions].filter(Boolean).join('. ') || null,
+          });
+        }
+      }
+      toast({ title: "Prescription Saved", description: `${data.medications.length} medication(s) added.` });
+    } catch (e) { console.error(e); }
+    setReviewLoading(false);
+    setShowPrescriptionReview(false);
+    if (extractedInvoice) setShowInvoiceReview(true);
+    else if (extractedReferral) setShowReferralReview(true);
+  };
+
+  const handleApproveInvoice = async (data: InvoiceData) => {
+    if (!patientId || !currentSessionId) return;
+    setReviewLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const invoiceNumber = `INV-${Date.now().toString().slice(-8)}`;
+        const description = data.items.map(i => `${i.description}: R${i.amount}`).join('; ');
+        const total = data.total || data.items.reduce((s, i) => s + (Number(i.amount) || 0), 0);
+        const { data: inv } = await supabase.from('invoices').insert({
+          patient_id: patientId,
+          doctor_id: user.id,
+          session_id: currentSessionId,
+          invoice_number: invoiceNumber,
+          description,
+          amount: total,
+          due_date: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+        }).select().single();
+        if (inv) setInvoice({ id: inv.id, invoice_number: inv.invoice_number, amount: inv.amount });
+      }
+      toast({ title: "Invoice Created", description: "Invoice saved successfully." });
+    } catch (e) { console.error(e); }
+    setReviewLoading(false);
+    setShowInvoiceReview(false);
+    if (extractedReferral) setShowReferralReview(true);
+  };
+
+  const handleApproveReferral = async (data: ReferralData) => {
+    if (!patientId) return;
+    setReviewLoading(true);
+    try {
+      const content = `<b>REFERRAL LETTER</b>\n\nReferral To: ${data.specialist_type}${data.doctor_name ? ` - ${data.doctor_name}` : ''}\nReason: ${data.reason}\nUrgency: ${data.urgency || 'routine'}`;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from('documents').insert({
+          user_id: user.id,
+          patient_id: patientId,
+          patient_name: currentPatient?.name || null,
+          name: `Referral Letter - ${data.specialist_type} - ${new Date().toLocaleDateString()}`,
+          content,
+          template_name: 'Referral Letter',
+        });
+        // Increment referral count if doctor exists in referral_doctors
+        if (data.doctor_name) {
+          const { data: refDoc } = await supabase.from('referral_doctors')
+            .select('id, referral_count')
+            .eq('user_id', user.id)
+            .ilike('last_name', `%${data.doctor_name.split(' ').pop()}%`)
+            .maybeSingle();
+          if (refDoc) {
+            await supabase.from('referral_doctors')
+              .update({ referral_count: (refDoc.referral_count || 0) + 1 })
+              .eq('id', refDoc.id);
+          }
+        }
+      }
+      toast({ title: "Referral Letter Created", description: "Document saved successfully." });
+    } catch (e) { console.error(e); }
+    setReviewLoading(false);
+    setShowReferralReview(false);
+  };
+
+  const { toast } = useToast();
 
   const startSession = async () => {
     setSessionState("active");
