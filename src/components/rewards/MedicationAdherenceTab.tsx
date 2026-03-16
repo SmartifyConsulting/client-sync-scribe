@@ -230,77 +230,55 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const fileName = `medication-proof/${user.id}/${Date.now()}.webm`;
+      // Upload video temporarily
+      const filePath = `medication-proof/${user.id}/${Date.now()}.webm`;
       const { error: uploadError } = await supabase.storage
         .from("patient-media")
-        .upload(fileName, recordedBlob, { contentType: "video/webm" });
+        .upload(filePath, recordedBlob, { contentType: "video/webm" });
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage.from("patient-media").getPublicUrl(fileName);
+      const { data: urlData } = supabase.storage.from("patient-media").getPublicUrl(filePath);
 
-      // Update adherence record
-      await supabase
-        .from("medication_adherence")
-        .update({
-          status: "completed",
-          taken_at: new Date().toISOString(),
-          proof_url: urlData.publicUrl,
-        })
-        .eq("patient_id", patientId)
-        .eq("prescription_id", recordingPrescriptionId)
-        .eq("scheduled_date", today);
+      // Call AI validation edge function (handles adherence update, rewards, and video deletion)
+      const { data: validationData, error: fnError } = await supabase.functions.invoke(
+        "validate-medication-video",
+        {
+          body: {
+            videoUrl: urlData.publicUrl,
+            filePath,
+            prescriptionId: recordingPrescriptionId,
+            patientId,
+          },
+        }
+      );
 
-      // Award moolas for daily adherence
-      const { data: config } = await supabase
-        .from("gamification_config")
-        .select("lollipops_awarded")
-        .eq("visit_category", "Acknowledgement of Achievement")
-        .eq("is_active", true)
-        .maybeSingle();
+      if (fnError) throw fnError;
 
-      // Award a smaller daily amount (e.g., 5 moolas for daily adherence)
-      const { data: patient } = await supabase
-        .from("patients")
-        .select("user_id")
-        .eq("id", patientId)
-        .maybeSingle();
-      
-      if (patient) {
-        await supabase.from("patient_rewards").insert({
-          patient_id: patientId,
-          awarded_by: patient.user_id,
-          lollipops_count: 5,
-          visit_category: "Medication Adherence",
-          reward_type: "medication_adherence",
+      const validation = validationData?.validation;
+
+      if (validation?.isValid) {
+        toast({ title: "✅ Medication verified!", description: `AI confirmed ingestion. +5 Moolas earned!` });
+        handleCloseRecording();
+        queryClient.invalidateQueries({ queryKey: ["medication-adherence", patientId] });
+        queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
+      } else {
+        // Validation failed — allow retry
+        setRecordedBlob(null);
+        startCamera();
+        const reason = validation?.description || "Could not confirm medication ingestion.";
+        const missing: string[] = [];
+        if (!validation?.person_detected) missing.push("person visible");
+        if (!validation?.medication_detected) missing.push("medication visible");
+        if (!validation?.ingestion_detected) missing.push("taking the medication");
+        toast({
+          title: "Verification failed",
+          description: `${reason}${missing.length > 0 ? ` Missing: ${missing.join(", ")}.` : ""} Please try again.`,
+          variant: "destructive",
         });
       }
-
-      // Notify doctor of streak milestones
-      const streak = getStreak(recordingPrescriptionId) + 1; // +1 for today
-      if (streak > 0 && streak % 7 === 0 && patient) {
-        const { data: patientData } = await supabase
-          .from("patients")
-          .select("name, user_id")
-          .eq("id", patientId)
-          .maybeSingle();
-        if (patientData) {
-          await supabase.from("notifications").insert({
-            user_id: patientData.user_id,
-            title: "🔥 Medication Streak Achievement!",
-            description: `${patientData.name} has a ${streak}-day medication adherence streak! Consider congratulating them.`,
-            type: "medication_streak",
-            reference_id: patientId,
-          });
-        }
-      }
-
-      toast({ title: "Medication logged!", description: `Proof submitted. +5 Moolas earned!` });
-      handleCloseRecording();
-      queryClient.invalidateQueries({ queryKey: ["medication-adherence", patientId] });
-      queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
     } catch (error: any) {
       console.error(error);
-      toast({ title: "Upload failed", description: error.message || "Could not submit proof.", variant: "destructive" });
+      toast({ title: "Validation failed", description: error.message || "Could not validate proof.", variant: "destructive" });
     }
     setIsUploading(false);
   };
