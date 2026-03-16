@@ -202,53 +202,39 @@ export default function Sessions() {
   const handleSessionComplete = useCallback(async (transcriptText: string, visitCategory?: string | null) => {
     console.log("=== handleSessionComplete START ===");
     console.log("transcriptText length:", transcriptText?.length);
-    console.log("sessionId:", currentSessionIdRef.current);
     console.log("visitCategory:", visitCategory);
     
     setSessionState("processing");
     
-    const sessionId = currentSessionIdRef.current;
     const currentNotes = notesRef.current;
     const fullContent = [transcriptText, currentNotes].filter(Boolean).join('\n\n');
     
     console.log("fullContent length:", fullContent?.length);
     
-    if (sessionId) {
-      try {
-        if (fullContent) {
-          console.log("Calling completeSession with content...");
-          const result = await completeSession(sessionId, fullContent, currentNotes, visitCategory || undefined);
-          console.log("completeSession result:", result);
-          if (result) {
-            setSummary(result.summary || "Session completed successfully.");
-            setActionPoints(result.action_points || []);
-          }
-        } else {
-          // No content but still need to mark session as completed
-          console.log("No content, marking session as completed without AI...");
-          const { error } = await supabase
-            .from('sessions')
-            .update({ 
-              status: 'completed', 
-              ended_at: new Date().toISOString(),
-              summary: "Session completed. No content was recorded or noted."
-            })
-            .eq('id', sessionId);
-          
-          if (error) console.error("Error updating session:", error);
-          setSummary("Session completed. No content was recorded or noted.");
-          setActionPoints([]);
+    try {
+      // Create session and complete it in one flow (no in_progress state persisted)
+      const result = await completeSession(
+        null, // no existing session ID
+        fullContent || '',
+        currentNotes,
+        visitCategory || undefined,
+        {
+          patient_id: patientId!,
+          title: `Session - ${new Date().toLocaleDateString()}`,
+          started_at: sessionStartTimeRef.current?.toISOString() || new Date().toISOString(),
         }
-      } catch (error) {
-        console.error("Error in handleSessionComplete:", error);
-        // Still mark as completed even on error
-        await supabase
-          .from('sessions')
-          .update({ status: 'completed', ended_at: new Date().toISOString() })
-          .eq('id', sessionId);
+      );
+      
+      if (result) {
+        setCurrentSessionId(result.id);
+        setSummary(result.summary || "Session completed successfully.");
+        setActionPoints(result.action_points || []);
+      } else {
+        setSummary("Session completed. No content was recorded or noted.");
+        setActionPoints([]);
       }
-    } else {
-      console.log("No session ID!");
+    } catch (error) {
+      console.error("Error in handleSessionComplete:", error);
       setSummary("Session completed. No content was recorded or noted.");
       setActionPoints([]);
     }
@@ -256,7 +242,7 @@ export default function Sessions() {
     setSessionState("completed");
     pendingCompletionRef.current = false;
     console.log("=== handleSessionComplete END ===");
-  }, [completeSession]);
+  }, [completeSession, patientId]);
 
   // Handle visit category selection
   const handleVisitCategoryConfirm = async (category: string | null) => {
