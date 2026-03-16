@@ -6,6 +6,7 @@ import {
   Calendar,
   FileText,
   Settings,
+  Mic,
   Pill,
   Receipt,
   Stethoscope,
