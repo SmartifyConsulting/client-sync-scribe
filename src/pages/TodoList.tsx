@@ -116,6 +116,18 @@ export default function TodoList() {
     fetchTodos();
   }, []);
 
+  // Auto-start recording if navigated with ?autoRecord=true
+  const autoRecordTriggered = useRef(false);
+  useEffect(() => {
+    if (loading || autoRecordTriggered.current) return;
+    if (searchParams.get('autoRecord') === 'true') {
+      autoRecordTriggered.current = true;
+      setSearchParams({}, { replace: true });
+      // Small delay to ensure component is ready
+      setTimeout(() => startRecording(), 300);
+    }
+  }, [loading, searchParams]);
+
   const cleanupSilenceDetection = () => {
     if (silenceIntervalRef.current) {
       clearInterval(silenceIntervalRef.current);
