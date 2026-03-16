@@ -20,7 +20,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
