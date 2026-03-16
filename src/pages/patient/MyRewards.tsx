@@ -35,6 +35,7 @@ import { useMyRewards, useMyStreaks } from "@/hooks/usePatientRewards";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ActivityProofCapture } from "@/components/rewards/ActivityProofCapture";
+import { MedicationAdherenceTab } from "@/components/rewards/MedicationAdherenceTab";
 import { useToast } from "@/hooks/use-toast";
 
 const MILESTONES = [
