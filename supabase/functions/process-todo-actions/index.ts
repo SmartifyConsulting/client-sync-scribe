@@ -36,7 +36,7 @@ serve(async (req) => {
 
     // Fetch doctor's patients and profile in parallel
     const [patientsRes, profileRes] = await Promise.all([
-      supabase.from("patients").select("id, name, email, phone").eq("user_id", user.id),
+      supabase.from("patients").select("id, name, email, phone, patient_user_id").eq("user_id", user.id),
       supabase.from("profiles").select("full_name, practice_number, doctor_number, practice_address, specialty").eq("id", user.id).single(),
     ]);
 
