@@ -54,8 +54,8 @@ const patientNavItems: NavItem[] = [
   { icon: Users, label: "My Doctors", to: "/patient/doctors" },
   { icon: Mail, label: "Invites", to: "/patient/invites" },
   { icon: Gift, label: "My Rewards", to: "/patient/rewards" },
-  { icon: Camera, label: "Health Album", to: "/patient/health-album" },
   { icon: Calendar, label: "My Calendar", to: "/patient/calendar" },
+  { icon: CheckSquare, label: "My Tasks", to: "/patient/tasks" },
   { icon: Pill, label: "Prescriptions", to: "/patient/prescriptions" },
   { icon: Receipt, label: "Invoices", to: "/patient/invoices" },
 ];

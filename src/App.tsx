@@ -125,7 +125,8 @@ const App = () => (
             <Route path="/patient/invoices" element={<Invoices />} />
             <Route path="/patient/invites" element={<PatientAccessManagement />} />
             <Route path="/patient/rewards" element={<MyRewards />} />
-            <Route path="/patient/health-album" element={<HealthAlbum />} />
+            <Route path="/patient/health-album" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/patient/tasks" element={<PatientTasks />} />
             
             {/* Admin routes */}
             <Route path="/admin/pricing" element={<PricingAdmin />} />
