@@ -633,7 +633,16 @@ export default function Sessions() {
                         )}
                       </CommandEmpty>
                       <CommandGroup>
-                        {patients.map((patient) => (
+                        {[...patients].sort((a, b) => {
+                          const surnameA = a.name.trim().split(/\s+/).pop()?.toLowerCase() || '';
+                          const surnameB = b.name.trim().split(/\s+/).pop()?.toLowerCase() || '';
+                          return surnameA.localeCompare(surnameB);
+                        }).map((patient) => {
+                          const parts = patient.name.trim().split(/\s+/);
+                          const displayName = parts.length > 1
+                            ? `${parts[parts.length - 1]}, ${parts.slice(0, -1).join(' ')}`
+                            : patient.name;
+                          return (
                           <CommandItem
                             key={patient.id}
                             value={patient.name}
@@ -649,9 +658,10 @@ export default function Sessions() {
                               )}
                             />
                             <User className="mr-2 h-4 w-4 text-muted-foreground" />
-                            {patient.name}
+                            {displayName}
                           </CommandItem>
-                        ))}
+                          );
+                        })}
                       </CommandGroup>
                     </CommandList>
                   </Command>

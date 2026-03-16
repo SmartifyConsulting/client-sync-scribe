@@ -55,6 +55,7 @@ export interface Patient {
   pharmacy_name: string | null;
   pharmacy_email: string | null;
   pharmacies: Pharmacy[] | null;
+  is_chronic: boolean | null;
   last_visit?: string | null;
   patient_user_id?: string | null;
 }

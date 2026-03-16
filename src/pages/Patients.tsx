@@ -761,6 +761,11 @@ export default function Patients() {
                                 const firstNames = parts.slice(0, -1).join(" ");
                                 return `${lastName}, ${firstNames}`;
                               })()}
+                              {patient.is_chronic && (
+                                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-terracotta/10 px-2 py-0.5 text-[10px] font-bold text-terracotta">
+                                  <Pill className="h-2.5 w-2.5" />Chronic
+                                </span>
+                              )}
                             </span>
                           </Link>
                         </td>
