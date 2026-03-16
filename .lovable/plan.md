@@ -1,35 +1,59 @@
 
 
-# Plan: Add Hospital Admission Everywhere Medical Certificate & Prescription Appear
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## Overview
-Add "Hospital Admission" as a 6th default template, include it in all document action menus (session history, documents tab), and add it to the SessionHistoryTable dropdown.
+## 1. Increase Logo Size by 130%
 
-## Changes
+Scale all logo instances by 130%:
 
-### 1. Add Default Template (`src/hooks/useTemplates.ts`)
-Add a 6th entry to the `defaultTemplates` array after Invoice, using the existing `FALLBACK_TEMPLATE` content from `HospitalAdmissionEditor.tsx` but reformatted with standard placeholder style (`[PatientName]`, `[DoctorName]`, etc.):
-- Name: "Hospital Admission Form"
-- Category: "Admission"
-- `is_default: true`
-- Content mirrors the structured admission form (practice details, diagnosis ICD-10 codes, procedure details, special instructions)
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-### 2. Add to Session History Dropdown (`src/components/patients/SessionHistoryTable.tsx`)
-- Import `Hospital` icon and `HospitalAdmissionEditor`
-- Add `hospitalAdmissionOpen` state + handler
-- Add "Hospital Admission" menu item after Medical Certificate in the dropdown
-- Render `HospitalAdmissionEditor` modal alongside existing Prescription/Invoice editors
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-### 3. Add to Documents Tab Template Selection
-- Ensure the Documents page (`src/pages/Documents.tsx` or equivalent) picks up the new template when users click "Add New Document" — this happens automatically since the template list is fetched from the database/defaults via `useTemplates`
+## 2. Fix Practice Number Not Persisting
 
-### 4. Patient Documents Classification (`src/pages/patient/PatientDocuments.tsx`)
-- Already has `hospital_admission` category mapping — no changes needed
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-## Files Modified
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
 
-| File | Change |
-|------|--------|
-| `src/hooks/useTemplates.ts` | Add Hospital Admission Form to `defaultTemplates` array |
-| `src/components/patients/SessionHistoryTable.tsx` | Add Hospital Admission to dropdown + editor modal |
+## 3. Make Partner Email Required and Create Pending Users
+
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
+
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
+
+## Technical Summary
+
+### Database Migration
+- Add `email text` column to `practice_partners` table
+
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 
