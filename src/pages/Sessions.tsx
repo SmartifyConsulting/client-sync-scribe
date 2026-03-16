@@ -31,6 +31,13 @@ import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
 import { VisitCategoryDialog } from "@/components/sessions/VisitCategoryDialog";
 import { SessionNotepad } from "@/components/sessions/SessionNotepad";
+import {
+  MedCertReviewDialog,
+  PrescriptionReviewDialog,
+  InvoiceReviewDialog,
+  ReferralReviewDialog,
+} from "@/components/sessions/TranscriptionReviewDialogs";
+import type { MedCertData, PrescriptionData, InvoiceData, ReferralData } from "@/components/sessions/TranscriptionReviewDialogs";
 import { Toggle } from "@/components/ui/toggle";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
