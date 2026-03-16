@@ -735,9 +735,27 @@ export default function Profile() {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Practice Partners */}
+        {/* Narration Voice */}
+        <div className="mt-6 space-y-2">
+          <Label>Narration Voice</Label>
+          <p className="text-sm text-muted-foreground mb-2">Select the voice used for briefing narration</p>
+          <Select value={(profile as any)?.narration_voice || "nova"} onValueChange={async (value) => {
+            await updateProfile({ narration_voice: value } as any);
+            toast({ title: "Voice updated", description: `Narration voice set to ${value}` });
+          }}>
+            <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="alloy">Alloy</SelectItem>
+              <SelectItem value="echo">Echo</SelectItem>
+              <SelectItem value="fable">Fable</SelectItem>
+              <SelectItem value="nova">Nova</SelectItem>
+              <SelectItem value="onyx">Onyx</SelectItem>
+              <SelectItem value="shimmer">Shimmer</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
       <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
