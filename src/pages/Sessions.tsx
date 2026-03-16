@@ -475,6 +475,8 @@ export default function Sessions() {
     clearTranscript();
     sessionStartTimeRef.current = new Date();
     savedAudioUrlRef.current = null;
+    // Auto-start recording when session begins
+    startRecording();
   };
 
   const handleSavePrescription = (prescriptionData: { content: string; rawTranscript: string }) => {
