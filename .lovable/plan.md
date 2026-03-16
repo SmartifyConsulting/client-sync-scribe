@@ -1,28 +1,59 @@
 
 
-# Fix Patient Import Table Scrolling & Field Widths
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## Problem
-The import preview table is inside a `max-w-2xl` dialog but has `minWidth: 1400px` on the table. The scrolling containers conflict with the `ScrollArea` wrapper in the dialog, preventing horizontal and vertical scrolling. Fields are also too wide.
+## 1. Increase Logo Size by 130%
 
-## Changes
+Scale all logo instances by 130%:
 
-### `src/components/patients/PatientImport.tsx`
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-1. **Reduce column min-widths** significantly — Name: 120px, Email: 140px, Phone: 100px, DOB: 110px, Gender: 70px, ID: 100px, Medical Aid: 110px, Employer: 100px, Allergies: 100px, Address: 110px, Status: 70px
-2. **Reduce table minWidth** from 1400px to ~1200px
-3. **Make input fields narrower** — reduce padding, use compact styling
-4. **Fix scrolling** — remove the outer `ScrollArea` from the `PatientImportDialog` (line 758) and rely on the inner `overflow-x-auto overflow-y-auto` div with a proper constrained height. Set `overflow-y-auto` on the dialog content area itself.
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-### `PatientImportDialog` (lines 748-761)
-- Expand dialog to `max-w-4xl` so more columns are visible without scrolling
-- Remove the `ScrollArea` wrapper — let the inner div handle scrolling
-- Add `overflow-y-auto` to the content container
+## 2. Fix Practice Number Not Persisting
 
-### Preview table container (lines 608-652)
-- Keep `overflow-x-auto overflow-y-auto` on the inner div
-- Reduce `maxHeight` to `400px` for the table container so it scrolls vertically within the dialog
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-### Input fields
-- Use `className="h-7 text-xs px-1.5"` instead of `h-8 text-sm` for compact inputs
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
+
+## 3. Make Partner Email Required and Create Pending Users
+
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
+
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
+
+## Technical Summary
+
+### Database Migration
+- Add `email text` column to `practice_partners` table
+
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 
