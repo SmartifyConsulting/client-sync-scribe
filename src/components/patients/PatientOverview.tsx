@@ -304,8 +304,20 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
         </div>
       </div>
 
-      {/* Legend */}
+      {/* Legend — Allergy, Condition, Medication, Symptom */}
       <div className="flex flex-wrap gap-4 text-sm">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-red-500/15 text-red-700 dark:text-red-400 font-medium">
+            <AlertTriangle className="h-3 w-3" />
+            Allergy
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-blue-500/15 text-blue-700 dark:text-blue-400 font-medium">
+            <HeartPulse className="h-3 w-3" />
+            Condition
+          </span>
+        </div>
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-500/15 text-green-700 dark:text-green-400 font-medium">
             <Pill className="h-3 w-3" />
@@ -316,18 +328,6 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
           <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-amber-500/15 text-amber-700 dark:text-amber-400 font-medium">
             <Activity className="h-3 w-3" />
             Symptom
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-blue-500/15 text-blue-700 dark:text-blue-400 font-medium">
-            <HeartPulse className="h-3 w-3" />
-            Condition
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-red-500/15 text-red-700 dark:text-red-400 font-medium">
-            <AlertTriangle className="h-3 w-3" />
-            Allergy
           </span>
         </div>
       </div>

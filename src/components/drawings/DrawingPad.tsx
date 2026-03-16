@@ -953,7 +953,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                   onTouchStart={(e) => handleElementDragStart(e, el.id)}
                 >
                   {asset.imageSrc ? (
-                    <img src={asset.imageSrc} alt={asset.name} className="w-full h-full object-cover pointer-events-none" />
+                    <img src={asset.imageSrc} alt={asset.name} className="w-full h-full object-contain pointer-events-none" />
                   ) : (
                     <asset.component />
                   )}

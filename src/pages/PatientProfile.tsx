@@ -380,17 +380,12 @@ export default function PatientProfile() {
             </p>
           </div>
 
-          {/* Media Capture */}
-          <MediaCapture patientId={patient.id} patientName={patient.name} onSaved={fetchDocuments} />
-
-          <div className="flex justify-end gap-2">
+          {/* Media Capture + Create Document on same row */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <MediaCapture patientId={patient.id} patientName={patient.name} onSaved={fetchDocuments} />
             <Button variant="outline" className="gap-2 h-11" onClick={() => setShowTemplateSelector(true)}>
               <Plus className="h-4 w-4" />
               Create New Document
-            </Button>
-            <Button variant="outline" className="gap-2 h-11">
-              <Upload className="h-4 w-4" />
-              Upload Document
             </Button>
           </div>
           <div className="rounded-2xl bg-card shadow-card overflow-hidden">
