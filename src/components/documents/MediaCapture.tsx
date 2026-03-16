@@ -101,6 +101,10 @@ export function MediaCapture({ patientId, patientName, onSaved }: MediaCapturePr
       toast({ title: "Missing Info", description: "Please provide a title", variant: "destructive" });
       return;
     }
+    if (recordedBlob.size > 5 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Media files must be under 5MB", variant: "destructive" });
+      return;
+    }
 
     setIsSaving(true);
     try {
