@@ -50,6 +50,7 @@ interface ParsedPatient {
   id_passport_number?: string;
   gender?: string;
   marital_status?: string;
+  status?: string;
 }
 
 // Common column name mappings
