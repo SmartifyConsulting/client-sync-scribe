@@ -9,6 +9,7 @@ import {
   Pill,
   Receipt,
   Stethoscope,
+  CheckSquare,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 
