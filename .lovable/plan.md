@@ -1,35 +1,59 @@
 
 
-# Fix Stale "In Progress" Sessions
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## Problem
-When `startSession()` is called, a record is inserted into the `sessions` table with `status: 'in_progress'`. If the doctor navigates away, closes the browser, or the completion flow fails (e.g., AI summary timeout), the session stays as `in_progress` permanently. Per the project constraint, sessions should only persist once completed — `in_progress` is not a valid persisted state.
+## 1. Increase Logo Size by 130%
 
-## Solution
+Scale all logo instances by 130%:
 
-Two-part fix:
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-### 1. Stop persisting sessions until completion
-**File: `src/pages/Sessions.tsx`**
-- Remove the `createSession()` call from `startSession()`. Instead, only track session start time locally (already done with `setSessionState("active")`).
-- Move the database insert to the completion flow — create the session record only when the doctor completes it, with `status: 'completed'` directly.
-- Update `handleVisitCategoryConfirm` to call `createSession` + immediately update it to completed, or use a single insert with all final data.
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-**File: `src/hooks/useSessions.ts`**
-- Modify `completeSession` to accept creation data (patient_id, title) and do a single insert with `status: 'completed'` if no session ID exists yet, or keep the current update flow if an ID was already created.
+## 2. Fix Practice Number Not Persisting
 
-### 2. Clean up existing stale sessions
-**Database migration:**
-```sql
--- Delete or cancel any existing in_progress sessions (they are stale)
-UPDATE sessions SET status = 'cancelled' WHERE status = 'in_progress';
-```
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-### 3. Filter out in_progress from listings (safety net)
-**File: `src/pages/Sessions.tsx`** — filter session list to exclude `in_progress` sessions from the history table.
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
 
-## Files Modified
-- `src/pages/Sessions.tsx` — defer DB insert to completion; filter listing
-- `src/hooks/useSessions.ts` — support creating-and-completing in one flow
-- Database migration — clean up existing stale records
+## 3. Make Partner Email Required and Create Pending Users
+
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
+
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
+
+## Technical Summary
+
+### Database Migration
+- Add `email text` column to `practice_partners` table
+
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 

@@ -79,12 +79,14 @@ export default function Sessions() {
   const [aiDiagnosis, setAiDiagnosis] = useState<string | null>(null);
   const [isGeneratingDiagnosis, setIsGeneratingDiagnosis] = useState(false);
   const [pastPatientSessions, setPastPatientSessions] = useState<any[]>([]);
+  const savedAudioUrlRef = useRef<string | null>(null);
   const [showVisitCategoryDialog, setShowVisitCategoryDialog] = useState(false);
   const [pendingTranscript, setPendingTranscript] = useState<string>("");
   const pendingCompletionRef = useRef(false);
   const latestTranscriptRef = useRef<string>("");
   const currentSessionIdRef = useRef<string | null>(null);
   const notesRef = useRef<string>("");
+  const sessionStartTimeRef = useRef<Date | null>(null);
 
   const navigate = useNavigate();
   const { patients, loading: patientsLoading } = usePatients();
@@ -202,53 +204,40 @@ export default function Sessions() {
   const handleSessionComplete = useCallback(async (transcriptText: string, visitCategory?: string | null) => {
     console.log("=== handleSessionComplete START ===");
     console.log("transcriptText length:", transcriptText?.length);
-    console.log("sessionId:", currentSessionIdRef.current);
     console.log("visitCategory:", visitCategory);
     
     setSessionState("processing");
     
-    const sessionId = currentSessionIdRef.current;
     const currentNotes = notesRef.current;
     const fullContent = [transcriptText, currentNotes].filter(Boolean).join('\n\n');
     
     console.log("fullContent length:", fullContent?.length);
     
-    if (sessionId) {
-      try {
-        if (fullContent) {
-          console.log("Calling completeSession with content...");
-          const result = await completeSession(sessionId, fullContent, currentNotes, visitCategory || undefined);
-          console.log("completeSession result:", result);
-          if (result) {
-            setSummary(result.summary || "Session completed successfully.");
-            setActionPoints(result.action_points || []);
-          }
-        } else {
-          // No content but still need to mark session as completed
-          console.log("No content, marking session as completed without AI...");
-          const { error } = await supabase
-            .from('sessions')
-            .update({ 
-              status: 'completed', 
-              ended_at: new Date().toISOString(),
-              summary: "Session completed. No content was recorded or noted."
-            })
-            .eq('id', sessionId);
-          
-          if (error) console.error("Error updating session:", error);
-          setSummary("Session completed. No content was recorded or noted.");
-          setActionPoints([]);
+    try {
+      // Create session and complete it in one flow (no in_progress state persisted)
+      const result = await completeSession(
+        null, // no existing session ID
+        fullContent || '',
+        currentNotes,
+        visitCategory || undefined,
+        {
+          patient_id: patientId!,
+          title: `Session - ${new Date().toLocaleDateString()}`,
+          started_at: sessionStartTimeRef.current?.toISOString() || new Date().toISOString(),
+          audio_url: savedAudioUrlRef.current || undefined,
         }
-      } catch (error) {
-        console.error("Error in handleSessionComplete:", error);
-        // Still mark as completed even on error
-        await supabase
-          .from('sessions')
-          .update({ status: 'completed', ended_at: new Date().toISOString() })
-          .eq('id', sessionId);
+      );
+      
+      if (result) {
+        setCurrentSessionId(result.id);
+        setSummary(result.summary || "Session completed successfully.");
+        setActionPoints(result.action_points || []);
+      } else {
+        setSummary("Session completed. No content was recorded or noted.");
+        setActionPoints([]);
       }
-    } else {
-      console.log("No session ID!");
+    } catch (error) {
+      console.error("Error in handleSessionComplete:", error);
       setSummary("Session completed. No content was recorded or noted.");
       setActionPoints([]);
     }
@@ -256,7 +245,7 @@ export default function Sessions() {
     setSessionState("completed");
     pendingCompletionRef.current = false;
     console.log("=== handleSessionComplete END ===");
-  }, [completeSession]);
+  }, [completeSession, patientId]);
 
   // Handle visit category selection
   const handleVisitCategoryConfirm = async (category: string | null) => {
@@ -298,19 +287,8 @@ export default function Sessions() {
     },
     onAudioSaved: async (audioStorageUrl) => {
       console.log("Audio saved to storage:", audioStorageUrl);
-      // Update session with audio URL
-      if (currentSessionIdRef.current) {
-        const { error } = await supabase
-          .from('sessions')
-          .update({ audio_url: audioStorageUrl })
-          .eq('id', currentSessionIdRef.current);
-        
-        if (error) {
-          console.error("Error saving audio URL to session:", error);
-        } else {
-          console.log("Audio URL saved to session successfully");
-        }
-      }
+      // Store audio URL locally - will be included when session is created on completion
+      savedAudioUrlRef.current = audioStorageUrl;
     }
   });
 
@@ -332,6 +310,7 @@ export default function Sessions() {
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+
   const startSession = async () => {
     setSessionState("active");
     setNotes("");
@@ -341,14 +320,10 @@ export default function Sessions() {
     setPrescription(null);
     setInvoice(null);
     setAiDiagnosis(null);
+    setCurrentSessionId(null);
     clearTranscript();
-    
-    if (patientId) {
-      const session = await createSession(patientId, `Session - ${new Date().toLocaleDateString()}`);
-      if (session) {
-        setCurrentSessionId(session.id);
-      }
-    }
+    sessionStartTimeRef.current = new Date();
+    savedAudioUrlRef.current = null;
   };
 
   const handleSavePrescription = (prescriptionData: { content: string; rawTranscript: string }) => {
@@ -895,18 +870,18 @@ export default function Sessions() {
             <Calendar className="h-5 w-5 text-primary" />
             <h2 className="text-xl font-semibold text-foreground">All Sessions</h2>
           </div>
-          <Badge variant="secondary">{sessions.length} sessions</Badge>
+          <Badge variant="secondary">{sessions.filter(s => s.status !== 'in_progress').length} sessions</Badge>
         </div>
         
         {sessionsLoading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
-        ) : sessions.length === 0 ? (
+        ) : sessions.filter(s => s.status !== 'in_progress').length === 0 ? (
           <p className="text-muted-foreground text-center py-8">No sessions recorded yet.</p>
         ) : (
           <div className="space-y-3">
-            {sessions.map((session) => (
+            {sessions.filter(s => s.status !== 'in_progress').map((session) => (
               <div
                 key={session.id}
                 onClick={() => navigate(`/sessions/${session.id}`)}
