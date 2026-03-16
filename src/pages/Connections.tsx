@@ -43,9 +43,13 @@ interface Connection {
 interface PendingInvitation {
   id: string;
   recipient_email: string;
+  sender_id: string;
+  recipient_id: string | null;
   status: string;
   created_at: string;
-  expires_at: string;
+  message: string | null;
+  direction: "sent" | "received";
+  sender_name?: string | null;
 }
 
 export default function Connections() {
@@ -169,17 +173,80 @@ export default function Connections() {
     if (!currentUserId) return;
 
     try {
-      const { data, error } = await supabase
+      // Sent invitations
+      const { data: sent, error: sentError } = await supabase
         .from("user_invitations")
-        .select("id, recipient_email, status, created_at, expires_at")
+        .select("id, recipient_email, sender_id, recipient_id, status, created_at, message")
         .eq("sender_id", currentUserId)
         .eq("status", "pending")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      setPendingInvitations(data || []);
+      if (sentError) throw sentError;
+
+      // Received invitations
+      const { data: received, error: receivedError } = await supabase
+        .from("user_invitations")
+        .select("id, recipient_email, sender_id, recipient_id, status, created_at, message")
+        .eq("recipient_id", currentUserId)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+
+      if (receivedError) throw receivedError;
+
+      // Get sender names for received invitations
+      const senderIds = (received || []).map(r => r.sender_id);
+      let senderProfiles: Record<string, string | null> = {};
+      if (senderIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", senderIds);
+        (profiles || []).forEach(p => { senderProfiles[p.id] = p.full_name; });
+      }
+
+      const allPending: PendingInvitation[] = [
+        ...(sent || []).map(i => ({ ...i, direction: "sent" as const })),
+        ...(received || []).map(i => ({ ...i, direction: "received" as const, sender_name: senderProfiles[i.sender_id] })),
+      ];
+
+      setPendingInvitations(allPending);
     } catch (error: any) {
       console.error("Error fetching pending invitations:", error);
+    }
+  };
+
+  const acceptInvitation = async (invitationId: string) => {
+    try {
+      const { error } = await supabase
+        .from("user_invitations")
+        .update({ status: "accepted", updated_at: new Date().toISOString(), recipient_id: currentUserId })
+        .eq("id", invitationId);
+
+      if (error) throw error;
+
+      toast({ title: "Invitation accepted", description: "You are now connected" });
+      fetchPendingInvitations();
+      fetchConnections();
+    } catch (error: any) {
+      console.error("Error accepting invitation:", error);
+      toast({ title: "Error", description: "Failed to accept invitation", variant: "destructive" });
+    }
+  };
+
+  const declineInvitation = async (invitationId: string) => {
+    try {
+      const { error } = await supabase
+        .from("user_invitations")
+        .update({ status: "declined", updated_at: new Date().toISOString() })
+        .eq("id", invitationId);
+
+      if (error) throw error;
+
+      toast({ title: "Invitation declined" });
+      fetchPendingInvitations();
+    } catch (error: any) {
+      console.error("Error declining invitation:", error);
+      toast({ title: "Error", description: "Failed to decline invitation", variant: "destructive" });
     }
   };
 
@@ -389,27 +456,58 @@ export default function Connections() {
                   className="flex items-center justify-between p-4"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                      <Mail className="h-5 w-5 text-primary" />
+                    <div className={cn(
+                      "flex h-10 w-10 items-center justify-center rounded-full",
+                      invitation.direction === "received" ? "bg-secondary/10" : "bg-primary/10"
+                    )}>
+                      <Mail className={cn(
+                        "h-5 w-5",
+                        invitation.direction === "received" ? "text-secondary" : "text-primary"
+                      )} />
                     </div>
                     <div>
                       <p className="font-medium text-foreground">
-                        {invitation.recipient_email}
+                        {invitation.direction === "received"
+                          ? invitation.sender_name || "Unknown User"
+                          : invitation.recipient_email}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Sent {format(new Date(invitation.created_at), "dd MMM yyyy")} • 
-                        Expires {format(new Date(invitation.expires_at), "dd MMM")}
+                        {invitation.direction === "received" ? "Received" : "Sent"}{" "}
+                        {format(new Date(invitation.created_at), "dd MMM yyyy")}
+                        {invitation.message && ` • "${invitation.message}"`}
                       </p>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground hover:text-destructive"
-                    onClick={() => cancelPendingInvitation(invitation.id)}
-                  >
-                    Cancel
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    {invitation.direction === "received" ? (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => acceptInvitation(invitation.id)}
+                        >
+                          <UserCheck className="h-4 w-4 mr-1" />
+                          Accept
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-muted-foreground hover:text-destructive"
+                          onClick={() => declineInvitation(invitation.id)}
+                        >
+                          Decline
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-muted-foreground hover:text-destructive"
+                        onClick={() => cancelPendingInvitation(invitation.id)}
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
