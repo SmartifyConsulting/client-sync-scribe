@@ -23,6 +23,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { usePatient } from "@/hooks/usePatients";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSessions } from "@/hooks/useSessions";
 import { usePatientRewards } from "@/hooks/usePatientRewards";
@@ -58,6 +60,30 @@ export default function PatientProfile() {
   const { lollipopCount } = usePatientRewards(id);
   const { templates, loading: templatesLoading } = useTemplates();
   const { documents, loading: documentsLoading, fetchDocuments } = useDocuments();
+  const { user } = useAuth();
+  const [mailboxAlias, setMailboxAlias] = useState<string | null>(null);
+  const [mailboxId, setMailboxId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase
+      .from('profiles')
+      .select('mailbox_id, mailbox_alias')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (data) {
+          setMailboxAlias(data.mailbox_alias);
+          setMailboxId(data.mailbox_id);
+        }
+      });
+  }, [user?.id]);
+
+  const displayEmail = mailboxAlias
+    ? `${mailboxAlias}@medipad.com`
+    : mailboxId
+      ? `docs-${mailboxId.slice(0, 8)}@inbox.medipad.health`
+      : '';
   
   const [additionalNotes, setAdditionalNotes] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
@@ -373,13 +399,27 @@ export default function PatientProfile() {
           {/* Document Mailbox Info Banner */}
           <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 flex items-start gap-3">
             <FileText className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-            <p className="text-sm text-muted-foreground">
-              Documents can be emailed to your documents tab by external parties (e.g., radiologists, labs) to{" "}
-              <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded text-foreground">
-                docs-{(() => { const el = document.querySelector('[data-mailbox-id]'); return 'ee468073'; })()}@inbox.medipad.health
-              </code>
-              , and they will be saved under your Documents.
-            </p>
+            <div className="flex-1">
+              <p className="text-sm text-muted-foreground">
+                Documents can be emailed to your documents tab by external parties (e.g., radiologists, labs) to{" "}
+                <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded text-foreground">
+                  {displayEmail || 'Loading...'}
+                </code>
+                {displayEmail && (
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(displayEmail);
+                      toast({ title: "Copied!", description: "Email address copied to clipboard." });
+                    }}
+                    className="inline-flex items-center ml-1.5 text-primary hover:text-primary/80"
+                    title="Copy email address"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                  </button>
+                )}
+                , and they will be saved under your Documents.
+              </p>
+            </div>
           </div>
 
           {/* Quick action icon buttons */}
