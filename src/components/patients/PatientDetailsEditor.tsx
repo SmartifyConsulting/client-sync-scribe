@@ -69,6 +69,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         dob: patient.dob || "",
         occupation: patient.occupation || "",
         employer: patient.employer || "",
+        reporting_to_email: patient.reporting_to_email || "",
         referred_by: patient.referred_by || "",
         marital_status: patient.marital_status || "",
         id_passport_number: patient.id_passport_number || "",
