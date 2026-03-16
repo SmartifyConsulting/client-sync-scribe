@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Calendar, FileText, Receipt, Clock, User, Loader2, Bell, Pill, Award } from "lucide-react";
+import { Calendar, FileText, Receipt, Clock, User, Loader2, Bell, Pill, Award, LogOut, Settings } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
