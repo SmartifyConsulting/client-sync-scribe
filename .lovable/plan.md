@@ -1,64 +1,59 @@
 
 
-# Plan: Move Certificates into Profile & Compact Layout
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## Overview
-Embed the CPD Certificates management directly into the doctor's Profile page, make CPD data visible to patients searching for doctors, and compact the entire Profile layout for both roles.
+## 1. Increase Logo Size by 130%
 
-## Changes
+Scale all logo instances by 130%:
 
-### 1. Compact Profile Layout with Tabs (`src/pages/Profile.tsx`)
-Replace the current long-scroll layout with a **tabbed interface** using the existing Tabs component:
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-**Doctor tabs:**
-- **Personal** — Avatar, name, email, mobile, mailbox (condensed grid)
-- **Practice** — Practice number, registration, specialty, address, logo, signature, country, language, narration voice
-- **Partners** — Practice partners list and add form
-- **Pricing** — Service prices and currency
-- **Certificates** — Full CPD certificates management (moved from standalone page)
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-**Patient tabs:**
-- **Personal** — Avatar, name, email, mobile
-- **Preferences** — Auto-email toggles
+## 2. Fix Practice Number Not Persisting
 
-Layout changes:
-- Reduce `space-y-8` → `space-y-4` between sections within tabs
-- Reduce card padding from `p-6` → `p-4`
-- Use `sm:grid-cols-3` where possible to tighten form grids
-- Remove the standalone CPD Points badge card at the top; instead show points in the Certificates tab header
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-### 2. Embed CPD Certificates in Profile (`src/pages/Profile.tsx`)
-Move the core CRUD logic from `CPDCertificates.tsx` into a new section within the "Certificates" tab:
-- Compact table with add/edit/delete inline
-- File upload for certificate attachments
-- Total CPD points shown in tab label: `Certificates (42 pts)`
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
 
-### 3. Show CPD Points in Doctor Search Results (`src/components/patient/InviteDoctorDialog.tsx`)
-When patients search for doctors, display CPD points alongside specialty:
-```
-Dr. Smith
-Cardiologist · PR: PR123456 · 42 CPD Points
-```
-This requires a query to sum `cpd_certificates.cpd_points` for each doctor result.
+## 3. Make Partner Email Required and Create Pending Users
 
-### 4. Database: RLS Policy for Patient Access to CPD Data
-Add a SELECT policy on `cpd_certificates` so authenticated users can read any doctor's certificates (public professional data):
-```sql
-CREATE POLICY "Anyone authenticated can view CPD certificates"
-ON public.cpd_certificates FOR SELECT TO authenticated
-USING (true);
-```
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
 
-### 5. Cleanup
-- Keep `/cpd-certificates` route but redirect to `/profile` (or remove entirely)
-- Remove the CPD badge from the Profile header since it moves into the Certificates tab
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
 
-## Files to Modify/Create
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
 
-| File | Change |
-|------|--------|
-| `src/pages/Profile.tsx` | Add Tabs layout, embed CPD certificates, compact spacing |
-| `src/components/patient/InviteDoctorDialog.tsx` | Show CPD points in doctor search results |
-| `src/App.tsx` | Redirect `/cpd-certificates` to `/profile` |
-| Database migration | Add RLS SELECT policy on `cpd_certificates` for authenticated users |
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
+
+## Technical Summary
+
+### Database Migration
+- Add `email text` column to `practice_partners` table
+
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 

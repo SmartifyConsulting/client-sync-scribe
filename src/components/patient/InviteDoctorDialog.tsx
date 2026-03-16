@@ -38,6 +38,7 @@ interface DoctorSuggestion {
   specialty: string | null;
   practice_number: string | null;
   doctor_number: string | null;
+  cpd_points: number;
 }
 
 interface InviteDoctorDialogProps {
@@ -98,7 +99,20 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
           .in("id", doctorIds)
           .limit(5);
 
-        setSuggestions(profiles || []);
+        // Fetch CPD points for each doctor
+        const doctorProfileIds = (profiles || []).map(p => p.id);
+        let cpdMap: Record<string, number> = {};
+        if (doctorProfileIds.length > 0) {
+          const { data: cpdData } = await supabase
+            .from("cpd_certificates")
+            .select("user_id, cpd_points")
+            .in("user_id", doctorProfileIds);
+          if (cpdData) {
+            cpdData.forEach(c => { cpdMap[c.user_id] = (cpdMap[c.user_id] || 0) + (c.cpd_points || 0); });
+          }
+        }
+
+        setSuggestions((profiles || []).map(p => ({ ...p, cpd_points: cpdMap[p.id] || 0 })));
         setShowSuggestions(true);
       } catch (e) {
         console.error("Doctor search error:", e);
@@ -232,6 +246,7 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
                     <p className="text-xs text-muted-foreground">
                       {doc.specialty && `${doc.specialty} · `}
                       {doc.practice_number && `PR: ${doc.practice_number}`}
+                      {doc.cpd_points > 0 && ` · ${doc.cpd_points} CPD Points`}
                     </p>
                   </button>
                 ))}
