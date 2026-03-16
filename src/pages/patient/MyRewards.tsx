@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { Loader2, Trophy, Target, Flame, Gift, Star, Calendar, CheckSquare, Clock, AlertCircle, Video } from "lucide-react";
+import { Loader2, Trophy, Target, Flame, Gift, Star, Calendar, CheckSquare, Clock, AlertCircle, Video, Send, ArrowRightLeft } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -12,11 +15,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { useMyRewards, useMyStreaks } from "@/hooks/usePatientRewards";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ActivityProofCapture } from "@/components/rewards/ActivityProofCapture";
+import { useToast } from "@/hooks/use-toast";
 
 const MILESTONES = [
   { count: 5, label: "First Steps", icon: "🌟", color: "text-yellow-500" },
@@ -40,10 +59,30 @@ interface PatientTask {
   patient_id: string | null;
 }
 
+interface PartnerApp {
+  id: string;
+  name: string;
+  logo_url: string | null;
+  is_active: boolean;
+}
+
+interface MoolaTransfer {
+  id: string;
+  amount: number;
+  created_at: string;
+  partner_app_id: string;
+  moola_partner_apps?: { name: string; logo_url: string | null };
+}
+
 export default function MyRewards() {
   const { rewards, lollipopCount, loading: rewardsLoading } = useMyRewards();
   const { streaks, loading: streaksLoading } = useMyStreaks();
   const [activeTab, setActiveTab] = useState("overview");
+  const [showTransferDialog, setShowTransferDialog] = useState(false);
+  const [transferAppId, setTransferAppId] = useState("");
+  const [transferAmount, setTransferAmount] = useState("");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: tasks = [], isLoading: tasksLoading, refetch: refetchTasks } = useQuery({
     queryKey: ["patient-assigned-tasks"],
@@ -63,6 +102,81 @@ export default function MyRewards() {
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (todos || []) as PatientTask[];
+    },
+  });
+
+  const { data: partnerApps = [] } = useQuery({
+    queryKey: ["moola-partner-apps"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("moola_partner_apps")
+        .select("*")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return (data || []) as PartnerApp[];
+    },
+  });
+
+  const { data: transfers = [] } = useQuery({
+    queryKey: ["moola-transfers"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("moola_transfers")
+        .select("*, moola_partner_apps(name, logo_url)")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data || []) as MoolaTransfer[];
+    },
+  });
+
+  const transferMutation = useMutation({
+    mutationFn: async ({ appId, amount }: { appId: string; amount: number }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      if (amount > lollipopCount) throw new Error("Insufficient Moolas");
+      if (amount <= 0) throw new Error("Amount must be positive");
+
+      // Get patient id for the deduction record
+      const { data: patient } = await supabase
+        .from("patients")
+        .select("id")
+        .eq("patient_user_id", user.id)
+        .maybeSingle();
+      if (!patient) throw new Error("No patient record found");
+
+      // Insert transfer record
+      const { error: transferError } = await supabase
+        .from("moola_transfers")
+        .insert({ user_id: user.id, partner_app_id: appId, amount });
+      if (transferError) throw transferError;
+
+      // Insert negative reward to deduct balance
+      const { error: deductError } = await supabase
+        .from("patient_rewards")
+        .insert({
+          patient_id: patient.id,
+          awarded_by: user.id,
+          lollipops_count: -amount,
+          visit_category: "Moola Transfer",
+          reward_type: "transfer",
+        });
+      if (deductError) throw deductError;
+    },
+    onSuccess: () => {
+      toast({ title: "Transfer successful", description: "Your Moolas have been transferred." });
+      queryClient.invalidateQueries({ queryKey: ["moola-transfers"] });
+      queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
+      setShowTransferDialog(false);
+      setTransferAppId("");
+      setTransferAmount("");
+    },
+    onError: (err: Error) => {
+      toast({ title: "Transfer failed", description: err.message, variant: "destructive" });
     },
   });
 
@@ -101,15 +215,73 @@ export default function MyRewards() {
   };
 
   const pendingActivityTasks = tasks.filter((t) => t.task_type === "activity" && t.status !== "completed");
+  const totalTransferred = transfers.reduce((sum, t) => sum + t.amount, 0);
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">My Rewards</h1>
-        <p className="mt-1 text-muted-foreground">
-          Track your Moolas, milestones, and health streaks
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">My Rewards</h1>
+          <p className="mt-1 text-muted-foreground">
+            Track your Moolas, milestones, and health streaks
+          </p>
+        </div>
+        {partnerApps.length > 0 && (
+          <Button onClick={() => setShowTransferDialog(true)} className="gap-2">
+            <Send className="h-4 w-4" />
+            Transfer Moolas
+          </Button>
+        )}
       </div>
+
+      {/* Transfer Dialog */}
+      <Dialog open={showTransferDialog} onOpenChange={setShowTransferDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Transfer Moolas</DialogTitle>
+            <DialogDescription>
+              Send your Moolas to a linked partner app. Available balance: {lollipopCount} Ⓜ
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Partner App</Label>
+              <Select value={transferAppId} onValueChange={setTransferAppId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an app" />
+                </SelectTrigger>
+                <SelectContent>
+                  {partnerApps.map((app) => (
+                    <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Amount</Label>
+              <Input
+                type="number"
+                min={1}
+                max={lollipopCount}
+                placeholder="Enter amount"
+                value={transferAmount}
+                onChange={(e) => setTransferAmount(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">Max: {lollipopCount} Ⓜ</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTransferDialog(false)}>Cancel</Button>
+            <Button
+              onClick={() => transferMutation.mutate({ appId: transferAppId, amount: parseInt(transferAmount) || 0 })}
+              disabled={!transferAppId || !transferAmount || parseInt(transferAmount) <= 0 || parseInt(transferAmount) > lollipopCount || transferMutation.isPending}
+            >
+              {transferMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+              Transfer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Hero Stats */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -151,14 +323,14 @@ export default function MyRewards() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20 border-green-200 dark:border-green-800/30">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 border-blue-200 dark:border-blue-800/30">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Visits Completed</p>
-                <p className="text-4xl font-bold text-green-600 dark:text-green-400">{rewards.length}</p>
+                <p className="text-sm text-muted-foreground">Transferred</p>
+                <p className="text-4xl font-bold text-blue-600 dark:text-blue-400">{totalTransferred}</p>
               </div>
-              <Gift className="h-12 w-12 text-green-500" />
+              <ArrowRightLeft className="h-12 w-12 text-blue-500" />
             </div>
           </CardContent>
         </Card>
@@ -181,6 +353,9 @@ export default function MyRewards() {
           </TabsTrigger>
           <TabsTrigger value="streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
             Streaks
+          </TabsTrigger>
+          <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+            Transfers
           </TabsTrigger>
           <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
             History
@@ -443,6 +618,60 @@ export default function MyRewards() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="transfers" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ArrowRightLeft className="h-5 w-5 text-blue-500" />
+                Transfer History
+              </CardTitle>
+              <CardDescription>
+                Record of all Moola transfers to partner apps
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {transfers.length === 0 ? (
+                <div className="text-center py-8">
+                  <ArrowRightLeft className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No transfers yet</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Partner App</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {transfers.map((transfer) => (
+                      <TableRow key={transfer.id}>
+                        <TableCell>
+                          <div>{format(parseISO(transfer.created_at), "MMM d, yyyy")}</div>
+                          <span className="text-xs text-muted-foreground">
+                            {format(parseISO(transfer.created_at), "h:mm a")}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                            {transfer.moola_partner_apps?.name || "Unknown App"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <span className="text-blue-600 font-semibold">
+                            -{transfer.amount} Ⓜ
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="history" className="space-y-6">
           <Card>
             <CardHeader>
@@ -486,8 +715,8 @@ export default function MyRewards() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <span className="text-emerald-600 font-semibold">
-                            +{reward.lollipops_count} Ⓜ
+                          <span className={`font-semibold ${reward.lollipops_count < 0 ? "text-blue-600" : "text-emerald-600"}`}>
+                            {reward.lollipops_count > 0 ? "+" : ""}{reward.lollipops_count} Ⓜ
                           </span>
                         </TableCell>
                       </TableRow>
