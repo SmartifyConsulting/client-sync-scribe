@@ -531,9 +531,10 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
       {/* 4. Employer */}
       <div>
         <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Employer</h3>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-2"><Label htmlFor="employer">Employer</Label><Input id="employer" value={formData.employer} onChange={(e) => updateFormData({ employer: e.target.value })} placeholder="Company name" /></div>
           <div className="space-y-2"><Label htmlFor="occupation">Occupation</Label><Input id="occupation" value={formData.occupation} onChange={(e) => updateFormData({ occupation: e.target.value })} placeholder="Job title" /></div>
+          <div className="space-y-2"><Label htmlFor="reporting_to_email">Reporting To (Email)</Label><Input id="reporting_to_email" type="email" value={formData.reporting_to_email} onChange={(e) => updateFormData({ reporting_to_email: e.target.value })} placeholder="manager@company.com" /></div>
         </div>
       </div>
 
