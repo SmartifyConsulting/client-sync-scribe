@@ -31,7 +31,7 @@ export default function Dashboard() {
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id)
         .eq("is_read", false)
-        .in("type", ["invitation", "document", "connection_request", "reward", "streak"]);
+        .in("type", ["invitation", "document", "document_received", "connection_request", "reward", "streak"]);
 
       if (error) return 0;
       return count || 0;

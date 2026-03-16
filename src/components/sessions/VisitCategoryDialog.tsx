@@ -55,11 +55,11 @@ export function VisitCategoryDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <span className="text-2xl">🍭</span>
-            Award Lollipop?
+            <span className="text-2xl">Ⓜ️</span>
+            Award Moola?
           </DialogTitle>
           <DialogDescription>
-            Select the visit type to award {patientName || "the patient"} a lollipop for attending a healthy visit.
+            Select the visit type to award {patientName || "the patient"} moola for attending a healthy visit.
           </DialogDescription>
         </DialogHeader>
         
@@ -113,14 +113,14 @@ export function VisitCategoryDialog({
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
           <Button variant="ghost" onClick={handleSkip} className="sm:mr-auto">
-            Skip (No lollipop)
+            Skip (No moola)
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={!selectedCategory && !customCategory}
             className="bg-pink-500 hover:bg-pink-600 text-white"
           >
-            🍭 Award Lollipop
+            Ⓜ️ Award Moola
           </Button>
         </DialogFooter>
       </DialogContent>

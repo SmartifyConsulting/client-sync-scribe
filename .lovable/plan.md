@@ -1,37 +1,59 @@
 
 
-# Fixes Plan
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## 1. Reset Faith Akeno's Password
-Faith Akeno is a **patient record only** — she has no user account in the system (no `patient_user_id`). There is no password to reset. She would need to be invited/registered as a user first. I will note this to you rather than make changes.
+## 1. Increase Logo Size by 130%
 
-## 2. Sort Languages Alphabetically
-**File: `src/pages/Profile.tsx`** (lines 71-100)
-- Reorder the `LANGUAGES` array alphabetically by `name`.
+Scale all logo instances by 130%:
 
-## 3. Fix Voice Preview for Non-English Languages
-**File: `src/pages/Profile.tsx`** (lines 843-844)
-- The `narrate-briefing` edge function calls OpenAI TTS, which only supports English text well. The preview text is hardcoded in English.
-- Fix: Generate language-appropriate sample text based on the selected language. Add a mapping of sample sentences per language code (e.g., French → "Bonjour, ceci est un aperçu de votre voix de narration MediPad.").
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-## 4. Remove Duplicate "Upload File" Button
-**File: `src/components/documents/MediaCapture.tsx`** (lines 174-184)
-- Remove the "Upload File" button and hidden file input from inside `MediaCapture`, since `PatientProfile.tsx` already has its own standalone "Upload File" button next to it.
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-## 5. Rename Lollipop → Moola in VisitCategoryDialog
-**File: `src/components/sessions/VisitCategoryDialog.tsx`**
-- Change "Award Lollipop?" → "Award Moola?"
-- Change lollipop emoji 🍭 → Ⓜ️
-- Change "Skip (No lollipop)" → "Skip (No moola)"
-- Change button text "🍭 Award Lollipop" → "Ⓜ️ Award Moola"
+## 2. Fix Practice Number Not Persisting
 
-## 6. Notification Bell Counter Already Exists
-The notification bell in `Dashboard.tsx` and `PatientDashboard.tsx` already shows an unread count badge with `unreadNotifCount`. If it's not appearing, the issue is likely that there are no unread notifications matching the filter types. I will verify the query filters match actual notification types in the database.
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
+
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
+
+## 3. Make Partner Email Required and Create Pending Users
+
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
+
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
+
+## Technical Summary
+
+### Database Migration
+- Add `email text` column to `practice_partners` table
 
 ### Files Modified
-| File | Change |
-|------|--------|
-| `Profile.tsx` | Sort languages, add multilingual preview text |
-| `MediaCapture.tsx` | Remove duplicate Upload File button |
-| `VisitCategoryDialog.tsx` | Rename lollipop → moola |
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 

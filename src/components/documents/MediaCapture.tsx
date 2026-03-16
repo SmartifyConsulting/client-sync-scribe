@@ -166,23 +166,10 @@ export function MediaCapture({ patientId, patientName, onSaved }: MediaCapturePr
           </Select>
 
           {!isRecording && !recordedBlob && (
-            <>
-              <Button onClick={startRecording} className="gap-2" variant="default">
-                {mediaType === "video" ? <Video className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                Record
-              </Button>
-              <Button variant="outline" className="gap-2" onClick={() => fileInputRef.current?.click()}>
-                <Upload className="h-4 w-4" />
-                Upload File
-              </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="audio/*,video/*"
-                className="hidden"
-                onChange={handleFileUpload}
-              />
-            </>
+            <Button onClick={startRecording} className="gap-2" variant="default">
+              {mediaType === "video" ? <Video className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              Record
+            </Button>
           )}
 
           {isRecording && (
