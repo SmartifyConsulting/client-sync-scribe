@@ -109,6 +109,7 @@ const FILTER_OPTIONS: { value: DocType | "all"; label: string }[] = [
   { value: "medical_certificate", label: "Certificates" },
   { value: "referral_letter", label: "Referrals" },
   { value: "general_letter", label: "Letters" },
+  { value: "hospital_admission", label: "Admissions" },
   { value: "audio", label: "Audio" },
   { value: "video", label: "Video" },
 ];
