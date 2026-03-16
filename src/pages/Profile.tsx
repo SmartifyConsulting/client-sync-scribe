@@ -1147,6 +1147,18 @@ export default function Profile() {
   );
 }
 
+function AutoEmailToggle({ label, description, checked, onCheckedChange }: { label: string; description: string; checked: boolean; onCheckedChange: (checked: boolean) => void }) {
+  return (
+    <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/20">
+      <div className="flex-1 mr-4">
+        <p className="text-sm font-medium text-foreground">{label}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+      </div>
+      <Switch checked={checked} onCheckedChange={onCheckedChange} />
+    </div>
+  );
+}
+
 function formatPhoneNumber(value: string): string {
   const digits = value.replace(/\D/g, '');
   if (digits.length <= 2) return digits;
