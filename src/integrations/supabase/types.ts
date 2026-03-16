@@ -1531,10 +1531,13 @@ export type Database = {
           due_date: string | null
           id: string
           is_auto_executed: boolean | null
+          moolas_reward: number
           patient_id: string | null
           priority: string
+          proof_url: string | null
           session_id: string | null
           status: string
+          task_type: string
           title: string
           updated_at: string
           user_id: string
@@ -1546,10 +1549,13 @@ export type Database = {
           due_date?: string | null
           id?: string
           is_auto_executed?: boolean | null
+          moolas_reward?: number
           patient_id?: string | null
           priority?: string
+          proof_url?: string | null
           session_id?: string | null
           status?: string
+          task_type?: string
           title: string
           updated_at?: string
           user_id: string
@@ -1561,10 +1567,13 @@ export type Database = {
           due_date?: string | null
           id?: string
           is_auto_executed?: boolean | null
+          moolas_reward?: number
           patient_id?: string | null
           priority?: string
+          proof_url?: string | null
           session_id?: string | null
           status?: string
+          task_type?: string
           title?: string
           updated_at?: string
           user_id?: string
