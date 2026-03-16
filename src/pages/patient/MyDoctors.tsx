@@ -6,9 +6,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, Stethoscope, MapPin, Phone, Search, UserPlus } from "lucide-react";
+import { Loader2, Stethoscope, MapPin, Phone, Search } from "lucide-react";
 import { InviteDoctorDialog } from "@/components/patient/InviteDoctorDialog";
-import { RequestConnectionButton } from "@/components/patients/RequestConnectionButton";
+import { useToast } from "@/hooks/use-toast";
 
 interface DoctorProfile {
   id: string;
