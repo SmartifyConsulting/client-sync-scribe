@@ -824,7 +824,18 @@ export default function Patients() {
                 {availableLetters.sort().map((letter) => (
                   <React.Fragment key={letter}>
                     <tr id={`patient-group-${letter}`}>
-                      <td colSpan={6} className="px-6 py-2 bg-muted/50 sticky top-0">
+                      <td colSpan={6} className={cn(
+                        "px-6 py-2 sticky top-0",
+                        (() => {
+                          const idx = availableLetters.indexOf(letter);
+                          const colors = [
+                            "bg-teal-50/60 dark:bg-teal-950/30",
+                            "bg-amber-50/60 dark:bg-amber-950/30",
+                            "bg-orange-50/60 dark:bg-orange-950/30",
+                          ];
+                          return colors[idx % 3];
+                        })()
+                      )}>
                         <span className="text-sm font-bold text-primary">{letter}</span>
                       </td>
                     </tr>
