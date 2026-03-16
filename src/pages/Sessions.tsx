@@ -886,11 +886,11 @@ export default function Sessions() {
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
-        ) : sessions.length === 0 ? (
+        ) : sessions.filter(s => s.status !== 'in_progress').length === 0 ? (
           <p className="text-muted-foreground text-center py-8">No sessions recorded yet.</p>
         ) : (
           <div className="space-y-3">
-            {sessions.map((session) => (
+            {sessions.filter(s => s.status !== 'in_progress').map((session) => (
               <div
                 key={session.id}
                 onClick={() => navigate(`/sessions/${session.id}`)}
