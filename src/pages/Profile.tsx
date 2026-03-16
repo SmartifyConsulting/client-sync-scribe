@@ -831,6 +831,31 @@ export default function Profile() {
           </div>
         </div>
 
+        {/* Country */}
+        <div className="mt-6 space-y-2">
+          <Label>Country</Label>
+          <p className="text-sm text-muted-foreground mb-2">Used for medical code lookups (ICD-10, NHRPL, etc.)</p>
+          <Select value={(profile as any)?.country || "ZA"} onValueChange={async (value) => {
+            await updateProfile({ country: value } as any);
+            toast({ title: "Country updated", description: `Country set to ${value}` });
+          }}>
+            <SelectTrigger className="w-[280px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ZA">🇿🇦 South Africa</SelectItem>
+              <SelectItem value="US">🇺🇸 United States</SelectItem>
+              <SelectItem value="GB">🇬🇧 United Kingdom</SelectItem>
+              <SelectItem value="AU">🇦🇺 Australia</SelectItem>
+              <SelectItem value="CA">🇨🇦 Canada</SelectItem>
+              <SelectItem value="IN">🇮🇳 India</SelectItem>
+              <SelectItem value="DE">🇩🇪 Germany</SelectItem>
+              <SelectItem value="FR">🇫🇷 France</SelectItem>
+              <SelectItem value="AE">🇦🇪 UAE</SelectItem>
+              <SelectItem value="BW">🇧🇼 Botswana</SelectItem>
+              <SelectItem value="NA">🇳🇦 Namibia</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Preferred Language */}
         <div className="mt-6 space-y-2">
           <Label>Preferred Language</Label>

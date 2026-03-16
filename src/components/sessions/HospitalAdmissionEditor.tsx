@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { X, FileText, Loader2, Save, Eye, Plus, Trash2 } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { X, FileText, Loader2, Save, Eye, Plus, Trash2, Search } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -23,13 +23,24 @@ interface HospitalAdmissionEditorProps {
   onSave: (doc: { content: string }) => void;
 }
 
-interface ICD10Entry {
+interface CodeEntry {
   code: string;
   description: string;
 }
 
+interface CodeSystem {
+  name: string;
+  key: string;
+  entries: CodeEntry[];
+}
+
 interface InstructionEntry {
   instruction: string;
+  description: string;
+}
+
+interface CodeSuggestion {
+  code: string;
   description: string;
 }
 
@@ -60,9 +71,12 @@ PROCEDURE DETAILS
 
 Date of Procedure: [PROCEDURE_DATE]
 Procedure Description: [PROCEDURE_DESCRIPTION]
-NHRPL Codes: [NHRPL_CODES]
+
+[PROCEDURE_CODES]
 
 ─────────────────────────────────────
+
+[ADDITIONAL_CODE_SYSTEMS]
 
 PATIENT SPECIAL INSTRUCTIONS
 
@@ -75,6 +89,134 @@ Patient: [PATIENT_NAME]
 Signature: ___________________
            [DOCTOR_NAME]
 `;
+
+function useCodeSearch(country: string) {
+  const [suggestions, setSuggestions] = useState<Record<string, CodeSuggestion[]>>({});
+  const [loading, setLoading] = useState<Record<string, boolean>>({});
+  const timerRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  const search = useCallback((query: string, codeSystem: string, fieldKey: string) => {
+    if (timerRef.current[fieldKey]) clearTimeout(timerRef.current[fieldKey]);
+    
+    if (!query || query.trim().length < 2) {
+      setSuggestions(prev => ({ ...prev, [fieldKey]: [] }));
+      return;
+    }
+
+    setLoading(prev => ({ ...prev, [fieldKey]: true }));
+    timerRef.current[fieldKey] = setTimeout(async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('lookup-medical-codes', {
+          body: { query, codeSystem, country },
+        });
+        if (error) throw error;
+        const results = Array.isArray(data) ? data : [];
+        setSuggestions(prev => ({ ...prev, [fieldKey]: results }));
+      } catch (e) {
+        console.error("Code search error:", e);
+        setSuggestions(prev => ({ ...prev, [fieldKey]: [] }));
+      } finally {
+        setLoading(prev => ({ ...prev, [fieldKey]: false }));
+      }
+    }, 400);
+  }, [country]);
+
+  const clearSuggestions = useCallback((fieldKey: string) => {
+    setSuggestions(prev => ({ ...prev, [fieldKey]: [] }));
+  }, []);
+
+  return { suggestions, loading, search, clearSuggestions };
+}
+
+function CodeEntryRow({
+  entry,
+  index,
+  systemKey,
+  systemName,
+  canRemove,
+  onUpdate,
+  onRemove,
+  suggestions,
+  isLoading,
+  onSearch,
+  onClearSuggestions,
+}: {
+  entry: CodeEntry;
+  index: number;
+  systemKey: string;
+  systemName: string;
+  canRemove: boolean;
+  onUpdate: (field: keyof CodeEntry, value: string) => void;
+  onRemove: () => void;
+  suggestions: CodeSuggestion[];
+  isLoading: boolean;
+  onSearch: (query: string) => void;
+  onClearSuggestions: () => void;
+}) {
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div className="flex items-start gap-2">
+      <div className="relative w-32 shrink-0" ref={dropdownRef}>
+        <Input
+          value={entry.code}
+          onChange={(e) => {
+            onUpdate("code", e.target.value);
+            onSearch(e.target.value);
+            setShowDropdown(true);
+          }}
+          onFocus={() => { if (suggestions.length > 0) setShowDropdown(true); }}
+          placeholder="Code"
+          className="pr-7"
+        />
+        {isLoading && <Loader2 className="absolute right-2 top-2.5 h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+        {!isLoading && entry.code.length >= 2 && <Search className="absolute right-2 top-2.5 h-3.5 w-3.5 text-muted-foreground" />}
+        {showDropdown && suggestions.length > 0 && (
+          <div className="absolute z-50 top-full left-0 mt-1 w-80 max-h-48 overflow-y-auto rounded-md border border-border bg-popover shadow-md">
+            {suggestions.map((s, si) => (
+              <button
+                key={si}
+                type="button"
+                className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex gap-2"
+                onClick={() => {
+                  onUpdate("code", s.code);
+                  onUpdate("description", s.description);
+                  setShowDropdown(false);
+                  onClearSuggestions();
+                }}
+              >
+                <span className="font-mono font-medium shrink-0">{s.code}</span>
+                <span className="text-muted-foreground truncate">{s.description}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <Input
+        className="flex-1"
+        value={entry.description}
+        onChange={(e) => onUpdate("description", e.target.value)}
+        placeholder="Description"
+      />
+      {canRemove && (
+        <Button variant="ghost" size="icon" onClick={onRemove} className="shrink-0 text-destructive hover:text-destructive">
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      )}
+    </div>
+  );
+}
 
 export function HospitalAdmissionEditor({
   patientId,
@@ -92,25 +234,54 @@ export function HospitalAdmissionEditor({
   const practiceNumber = profile?.practice_number || "";
   const practiceAddress = profile?.practice_address || "";
   const doctorNumber = profile?.doctor_number || "";
+  const country = (profile as any)?.country || "ZA";
 
   const [hospital, setHospital] = useState("");
   const [admissionDate, setAdmissionDate] = useState<Date | undefined>(new Date());
-  const [icd10Codes, setIcd10Codes] = useState<ICD10Entry[]>([{ code: "", description: "" }]);
   const [procedureDate, setProcedureDate] = useState<Date | undefined>(new Date());
   const [procedureDescription, setProcedureDescription] = useState("");
-  const [nhrplCodes, setNhrplCodes] = useState("");
   const [specialInstructions, setSpecialInstructions] = useState<InstructionEntry[]>([
     { instruction: "", description: "" },
   ]);
   const [isSaving, setIsSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
-  const addICD10 = () => setIcd10Codes([...icd10Codes, { code: "", description: "" }]);
-  const removeICD10 = (i: number) => setIcd10Codes(icd10Codes.filter((_, idx) => idx !== i));
-  const updateICD10 = (i: number, field: keyof ICD10Entry, value: string) => {
-    const updated = [...icd10Codes];
-    updated[i][field] = value;
-    setIcd10Codes(updated);
+  // Dynamic code systems
+  const [codeSystems, setCodeSystems] = useState<CodeSystem[]>([
+    { name: "ICD-10", key: "icd10", entries: [{ code: "", description: "" }] },
+    { name: "NHRPL", key: "nhrpl", entries: [{ code: "", description: "" }] },
+  ]);
+  const [newSystemName, setNewSystemName] = useState("");
+
+  const { suggestions, loading, search, clearSuggestions } = useCodeSearch(country);
+
+  const addCodeSystem = () => {
+    if (!newSystemName.trim()) return;
+    const key = newSystemName.toLowerCase().replace(/[^a-z0-9]/g, "_");
+    setCodeSystems([...codeSystems, { name: newSystemName.trim(), key, entries: [{ code: "", description: "" }] }]);
+    setNewSystemName("");
+  };
+
+  const removeCodeSystem = (index: number) => {
+    setCodeSystems(codeSystems.filter((_, i) => i !== index));
+  };
+
+  const addEntry = (sysIndex: number) => {
+    const updated = [...codeSystems];
+    updated[sysIndex].entries.push({ code: "", description: "" });
+    setCodeSystems(updated);
+  };
+
+  const removeEntry = (sysIndex: number, entryIndex: number) => {
+    const updated = [...codeSystems];
+    updated[sysIndex].entries = updated[sysIndex].entries.filter((_, i) => i !== entryIndex);
+    setCodeSystems(updated);
+  };
+
+  const updateEntry = (sysIndex: number, entryIndex: number, field: keyof CodeEntry, value: string) => {
+    const updated = [...codeSystems];
+    updated[sysIndex].entries[entryIndex][field] = value;
+    setCodeSystems(updated);
   };
 
   const addInstruction = () =>
@@ -126,9 +297,31 @@ export function HospitalAdmissionEditor({
   const baseTemplate = savedTemplate || FALLBACK_TEMPLATE;
 
   const generateContent = () => {
-    const icd10Text = icd10Codes
+    const icd10System = codeSystems.find(s => s.key === "icd10");
+    const nhrplSystem = codeSystems.find(s => s.key === "nhrpl");
+    const additionalSystems = codeSystems.filter(s => s.key !== "icd10" && s.key !== "nhrpl");
+
+    const icd10Text = icd10System?.entries
       .filter((e) => e.code.trim())
       .map((e) => `• ${e.code}${e.description ? ` — ${e.description}` : ""}`)
+      .join("\n") || "None specified";
+
+    const nhrplText = nhrplSystem?.entries
+      .filter((e) => e.code.trim())
+      .map((e) => `• ${e.code}${e.description ? ` — ${e.description}` : ""}`)
+      .join("\n") || "—";
+
+    const procedureCodesText = `NHRPL Codes:\n${nhrplText}`;
+
+    const additionalText = additionalSystems
+      .map(sys => {
+        const entries = sys.entries
+          .filter(e => e.code.trim())
+          .map(e => `• ${e.code}${e.description ? ` — ${e.description}` : ""}`)
+          .join("\n");
+        return entries ? `${sys.name} CODES\n\n${entries}\n\n─────────────────────────────────────\n` : "";
+      })
+      .filter(Boolean)
       .join("\n");
 
     const instructionsText = specialInstructions
@@ -149,10 +342,12 @@ export function HospitalAdmissionEditor({
       .replace(/\[PatientName\]/g, patientName)
       .replace("[HOSPITAL]", hospital || "—")
       .replace("[ADMISSION_DATE]", admissionDate ? format(admissionDate, "dd/MM/yyyy") : "—")
-      .replace("[ICD10_CODES]", icd10Text || "None specified")
+      .replace("[ICD10_CODES]", icd10Text)
       .replace("[PROCEDURE_DATE]", procedureDate ? format(procedureDate, "dd/MM/yyyy") : "—")
       .replace("[PROCEDURE_DESCRIPTION]", procedureDescription || "—")
-      .replace("[NHRPL_CODES]", nhrplCodes || "—")
+      .replace("[PROCEDURE_CODES]", procedureCodesText)
+      .replace("[NHRPL_CODES]", nhrplText)
+      .replace("[ADDITIONAL_CODE_SYSTEMS]", additionalText)
       .replace("[SPECIAL_INSTRUCTIONS]", instructionsText || "None");
   };
 
@@ -257,34 +452,63 @@ export function HospitalAdmissionEditor({
             </div>
           </div>
 
-          {/* ICD-10 Codes */}
-          <div>
-            <h3 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">Diagnosis Details — ICD-10 Codes</h3>
-            <div className="space-y-2">
-              {icd10Codes.map((entry, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <Input
-                    className="w-28 shrink-0"
-                    value={entry.code}
-                    onChange={(e) => updateICD10(i, "code", e.target.value)}
-                    placeholder="Code"
-                  />
-                  <Input
-                    className="flex-1"
-                    value={entry.description}
-                    onChange={(e) => updateICD10(i, "description", e.target.value)}
-                    placeholder="Description"
-                  />
-                  {icd10Codes.length > 1 && (
-                    <Button variant="ghost" size="icon" onClick={() => removeICD10(i)} className="shrink-0 text-destructive hover:text-destructive">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              ))}
-              <Button variant="outline" size="sm" onClick={addICD10} className="gap-1.5">
+          {/* Dynamic Code Systems */}
+          {codeSystems.map((sys, sysIndex) => (
+            <div key={sys.key}>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+                  {sys.key === "icd10" ? "Diagnosis Details — ICD-10 Codes" :
+                   sys.key === "nhrpl" ? "Procedure — NHRPL Codes" :
+                   `${sys.name} Codes`}
+                </h3>
+                {sys.key !== "icd10" && sys.key !== "nhrpl" && (
+                  <Button variant="ghost" size="sm" onClick={() => removeCodeSystem(sysIndex)} className="text-destructive hover:text-destructive h-7 px-2">
+                    <Trash2 className="h-3.5 w-3.5 mr-1" /> Remove
+                  </Button>
+                )}
+              </div>
+              <div className="space-y-2">
+                {sys.entries.map((entry, entryIndex) => {
+                  const fieldKey = `${sys.key}-${entryIndex}`;
+                  return (
+                    <CodeEntryRow
+                      key={fieldKey}
+                      entry={entry}
+                      index={entryIndex}
+                      systemKey={sys.key}
+                      systemName={sys.name}
+                      canRemove={sys.entries.length > 1}
+                      onUpdate={(field, value) => updateEntry(sysIndex, entryIndex, field, value)}
+                      onRemove={() => removeEntry(sysIndex, entryIndex)}
+                      suggestions={suggestions[fieldKey] || []}
+                      isLoading={loading[fieldKey] || false}
+                      onSearch={(query) => search(query, sys.name, fieldKey)}
+                      onClearSuggestions={() => clearSuggestions(fieldKey)}
+                    />
+                  );
+                })}
+                <Button variant="outline" size="sm" onClick={() => addEntry(sysIndex)} className="gap-1.5">
+                  <Plus className="h-3.5 w-3.5" />
+                  Add {sys.name} Code
+                </Button>
+              </div>
+            </div>
+          ))}
+
+          {/* Add Code System */}
+          <div className="border border-dashed border-border rounded-lg p-4">
+            <p className="text-sm text-muted-foreground mb-2">Add additional code systems (e.g., CPT, OPCS, MBS)</p>
+            <div className="flex gap-2">
+              <Input
+                value={newSystemName}
+                onChange={(e) => setNewSystemName(e.target.value)}
+                placeholder="Code system name"
+                className="flex-1"
+                onKeyDown={(e) => { if (e.key === "Enter") addCodeSystem(); }}
+              />
+              <Button variant="outline" size="sm" onClick={addCodeSystem} disabled={!newSystemName.trim()} className="gap-1.5">
                 <Plus className="h-3.5 w-3.5" />
-                Add ICD-10 Code
+                Add
               </Button>
             </div>
           </div>
@@ -307,10 +531,6 @@ export function HospitalAdmissionEditor({
                       <Calendar mode="single" selected={procedureDate} onSelect={setProcedureDate} initialFocus className="p-3 pointer-events-auto" />
                     </PopoverContent>
                   </Popover>
-                </div>
-                <div className="space-y-2">
-                  <Label>NHRPL Codes</Label>
-                  <Input value={nhrplCodes} onChange={(e) => setNhrplCodes(e.target.value)} placeholder="e.g., 0517" />
                 </div>
               </div>
               <div className="space-y-2">
