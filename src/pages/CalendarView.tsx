@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar, MapPin, Video, Play, Trash2, Link, Unlink, Loader2 } from "lucide-react";
+import { AppointmentRequestsPanel } from "@/components/appointments/AppointmentRequestsPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -279,6 +280,9 @@ export default function CalendarView() {
         </Dialog>
         </div>
       </div>
+
+      {/* Appointment Requests from Patients */}
+      <AppointmentRequestsPanel />
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Calendar */}

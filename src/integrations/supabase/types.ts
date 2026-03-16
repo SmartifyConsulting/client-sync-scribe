@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointment_requests: {
+        Row: {
+          created_at: string | null
+          doctor_id: string
+          id: string
+          notes: string | null
+          patient_id: string
+          patient_user_id: string
+          proposed_end: string | null
+          proposed_start: string | null
+          requested_end: string
+          requested_start: string
+          service_id: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          doctor_id: string
+          id?: string
+          notes?: string | null
+          patient_id: string
+          patient_user_id: string
+          proposed_end?: string | null
+          proposed_start?: string | null
+          requested_end: string
+          requested_start: string
+          service_id?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          doctor_id?: string
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          patient_user_id?: string
+          proposed_end?: string | null
+          proposed_start?: string | null
+          requested_end?: string
+          requested_start?: string
+          service_id?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_requests_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_requests_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "service_prices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointments: {
         Row: {
           created_at: string
