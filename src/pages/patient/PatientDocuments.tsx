@@ -80,6 +80,11 @@ const DOC_TYPE_CONFIG: Record<
     color: "bg-slate-100 text-slate-700 dark:bg-slate-800/50 dark:text-slate-300",
     icon: FileText,
   },
+  hospital_admission: {
+    label: "Hospital Admission",
+    color: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400",
+    icon: FileText,
+  },
   audio: {
     label: "Audio",
     color: "bg-muted text-muted-foreground",
