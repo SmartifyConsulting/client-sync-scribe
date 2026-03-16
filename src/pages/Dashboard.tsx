@@ -291,6 +291,13 @@ export default function Dashboard() {
           <RecentActivity />
         </div>
       </div>
+
+      {/* To-Do List */}
+      {isDoctor && (
+        <div className="mt-2">
+          <TodoList />
+        </div>
+      )}
     </div>
   );
 }
