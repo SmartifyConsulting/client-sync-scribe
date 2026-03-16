@@ -65,6 +65,7 @@ import {
 type SessionState = "idle" | "active" | "processing" | "completed";
 
 export default function Sessions() {
+  const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlPatientId = searchParams.get("patient");
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(urlPatientId);
