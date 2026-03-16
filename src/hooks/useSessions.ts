@@ -134,8 +134,17 @@ export function useSessions(patientId?: string) {
     }
   };
 
-const completeSession = async (id: string, content: string, additionalNotes?: string, visitCategory?: string) => {
+const completeSession = async (
+    id: string | null, 
+    content: string, 
+    additionalNotes?: string, 
+    visitCategory?: string,
+    creationData?: { patient_id: string; title: string; started_at: string }
+  ) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
       // Combine transcript and notes for AI analysis
       const fullContent = additionalNotes 
         ? `${content}\n\nAdditional Notes:\n${additionalNotes}`
@@ -150,118 +159,134 @@ const completeSession = async (id: string, content: string, additionalNotes?: st
 
       if (summaryError) {
         console.error('AI summary error:', summaryError);
-        // Continue without AI summary
       }
 
       console.log('Summary data received:', summaryData);
 
-      const startedSession = sessions.find(s => s.id === id);
-      const durationMinutes = startedSession 
-        ? Math.round((Date.now() - new Date(startedSession.started_at).getTime()) / 60000)
-        : null;
+      const now = new Date().toISOString();
+      const startedAt = creationData?.started_at || now;
+      const durationMinutes = Math.round((Date.now() - new Date(startedAt).getTime()) / 60000);
+      const patientId = creationData?.patient_id || '';
 
-      const updates: any = {
+      const sessionRecord: any = {
+        user_id: user.id,
+        patient_id: patientId,
+        title: creationData?.title || `Session - ${new Date().toLocaleDateString()}`,
         transcript: content,
         notes: additionalNotes || null,
         status: 'completed',
-        ended_at: new Date().toISOString(),
+        started_at: startedAt,
+        ended_at: now,
         duration_minutes: durationMinutes,
       };
 
       if (summaryData && !summaryData.error) {
-        updates.summary = summaryData.summary;
-        updates.action_points = summaryData.action_points || [];
-        
-        // Auto-add action points to todos
-        if (summaryData.action_points && summaryData.action_points.length > 0) {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            const todosToInsert = summaryData.action_points.map((point: string) => ({
-              user_id: user.id,
-              session_id: id,
-              patient_id: startedSession?.patient_id || null,
-              title: point,
-              priority: 'medium',
-              status: 'pending',
-            }));
-            
-            const { error: todoError } = await supabase
-              .from('todos')
-              .insert(todosToInsert);
-            
-            if (todoError) {
-              console.error('Error adding todos:', todoError);
-            } else {
-              console.log('Added', todosToInsert.length, 'todos from session');
-            }
-          }
-        }
+        sessionRecord.summary = summaryData.summary;
+        sessionRecord.action_points = summaryData.action_points || [];
       }
 
-      const result = await updateSession(id, updates);
+      let sessionId = id;
+      let resultData: any;
 
-      // Award lollipop for qualifying visits
-      if (result && visitCategory && startedSession?.patient_id) {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          // Get gamification config to determine lollipop count
-          const { data: configData } = await supabase
-            .from('gamification_config')
-            .select('lollipops_awarded')
-            .eq('visit_category', visitCategory)
-            .eq('is_active', true)
-            .maybeSingle();
+      if (sessionId) {
+        // Update existing session
+        const { data, error } = await supabase
+          .from('sessions')
+          .update(sessionRecord)
+          .eq('id', sessionId)
+          .select(`*, patient:patients(id, name)`)
+          .single();
+        if (error) throw error;
+        resultData = data;
+      } else {
+        // Insert new session directly as completed
+        const { data, error } = await supabase
+          .from('sessions')
+          .insert(sessionRecord)
+          .select(`*, patient:patients(id, name)`)
+          .single();
+        if (error) throw error;
+        resultData = data;
+        sessionId = resultData.id;
+      }
+
+      const transformedData = transformSession(resultData);
+      setSessions((prev) => {
+        const exists = prev.some(s => s.id === sessionId);
+        if (exists) return prev.map(s => s.id === sessionId ? transformedData : s);
+        return [transformedData, ...prev];
+      });
+
+      // Auto-add action points to todos
+      if (summaryData?.action_points?.length > 0) {
+        const todosToInsert = summaryData.action_points.map((point: string) => ({
+          user_id: user.id,
+          session_id: sessionId,
+          patient_id: patientId || null,
+          title: point,
+          priority: 'medium',
+          status: 'pending',
+        }));
+        
+        const { error: todoError } = await supabase.from('todos').insert(todosToInsert);
+        if (todoError) console.error('Error adding todos:', todoError);
+        else console.log('Added', todosToInsert.length, 'todos from session');
+      }
+
+      // Award moola for qualifying visits
+      if (visitCategory && patientId) {
+        const { data: configData } = await supabase
+          .from('gamification_config')
+          .select('lollipops_awarded')
+          .eq('visit_category', visitCategory)
+          .eq('is_active', true)
+          .maybeSingle();
+        
+        const lollipopsToAward = configData?.lollipops_awarded || 1;
+
+        const { data: patientData } = await supabase
+          .from('patients')
+          .select('patient_user_id')
+          .eq('id', patientId)
+          .maybeSingle();
+
+        const { data: rewardData, error: rewardError } = await supabase
+          .from('patient_rewards')
+          .insert({
+            patient_id: patientId,
+            session_id: sessionId,
+            reward_type: 'lollipop',
+            visit_category: visitCategory,
+            lollipops_count: lollipopsToAward,
+            awarded_by: user.id,
+          })
+          .select()
+          .single();
+
+        if (rewardError) {
+          console.error('Error awarding moola:', rewardError);
+        } else {
+          console.log('Moola awarded for:', visitCategory, 'count:', lollipopsToAward);
           
-          const lollipopsToAward = configData?.lollipops_awarded || 1;
-
-          // Get patient_user_id for notification
-          const { data: patientData } = await supabase
-            .from('patients')
-            .select('patient_user_id')
-            .eq('id', startedSession.patient_id)
-            .maybeSingle();
-
-          const { data: rewardData, error: rewardError } = await supabase
-            .from('patient_rewards')
-            .insert({
-              patient_id: startedSession.patient_id,
-              session_id: id,
-              reward_type: 'lollipop',
-              visit_category: visitCategory,
-              lollipops_count: lollipopsToAward,
-              awarded_by: user.id,
-            })
-            .select()
-            .single();
-
-          if (rewardError) {
-            console.error('Error awarding lollipop:', rewardError);
-          } else {
-            console.log('Lollipop awarded for:', visitCategory, 'count:', lollipopsToAward);
-            
-            // Create notification for patient if they have a user account
-            if (patientData?.patient_user_id) {
-              await supabase.from('notifications').insert({
-                user_id: patientData.patient_user_id,
-                title: `🍭 You earned ${lollipopsToAward} lollipop${lollipopsToAward > 1 ? 's' : ''}!`,
-                description: `Great job! You received ${lollipopsToAward} lollipop${lollipopsToAward > 1 ? 's' : ''} for your ${visitCategory}.`,
-                type: 'reward',
-                reference_id: rewardData.id,
-              });
-            }
-
-            toast({ 
-              title: `🍭 ${lollipopsToAward} Lollipop${lollipopsToAward > 1 ? 's' : ''} Awarded!`, 
-              description: `Patient earned ${lollipopsToAward} lollipop${lollipopsToAward > 1 ? 's' : ''} for their ${visitCategory}` 
+          if (patientData?.patient_user_id) {
+            await supabase.from('notifications').insert({
+              user_id: patientData.patient_user_id,
+              title: `Ⓜ️ You earned ${lollipopsToAward} Moola${lollipopsToAward > 1 ? 's' : ''}!`,
+              description: `Great job! You received ${lollipopsToAward} Moola${lollipopsToAward > 1 ? 's' : ''} for your ${visitCategory}.`,
+              type: 'reward',
+              reference_id: rewardData.id,
             });
           }
+
+          toast({ 
+            title: `Ⓜ️ ${lollipopsToAward} Moola${lollipopsToAward > 1 ? 's' : ''} Awarded!`, 
+            description: `Patient earned ${lollipopsToAward} Moola${lollipopsToAward > 1 ? 's' : ''} for their ${visitCategory}` 
+          });
         }
       }
 
-      if (result) {
-        toast({ title: 'Session Completed', description: 'Session saved with AI summary and action items added to to-do list' });
-      }
-      return result;
+      toast({ title: 'Session Completed', description: 'Session saved with AI summary and action items added to to-do list' });
+      return transformedData;
     } catch (error: any) {
       console.error('Error completing session:', error);
       toast({
