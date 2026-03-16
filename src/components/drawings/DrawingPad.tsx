@@ -540,11 +540,17 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       const dy = clientY - draggingElement.startY;
 
       setElements((prev) =>
-        prev.map((el) =>
-          el.id === draggingElement.elementId
-            ? { ...el, x: draggingElement.elStartX + dx, y: draggingElement.elStartY + dy }
-            : el
-        )
+        prev.map((el) => {
+          if (el.id !== draggingElement.elementId) return el;
+          const updated = { ...el, x: draggingElement.elStartX + dx, y: draggingElement.elStartY + dy };
+          // For shapes, also move endX/endY
+          if (el.type === "shape" && el.data.endX !== undefined && el.data.endY !== undefined) {
+            const origDx = el.data.endX - el.x;
+            const origDy = el.data.endY - el.y;
+            updated.data = { ...el.data, endX: updated.x + origDx, endY: updated.y + origDy };
+          }
+          return updated;
+        })
       );
     };
 
