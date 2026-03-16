@@ -186,6 +186,14 @@ const completeSession = async (
         sessionRecord.action_points = summaryData.action_points || [];
       }
 
+      // Store extracted documents metadata for return
+      const extractedDocuments = {
+        medical_certificate: summaryData?.medical_certificate || null,
+        prescription: summaryData?.prescription || null,
+        invoice: summaryData?.invoice || null,
+        referral: summaryData?.referral || null,
+      };
+
       let sessionId = id;
       let resultData: any;
 
@@ -211,7 +219,7 @@ const completeSession = async (
         sessionId = resultData.id;
       }
 
-      const transformedData = transformSession(resultData);
+      const transformedData = { ...transformSession(resultData), _extractedDocuments: extractedDocuments };
       setSessions((prev) => {
         const exists = prev.some(s => s.id === sessionId);
         if (exists) return prev.map(s => s.id === sessionId ? transformedData : s);

@@ -1,4 +1,4 @@
-import { Users, Calendar, TrendingUp, LogOut } from "lucide-react";
+import { Users, Calendar, TrendingUp, LogOut, Award } from "lucide-react";
 import { Link } from "react-router-dom";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { TodaysBriefing } from "@/components/dashboard/TodaysBriefing";
@@ -7,6 +7,7 @@ import { DoctorAccessRequests } from "@/components/doctor/DoctorAccessRequests";
 import { useProfile } from "@/hooks/useProfile";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -51,6 +52,24 @@ export default function Dashboard() {
       return count || 0;
     },
     refetchInterval: 30000,
+  });
+
+  // Query for total CPD points
+  const { data: totalCpdPoints = 0 } = useQuery({
+    queryKey: ["cpd-points-dashboard"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return 0;
+
+      const { data, error } = await supabase
+        .from("cpd_certificates")
+        .select("cpd_points")
+        .eq("user_id", user.id);
+
+      if (error) return 0;
+      return data.reduce((sum, cert) => sum + (cert.cpd_points || 0), 0);
+    },
+    refetchInterval: 60000,
   });
   
   // Format display name based on role - return empty string while loading
@@ -103,13 +122,19 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Link to="/profile" className="rounded-xl p-2 hover:bg-accent transition-colors">
+          <Link to="/profile" className="rounded-xl p-2 hover:bg-accent transition-colors relative">
             <Avatar className="h-10 w-10 border-2 border-primary/20">
               <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} className="object-cover" />
               <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                 {getInitials()}
               </AvatarFallback>
             </Avatar>
+            {isDoctor && totalCpdPoints > 0 && (
+              <Badge className="absolute -top-1 -right-1 h-5 min-w-5 px-1 text-[10px] bg-amber-500 hover:bg-amber-500 text-white border-2 border-background">
+                <Award className="h-2.5 w-2.5 mr-0.5" />
+                {totalCpdPoints}
+              </Badge>
+            )}
           </Link>
           <Button 
             variant="ghost" 

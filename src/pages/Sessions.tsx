@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
@@ -31,6 +32,13 @@ import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
 import { VisitCategoryDialog } from "@/components/sessions/VisitCategoryDialog";
 import { SessionNotepad } from "@/components/sessions/SessionNotepad";
+import {
+  MedCertReviewDialog,
+  PrescriptionReviewDialog,
+  InvoiceReviewDialog,
+  ReferralReviewDialog,
+} from "@/components/sessions/TranscriptionReviewDialogs";
+import type { MedCertData, PrescriptionData, InvoiceData, ReferralData } from "@/components/sessions/TranscriptionReviewDialogs";
 import { Toggle } from "@/components/ui/toggle";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -57,6 +65,7 @@ import {
 type SessionState = "idle" | "active" | "processing" | "completed";
 
 export default function Sessions() {
+  const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlPatientId = searchParams.get("patient");
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(urlPatientId);
@@ -87,6 +96,17 @@ export default function Sessions() {
   const currentSessionIdRef = useRef<string | null>(null);
   const notesRef = useRef<string>("");
   const sessionStartTimeRef = useRef<Date | null>(null);
+
+  // AI-extracted document review state
+  const [showMedCertReview, setShowMedCertReview] = useState(false);
+  const [showPrescriptionReview, setShowPrescriptionReview] = useState(false);
+  const [showInvoiceReview, setShowInvoiceReview] = useState(false);
+  const [showReferralReview, setShowReferralReview] = useState(false);
+  const [extractedMedCert, setExtractedMedCert] = useState<MedCertData | null>(null);
+  const [extractedPrescription, setExtractedPrescription] = useState<PrescriptionData | null>(null);
+  const [extractedInvoice, setExtractedInvoice] = useState<InvoiceData | null>(null);
+  const [extractedReferral, setExtractedReferral] = useState<ReferralData | null>(null);
+  const [reviewLoading, setReviewLoading] = useState(false);
 
   const navigate = useNavigate();
   const { patients, loading: patientsLoading } = usePatients();
@@ -232,6 +252,22 @@ export default function Sessions() {
         setCurrentSessionId(result.id);
         setSummary(result.summary || "Session completed successfully.");
         setActionPoints(result.action_points || []);
+        
+        // Process AI-extracted documents
+        const docs = (result as any)._extractedDocuments;
+        if (docs?.medical_certificate) {
+          setExtractedMedCert(docs.medical_certificate);
+          setShowMedCertReview(true);
+        }
+        if (docs?.prescription) {
+          setExtractedPrescription(docs.prescription);
+        }
+        if (docs?.invoice) {
+          setExtractedInvoice(docs.invoice);
+        }
+        if (docs?.referral) {
+          setExtractedReferral(docs.referral);
+        }
       } else {
         setSummary("Session completed. No content was recorded or noted.");
         setActionPoints([]);
@@ -310,6 +346,121 @@ export default function Sessions() {
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Handlers for AI-extracted document approvals
+  const handleApproveMedCert = async (data: MedCertData) => {
+    if (!patientId || !currentSessionId) return;
+    setReviewLoading(true);
+    try {
+      const content = `<b>MEDICAL CERTIFICATE</b>\n\nPatient: ${data.patient_name || currentPatient?.name}\nDiagnosis: ${data.diagnosis}\nLeave Period: ${data.start_date} to ${data.end_date}${data.notes ? `\nNotes: ${data.notes}` : ''}`;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from('documents').insert({
+          user_id: user.id,
+          patient_id: patientId,
+          patient_name: currentPatient?.name || null,
+          name: `Medical Certificate - ${new Date().toLocaleDateString()}`,
+          content,
+          template_name: 'Medical Certificate',
+        });
+      }
+      toast({ title: "Medical Certificate Created", description: "Document saved and ready for sending." });
+    } catch (e) { console.error(e); }
+    setReviewLoading(false);
+    setShowMedCertReview(false);
+    // Show next dialog if available
+    if (extractedPrescription) setShowPrescriptionReview(true);
+    else if (extractedInvoice) setShowInvoiceReview(true);
+    else if (extractedReferral) setShowReferralReview(true);
+  };
+
+  const handleApprovePrescription = async (data: PrescriptionData) => {
+    if (!patientId || !currentSessionId) return;
+    setReviewLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        for (const med of data.medications) {
+          await supabase.from('prescriptions').insert({
+            patient_id: patientId,
+            doctor_id: user.id,
+            session_id: currentSessionId,
+            medication: med.medication,
+            dosage: med.dosage,
+            frequency: med.frequency,
+            instructions: [med.duration, med.instructions].filter(Boolean).join('. ') || null,
+          });
+        }
+      }
+      toast({ title: "Prescription Saved", description: `${data.medications.length} medication(s) added.` });
+    } catch (e) { console.error(e); }
+    setReviewLoading(false);
+    setShowPrescriptionReview(false);
+    if (extractedInvoice) setShowInvoiceReview(true);
+    else if (extractedReferral) setShowReferralReview(true);
+  };
+
+  const handleApproveInvoice = async (data: InvoiceData) => {
+    if (!patientId || !currentSessionId) return;
+    setReviewLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const invoiceNumber = `INV-${Date.now().toString().slice(-8)}`;
+        const description = data.items.map(i => `${i.description}: R${i.amount}`).join('; ');
+        const total = data.total || data.items.reduce((s, i) => s + (Number(i.amount) || 0), 0);
+        const { data: inv } = await supabase.from('invoices').insert({
+          patient_id: patientId,
+          doctor_id: user.id,
+          session_id: currentSessionId,
+          invoice_number: invoiceNumber,
+          description,
+          amount: total,
+          due_date: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+        }).select().single();
+        if (inv) setInvoice({ id: inv.id, invoice_number: inv.invoice_number, amount: inv.amount });
+      }
+      toast({ title: "Invoice Created", description: "Invoice saved successfully." });
+    } catch (e) { console.error(e); }
+    setReviewLoading(false);
+    setShowInvoiceReview(false);
+    if (extractedReferral) setShowReferralReview(true);
+  };
+
+  const handleApproveReferral = async (data: ReferralData) => {
+    if (!patientId) return;
+    setReviewLoading(true);
+    try {
+      const content = `<b>REFERRAL LETTER</b>\n\nReferral To: ${data.specialist_type}${data.doctor_name ? ` - ${data.doctor_name}` : ''}\nReason: ${data.reason}\nUrgency: ${data.urgency || 'routine'}`;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from('documents').insert({
+          user_id: user.id,
+          patient_id: patientId,
+          patient_name: currentPatient?.name || null,
+          name: `Referral Letter - ${data.specialist_type} - ${new Date().toLocaleDateString()}`,
+          content,
+          template_name: 'Referral Letter',
+        });
+        // Increment referral count if doctor exists in referral_doctors
+        if (data.doctor_name) {
+          const { data: refDoc } = await supabase.from('referral_doctors')
+            .select('id, referral_count')
+            .eq('user_id', user.id)
+            .ilike('last_name', `%${data.doctor_name.split(' ').pop()}%`)
+            .maybeSingle();
+          if (refDoc) {
+            await supabase.from('referral_doctors')
+              .update({ referral_count: (refDoc.referral_count || 0) + 1 })
+              .eq('id', refDoc.id);
+          }
+        }
+      }
+      toast({ title: "Referral Letter Created", description: "Document saved successfully." });
+    } catch (e) { console.error(e); }
+    setReviewLoading(false);
+    setShowReferralReview(false);
+  };
+
 
   const startSession = async () => {
     setSessionState("active");
@@ -372,6 +523,46 @@ export default function Sessions() {
         onConfirm={handleVisitCategoryConfirm}
         patientName={currentPatient?.name}
       />
+
+      {/* AI-Extracted Document Review Dialogs */}
+      {extractedMedCert && (
+        <MedCertReviewDialog
+          open={showMedCertReview}
+          onOpenChange={setShowMedCertReview}
+          data={extractedMedCert}
+          patientName={currentPatient?.name || ""}
+          onApprove={handleApproveMedCert}
+          loading={reviewLoading}
+        />
+      )}
+      {extractedPrescription && (
+        <PrescriptionReviewDialog
+          open={showPrescriptionReview}
+          onOpenChange={setShowPrescriptionReview}
+          data={extractedPrescription}
+          onApprove={handleApprovePrescription}
+          loading={reviewLoading}
+        />
+      )}
+      {extractedInvoice && (
+        <InvoiceReviewDialog
+          open={showInvoiceReview}
+          onOpenChange={setShowInvoiceReview}
+          data={extractedInvoice}
+          onApprove={handleApproveInvoice}
+          loading={reviewLoading}
+        />
+      )}
+      {extractedReferral && (
+        <ReferralReviewDialog
+          open={showReferralReview}
+          onOpenChange={setShowReferralReview}
+          data={extractedReferral}
+          onApprove={handleApproveReferral}
+          loading={reviewLoading}
+        />
+      )}
+
       {/* Header with Back Link */}
       <div className="flex items-center gap-4">
         {currentPatient && (
@@ -650,6 +841,34 @@ export default function Sessions() {
               </p>
             </div>
           </div>
+
+          {/* AI-Detected Documents Banner */}
+          {(extractedMedCert || extractedPrescription || extractedInvoice || extractedReferral) && (
+            <div className="flex flex-wrap items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <span className="text-sm font-medium text-foreground">AI detected documents from this session:</span>
+              {extractedMedCert && (
+                <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowMedCertReview(true)}>
+                  <FileTextIcon className="h-3 w-3" /> Medical Certificate
+                </Button>
+              )}
+              {extractedPrescription && (
+                <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowPrescriptionReview(true)}>
+                  <Pill className="h-3 w-3" /> Prescription
+                </Button>
+              )}
+              {extractedInvoice && (
+                <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowInvoiceReview(true)}>
+                  <Receipt className="h-3 w-3" /> Invoice
+                </Button>
+              )}
+              {extractedReferral && (
+                <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowReferralReview(true)}>
+                  <Users className="h-3 w-3" /> Referral Letter
+                </Button>
+              )}
+            </div>
+          )}
 
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Transcription */}
