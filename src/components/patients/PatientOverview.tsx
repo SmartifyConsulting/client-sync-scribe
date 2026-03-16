@@ -129,7 +129,7 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
     });
   };
 
-  // Render summary as timeline bullets
+  // Render summary as timeline bullets with dates
   const renderSummaryTimeline = (text: string) => {
     // Strip XML-like tags for splitting, but preserve for rendering
     const cleanText = text.replace(/<\/?(?:med|symptom|condition)>/g, '');
@@ -137,19 +137,47 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
     const sentences = cleanText.split(/(?<=[.!?])\s+|(?:^|\n)\s*[-•]\s*/).filter(s => s.trim().length > 0);
     
     if (sentences.length <= 1) {
-      // Single sentence - render inline
       return <div className="text-foreground leading-relaxed">{renderInlineHighlights(text)}</div>;
     }
 
+    // Parse date prefixes from sentences and group undated items under previous date
+    const datePattern = /^(\d{1,2}\s+\w+\s+\d{4}|\w+\s+\d{1,2},?\s+\d{4}|\d{4}-\d{2}-\d{2}|\w+\s+\d{4})\s*[-–:]\s*/;
+    
+    interface TimelineItem {
+      date: string | null;
+      lines: string[];
+    }
+    
+    const timelineItems: TimelineItem[] = [];
+    
+    sentences.forEach((sentence) => {
+      const match = sentence.match(datePattern);
+      if (match) {
+        timelineItems.push({ date: match[1], lines: [sentence.replace(datePattern, '').trim()] });
+      } else if (timelineItems.length > 0) {
+        // Attach to previous dated item
+        timelineItems[timelineItems.length - 1].lines.push(sentence.trim());
+      } else {
+        timelineItems.push({ date: null, lines: [sentence.trim()] });
+      }
+    });
+
     return (
       <div className="space-y-3">
-        {sentences.map((sentence, i) => (
+        {timelineItems.map((item, i) => (
           <div key={i} className="flex gap-3">
             <div className="flex flex-col items-center">
               <div className="w-2.5 h-2.5 rounded-full bg-primary mt-1.5 shrink-0" />
-              {i < sentences.length - 1 && <div className="w-0.5 flex-1 bg-border mt-1" />}
+              {i < timelineItems.length - 1 && <div className="w-0.5 flex-1 bg-border mt-1" />}
             </div>
-            <p className="text-sm text-foreground leading-relaxed pb-2">{sentence.trim()}</p>
+            <div className="pb-2">
+              {item.date && (
+                <p className="text-xs font-bold text-primary mb-0.5">{item.date}</p>
+              )}
+              {item.lines.map((line, j) => (
+                <p key={j} className="text-sm text-foreground leading-relaxed">{line}</p>
+              ))}
+            </div>
           </div>
         ))}
       </div>
