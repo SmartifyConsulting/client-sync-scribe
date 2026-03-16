@@ -319,8 +319,6 @@ export default function Sessions() {
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Track session start time locally - no DB insert until completion
-  const sessionStartTimeRef = useRef<Date | null>(null);
 
   const startSession = async () => {
     setSessionState("active");
