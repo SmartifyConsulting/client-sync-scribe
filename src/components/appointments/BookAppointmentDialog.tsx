@@ -67,6 +67,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
   // Step 2: Services
   const [services, setServices] = useState<ServicePrice[]>([]);
   const [selectedService, setSelectedService] = useState<ServicePrice | null>(null);
+  const [isFirstVisit, setIsFirstVisit] = useState(false);
 
   // Step 3: Date & time
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
