@@ -517,7 +517,7 @@ export default function TodoList() {
               : isAiProcessing
               ? "AI is processing your tasks..."
               : isRecording
-              ? "Recording... Tap to stop"
+              ? "Listening... stops automatically after a pause"
               : "Tap to record a task"}
           </p>
         </div>
