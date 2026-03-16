@@ -183,9 +183,9 @@ export default function Dashboard() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link to="/todos?autoRecord=true">
-                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-primary/10">
-                    <Mic className="h-5 w-5" />
-                  </Button>
+                  <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/90 transition-colors">
+                    <Mic className="h-5 w-5 text-white" />
+                  </div>
                 </Link>
               </TooltipTrigger>
               <TooltipContent>Record a Task</TooltipContent>
@@ -195,7 +195,7 @@ export default function Dashboard() {
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
+                <Bell className="h-5 w-5 fill-secondary text-secondary" />
                 {unreadNotifCount > 0 && (
                   <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
                     {unreadNotifCount > 99 ? "99+" : unreadNotifCount}
