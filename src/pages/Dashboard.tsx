@@ -228,29 +228,39 @@ export default function Dashboard() {
               </div>
             </PopoverContent>
           </Popover>
-          <Link to="/profile" className="rounded-xl p-2 hover:bg-accent transition-colors relative">
-            <Avatar className="h-10 w-10 border-2 border-primary/20">
-              <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} className="object-cover" />
-              <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                {getInitials()}
-              </AvatarFallback>
-            </Avatar>
-            {isDoctor && totalCpdPoints > 0 && (
-              <Badge className="absolute -top-1 -right-1 h-5 min-w-5 px-1 text-[10px] bg-amber-500 hover:bg-amber-500 text-white border-2 border-background">
-                <Award className="h-2.5 w-2.5 mr-0.5" />
-                {totalCpdPoints}
-              </Badge>
-            )}
-          </Link>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={handleLogout}
-            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-            title="Log out"
-          >
-            <LogOut className="h-5 w-5" />
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className="rounded-xl p-2 hover:bg-accent transition-colors relative">
+                <Avatar className="h-10 w-10 border-2 border-primary/20">
+                  <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} className="object-cover" />
+                  <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                    {getInitials()}
+                  </AvatarFallback>
+                </Avatar>
+                {isDoctor && totalCpdPoints > 0 && (
+                  <Badge className="absolute -top-1 -right-1 h-5 min-w-5 px-1 text-[10px] bg-amber-500 hover:bg-amber-500 text-white border-2 border-background">
+                    <Award className="h-2.5 w-2.5 mr-0.5" />
+                    {totalCpdPoints}
+                  </Badge>
+                )}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-2" align="end">
+              <div className="px-3 py-2 border-b border-border mb-1">
+                <p className="text-sm font-semibold text-foreground">{profile?.full_name || "User"}</p>
+                <p className="text-xs text-muted-foreground capitalize">{isDoctor ? "Doctor" : "Patient"}</p>
+              </div>
+              <Link to="/profile" className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors">
+                <User className="h-4 w-4" /> View Profile
+              </Link>
+              <Link to="/settings" className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors">
+                <Settings className="h-4 w-4" /> Settings
+              </Link>
+              <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-destructive/10 text-destructive transition-colors w-full">
+                <LogOut className="h-4 w-4" /> Sign Out
+              </button>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
