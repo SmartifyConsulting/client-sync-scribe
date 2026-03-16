@@ -267,7 +267,7 @@ export default function GamificationAdmin() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Visit Category</TableHead>
-                    <TableHead>Lollipops</TableHead>
+                     <TableHead>Moolas</TableHead>
                     <TableHead>Description</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
