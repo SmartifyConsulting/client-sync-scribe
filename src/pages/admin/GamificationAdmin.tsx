@@ -238,7 +238,7 @@ export default function GamificationAdmin() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Lollipops Awarded</Label>
+                      <Label>Moolas Awarded</Label>
                       <Input
                         type="number"
                         min={1}
