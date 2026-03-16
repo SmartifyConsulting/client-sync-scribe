@@ -289,15 +289,9 @@ export default function Dashboard() {
         </div>
         <div>
           <RecentActivity />
+          {isDoctor && <CompactTodoList />}
         </div>
       </div>
-
-      {/* To-Do List */}
-      {isDoctor && (
-        <div className="mt-2">
-          <TodoList />
-        </div>
-      )}
     </div>
   );
 }
