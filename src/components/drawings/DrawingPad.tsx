@@ -571,6 +571,21 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     };
   }, [draggingElement, elements]);
 
+  // Delete selected element with Delete/Backspace key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.key === "Delete" || e.key === "Backspace") && selectedElement && !textPosition) {
+        e.preventDefault();
+        const newElements = elements.filter((el) => el.id !== selectedElement);
+        setElements(newElements);
+        addToHistory(newElements);
+        setSelectedElement(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedElement, elements, textPosition]);
+
   const handleAddText = () => {
     if (!textInput || !textPosition) return;
     
