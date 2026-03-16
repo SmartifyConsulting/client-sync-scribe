@@ -626,8 +626,8 @@ export default function Patients() {
                             to={`/patients/${patient.id}`}
                             className="flex items-center gap-3"
                           >
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-accent-foreground font-medium">
-                              {patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                            <div className={cn("flex h-10 w-10 items-center justify-center rounded-full font-medium", patient.patient_user_id === user?.id ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground")}>
+                              {patient.patient_user_id === user?.id ? "ME" : patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                             </div>
                             <span className="font-medium text-foreground group-hover:text-primary transition-colors">
                               {(() => {
@@ -637,6 +637,9 @@ export default function Patients() {
                                 const firstNames = parts.slice(0, -1).join(" ");
                                 return `${lastName}, ${firstNames}`;
                               })()}
+                              {patient.patient_user_id === user?.id && (
+                                <span className="ml-2 inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">ME</span>
+                              )}
                             </span>
                           </Link>
                         </td>
