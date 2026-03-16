@@ -278,6 +278,10 @@ export default function GamificationAdmin() {
             <Flame className="h-4 w-4 mr-2" />
             Streak Programs
           </TabsTrigger>
+          <TabsTrigger value="partner-apps" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+            <Globe className="h-4 w-4 mr-2" />
+            Partner Apps
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="rewards" className="space-y-4">
