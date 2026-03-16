@@ -260,6 +260,15 @@ export default function Auth() {
               signatureUrl = await uploadSignature(data.user.id);
             }
 
+            // Auto-generate mailbox alias from name
+            const nameParts = fullName.trim().toLowerCase().split(/\s+/);
+            const firstName = nameParts[0] || "user";
+            const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
+            const year = new Date().getFullYear();
+            const mailboxAlias = lastName 
+              ? `${firstName}-${lastName}-${year}`.replace(/[^a-z0-9-]/g, '')
+              : `${firstName}-${year}`.replace(/[^a-z0-9-]/g, '');
+
             // Update profile with doctor info
             const { error: profileError } = await supabase
               .from("profiles")
@@ -272,6 +281,7 @@ export default function Auth() {
                 avatar_url: avatarUrl,
                 signature_url: signatureUrl,
                 role: userRole,
+                mailbox_alias: mailboxAlias,
               })
               .eq("id", data.user.id);
 
