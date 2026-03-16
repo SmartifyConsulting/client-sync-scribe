@@ -428,7 +428,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     setShapeStart(null);
   };
 
-  // Resize handlers for anatomy overlays
+  // Resize handlers for overlays (anatomy, shapes, text)
   const handleResizeStart = (e: React.MouseEvent | React.TouchEvent, elementId: string) => {
     e.stopPropagation();
     e.preventDefault();
@@ -444,12 +444,35 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       clientY = e.clientY;
     }
 
+    // Compute initial width/height for shapes
+    let startW = el.width || 120;
+    let startH = el.height || 120;
+    if (el.type === "shape") {
+      const { shapeType, endX, endY } = el.data;
+      if (shapeType === "circle") {
+        const radius = Math.sqrt(Math.pow(endX - el.x, 2) + Math.pow(endY - el.y, 2));
+        startW = radius * 2;
+        startH = radius * 2;
+      } else if (shapeType === "rectangle") {
+        startW = Math.abs(endX - el.x);
+        startH = Math.abs(endY - el.y);
+      } else {
+        startW = Math.abs(endX - el.x) + 8;
+        startH = Math.abs(endY - el.y) + 8;
+      }
+    } else if (el.type === "text") {
+      const fontSize = el.strokeWidth || 16;
+      const text = el.data.text || "";
+      startW = Math.max(text.length * fontSize * 0.6, 40);
+      startH = fontSize * 1.4;
+    }
+
     setResizing({
       elementId,
       startX: clientX,
       startY: clientY,
-      startW: el.width || 120,
-      startH: el.height || 120,
+      startW,
+      startH,
     });
   };
 
