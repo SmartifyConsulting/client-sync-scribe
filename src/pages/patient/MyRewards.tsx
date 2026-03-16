@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, Trophy, Target, Flame, Gift, Star, Calendar } from "lucide-react";
+import { Loader2, Trophy, Target, Flame, Gift, Star, Calendar, CheckSquare, Clock, AlertCircle, Video } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -14,6 +14,9 @@ import {
 } from "@/components/ui/table";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { useMyRewards, useMyStreaks } from "@/hooks/usePatientRewards";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { ActivityProofCapture } from "@/components/rewards/ActivityProofCapture";
 
 const MILESTONES = [
   { count: 5, label: "First Steps", icon: "🌟", color: "text-yellow-500" },
@@ -23,10 +26,45 @@ const MILESTONES = [
   { count: 100, label: "Health Legend", icon: "👑", color: "text-pink-500" },
 ];
 
+interface PatientTask {
+  id: string;
+  title: string;
+  description: string | null;
+  priority: string;
+  status: string;
+  due_date: string | null;
+  created_at: string;
+  task_type: string;
+  moolas_reward: number;
+  proof_url: string | null;
+  patient_id: string | null;
+}
+
 export default function MyRewards() {
   const { rewards, lollipopCount, loading: rewardsLoading } = useMyRewards();
   const { streaks, loading: streaksLoading } = useMyStreaks();
   const [activeTab, setActiveTab] = useState("overview");
+
+  const { data: tasks = [], isLoading: tasksLoading, refetch: refetchTasks } = useQuery({
+    queryKey: ["patient-assigned-tasks"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      const { data: patients } = await supabase
+        .from("patients")
+        .select("id")
+        .eq("patient_user_id", user.id);
+      if (!patients || patients.length === 0) return [];
+      const patientIds = patients.map((p) => p.id);
+      const { data: todos, error } = await supabase
+        .from("todos")
+        .select("*")
+        .in("patient_id", patientIds)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (todos || []) as PatientTask[];
+    },
+  });
 
   const loading = rewardsLoading || streaksLoading;
 
@@ -45,6 +83,24 @@ export default function MyRewards() {
     : 100;
 
   const activeStreaks = streaks.filter(s => s.current_streak > 0);
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "high": return "destructive";
+      case "medium": return "secondary";
+      default: return "outline";
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "completed": return <CheckSquare className="h-4 w-4 text-green-500" />;
+      case "pending": return <Clock className="h-4 w-4 text-muted-foreground" />;
+      default: return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
+    }
+  };
+
+  const pendingActivityTasks = tasks.filter((t) => t.task_type === "activity" && t.status !== "completed");
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -113,6 +169,13 @@ export default function MyRewards() {
           <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
             Overview
           </TabsTrigger>
+          <TabsTrigger value="tasks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+            Assigned Tasks {tasks.filter(t => t.status !== "completed").length > 0 && (
+              <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
+                {tasks.filter(t => t.status !== "completed").length}
+              </Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="milestones" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
             Milestones
           </TabsTrigger>
@@ -125,7 +188,6 @@ export default function MyRewards() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          {/* Progress to Next Milestone */}
           {nextMilestone && (
             <Card>
               <CardHeader>
@@ -149,7 +211,6 @@ export default function MyRewards() {
             </Card>
           )}
 
-          {/* Recent Rewards */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -179,6 +240,76 @@ export default function MyRewards() {
                       <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
                         +{reward.lollipops_count} Ⓜ
                       </Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="tasks" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckSquare className="h-5 w-5 text-primary" />
+                    Assigned Tasks
+                  </CardTitle>
+                  <CardDescription>
+                    Tasks assigned by your healthcare provider. Complete activities to earn Moolas!
+                  </CardDescription>
+                </div>
+                <ActivityProofCapture tasks={pendingActivityTasks} onProofSubmitted={refetchTasks} />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {tasksLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                </div>
+              ) : tasks.length === 0 ? (
+                <div className="text-center py-8">
+                  <CheckSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No tasks assigned yet.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {tasks.map((task) => (
+                    <div key={task.id} className={`flex items-start gap-3 p-3 rounded-lg border ${task.status === "completed" ? "opacity-60 bg-muted/30" : "bg-background"}`}>
+                      {getStatusIcon(task.status)}
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-medium text-foreground ${task.status === "completed" ? "line-through" : ""}`}>
+                          {task.title}
+                        </p>
+                        {task.description && (
+                          <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
+                        )}
+                        <div className="flex items-center gap-2 mt-2 flex-wrap">
+                          <Badge variant={getPriorityColor(task.priority) as any} className="text-xs">
+                            {task.priority}
+                          </Badge>
+                          {task.task_type === "activity" && (
+                            <Badge className="bg-primary/10 text-primary text-xs gap-1">
+                              <Video className="h-3 w-3" /> Activity
+                            </Badge>
+                          )}
+                          {task.moolas_reward > 0 && (
+                            <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 text-xs">
+                              +{task.moolas_reward} Ⓜ
+                            </Badge>
+                          )}
+                          {task.due_date && (
+                            <span className="text-xs text-muted-foreground">
+                              Due: {format(new Date(task.due_date), "dd MMM yyyy")}
+                            </span>
+                          )}
+                          {task.proof_url && (
+                            <Badge variant="outline" className="text-xs text-green-600">✓ Proof submitted</Badge>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
