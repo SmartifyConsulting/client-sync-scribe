@@ -251,6 +251,62 @@ Signature: ___________________
         console.error("Auto-email prescription error:", autoErr);
       }
 
+      // Auto-assign medication adherence tasks for chronic patients
+      try {
+        const { data: patientCheck } = await supabase
+          .from('patients')
+          .select('is_chronic, patient_user_id')
+          .eq('id', patientId)
+          .maybeSingle();
+
+        if (patientCheck?.is_chronic) {
+          const { data: { user } } = await supabase.auth.getUser();
+          const validMeds = medications.filter(m => m.medication.trim());
+          
+          for (const med of validMeds) {
+            // Save prescription record to DB
+            await supabase.from('prescriptions').insert({
+              patient_id: patientId,
+              doctor_id: user!.id,
+              medication: med.medication,
+              dosage: med.dosage,
+              frequency: med.frequency,
+              instructions: med.instructions || null,
+              status: 'active',
+            });
+
+            // Create a todo task for the patient
+            await supabase.from('todos').insert({
+              user_id: user!.id,
+              patient_id: patientId,
+              title: `Take ${med.medication} - ${med.dosage}`,
+              description: `Daily medication: ${med.frequency}. ${med.instructions || ''}`.trim(),
+              task_type: 'medication',
+              moolas_reward: 5,
+              priority: 'high',
+            });
+          }
+
+          // Notify patient about new medication tracking
+          if (patientCheck.patient_user_id) {
+            await supabase.from('notifications').insert({
+              user_id: patientCheck.patient_user_id,
+              title: 'New Chronic Medication Assigned',
+              description: `Your doctor has prescribed chronic medication. Track your daily adherence in My Rewards → Chronic Meds to earn Moolas!`,
+              type: 'medication_assigned',
+              reference_id: patientId,
+            });
+          }
+
+          toast({
+            title: "Adherence Tracking Enabled",
+            description: "Daily medication tasks auto-assigned to patient",
+          });
+        }
+      } catch (adherenceErr) {
+        console.error("Auto-assign medication adherence error:", adherenceErr);
+      }
+
       onClose();
     } finally {
       setIsSaving(false);
