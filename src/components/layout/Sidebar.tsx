@@ -21,6 +21,8 @@ import {
   Users2,
   Gift,
   Camera,
+  UserPlus,
+  Award,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
