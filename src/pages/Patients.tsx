@@ -693,7 +693,7 @@ export default function Patients() {
                               const firstNames = parts.slice(0, -1).join(" ");
                               return `${lastName}, ${firstNames}`;
                             })()}
-                            <span className="ml-2 inline-flex items-center rounded-full bg-secondary/10 px-2 py-0.5 text-[10px] font-bold text-secondary">ME</span>
+                            <span className="ml-2 inline-flex items-center rounded-full bg-terracotta/10 px-2 py-0.5 text-[10px] font-bold text-terracotta">ME</span>
                           </span>
                         </Link>
                       </td>
