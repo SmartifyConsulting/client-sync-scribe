@@ -177,6 +177,42 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {/* Notification Bell */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell className="h-5 w-5" />
+                {unreadNotifCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+                    {unreadNotifCount > 99 ? "99+" : unreadNotifCount}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-0" align="end">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                <p className="text-sm font-semibold">Notifications</p>
+                {unreadNotifCount > 0 && (
+                  <Button variant="ghost" size="sm" className="text-xs h-7" onClick={markAllRead}>
+                    Mark all read
+                  </Button>
+                )}
+              </div>
+              <div className="max-h-64 overflow-y-auto">
+                {recentNotifications.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-6">No notifications</p>
+                ) : (
+                  recentNotifications.map((n: any) => (
+                    <div key={n.id} className={`px-4 py-3 border-b border-border/50 text-sm ${!n.is_read ? 'bg-primary/5' : ''}`}>
+                      <p className="font-medium text-foreground">{n.title}</p>
+                      {n.description && <p className="text-xs text-muted-foreground mt-0.5">{n.description}</p>}
+                      <p className="text-xs text-muted-foreground mt-1">{new Date(n.created_at).toLocaleDateString()}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
           <Link to="/profile" className="rounded-xl p-2 hover:bg-accent transition-colors relative">
             <Avatar className="h-10 w-10 border-2 border-primary/20">
               <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} className="object-cover" />
