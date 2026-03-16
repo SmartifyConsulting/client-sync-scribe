@@ -58,7 +58,7 @@ export function useProfile() {
           .single();
         
         if (!insertError && newProfile) {
-          setProfile(newProfile as Profile);
+          setProfile(newProfile as unknown as Profile);
         }
       }
     } else {
