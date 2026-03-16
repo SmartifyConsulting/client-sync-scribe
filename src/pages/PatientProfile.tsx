@@ -41,7 +41,7 @@ import { useTemplates } from "@/hooks/useTemplates";
 import { useDocuments } from "@/hooks/useDocuments";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
 import { DrawingPad } from "@/components/drawings/DrawingPad";
-import { MediaCapture } from "@/components/documents/MediaCapture";
+import { DrawingPad } from "@/components/drawings/DrawingPad";
 import {
   Dialog,
   DialogContent,
