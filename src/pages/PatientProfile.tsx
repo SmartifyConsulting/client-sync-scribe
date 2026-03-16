@@ -252,13 +252,13 @@ export default function PatientProfile() {
             {format(new Date(patient.created_at), "MMM yyyy")}
           </p>
         </div>
-        {/* Lollipop Rewards */}
-        <div className="rounded-xl bg-gradient-to-br from-pink-50 to-purple-50 dark:from-pink-950/20 dark:to-purple-950/20 p-4 shadow-sm border border-pink-200 dark:border-pink-800/30">
+        {/* Moola Rewards */}
+        <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-4 shadow-sm border border-emerald-200 dark:border-emerald-800/30">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-muted-foreground">Lollipops</p>
-            <span className="text-lg">🍭</span>
+            <p className="text-xs font-medium text-muted-foreground">Moolas</p>
+            <span className="text-lg font-bold text-emerald-600">Ⓜ</span>
           </div>
-          <p className="mt-2 text-2xl font-bold text-pink-600 dark:text-pink-400">
+          <p className="mt-2 text-2xl font-bold text-emerald-600 dark:text-emerald-400">
             {lollipopCount}
           </p>
         </div>
