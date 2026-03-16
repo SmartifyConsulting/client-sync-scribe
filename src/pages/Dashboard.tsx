@@ -184,7 +184,7 @@ export default function Dashboard() {
               <TooltipTrigger asChild>
                 <Link to="/todos?autoRecord=true">
                   <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/90 transition-colors">
-                    <Mic className="h-5 w-5 text-white" />
+                    <Mic className="h-5 w-5 text-white stroke-white fill-none" />
                   </div>
                 </Link>
               </TooltipTrigger>
