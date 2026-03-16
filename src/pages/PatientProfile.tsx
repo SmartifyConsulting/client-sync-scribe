@@ -367,6 +367,9 @@ export default function PatientProfile() {
         </TabsContent>
 
         <TabsContent value="documents" className="space-y-4">
+          {/* Media Capture */}
+          <MediaCapture patientId={patient.id} patientName={patient.name} onSaved={fetchDocuments} />
+
           <div className="flex justify-end gap-2">
             <Button variant="outline" className="gap-2 h-11" onClick={() => setShowTemplateSelector(true)}>
               <Plus className="h-4 w-4" />
