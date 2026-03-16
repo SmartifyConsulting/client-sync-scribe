@@ -275,7 +275,7 @@ export function CompactTodoList() {
   const completedCount = todos.filter((t) => t.completed).length;
 
   return (
-    <div className="rounded-xl border border-primary bg-card shadow-sm mt-4">
+    <div className="rounded-xl border border-primary bg-card shadow-sm">
       {/* Header */}
       <div className="rounded-t-xl bg-primary px-4 py-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-primary-foreground">To-Do List</h3>
