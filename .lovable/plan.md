@@ -1,37 +1,59 @@
 
 
-# Plan: Dashboard Header, Layout & Silence Fix
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## Changes
+## 1. Increase Logo Size by 130%
 
-### 1. Dashboard header — Name links to Profile (`src/pages/Dashboard.tsx`)
-- Change the greeting from `{greeting}, {getDisplayName()}` to `{greeting}, <Link to="/profile">{profile?.full_name} Profile</Link>` where the full name + "Profile" text is styled in `text-primary` (aqua/teal)
-- Remove the "View Profile" link from the avatar popover menu (keep Settings and Sign Out only)
+Scale all logo instances by 130%:
 
-### 2. Sidebar — Remove Profile button (`src/components/layout/Sidebar.tsx`)
-- Remove the Profile `<NavLink>` from the bottom section (lines 162-176) since users now access profile from the dashboard greeting
-- The avatar + name display at top of bottom section remains as-is
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-### 3. Reorder: Recent Activity below To-Do List (`src/pages/Dashboard.tsx`)
-- In the right column, swap the order:
-```tsx
-<div>
-  {isDoctor && <CompactTodoList />}
-  <RecentActivity />
-</div>
-```
-- Remove the `mt-4` from CompactTodoList since it will now be first, and add `mt-4` to RecentActivity instead
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-### 4. Fix silence recording — skip transcription for empty audio (`src/components/dashboard/CompactTodoList.tsx`)
-- In `processAudio`, before sending to transcribe, check the audio blob duration/size. If the blob is very small (< ~1KB of actual audio data beyond the webm header), skip transcription entirely and show no toast or a simple "Nothing captured" toast
-- This prevents Whisper from hallucinating text (like Japanese phrases) from silence
-- Approximate check: if `audioBlob.size < 5000` (under ~5KB), skip processing
+## 2. Fix Practice Number Not Persisting
 
-### Files
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-| File | Change |
-|------|--------|
-| `src/pages/Dashboard.tsx` | Name as aqua Profile link, remove View Profile from popover, swap RecentActivity/CompactTodoList order |
-| `src/components/layout/Sidebar.tsx` | Remove Profile NavLink |
-| `src/components/dashboard/CompactTodoList.tsx` | Add minimum audio size check before transcription, remove `mt-4` |
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
+
+## 3. Make Partner Email Required and Create Pending Users
+
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
+
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
+
+## Technical Summary
+
+### Database Migration
+- Add `email text` column to `practice_partners` table
+
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 
