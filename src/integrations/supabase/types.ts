@@ -109,6 +109,42 @@ export type Database = {
         }
         Relationships: []
       }
+      cpd_certificates: {
+        Row: {
+          certificate_name: string
+          certificate_url: string | null
+          cpd_points: number | null
+          created_at: string | null
+          date_earned: string
+          id: string
+          issuing_body: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          certificate_name: string
+          certificate_url?: string | null
+          cpd_points?: number | null
+          created_at?: string | null
+          date_earned: string
+          id?: string
+          issuing_body?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          certificate_name?: string
+          certificate_url?: string | null
+          cpd_points?: number | null
+          created_at?: string | null
+          date_earned?: string
+          id?: string
+          issuing_body?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       doctor_access_requests: {
         Row: {
           created_at: string
@@ -660,6 +696,7 @@ export type Database = {
           notes: string | null
           occupation: string | null
           patient_user_id: string | null
+          pharmacies: Json | null
           pharmacy_email: string | null
           pharmacy_name: string | null
           phone: string | null
@@ -699,6 +736,7 @@ export type Database = {
           notes?: string | null
           occupation?: string | null
           patient_user_id?: string | null
+          pharmacies?: Json | null
           pharmacy_email?: string | null
           pharmacy_name?: string | null
           phone?: string | null
@@ -738,6 +776,7 @@ export type Database = {
           notes?: string | null
           occupation?: string | null
           patient_user_id?: string | null
+          pharmacies?: Json | null
           pharmacy_email?: string | null
           pharmacy_name?: string | null
           phone?: string | null
@@ -942,6 +981,7 @@ export type Database = {
           mailbox_alias: string | null
           mailbox_id: string
           mobile_number: string | null
+          narration_voice: string | null
           practice_address: string | null
           practice_number: string | null
           role: Database["public"]["Enums"]["user_role"] | null
@@ -964,6 +1004,7 @@ export type Database = {
           mailbox_alias?: string | null
           mailbox_id?: string
           mobile_number?: string | null
+          narration_voice?: string | null
           practice_address?: string | null
           practice_number?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
@@ -986,6 +1027,7 @@ export type Database = {
           mailbox_alias?: string | null
           mailbox_id?: string
           mobile_number?: string | null
+          narration_voice?: string | null
           practice_address?: string | null
           practice_number?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
@@ -996,6 +1038,48 @@ export type Database = {
           specialty?: string | null
           status?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      referral_doctors: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          email: string | null
+          first_name: string
+          id: string
+          last_name: string
+          phone: string | null
+          practice_number: string | null
+          referral_count: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          phone?: string | null
+          practice_number?: string | null
+          referral_count?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          phone?: string | null
+          practice_number?: string | null
+          referral_count?: number | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
