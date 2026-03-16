@@ -139,7 +139,7 @@ const completeSession = async (
     content: string, 
     additionalNotes?: string, 
     visitCategory?: string,
-    creationData?: { patient_id: string; title: string; started_at: string }
+    creationData?: { patient_id: string; title: string; started_at: string; audio_url?: string }
   ) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
