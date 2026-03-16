@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, Plus, Pencil, Trash2, Save, X, Gift, Flame, Calendar } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Save, X, Gift, Flame, Calendar, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,6 +25,17 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useGamificationAdmin, useStreakAdmin, GamificationConfig, StreakConfig } from "@/hooks/usePatientRewards";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+interface PartnerApp {
+  id: string;
+  name: string;
+  logo_url: string | null;
+  is_active: boolean;
+  created_at: string;
+}
 
 export default function GamificationAdmin() {
   const { configs, loading, updateConfig, createConfig, deleteConfig } = useGamificationAdmin();
@@ -50,6 +61,74 @@ export default function GamificationAdmin() {
     lollipops_awarded: 3,
     description: "",
     is_active: true,
+  });
+
+  // Partner Apps state
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [showAddAppDialog, setShowAddAppDialog] = useState(false);
+  const [newAppName, setNewAppName] = useState("");
+  const [newAppLogoUrl, setNewAppLogoUrl] = useState("");
+
+  const { data: partnerApps = [], isLoading: appsLoading } = useQuery({
+    queryKey: ["admin-partner-apps"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("moola_partner_apps")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data || []) as PartnerApp[];
+    },
+  });
+
+  const addAppMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("moola_partner_apps")
+        .insert({ name: newAppName, logo_url: newAppLogoUrl || null });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-partner-apps"] });
+      setShowAddAppDialog(false);
+      setNewAppName("");
+      setNewAppLogoUrl("");
+      toast({ title: "Partner app added" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const toggleAppMutation = useMutation({
+    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
+      const { error } = await supabase
+        .from("moola_partner_apps")
+        .update({ is_active })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-partner-apps"] });
+    },
+  });
+
+  const deleteAppMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("moola_partner_apps")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-partner-apps"] });
+      toast({ title: "Partner app removed" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
   });
 
   const handleEdit = (config: GamificationConfig) => {
@@ -198,6 +277,10 @@ export default function GamificationAdmin() {
           <TabsTrigger value="streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
             <Flame className="h-4 w-4 mr-2" />
             Streak Programs
+          </TabsTrigger>
+          <TabsTrigger value="partner-apps" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+            <Globe className="h-4 w-4 mr-2" />
+            Partner Apps
           </TabsTrigger>
         </TabsList>
 
@@ -528,6 +611,107 @@ export default function GamificationAdmin() {
                   ))}
                 </TableBody>
               </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="partner-apps" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-blue-500" />
+                  Partner Apps
+                </CardTitle>
+                <CardDescription>
+                  Manage external apps that accept Moola transfers from patients
+                </CardDescription>
+              </div>
+              <Dialog open={showAddAppDialog} onOpenChange={setShowAddAppDialog}>
+                <DialogTrigger asChild>
+                  <Button className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add App
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add Partner App</DialogTitle>
+                    <DialogDescription>
+                      Add an external app that can receive Moola transfers
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label>App Name</Label>
+                      <Input
+                        placeholder="e.g., HealthStore"
+                        value={newAppName}
+                        onChange={(e) => setNewAppName(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Logo URL (optional)</Label>
+                      <Input
+                        placeholder="https://..."
+                        value={newAppLogoUrl}
+                        onChange={(e) => setNewAppLogoUrl(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setShowAddAppDialog(false)}>Cancel</Button>
+                    <Button onClick={() => addAppMutation.mutate()} disabled={!newAppName.trim() || addAppMutation.isPending}>
+                      Add App
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </CardHeader>
+            <CardContent>
+              {appsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                </div>
+              ) : partnerApps.length === 0 ? (
+                <div className="text-center py-8">
+                  <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No partner apps yet. Add one to enable Moola transfers.</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>App Name</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {partnerApps.map((app) => (
+                      <TableRow key={app.id}>
+                        <TableCell className="font-medium">{app.name}</TableCell>
+                        <TableCell>
+                          <Switch
+                            checked={app.is_active}
+                            onCheckedChange={(checked) => toggleAppMutation.mutate({ id: app.id, is_active: checked })}
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => deleteAppMutation.mutate(app.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

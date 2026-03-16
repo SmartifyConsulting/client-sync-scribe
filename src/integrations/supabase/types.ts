@@ -554,6 +554,62 @@ export type Database = {
           },
         ]
       }
+      moola_partner_apps: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
+      moola_transfers: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          partner_app_id: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          partner_app_id: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          partner_app_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moola_transfers_partner_app_id_fkey"
+            columns: ["partner_app_id"]
+            isOneToOne: false
+            referencedRelation: "moola_partner_apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string

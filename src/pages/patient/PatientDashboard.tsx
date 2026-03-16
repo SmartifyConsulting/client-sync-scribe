@@ -208,7 +208,7 @@ export default function PatientDashboard() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-foreground">
-              Welcome back, {profile?.full_name || "Patient"}
+              Welcome back, {profile?.full_name?.split(" ")[0] || "Patient"}
             </h1>
             <p className="text-muted-foreground">
               Manage your health information and appointments
