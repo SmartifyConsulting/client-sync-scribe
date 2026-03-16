@@ -36,7 +36,47 @@ interface DoctorAccess {
 export default function PatientDashboard() {
   const { user } = useAuth();
   const { profile } = useProfile();
+  const queryClient = useQueryClient();
   const { lollipopCount, rewards, loading: rewardsLoading } = useMyRewards();
+
+  const { data: unreadNotifCount = 0 } = useQuery({
+    queryKey: ["unread-notifications-patient-dashboard"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return 0;
+      const { count } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("is_read", false);
+      return count || 0;
+    },
+    refetchInterval: 30000,
+  });
+
+  const { data: recentNotifications = [] } = useQuery({
+    queryKey: ["recent-notifications-patient-dashboard"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      const { data } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      return data || [];
+    },
+    refetchInterval: 30000,
+  });
+
+  const markAllRead = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false);
+    queryClient.invalidateQueries({ queryKey: ["unread-notifications-patient-dashboard"] });
+    queryClient.invalidateQueries({ queryKey: ["recent-notifications-patient-dashboard"] });
+  };
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
     upcomingAppointments: 0,
