@@ -114,7 +114,7 @@ const App = () => (
             <Route path="/invoices" element={<DoctorInvoices />} />
             <Route path="/referral-doctors" element={<ReferralDoctors />} />
             <Route path="/cpd-certificates" element={<CPDCertificates />} />
-            <Route path="/notifications" element={<Notifications />} />
+            {/* Notifications removed from route - now a dashboard badge */}
             <Route path="/connections" element={<Connections />} />
             
             {/* Patient routes */}

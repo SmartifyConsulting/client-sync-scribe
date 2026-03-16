@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy, Clock, Mail, Save, Award } from "lucide-react";
+import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy, Clock, Mail, Save, Award, Volume2 } from "lucide-react";
 import { PatientImport } from "@/components/patients/PatientImport";
 import { useToast as useGlobalToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -769,20 +769,48 @@ export default function Profile() {
         <div className="mt-6 space-y-2">
           <Label>Narration Voice</Label>
           <p className="text-sm text-muted-foreground mb-2">Select the voice used for briefing narration</p>
-          <Select value={(profile as any)?.narration_voice || "nova"} onValueChange={async (value) => {
-            await updateProfile({ narration_voice: value } as any);
-            toast({ title: "Voice updated", description: `Narration voice set to ${value}` });
-          }}>
-            <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="alloy">Alloy</SelectItem>
-              <SelectItem value="echo">Echo</SelectItem>
-              <SelectItem value="fable">Fable</SelectItem>
-              <SelectItem value="nova">Nova</SelectItem>
-              <SelectItem value="onyx">Onyx</SelectItem>
-              <SelectItem value="shimmer">Shimmer</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-3">
+            <Select value={(profile as any)?.narration_voice || "nova"} onValueChange={async (value) => {
+              await updateProfile({ narration_voice: value } as any);
+              toast({ title: "Voice updated", description: `Narration voice set to ${value}` });
+            }}>
+              <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="alloy">Alloy</SelectItem>
+                <SelectItem value="echo">Echo</SelectItem>
+                <SelectItem value="fable">Fable</SelectItem>
+                <SelectItem value="nova">Nova</SelectItem>
+                <SelectItem value="onyx">Onyx</SelectItem>
+                <SelectItem value="shimmer">Shimmer</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={async () => {
+                const voice = (profile as any)?.narration_voice || "nova";
+                toast({ title: "Generating preview...", description: `Playing sample with "${voice}" voice` });
+                try {
+                  const response = await supabase.functions.invoke('narrate-briefing', {
+                    body: { text: "Hello, this is your MediPad briefing voice. Here is a preview of how your narrations will sound.", voice },
+                  });
+                  if (response.error) throw response.error;
+                  // response.data is a Blob for audio
+                  const blob = response.data;
+                  const url = URL.createObjectURL(blob);
+                  const audio = new Audio(url);
+                  audio.play();
+                  audio.onended = () => URL.revokeObjectURL(url);
+                } catch (err: any) {
+                  toast({ title: "Preview failed", description: err.message || "Could not generate voice preview", variant: "destructive" });
+                }
+              }}
+            >
+              <Volume2 className="h-4 w-4" />
+              Preview
+            </Button>
+          </div>
         </div>
       </div>
       <div className="rounded-xl border border-border bg-card p-6 shadow-sm">

@@ -146,7 +146,7 @@ export default function ReferralDoctors() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Referral Doctors</h1>
+          <h1 className="text-3xl font-bold text-foreground">Referrals</h1>
           <p className="mt-1 text-muted-foreground">Manage doctors you refer patients to</p>
         </div>
         <Button onClick={() => { setShowForm(true); setEditingId(null); setForm({ first_name: "", last_name: "", practice_number: "", address: "", email: "", phone: "", specialty: "" }); setCustomSpecialty(""); }} className="gap-2">

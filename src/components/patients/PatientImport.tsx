@@ -50,6 +50,7 @@ interface ParsedPatient {
   id_passport_number?: string;
   gender?: string;
   marital_status?: string;
+  status?: string;
 }
 
 // Common column name mappings
@@ -196,7 +197,11 @@ const COLUMN_MAPPINGS: Record<string, keyof ParsedPatient> = {
   // Marital status
   "marital status": "marital_status",
   "marital": "marital_status",
-  "status": "marital_status",
+  
+  // Status
+  "status": "status",
+  "patient status": "status",
+  "active/inactive": "status",
 };
 
 function mapColumnName(header: string): keyof ParsedPatient | null {
@@ -480,7 +485,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
           id_passport_number: patient.id_passport_number || null,
           gender: patient.gender || null,
           marital_status: patient.marital_status || null,
-          status: "active",
+          status: patient.status || "active",
         });
 
         if (error) {
@@ -600,8 +605,9 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
             </Button>
           </div>
 
-          <div className="border rounded-lg overflow-auto" style={{ maxHeight: '500px' }}>
-            <Table>
+          <div className="border rounded-lg overflow-hidden" style={{ maxHeight: '500px' }}>
+            <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: '500px' }}>
+            <Table style={{ minWidth: '1400px' }}>
               <TableHeader>
                 <TableRow>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[40px]">#</TableHead>
@@ -615,6 +621,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[150px]">Employer</TableHead>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[130px]">Allergies</TableHead>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[130px]">Address</TableHead>
+                  <TableHead className="sticky top-0 bg-card z-10 min-w-[100px]">Status</TableHead>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[60px]"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -632,6 +639,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
                     <TableCell><Input className="h-8 text-sm" value={patient.employer || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], employer: e.target.value }; setParsedPatients(updated); }} /></TableCell>
                     <TableCell><Input className="h-8 text-sm" value={patient.allergies || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], allergies: e.target.value }; setParsedPatients(updated); }} /></TableCell>
                     <TableCell><Input className="h-8 text-sm" value={patient.physical_address || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], physical_address: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell><Input className="h-8 text-sm" value={patient.status || "active"} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], status: e.target.value }; setParsedPatients(updated); }} /></TableCell>
                     <TableCell>
                       <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => setParsedPatients(parsedPatients.filter((_, i) => i !== index))}>
                         <X className="h-3.5 w-3.5" />
@@ -641,6 +649,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
                 ))}
               </TableBody>
             </Table>
+            </div>
           </div>
 
           {isImporting && (

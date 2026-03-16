@@ -1,4 +1,4 @@
-import { Users, Calendar, TrendingUp, LogOut, Award } from "lucide-react";
+import { Users, Calendar, TrendingUp, LogOut, Award, Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { TodaysBriefing } from "@/components/dashboard/TodaysBriefing";
@@ -9,12 +9,67 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 export default function Dashboard() {
   const { profile, loading: profileLoading } = useProfile();
   const { isDoctor, loading: roleLoading } = useUserRole();
+  const queryClient = useQueryClient();
+
+  // Query for unread notifications count (invitations + document receipts only)
+  const { data: unreadNotifCount = 0 } = useQuery({
+    queryKey: ["unread-notifications-dashboard"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return 0;
+
+      const { count, error } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("is_read", false)
+        .in("type", ["invitation", "document", "connection_request", "reward", "streak"]);
+
+      if (error) return 0;
+      return count || 0;
+    },
+    refetchInterval: 30000,
+  });
+
+  // Query for recent notifications
+  const { data: recentNotifications = [] } = useQuery({
+    queryKey: ["recent-notifications-dashboard"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (error) return [];
+      return data || [];
+    },
+    refetchInterval: 30000,
+  });
+
+  const markAllRead = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("user_id", user.id)
+      .eq("is_read", false);
+    queryClient.invalidateQueries({ queryKey: ["unread-notifications-dashboard"] });
+    queryClient.invalidateQueries({ queryKey: ["recent-notifications-dashboard"] });
+  };
 
   // Query for unread messages count
   const { data: unreadMessagesCount = 0 } = useQuery({
@@ -122,6 +177,42 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {/* Notification Bell */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell className="h-5 w-5" />
+                {unreadNotifCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+                    {unreadNotifCount > 99 ? "99+" : unreadNotifCount}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-0" align="end">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                <p className="text-sm font-semibold">Notifications</p>
+                {unreadNotifCount > 0 && (
+                  <Button variant="ghost" size="sm" className="text-xs h-7" onClick={markAllRead}>
+                    Mark all read
+                  </Button>
+                )}
+              </div>
+              <div className="max-h-64 overflow-y-auto">
+                {recentNotifications.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-6">No notifications</p>
+                ) : (
+                  recentNotifications.map((n: any) => (
+                    <div key={n.id} className={`px-4 py-3 border-b border-border/50 text-sm ${!n.is_read ? 'bg-primary/5' : ''}`}>
+                      <p className="font-medium text-foreground">{n.title}</p>
+                      {n.description && <p className="text-xs text-muted-foreground mt-0.5">{n.description}</p>}
+                      <p className="text-xs text-muted-foreground mt-1">{new Date(n.created_at).toLocaleDateString()}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
           <Link to="/profile" className="rounded-xl p-2 hover:bg-accent transition-colors relative">
             <Avatar className="h-10 w-10 border-2 border-primary/20">
               <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} className="object-cover" />
