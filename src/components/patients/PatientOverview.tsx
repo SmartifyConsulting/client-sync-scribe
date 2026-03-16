@@ -386,18 +386,9 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
         </div>
       </div>
 
-      {/* Chronic Medication Badge */}
+      {/* Chronic Medication Badge + Adherence Streak */}
       {patient.is_chronic && (
-        <div className="rounded-xl border border-terracotta/30 bg-terracotta/5 p-4">
-          <div className="flex items-center gap-2">
-            <Pill className="h-5 w-5 text-terracotta" />
-            <span className="font-semibold text-foreground">Chronic Medication Patient</span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-terracotta/10 px-2.5 py-1 text-xs font-bold text-terracotta">
-              Chronic
-            </span>
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">This patient is on chronic medication and can earn adherence rewards (moolas) for daily medication logging.</p>
-        </div>
+        <ChronicAdherenceSection patientId={patient.id} patientName={patient.name} />
       )}
 
       {/* Conflicting Medication Alert */}
