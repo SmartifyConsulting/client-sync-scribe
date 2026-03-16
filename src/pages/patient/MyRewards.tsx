@@ -51,20 +51,20 @@ export default function MyRewards() {
       <div>
         <h1 className="text-3xl font-bold text-foreground">My Rewards</h1>
         <p className="mt-1 text-muted-foreground">
-          Track your lollipops, milestones, and health streaks
+          Track your Moolas, milestones, and health streaks
         </p>
       </div>
 
       {/* Hero Stats */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-950/30 dark:to-pink-900/20 border-pink-200 dark:border-pink-800/30">
+        <Card className="bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950/30 dark:to-teal-900/20 border-emerald-200 dark:border-emerald-800/30">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Lollipops</p>
-                <p className="text-4xl font-bold text-pink-600 dark:text-pink-400">{lollipopCount}</p>
+                <p className="text-sm text-muted-foreground">Total Moolas</p>
+                <p className="text-4xl font-bold text-emerald-600 dark:text-emerald-400">{lollipopCount}</p>
               </div>
-              <span className="text-5xl">🍭</span>
+              <span className="text-5xl font-bold text-emerald-600">Ⓜ</span>
             </div>
           </CardContent>
         </Card>
@@ -134,7 +134,7 @@ export default function MyRewards() {
                   Progress to Next Milestone
                 </CardTitle>
                 <CardDescription>
-                  {lollipopCount} / {nextMilestone.count} lollipops to "{nextMilestone.label}"
+                  {lollipopCount} / {nextMilestone.count} Moolas to "{nextMilestone.label}"
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -153,14 +153,14 @@ export default function MyRewards() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Gift className="h-5 w-5 text-pink-500" />
+                <Gift className="h-5 w-5 text-emerald-500" />
                 Recent Rewards
               </CardTitle>
             </CardHeader>
             <CardContent>
               {rewards.length === 0 ? (
                 <div className="text-center py-8">
-                  <span className="text-5xl mb-4 block">🍭</span>
+                  <span className="text-5xl mb-4 block font-bold text-emerald-600">Ⓜ</span>
                   <p className="text-muted-foreground">No rewards yet. Start your health journey!</p>
                 </div>
               ) : (
@@ -168,7 +168,7 @@ export default function MyRewards() {
                   {rewards.slice(0, 5).map((reward) => (
                     <div key={reward.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl">🍭</span>
+                        <span className="text-2xl font-bold text-emerald-600">Ⓜ</span>
                         <div>
                           <p className="font-medium">{reward.visit_category}</p>
                           <p className="text-sm text-muted-foreground">
@@ -176,8 +176,8 @@ export default function MyRewards() {
                           </p>
                         </div>
                       </div>
-                      <Badge variant="secondary" className="bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300">
-                        +{reward.lollipops_count}
+                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                        +{reward.lollipops_count} Ⓜ
                       </Badge>
                     </div>
                   ))}
@@ -195,7 +195,7 @@ export default function MyRewards() {
                 Milestone Achievements
               </CardTitle>
               <CardDescription>
-                Collect lollipops to unlock milestone badges
+                Collect Moolas to unlock milestone badges
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -220,7 +220,7 @@ export default function MyRewards() {
                             {milestone.label}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {milestone.count} lollipops
+                            {milestone.count} Moolas
                           </p>
                         </div>
                       </div>
@@ -245,7 +245,7 @@ export default function MyRewards() {
                 Health Streaks
               </CardTitle>
               <CardDescription>
-                Maintain regular health checkups to earn bonus lollipops
+                Maintain regular health checkups to earn bonus Moolas
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -301,7 +301,7 @@ export default function MyRewards() {
                         </div>
                         
                         <div className="mt-2 text-xs text-muted-foreground">
-                          Earns: {streak.lollipops_awarded} 🍭 per completion
+                          Earns: {streak.lollipops_awarded} Ⓜ per completion
                         </div>
                       </div>
                     );
@@ -320,13 +320,13 @@ export default function MyRewards() {
                 Full Reward History
               </CardTitle>
               <CardDescription>
-                Complete log of all lollipops earned
+                Complete log of all Moolas earned
               </CardDescription>
             </CardHeader>
             <CardContent>
               {rewards.length === 0 ? (
                 <div className="text-center py-8">
-                  <span className="text-5xl mb-4 block">🍭</span>
+                  <span className="text-5xl mb-4 block font-bold text-emerald-600">Ⓜ</span>
                   <p className="text-muted-foreground">No rewards yet</p>
                 </div>
               ) : (
@@ -335,7 +335,7 @@ export default function MyRewards() {
                     <TableRow>
                       <TableHead>Date</TableHead>
                       <TableHead>Visit Type</TableHead>
-                      <TableHead className="text-right">Lollipops</TableHead>
+                      <TableHead className="text-right">Moolas</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -355,8 +355,8 @@ export default function MyRewards() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <span className="text-pink-600 font-semibold">
-                            +{reward.lollipops_count} 🍭
+                          <span className="text-emerald-600 font-semibold">
+                            +{reward.lollipops_count} Ⓜ
                           </span>
                         </TableCell>
                       </TableRow>

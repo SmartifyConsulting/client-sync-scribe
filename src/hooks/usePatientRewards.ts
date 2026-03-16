@@ -287,8 +287,8 @@ export function usePatientRewards(patientId?: string) {
       // Create welcome notification
       await supabase.from('notifications').insert({
         user_id: patientUserId,
-        title: '🍭 Welcome! You earned your first lollipop!',
-        description: `Congratulations on signing up! You received ${lollipopsToAward} lollipop${lollipopsToAward > 1 ? 's' : ''} as a welcome bonus.`,
+        title: 'Ⓜ Welcome! You earned your first Moola!',
+        description: `Congratulations on signing up! You received ${lollipopsToAward} Moola${lollipopsToAward > 1 ? 's' : ''} as a welcome bonus.`,
         type: 'reward',
         reference_id: data.id,
       });

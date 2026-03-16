@@ -280,6 +280,8 @@ export default function DoctorInvoices() {
 
       if (error) throw error;
 
+      const updatedInvoice = invoices.find(inv => inv.id === invoiceId);
+
       setInvoices(prev => prev.map(inv => 
         inv.id === invoiceId 
           ? { ...inv, status: 'paid', paid_at: new Date().toISOString() }
@@ -290,6 +292,38 @@ export default function DoctorInvoices() {
         title: "Invoice Updated",
         description: "Invoice marked as paid",
       });
+
+      // Auto-forward to claims email if patient has one
+      if (updatedInvoice?.patient?.id) {
+        try {
+          const { data: patientData } = await supabase
+            .from('patients')
+            .select('claims_email, name')
+            .eq('id', updatedInvoice.patient.id)
+            .maybeSingle();
+
+          if (patientData?.claims_email) {
+            await supabase.functions.invoke('send-document-email', {
+              body: {
+                to: patientData.claims_email,
+                subject: `Invoice ${updatedInvoice.invoice_number} - ${patientData.name}`,
+                documentName: `Invoice ${updatedInvoice.invoice_number}`,
+                documentContent: `Invoice Number: ${updatedInvoice.invoice_number}\nPatient: ${patientData.name}\nDescription: ${updatedInvoice.description}\nAmount: ${updatedInvoice.amount}\nStatus: Paid\nPaid At: ${new Date().toLocaleDateString()}`,
+                senderName: profile?.full_name || 'Doctor',
+                practiceName: profile?.practice_number || undefined,
+              },
+            });
+
+            toast({
+              title: "Claim Forwarded",
+              description: `Invoice automatically sent to ${patientData.claims_email}`,
+            });
+          }
+        } catch (claimError) {
+          console.error("Error forwarding claim:", claimError);
+          // Don't show error toast - claim forwarding is best-effort
+        }
+      }
     } catch (error: any) {
       console.error("Error updating invoice:", error);
       toast({

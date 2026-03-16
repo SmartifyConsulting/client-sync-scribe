@@ -10,6 +10,7 @@ import {
   Plus,
   Trash2,
   Eye,
+  Send,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DocumentPreview } from "./DocumentPreview";

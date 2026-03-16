@@ -30,11 +30,11 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
   return (
     <div className="space-y-6">
       {/* Summary Card */}
-      <Card className="bg-gradient-to-br from-pink-50 to-purple-50 dark:from-pink-950/20 dark:to-purple-950/20 border-pink-200 dark:border-pink-800/30">
+      <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 border-emerald-200 dark:border-emerald-800/30">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <span className="text-3xl">🍭</span>
-            Lollipop Summary
+            <span className="text-3xl font-bold text-emerald-600">Ⓜ</span>
+            Moola Summary
           </CardTitle>
           <CardDescription>
             Total rewards earned for healthy visits
@@ -45,9 +45,9 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
             <div className="rounded-lg bg-white/50 dark:bg-black/20 p-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <Award className="h-4 w-4" />
-                Total Lollipops
+                Total Moolas
               </div>
-              <div className="text-4xl font-bold text-pink-600 dark:text-pink-400">
+              <div className="text-4xl font-bold text-emerald-600 dark:text-emerald-400">
                 {totalCount}
               </div>
             </div>
@@ -56,7 +56,7 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
                 <Gift className="h-4 w-4" />
                 Rewards Earned
               </div>
-              <div className="text-4xl font-bold text-purple-600 dark:text-purple-400">
+              <div className="text-4xl font-bold text-teal-600 dark:text-teal-400">
                 {rewards.length}
               </div>
             </div>
@@ -80,20 +80,20 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Gift className="h-5 w-5 text-pink-500" />
+            <Gift className="h-5 w-5 text-emerald-500" />
             Reward History
           </CardTitle>
           <CardDescription>
-            Detailed log of all lollipops earned
+            Detailed log of all Moolas earned
           </CardDescription>
         </CardHeader>
         <CardContent>
           {rewards.length === 0 ? (
             <div className="text-center py-12">
-              <span className="text-5xl mb-4 block">🍭</span>
-              <p className="text-muted-foreground">No lollipops earned yet</p>
+              <span className="text-5xl mb-4 block font-bold text-emerald-600">Ⓜ</span>
+              <p className="text-muted-foreground">No Moolas earned yet</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Attend healthy visits to start collecting lollipops!
+                Attend healthy visits to start collecting Moolas!
               </p>
             </div>
           ) : (
@@ -102,7 +102,7 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
                 <TableRow>
                   <TableHead>Date</TableHead>
                   <TableHead>Visit Type</TableHead>
-                  <TableHead>Lollipops</TableHead>
+                  <TableHead>Moolas</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -123,8 +123,8 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <span className="inline-flex items-center gap-1 text-pink-600 font-semibold">
-                        +{reward.lollipops_count || 1} 🍭
+                      <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold">
+                        +{reward.lollipops_count || 1} Ⓜ
                       </span>
                     </TableCell>
                   </TableRow>
