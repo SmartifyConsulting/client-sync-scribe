@@ -35,6 +35,7 @@ type DocType =
   | "medical_certificate"
   | "referral_letter"
   | "general_letter"
+  | "hospital_admission"
   | "audio"
   | "video"
   | "file";
