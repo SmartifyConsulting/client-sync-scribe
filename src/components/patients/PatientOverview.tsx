@@ -130,57 +130,109 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
     });
   };
 
-  // Render summary as timeline bullets with dates
+  const YEAR_COLORS = [
+    "text-primary border-primary",
+    "text-blue-600 border-blue-500",
+    "text-amber-600 border-amber-500",
+    "text-emerald-600 border-emerald-500",
+    "text-violet-600 border-violet-500",
+    "text-rose-600 border-rose-500",
+  ];
+
+  const YEAR_DOT_COLORS = [
+    "bg-primary",
+    "bg-blue-500",
+    "bg-amber-500",
+    "bg-emerald-500",
+    "bg-violet-500",
+    "bg-rose-500",
+  ];
+
+  // Render summary as timeline bullets with dates, grouped by year
   const renderSummaryTimeline = (text: string) => {
-    // Strip XML-like tags for splitting, but preserve for rendering
     const cleanText = text.replace(/<\/?(?:med|symptom|condition)>/g, '');
-    // Split by sentence endings or bullet markers
     const sentences = cleanText.split(/(?<=[.!?])\s+|(?:^|\n)\s*[-•]\s*/).filter(s => s.trim().length > 0);
     
     if (sentences.length <= 1) {
       return <div className="text-foreground leading-relaxed">{renderInlineHighlights(text)}</div>;
     }
 
-    // Parse date prefixes from sentences and group undated items under previous date
     const datePattern = /^(\d{1,2}\s+\w+\s+\d{4}|\w+\s+\d{1,2},?\s+\d{4}|\d{4}-\d{2}-\d{2}|\w+\s+\d{4})\s*[-–:]\s*/;
     
     interface TimelineItem {
       date: string | null;
       lines: string[];
+      year: number | null;
     }
     
     const timelineItems: TimelineItem[] = [];
+    const currentYear = new Date().getFullYear();
     
     sentences.forEach((sentence) => {
       const match = sentence.match(datePattern);
       if (match) {
-        timelineItems.push({ date: match[1], lines: [sentence.replace(datePattern, '').trim()] });
+        const dateStr = match[1];
+        // Try to extract year from date string
+        const yearMatch = dateStr.match(/(\d{4})/);
+        const year = yearMatch ? parseInt(yearMatch[1]) : null;
+        timelineItems.push({ date: dateStr, lines: [sentence.replace(datePattern, '').trim()], year });
       } else if (timelineItems.length > 0) {
-        // Attach to previous dated item
         timelineItems[timelineItems.length - 1].lines.push(sentence.trim());
       } else {
-        timelineItems.push({ date: null, lines: [sentence.trim()] });
+        timelineItems.push({ date: null, lines: [sentence.trim()], year: null });
       }
     });
 
+    // Group by year
+    const yearGroups: Record<string, TimelineItem[]> = {};
+    timelineItems.forEach((item) => {
+      const yearKey = item.year ? String(item.year) : String(currentYear);
+      if (!yearGroups[yearKey]) yearGroups[yearKey] = [];
+      yearGroups[yearKey].push(item);
+    });
+
+    const sortedYears = Object.keys(yearGroups).sort((a, b) => parseInt(b) - parseInt(a));
+
     return (
-      <div className="space-y-3">
-        {timelineItems.map((item, i) => (
-          <div key={i} className="flex gap-3">
-            <div className="flex flex-col items-center">
-              <div className="w-2.5 h-2.5 rounded-full bg-primary mt-1.5 shrink-0" />
-              {i < timelineItems.length - 1 && <div className="w-0.5 flex-1 bg-border mt-1" />}
-            </div>
-            <div className="pb-2">
-              {item.date && (
-                <p className="text-xs font-bold text-primary mb-0.5">{item.date}</p>
-              )}
-              {item.lines.map((line, j) => (
-                <p key={j} className="text-sm text-foreground leading-relaxed">{line}</p>
-              ))}
-            </div>
-          </div>
-        ))}
+      <div className="space-y-4">
+        {sortedYears.map((yearStr, yearIndex) => {
+          const year = parseInt(yearStr);
+          const isCurrentYear = year === currentYear;
+          const colorClass = YEAR_COLORS[yearIndex % YEAR_COLORS.length];
+          const dotColor = YEAR_DOT_COLORS[yearIndex % YEAR_DOT_COLORS.length];
+          const items = yearGroups[yearStr];
+
+          return (
+            <Collapsible key={yearStr} defaultOpen={isCurrentYear}>
+              <CollapsibleTrigger className={`flex items-center gap-2 w-full text-left px-2 py-1.5 rounded-lg hover:bg-muted/50 transition-colors font-semibold text-sm ${colorClass}`}>
+                <ChevronDown className="h-4 w-4 transition-transform data-[state=closed]:rotate-[-90deg]" />
+                <span className={`w-3 h-3 rounded-full ${dotColor}`} />
+                {yearStr}
+                <Badge variant="secondary" className="ml-auto text-xs">{items.length} event{items.length !== 1 ? 's' : ''}</Badge>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="space-y-3 ml-4 mt-2 pl-4 border-l-2" style={{ borderColor: `var(--${yearIndex === 0 ? 'primary' : 'border'})` }}>
+                  {items.map((item, i) => (
+                    <div key={i} className="flex gap-3">
+                      <div className="flex flex-col items-center">
+                        <div className={`w-2.5 h-2.5 rounded-full ${dotColor} mt-1.5 shrink-0`} />
+                        {i < items.length - 1 && <div className="w-0.5 flex-1 bg-border mt-1" />}
+                      </div>
+                      <div className="pb-2">
+                        {item.date && (
+                          <p className={`text-xs font-bold mb-0.5 ${colorClass.split(' ')[0]}`}>{item.date}</p>
+                        )}
+                        {item.lines.map((line, j) => (
+                          <p key={j} className="text-sm text-foreground leading-relaxed">{line}</p>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          );
+        })}
       </div>
     );
   };
