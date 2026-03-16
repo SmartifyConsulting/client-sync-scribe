@@ -85,6 +85,7 @@ export default function Sessions() {
   const latestTranscriptRef = useRef<string>("");
   const currentSessionIdRef = useRef<string | null>(null);
   const notesRef = useRef<string>("");
+  const sessionStartTimeRef = useRef<Date | null>(null);
 
   const navigate = useNavigate();
   const { patients, loading: patientsLoading } = usePatients();
