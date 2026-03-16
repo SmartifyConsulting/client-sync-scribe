@@ -4,7 +4,7 @@ import {
   LayoutDashboard,
   Users,
   Calendar,
-  Mic,
+  FileText,
   Settings,
   Pill,
   Receipt,

@@ -13,7 +13,7 @@ import {
   Pill,
   Receipt,
   Loader2,
-  Mail,
+  MessageSquare,
   Bell,
   User,
   LucideIcon,

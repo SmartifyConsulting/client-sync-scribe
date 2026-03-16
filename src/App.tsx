@@ -129,6 +129,8 @@ const App = () => (
             <Route path="/patient/rewards" element={<MyRewards />} />
             <Route path="/patient/health-album" element={<Navigate to="/dashboard" replace />} />
             <Route path="/patient/tasks" element={<PatientTasks />} />
+            <Route path="/patient/documents" element={<PatientDocuments />} />
+            <Route path="/patient/round-table" element={<PatientRoundTable />} />
             
             {/* Admin routes */}
             <Route path="/admin/pricing" element={<PricingAdmin />} />
