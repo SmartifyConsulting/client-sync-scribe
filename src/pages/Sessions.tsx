@@ -224,6 +224,7 @@ export default function Sessions() {
           patient_id: patientId!,
           title: `Session - ${new Date().toLocaleDateString()}`,
           started_at: sessionStartTimeRef.current?.toISOString() || new Date().toISOString(),
+          audio_url: savedAudioUrlRef.current || undefined,
         }
       );
       
