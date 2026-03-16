@@ -380,9 +380,43 @@ export default function PatientProfile() {
             </p>
           </div>
 
-          {/* Media Capture + Create Document on same row */}
-          <div className="flex items-center gap-2 flex-wrap">
+          {/* Media Capture + Upload File + Create Document on same row, centered */}
+          <div className="flex items-center gap-2 flex-wrap justify-center">
             <MediaCapture patientId={patient.id} patientName={patient.name} onSaved={fetchDocuments} />
+            <Button variant="outline" className="gap-2 h-11" onClick={() => {
+              const input = document.createElement('input');
+              input.type = 'file';
+              input.accept = 'audio/*,video/*,image/*,.pdf,.doc,.docx';
+              input.onchange = async (e) => {
+                const file = (e.target as HTMLInputElement).files?.[0];
+                if (!file) return;
+                try {
+                  const fileName = `${patient.id}/${Date.now()}-${file.name}`;
+                  const { error: uploadError } = await supabase.storage.from("patient-media").upload(fileName, file);
+                  if (uploadError) throw uploadError;
+                  const { data: { publicUrl } } = supabase.storage.from("patient-media").getPublicUrl(fileName);
+                  const { data: { user } } = await supabase.auth.getUser();
+                  if (!user) throw new Error("Not authenticated");
+                  await supabase.from("documents").insert({
+                    name: file.name,
+                    content: `[Uploaded File] ${file.name}`,
+                    user_id: user.id,
+                    patient_id: patient.id,
+                    patient_name: patient.name,
+                    media_url: publicUrl,
+                    media_type: file.type.startsWith("video") ? "video" : file.type.startsWith("audio") ? "audio" : "file",
+                  });
+                  toast({ title: "File uploaded", description: `${file.name} saved to documents` });
+                  fetchDocuments();
+                } catch (err: any) {
+                  toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+                }
+              };
+              input.click();
+            }}>
+              <Upload className="h-4 w-4" />
+              Upload File
+            </Button>
             <Button variant="outline" className="gap-2 h-11" onClick={() => setShowTemplateSelector(true)}>
               <Plus className="h-4 w-4" />
               Create New Document
