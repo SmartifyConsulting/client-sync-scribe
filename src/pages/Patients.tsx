@@ -676,8 +676,8 @@ export default function Patients() {
                 {mePatient && (
                   <>
                     <tr>
-                      <td colSpan={6} className="px-6 py-2 bg-secondary/30 sticky top-0">
-                        <span className="text-sm font-bold text-secondary">MY RECORD</span>
+                      <td colSpan={6} className="px-6 py-2 bg-terracotta/20 sticky top-0">
+                        <span className="text-sm font-bold text-terracotta">MY RECORD</span>
                       </td>
                     </tr>
                     <tr className="group transition-colors bg-secondary/5 hover:bg-secondary/10 border-l-2 border-secondary">
