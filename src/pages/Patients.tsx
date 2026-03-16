@@ -134,7 +134,7 @@ export default function Patients() {
         patient_user_id: user.id,
       });
     }
-  }, [loading, user, patients]);
+  }, [loading, user, patients, profile]);
 
   const filteredPatients = patients.filter((patient) => {
     // Name filter
