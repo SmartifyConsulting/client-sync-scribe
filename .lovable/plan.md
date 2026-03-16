@@ -1,39 +1,59 @@
 
 
-# Fix: Make Shapes and Text Selectable, Movable, and Resizable
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## Root Cause
+## 1. Increase Logo Size by 130%
 
-Shapes (circles, rectangles, lines, arrows) and text elements are drawn directly onto the HTML `<canvas>` in `renderCanvas()` (lines 130-180). Once drawn on canvas, they become pixels — **not interactive DOM elements**. You can't click on pixels to select them.
+Scale all logo instances by 130%:
 
-Only `anatomy` elements work because they're rendered as **HTML overlay `<div>`s** (lines 937-986) positioned absolutely over the canvas, with mouse/touch handlers for drag and resize.
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-## Solution
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-Render shape and text elements as HTML overlays (like anatomy), not just canvas pixels. This gives them DOM presence so they can be clicked, dragged, and resized.
+## 2. Fix Practice Number Not Persisting
 
-### Changes to `src/components/drawings/DrawingPad.tsx`:
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-1. **Stop rendering shapes/text on canvas** — In `renderCanvas()`, skip elements of type `"shape"` and `"text"` (just like `"anatomy"` is already skipped at line 134).
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
 
-2. **Render shape elements as SVG overlays** — After the anatomy overlays block (line 986), add a new block that maps over `shape` and `text` elements and renders them as absolutely positioned HTML/SVG overlays:
-   - **Circle**: An `<svg>` with an `<ellipse>` element, positioned using a bounding box derived from center + radius.
-   - **Rectangle**: An `<svg>` with a `<rect>`.
-   - **Line/Arrow**: An `<svg>` with a `<line>` and optional arrowhead `<polygon>`.
-   - **Text**: A `<div>` with the text content styled with the element's color and font size.
+## 3. Make Partner Email Required and Create Pending Users
 
-3. **Attach drag and resize handlers** — Each overlay gets the same `handleElementDragStart` and `handleResizeStart` handlers already used by anatomy elements. Selection border and corner resize handles are identical to anatomy's pattern.
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
 
-4. **Compute bounding boxes** — For each shape type, calculate `left`, `top`, `width`, `height`:
-   - Circle: `x - radius, y - radius, 2*radius, 2*radius`
-   - Rectangle: `min(x, endX), min(y, endY), abs(endX-x), abs(endY-y)`
-   - Line/Arrow: `min(x, endX), min(y, endY), abs(endX-x)+padding, abs(endY-y)+padding`
-   - Text: approximate from font size and text length
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
 
-5. **Update drag/resize to work for shapes** — When a shape is moved, update `x`, `y`, `endX`, `endY` together. When resized, scale the shape proportionally.
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
 
-6. **Add "select" tool behavior** — When tool is `"select"`, clicking on the canvas overlay of any element selects it (already works for anatomy, will now work for shapes/text too). Add a Delete key handler to remove the selected element.
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
+
+## Technical Summary
+
+### Database Migration
+- Add `email text` column to `practice_partners` table
 
 ### Files Modified
-- `src/components/drawings/DrawingPad.tsx` — All changes in one file
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 

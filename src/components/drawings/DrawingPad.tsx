@@ -128,55 +128,11 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           ctx.stroke();
         }
       } else if (element.type === "text") {
-        ctx.fillStyle = element.color || "#000000";
-        ctx.font = `${element.strokeWidth || 16}px sans-serif`;
-        ctx.fillText(element.data.text, element.x, element.y);
+        // Text elements are rendered as overlays in React
       } else if (element.type === "anatomy") {
         // Anatomy elements are rendered as overlays in React
       } else if (element.type === "shape") {
-        ctx.strokeStyle = element.color || "#000000";
-        ctx.lineWidth = element.strokeWidth || 2;
-        
-        if (element.data.shapeType === "line" || element.data.shapeType === "arrow") {
-          ctx.beginPath();
-          ctx.moveTo(element.x, element.y);
-          ctx.lineTo(element.data.endX, element.data.endY);
-          ctx.stroke();
-          
-          if (element.data.shapeType === "arrow") {
-            const angle = Math.atan2(element.data.endY - element.y, element.data.endX - element.x);
-            const headLen = 15;
-            ctx.beginPath();
-            ctx.moveTo(element.data.endX, element.data.endY);
-            ctx.lineTo(
-              element.data.endX - headLen * Math.cos(angle - Math.PI / 6),
-              element.data.endY - headLen * Math.sin(angle - Math.PI / 6)
-            );
-            ctx.moveTo(element.data.endX, element.data.endY);
-            ctx.lineTo(
-              element.data.endX - headLen * Math.cos(angle + Math.PI / 6),
-              element.data.endY - headLen * Math.sin(angle + Math.PI / 6)
-            );
-            ctx.stroke();
-          }
-        } else if (element.data.shapeType === "circle") {
-          ctx.beginPath();
-          const radius = Math.sqrt(
-            Math.pow(element.data.endX - element.x, 2) + 
-            Math.pow(element.data.endY - element.y, 2)
-          );
-          ctx.arc(element.x, element.y, radius, 0, 2 * Math.PI);
-          ctx.stroke();
-        } else if (element.data.shapeType === "rectangle") {
-          ctx.beginPath();
-          ctx.rect(
-            element.x, 
-            element.y, 
-            element.data.endX - element.x, 
-            element.data.endY - element.y
-          );
-          ctx.stroke();
-        }
+        // Shape elements are rendered as overlays in React
       }
       
       ctx.restore();
@@ -250,6 +206,12 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const coords = getCanvasCoords(e);
+
+    if (tool === "select") {
+      setSelectedElement(null);
+      return;
+    }
+
     setIsDrawing(true);
 
     if (tool === "pen" || tool === "eraser") {
@@ -472,7 +434,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     setShapeStart(null);
   };
 
-  // Resize handlers for anatomy overlays
+  // Resize handlers for overlays (anatomy, shapes, text)
   const handleResizeStart = (e: React.MouseEvent | React.TouchEvent, elementId: string) => {
     e.stopPropagation();
     e.preventDefault();
@@ -488,12 +450,35 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       clientY = e.clientY;
     }
 
+    // Compute initial width/height for shapes
+    let startW = el.width || 120;
+    let startH = el.height || 120;
+    if (el.type === "shape") {
+      const { shapeType, endX, endY } = el.data;
+      if (shapeType === "circle") {
+        const radius = Math.sqrt(Math.pow(endX - el.x, 2) + Math.pow(endY - el.y, 2));
+        startW = radius * 2;
+        startH = radius * 2;
+      } else if (shapeType === "rectangle") {
+        startW = Math.abs(endX - el.x);
+        startH = Math.abs(endY - el.y);
+      } else {
+        startW = Math.abs(endX - el.x) + 8;
+        startH = Math.abs(endY - el.y) + 8;
+      }
+    } else if (el.type === "text") {
+      const fontSize = el.strokeWidth || 16;
+      const text = el.data.text || "";
+      startW = Math.max(text.length * fontSize * 0.6, 40);
+      startH = fontSize * 1.4;
+    }
+
     setResizing({
       elementId,
       startX: clientX,
       startY: clientY,
-      startW: el.width || 120,
-      startH: el.height || 120,
+      startW,
+      startH,
     });
   };
 
@@ -519,9 +504,34 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       const newH = newW / aspectRatio;
 
       setElements((prev) =>
-        prev.map((el) =>
-          el.id === resizing.elementId ? { ...el, width: newW, height: newH } : el
-        )
+        prev.map((el) => {
+          if (el.id !== resizing.elementId) return el;
+          const updated = { ...el, width: newW, height: newH };
+          // For shapes, scale endX/endY proportionally
+          if (el.type === "shape") {
+            const scale = newW / resizing.startW;
+            const { shapeType, endX, endY } = el.data;
+            if (shapeType === "circle") {
+              const newRadius = newW / 2;
+              updated.data = { ...el.data, endX: el.x + newRadius, endY: el.y };
+            } else if (shapeType === "rectangle") {
+              const dirX = endX >= el.x ? 1 : -1;
+              const dirY = endY >= el.y ? 1 : -1;
+              updated.data = { ...el.data, endX: el.x + dirX * newW, endY: el.y + dirY * newH };
+            } else {
+              // line / arrow
+              const dx = endX - el.x;
+              const dy = endY - el.y;
+              updated.data = { ...el.data, endX: el.x + dx * scale, endY: el.y + dy * scale };
+            }
+          } else if (el.type === "text") {
+            // Scale font size
+            const origFontSize = el.strokeWidth || 16;
+            const scale = newW / resizing.startW;
+            updated.strokeWidth = Math.max(8, Math.round(origFontSize * scale));
+          }
+          return updated;
+        })
       );
     };
 
@@ -584,11 +594,17 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       const dy = clientY - draggingElement.startY;
 
       setElements((prev) =>
-        prev.map((el) =>
-          el.id === draggingElement.elementId
-            ? { ...el, x: draggingElement.elStartX + dx, y: draggingElement.elStartY + dy }
-            : el
-        )
+        prev.map((el) => {
+          if (el.id !== draggingElement.elementId) return el;
+          const updated = { ...el, x: draggingElement.elStartX + dx, y: draggingElement.elStartY + dy };
+          // For shapes, also move endX/endY
+          if (el.type === "shape" && el.data.endX !== undefined && el.data.endY !== undefined) {
+            const origDx = el.data.endX - el.x;
+            const origDy = el.data.endY - el.y;
+            updated.data = { ...el.data, endX: updated.x + origDx, endY: updated.y + origDy };
+          }
+          return updated;
+        })
       );
     };
 
@@ -608,6 +624,21 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       window.removeEventListener("touchend", handleEnd);
     };
   }, [draggingElement, elements]);
+
+  // Delete selected element with Delete/Backspace key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.key === "Delete" || e.key === "Backspace") && selectedElement && !textPosition) {
+        e.preventDefault();
+        const newElements = elements.filter((el) => el.id !== selectedElement);
+        setElements(newElements);
+        addToHistory(newElements);
+        setSelectedElement(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedElement, elements, textPosition]);
 
   const handleAddText = () => {
     if (!textInput || !textPosition) return;
@@ -969,6 +1000,171 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                     "bottom-0 left-0 cursor-sw-resize",
                     "bottom-0 right-0 cursor-se-resize",
                   ].map((pos, idx) => (
+                    <div
+                      key={idx}
+                      className={cn(
+                        "absolute w-3 h-3 bg-primary border border-primary-foreground rounded-sm touch-none",
+                        pos,
+                        selectedElement === el.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                      )}
+                      style={{ transform: "translate(-50%, -50%)" }}
+                      onMouseDown={(e) => handleResizeStart(e, el.id)}
+                      onTouchStart={(e) => handleResizeStart(e, el.id)}
+                    />
+                  ))}
+                </div>
+              );
+            })}
+
+          {/* Shape overlays — rendered as DOM elements for interactivity */}
+          {elements
+            .filter((el) => el.type === "shape")
+            .map((el) => {
+              const { shapeType, endX, endY } = el.data;
+              let left: number, top: number, width: number, height: number;
+              const pad = 4;
+
+              if (shapeType === "circle") {
+                const radius = Math.sqrt(Math.pow(endX - el.x, 2) + Math.pow(endY - el.y, 2));
+                left = el.x - radius;
+                top = el.y - radius;
+                width = radius * 2;
+                height = radius * 2;
+              } else if (shapeType === "rectangle") {
+                left = Math.min(el.x, endX);
+                top = Math.min(el.y, endY);
+                width = Math.abs(endX - el.x);
+                height = Math.abs(endY - el.y);
+              } else {
+                // line / arrow
+                left = Math.min(el.x, endX) - pad;
+                top = Math.min(el.y, endY) - pad;
+                width = Math.abs(endX - el.x) + pad * 2;
+                height = Math.abs(endY - el.y) + pad * 2;
+              }
+
+              // Ensure minimum dimensions
+              width = Math.max(width, 10);
+              height = Math.max(height, 10);
+
+              const svgContent = (() => {
+                const sw = el.strokeWidth || 2;
+                const c = el.color || "#000000";
+                if (shapeType === "circle") {
+                  const r = width / 2;
+                  return (
+                    <svg width={width} height={height} className="pointer-events-none">
+                      <ellipse cx={r} cy={r} rx={r - sw / 2} ry={height / 2 - sw / 2} fill="none" stroke={c} strokeWidth={sw} />
+                    </svg>
+                  );
+                } else if (shapeType === "rectangle") {
+                  return (
+                    <svg width={width} height={height} className="pointer-events-none">
+                      <rect x={sw / 2} y={sw / 2} width={Math.max(0, width - sw)} height={Math.max(0, height - sw)} fill="none" stroke={c} strokeWidth={sw} />
+                    </svg>
+                  );
+                } else {
+                  // line / arrow
+                  const x1 = el.x - left;
+                  const y1 = el.y - top;
+                  const x2 = endX - left;
+                  const y2 = endY - top;
+                  return (
+                    <svg width={width} height={height} className="pointer-events-none">
+                      <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={c} strokeWidth={sw} />
+                      {shapeType === "arrow" && (() => {
+                        const angle = Math.atan2(y2 - y1, x2 - x1);
+                        const headLen = 15;
+                        const ax1 = x2 - headLen * Math.cos(angle - Math.PI / 6);
+                        const ay1 = y2 - headLen * Math.sin(angle - Math.PI / 6);
+                        const ax2 = x2 - headLen * Math.cos(angle + Math.PI / 6);
+                        const ay2 = y2 - headLen * Math.sin(angle + Math.PI / 6);
+                        return (
+                          <>
+                            <line x1={x2} y1={y2} x2={ax1} y2={ay1} stroke={c} strokeWidth={sw} />
+                            <line x1={x2} y1={y2} x2={ax2} y2={ay2} stroke={c} strokeWidth={sw} />
+                          </>
+                        );
+                      })()}
+                    </svg>
+                  );
+                }
+              })();
+
+              return (
+                <div
+                  key={el.id}
+                  className="absolute cursor-move group"
+                  style={{ left, top, width, height }}
+                  onClick={(e) => { e.stopPropagation(); setSelectedElement(el.id); }}
+                  onMouseDown={(e) => { setSelectedElement(el.id); handleElementDragStart(e, el.id); }}
+                  onTouchStart={(e) => { setSelectedElement(el.id); handleElementDragStart(e, el.id); }}
+                >
+                  {svgContent}
+                  {/* Selection border */}
+                  <div className={cn(
+                    "absolute inset-0 border-2 pointer-events-none transition-colors",
+                    selectedElement === el.id ? "border-primary" : "border-transparent group-hover:border-primary/40"
+                  )} />
+                  {/* Corner resize handles */}
+                  {["top-0 left-0 cursor-nw-resize", "top-0 right-0 cursor-ne-resize", "bottom-0 left-0 cursor-sw-resize", "bottom-0 right-0 cursor-se-resize"].map((pos, idx) => (
+                    <div
+                      key={idx}
+                      className={cn(
+                        "absolute w-3 h-3 bg-primary border border-primary-foreground rounded-sm touch-none",
+                        pos,
+                        selectedElement === el.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                      )}
+                      style={{ transform: "translate(-50%, -50%)" }}
+                      onMouseDown={(e) => handleResizeStart(e, el.id)}
+                      onTouchStart={(e) => handleResizeStart(e, el.id)}
+                    />
+                  ))}
+                </div>
+              );
+            })}
+
+          {/* Text overlays — rendered as DOM elements for interactivity */}
+          {elements
+            .filter((el) => el.type === "text")
+            .map((el) => {
+              const fontSize = el.strokeWidth || 16;
+              const text = el.data.text || "";
+              // Approximate width/height
+              const approxWidth = Math.max(text.length * fontSize * 0.6, 40);
+              const approxHeight = fontSize * 1.4;
+
+              return (
+                <div
+                  key={el.id}
+                  className="absolute cursor-move group"
+                  style={{
+                    left: el.x,
+                    top: el.y - fontSize,
+                    minWidth: approxWidth,
+                    minHeight: approxHeight,
+                  }}
+                  onClick={(e) => { e.stopPropagation(); setSelectedElement(el.id); }}
+                  onMouseDown={(e) => { setSelectedElement(el.id); handleElementDragStart(e, el.id); }}
+                  onTouchStart={(e) => { setSelectedElement(el.id); handleElementDragStart(e, el.id); }}
+                >
+                  <span
+                    className="pointer-events-none select-none whitespace-nowrap"
+                    style={{
+                      color: el.color || "#000000",
+                      fontSize: `${fontSize}px`,
+                      fontFamily: "sans-serif",
+                    }}
+                  >
+                    {text}
+                  </span>
+                  {/* Selection border */}
+                  <div className={cn(
+                    "absolute inset-0 border-2 pointer-events-none transition-colors",
+                    selectedElement === el.id ? "border-primary" : "border-transparent group-hover:border-primary/40"
+                  )} />
+                  {/* Corner resize handles */}
+                  {["top-0 left-0 cursor-nw-resize", "top-0 right-0 cursor-ne-resize", "bottom-0 left-0 cursor-sw-resize", "bottom-0 right-0 cursor-se-resize"].map((pos, idx) => (
                     <div
                       key={idx}
                       className={cn(
