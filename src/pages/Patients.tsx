@@ -616,7 +616,13 @@ export default function Patients() {
                               {patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                             </div>
                             <span className="font-medium text-foreground group-hover:text-primary transition-colors">
-                              {patient.name}
+                              {(() => {
+                                const parts = patient.name.trim().split(/\s+/);
+                                if (parts.length <= 1) return patient.name;
+                                const lastName = parts[parts.length - 1];
+                                const firstNames = parts.slice(0, -1).join(" ");
+                                return `${lastName}, ${firstNames}`;
+                              })()}
                             </span>
                           </Link>
                         </td>
