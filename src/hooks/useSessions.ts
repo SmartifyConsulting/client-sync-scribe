@@ -219,7 +219,7 @@ const completeSession = async (
         sessionId = resultData.id;
       }
 
-      const transformedData = transformSession(resultData);
+      const transformedData = { ...transformSession(resultData), _extractedDocuments: extractedDocuments };
       setSessions((prev) => {
         const exists = prev.some(s => s.id === sessionId);
         if (exists) return prev.map(s => s.id === sessionId ? transformedData : s);
