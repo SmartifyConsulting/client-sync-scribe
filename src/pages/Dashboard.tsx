@@ -1,5 +1,6 @@
-import { Users, Calendar, TrendingUp, LogOut, Award, Bell } from "lucide-react";
+import { Users, Calendar, TrendingUp, LogOut, Award, Bell, Mic } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { TodaysBriefing } from "@/components/dashboard/TodaysBriefing";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
