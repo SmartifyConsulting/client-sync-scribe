@@ -1,57 +1,59 @@
 
 
-# Fix Narration Voice Preview
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## Root Cause
+## 1. Increase Logo Size by 130%
 
-The preview button uses `supabase.functions.invoke('narrate-briefing', ...)` which defaults to parsing the response as JSON. But `narrate-briefing` returns raw binary audio (`audio/mpeg`). This corrupts the audio data, causing playback failure. The language selection is not the issue.
+Scale all logo instances by 130%:
 
-The working implementation in `TodaysBriefing.tsx` correctly uses `fetch()` with `.blob()` to handle the binary audio response.
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-## Fix: `src/pages/Profile.tsx` (lines 870-888)
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-Replace `supabase.functions.invoke()` with direct `fetch()` call, matching the pattern used in `TodaysBriefing.tsx`:
+## 2. Fix Practice Number Not Persisting
 
-```typescript
-onClick={async () => {
-  const voice = (profile as any)?.narration_voice || "nova";
-  toast({ title: "Generating preview...", description: `Playing sample with "${voice}" voice` });
-  try {
-    const langCode = profile?.preferred_language || "en";
-    const sampleText = SAMPLE_TEXTS[langCode] || SAMPLE_TEXTS.en;
-    
-    // Create Audio element immediately for mobile gesture unlock
-    const audio = new Audio();
-    audio.play().catch(() => {});
-    
-    const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-        },
-        body: JSON.stringify({ text: sampleText, voice }),
-      }
-    );
-    if (!response.ok) throw new Error('Failed to generate preview');
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    audio.src = url;
-    await audio.play();
-    audio.onended = () => URL.revokeObjectURL(url);
-  } catch (err: any) {
-    toast({ title: "Preview failed", description: err.message || "Could not generate voice preview", variant: "destructive" });
-  }
-}}
-```
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-**Key changes:**
-1. Use `fetch()` + `.blob()` instead of `supabase.functions.invoke()` to correctly handle binary audio
-2. Create `Audio` element and call `.play()` synchronously within the click handler to unlock audio on mobile browsers
-3. Set `audio.src` after fetching, then play — matching the mobile audio unlock pattern
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
 
-**Single file change:** `src/pages/Profile.tsx`
+## 3. Make Partner Email Required and Create Pending Users
+
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
+
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
+
+## Technical Summary
+
+### Database Migration
+- Add `email text` column to `practice_partners` table
+
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 
