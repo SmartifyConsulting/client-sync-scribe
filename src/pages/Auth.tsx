@@ -304,12 +304,22 @@ export default function Auth() {
               }
             }
           } else {
+            // Patient registration - generate alias with DOB year if available
+            const patientNameParts = fullName.trim().toLowerCase().split(/\s+/);
+            const patientFirst = patientNameParts[0] || "user";
+            const patientLast = patientNameParts.length > 1 ? patientNameParts[patientNameParts.length - 1] : "";
+            const birthYear = dob ? new Date(dob).getFullYear().toString() : "";
+            let patientAlias = patientLast ? `${patientFirst}-${patientLast}` : patientFirst;
+            if (birthYear) patientAlias += `-${birthYear}`;
+            patientAlias = patientAlias.replace(/[^a-z0-9-]/g, '');
+
             // Patient registration - update profile
             const { error: profileError } = await supabase
               .from("profiles")
               .update({
                 full_name: fullName,
                 role: userRole,
+                mailbox_alias: patientAlias,
               })
               .eq("id", data.user.id);
 
