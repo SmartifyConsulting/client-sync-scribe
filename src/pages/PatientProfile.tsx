@@ -60,6 +60,30 @@ export default function PatientProfile() {
   const { lollipopCount } = usePatientRewards(id);
   const { templates, loading: templatesLoading } = useTemplates();
   const { documents, loading: documentsLoading, fetchDocuments } = useDocuments();
+  const { user } = useAuth();
+  const [mailboxAlias, setMailboxAlias] = useState<string | null>(null);
+  const [mailboxId, setMailboxId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase
+      .from('profiles')
+      .select('mailbox_id, mailbox_alias')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (data) {
+          setMailboxAlias(data.mailbox_alias);
+          setMailboxId(data.mailbox_id);
+        }
+      });
+  }, [user?.id]);
+
+  const displayEmail = mailboxAlias
+    ? `${mailboxAlias}@medipad.com`
+    : mailboxId
+      ? `docs-${mailboxId.slice(0, 8)}@inbox.medipad.health`
+      : '';
   
   const [additionalNotes, setAdditionalNotes] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
