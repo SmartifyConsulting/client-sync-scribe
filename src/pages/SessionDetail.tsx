@@ -224,6 +224,13 @@ export default function SessionDetail() {
               <PenTool className="h-4 w-4 shrink-0" />
               <span className="truncate">Drawing Pad</span>
             </Button>
+            <Button
+              className="gap-1.5 text-sm h-10 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
+              onClick={() => setShowHospitalAdmissionEditor(true)}
+            >
+              <Hospital className="h-4 w-4 shrink-0" />
+              <span className="truncate">Hospital Admission</span>
+            </Button>
           </div>
         </div>
       )}
