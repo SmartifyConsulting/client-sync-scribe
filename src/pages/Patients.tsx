@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock, X, CalendarIcon, Upload } from "lucide-react";
+import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock, X, CalendarIcon, Upload, Pill } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -44,6 +45,7 @@ import { Label } from "@/components/ui/label";
 
 export default function Patients() {
   const { user } = useAuth();
+  const { profile } = useProfile();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { patients, loading, createPatient, deletePatient, fetchPatients } = usePatients();
@@ -84,8 +86,19 @@ export default function Patients() {
     const hasMe = patients.some(p => p.email?.toLowerCase() === user.email?.toLowerCase());
     if (!hasMe) {
       meAutoCreated.current = true;
+      // Format as "Surname, FirstNames" from profile name
+      const profileName = profile?.full_name || user.user_metadata?.full_name || '';
+      let formattedName = profileName || user.email?.split('@')[0] || 'Me';
+      if (profileName) {
+        const parts = profileName.trim().split(/\s+/);
+        if (parts.length > 1) {
+          const surname = parts[parts.length - 1];
+          const firstNames = parts.slice(0, -1).join(' ');
+          formattedName = `${surname}, ${firstNames}`;
+        }
+      }
       createPatient({
-        name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Me',
+        name: formattedName,
         email: user.email || null,
         phone: null,
         dob: null,
@@ -118,10 +131,11 @@ export default function Patients() {
         pharmacy_name: null,
         pharmacy_email: null,
         pharmacies: null,
+        is_chronic: false,
         patient_user_id: user.id,
       });
     }
-  }, [loading, user, patients]);
+  }, [loading, user, patients, profile]);
 
   const filteredPatients = patients.filter((patient) => {
     // Name filter
@@ -662,17 +676,17 @@ export default function Patients() {
                 {mePatient && (
                   <>
                     <tr>
-                      <td colSpan={6} className="px-6 py-2 bg-secondary/30 sticky top-0">
-                        <span className="text-sm font-bold text-secondary">MY RECORD</span>
+                      <td colSpan={6} className="px-6 py-2 bg-terracotta/20 sticky top-0">
+                        <span className="text-sm font-bold text-terracotta">MY RECORD</span>
                       </td>
                     </tr>
-                    <tr className="group transition-colors bg-secondary/5 hover:bg-secondary/10 border-l-2 border-secondary">
+                    <tr className="group transition-colors bg-terracotta/5 hover:bg-terracotta/10 border-l-2 border-terracotta">
                       <td className="px-6 py-4">
                         <Link to={`/patients/${mePatient.id}`} className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full font-medium bg-secondary text-secondary-foreground">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full font-medium bg-terracotta text-terracotta-foreground">
                             ME
                           </div>
-                          <span className="font-medium text-foreground group-hover:text-secondary transition-colors">
+                          <span className="font-medium text-foreground group-hover:text-terracotta transition-colors">
                             {(() => {
                               const parts = mePatient.name.trim().split(/\s+/);
                               if (parts.length <= 1) return mePatient.name;
@@ -680,7 +694,7 @@ export default function Patients() {
                               const firstNames = parts.slice(0, -1).join(" ");
                               return `${lastName}, ${firstNames}`;
                             })()}
-                            <span className="ml-2 inline-flex items-center rounded-full bg-secondary/10 px-2 py-0.5 text-[10px] font-bold text-secondary">ME</span>
+                            <span className="ml-2 inline-flex items-center rounded-full bg-terracotta/10 px-2 py-0.5 text-[10px] font-bold text-terracotta">ME</span>
                           </span>
                         </Link>
                       </td>
@@ -748,6 +762,11 @@ export default function Patients() {
                                 const firstNames = parts.slice(0, -1).join(" ");
                                 return `${lastName}, ${firstNames}`;
                               })()}
+                              {patient.is_chronic && (
+                                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-terracotta/10 px-2 py-0.5 text-[10px] font-bold text-terracotta">
+                                  <Pill className="h-2.5 w-2.5" />Chronic
+                                </span>
+                              )}
                             </span>
                           </Link>
                         </td>

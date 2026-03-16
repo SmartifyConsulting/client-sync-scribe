@@ -684,6 +684,7 @@ export type Database = {
           height_cm: number | null
           id: string
           id_passport_number: string | null
+          is_chronic: boolean | null
           marital_status: string | null
           medical_aid: string | null
           medical_aid_number: string | null
@@ -724,6 +725,7 @@ export type Database = {
           height_cm?: number | null
           id?: string
           id_passport_number?: string | null
+          is_chronic?: boolean | null
           marital_status?: string | null
           medical_aid?: string | null
           medical_aid_number?: string | null
@@ -764,6 +766,7 @@ export type Database = {
           height_cm?: number | null
           id?: string
           id_passport_number?: string | null
+          is_chronic?: boolean | null
           marital_status?: string | null
           medical_aid?: string | null
           medical_aid_number?: string | null

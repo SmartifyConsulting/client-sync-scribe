@@ -1,57 +1,59 @@
 
 
-# Three Fixes: ME Record Name, Sessions Patient Sort, Chronic Medication Badge
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## 1. ME Record: Use Doctor's Profile Name (Surname, Full Name)
+## 1. Increase Logo Size by 130%
 
-**Problem**: The ME auto-create uses `user.user_metadata?.full_name` which may not reflect the doctor's actual profile name. The display should use the doctor's profile `full_name` formatted as "Surname, FirstName".
+Scale all logo instances by 130%:
 
-**Fix in `src/pages/Patients.tsx`**:
-- Import `useProfile` hook
-- In the auto-create `useEffect`, use `profile?.full_name` instead of `user.user_metadata?.full_name` for the name
-- Format as "LastName, FirstNames" in the auto-create (so it stores correctly)
-- The ME badge `bg-secondary/10 text-secondary` is already using the secondary (terracotta) color — but need to verify it renders as terracotta orange, not a different shade. Will ensure the badge explicitly uses terracotta classes.
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-## 2. Sessions Page: Sort Patient Dropdown Alphabetically by Surname
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-**Problem**: In `src/pages/Sessions.tsx` (lines 635-654), `patients.map(...)` renders the patient combobox in whatever order `usePatients` returns (creation order), not sorted alphabetically by surname.
+## 2. Fix Practice Number Not Persisting
 
-**Fix in `src/pages/Sessions.tsx`**:
-- Create a `sortedPatients` memo that sorts `patients` by surname (last word of name) alphabetically
-- Display names in "Surname, FirstName" format in the `CommandItem`
-- Use `sortedPatients` instead of `patients` in the combobox rendering
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-## 3. Chronic Medication Badge on Patient Profile & List
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
 
-**Problem**: No mechanism exists to flag patients on chronic medication or display a "Chronic" badge.
+## 3. Make Partner Email Required and Create Pending Users
 
-**Changes**:
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
+
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
+
+## Technical Summary
 
 ### Database Migration
-- Add `is_chronic` boolean column to `patients` table (default `false`, nullable)
+- Add `email text` column to `practice_partners` table
 
-### `src/hooks/usePatients.ts`
-- Add `is_chronic` to the `Patient` interface
-
-### `src/components/patients/PatientOverview.tsx`
-- After AI summary parses medications, check if any medication has `status: "active"` — if so, auto-detect chronic status
-- Alternatively, add a manual toggle for doctors to mark a patient as chronic
-- Display a terracotta "Chronic" badge near the patient name/allergies badges
-
-### `src/pages/Patients.tsx`
-- In the patient table rows, show a small "Chronic" badge (terracotta) next to the patient name if `patient.is_chronic` is true
-
-### `src/components/patients/PatientDetailsEditor.tsx`
-- Add a checkbox/toggle for "Chronic Medication" in the patient details form
-
-### Medication Adherence Moolas
-- This is an extension of the existing health photo gamification system. Patients on chronic medication can log daily medication adherence (similar to health photos). This will be noted in the plan but the full adherence logging UI can be a follow-up feature. For now, the badge and flag are the foundation.
-
-## Files to Modify
-1. **Database migration**: Add `is_chronic` boolean to `patients` table
-2. `src/hooks/usePatients.ts` — Add `is_chronic` to Patient interface
-3. `src/pages/Patients.tsx` — Use profile name for ME, add chronic badge to rows
-4. `src/pages/Sessions.tsx` — Sort patient dropdown by surname, display as "Surname, First"
-5. `src/components/patients/PatientDetailsEditor.tsx` — Add chronic toggle
-6. `src/components/patients/PatientOverview.tsx` — Show chronic badge
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 

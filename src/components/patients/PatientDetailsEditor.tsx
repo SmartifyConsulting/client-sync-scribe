@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star } from "lucide-react";
+import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -402,6 +402,25 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
           </div>
         </div>
 
+        {/* Chronic Medication Status */}
+        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-terracotta/10">
+                <Pill className="h-4 w-4 text-terracotta" />
+              </div>
+              <h3 className="font-semibold text-foreground">Chronic Medication</h3>
+            </div>
+            {patient.is_chronic ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-terracotta/10 px-3 py-1 text-xs font-bold text-terracotta">
+                <Pill className="h-3 w-3" />Chronic
+              </span>
+            ) : (
+              <span className="text-sm text-muted-foreground">Not on chronic medication</span>
+            )}
+          </div>
+        </div>
+
         {/* 9. Surgeries and Dates */}
         <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
@@ -586,6 +605,27 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
       <div>
         <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-4 w-4" />Allergies</h3>
         <Textarea id="allergies" value={formData.allergies} onChange={(e) => updateFormData({ allergies: e.target.value })} placeholder="List any allergies (medications, food, etc.)" rows={2} />
+      </div>
+
+      {/* Chronic Medication Toggle */}
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-4 w-4" />Chronic Medication</h3>
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="is_chronic"
+            checked={patient.is_chronic || false}
+            onCheckedChange={(checked) => {
+              onSave({ is_chronic: checked as boolean });
+            }}
+          />
+          <Label htmlFor="is_chronic" className="text-sm">Patient is on chronic medication</Label>
+          {patient.is_chronic && (
+            <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-terracotta/10 px-2 py-0.5 text-[10px] font-bold text-terracotta">
+              <Pill className="h-2.5 w-2.5" />Chronic
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground mt-2">Chronic patients can earn medication adherence rewards (moolas) by logging daily medication intake.</p>
       </div>
 
       {/* 9. Surgeries and Dates */}
