@@ -281,6 +281,9 @@ export default function CalendarView() {
         </div>
       </div>
 
+      {/* Appointment Requests from Patients */}
+      <AppointmentRequestsPanel />
+
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Calendar */}
         <div className="lg:col-span-2 rounded-xl border border-primary bg-card p-6 shadow-sm">
