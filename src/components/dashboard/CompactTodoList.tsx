@@ -168,6 +168,13 @@ export function CompactTodoList() {
     setIsProcessing(true);
     try {
       const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
+      
+      // Skip transcription if audio is too short/silent (under 5KB is typically just the webm header)
+      if (audioBlob.size < 5000) {
+        setIsProcessing(false);
+        return;
+      }
+      
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve, reject) => {
         reader.onloadend = () => resolve((reader.result as string).split(",")[1]);
