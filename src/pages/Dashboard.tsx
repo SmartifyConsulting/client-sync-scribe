@@ -296,7 +296,7 @@ export default function Dashboard() {
         </div>
         <div>
           {isDoctor && <CompactTodoList />}
-          <RecentActivity />
+          <div className="mt-4"><RecentActivity /></div>
         </div>
       </div>
     </div>
