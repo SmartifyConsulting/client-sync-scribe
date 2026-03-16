@@ -45,6 +45,8 @@ export interface Patient {
   surgeries: Surgery[] | null;
   id_passport_number: string | null;
   gender: string | null;
+  pharmacy_name: string | null;
+  pharmacy_email: string | null;
   last_visit?: string | null;
 }
 

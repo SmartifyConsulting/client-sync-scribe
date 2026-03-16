@@ -70,7 +70,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ onNavigate }: SidebarProps) {
-  const { role, loading, isPatient, isAdmin } = useUserRole();
+  const { role, loading: roleLoading, isPatient, isAdmin } = useUserRole();
+  const loading = roleLoading;
   const { profile } = useProfile();
   const navItems = isAdmin ? adminNavItems : isPatient ? patientNavItems : doctorNavItems;
 
@@ -151,7 +152,11 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-foreground truncate">{profile?.full_name || "User"}</p>
+              {loading ? (
+                <div className="h-3 w-20 rounded bg-muted animate-pulse" />
+              ) : (
+                <p className="text-xs font-medium text-foreground truncate">{profile?.full_name || "User"}</p>
+              )}
             </div>
           </div>
           <div className="px-3 pb-3 space-y-0.5">

@@ -33,7 +33,7 @@ import { DoctorsOnProfile } from "@/components/patients/DoctorsOnProfile";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { RequestConnectionButton } from "@/components/patients/RequestConnectionButton";
 import { RoundTable } from "@/components/patients/RoundTable";
-import { LollipopDisplay } from "@/components/gamification/LollipopDisplay";
+import { LollipopDisplay } from "@/components/gamification/LollipopDisplay"; // Moola display
 import { useTemplates } from "@/hooks/useTemplates";
 import { useDocuments } from "@/hooks/useDocuments";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
@@ -252,13 +252,13 @@ export default function PatientProfile() {
             {format(new Date(patient.created_at), "MMM yyyy")}
           </p>
         </div>
-        {/* Lollipop Rewards */}
-        <div className="rounded-xl bg-gradient-to-br from-pink-50 to-purple-50 dark:from-pink-950/20 dark:to-purple-950/20 p-4 shadow-sm border border-pink-200 dark:border-pink-800/30">
+        {/* Moola Rewards */}
+        <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-4 shadow-sm border border-emerald-200 dark:border-emerald-800/30">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-muted-foreground">Lollipops</p>
-            <span className="text-lg">🍭</span>
+            <p className="text-xs font-medium text-muted-foreground">Moolas</p>
+            <span className="text-lg font-bold text-emerald-600">Ⓜ</span>
           </div>
-          <p className="mt-2 text-2xl font-bold text-pink-600 dark:text-pink-400">
+          <p className="mt-2 text-2xl font-bold text-emerald-600 dark:text-emerald-400">
             {lollipopCount}
           </p>
         </div>
@@ -272,7 +272,6 @@ export default function PatientProfile() {
           <TabsTrigger value="sessions" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Session History</TabsTrigger>
           <TabsTrigger value="doctors" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Doctors</TabsTrigger>
           <TabsTrigger value="documents" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Documents</TabsTrigger>
-          <TabsTrigger value="notes" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Notes</TabsTrigger>
           <TabsTrigger value="drawings" className="rounded-lg px-4 py-2.5 gap-1.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
             <PenTool className="h-3.5 w-3.5" />
             Drawing Pad
@@ -433,43 +432,7 @@ export default function PatientProfile() {
           <PatientDetailsEditor patient={patient} onSave={updatePatient} />
         </TabsContent>
 
-        {/* Notes Tab */}
-        <TabsContent value="notes">
-          <div className="rounded-2xl bg-card p-6 shadow-card space-y-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-                  <StickyNote className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground text-lg">Additional Notes</h3>
-                  <p className="text-sm text-muted-foreground">Add any additional information about this patient</p>
-                </div>
-              </div>
-              <Button 
-                onClick={handleSaveNotes} 
-                disabled={savingNotes}
-                className="gap-2 h-11"
-              >
-                {savingNotes ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
-                Save Notes
-              </Button>
-            </div>
-            <Textarea
-              placeholder="Enter any additional notes, observations, or important information about this patient..."
-              value={additionalNotes}
-              onChange={(e) => setAdditionalNotes(e.target.value)}
-              className="min-h-[300px] resize-none rounded-xl"
-            />
-            <p className="text-xs text-muted-foreground">
-              Last updated: {patient.updated_at ? format(new Date(patient.updated_at), "MMM d, yyyy 'at' h:mm a") : "Never"}
-            </p>
-          </div>
-        </TabsContent>
+        {/* Notes tab removed - notes now in General Notes frame under Details */}
 
         {/* Round Table Tab */}
         <TabsContent value="roundtable">

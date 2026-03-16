@@ -68,7 +68,6 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      // Ensure backwards compatibility - map old conditions to symptoms if needed
       const processedData: SummaryData = {
         summary: data.summary || "",
         medications: (data.medications || []).map((m: any) => ({
@@ -130,8 +129,35 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
     });
   };
 
-  // Parse and render summary with highlighted elements
-  const renderSummary = (text: string) => {
+  // Render summary as timeline bullets
+  const renderSummaryTimeline = (text: string) => {
+    // Strip XML-like tags for splitting, but preserve for rendering
+    const cleanText = text.replace(/<\/?(?:med|symptom|condition)>/g, '');
+    // Split by sentence endings or bullet markers
+    const sentences = cleanText.split(/(?<=[.!?])\s+|(?:^|\n)\s*[-•]\s*/).filter(s => s.trim().length > 0);
+    
+    if (sentences.length <= 1) {
+      // Single sentence - render inline
+      return <div className="text-foreground leading-relaxed">{renderInlineHighlights(text)}</div>;
+    }
+
+    return (
+      <div className="space-y-3">
+        {sentences.map((sentence, i) => (
+          <div key={i} className="flex gap-3">
+            <div className="flex flex-col items-center">
+              <div className="w-2.5 h-2.5 rounded-full bg-primary mt-1.5 shrink-0" />
+              {i < sentences.length - 1 && <div className="w-0.5 flex-1 bg-border mt-1" />}
+            </div>
+            <p className="text-sm text-foreground leading-relaxed pb-2">{sentence.trim()}</p>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // Render inline highlighted elements
+  const renderInlineHighlights = (text: string) => {
     const parts: React.ReactNode[] = [];
     let remaining = text;
     let key = 0;
@@ -164,37 +190,23 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
           parts.push(<span key={key++}>{remaining.substring(0, firstMatch.index)}</span>);
         }
 
-        if (firstMatch.type === "med") {
-          parts.push(
-            <span
-              key={key++}
-              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-green-500/15 text-green-700 dark:text-green-400 font-medium"
-            >
-              <Pill className="h-3 w-3" />
-              {firstMatch.text}
-            </span>
-          );
-        } else if (firstMatch.type === "symptom") {
-          parts.push(
-            <span
-              key={key++}
-              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-400 font-medium"
-            >
-              <Activity className="h-3 w-3" />
-              {firstMatch.text}
-            </span>
-          );
-        } else {
-          parts.push(
-            <span
-              key={key++}
-              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-700 dark:text-blue-400 font-medium"
-            >
-              <HeartPulse className="h-3 w-3" />
-              {firstMatch.text}
-            </span>
-          );
-        }
+        const colorMap = {
+          med: "bg-green-500/15 text-green-700 dark:text-green-400",
+          symptom: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
+          condition: "bg-blue-500/15 text-blue-700 dark:text-blue-400",
+        };
+        const iconMap = {
+          med: <Pill className="h-3 w-3" />,
+          symptom: <Activity className="h-3 w-3" />,
+          condition: <HeartPulse className="h-3 w-3" />,
+        };
+
+        parts.push(
+          <span key={key++} className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded ${colorMap[firstMatch.type]} font-medium`}>
+            {iconMap[firstMatch.type]}
+            {firstMatch.text}
+          </span>
+        );
 
         remaining = remaining.substring(firstMatch.index + firstMatch.fullMatch.length);
       } else {
@@ -242,7 +254,7 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
 
   return (
     <div className="space-y-6">
-      {/* AI Summary Card */}
+      {/* AI Summary Card - Timeline */}
       <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -259,8 +271,8 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
             Refresh
           </Button>
         </div>
-        <div className="prose prose-sm max-w-none text-foreground leading-relaxed">
-          {renderSummary(summaryData.summary)}
+        <div className="prose prose-sm max-w-none">
+          {renderSummaryTimeline(summaryData.summary)}
         </div>
       </div>
 
@@ -359,31 +371,71 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
         </div>
       )}
 
-      {/* Allergies Section */}
-      {(summaryData.allergies.length > 0 || patient.allergies) && (
+      {/* Allergies Section - Always visible */}
+      <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-5">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="h-4 w-4 text-red-600" />
             <h4 className="font-medium text-foreground">Allergies</h4>
           </div>
           <div className="flex flex-wrap gap-2">
-            {summaryData.allergies.map((allergy, i) => (
-              <Badge
-                key={i}
-                variant="outline"
-                className={`${getSeverityColor(allergy.severity)} capitalize`}
-              >
-                {allergy.name} ({allergy.severity})
-              </Badge>
-            ))}
-            {patient.allergies && summaryData.allergies.length === 0 && (
+            {summaryData.allergies.length > 0 ? (
+              summaryData.allergies.map((allergy, i) => (
+                <Badge
+                  key={i}
+                  variant="outline"
+                  className={`${getSeverityColor(allergy.severity)} capitalize`}
+                >
+                  {allergy.name} ({allergy.severity})
+                </Badge>
+              ))
+            ) : patient.allergies ? (
               <span className="text-sm text-foreground">{patient.allergies}</span>
+            ) : (
+              <span className="text-sm text-muted-foreground italic">No allergies recorded</span>
             )}
           </div>
         </div>
-      )}
 
-      {/* Quick Reference Lists */}
+        {/* Conditions */}
+        <div className="rounded-xl border border-primary bg-card p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <HeartPulse className="h-4 w-4 text-blue-600" />
+            <h4 className="font-medium text-foreground">Conditions / Diagnoses</h4>
+          </div>
+          {summaryData.conditions.length > 0 ? (
+            <div className="space-y-2">
+              {summaryData.conditions.map((cond, i) => (
+                <div key={i} className="text-sm flex items-center justify-between gap-2 group">
+                  <div className="flex items-start gap-2 flex-1">
+                    <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${cond.status === "active" ? "bg-blue-500" : "bg-muted-foreground/40"}`} />
+                    <div className={cond.status === "inactive" ? "text-muted-foreground/50" : ""}>
+                      <span className={cond.status === "inactive" ? "text-muted-foreground/50" : "text-foreground font-medium"}>{cond.name}</span>
+                      <span className="text-muted-foreground ml-2 text-xs">({cond.date})</span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => toggleStatus("conditions", i)}
+                  >
+                    {cond.status === "active" ? (
+                      <span className="flex items-center gap-1 text-xs text-blue-600"><Check className="h-3 w-3" /> Active</span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground"><X className="h-3 w-3" /> Resolved</span>
+                    )}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground italic">No conditions/diagnoses recorded</p>
+          )}
+        </div>
+      </div>
+
+      {/* Medications and Symptoms */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* Medications List */}
         <div className="rounded-xl border border-primary bg-card p-5">
@@ -397,8 +449,8 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
                 <li key={i} className="text-sm flex items-center justify-between gap-2 group">
                   <div className="flex items-start gap-2 flex-1">
                     <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${med.status === "active" ? "bg-green-500" : "bg-muted-foreground/40"}`} />
-                    <div className={med.status === "inactive" ? "opacity-60" : ""}>
-                      <span className="text-foreground font-medium">{med.name}</span>
+                    <div className={med.status === "inactive" ? "text-muted-foreground/50" : ""}>
+                      <span className={med.status === "inactive" ? "text-muted-foreground/50" : "text-foreground font-medium"}>{med.name}</span>
                       <span className="text-muted-foreground ml-2 text-xs">({med.date})</span>
                     </div>
                   </div>
@@ -409,13 +461,9 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
                     onClick={() => toggleStatus("medications", i)}
                   >
                     {med.status === "active" ? (
-                      <span className="flex items-center gap-1 text-xs text-green-600">
-                        <Check className="h-3 w-3" /> In Use
-                      </span>
+                      <span className="flex items-center gap-1 text-xs text-green-600"><Check className="h-3 w-3" /> In Use</span>
                     ) : (
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <X className="h-3 w-3" /> Not Used
-                      </span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground"><X className="h-3 w-3" /> Not Used</span>
                     )}
                   </Button>
                 </li>
@@ -438,8 +486,8 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
                 <li key={i} className="text-sm flex items-center justify-between gap-2 group">
                   <div className="flex items-start gap-2 flex-1">
                     <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${symptom.status === "active" ? "bg-amber-500" : "bg-muted-foreground/40"}`} />
-                    <div className={symptom.status === "inactive" ? "opacity-60" : ""}>
-                      <span className="text-foreground font-medium">{symptom.name}</span>
+                    <div className={symptom.status === "inactive" ? "text-muted-foreground/50" : ""}>
+                      <span className={symptom.status === "inactive" ? "text-muted-foreground/50" : "text-foreground font-medium"}>{symptom.name}</span>
                       <span className="text-muted-foreground ml-2 text-xs">({symptom.date})</span>
                     </div>
                   </div>
@@ -450,13 +498,9 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
                     onClick={() => toggleStatus("symptoms", i)}
                   >
                     {symptom.status === "active" ? (
-                      <span className="flex items-center gap-1 text-xs text-amber-600">
-                        <Check className="h-3 w-3" /> Active
-                      </span>
+                      <span className="flex items-center gap-1 text-xs text-amber-600"><Check className="h-3 w-3" /> Active</span>
                     ) : (
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <X className="h-3 w-3" /> Resolved
-                      </span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground"><X className="h-3 w-3" /> Resolved</span>
                     )}
                   </Button>
                 </li>
@@ -464,47 +508,6 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
             </ul>
           ) : (
             <p className="text-sm text-muted-foreground italic">No symptoms recorded</p>
-          )}
-        </div>
-
-        {/* Conditions List */}
-        <div className="rounded-xl border border-primary bg-card p-5 md:col-span-2">
-          <div className="flex items-center gap-2 mb-3">
-            <HeartPulse className="h-4 w-4 text-blue-600" />
-            <h4 className="font-medium text-foreground">Conditions / Diagnoses</h4>
-          </div>
-          {summaryData.conditions.length > 0 ? (
-            <div className="grid gap-2 sm:grid-cols-2">
-              {summaryData.conditions.map((cond, i) => (
-                <div key={i} className="text-sm flex items-center justify-between gap-2 group p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="flex items-start gap-2 flex-1">
-                    <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${cond.status === "active" ? "bg-blue-500" : "bg-muted-foreground/40"}`} />
-                    <div className={cond.status === "inactive" ? "opacity-60" : ""}>
-                      <span className="text-foreground font-medium">{cond.name}</span>
-                      <span className="text-muted-foreground ml-2 text-xs">({cond.date})</span>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => toggleStatus("conditions", i)}
-                  >
-                    {cond.status === "active" ? (
-                      <span className="flex items-center gap-1 text-xs text-blue-600">
-                        <Check className="h-3 w-3" /> Active
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <X className="h-3 w-3" /> Resolved
-                      </span>
-                    )}
-                  </Button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground italic">No conditions/diagnoses recorded</p>
           )}
         </div>
       </div>

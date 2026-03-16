@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale } from "lucide-react";
+import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -48,6 +48,9 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
     next_of_kin_relationship: "",
     height_cm: "",
     weight_kg: "",
+    pharmacy_name: "",
+    pharmacy_email: "",
+    notes: "",
   });
   const [surgeries, setSurgeries] = useState<Surgery[]>([]);
   const [newSurgery, setNewSurgery] = useState({ name: "", date: "", notes: "" });
@@ -82,6 +85,9 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         next_of_kin_relationship: patient.next_of_kin_relationship || "",
         height_cm: patient.height_cm?.toString() || "",
         weight_kg: patient.weight_kg?.toString() || "",
+        pharmacy_name: patient.pharmacy_name || "",
+        pharmacy_email: patient.pharmacy_email || "",
+        notes: patient.notes || "",
       });
       setSurgeries(patient.surgeries || []);
       setHasChanges(false);
@@ -121,6 +127,9 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
       height_cm: data.height_cm ? parseFloat(data.height_cm) : null,
       weight_kg: data.weight_kg ? parseFloat(data.weight_kg) : null,
       surgeries: surgeriesData,
+      pharmacy_name: data.pharmacy_name || null,
+      pharmacy_email: data.pharmacy_email || null,
+      notes: data.notes || null,
     });
     setSaving(false);
     setHasChanges(false);
@@ -206,6 +215,9 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
       next_of_kin_relationship: patient.next_of_kin_relationship || "",
       height_cm: patient.height_cm?.toString() || "",
       weight_kg: patient.weight_kg?.toString() || "",
+      pharmacy_name: patient.pharmacy_name || "",
+      pharmacy_email: patient.pharmacy_email || "",
+      notes: patient.notes || "",
     });
     setSurgeries(patient.surgeries || []);
     setIsEditing(false);
@@ -374,6 +386,21 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             </div>
           </div>
 
+          {/* Main Pharmacy */}
+          <div className="mt-6">
+            <h4 className="text-sm font-medium text-foreground mb-3">Main Pharmacy</h4>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <p className="text-sm text-muted-foreground">Pharmacy Name</p>
+                <p className="mt-1 text-foreground">{patient.pharmacy_name || "Not provided"}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Pharmacy Email</p>
+                <p className="mt-1 text-foreground">{patient.pharmacy_email || "Not provided"}</p>
+              </div>
+            </div>
+          </div>
+
           {/* Surgery History */}
           <div className="mt-6">
             <div className="flex items-center justify-between mb-4">
@@ -438,6 +465,17 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             </div>
           </div>
         </div>
+
+        {/* General Notes */}
+        <div>
+          <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide flex items-center gap-2">
+            <StickyNote className="h-4 w-4" />
+            General Notes
+          </h3>
+          <div className="rounded-lg bg-muted/30 p-4 border border-border/50 min-h-[80px]">
+            <p className="text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -474,31 +512,16 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-2">
             <Label htmlFor="name">Full Name *</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => updateFormData({ name: e.target.value })}
-              placeholder="Patient name"
-            />
+            <Input id="name" value={formData.name} onChange={(e) => updateFormData({ name: e.target.value })} placeholder="Patient name" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="id_passport_number">ID/Passport Number</Label>
-            <Input
-              id="id_passport_number"
-              value={formData.id_passport_number}
-              onChange={(e) => updateFormData({ id_passport_number: e.target.value })}
-              placeholder="ID or passport number"
-            />
+            <Input id="id_passport_number" value={formData.id_passport_number} onChange={(e) => updateFormData({ id_passport_number: e.target.value })} placeholder="ID or passport number" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="gender">Gender</Label>
-            <Select
-              value={formData.gender}
-              onValueChange={(value) => updateFormData({ gender: value })}
-            >
-              <SelectTrigger id="gender">
-                <SelectValue placeholder="Select gender" />
-              </SelectTrigger>
+            <Select value={formData.gender} onValueChange={(value) => updateFormData({ gender: value })}>
+              <SelectTrigger id="gender"><SelectValue placeholder="Select gender" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="Male">Male</SelectItem>
                 <SelectItem value="Female">Female</SelectItem>
@@ -508,68 +531,32 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
           </div>
           <div className="space-y-2">
             <Label htmlFor="dob">Date of Birth</Label>
-            <Input
-              id="dob"
-              type="date"
-              value={formData.dob}
-              onChange={(e) => updateFormData({ dob: e.target.value })}
-            />
+            <Input id="dob" type="date" value={formData.dob} onChange={(e) => updateFormData({ dob: e.target.value })} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => updateFormData({ email: e.target.value })}
-              placeholder="patient@email.com"
-            />
+            <Input id="email" type="email" value={formData.email} onChange={(e) => updateFormData({ email: e.target.value })} placeholder="patient@email.com" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              value={formData.phone}
-              onChange={(e) => updateFormData({ phone: e.target.value })}
-              placeholder="+1 (555) 123-4567"
-            />
+            <Input id="phone" value={formData.phone} onChange={(e) => updateFormData({ phone: e.target.value })} placeholder="+1 (555) 123-4567" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="occupation">Occupation</Label>
-            <Input
-              id="occupation"
-              value={formData.occupation}
-              onChange={(e) => updateFormData({ occupation: e.target.value })}
-              placeholder="Job title"
-            />
+            <Input id="occupation" value={formData.occupation} onChange={(e) => updateFormData({ occupation: e.target.value })} placeholder="Job title" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="employer">Employer</Label>
-            <Input
-              id="employer"
-              value={formData.employer}
-              onChange={(e) => updateFormData({ employer: e.target.value })}
-              placeholder="Company name"
-            />
+            <Input id="employer" value={formData.employer} onChange={(e) => updateFormData({ employer: e.target.value })} placeholder="Company name" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="referred_by">Referred By</Label>
-            <Input
-              id="referred_by"
-              value={formData.referred_by}
-              onChange={(e) => updateFormData({ referred_by: e.target.value })}
-              placeholder="Referral source"
-            />
+            <Input id="referred_by" value={formData.referred_by} onChange={(e) => updateFormData({ referred_by: e.target.value })} placeholder="Referral source" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="marital_status">Marital Status</Label>
-            <Select
-              value={formData.marital_status}
-              onValueChange={(value) => updateFormData({ marital_status: value })}
-            >
-              <SelectTrigger id="marital_status">
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
+            <Select value={formData.marital_status} onValueChange={(value) => updateFormData({ marital_status: value })}>
+              <SelectTrigger id="marital_status"><SelectValue placeholder="Select status" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="Single">Single</SelectItem>
                 <SelectItem value="Married">Married</SelectItem>
@@ -587,29 +574,14 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-2">
             <Label htmlFor="height_cm">Height (cm)</Label>
-            <Input
-              id="height_cm"
-              type="number"
-              step="0.1"
-              value={formData.height_cm}
-              onChange={(e) => updateFormData({ height_cm: e.target.value })}
-              placeholder="e.g., 175"
-            />
+            <Input id="height_cm" type="number" step="0.1" value={formData.height_cm} onChange={(e) => updateFormData({ height_cm: e.target.value })} placeholder="e.g., 175" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="weight_kg">Weight (kg)</Label>
-            <Input
-              id="weight_kg"
-              type="number"
-              step="0.1"
-              value={formData.weight_kg}
-              onChange={(e) => updateFormData({ weight_kg: e.target.value })}
-              placeholder="e.g., 70"
-            />
+            <Input id="weight_kg" type="number" step="0.1" value={formData.weight_kg} onChange={(e) => updateFormData({ weight_kg: e.target.value })} placeholder="e.g., 70" />
           </div>
         </div>
       </div>
-
 
       {/* Address Information */}
       <div>
@@ -617,32 +589,16 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="physical_address">Physical Address</Label>
-            <Textarea
-              id="physical_address"
-              value={formData.physical_address}
-              onChange={(e) => updateFormData({ physical_address: e.target.value })}
-              placeholder="Enter physical address"
-              rows={2}
-            />
+            <Textarea id="physical_address" value={formData.physical_address} onChange={(e) => updateFormData({ physical_address: e.target.value })} placeholder="Enter physical address" rows={2} />
           </div>
           <div className="flex items-center space-x-2">
-            <Checkbox
-              id="same_as_physical"
-              checked={formData.same_as_physical}
-              onCheckedChange={(checked) => updateFormData({ same_as_physical: checked as boolean })}
-            />
+            <Checkbox id="same_as_physical" checked={formData.same_as_physical} onCheckedChange={(checked) => updateFormData({ same_as_physical: checked as boolean })} />
             <Label htmlFor="same_as_physical" className="text-sm">Postal address same as physical address</Label>
           </div>
           {!formData.same_as_physical && (
             <div className="space-y-2">
               <Label htmlFor="postal_address">Postal Address</Label>
-              <Textarea
-                id="postal_address"
-                value={formData.postal_address}
-                onChange={(e) => updateFormData({ postal_address: e.target.value })}
-                placeholder="Enter postal address"
-                rows={2}
-              />
+              <Textarea id="postal_address" value={formData.postal_address} onChange={(e) => updateFormData({ postal_address: e.target.value })} placeholder="Enter postal address" rows={2} />
             </div>
           )}
         </div>
@@ -654,71 +610,49 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-2">
             <Label htmlFor="medical_aid">Medical Insurance Provider</Label>
-            <Input
-              id="medical_aid"
-              value={formData.medical_aid}
-              onChange={(e) => updateFormData({ medical_aid: e.target.value })}
-              placeholder="Insurance provider"
-            />
+            <Input id="medical_aid" value={formData.medical_aid} onChange={(e) => updateFormData({ medical_aid: e.target.value })} placeholder="Insurance provider" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="medical_insurance_product">Medical Insurance Product</Label>
-            <Input
-              id="medical_insurance_product"
-              value={formData.medical_insurance_product}
-              onChange={(e) => updateFormData({ medical_insurance_product: e.target.value })}
-              placeholder="e.g., Executive Plan"
-            />
+            <Input id="medical_insurance_product" value={formData.medical_insurance_product} onChange={(e) => updateFormData({ medical_insurance_product: e.target.value })} placeholder="e.g., Executive Plan" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="medical_aid_number">Medical Insurance Number</Label>
-            <Input
-              id="medical_aid_number"
-              value={formData.medical_aid_number}
-              onChange={(e) => updateFormData({ medical_aid_number: e.target.value })}
-              placeholder="Member number"
-            />
+            <Input id="medical_aid_number" value={formData.medical_aid_number} onChange={(e) => updateFormData({ medical_aid_number: e.target.value })} placeholder="Member number" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="primary_member">Primary Member</Label>
-            <Input
-              id="primary_member"
-              value={formData.primary_member}
-              onChange={(e) => updateFormData({ primary_member: e.target.value })}
-              placeholder="Primary member name"
-            />
+            <Input id="primary_member" value={formData.primary_member} onChange={(e) => updateFormData({ primary_member: e.target.value })} placeholder="Primary member name" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="claims_email">Claims Email</Label>
-            <Input
-              id="claims_email"
-              type="email"
-              value={formData.claims_email}
-              onChange={(e) => updateFormData({ claims_email: e.target.value })}
-              placeholder="claims@insurance.com"
-            />
+            <Input id="claims_email" type="email" value={formData.claims_email} onChange={(e) => updateFormData({ claims_email: e.target.value })} placeholder="claims@insurance.com" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="general_practitioner">General Practitioner</Label>
-            <Input
-              id="general_practitioner"
-              value={formData.general_practitioner}
-              onChange={(e) => updateFormData({ general_practitioner: e.target.value })}
-              placeholder="GP name"
-            />
+            <Input id="general_practitioner" value={formData.general_practitioner} onChange={(e) => updateFormData({ general_practitioner: e.target.value })} placeholder="GP name" />
           </div>
           <div className="space-y-2 sm:col-span-2 lg:col-span-3">
             <Label htmlFor="allergies" className="flex items-center gap-1.5">
               <AlertCircle className="h-3.5 w-3.5" />
               Allergies
             </Label>
-            <Textarea
-              id="allergies"
-              value={formData.allergies}
-              onChange={(e) => updateFormData({ allergies: e.target.value })}
-              placeholder="List any allergies (medications, food, etc.)"
-              rows={2}
-            />
+            <Textarea id="allergies" value={formData.allergies} onChange={(e) => updateFormData({ allergies: e.target.value })} placeholder="List any allergies (medications, food, etc.)" rows={2} />
+          </div>
+        </div>
+
+        {/* Main Pharmacy */}
+        <div className="mt-6">
+          <h4 className="text-sm font-medium text-foreground mb-3">Main Pharmacy</h4>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="pharmacy_name">Pharmacy Name</Label>
+              <Input id="pharmacy_name" value={formData.pharmacy_name} onChange={(e) => updateFormData({ pharmacy_name: e.target.value })} placeholder="e.g., Clicks Pharmacy" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="pharmacy_email">Pharmacy Email</Label>
+              <Input id="pharmacy_email" type="email" value={formData.pharmacy_email} onChange={(e) => updateFormData({ pharmacy_email: e.target.value })} placeholder="pharmacy@email.com" />
+            </div>
           </div>
         </div>
 
@@ -727,12 +661,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
           <div className="flex items-center justify-between mb-4">
             <h4 className="text-sm font-medium text-foreground">Surgery History</h4>
             {!showAddSurgery && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="gap-1.5"
-                onClick={() => setShowAddSurgery(true)}
-              >
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowAddSurgery(true)}>
                 <Plus className="h-3.5 w-3.5" />
                 Add Surgery
               </Button>
@@ -744,43 +673,20 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label>Surgery Name *</Label>
-                  <Input
-                    value={newSurgery.name}
-                    onChange={(e) => setNewSurgery(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="e.g., Appendectomy"
-                  />
+                  <Input value={newSurgery.name} onChange={(e) => setNewSurgery(prev => ({ ...prev, name: e.target.value }))} placeholder="e.g., Appendectomy" />
                 </div>
                 <div className="space-y-2">
                   <Label>Date *</Label>
-                  <Input
-                    type="date"
-                    value={newSurgery.date}
-                    onChange={(e) => setNewSurgery(prev => ({ ...prev, date: e.target.value }))}
-                  />
+                  <Input type="date" value={newSurgery.date} onChange={(e) => setNewSurgery(prev => ({ ...prev, date: e.target.value }))} />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>Notes (optional)</Label>
-                <Input
-                  value={newSurgery.notes}
-                  onChange={(e) => setNewSurgery(prev => ({ ...prev, notes: e.target.value }))}
-                  placeholder="Any additional notes about the surgery"
-                />
+                <Input value={newSurgery.notes} onChange={(e) => setNewSurgery(prev => ({ ...prev, notes: e.target.value }))} placeholder="Any additional notes about the surgery" />
               </div>
               <div className="flex justify-end gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => {
-                    setShowAddSurgery(false);
-                    setNewSurgery({ name: "", date: "", notes: "" });
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button size="sm" onClick={handleAddSurgery}>
-                  Add Surgery
-                </Button>
+                <Button variant="ghost" size="sm" onClick={() => { setShowAddSurgery(false); setNewSurgery({ name: "", date: "", notes: "" }); }}>Cancel</Button>
+                <Button size="sm" onClick={handleAddSurgery}>Add Surgery</Button>
               </div>
             </div>
           )}
@@ -790,25 +696,13 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
           ) : (
             <div className="space-y-2">
               {surgeries.map((surgery) => (
-                <div 
-                  key={surgery.id} 
-                  className="flex items-start justify-between p-3 rounded-lg bg-muted/30 border border-border/50"
-                >
+                <div key={surgery.id} className="flex items-start justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
                   <div>
                     <p className="font-medium text-foreground">{surgery.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {format(new Date(surgery.date), "MMMM d, yyyy")}
-                    </p>
-                    {surgery.notes && (
-                      <p className="text-sm text-muted-foreground mt-1">{surgery.notes}</p>
-                    )}
+                    <p className="text-sm text-muted-foreground">{format(new Date(surgery.date), "MMMM d, yyyy")}</p>
+                    {surgery.notes && <p className="text-sm text-muted-foreground mt-1">{surgery.notes}</p>}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive"
-                    onClick={() => handleRemoveSurgery(surgery.id)}
-                  >
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleRemoveSurgery(surgery.id)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
@@ -824,42 +718,37 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-2">
             <Label htmlFor="next_of_kin_name">Name</Label>
-            <Input
-              id="next_of_kin_name"
-              value={formData.next_of_kin_name}
-              onChange={(e) => updateFormData({ next_of_kin_name: e.target.value })}
-              placeholder="Full name"
-            />
+            <Input id="next_of_kin_name" value={formData.next_of_kin_name} onChange={(e) => updateFormData({ next_of_kin_name: e.target.value })} placeholder="Full name" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="next_of_kin_relationship">Relationship</Label>
-            <Input
-              id="next_of_kin_relationship"
-              value={formData.next_of_kin_relationship}
-              onChange={(e) => updateFormData({ next_of_kin_relationship: e.target.value })}
-              placeholder="e.g. Spouse, Parent, Sibling"
-            />
+            <Input id="next_of_kin_relationship" value={formData.next_of_kin_relationship} onChange={(e) => updateFormData({ next_of_kin_relationship: e.target.value })} placeholder="e.g. Spouse, Parent, Sibling" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="next_of_kin_phone">Phone</Label>
-            <Input
-              id="next_of_kin_phone"
-              value={formData.next_of_kin_phone}
-              onChange={(e) => updateFormData({ next_of_kin_phone: e.target.value })}
-              placeholder="Phone number"
-            />
+            <Input id="next_of_kin_phone" value={formData.next_of_kin_phone} onChange={(e) => updateFormData({ next_of_kin_phone: e.target.value })} placeholder="Phone number" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="next_of_kin_email">Email</Label>
-            <Input
-              id="next_of_kin_email"
-              type="email"
-              value={formData.next_of_kin_email}
-              onChange={(e) => updateFormData({ next_of_kin_email: e.target.value })}
-              placeholder="Email address"
-            />
+            <Input id="next_of_kin_email" type="email" value={formData.next_of_kin_email} onChange={(e) => updateFormData({ next_of_kin_email: e.target.value })} placeholder="Email address" />
           </div>
         </div>
+      </div>
+
+      {/* General Notes */}
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide flex items-center gap-2">
+          <StickyNote className="h-4 w-4" />
+          General Notes
+        </h3>
+        <Textarea
+          id="notes"
+          value={formData.notes}
+          onChange={(e) => updateFormData({ notes: e.target.value })}
+          placeholder="Enter any additional notes, observations, or important information about this patient..."
+          className="min-h-[120px] resize-none rounded-xl"
+          rows={4}
+        />
       </div>
     </div>
   );
