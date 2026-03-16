@@ -70,7 +70,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ onNavigate }: SidebarProps) {
-  const { role, loading, isPatient, isAdmin } = useUserRole();
+  const { role, loading: roleLoading, isPatient, isAdmin } = useUserRole();
+  const loading = roleLoading;
   const { profile } = useProfile();
   const navItems = isAdmin ? adminNavItems : isPatient ? patientNavItems : doctorNavItems;
 
