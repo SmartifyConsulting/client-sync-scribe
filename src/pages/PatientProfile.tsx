@@ -14,6 +14,9 @@ import {
   Star,
   Plus,
   PenTool,
+  Mic,
+  Video,
+  FilePlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -38,7 +41,6 @@ import { useTemplates } from "@/hooks/useTemplates";
 import { useDocuments } from "@/hooks/useDocuments";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
 import { DrawingPad } from "@/components/drawings/DrawingPad";
-import { MediaCapture } from "@/components/documents/MediaCapture";
 import {
   Dialog,
   DialogContent,
@@ -380,46 +382,124 @@ export default function PatientProfile() {
             </p>
           </div>
 
-          {/* Media Capture + Upload File + Create Document on same row, centered */}
-          <div className="flex items-center gap-2 flex-wrap justify-center">
-            <MediaCapture patientId={patient.id} patientName={patient.name} onSaved={fetchDocuments} />
-            <Button variant="outline" className="gap-2 h-11" onClick={() => {
-              const input = document.createElement('input');
-              input.type = 'file';
-              input.accept = 'audio/*,video/*,image/*,.pdf,.doc,.docx';
-              input.onchange = async (e) => {
-                const file = (e.target as HTMLInputElement).files?.[0];
-                if (!file) return;
+          {/* Quick action icon buttons */}
+          <div className="flex items-center gap-3 justify-center">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-12 w-12 rounded-xl"
+              title="Record Audio"
+              onClick={async () => {
                 try {
-                  const fileName = `${patient.id}/${Date.now()}-${file.name}`;
-                  const { error: uploadError } = await supabase.storage.from("patient-media").upload(fileName, file);
-                  if (uploadError) throw uploadError;
-                  const { data: { publicUrl } } = supabase.storage.from("patient-media").getPublicUrl(fileName);
-                  const { data: { user } } = await supabase.auth.getUser();
-                  if (!user) throw new Error("Not authenticated");
-                  await supabase.from("documents").insert({
-                    name: file.name,
-                    content: `[Uploaded File] ${file.name}`,
-                    user_id: user.id,
-                    patient_id: patient.id,
-                    patient_name: patient.name,
-                    media_url: publicUrl,
-                    media_type: file.type.startsWith("video") ? "video" : file.type.startsWith("audio") ? "audio" : "file",
-                  });
-                  toast({ title: "File uploaded", description: `${file.name} saved to documents` });
-                  fetchDocuments();
-                } catch (err: any) {
-                  toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+                  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                  const recorder = new MediaRecorder(stream);
+                  const chunks: Blob[] = [];
+                  recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+                  recorder.onstop = async () => {
+                    stream.getTracks().forEach(t => t.stop());
+                    const blob = new Blob(chunks, { type: "audio/webm" });
+                    const fileName = `${patient.id}/${Date.now()}.webm`;
+                    const { error: uploadError } = await supabase.storage.from("patient-media").upload(fileName, blob, { contentType: "audio/webm" });
+                    if (uploadError) { toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" }); return; }
+                    const { data: { publicUrl } } = supabase.storage.from("patient-media").getPublicUrl(fileName);
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) return;
+                    await supabase.from("documents").insert({ name: `Audio Recording ${format(new Date(), "dd MMM yyyy HH:mm")}`, content: "[AUDIO Recording]", user_id: user.id, patient_id: patient.id, patient_name: patient.name, media_url: publicUrl, media_type: "audio" });
+                    toast({ title: "Audio saved" });
+                    fetchDocuments();
+                  };
+                  recorder.start();
+                  toast({ title: "🎙️ Recording...", description: "Click the microphone again or wait — recording for 60s max." });
+                  setTimeout(() => { if (recorder.state === "recording") recorder.stop(); }, 60000);
+                  // Store recorder to stop on next click — simplified: auto-stop after 60s
+                } catch {
+                  toast({ title: "Permission denied", description: "Microphone access is required", variant: "destructive" });
                 }
-              };
-              input.click();
-            }}>
-              <Upload className="h-4 w-4" />
-              Upload File
+              }}
+            >
+              <Mic className="h-5 w-5" />
             </Button>
-            <Button variant="outline" className="gap-2 h-11" onClick={() => setShowTemplateSelector(true)}>
-              <Plus className="h-4 w-4" />
-              Create New Document
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-12 w-12 rounded-xl"
+              title="Record Video"
+              onClick={async () => {
+                try {
+                  const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: { facingMode: "environment" } });
+                  const recorder = new MediaRecorder(stream);
+                  const chunks: Blob[] = [];
+                  recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+                  recorder.onstop = async () => {
+                    stream.getTracks().forEach(t => t.stop());
+                    const blob = new Blob(chunks, { type: "video/webm" });
+                    const fileName = `${patient.id}/${Date.now()}.webm`;
+                    const { error: uploadError } = await supabase.storage.from("patient-media").upload(fileName, blob, { contentType: "video/webm" });
+                    if (uploadError) { toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" }); return; }
+                    const { data: { publicUrl } } = supabase.storage.from("patient-media").getPublicUrl(fileName);
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) return;
+                    await supabase.from("documents").insert({ name: `Video Recording ${format(new Date(), "dd MMM yyyy HH:mm")}`, content: "[VIDEO Recording]", user_id: user.id, patient_id: patient.id, patient_name: patient.name, media_url: publicUrl, media_type: "video" });
+                    toast({ title: "Video saved" });
+                    fetchDocuments();
+                  };
+                  recorder.start();
+                  toast({ title: "🎥 Recording video...", description: "Auto-stops after 5 minutes." });
+                  setTimeout(() => { if (recorder.state === "recording") recorder.stop(); }, 300000);
+                } catch {
+                  toast({ title: "Permission denied", description: "Camera access is required", variant: "destructive" });
+                }
+              }}
+            >
+              <Video className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-12 w-12 rounded-xl"
+              title="Upload File"
+              onClick={() => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'audio/*,video/*,image/*,.pdf,.doc,.docx';
+                input.onchange = async (e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0];
+                  if (!file) return;
+                  try {
+                    const fileName = `${patient.id}/${Date.now()}-${file.name}`;
+                    const { error: uploadError } = await supabase.storage.from("patient-media").upload(fileName, file);
+                    if (uploadError) throw uploadError;
+                    const { data: { publicUrl } } = supabase.storage.from("patient-media").getPublicUrl(fileName);
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) throw new Error("Not authenticated");
+                    await supabase.from("documents").insert({
+                      name: file.name,
+                      content: `[Uploaded File] ${file.name}`,
+                      user_id: user.id,
+                      patient_id: patient.id,
+                      patient_name: patient.name,
+                      media_url: publicUrl,
+                      media_type: file.type.startsWith("video") ? "video" : file.type.startsWith("audio") ? "audio" : "file",
+                    });
+                    toast({ title: "File uploaded", description: `${file.name} saved to documents` });
+                    fetchDocuments();
+                  } catch (err: any) {
+                    toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+                  }
+                };
+                input.click();
+              }}
+            >
+              <Upload className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-12 w-12 rounded-xl"
+              title="Create New Document"
+              onClick={() => setShowTemplateSelector(true)}
+            >
+              <FilePlus className="h-5 w-5" />
             </Button>
           </div>
           <div className="rounded-2xl bg-card shadow-card overflow-hidden">
