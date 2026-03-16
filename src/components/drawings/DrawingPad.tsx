@@ -128,55 +128,11 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           ctx.stroke();
         }
       } else if (element.type === "text") {
-        ctx.fillStyle = element.color || "#000000";
-        ctx.font = `${element.strokeWidth || 16}px sans-serif`;
-        ctx.fillText(element.data.text, element.x, element.y);
+        // Text elements are rendered as overlays in React
       } else if (element.type === "anatomy") {
         // Anatomy elements are rendered as overlays in React
       } else if (element.type === "shape") {
-        ctx.strokeStyle = element.color || "#000000";
-        ctx.lineWidth = element.strokeWidth || 2;
-        
-        if (element.data.shapeType === "line" || element.data.shapeType === "arrow") {
-          ctx.beginPath();
-          ctx.moveTo(element.x, element.y);
-          ctx.lineTo(element.data.endX, element.data.endY);
-          ctx.stroke();
-          
-          if (element.data.shapeType === "arrow") {
-            const angle = Math.atan2(element.data.endY - element.y, element.data.endX - element.x);
-            const headLen = 15;
-            ctx.beginPath();
-            ctx.moveTo(element.data.endX, element.data.endY);
-            ctx.lineTo(
-              element.data.endX - headLen * Math.cos(angle - Math.PI / 6),
-              element.data.endY - headLen * Math.sin(angle - Math.PI / 6)
-            );
-            ctx.moveTo(element.data.endX, element.data.endY);
-            ctx.lineTo(
-              element.data.endX - headLen * Math.cos(angle + Math.PI / 6),
-              element.data.endY - headLen * Math.sin(angle + Math.PI / 6)
-            );
-            ctx.stroke();
-          }
-        } else if (element.data.shapeType === "circle") {
-          ctx.beginPath();
-          const radius = Math.sqrt(
-            Math.pow(element.data.endX - element.x, 2) + 
-            Math.pow(element.data.endY - element.y, 2)
-          );
-          ctx.arc(element.x, element.y, radius, 0, 2 * Math.PI);
-          ctx.stroke();
-        } else if (element.data.shapeType === "rectangle") {
-          ctx.beginPath();
-          ctx.rect(
-            element.x, 
-            element.y, 
-            element.data.endX - element.x, 
-            element.data.endY - element.y
-          );
-          ctx.stroke();
-        }
+        // Shape elements are rendered as overlays in React
       }
       
       ctx.restore();
