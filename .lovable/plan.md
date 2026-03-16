@@ -1,59 +1,54 @@
 
 
-# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
+# Plan: Patient Documents Page, Round Table Page, Storage Usage Indicator, Navigation Reorder
 
-## 1. Increase Logo Size by 130%
+## 1. Patient Navigation Menu Reorder
 
-Scale all logo instances by 130%:
+Update `Sidebar.tsx` and `BottomNav.tsx` patient nav items to match the requested sequence:
 
-| Location | Current | New (130%) |
-|---|---|---|
-| Sidebar | h-10 (40px) | h-[52px] |
-| Mobile Header | h-8 (32px) | h-[42px] |
-| Auth page | h-12 (48px) | h-[62px] |
-| Forgot/Reset Password | h-12 (48px) | h-[62px] |
-| Landing page | h-10 (40px) | h-[52px] |
+```
+Dashboard → My Doctors → My Calendar → My Tasks → My Documents → Round Table → My Rewards → Prescriptions → Invoices
+```
 
-**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
+Remove "Invites" as a separate nav item (it was `/patient/invites`). Add "My Documents" (`/patient/documents`) and "Round Table" (`/patient/round-table`).
 
-## 2. Fix Practice Number Not Persisting
+## 2. Create Patient Documents Page
 
-**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
+Create `src/pages/patient/PatientDocuments.tsx` — a read-only view of documents associated with the patient. Query the `documents` table where `patient_id` matches a patient record linked to the current user.
 
-**Fix in `src/pages/Profile.tsx`:**
-- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
-- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
-- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
-- This prevents the race condition where autosave fires with stale/initial data
+**Storage Usage Indicator**: At the top of the page, show a progress bar indicating storage used out of 100MB allocation. Calculate total storage by summing the `content` field lengths of all documents for the patient. Display "X MB / 100 MB used" with a visual progress bar. Show a warning when approaching the limit and a prompt to upgrade when exceeded.
 
-## 3. Make Partner Email Required and Create Pending Users
+**Database**: Add an RLS policy so patients can view documents associated with them:
+```sql
+CREATE POLICY "Patients can view documents for their patient record"
+ON public.documents FOR SELECT TO authenticated
+USING (patient_id IN (SELECT id FROM patients WHERE patient_user_id = auth.uid()));
+```
 
-**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+## 3. Create Patient Round Table Page
 
-**Fix:**
-- Add an `email` column to the `practice_partners` table via migration
-- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
-- Ensure the `addPartner` function validates email is provided before saving
-- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+Create `src/pages/patient/PatientRoundTable.tsx` — shows round table notes across all patient records linked to the current user. Query `round_table_notes` joined with patient records where `patient_user_id = auth.uid()`. Display notes grouped by patient (if patient has multiple doctor relationships), showing doctor name, content, and timestamp. Read-only for patients.
 
-**Database Migration:**
-- `ALTER TABLE practice_partners ADD COLUMN email text;`
+**Database**: Add RLS policy for patients to view their round table notes:
+```sql
+CREATE POLICY "Patients can view their round table notes"
+ON public.round_table_notes FOR SELECT TO authenticated
+USING (patient_id IN (SELECT id FROM patients WHERE patient_user_id = auth.uid()));
+```
 
-**Changes in `src/pages/Profile.tsx`:**
-- Make email field required in validation (alongside name and registration number)
-- Show validation error if email is missing
+## 4. Add Routes in App.tsx
 
-## Technical Summary
+- `/patient/documents` → `PatientDocuments`
+- `/patient/round-table` → `PatientRoundTable`
 
-### Database Migration
-- Add `email text` column to `practice_partners` table
+## Files to Create/Modify
 
-### Files Modified
-- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
-- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
-- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
-- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
+| File | Action |
+|------|--------|
+| `src/pages/patient/PatientDocuments.tsx` | New — patient documents view with storage usage bar |
+| `src/pages/patient/PatientRoundTable.tsx` | New — patient round table notes view |
+| `src/components/layout/Sidebar.tsx` | Reorder patient nav, add My Documents + Round Table |
+| `src/components/layout/BottomNav.tsx` | Update patient nav (keep 5 most important) |
+| `src/App.tsx` | Add 2 new patient routes |
+| SQL Migration | RLS policies for patient document + round table access |
 
