@@ -1052,6 +1052,7 @@ export type Database = {
           phone: string | null
           practice_number: string | null
           referral_count: number | null
+          specialty: string | null
           updated_at: string | null
           user_id: string
         }
@@ -1065,6 +1066,7 @@ export type Database = {
           phone?: string | null
           practice_number?: string | null
           referral_count?: number | null
+          specialty?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -1078,6 +1080,7 @@ export type Database = {
           phone?: string | null
           practice_number?: string | null
           referral_count?: number | null
+          specialty?: string | null
           updated_at?: string | null
           user_id?: string
         }
