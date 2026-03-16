@@ -902,7 +902,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                   >
                     <div className="h-16 flex items-center justify-center text-muted-foreground overflow-hidden">
                       {asset.imageSrc ? (
-                        <img src={asset.imageSrc} alt={asset.name} className="h-full w-auto object-cover" />
+                        <img src={asset.imageSrc} alt={asset.name} className="h-full w-auto object-contain" />
                       ) : (
                         <asset.component />
                       )}
