@@ -1,59 +1,61 @@
 
 
-# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
+# Plan: Add Hospital Admission Form Document Type
 
-## 1. Increase Logo Size by 130%
+## Overview
 
-Scale all logo instances by 130%:
+Add "Hospital Admission Form" as a 6th document type available to doctors (as a quick action in sessions + as a template) and visible to patients in their documents view. The form has structured fields for admission details, diagnosis with multiple ICD-10 codes, procedure details with NHRPL codes, and multiple patient special instructions.
 
-| Location | Current | New (130%) |
-|---|---|---|
-| Sidebar | h-10 (40px) | h-[52px] |
-| Mobile Header | h-8 (32px) | h-[42px] |
-| Auth page | h-12 (48px) | h-[62px] |
-| Forgot/Reset Password | h-12 (48px) | h-[62px] |
-| Landing page | h-10 (40px) | h-[52px] |
+## 1. Create `HospitalAdmissionEditor.tsx` Component
 
-**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
+New file: `src/components/sessions/HospitalAdmissionEditor.tsx`
 
-## 2. Fix Practice Number Not Persisting
+A form-based editor (matching the pattern of PrescriptionEditor, InvoiceEditor, etc.) with these sections:
 
-**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
+**Admission Details:**
+- Admitting Doctor (auto-filled from profile)
+- Practice Number (auto-filled from profile)
+- Hospital (text input)
+- Date of Admission (date picker)
 
-**Fix in `src/pages/Profile.tsx`:**
-- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
-- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
-- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
-- This prevents the race condition where autosave fires with stale/initial data
+**Diagnosis Details — ICD-10 Codes:**
+- Dynamic list (add/remove rows), each row: Code (text) + Description (text)
+- "Add ICD-10 Code" button
 
-## 3. Make Partner Email Required and Create Pending Users
+**Procedure Details:**
+- Date of Procedure (date picker)
+- Procedure Description (textarea)
+- NHRPL Codes (text input)
 
-**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+**Patient Special Instructions:**
+- Dynamic list (add/remove rows), each row: Instruction (text) + Description (text)
+- "Add Instruction" button
 
-**Fix:**
-- Add an `email` column to the `practice_partners` table via migration
-- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
-- Ensure the `addPartner` function validates email is provided before saving
-- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+On save, the form content is rendered into a text template and saved to the `documents` table with `template_name = "Hospital Admission Form"`. Also uses `useTemplateWithHeaderFooter` to apply the doctor's header/footer if configured. Includes a Preview button like other editors.
 
-**Database Migration:**
-- `ALTER TABLE practice_partners ADD COLUMN email text;`
+## 2. Add Quick Action to SessionDetail.tsx
 
-**Changes in `src/pages/Profile.tsx`:**
-- Make email field required in validation (alongside name and registration number)
-- Show validation error if email is missing
+Add a "Hospital Admission" button to the Quick Actions grid in `src/pages/SessionDetail.tsx` (alongside Prescription, Invoice, etc.). Add state `showHospitalAdmissionEditor` and render the `HospitalAdmissionEditor` dialog.
 
-## Technical Summary
+## 3. Add to Patient Documents View
 
-### Database Migration
-- Add `email text` column to `practice_partners` table
+In `src/pages/patient/PatientDocuments.tsx`:
+- Add `hospital_admission` to the `DocType` union
+- Add config entry with a **rose/red** color badge
+- Add to `FILTER_OPTIONS`
+- Update `deriveDocType` to detect "hospital admission" in template name
 
-### Files Modified
-- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
-- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
-- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
-- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
+## 4. Add Default Template for Doctors
+
+The template system allows doctors to customize their Hospital Admission Form template. No DB migration needed — the editor will have a built-in fallback template (like MedicalCertificateEditor does with `FALLBACK_TEMPLATE`). Doctors can also create a "Hospital Admission Form" content template in the Templates page if they want custom formatting.
+
+## Files to Create/Modify
+
+| File | Action |
+|------|--------|
+| `src/components/sessions/HospitalAdmissionEditor.tsx` | **New** — Form-based editor with dynamic ICD-10 codes and instructions lists |
+| `src/pages/SessionDetail.tsx` | Add quick action button + editor dialog |
+| `src/pages/patient/PatientDocuments.tsx` | Add `hospital_admission` doc type, badge color, filter option |
+
+No database migration needed — documents are saved to the existing `documents` table with `template_name = "Hospital Admission Form"`.
 
