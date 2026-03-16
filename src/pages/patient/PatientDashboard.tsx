@@ -40,6 +40,21 @@ export default function PatientDashboard() {
   const queryClient = useQueryClient();
   const { lollipopCount, rewards, loading: rewardsLoading } = useMyRewards();
 
+  // Fetch patient record for chronic status
+  const { data: patientRecord } = useQuery({
+    queryKey: ["my-patient-record"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data } = await supabase
+        .from("patients")
+        .select("is_chronic")
+        .eq("patient_user_id", user.id)
+        .maybeSingle();
+      return data;
+    },
+  });
+
   const { data: unreadNotifCount = 0 } = useQuery({
     queryKey: ["unread-notifications-patient-dashboard"],
     queryFn: async () => {
