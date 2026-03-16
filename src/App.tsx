@@ -36,6 +36,7 @@ import PatientAccessManagement from "./pages/patient/PatientAccessManagement";
 import MyRewards from "./pages/patient/MyRewards";
 import HealthAlbum from "./pages/patient/HealthAlbum";
 import MyDoctors from "./pages/patient/MyDoctors";
+import PatientTasks from "./pages/patient/PatientTasks";
 import DoctorInvoices from "./pages/doctor/Invoices";
 import PricingAdmin from "./pages/admin/PricingAdmin";
 import GamificationAdmin from "./pages/admin/GamificationAdmin";
