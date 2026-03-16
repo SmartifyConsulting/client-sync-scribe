@@ -1,59 +1,47 @@
 
 
-# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
+# Plan: Auto-create Patient Record on Accept + Auto-apply First Consultation Fee
 
-## 1. Increase Logo Size by 130%
+## 1. Auto-create Patient Record When Doctor Accepts Request
 
-Scale all logo instances by 130%:
+In `DoctorAccessRequests.tsx`, after the doctor accepts the request and creates the `doctor_patient_access` record, automatically create a patient record in the `patients` table for this doctor.
 
-| Location | Current | New (130%) |
-|---|---|---|
-| Sidebar | h-10 (40px) | h-[52px] |
-| Mobile Header | h-8 (32px) | h-[42px] |
-| Auth page | h-12 (48px) | h-[62px] |
-| Forgot/Reset Password | h-12 (48px) | h-[62px] |
-| Landing page | h-10 (40px) | h-[52px] |
+**In `handleAcceptRequest`**, after the access grant insert succeeds:
+- Fetch the patient's profile (name, email, phone, etc.) from `profiles` table using `acceptingRequest.patient_user_id`
+- Check if this doctor already has a patient record for this user (`patients` table where `user_id = doctor.id` and `patient_user_id = patient_user_id`)
+- If no existing record, insert a new patient record with:
+  - `user_id`: doctor's user ID (the doctor "owns" this patient record)
+  - `patient_user_id`: the patient's auth user ID
+  - `name`: from patient's profile `full_name`
+  - `email`: from patient's profile or auth email
+  - `status`: "active"
 
-**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
+## 2. Auto-apply First Consultation Fee on First Appointment
 
-## 2. Fix Practice Number Not Persisting
+In `BookAppointmentDialog.tsx`, when a patient selects a doctor (Step 1 → Step 2), check if the patient has any prior appointments/requests with that doctor. If this is their first appointment:
+- Look for a service named like "first consultation" or "initial consultation" in the doctor's `service_prices`
+- If found, auto-select it and move to Step 2 with it pre-selected (or highlight it)
+- Show a note indicating this is the first visit fee
 
-**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
+**Implementation approach**: After fetching services in `fetchServices`, also check `appointment_requests` for any prior requests between this patient and doctor. If none exist and a "first consultation" service exists, auto-select it.
 
-**Fix in `src/pages/Profile.tsx`:**
-- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
-- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
-- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
-- This prevents the race condition where autosave fires with stale/initial data
+To make this work, doctors need a way to designate a service as the "first consultation" fee. The simplest approach: add a `is_first_consultation` boolean column to `service_prices` table. Then the booking flow checks for it automatically.
 
-## 3. Make Partner Email Required and Create Pending Users
+## Files to Modify
 
-**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+| File | Change |
+|------|--------|
+| `src/components/doctor/DoctorAccessRequests.tsx` | After accepting, create patient record for doctor |
+| `src/components/appointments/BookAppointmentDialog.tsx` | Auto-select first consultation service for new patients |
+| SQL Migration | Add `is_first_consultation` boolean to `service_prices` |
+| `src/pages/Profile.tsx` | Add toggle for "First Consultation Fee" when creating/editing services |
 
-**Fix:**
-- Add an `email` column to the `practice_partners` table via migration
-- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
-- Ensure the `addPartner` function validates email is provided before saving
-- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+## Database Migration
 
-**Database Migration:**
-- `ALTER TABLE practice_partners ADD COLUMN email text;`
+```sql
+ALTER TABLE public.service_prices
+ADD COLUMN is_first_consultation boolean NOT NULL DEFAULT false;
+```
 
-**Changes in `src/pages/Profile.tsx`:**
-- Make email field required in validation (alongside name and registration number)
-- Show validation error if email is missing
-
-## Technical Summary
-
-### Database Migration
-- Add `email text` column to `practice_partners` table
-
-### Files Modified
-- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
-- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
-- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
-- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
+No RLS changes needed — existing policies cover service_prices.
 
