@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock, X, CalendarIcon, Upload } from "lucide-react";
@@ -76,6 +76,52 @@ export default function Patients() {
     claims_email: "",
   });
   const [creating, setCreating] = useState(false);
+  const meAutoCreated = useRef(false);
+
+  // Auto-create "ME" patient record for doctors who don't have one
+  useEffect(() => {
+    if (loading || !user?.email || meAutoCreated.current) return;
+    const hasMe = patients.some(p => p.email?.toLowerCase() === user.email?.toLowerCase());
+    if (!hasMe) {
+      meAutoCreated.current = true;
+      createPatient({
+        name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Me',
+        email: user.email || null,
+        phone: null,
+        dob: null,
+        address: null,
+        notes: null,
+        status: 'active',
+        physical_address: null,
+        postal_address: null,
+        same_as_physical: false,
+        referred_by: null,
+        employer: null,
+        occupation: null,
+        medical_aid: null,
+        medical_aid_number: null,
+        primary_member: null,
+        next_of_kin_name: null,
+        next_of_kin_phone: null,
+        next_of_kin_email: null,
+        next_of_kin_relationship: null,
+        general_practitioner: null,
+        allergies: null,
+        claims_email: null,
+        medical_insurance_product: null,
+        marital_status: null,
+        height_cm: null,
+        weight_kg: null,
+        surgeries: null,
+        id_passport_number: null,
+        gender: null,
+        pharmacy_name: null,
+        pharmacy_email: null,
+        pharmacies: null,
+        patient_user_id: user.id,
+      });
+    }
+  }, [loading, user, patients]);
 
   const filteredPatients = patients.filter((patient) => {
     // Name filter
