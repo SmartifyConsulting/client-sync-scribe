@@ -614,6 +614,107 @@ export default function GamificationAdmin() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="partner-apps" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-blue-500" />
+                  Partner Apps
+                </CardTitle>
+                <CardDescription>
+                  Manage external apps that accept Moola transfers from patients
+                </CardDescription>
+              </div>
+              <Dialog open={showAddAppDialog} onOpenChange={setShowAddAppDialog}>
+                <DialogTrigger asChild>
+                  <Button className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add App
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add Partner App</DialogTitle>
+                    <DialogDescription>
+                      Add an external app that can receive Moola transfers
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label>App Name</Label>
+                      <Input
+                        placeholder="e.g., HealthStore"
+                        value={newAppName}
+                        onChange={(e) => setNewAppName(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Logo URL (optional)</Label>
+                      <Input
+                        placeholder="https://..."
+                        value={newAppLogoUrl}
+                        onChange={(e) => setNewAppLogoUrl(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setShowAddAppDialog(false)}>Cancel</Button>
+                    <Button onClick={() => addAppMutation.mutate()} disabled={!newAppName.trim() || addAppMutation.isPending}>
+                      Add App
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </CardHeader>
+            <CardContent>
+              {appsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                </div>
+              ) : partnerApps.length === 0 ? (
+                <div className="text-center py-8">
+                  <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No partner apps yet. Add one to enable Moola transfers.</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>App Name</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {partnerApps.map((app) => (
+                      <TableRow key={app.id}>
+                        <TableCell className="font-medium">{app.name}</TableCell>
+                        <TableCell>
+                          <Switch
+                            checked={app.is_active}
+                            onCheckedChange={(checked) => toggleAppMutation.mutate({ id: app.id, is_active: checked })}
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => deleteAppMutation.mutate(app.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
