@@ -28,6 +28,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
     dob: "",
     occupation: "",
     employer: "",
+    reporting_to_email: "",
     referred_by: "",
     marital_status: "",
     id_passport_number: "",
