@@ -77,6 +77,10 @@ export default function TodoList() {
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const silenceTimerRef = useRef<number>(0);
+  const silenceIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Fetch todos from database
   const fetchTodos = async () => {
