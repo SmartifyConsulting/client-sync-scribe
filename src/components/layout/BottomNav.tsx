@@ -4,8 +4,9 @@ import {
   LayoutDashboard,
   Users,
   Calendar,
-  Mic,
+  FileText,
   Settings,
+  Mic,
   Pill,
   Receipt,
   Stethoscope,
@@ -25,7 +26,7 @@ const patientNavItems = [
   { icon: LayoutDashboard, label: "Home", to: "/dashboard" },
   { icon: Stethoscope, label: "Doctors", to: "/patient/doctors" },
   { icon: Calendar, label: "Calendar", to: "/patient/calendar" },
-  { icon: CheckSquare, label: "Tasks", to: "/patient/tasks" },
+  { icon: FileText, label: "Docs", to: "/patient/documents" },
   { icon: Settings, label: "Settings", to: "/settings" },
 ];
 
