@@ -687,14 +687,14 @@ export default function Patients() {
                             ME
                           </div>
                           <span className="font-medium text-foreground group-hover:text-terracotta transition-colors">
-                            {(() => {
+                            {mePatient.name.includes(',') ? mePatient.name : (() => {
                               const parts = mePatient.name.trim().split(/\s+/);
                               if (parts.length <= 1) return mePatient.name;
                               const lastName = parts[parts.length - 1];
                               const firstNames = parts.slice(0, -1).join(" ");
                               return `${lastName}, ${firstNames}`;
                             })()}
-                            <span className="ml-2 inline-flex items-center rounded-full bg-terracotta/10 px-2 py-0.5 text-[10px] font-bold text-terracotta">ME</span>
+                            <span className="ml-2 inline-flex items-center rounded-full bg-terracotta px-2 py-0.5 text-[10px] font-bold text-white">ME</span>
                           </span>
                         </Link>
                       </td>
@@ -755,7 +755,7 @@ export default function Patients() {
                               {patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                             </div>
                             <span className="font-medium text-foreground group-hover:text-primary transition-colors">
-                              {(() => {
+                              {patient.name.includes(',') ? patient.name : (() => {
                                 const parts = patient.name.trim().split(/\s+/);
                                 if (parts.length <= 1) return patient.name;
                                 const lastName = parts[parts.length - 1];

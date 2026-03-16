@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Plus,
   Mic,
@@ -63,6 +64,7 @@ const actionTypeLabels: Record<string, string> = {
 
 export default function TodoList() {
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [newTaskText, setNewTaskText] = useState("");
@@ -113,6 +115,18 @@ export default function TodoList() {
   useEffect(() => {
     fetchTodos();
   }, []);
+
+  // Auto-start recording if navigated with ?autoRecord=true
+  const autoRecordTriggered = useRef(false);
+  useEffect(() => {
+    if (loading || autoRecordTriggered.current) return;
+    if (searchParams.get('autoRecord') === 'true') {
+      autoRecordTriggered.current = true;
+      setSearchParams({}, { replace: true });
+      // Small delay to ensure component is ready
+      setTimeout(() => startRecording(), 300);
+    }
+  }, [loading, searchParams]);
 
   const cleanupSilenceDetection = () => {
     if (silenceIntervalRef.current) {

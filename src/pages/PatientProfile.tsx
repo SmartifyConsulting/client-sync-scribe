@@ -396,16 +396,16 @@ export default function PatientProfile() {
         </TabsContent>
 
         <TabsContent value="documents" className="space-y-4">
-          {/* Document Mailbox Info Banner */}
-          <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 flex items-start gap-3">
-            <FileText className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-            <div className="flex-1">
-              <p className="text-sm text-muted-foreground">
-                Documents can be emailed to your documents tab by external parties (e.g., radiologists, labs) to{" "}
-                <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded text-foreground">
-                  {displayEmail || 'Loading...'}
-                </code>
-                {displayEmail && (
+          {/* Document Mailbox Info Banner - only show on ME record */}
+          {patient.email?.toLowerCase() === user?.email?.toLowerCase() && displayEmail && (
+            <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 flex items-start gap-3">
+              <FileText className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm text-muted-foreground">
+                  Documents can be emailed to your documents tab by external parties (e.g., radiologists, labs) to{" "}
+                  <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded text-foreground">
+                    {displayEmail}
+                  </code>
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(displayEmail);
@@ -416,11 +416,11 @@ export default function PatientProfile() {
                   >
                     <Copy className="h-3.5 w-3.5" />
                   </button>
-                )}
-                , and they will be saved under your Documents.
-              </p>
+                  , and they will be saved under your Documents.
+                </p>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Quick action icon buttons */}
           <div className="flex items-center gap-3 justify-center">
@@ -438,6 +438,7 @@ export default function PatientProfile() {
                   recorder.onstop = async () => {
                     stream.getTracks().forEach(t => t.stop());
                     const blob = new Blob(chunks, { type: "audio/webm" });
+                    if (blob.size > 5 * 1024 * 1024) { toast({ title: "File too large", description: "Audio recording exceeds 5MB limit", variant: "destructive" }); return; }
                     const fileName = `${patient.id}/${Date.now()}.webm`;
                     const { error: uploadError } = await supabase.storage.from("patient-media").upload(fileName, blob, { contentType: "audio/webm" });
                     if (uploadError) { toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" }); return; }
@@ -473,6 +474,7 @@ export default function PatientProfile() {
                   recorder.onstop = async () => {
                     stream.getTracks().forEach(t => t.stop());
                     const blob = new Blob(chunks, { type: "video/webm" });
+                    if (blob.size > 5 * 1024 * 1024) { toast({ title: "File too large", description: "Video recording exceeds 5MB limit", variant: "destructive" }); return; }
                     const fileName = `${patient.id}/${Date.now()}.webm`;
                     const { error: uploadError } = await supabase.storage.from("patient-media").upload(fileName, blob, { contentType: "video/webm" });
                     if (uploadError) { toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" }); return; }
@@ -505,6 +507,10 @@ export default function PatientProfile() {
                 input.onchange = async (e) => {
                   const file = (e.target as HTMLInputElement).files?.[0];
                   if (!file) return;
+                  if ((file.type.startsWith("audio/") || file.type.startsWith("video/")) && file.size > 5 * 1024 * 1024) {
+                    toast({ title: "File too large", description: "Audio/video files must be under 5MB", variant: "destructive" });
+                    return;
+                  }
                   try {
                     const fileName = `${patient.id}/${Date.now()}-${file.name}`;
                     const { error: uploadError } = await supabase.storage.from("patient-media").upload(fileName, file);
