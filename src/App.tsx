@@ -132,6 +132,7 @@ const App = () => (
             <Route path="/patient/tasks" element={<PatientTasks />} />
             <Route path="/patient/documents" element={<PatientDocuments />} />
             <Route path="/patient/round-table" element={<PatientRoundTable />} />
+            <Route path="/patient/details" element={<MyDetails />} />
             
             {/* Admin routes */}
             <Route path="/admin/pricing" element={<PricingAdmin />} />
