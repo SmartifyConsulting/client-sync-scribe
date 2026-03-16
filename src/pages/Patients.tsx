@@ -680,7 +680,7 @@ export default function Patients() {
                         <span className="text-sm font-bold text-terracotta">MY RECORD</span>
                       </td>
                     </tr>
-                    <tr className="group transition-colors bg-secondary/5 hover:bg-secondary/10 border-l-2 border-secondary">
+                    <tr className="group transition-colors bg-terracotta/5 hover:bg-terracotta/10 border-l-2 border-terracotta">
                       <td className="px-6 py-4">
                         <Link to={`/patients/${mePatient.id}`} className="flex items-center gap-3">
                           <div className="flex h-10 w-10 items-center justify-center rounded-full font-medium bg-terracotta text-terracotta-foreground">

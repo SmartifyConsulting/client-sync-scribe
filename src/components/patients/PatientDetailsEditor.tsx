@@ -607,6 +607,27 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         <Textarea id="allergies" value={formData.allergies} onChange={(e) => updateFormData({ allergies: e.target.value })} placeholder="List any allergies (medications, food, etc.)" rows={2} />
       </div>
 
+      {/* Chronic Medication Toggle */}
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-4 w-4" />Chronic Medication</h3>
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="is_chronic"
+            checked={patient.is_chronic || false}
+            onCheckedChange={(checked) => {
+              onSave({ is_chronic: checked as boolean });
+            }}
+          />
+          <Label htmlFor="is_chronic" className="text-sm">Patient is on chronic medication</Label>
+          {patient.is_chronic && (
+            <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-terracotta/10 px-2 py-0.5 text-[10px] font-bold text-terracotta">
+              <Pill className="h-2.5 w-2.5" />Chronic
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground mt-2">Chronic patients can earn medication adherence rewards (moolas) by logging daily medication intake.</p>
+      </div>
+
       {/* 9. Surgeries and Dates */}
       <div>
         <div className="flex items-center justify-between mb-4">
