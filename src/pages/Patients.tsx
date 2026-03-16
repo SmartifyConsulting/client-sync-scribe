@@ -118,10 +118,13 @@ export default function Patients() {
     return sorted;
   }, [filteredPatients, user?.id]);
 
-  // Group by first letter of surname (skip "ME" patient for grouping)
+  // Extract ME patient before grouping
+  const mePatient = sortedPatients.find(p => p.patient_user_id === user?.id) || null;
+  const patientsForGrouping = mePatient ? sortedPatients.filter(p => p.id !== mePatient.id) : sortedPatients;
+
+  // Group by first letter of surname
   const groupedPatients: Record<string, typeof filteredPatients> = {};
-  sortedPatients.forEach((patient, index) => {
-    // First patient might be "ME" — still group by their surname letter
+  patientsForGrouping.forEach((patient) => {
     const letter = getSurname(patient.name)[0] || '#';
     if (!groupedPatients[letter]) groupedPatients[letter] = [];
     groupedPatients[letter].push(patient);
