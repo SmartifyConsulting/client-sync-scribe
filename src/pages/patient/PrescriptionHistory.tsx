@@ -104,8 +104,8 @@ export default function PrescriptionHistory() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Prescription History</h1>
-        <p className="text-muted-foreground">View and manage your prescriptions</p>
+        <h1 className="text-2xl font-bold text-foreground">Documentation</h1>
+        <p className="text-muted-foreground">View and manage your documents</p>
       </div>
 
       {/* Stats */}
