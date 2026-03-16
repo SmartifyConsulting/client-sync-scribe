@@ -698,7 +698,7 @@ export default function Patients() {
 
       {/* Alphabet Jump Bar */}
       {sortedPatients.length > 0 && (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex gap-0.5 overflow-x-auto pb-1">
           {alphabet.map((letter) => {
             const hasPatients = availableLetters.includes(letter);
             return (
@@ -712,7 +712,7 @@ export default function Patients() {
                   }
                 }}
                 className={cn(
-                  "w-8 h-8 rounded-lg text-xs font-semibold transition-colors",
+                  "w-7 h-7 flex-shrink-0 rounded-lg text-[11px] font-semibold transition-colors",
                   hasPatients
                     ? selectedLetter === letter
                       ? "bg-primary text-primary-foreground"
