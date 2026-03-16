@@ -43,6 +43,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
 
 export default function Patients() {
+  const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { patients, loading, createPatient, deletePatient, fetchPatients } = usePatients();
