@@ -18,7 +18,9 @@ import {
   FileBadge,
   FileEdit,
   PenTool,
+  Hospital,
 } from "lucide-react";
+import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
 import { MedicalCertificateEditor } from "@/components/sessions/MedicalCertificateEditor";
@@ -59,6 +61,7 @@ export default function SessionDetail() {
   const [showReferralLetterEditor, setShowReferralLetterEditor] = useState(false);
   const [showGeneralLetterEditor, setShowGeneralLetterEditor] = useState(false);
   const [showDrawingPad, setShowDrawingPad] = useState(false);
+  const [showHospitalAdmissionEditor, setShowHospitalAdmissionEditor] = useState(false);
 
   const handleDelete = async () => {
     if (!id) return;
@@ -178,7 +181,7 @@ export default function SessionDetail() {
       {session.status === "completed" && session.patient && (
         <div className="rounded-xl border border-border bg-card p-6">
           <h2 className="font-semibold text-foreground mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2">
             <Button
               className="gap-1.5 text-sm h-10 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowPrescriptionEditor(true)}
@@ -220,6 +223,13 @@ export default function SessionDetail() {
             >
               <PenTool className="h-4 w-4 shrink-0" />
               <span className="truncate">Drawing Pad</span>
+            </Button>
+            <Button
+              className="gap-1.5 text-sm h-10 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
+              onClick={() => setShowHospitalAdmissionEditor(true)}
+            >
+              <Hospital className="h-4 w-4 shrink-0" />
+              <span className="truncate">Hospital Admission</span>
             </Button>
           </div>
         </div>
@@ -418,6 +428,22 @@ export default function SessionDetail() {
             toast({
               title: "General Letter created",
               description: "The letter has been saved.",
+            });
+          }}
+        />
+      )}
+
+      {/* Hospital Admission Editor Modal */}
+      {showHospitalAdmissionEditor && session.patient && (
+        <HospitalAdmissionEditor
+          patientId={session.patient_id}
+          patientName={session.patient.name}
+          sessionId={id}
+          onClose={() => setShowHospitalAdmissionEditor(false)}
+          onSave={() => {
+            toast({
+              title: "Hospital Admission Form created",
+              description: "The form has been saved.",
             });
           }}
         />

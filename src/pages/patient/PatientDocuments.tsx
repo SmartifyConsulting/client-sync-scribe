@@ -35,6 +35,7 @@ type DocType =
   | "medical_certificate"
   | "referral_letter"
   | "general_letter"
+  | "hospital_admission"
   | "audio"
   | "video"
   | "file";
@@ -79,6 +80,11 @@ const DOC_TYPE_CONFIG: Record<
     color: "bg-slate-100 text-slate-700 dark:bg-slate-800/50 dark:text-slate-300",
     icon: FileText,
   },
+  hospital_admission: {
+    label: "Hospital Admission",
+    color: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400",
+    icon: FileText,
+  },
   audio: {
     label: "Audio",
     color: "bg-muted text-muted-foreground",
@@ -103,6 +109,7 @@ const FILTER_OPTIONS: { value: DocType | "all"; label: string }[] = [
   { value: "medical_certificate", label: "Certificates" },
   { value: "referral_letter", label: "Referrals" },
   { value: "general_letter", label: "Letters" },
+  { value: "hospital_admission", label: "Admissions" },
   { value: "audio", label: "Audio" },
   { value: "video", label: "Video" },
 ];
@@ -116,6 +123,7 @@ function deriveDocType(
   const lower = (templateName || "").toLowerCase();
   if (lower.includes("prescription")) return "prescription";
   if (lower.includes("invoice")) return "invoice";
+  if (lower.includes("hospital admission")) return "hospital_admission";
   if (lower.includes("medical certificate") || lower.includes("certificate"))
     return "medical_certificate";
   if (lower.includes("referral")) return "referral_letter";
