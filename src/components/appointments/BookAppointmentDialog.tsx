@@ -403,13 +403,14 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
                         className={cn(
                           "px-2 py-2 rounded-md text-sm font-medium transition-colors border",
                           busy
-                            ? "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
+                            ? "bg-muted text-muted-foreground cursor-not-allowed opacity-50 line-through"
                             : isSelected
                             ? "bg-primary text-primary-foreground border-primary"
                             : "border-border hover:bg-muted/50"
                         )}
+                        title={busy ? "This slot is booked" : undefined}
                       >
-                        {slot.label}
+                        {busy ? "Booked" : slot.label}
                       </button>
                     );
                   })}
