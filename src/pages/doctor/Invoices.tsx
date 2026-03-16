@@ -293,35 +293,43 @@ export default function DoctorInvoices() {
         description: "Invoice marked as paid",
       });
 
-      // Auto-forward to claims email if patient has one
+      // Auto-forward to claims email if patient has one AND patient allows it
       if (updatedInvoice?.patient?.id) {
         try {
           const { data: patientData } = await supabase
             .from('patients')
-            .select('claims_email, name')
+            .select('claims_email, name, patient_user_id')
             .eq('id', updatedInvoice.patient.id)
             .maybeSingle();
 
-          if (patientData?.claims_email) {
-            await supabase.functions.invoke('send-document-email', {
-              body: {
-                to: patientData.claims_email,
-                subject: `Invoice ${updatedInvoice.invoice_number} - ${patientData.name}`,
-                documentName: `Invoice ${updatedInvoice.invoice_number}`,
-                documentContent: `Invoice Number: ${updatedInvoice.invoice_number}\nPatient: ${patientData.name}\nDescription: ${updatedInvoice.description}\nAmount: ${updatedInvoice.amount}\nStatus: Paid\nPaid At: ${new Date().toLocaleDateString()}`,
-                senderName: profile?.full_name || 'Doctor',
-                practiceName: profile?.practice_number || undefined,
-              },
-            });
+          if (patientData?.claims_email && patientData?.patient_user_id) {
+            // Check patient's auto-email preference
+            const { data: patientProfile } = await supabase
+              .from('profiles')
+              .select('auto_email_invoice_to_insurance')
+              .eq('id', patientData.patient_user_id)
+              .maybeSingle();
 
-            toast({
-              title: "Claim Forwarded",
-              description: `Invoice automatically sent to ${patientData.claims_email}`,
-            });
+            if (patientProfile?.auto_email_invoice_to_insurance) {
+              await supabase.functions.invoke('send-document-email', {
+                body: {
+                  to: patientData.claims_email,
+                  subject: `Invoice ${updatedInvoice.invoice_number} - ${patientData.name}`,
+                  documentName: `Invoice ${updatedInvoice.invoice_number}`,
+                  documentContent: `Invoice Number: ${updatedInvoice.invoice_number}\nPatient: ${patientData.name}\nDescription: ${updatedInvoice.description}\nAmount: ${updatedInvoice.amount}\nStatus: Paid\nPaid At: ${new Date().toLocaleDateString()}`,
+                  senderName: profile?.full_name || 'Doctor',
+                  practiceName: profile?.practice_number || undefined,
+                },
+              });
+
+              toast({
+                title: "Claim Forwarded",
+                description: `Invoice automatically sent to ${patientData.claims_email}`,
+              });
+            }
           }
         } catch (claimError) {
           console.error("Error forwarding claim:", claimError);
-          // Don't show error toast - claim forwarding is best-effort
         }
       }
     } catch (error: any) {

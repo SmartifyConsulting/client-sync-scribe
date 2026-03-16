@@ -251,10 +251,42 @@ export default function PatientDashboard() {
         </Popover>
       </div>
 
+      {/* Chronic Medication Badge */}
+      {patientRecord?.is_chronic && (
+        <div className="flex items-center gap-3 p-4 rounded-xl border border-secondary/30 bg-secondary/5">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/10">
+            <Pill className="h-5 w-5 text-secondary" />
+          </div>
+          <div>
+            <p className="font-semibold text-foreground">Chronic Medication</p>
+            <p className="text-sm text-muted-foreground">You are on chronic medication — remember to log daily intake for rewards</p>
+          </div>
+          <Badge className="ml-auto bg-secondary/10 text-secondary hover:bg-secondary/20 border-0">
+            <Pill className="h-3 w-3 mr-1" />Chronic
+          </Badge>
+        </div>
+      )}
+
       {/* Lollipop Rewards */}
       {!rewardsLoading && lollipopCount > 0 && (
         <LollipopDisplay count={lollipopCount} rewards={rewards} showHistory variant="card" />
       )}
+
+      {/* Rewards Stat Card */}
+      <Link to="/patient/rewards">
+        <Card className="cursor-pointer hover:bg-muted/50 transition-colors border-secondary/30">
+          <CardContent className="flex items-center gap-4 py-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10">
+              <Award className="h-6 w-6 text-secondary" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-muted-foreground">My Moolas</p>
+              <p className="text-2xl font-bold text-foreground">{lollipopCount} Ⓜ️</p>
+            </div>
+            <p className="text-sm text-primary">View details →</p>
+          </CardContent>
+        </Card>
+      </Link>
 
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
