@@ -954,22 +954,34 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                   onTouchStart={(e) => handleElementDragStart(e, el.id)}
                 >
                   {asset.imageSrc ? (
-                    <img src={asset.imageSrc} alt={asset.name} className="w-full h-full object-contain pointer-events-none" />
+                    <img src={asset.imageSrc} alt={asset.name} className="w-full h-full object-cover pointer-events-none" />
                   ) : (
                     <asset.component />
                   )}
-                  {/* Resize handle - bottom right corner */}
-                  <div
-                    className="absolute bottom-0 right-0 w-4 h-4 bg-primary/80 border border-primary-foreground rounded-sm cursor-se-resize opacity-0 group-hover:opacity-100 transition-opacity touch-none"
-                    onMouseDown={(e) => handleResizeStart(e, el.id)}
-                    onTouchStart={(e) => handleResizeStart(e, el.id)}
-                  />
-                  {/* Resize handle - bottom left corner */}
-                  <div
-                    className="absolute bottom-0 left-0 w-4 h-4 bg-primary/80 border border-primary-foreground rounded-sm cursor-sw-resize opacity-0 group-hover:opacity-100 transition-opacity touch-none"
-                    onMouseDown={(e) => handleResizeStart(e, el.id)}
-                    onTouchStart={(e) => handleResizeStart(e, el.id)}
-                  />
+                  {/* Selection border */}
+                  <div className={cn(
+                    "absolute inset-0 border-2 pointer-events-none transition-colors",
+                    selectedElement === el.id ? "border-primary" : "border-transparent group-hover:border-primary/40"
+                  )} />
+                  {/* Corner resize handles - always visible when selected */}
+                  {[
+                    "top-0 left-0 cursor-nw-resize",
+                    "top-0 right-0 cursor-ne-resize", 
+                    "bottom-0 left-0 cursor-sw-resize",
+                    "bottom-0 right-0 cursor-se-resize",
+                  ].map((pos, idx) => (
+                    <div
+                      key={idx}
+                      className={cn(
+                        "absolute w-3 h-3 bg-primary border border-primary-foreground rounded-sm touch-none",
+                        pos,
+                        selectedElement === el.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                      )}
+                      style={{ transform: "translate(-50%, -50%)" }}
+                      onMouseDown={(e) => handleResizeStart(e, el.id)}
+                      onTouchStart={(e) => handleResizeStart(e, el.id)}
+                    />
+                  ))}
                 </div>
               );
             })}
