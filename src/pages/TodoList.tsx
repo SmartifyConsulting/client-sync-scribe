@@ -567,7 +567,7 @@ export default function TodoList() {
 
             {/* AI Process Button */}
             <Button
-              onClick={handleAiProcess}
+              onClick={() => handleAiProcess()}
               disabled={!newTaskText.trim() || isAiProcessing}
               variant="secondary"
               className="gap-2"
