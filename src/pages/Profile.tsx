@@ -542,6 +542,25 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* CPD Points Badge */}
+      {!isAdmin && (
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10">
+              <Award className="h-5 w-5 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground">CPD Points</p>
+              <p className="text-2xl font-bold text-foreground">{cpdPoints}</p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => window.location.href = '/cpd-certificates'}>
+            <Plus className="h-4 w-4" />
+            Add CPD Training
+          </Button>
+        </div>
+      )}
+
       {/* Profile Section */}
       <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
