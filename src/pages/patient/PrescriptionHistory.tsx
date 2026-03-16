@@ -36,7 +36,7 @@ const statusLabels: Record<string, string> = {
   cancelled: "Cancelled",
 };
 
-export default function PrescriptionHistory() {
+export default function Documentation() {
   const { user } = useAuth();
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [loading, setLoading] = useState(true);
