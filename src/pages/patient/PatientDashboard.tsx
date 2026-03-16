@@ -7,7 +7,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useMyRewards } from "@/hooks/usePatientRewards";
-import { LollipopDisplay } from "@/components/gamification/LollipopDisplay";
 import { supabase } from "@/integrations/supabase/client";
 import { format, parseISO, isFuture } from "date-fns";
 import { Link } from "react-router-dom";
