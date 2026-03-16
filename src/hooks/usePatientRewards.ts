@@ -226,16 +226,16 @@ export function usePatientRewards(patientId?: string) {
       if (patientUserId) {
         await supabase.from('notifications').insert({
           user_id: patientUserId,
-          title: `🍭 You earned ${lollipopsToAward} lollipop${lollipopsToAward > 1 ? 's' : ''}!`,
-          description: `Great job! You received ${lollipopsToAward} lollipop${lollipopsToAward > 1 ? 's' : ''} for your ${visitCategory}.`,
+          title: `Ⓜ You earned ${lollipopsToAward} Moola${lollipopsToAward > 1 ? 's' : ''}!`,
+          description: `Great job! You received ${lollipopsToAward} Moola${lollipopsToAward > 1 ? 's' : ''} for your ${visitCategory}.`,
           type: 'reward',
           reference_id: data.id,
         });
       }
 
       toast({
-        title: `🍭 ${lollipopsToAward} Lollipop${lollipopsToAward > 1 ? 's' : ''} Awarded!`,
-        description: `Patient earned ${lollipopsToAward} lollipop${lollipopsToAward > 1 ? 's' : ''} for their ${visitCategory}`,
+        title: `Ⓜ ${lollipopsToAward} Moola${lollipopsToAward > 1 ? 's' : ''} Awarded!`,
+        description: `Patient earned ${lollipopsToAward} Moola${lollipopsToAward > 1 ? 's' : ''} for their ${visitCategory}`,
       });
 
       return true;
