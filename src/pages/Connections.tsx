@@ -456,27 +456,58 @@ export default function Connections() {
                   className="flex items-center justify-between p-4"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                      <Mail className="h-5 w-5 text-primary" />
+                    <div className={cn(
+                      "flex h-10 w-10 items-center justify-center rounded-full",
+                      invitation.direction === "received" ? "bg-secondary/10" : "bg-primary/10"
+                    )}>
+                      <Mail className={cn(
+                        "h-5 w-5",
+                        invitation.direction === "received" ? "text-secondary" : "text-primary"
+                      )} />
                     </div>
                     <div>
                       <p className="font-medium text-foreground">
-                        {invitation.recipient_email}
+                        {invitation.direction === "received"
+                          ? invitation.sender_name || "Unknown User"
+                          : invitation.recipient_email}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Sent {format(new Date(invitation.created_at), "dd MMM yyyy")} • 
-                        Expires {format(new Date(invitation.expires_at), "dd MMM")}
+                        {invitation.direction === "received" ? "Received" : "Sent"}{" "}
+                        {format(new Date(invitation.created_at), "dd MMM yyyy")}
+                        {invitation.message && ` • "${invitation.message}"`}
                       </p>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground hover:text-destructive"
-                    onClick={() => cancelPendingInvitation(invitation.id)}
-                  >
-                    Cancel
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    {invitation.direction === "received" ? (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => acceptInvitation(invitation.id)}
+                        >
+                          <UserCheck className="h-4 w-4 mr-1" />
+                          Accept
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-muted-foreground hover:text-destructive"
+                          onClick={() => declineInvitation(invitation.id)}
+                        >
+                          Decline
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-muted-foreground hover:text-destructive"
+                        onClick={() => cancelPendingInvitation(invitation.id)}
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
