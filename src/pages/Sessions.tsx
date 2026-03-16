@@ -461,7 +461,6 @@ export default function Sessions() {
     setShowReferralReview(false);
   };
 
-  const { toast } = useToast();
 
   const startSession = async () => {
     setSessionState("active");
