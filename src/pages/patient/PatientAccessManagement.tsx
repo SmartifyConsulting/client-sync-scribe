@@ -32,7 +32,7 @@ const permissionOptions: PermissionOption[] = [
   { id: "patient_info", label: "Patient Information", description: "View your personal and medical details" },
   { id: "calendar", label: "Calendar", description: "View and manage your appointments" },
   { id: "session_summaries", label: "Session Summaries", description: "View summaries from your consultations" },
-  { id: "prescription_history", label: "Prescription History", description: "View your prescription records" },
+  { id: "prescription_history", label: "Documentation", description: "View your documents and records" },
 ];
 
 interface ApprovedInvite {

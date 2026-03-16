@@ -338,14 +338,14 @@ export default function PatientDashboard() {
           </Card>
         </Link>
 
-        <Link to="/patient/prescriptions">
+        <Link to="/patient/documentation">
           <Card className="cursor-pointer hover:bg-muted/50 transition-colors h-full">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-primary" />
-                Prescriptions
+                Documentation
               </CardTitle>
-              <CardDescription>View your prescription history</CardDescription>
+              <CardDescription>View your documents and records</CardDescription>
             </CardHeader>
           </Card>
         </Link>

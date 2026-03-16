@@ -123,7 +123,7 @@ const App = () => (
             {/* Patient routes */}
             <Route path="/patient/doctors" element={<MyDoctors />} />
             <Route path="/patient/calendar" element={<PatientCalendar />} />
-            <Route path="/patient/prescriptions" element={<PrescriptionHistory />} />
+            <Route path="/patient/documentation" element={<Documentation />} />
             <Route path="/patient/invoices" element={<Invoices />} />
             <Route path="/patient/invites" element={<PatientAccessManagement />} />
             <Route path="/patient/rewards" element={<MyRewards />} />

@@ -141,8 +141,8 @@ export default function PrescriptionHistory() {
         <CardHeader>
           <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
             <div>
-              <CardTitle>All Prescriptions</CardTitle>
-              <CardDescription>Your complete prescription history</CardDescription>
+              <CardTitle>All Documents</CardTitle>
+              <CardDescription>Your complete documentation history</CardDescription>
             </div>
             <div className="flex gap-2">
               <Input
