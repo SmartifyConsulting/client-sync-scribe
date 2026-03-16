@@ -43,9 +43,13 @@ interface Connection {
 interface PendingInvitation {
   id: string;
   recipient_email: string;
+  sender_id: string;
+  recipient_id: string | null;
   status: string;
   created_at: string;
-  expires_at: string;
+  message: string | null;
+  direction: "sent" | "received";
+  sender_name?: string | null;
 }
 
 export default function Connections() {
