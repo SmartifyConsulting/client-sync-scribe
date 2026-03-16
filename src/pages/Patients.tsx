@@ -81,6 +81,69 @@ export default function Patients() {
   const [creating, setCreating] = useState(false);
   const meAutoCreated = useRef(false);
 
+  // Autofind patient state
+  const [patientSuggestions, setPatientSuggestions] = useState<Array<{ id: string; full_name: string | null; mobile_number: string | null }>>([]);
+  const [showPatientSuggestions, setShowPatientSuggestions] = useState(false);
+  const [searchingPatients, setSearchingPatients] = useState(false);
+  const [selectedPatientUserId, setSelectedPatientUserId] = useState<string | null>(null);
+
+  // Debounced patient name search
+  useEffect(() => {
+    if (newPatient.name.length < 2) {
+      setPatientSuggestions([]);
+      setShowPatientSuggestions(false);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setSearchingPatients(true);
+      try {
+        const { data: patientRoles } = await supabase
+          .from("user_roles")
+          .select("user_id")
+          .eq("role", "patient");
+        const patientIds = (patientRoles || []).map(r => r.user_id);
+        if (patientIds.length === 0) {
+          setPatientSuggestions([]);
+          setShowPatientSuggestions(false);
+          setSearchingPatients(false);
+          return;
+        }
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, mobile_number")
+          .ilike("full_name", `%${newPatient.name}%`)
+          .in("id", patientIds)
+          .limit(5);
+        setPatientSuggestions(profiles || []);
+        setShowPatientSuggestions(true);
+      } catch (e) {
+        console.error("Patient search error:", e);
+      } finally {
+        setSearchingPatients(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [newPatient.name]);
+
+  const handleSelectPatientSuggestion = (suggestion: { id: string; full_name: string | null; mobile_number: string | null }) => {
+    const name = suggestion.full_name || "";
+    // Format as "Surname, FirstNames"
+    const parts = name.trim().split(/\s+/);
+    let formatted = name;
+    if (parts.length > 1) {
+      const surname = parts[parts.length - 1];
+      const firstNames = parts.slice(0, -1).join(" ");
+      formatted = `${surname}, ${firstNames}`;
+    }
+    setNewPatient(prev => ({
+      ...prev,
+      name: formatted,
+      phone: suggestion.mobile_number || prev.phone,
+    }));
+    setSelectedPatientUserId(suggestion.id);
+    setShowPatientSuggestions(false);
+  };
+
   // Auto-create "ME" patient record for doctors who don't have one
   useEffect(() => {
     if (loading || !user?.email || meAutoCreated.current) return;
