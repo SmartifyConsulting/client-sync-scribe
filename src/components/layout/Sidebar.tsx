@@ -64,7 +64,7 @@ const adminNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard" },
   { icon: Users, label: "Users", to: "/admin/users" },
   { icon: DollarSign, label: "Pricing", to: "/admin/pricing" },
-  { icon: Gift, label: "Gamification", to: "/admin/gamification" },
+  { icon: Gift, label: "Rewards", to: "/admin/gamification" },
 ];
 
 interface SidebarProps {
