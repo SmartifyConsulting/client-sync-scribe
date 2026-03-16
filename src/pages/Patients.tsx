@@ -86,8 +86,19 @@ export default function Patients() {
     const hasMe = patients.some(p => p.email?.toLowerCase() === user.email?.toLowerCase());
     if (!hasMe) {
       meAutoCreated.current = true;
+      // Format as "Surname, FirstNames" from profile name
+      const profileName = profile?.full_name || user.user_metadata?.full_name || '';
+      let formattedName = profileName || user.email?.split('@')[0] || 'Me';
+      if (profileName) {
+        const parts = profileName.trim().split(/\s+/);
+        if (parts.length > 1) {
+          const surname = parts[parts.length - 1];
+          const firstNames = parts.slice(0, -1).join(' ');
+          formattedName = `${surname}, ${firstNames}`;
+        }
+      }
       createPatient({
-        name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Me',
+        name: formattedName,
         email: user.email || null,
         phone: null,
         dob: null,
