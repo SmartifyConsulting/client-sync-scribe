@@ -461,33 +461,6 @@ export default function Sessions() {
     setShowReferralReview(false);
   };
 
-          {/* AI-Detected Documents Banner */}
-          {(extractedMedCert || extractedPrescription || extractedInvoice || extractedReferral) && (
-            <div className="flex flex-wrap items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
-              <Sparkles className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium text-foreground">AI detected documents from this session:</span>
-              {extractedMedCert && (
-                <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowMedCertReview(true)}>
-                  <FileTextIcon className="h-3 w-3" /> Medical Certificate
-                </Button>
-              )}
-              {extractedPrescription && (
-                <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowPrescriptionReview(true)}>
-                  <Pill className="h-3 w-3" /> Prescription
-                </Button>
-              )}
-              {extractedInvoice && (
-                <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowInvoiceReview(true)}>
-                  <Receipt className="h-3 w-3" /> Invoice
-                </Button>
-              )}
-              {extractedReferral && (
-                <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowReferralReview(true)}>
-                  <Users className="h-3 w-3" /> Referral Letter
-                </Button>
-              )}
-            </div>
-          )}
 
   const startSession = async () => {
     setSessionState("active");
