@@ -1,5 +1,5 @@
 import { Users, Calendar, TrendingUp, LogOut, Award, Bell, Mic } from "lucide-react";
-import TodoList from "@/pages/TodoList";
+import { CompactTodoList } from "@/components/dashboard/CompactTodoList";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { StatsCard } from "@/components/dashboard/StatsCard";
@@ -289,15 +289,9 @@ export default function Dashboard() {
         </div>
         <div>
           <RecentActivity />
+          {isDoctor && <CompactTodoList />}
         </div>
       </div>
-
-      {/* To-Do List */}
-      {isDoctor && (
-        <div className="mt-2">
-          <TodoList />
-        </div>
-      )}
     </div>
   );
 }
