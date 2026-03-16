@@ -250,6 +250,58 @@ Thank you.
     is_default: true,
     header_footer_template_id: null,
   },
+  {
+    name: "Hospital Admission Form",
+    description: "Form for requesting hospital admission for a patient",
+    category: "Admission",
+    content: `<u><b>HOSPITAL ADMISSION FORM</b></u>
+
+Practice Address: [PracticeAddress]
+Practice No: [PracticeNumber]
+Registration No: [DoctorNumber]
+
+─────────────────────────────────────
+
+<u><b>ADMISSION DETAILS</b></u>
+
+Admitting Doctor: [DoctorName]
+Practice Number: [PracticeNumber]
+Hospital: [Hospital]
+Date of Admission: [AdmissionDate]
+
+─────────────────────────────────────
+
+<u><b>DIAGNOSIS DETAILS — ICD-10 CODES</b></u>
+
+[ICD10Codes]
+
+─────────────────────────────────────
+
+<u><b>PROCEDURE DETAILS</b></u>
+
+Date of Procedure: [ProcedureDate]
+Procedure Description: [ProcedureDescription]
+
+[ProcedureCodes]
+
+─────────────────────────────────────
+
+<u><b>PATIENT SPECIAL INSTRUCTIONS</b></u>
+
+[SpecialInstructions]
+
+─────────────────────────────────────
+
+Patient: [PatientName]
+
+Signature: ................................................
+           [DoctorName]`,
+    logo_url: null,
+    logo_position: null,
+    font_family: "sans",
+    is_default: true,
+    header_footer_template_id: null,
+  },
 ];
 
 export function useTemplates() {
