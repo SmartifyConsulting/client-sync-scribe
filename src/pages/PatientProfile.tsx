@@ -23,6 +23,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { usePatient } from "@/hooks/usePatients";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSessions } from "@/hooks/useSessions";
 import { usePatientRewards } from "@/hooks/usePatientRewards";
