@@ -250,6 +250,22 @@ export default function Sessions() {
         setCurrentSessionId(result.id);
         setSummary(result.summary || "Session completed successfully.");
         setActionPoints(result.action_points || []);
+        
+        // Process AI-extracted documents
+        const docs = (result as any)._extractedDocuments;
+        if (docs?.medical_certificate) {
+          setExtractedMedCert(docs.medical_certificate);
+          setShowMedCertReview(true);
+        }
+        if (docs?.prescription) {
+          setExtractedPrescription(docs.prescription);
+        }
+        if (docs?.invoice) {
+          setExtractedInvoice(docs.invoice);
+        }
+        if (docs?.referral) {
+          setExtractedReferral(docs.referral);
+        }
       } else {
         setSummary("Session completed. No content was recorded or noted.");
         setActionPoints([]);
