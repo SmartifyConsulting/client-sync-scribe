@@ -408,7 +408,7 @@ export default function GamificationAdmin() {
                       <p className="text-xs text-muted-foreground">How often must this visit be completed to maintain streak</p>
                     </div>
                     <div className="space-y-2">
-                      <Label>Bonus Lollipops per Streak</Label>
+                      <Label>Bonus Moolas per Streak</Label>
                       <Input
                         type="number"
                         min={1}
