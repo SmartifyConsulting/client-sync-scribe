@@ -191,6 +191,17 @@ Rules:
             is_auto_executed: false,
             patient_id: patientId,
           });
+
+          // Notify the patient if the task is assigned to one
+          if (patientId && patientRecord?.patient_user_id) {
+            await supabase.from("notifications").insert({
+              user_id: patientRecord.patient_user_id,
+              title: "📋 New task assigned by your doctor",
+              description: action.description,
+              type: "task_assigned",
+            });
+          }
+
           results.push({ action_type: action.action_type, description: action.description, auto_executed: false });
           continue;
         }
