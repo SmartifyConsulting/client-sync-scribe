@@ -112,6 +112,8 @@ const App = () => (
             <Route path="/sessions/:id" element={<SessionDetail />} />
             <Route path="/documents" element={<Documents />} />
             <Route path="/invoices" element={<DoctorInvoices />} />
+            <Route path="/referral-doctors" element={<ReferralDoctors />} />
+            <Route path="/cpd-certificates" element={<CPDCertificates />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/connections" element={<Connections />} />
             
