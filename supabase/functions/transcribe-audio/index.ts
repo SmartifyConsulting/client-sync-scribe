@@ -113,7 +113,7 @@ serve(async (req) => {
   }
 
   try {
-    const { audio, patientName, doctorName } = await req.json();
+    const { audio, patientName, doctorName, language } = await req.json();
     
     if (!audio) {
       console.error('No audio data provided');
