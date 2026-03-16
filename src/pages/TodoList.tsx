@@ -151,8 +151,12 @@ export default function TodoList() {
       reader.readAsDataURL(audioBlob);
       const base64Audio = await base64Promise;
 
+      // Fetch user's preferred language
+      const { data: profileData } = await supabase.from('profiles').select('preferred_language' as any).single();
+      const language = (profileData as any)?.preferred_language || undefined;
+
       const { data, error } = await supabase.functions.invoke('transcribe-audio', {
-        body: { audio: base64Audio }
+        body: { audio: base64Audio, language }
       });
 
       if (error) {

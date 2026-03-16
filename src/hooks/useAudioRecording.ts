@@ -8,6 +8,7 @@ interface UseAudioRecordingOptions {
   patientName?: string;
   doctorName?: string;
   sessionId?: string;
+  language?: string;
 }
 
 export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
@@ -165,6 +166,7 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
           audio: base64Audio,
           patientName: optionsRef.current.patientName,
           doctorName: optionsRef.current.doctorName,
+          language: optionsRef.current.language,
         },
       });
 

@@ -17,6 +17,7 @@ export interface Profile {
   inactive_threshold_months: number | null;
   signature_font: string | null;
   signature_color: string | null;
+  preferred_language: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -57,11 +58,11 @@ export function useProfile() {
           .single();
         
         if (!insertError && newProfile) {
-          setProfile(newProfile as Profile);
+          setProfile(newProfile as unknown as Profile);
         }
       }
     } else {
-      setProfile(data as Profile);
+      setProfile(data as unknown as Profile);
     }
     setLoading(false);
   };
@@ -77,7 +78,7 @@ export function useProfile() {
       .single();
 
     if (!error && data) {
-      setProfile(data as Profile);
+      setProfile(data as unknown as Profile);
     }
 
     return { data, error };
