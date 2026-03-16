@@ -229,7 +229,7 @@ export default function PatientDashboard() {
                   {unreadNotifCount > 99 ? "99+" : unreadNotifCount}
                 </span>
               )}
-            </Button>
+            </button>
           </PopoverTrigger>
           <PopoverContent className="w-80 p-0" align="end">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
