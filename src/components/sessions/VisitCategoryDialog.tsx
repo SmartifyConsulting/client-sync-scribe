@@ -113,14 +113,14 @@ export function VisitCategoryDialog({
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
           <Button variant="ghost" onClick={handleSkip} className="sm:mr-auto">
-            Skip (No lollipop)
+            Skip (No moola)
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={!selectedCategory && !customCategory}
             className="bg-pink-500 hover:bg-pink-600 text-white"
           >
-            🍭 Award Lollipop
+            Ⓜ️ Award Moola
           </Button>
         </DialogFooter>
       </DialogContent>

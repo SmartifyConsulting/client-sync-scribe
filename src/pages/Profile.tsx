@@ -871,8 +871,10 @@ export default function Profile() {
                 const voice = (profile as any)?.narration_voice || "nova";
                 toast({ title: "Generating preview...", description: `Playing sample with "${voice}" voice` });
                 try {
+                  const langCode = profile?.preferred_language || "en";
+                  const sampleText = SAMPLE_TEXTS[langCode] || SAMPLE_TEXTS.en;
                   const response = await supabase.functions.invoke('narrate-briefing', {
-                    body: { text: "Hello, this is your MediPad briefing voice. Here is a preview of how your narrations will sound.", voice },
+                    body: { text: sampleText, voice },
                   });
                   if (response.error) throw response.error;
                   // response.data is a Blob for audio
