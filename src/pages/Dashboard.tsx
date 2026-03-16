@@ -17,6 +17,59 @@ import { useState } from "react";
 export default function Dashboard() {
   const { profile, loading: profileLoading } = useProfile();
   const { isDoctor, loading: roleLoading } = useUserRole();
+  const queryClient = useQueryClient();
+
+  // Query for unread notifications count (invitations + document receipts only)
+  const { data: unreadNotifCount = 0 } = useQuery({
+    queryKey: ["unread-notifications-dashboard"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return 0;
+
+      const { count, error } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("is_read", false)
+        .in("type", ["invitation", "document", "connection_request", "reward", "streak"]);
+
+      if (error) return 0;
+      return count || 0;
+    },
+    refetchInterval: 30000,
+  });
+
+  // Query for recent notifications
+  const { data: recentNotifications = [] } = useQuery({
+    queryKey: ["recent-notifications-dashboard"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (error) return [];
+      return data || [];
+    },
+    refetchInterval: 30000,
+  });
+
+  const markAllRead = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("user_id", user.id)
+      .eq("is_read", false);
+    queryClient.invalidateQueries({ queryKey: ["unread-notifications-dashboard"] });
+    queryClient.invalidateQueries({ queryKey: ["recent-notifications-dashboard"] });
+  };
 
   // Query for unread messages count
   const { data: unreadMessagesCount = 0 } = useQuery({
