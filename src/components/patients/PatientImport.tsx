@@ -599,32 +599,48 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
             </Button>
           </div>
 
-          <ScrollArea className="h-[300px] border rounded-lg">
+          <div className="border rounded-lg overflow-auto" style={{ maxHeight: '500px' }}>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="sticky top-0 bg-card">Name</TableHead>
-                  <TableHead className="sticky top-0 bg-card">Email</TableHead>
-                  <TableHead className="sticky top-0 bg-card">Phone</TableHead>
-                  <TableHead className="sticky top-0 bg-card">DOB</TableHead>
-                  <TableHead className="sticky top-0 bg-card">Gender</TableHead>
-                  <TableHead className="sticky top-0 bg-card">Medical Aid</TableHead>
+                  <TableHead className="sticky top-0 bg-card z-10 min-w-[40px]">#</TableHead>
+                  <TableHead className="sticky top-0 bg-card z-10 min-w-[150px]">Name</TableHead>
+                  <TableHead className="sticky top-0 bg-card z-10 min-w-[180px]">Email</TableHead>
+                  <TableHead className="sticky top-0 bg-card z-10 min-w-[130px]">Phone</TableHead>
+                  <TableHead className="sticky top-0 bg-card z-10 min-w-[120px]">DOB</TableHead>
+                  <TableHead className="sticky top-0 bg-card z-10 min-w-[100px]">Gender</TableHead>
+                  <TableHead className="sticky top-0 bg-card z-10 min-w-[130px]">ID/Passport</TableHead>
+                  <TableHead className="sticky top-0 bg-card z-10 min-w-[150px]">Medical Aid</TableHead>
+                  <TableHead className="sticky top-0 bg-card z-10 min-w-[150px]">Employer</TableHead>
+                  <TableHead className="sticky top-0 bg-card z-10 min-w-[130px]">Allergies</TableHead>
+                  <TableHead className="sticky top-0 bg-card z-10 min-w-[130px]">Address</TableHead>
+                  <TableHead className="sticky top-0 bg-card z-10 min-w-[60px]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {parsedPatients.map((patient, index) => (
                   <TableRow key={index}>
-                    <TableCell className="font-medium">{patient.name}</TableCell>
-                    <TableCell>{patient.email || "-"}</TableCell>
-                    <TableCell>{patient.phone || "-"}</TableCell>
-                    <TableCell>{patient.dob || "-"}</TableCell>
-                    <TableCell>{patient.gender || "-"}</TableCell>
-                    <TableCell>{patient.medical_aid || "-"}</TableCell>
+                    <TableCell className="text-muted-foreground text-xs">{index + 1}</TableCell>
+                    <TableCell><Input className="h-8 text-sm" value={patient.name} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], name: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell><Input className="h-8 text-sm" value={patient.email || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], email: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell><Input className="h-8 text-sm" value={patient.phone || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], phone: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell><Input className="h-8 text-sm" type="date" value={patient.dob || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], dob: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell><Input className="h-8 text-sm" value={patient.gender || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], gender: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell><Input className="h-8 text-sm" value={patient.id_passport_number || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], id_passport_number: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell><Input className="h-8 text-sm" value={patient.medical_aid || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], medical_aid: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell><Input className="h-8 text-sm" value={patient.employer || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], employer: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell><Input className="h-8 text-sm" value={patient.allergies || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], allergies: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell><Input className="h-8 text-sm" value={patient.physical_address || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], physical_address: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => setParsedPatients(parsedPatients.filter((_, i) => i !== index))}>
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          </ScrollArea>
+          </div>
 
           {isImporting && (
             <div className="space-y-2">
