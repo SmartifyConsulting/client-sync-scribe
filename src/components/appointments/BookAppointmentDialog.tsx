@@ -142,7 +142,28 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
         .from("service_prices")
         .select("*")
         .eq("user_id", doctorId);
-      setServices(data || []);
+      const serviceList = (data || []) as ServicePrice[];
+      setServices(serviceList);
+
+      // Check if this is the patient's first appointment with this doctor
+      if (user && patientId) {
+        const { count } = await supabase
+          .from("appointment_requests")
+          .select("id", { count: "exact", head: true })
+          .eq("patient_user_id", user.id)
+          .eq("doctor_id", doctorId);
+
+        const firstVisit = (count || 0) === 0;
+        setIsFirstVisit(firstVisit);
+
+        // Auto-select first consultation service if it's the first visit
+        if (firstVisit) {
+          const firstConsultService = serviceList.find((s: any) => s.is_first_consultation);
+          if (firstConsultService) {
+            setSelectedService(firstConsultService);
+          }
+        }
+      }
     } finally {
       setLoading(false);
     }
