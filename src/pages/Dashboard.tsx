@@ -1,4 +1,4 @@
-import { Users, Calendar, TrendingUp, LogOut, Award, Bell, Mic } from "lucide-react";
+import { Users, Calendar, TrendingUp, LogOut, Award, Bell, Mic, User, Settings } from "lucide-react";
 import { CompactTodoList } from "@/components/dashboard/CompactTodoList";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
