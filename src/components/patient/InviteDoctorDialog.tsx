@@ -67,6 +67,13 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
   const { toast } = useToast();
   const { user } = useAuth();
 
+  useEffect(() => {
+    if (open) {
+      if (prefillPracticeNumber) setPracticeNumber(prefillPracticeNumber);
+      if (prefillRegistrationNumber) setRegistrationNumber(prefillRegistrationNumber);
+    }
+  }, [open, prefillPracticeNumber, prefillRegistrationNumber]);
+
   const handlePermissionToggle = (permission: AccessPermission) => {
     setSelectedPermissions((prev) =>
       prev.includes(permission)
