@@ -286,19 +286,8 @@ export default function Sessions() {
     },
     onAudioSaved: async (audioStorageUrl) => {
       console.log("Audio saved to storage:", audioStorageUrl);
-      // Update session with audio URL
-      if (currentSessionIdRef.current) {
-        const { error } = await supabase
-          .from('sessions')
-          .update({ audio_url: audioStorageUrl })
-          .eq('id', currentSessionIdRef.current);
-        
-        if (error) {
-          console.error("Error saving audio URL to session:", error);
-        } else {
-          console.log("Audio URL saved to session successfully");
-        }
-      }
+      // Store audio URL locally - will be included when session is created on completion
+      savedAudioUrlRef.current = audioStorageUrl;
     }
   });
 
