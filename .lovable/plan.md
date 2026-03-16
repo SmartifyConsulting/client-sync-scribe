@@ -1,59 +1,64 @@
 
 
-# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
+# Plan: Consolidate Patient Documents, Filter by Type, Moolas Icon on Dashboard
 
-## 1. Increase Logo Size by 130%
+## 1. Remove Prescriptions & Invoices from Patient Nav
 
-Scale all logo instances by 130%:
+**Sidebar.tsx**: Remove `Prescriptions` and `Invoices` entries from `patientNavItems`. Final sequence:
+Dashboard → My Doctors → My Calendar → My Tasks → My Documents → Round Table → My Rewards
 
-| Location | Current | New (130%) |
-|---|---|---|
-| Sidebar | h-10 (40px) | h-[52px] |
-| Mobile Header | h-8 (32px) | h-[42px] |
-| Auth page | h-12 (48px) | h-[62px] |
-| Forgot/Reset Password | h-12 (48px) | h-[62px] |
-| Landing page | h-10 (40px) | h-[52px] |
+**BottomNav.tsx**: No changes needed (already doesn't have these).
 
-**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
+**App.tsx**: Keep routes `/patient/prescriptions` and `/patient/invoices` working (redirect to `/patient/documents` or keep for backward compat), but they're no longer in nav.
 
-## 2. Fix Practice Number Not Persisting
+## 2. Enhance PatientDocuments with Prescriptions, Invoices, Certificates + Filtering
 
-**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
+**PatientDocuments.tsx** — Major enhancement:
 
-**Fix in `src/pages/Profile.tsx`:**
-- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
-- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
-- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
-- This prevents the race condition where autosave fires with stale/initial data
+- Fetch from 3 tables: `documents`, `prescriptions`, and `invoices` (all linked via `patient_id` where `patient_user_id = auth.uid()`).
+- Normalize into a unified list with a `type` field: `prescription`, `invoice`, `medical_certificate`, `referral_letter`, `general_letter`, `audio`, `video`, `file`.
+- For documents, derive type from `template_name` (e.g. "Prescription" → prescription, "Invoice" → invoice, "Medical Certificate" → medical_certificate).
+- For prescriptions table records, type = `prescription`.
+- For invoices table records, type = `invoice`.
 
-## 3. Make Partner Email Required and Create Pending Users
+**Color-coded badges** per document type:
+- Prescription → emerald/green
+- Invoice → amber/yellow  
+- Medical Certificate → blue
+- Referral Letter → purple
+- General Letter → slate/gray
+- Audio/Video/File → muted
 
-**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+**Filter bar**: Add a horizontal filter row with clickable badge buttons (All, Prescriptions, Invoices, Medical Certificates, Referral Letters, Audio/Video). Active filter highlighted.
 
-**Fix:**
-- Add an `email` column to the `practice_partners` table via migration
-- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
-- Ensure the `addPartner` function validates email is provided before saving
-- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+## 3. Add Patient Media Action Buttons (No Template Creation)
 
-**Database Migration:**
-- `ALTER TABLE practice_partners ADD COLUMN email text;`
+Add the same icon-only action buttons that doctors have (Mic, Video, Upload) to the PatientDocuments page — but **exclude** the FilePlus (create from template) button since patients cannot create medical documents.
 
-**Changes in `src/pages/Profile.tsx`:**
-- Make email field required in validation (alongside name and registration number)
-- Show validation error if email is missing
+Patient uploads will be saved to the `documents` table with `user_id` set to the patient's auth user ID and `patient_id` set to their patient record ID.
 
-## Technical Summary
+**RLS consideration**: Patients currently can only SELECT documents. Need to add an INSERT policy so patients can upload their own documents:
+```sql
+CREATE POLICY "Patients can insert documents for their own record"
+ON public.documents FOR INSERT TO authenticated
+WITH CHECK (
+  auth.uid() = user_id AND
+  patient_id IN (SELECT id FROM patients WHERE patient_user_id = auth.uid())
+);
+```
 
-### Database Migration
-- Add `email text` column to `practice_partners` table
+## 4. Moolas as Icon on Dashboard (Not a Card)
 
-### Files Modified
-- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
-- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
-- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
-- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
+Replace the full-width `Link to="/patient/rewards"` card and the `LollipopDisplay` card with a small icon/badge in the welcome header area (next to the notification bell). Show as a clickable badge: `Ⓜ {count}` linking to `/patient/rewards`.
+
+Remove both the `LollipopDisplay` block and the "My Moolas" `Card` block from `PatientDashboard.tsx`.
+
+## Files to Modify
+
+| File | Action |
+|------|--------|
+| `src/components/layout/Sidebar.tsx` | Remove Prescriptions + Invoices from patient nav |
+| `src/pages/patient/PatientDocuments.tsx` | Major rewrite: unified docs from 3 tables, color badges, filter, media upload buttons |
+| `src/pages/patient/PatientDashboard.tsx` | Replace Moolas card with small icon badge in header |
+| SQL Migration | Add INSERT policy for patients on documents table |
 
