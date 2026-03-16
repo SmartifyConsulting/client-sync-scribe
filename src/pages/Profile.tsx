@@ -162,6 +162,7 @@ interface ServicePrice {
   service_name: string;
   default_price: number;
   currency: string;
+  is_first_consultation?: boolean;
 }
 
 export default function Profile() {
