@@ -95,6 +95,28 @@ export default function Patients() {
     return true;
   });
 
+  // Sort alphabetically by surname (last word in name)
+  const getSurname = (name: string) => {
+    const parts = name.trim().split(/\s+/);
+    return parts[parts.length - 1].toUpperCase();
+  };
+
+  const sortedPatients = [...filteredPatients].sort((a, b) => 
+    getSurname(a.name).localeCompare(getSurname(b.name))
+  );
+
+  // Group by first letter of surname
+  const groupedPatients: Record<string, typeof filteredPatients> = {};
+  sortedPatients.forEach((patient) => {
+    const letter = getSurname(patient.name)[0] || '#';
+    if (!groupedPatients[letter]) groupedPatients[letter] = [];
+    groupedPatients[letter].push(patient);
+  });
+
+  const availableLetters = Object.keys(groupedPatients).sort();
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
+
   const clearFilters = () => {
     setStatusFilter("all");
     setDateFrom(undefined);
