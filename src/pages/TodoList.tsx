@@ -64,6 +64,7 @@ const actionTypeLabels: Record<string, string> = {
 
 export default function TodoList() {
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [newTaskText, setNewTaskText] = useState("");
