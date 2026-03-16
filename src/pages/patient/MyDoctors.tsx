@@ -148,10 +148,9 @@ export default function MyDoctors() {
           </div>
         ) : (
           <div className="pt-2 border-t border-border">
-            <RequestConnectionButton
-              doctorRegistrationNumber={doctor.doctor_number || ""}
-              doctorPracticeNumber={doctor.practice_number || ""}
-            />
+            <p className="text-xs text-muted-foreground">
+              Use the "Request Access" button above to connect with this doctor.
+            </p>
           </div>
         )}
       </CardContent>
