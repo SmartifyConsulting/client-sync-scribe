@@ -879,7 +879,7 @@ export default function Sessions() {
             <Calendar className="h-5 w-5 text-primary" />
             <h2 className="text-xl font-semibold text-foreground">All Sessions</h2>
           </div>
-          <Badge variant="secondary">{sessions.length} sessions</Badge>
+          <Badge variant="secondary">{sessions.filter(s => s.status !== 'in_progress').length} sessions</Badge>
         </div>
         
         {sessionsLoading ? (
