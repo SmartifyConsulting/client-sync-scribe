@@ -18,7 +18,9 @@ import {
   FileBadge,
   FileEdit,
   PenTool,
+  Hospital,
 } from "lucide-react";
+import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
 import { MedicalCertificateEditor } from "@/components/sessions/MedicalCertificateEditor";
