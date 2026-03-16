@@ -297,8 +297,8 @@ export default function Dashboard() {
           <TodaysBriefing />
         </div>
         <div>
-          <RecentActivity />
           {isDoctor && <CompactTodoList />}
+          <RecentActivity />
         </div>
       </div>
     </div>
