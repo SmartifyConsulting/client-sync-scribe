@@ -117,6 +117,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
       dob: data.dob || null,
       occupation: data.occupation || null,
       employer: data.employer || null,
+      reporting_to_email: data.reporting_to_email || null,
       referred_by: data.referred_by || null,
       marital_status: data.marital_status || null,
       id_passport_number: data.id_passport_number || null,
