@@ -1,59 +1,53 @@
 
 
-# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
+# Fixes: ME Badge, Record Task Auto-Start, File Size Limits, Patient Tasks, Document Email
 
-## 1. Increase Logo Size by 130%
+## 1. ME Badge: Terracotta Orange with White Font
 
-Scale all logo instances by 130%:
+**Problem**: The ME badge uses `bg-terracotta/10 text-terracotta` (light pink background, terracotta text). Should be solid terracotta with white text.
 
-| Location | Current | New (130%) |
-|---|---|---|
-| Sidebar | h-10 (40px) | h-[52px] |
-| Mobile Header | h-8 (32px) | h-[42px] |
-| Auth page | h-12 (48px) | h-[62px] |
-| Forgot/Reset Password | h-12 (48px) | h-[62px] |
-| Landing page | h-10 (40px) | h-[52px] |
+**Also**: The ME name is stored as "Surname, FirstNames" during auto-create, but then the display code re-parses it as if it's "First Last" — causing double-reversal (e.g., "Smith, John" → "John, Smith"). Need to detect the comma format and display as-is.
 
-**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
+**File**: `src/pages/Patients.tsx`
+- Change ME badge classes from `bg-terracotta/10 text-terracotta` to `bg-terracotta text-white`
+- Fix name display: if name already contains a comma, display as-is instead of re-parsing
 
-## 2. Fix Practice Number Not Persisting
+## 2. Record Task: Auto-Start Recording from Dashboard
 
-**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
+**Problem**: Dashboard mic button links to `/todos` but doesn't trigger recording automatically.
 
-**Fix in `src/pages/Profile.tsx`:**
-- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
-- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
-- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
-- This prevents the race condition where autosave fires with stale/initial data
+**Fix**:
+- `src/pages/Dashboard.tsx`: Change link to `/todos?autoRecord=true`
+- `src/pages/TodoList.tsx`: Read `autoRecord` query param on mount. If present, call `startRecording()` automatically and clear the param.
 
-## 3. Make Partner Email Required and Create Pending Users
+## 3. 5MB File Size Limit for Audio/Video Uploads
 
-**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+**Files**: `src/pages/PatientProfile.tsx`, `src/components/documents/MediaCapture.tsx`
+- In the upload handler and after recording stops, check `blob.size > 5 * 1024 * 1024` and show an error toast if exceeded
+- Apply to both the PatientProfile inline upload button and the MediaCapture component
 
-**Fix:**
-- Add an `email` column to the `practice_partners` table via migration
-- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
-- Ensure the `addPartner` function validates email is provided before saving
-- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+## 4. Patient Task Assignment (Doctor → Patient)
 
-**Database Migration:**
-- `ALTER TABLE practice_partners ADD COLUMN email text;`
+This extends the existing `todos` table which already has a `patient_id` column.
 
-**Changes in `src/pages/Profile.tsx`:**
-- Make email field required in validation (alongside name and registration number)
-- Show validation error if email is missing
+**Changes**:
+- `src/pages/TodoList.tsx`: Add ability to assign a patient when creating a task (dropdown of patients). Display patient name on task cards. The AI processing edge function already returns structured actions — enhance it to auto-assign `patient_id` when the dictated task mentions a patient name.
+- `supabase/functions/process-todo-actions/index.ts`: Add patient fuzzy-matching to auto-assign tasks to patients when mentioned in voice input.
 
-## Technical Summary
+## 5. Document Email: Per-Patient, Not Global Doctor Email
 
-### Database Migration
-- Add `email text` column to `practice_partners` table
+**Problem**: The Documents tab shows the doctor's mailbox alias for every patient. It should only show the doctor's alias on the ME record. For other patients, each patient would need their own document email — but patients don't have mailbox aliases yet.
 
-### Files Modified
-- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
-- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
-- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
-- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
+**Fix in `src/pages/PatientProfile.tsx`**:
+- Check if current patient is the ME record (patient email matches doctor email)
+- If ME: show the doctor's mailbox alias as it does now
+- If NOT ME: hide the mailbox email banner entirely (since patients don't have their own email aliases yet), or show a note that documents can be uploaded manually
+
+## Files to Modify
+1. `src/pages/Patients.tsx` — ME badge styling + name display fix
+2. `src/pages/Dashboard.tsx` — Add `?autoRecord=true` to todo link
+3. `src/pages/TodoList.tsx` — Auto-start recording from query param + patient assignment UI
+4. `src/pages/PatientProfile.tsx` — 5MB upload limit + conditional email banner
+5. `src/components/documents/MediaCapture.tsx` — 5MB upload limit
+6. `supabase/functions/process-todo-actions/index.ts` — Patient fuzzy-match for auto-assignment
 
