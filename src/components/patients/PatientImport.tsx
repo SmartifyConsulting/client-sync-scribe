@@ -197,7 +197,11 @@ const COLUMN_MAPPINGS: Record<string, keyof ParsedPatient> = {
   // Marital status
   "marital status": "marital_status",
   "marital": "marital_status",
-  "status": "marital_status",
+  
+  // Status
+  "status": "status",
+  "patient status": "status",
+  "active/inactive": "status",
 };
 
 function mapColumnName(header: string): keyof ParsedPatient | null {
