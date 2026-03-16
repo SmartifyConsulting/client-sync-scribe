@@ -402,6 +402,25 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
           </div>
         </div>
 
+        {/* Chronic Medication Status */}
+        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-terracotta/10">
+                <Pill className="h-4 w-4 text-terracotta" />
+              </div>
+              <h3 className="font-semibold text-foreground">Chronic Medication</h3>
+            </div>
+            {patient.is_chronic ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-terracotta/10 px-3 py-1 text-xs font-bold text-terracotta">
+                <Pill className="h-3 w-3" />Chronic
+              </span>
+            ) : (
+              <span className="text-sm text-muted-foreground">Not on chronic medication</span>
+            )}
+          </div>
+        </div>
+
         {/* 9. Surgeries and Dates */}
         <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
