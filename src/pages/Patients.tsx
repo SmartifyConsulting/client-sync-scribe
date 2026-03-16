@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock, X, CalendarIcon, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -42,6 +43,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
 
 export default function Patients() {
+  const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { patients, loading, createPatient, deletePatient, fetchPatients } = usePatients();
@@ -101,13 +103,25 @@ export default function Patients() {
     return parts[parts.length - 1].toUpperCase();
   };
 
-  const sortedPatients = [...filteredPatients].sort((a, b) => 
-    getSurname(a.name).localeCompare(getSurname(b.name))
-  );
+  const sortedPatients = useMemo(() => {
+    const sorted = [...filteredPatients].sort((a, b) => 
+      getSurname(a.name).localeCompare(getSurname(b.name))
+    );
+    // Move "ME" (doctor's own patient record) to top
+    if (user?.id) {
+      const meIndex = sorted.findIndex(p => p.patient_user_id === user.id);
+      if (meIndex > 0) {
+        const [me] = sorted.splice(meIndex, 1);
+        sorted.unshift(me);
+      }
+    }
+    return sorted;
+  }, [filteredPatients, user?.id]);
 
-  // Group by first letter of surname
+  // Group by first letter of surname (skip "ME" patient for grouping)
   const groupedPatients: Record<string, typeof filteredPatients> = {};
-  sortedPatients.forEach((patient) => {
+  sortedPatients.forEach((patient, index) => {
+    // First patient might be "ME" — still group by their surname letter
     const letter = getSurname(patient.name)[0] || '#';
     if (!groupedPatients[letter]) groupedPatients[letter] = [];
     groupedPatients[letter].push(patient);
@@ -612,8 +626,8 @@ export default function Patients() {
                             to={`/patients/${patient.id}`}
                             className="flex items-center gap-3"
                           >
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-accent-foreground font-medium">
-                              {patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                            <div className={cn("flex h-10 w-10 items-center justify-center rounded-full font-medium", patient.patient_user_id === user?.id ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground")}>
+                              {patient.patient_user_id === user?.id ? "ME" : patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                             </div>
                             <span className="font-medium text-foreground group-hover:text-primary transition-colors">
                               {(() => {
@@ -623,6 +637,9 @@ export default function Patients() {
                                 const firstNames = parts.slice(0, -1).join(" ");
                                 return `${lastName}, ${firstNames}`;
                               })()}
+                              {patient.patient_user_id === user?.id && (
+                                <span className="ml-2 inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">ME</span>
+                              )}
                             </span>
                           </Link>
                         </td>

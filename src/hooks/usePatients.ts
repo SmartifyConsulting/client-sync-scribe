@@ -56,6 +56,7 @@ export interface Patient {
   pharmacy_email: string | null;
   pharmacies: Pharmacy[] | null;
   last_visit?: string | null;
+  patient_user_id?: string | null;
 }
 
 // Helper to parse surgeries from JSON

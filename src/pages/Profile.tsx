@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy, Clock, Mail, Save, Award, Volume2 } from "lucide-react";
+import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy, Clock, Mail, Save, Award, Volume2, UserPlus } from "lucide-react";
 import { PatientImport } from "@/components/patients/PatientImport";
 import { useToast as useGlobalToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -963,7 +963,7 @@ export default function Profile() {
                           toast({ title: "Invitation sent", description: `Invitation sent to ${partnerEmail}` });
                         } catch { toast({ title: "Error", description: "Failed to send invitation", variant: "destructive" }); }
                       }} className="h-8 w-8 text-primary hover:text-primary">
-                        <Mail className="h-4 w-4" />
+                        <UserPlus className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="icon" onClick={() => removePartner(partner.id)} className="h-8 w-8 text-destructive hover:text-destructive">
                         <Trash2 className="h-4 w-4" />

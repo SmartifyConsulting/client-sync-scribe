@@ -73,7 +73,7 @@ export default function TodoList() {
   const [aiResults, setAiResults] = useState<Array<{ action_type: string; description: string; auto_executed: boolean }> | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
-  const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
+  const [filter, setFilter] = useState<"all" | "active" | "completed">("active");
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -617,7 +617,7 @@ export default function TodoList() {
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-2">
-        {(["all", "active", "completed"] as const).map((f) => (
+        {(["active", "completed", "all"] as const).map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
