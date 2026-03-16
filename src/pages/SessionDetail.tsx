@@ -61,6 +61,7 @@ export default function SessionDetail() {
   const [showReferralLetterEditor, setShowReferralLetterEditor] = useState(false);
   const [showGeneralLetterEditor, setShowGeneralLetterEditor] = useState(false);
   const [showDrawingPad, setShowDrawingPad] = useState(false);
+  const [showHospitalAdmissionEditor, setShowHospitalAdmissionEditor] = useState(false);
 
   const handleDelete = async () => {
     if (!id) return;
