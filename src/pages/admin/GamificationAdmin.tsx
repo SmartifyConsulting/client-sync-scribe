@@ -143,7 +143,7 @@ export default function GamificationAdmin() {
       <div>
         <h1 className="text-3xl font-bold text-foreground">Gamification Settings</h1>
         <p className="mt-1 text-muted-foreground">
-          Configure lollipop rewards and streak bonuses
+          Configure Moola rewards and streak bonuses
         </p>
       </div>
 
@@ -179,11 +179,11 @@ export default function GamificationAdmin() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Max Lollipops/Visit</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Max Moolas/Visit</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-pink-600">
-              {Math.max(...configs.map(c => c.lollipops_awarded), 0)} 🍭
+            <div className="text-3xl font-bold text-emerald-600">
+              {Math.max(...configs.map(c => c.lollipops_awarded), 0)} Ⓜ
             </div>
           </CardContent>
         </Card>
@@ -211,7 +211,7 @@ export default function GamificationAdmin() {
                   Reward Categories
                 </CardTitle>
                 <CardDescription>
-                  Configure how many lollipops patients earn for each type of visit
+                  Configure how many Moolas patients earn for each type of visit
                 </CardDescription>
               </div>
               <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
@@ -225,7 +225,7 @@ export default function GamificationAdmin() {
                   <DialogHeader>
                     <DialogTitle>Add New Reward Category</DialogTitle>
                     <DialogDescription>
-                      Create a new visit type that awards lollipops to patients
+                      Create a new visit type that awards Moolas to patients
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
@@ -238,7 +238,7 @@ export default function GamificationAdmin() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Lollipops Awarded</Label>
+                      <Label>Moolas Awarded</Label>
                       <Input
                         type="number"
                         min={1}
@@ -267,7 +267,7 @@ export default function GamificationAdmin() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Visit Category</TableHead>
-                    <TableHead>Lollipops</TableHead>
+                     <TableHead>Moolas</TableHead>
                     <TableHead>Description</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -289,8 +289,8 @@ export default function GamificationAdmin() {
                             onChange={(e) => setEditValues({ ...editValues, lollipops_awarded: parseInt(e.target.value) || 1 })}
                           />
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-pink-600 font-semibold">
-                            {config.lollipops_awarded} 🍭
+                          <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold">
+                            {config.lollipops_awarded} Ⓜ
                           </span>
                         )}
                       </TableCell>
@@ -408,7 +408,7 @@ export default function GamificationAdmin() {
                       <p className="text-xs text-muted-foreground">How often must this visit be completed to maintain streak</p>
                     </div>
                     <div className="space-y-2">
-                      <Label>Bonus Lollipops per Streak</Label>
+                      <Label>Bonus Moolas per Streak</Label>
                       <Input
                         type="number"
                         min={1}
@@ -441,8 +441,8 @@ export default function GamificationAdmin() {
                     <TableHead>Streak Name</TableHead>
                     <TableHead>Visit Category</TableHead>
                     <TableHead>Interval</TableHead>
-                    <TableHead>Lollipops</TableHead>
-                    <TableHead>Status</TableHead>
+                     <TableHead>Moolas</TableHead>
+                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -481,8 +481,8 @@ export default function GamificationAdmin() {
                             onChange={(e) => setEditStreakValues({ ...editStreakValues, lollipops_awarded: parseInt(e.target.value) || 1 })}
                           />
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-orange-600 font-semibold">
-                            {config.lollipops_awarded} 🍭
+                          <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold">
+                            {config.lollipops_awarded} Ⓜ
                           </span>
                         )}
                       </TableCell>

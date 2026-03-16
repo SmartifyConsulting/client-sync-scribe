@@ -38,6 +38,7 @@ import { useTemplates } from "@/hooks/useTemplates";
 import { useDocuments } from "@/hooks/useDocuments";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
 import { DrawingPad } from "@/components/drawings/DrawingPad";
+import { MediaCapture } from "@/components/documents/MediaCapture";
 import {
   Dialog,
   DialogContent,
@@ -367,6 +368,9 @@ export default function PatientProfile() {
         </TabsContent>
 
         <TabsContent value="documents" className="space-y-4">
+          {/* Media Capture */}
+          <MediaCapture patientId={patient.id} patientName={patient.name} onSaved={fetchDocuments} />
+
           <div className="flex justify-end gap-2">
             <Button variant="outline" className="gap-2 h-11" onClick={() => setShowTemplateSelector(true)}>
               <Plus className="h-4 w-4" />

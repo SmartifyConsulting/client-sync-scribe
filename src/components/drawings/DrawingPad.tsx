@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
@@ -70,6 +69,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
   const [showVersions, setShowVersions] = useState(false);
   const [textInput, setTextInput] = useState("");
   const [textPosition, setTextPosition] = useState<{ x: number; y: number } | null>(null);
+  const [anatomyCategory, setAnatomyCategory] = useState("face");
 
   // Resize state
   const [resizing, setResizing] = useState<{ elementId: string; startX: number; startY: number; startW: number; startH: number } | null>(null);
@@ -874,45 +874,44 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
       <div className="flex flex-1 min-h-0">
         {/* Anatomy panel */}
         <div className="w-48 border-r bg-muted/30 flex flex-col">
-          <div className="p-2 border-b">
+          <div className="p-2 border-b space-y-2">
             <h4 className="font-medium text-sm">Anatomy</h4>
+            <Select defaultValue="face" onValueChange={(val) => setAnatomyCategory(val)}>
+              <SelectTrigger className="w-full h-8 text-xs">
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="face">Face</SelectItem>
+                <SelectItem value="joints">Joints</SelectItem>
+                <SelectItem value="systems">Systems</SelectItem>
+                <SelectItem value="neuro">Neuro</SelectItem>
+                <SelectItem value="plastic-surgery">Plastic Surgery</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          <Tabs defaultValue="face" className="flex-1 flex flex-col">
-            <TabsList className="grid grid-cols-5 m-1 h-auto">
-              <TabsTrigger value="face" className="text-xs px-1">Face</TabsTrigger>
-              <TabsTrigger value="joints" className="text-xs px-1">Joints</TabsTrigger>
-              <TabsTrigger value="systems" className="text-xs px-1">Systems</TabsTrigger>
-              <TabsTrigger value="neuro" className="text-xs px-1">Neuro</TabsTrigger>
-              <TabsTrigger value="plastic-surgery" className="text-xs px-1">Plastic</TabsTrigger>
-            </TabsList>
-            {["face", "joints", "systems", "neuro", "plastic-surgery"].map((category) => (
-              <TabsContent key={category} value={category} className="flex-1 m-0">
-                <ScrollArea className="h-full">
-                  <div className="p-2 space-y-2">
-                    {anatomyAssets
-                      .filter((a) => a.category === category)
-                      .map((asset) => (
-                        <div
-                          key={asset.id}
-                          className="p-2 bg-background rounded border cursor-grab hover:border-primary transition-colors"
-                          draggable
-                          onDragStart={() => handleDragStart(asset)}
-                        >
-                          <div className="h-16 flex items-center justify-center text-muted-foreground">
-                            {asset.imageSrc ? (
-                              <img src={asset.imageSrc} alt={asset.name} className="h-full w-auto object-contain" />
-                            ) : (
-                              <asset.component />
-                            )}
-                          </div>
-                          <p className="text-xs text-center mt-1">{asset.name}</p>
-                        </div>
-                      ))}
+          <ScrollArea className="flex-1">
+            <div className="p-2 space-y-2">
+              {anatomyAssets
+                .filter((a) => a.category === anatomyCategory)
+                .map((asset) => (
+                  <div
+                    key={asset.id}
+                    className="p-2 bg-background rounded border cursor-grab hover:border-primary transition-colors"
+                    draggable
+                    onDragStart={() => handleDragStart(asset)}
+                  >
+                    <div className="h-16 flex items-center justify-center text-muted-foreground overflow-hidden">
+                      {asset.imageSrc ? (
+                        <img src={asset.imageSrc} alt={asset.name} className="h-full w-auto object-cover" />
+                      ) : (
+                        <asset.component />
+                      )}
+                    </div>
+                    <p className="text-xs text-center mt-1">{asset.name}</p>
                   </div>
-                </ScrollArea>
-              </TabsContent>
-            ))}
-          </Tabs>
+                ))}
+            </div>
+          </ScrollArea>
         </div>
 
         {/* Canvas area */}
@@ -954,22 +953,34 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                   onTouchStart={(e) => handleElementDragStart(e, el.id)}
                 >
                   {asset.imageSrc ? (
-                    <img src={asset.imageSrc} alt={asset.name} className="w-full h-full object-contain pointer-events-none" />
+                    <img src={asset.imageSrc} alt={asset.name} className="w-full h-full object-cover pointer-events-none" />
                   ) : (
                     <asset.component />
                   )}
-                  {/* Resize handle - bottom right corner */}
-                  <div
-                    className="absolute bottom-0 right-0 w-4 h-4 bg-primary/80 border border-primary-foreground rounded-sm cursor-se-resize opacity-0 group-hover:opacity-100 transition-opacity touch-none"
-                    onMouseDown={(e) => handleResizeStart(e, el.id)}
-                    onTouchStart={(e) => handleResizeStart(e, el.id)}
-                  />
-                  {/* Resize handle - bottom left corner */}
-                  <div
-                    className="absolute bottom-0 left-0 w-4 h-4 bg-primary/80 border border-primary-foreground rounded-sm cursor-sw-resize opacity-0 group-hover:opacity-100 transition-opacity touch-none"
-                    onMouseDown={(e) => handleResizeStart(e, el.id)}
-                    onTouchStart={(e) => handleResizeStart(e, el.id)}
-                  />
+                  {/* Selection border */}
+                  <div className={cn(
+                    "absolute inset-0 border-2 pointer-events-none transition-colors",
+                    selectedElement === el.id ? "border-primary" : "border-transparent group-hover:border-primary/40"
+                  )} />
+                  {/* Corner resize handles - always visible when selected */}
+                  {[
+                    "top-0 left-0 cursor-nw-resize",
+                    "top-0 right-0 cursor-ne-resize", 
+                    "bottom-0 left-0 cursor-sw-resize",
+                    "bottom-0 right-0 cursor-se-resize",
+                  ].map((pos, idx) => (
+                    <div
+                      key={idx}
+                      className={cn(
+                        "absolute w-3 h-3 bg-primary border border-primary-foreground rounded-sm touch-none",
+                        pos,
+                        selectedElement === el.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                      )}
+                      style={{ transform: "translate(-50%, -50%)" }}
+                      onMouseDown={(e) => handleResizeStart(e, el.id)}
+                      onTouchStart={(e) => handleResizeStart(e, el.id)}
+                    />
+                  ))}
                 </div>
               );
             })}
