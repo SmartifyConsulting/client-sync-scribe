@@ -39,6 +39,7 @@ export default function UserManagement() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editState, setEditState] = useState<EditState>({ first_name: "", last_name: "", email: "", role: "" });
   const [saving, setSaving] = useState(false);
+  const [resettingPasswords, setResettingPasswords] = useState(false);
 
   useEffect(() => {
     if (isAdmin) fetchUsers();
