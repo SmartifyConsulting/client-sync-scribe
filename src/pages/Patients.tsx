@@ -123,7 +123,7 @@ export default function Patients() {
     }
   }, [loading, user, patients]);
 
-
+  const filteredPatients = patients.filter((patient) => {
     // Name filter
     if (searchQuery && !patient.name.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false;
