@@ -438,6 +438,7 @@ export default function PatientProfile() {
                   recorder.onstop = async () => {
                     stream.getTracks().forEach(t => t.stop());
                     const blob = new Blob(chunks, { type: "audio/webm" });
+                    if (blob.size > 5 * 1024 * 1024) { toast({ title: "File too large", description: "Audio recording exceeds 5MB limit", variant: "destructive" }); return; }
                     const fileName = `${patient.id}/${Date.now()}.webm`;
                     const { error: uploadError } = await supabase.storage.from("patient-media").upload(fileName, blob, { contentType: "audio/webm" });
                     if (uploadError) { toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" }); return; }
