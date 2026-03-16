@@ -38,6 +38,7 @@ interface DoctorSuggestion {
   specialty: string | null;
   practice_number: string | null;
   doctor_number: string | null;
+  cpd_points: number;
 }
 
 interface InviteDoctorDialogProps {
