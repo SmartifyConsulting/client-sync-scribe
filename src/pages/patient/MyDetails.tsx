@@ -29,8 +29,8 @@ export default function MyDetails() {
       if (data) {
         setPatient({
           ...data,
-          surgeries: Array.isArray(data.surgeries) ? data.surgeries : [],
-          pharmacies: Array.isArray(data.pharmacies) ? data.pharmacies : [],
+          surgeries: Array.isArray(data.surgeries) ? data.surgeries as unknown as Patient["surgeries"] : [],
+          pharmacies: Array.isArray(data.pharmacies) ? data.pharmacies as unknown as Patient["pharmacies"] : [],
         } as Patient);
       }
     } catch (err) {
