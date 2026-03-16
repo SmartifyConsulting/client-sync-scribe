@@ -1070,6 +1070,30 @@ export default function Profile() {
                     </>
                   ) : (
                     <>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title={(service as any).is_first_consultation ? "Remove as first consultation fee" : "Set as first consultation fee"}
+                        onClick={async () => {
+                          // If toggling ON, first clear any existing first consultation flag
+                          if (!(service as any).is_first_consultation) {
+                            const currentFirst = servicePrices.find((s: any) => s.is_first_consultation);
+                            if (currentFirst) {
+                              await supabase.from('service_prices').update({ is_first_consultation: false } as any).eq('id', currentFirst.id);
+                            }
+                          }
+                          const newVal = !(service as any).is_first_consultation;
+                          await supabase.from('service_prices').update({ is_first_consultation: newVal } as any).eq('id', service.id);
+                          setServicePrices(servicePrices.map(s => ({
+                            ...s,
+                            is_first_consultation: s.id === service.id ? newVal : (newVal ? false : (s as any).is_first_consultation),
+                          })));
+                          toast({ title: newVal ? "First consultation fee set" : "First consultation fee removed" });
+                        }}
+                        className={cn("h-8 w-8", (service as any).is_first_consultation ? "text-primary hover:text-primary" : "text-muted-foreground hover:text-foreground")}
+                      >
+                        <Award className="h-4 w-4" />
+                      </Button>
                       <Button variant="ghost" size="icon" onClick={() => startEditingService(service)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
                         <Pencil className="h-4 w-4" />
                       </Button>

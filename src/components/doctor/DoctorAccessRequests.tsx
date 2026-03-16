@@ -140,9 +140,35 @@ export function DoctorAccessRequests() {
 
       if (updateError) throw updateError;
 
+      // Auto-create patient record for this doctor if one doesn't already exist
+      const patientUserId = acceptingRequest.patient_user_id;
+      const { data: existingPatient } = await supabase
+        .from("patients")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("patient_user_id", patientUserId)
+        .maybeSingle();
+
+      if (!existingPatient) {
+        // Fetch patient profile info
+        const { data: patientProfile } = await supabase
+          .from("profiles")
+          .select("full_name, mobile_number")
+          .eq("id", patientUserId)
+          .single();
+
+        await supabase.from("patients").insert({
+          user_id: user.id,
+          patient_user_id: patientUserId,
+          name: patientProfile?.full_name || acceptingRequest.patient_profile?.full_name || "Unknown Patient",
+          phone: patientProfile?.mobile_number || null,
+          status: "active",
+        });
+      }
+
       toast({
         title: "Access granted",
-        description: `You now have access to ${acceptingRequest.patient_profile?.full_name || "this patient"}'s information.`,
+        description: `You now have access to ${acceptingRequest.patient_profile?.full_name || "this patient"}'s information. They have been added to your patient list.`,
       });
 
       setAcceptingRequest(null);
