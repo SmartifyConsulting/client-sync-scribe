@@ -260,14 +260,13 @@ export default function Auth() {
               signatureUrl = await uploadSignature(data.user.id);
             }
 
-            // Auto-generate mailbox alias from name
+            // Auto-generate mailbox alias from name (firstname-lastname)
             const nameParts = fullName.trim().toLowerCase().split(/\s+/);
             const firstName = nameParts[0] || "user";
             const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
-            const year = new Date().getFullYear();
             const mailboxAlias = lastName 
-              ? `${firstName}-${lastName}-${year}`.replace(/[^a-z0-9-]/g, '')
-              : `${firstName}-${year}`.replace(/[^a-z0-9-]/g, '');
+              ? `${firstName}-${lastName}`.replace(/[^a-z0-9-]/g, '')
+              : `${firstName}`.replace(/[^a-z0-9-]/g, '');
 
             // Update profile with doctor info
             const { error: profileError } = await supabase
