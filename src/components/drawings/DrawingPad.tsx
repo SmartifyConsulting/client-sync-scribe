@@ -70,6 +70,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
   const [showVersions, setShowVersions] = useState(false);
   const [textInput, setTextInput] = useState("");
   const [textPosition, setTextPosition] = useState<{ x: number; y: number } | null>(null);
+  const [anatomyCategory, setAnatomyCategory] = useState("face");
 
   // Resize state
   const [resizing, setResizing] = useState<{ elementId: string; startX: number; startY: number; startW: number; startH: number } | null>(null);
