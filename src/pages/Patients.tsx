@@ -131,6 +131,7 @@ export default function Patients() {
         pharmacy_name: null,
         pharmacy_email: null,
         pharmacies: null,
+        is_chronic: false,
         patient_user_id: user.id,
       });
     }
