@@ -216,6 +216,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
     setFormData({
       name: patient.name || "", email: patient.email || "", phone: patient.phone || "",
       dob: patient.dob || "", occupation: patient.occupation || "", employer: patient.employer || "",
+      reporting_to_email: patient.reporting_to_email || "",
       referred_by: patient.referred_by || "", marital_status: patient.marital_status || "",
       id_passport_number: patient.id_passport_number || "", gender: patient.gender || "",
       physical_address: patient.physical_address || "", postal_address: patient.postal_address || "",
