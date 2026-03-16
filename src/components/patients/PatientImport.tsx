@@ -605,8 +605,9 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
             </Button>
           </div>
 
-          <div className="border rounded-lg overflow-auto" style={{ maxHeight: '500px' }}>
-            <Table>
+          <div className="border rounded-lg overflow-hidden" style={{ maxHeight: '500px' }}>
+            <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: '500px' }}>
+            <Table style={{ minWidth: '1400px' }}>
               <TableHeader>
                 <TableRow>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[40px]">#</TableHead>
@@ -620,6 +621,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[150px]">Employer</TableHead>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[130px]">Allergies</TableHead>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[130px]">Address</TableHead>
+                  <TableHead className="sticky top-0 bg-card z-10 min-w-[100px]">Status</TableHead>
                   <TableHead className="sticky top-0 bg-card z-10 min-w-[60px]"></TableHead>
                 </TableRow>
               </TableHeader>
