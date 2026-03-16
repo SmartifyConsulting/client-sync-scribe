@@ -10,10 +10,13 @@ import {
   Loader2,
   Calendar,
   Flag,
+  Zap,
+  Brain,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +36,7 @@ interface TodoItem {
   due_date?: string | null;
   patient_id?: string | null;
   session_id?: string | null;
+  is_auto_executed?: boolean;
 }
 
 const priorityColors = {
@@ -47,6 +51,16 @@ const priorityLabels = {
   high: "High",
 };
 
+const actionTypeLabels: Record<string, string> = {
+  schedule_appointment: "📅 Scheduled appointment",
+  write_prescription: "💊 Created prescription",
+  create_invoice: "🧾 Created invoice",
+  write_medical_certificate: "📋 Created medical certificate",
+  write_referral_letter: "✉️ Created referral letter",
+  write_general_letter: "📝 Created general letter",
+  manual_task: "📌 Manual task created",
+};
+
 export default function TodoList() {
   const { toast } = useToast();
   const [todos, setTodos] = useState<TodoItem[]>([]);
@@ -55,6 +69,8 @@ export default function TodoList() {
   const [newTaskPriority, setNewTaskPriority] = useState<"low" | "medium" | "high">("medium");
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isAiProcessing, setIsAiProcessing] = useState(false);
+  const [aiResults, setAiResults] = useState<Array<{ action_type: string; description: string; auto_executed: boolean }> | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
@@ -76,6 +92,7 @@ export default function TodoList() {
         ...todo,
         completed: todo.status === 'completed',
         priority: todo.priority as "low" | "medium" | "high",
+        is_auto_executed: (todo as any).is_auto_executed || false,
       })));
     } catch (error) {
       console.error('Error fetching todos:', error);
@@ -167,7 +184,7 @@ export default function TodoList() {
         setNewTaskText(data.text);
         toast({
           title: "Transcription complete",
-          description: "Your voice has been converted to text",
+          description: "Your voice has been converted to text. Click 'AI Process' to auto-execute tasks.",
         });
       } else {
         throw new Error('No transcription returned');
@@ -181,6 +198,43 @@ export default function TodoList() {
       });
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const handleAiProcess = async () => {
+    if (!newTaskText.trim()) return;
+
+    setIsAiProcessing(true);
+    setAiResults(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('process-todo-actions', {
+        body: { text: newTaskText.trim() }
+      });
+
+      if (error) throw new Error(error.message || 'AI processing failed');
+
+      if (data?.results) {
+        setAiResults(data.results);
+        setNewTaskText("");
+        await fetchTodos();
+
+        toast({
+          title: "AI Processing Complete",
+          description: data.summary,
+        });
+      } else if (data?.error) {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      console.error('AI processing error:', error);
+      toast({
+        title: "AI Processing Failed",
+        description: error instanceof Error ? error.message : "Please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAiProcessing(false);
     }
   };
 
@@ -204,7 +258,7 @@ export default function TodoList() {
 
       if (error) throw error;
 
-      setTodos([{ ...data, completed: false, priority: data.priority as "low" | "medium" | "high" }, ...todos]);
+      setTodos([{ ...data, completed: false, priority: data.priority as "low" | "medium" | "high", is_auto_executed: false }, ...todos]);
       setNewTaskText("");
       setNewTaskPriority("medium");
 
@@ -372,7 +426,7 @@ export default function TodoList() {
       <div>
         <h1 className="text-3xl font-bold text-foreground">To-Do List</h1>
         <p className="mt-1 text-muted-foreground">
-          Manage your tasks with voice or text input
+          Manage your tasks with voice or text input — AI can auto-execute actions
         </p>
       </div>
 
@@ -384,12 +438,12 @@ export default function TodoList() {
         <div className="flex flex-col items-center gap-4 py-4 mb-4 border-b border-border">
           <button
             onClick={isRecording ? stopRecording : startRecording}
-            disabled={isProcessing}
+            disabled={isProcessing || isAiProcessing}
             className={cn(
               "flex h-16 w-16 items-center justify-center rounded-full transition-all duration-300",
               isRecording
                 ? "bg-destructive text-destructive-foreground animate-pulse-soft"
-                : isProcessing
+                : isProcessing || isAiProcessing
                 ? "bg-muted text-muted-foreground cursor-not-allowed"
                 : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-glow"
             )}
@@ -405,6 +459,8 @@ export default function TodoList() {
           <p className="text-sm text-muted-foreground">
             {isProcessing
               ? "Transcribing your voice..."
+              : isAiProcessing
+              ? "AI is processing your tasks..."
               : isRecording
               ? "Recording... Tap to stop"
               : "Tap to record a task"}
@@ -421,38 +477,88 @@ export default function TodoList() {
               onKeyDown={(e) => e.key === "Enter" && addTask()}
               className="flex-1"
             />
-            <Button onClick={addTask} disabled={!newTaskText.trim()} className="gap-2">
+            <Button onClick={addTask} disabled={!newTaskText.trim() || isAiProcessing} className="gap-2">
               <Plus className="h-4 w-4" />
               Add
             </Button>
           </div>
 
-          {/* Priority Selection */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Priority:</span>
-            <div className="flex gap-2">
-              {(["low", "medium", "high"] as const).map((priority) => (
-                <button
-                  key={priority}
-                  onClick={() => setNewTaskPriority(priority)}
-                  className={cn(
-                    "rounded-full px-3 py-1 text-xs font-medium transition-all",
-                    newTaskPriority === priority
-                      ? priority === "high"
-                        ? "bg-destructive text-destructive-foreground"
-                        : priority === "medium"
-                        ? "bg-warning text-warning-foreground"
-                        : "bg-muted text-muted-foreground ring-2 ring-primary"
-                      : priorityColors[priority]
-                  )}
-                >
-                  {priorityLabels[priority]}
-                </button>
-              ))}
+          {/* AI Process + Priority Row */}
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            {/* Priority Selection */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Priority:</span>
+              <div className="flex gap-2">
+                {(["low", "medium", "high"] as const).map((priority) => (
+                  <button
+                    key={priority}
+                    onClick={() => setNewTaskPriority(priority)}
+                    className={cn(
+                      "rounded-full px-3 py-1 text-xs font-medium transition-all",
+                      newTaskPriority === priority
+                        ? priority === "high"
+                          ? "bg-destructive text-destructive-foreground"
+                          : priority === "medium"
+                          ? "bg-warning text-warning-foreground"
+                          : "bg-muted text-muted-foreground ring-2 ring-primary"
+                        : priorityColors[priority]
+                    )}
+                  >
+                    {priorityLabels[priority]}
+                  </button>
+                ))}
+              </div>
             </div>
+
+            {/* AI Process Button */}
+            <Button
+              onClick={handleAiProcess}
+              disabled={!newTaskText.trim() || isAiProcessing}
+              variant="secondary"
+              className="gap-2"
+            >
+              {isAiProcessing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Brain className="h-4 w-4" />
+              )}
+              AI Process
+            </Button>
           </div>
         </div>
       </div>
+
+      {/* AI Results Banner */}
+      {aiResults && (
+        <div className="rounded-xl border border-success/30 bg-success/5 p-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-foreground flex items-center gap-2">
+              <Zap className="h-4 w-4 text-success" />
+              AI Processing Results
+            </h3>
+            <Button variant="ghost" size="sm" onClick={() => setAiResults(null)}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="space-y-1">
+            {aiResults.map((result, idx) => (
+              <div key={idx} className="flex items-center gap-2 text-sm">
+                <span>{actionTypeLabels[result.action_type] || result.action_type}</span>
+                <span className="text-muted-foreground">—</span>
+                <span className="text-muted-foreground truncate">{result.description}</span>
+                {result.auto_executed ? (
+                  <Badge className="bg-success/10 text-success border-success/20 ml-auto shrink-0">
+                    <Zap className="h-3 w-3 mr-1" />
+                    Done
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="ml-auto shrink-0">Manual</Badge>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-2">
@@ -492,7 +598,8 @@ export default function TodoList() {
                 key={todo.id}
                 className={cn(
                   "flex items-center gap-4 p-4 transition-colors hover:bg-muted/30",
-                  todo.completed && "bg-muted/20"
+                  todo.completed && "bg-muted/20",
+                  todo.is_auto_executed && "bg-success/5"
                 )}
               >
                 <Checkbox
@@ -523,14 +630,22 @@ export default function TodoList() {
                 ) : (
                   <>
                     <div className="flex-1 min-w-0">
-                      <p
-                        className={cn(
-                          "font-medium text-foreground",
-                          todo.completed && "line-through text-muted-foreground"
+                      <div className="flex items-center gap-2">
+                        <p
+                          className={cn(
+                            "font-medium text-foreground",
+                            todo.completed && "line-through text-muted-foreground"
+                          )}
+                        >
+                          {todo.title}
+                        </p>
+                        {todo.is_auto_executed && (
+                          <Badge className="bg-success/10 text-success border-success/20 text-[10px] px-1.5 py-0">
+                            <Zap className="h-3 w-3 mr-0.5" />
+                            Auto
+                          </Badge>
                         )}
-                      >
-                        {todo.title}
-                      </p>
+                      </div>
                       <div className="flex items-center gap-3 mt-1">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>

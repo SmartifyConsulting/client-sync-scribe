@@ -1446,6 +1446,7 @@ export type Database = {
           description: string | null
           due_date: string | null
           id: string
+          is_auto_executed: boolean | null
           patient_id: string | null
           priority: string
           session_id: string | null
@@ -1460,6 +1461,7 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          is_auto_executed?: boolean | null
           patient_id?: string | null
           priority?: string
           session_id?: string | null
@@ -1474,6 +1476,7 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          is_auto_executed?: boolean | null
           patient_id?: string | null
           priority?: string
           session_id?: string | null

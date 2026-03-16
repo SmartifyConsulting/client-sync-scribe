@@ -1,65 +1,59 @@
 
 
-# AI-Powered Task Auto-Execution
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## Overview
-When a doctor dictates or types tasks (via the Todo list or session flow), the system uses AI to parse the input into structured actions, auto-execute what it can, and leave the rest as manual todos. Auto-executed tasks are marked done with a visual badge.
+## 1. Increase Logo Size by 130%
 
-## Database Migration
-```sql
-ALTER TABLE todos ADD COLUMN IF NOT EXISTS is_auto_executed boolean DEFAULT false;
-```
+Scale all logo instances by 130%:
 
-## New Edge Function: `process-todo-actions/index.ts`
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-Accepts `{ text: string, user_id: string }`. Uses Lovable AI (Gemini) to parse transcribed/typed text into structured actions. Matches patient names against the doctor's patient list (fuzzy match).
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-**Auto-executable action types:**
-1. **Schedule appointment** -- insert into `appointments` table
-2. **Write medical certificate** -- insert into `documents` table using the Medical Certificate template, auto-filling patient and practice data
-3. **Write prescription** -- insert into `prescriptions` table with parsed medication, dosage, frequency
-4. **Write referral letter** -- insert into `documents` table using the Referral Letter template
-5. **Create invoice** -- insert into `invoices` table with parsed service/amount
-6. **Write general letter** -- insert into `documents` table using the General Letter template
+## 2. Fix Practice Number Not Persisting
 
-For each auto-executed action:
-- Create the record in the appropriate table (appointments, documents, prescriptions, invoices)
-- Create a todo marked `is_auto_executed = true`, `status = 'completed'`
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-For non-automatable tasks:
-- Create a todo with `status = 'pending'`, `is_auto_executed = false`
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
 
-**AI prompt** instructs the model to extract: action type, patient name, date/time, description, and type-specific fields (medication/dosage for prescriptions, service/amount for invoices, referring doctor for referrals, leave period for certificates). Uses tool-calling for structured output.
+## 3. Make Partner Email Required and Create Pending Users
 
-**Logic flow:**
-1. Fetch doctor's patient list and profile (practice number, address, etc.)
-2. Call Gemini with tool-calling to parse input into structured actions
-3. For each action, match patient name to a patient record
-4. Execute the appropriate database insert
-5. Create completed todo with `is_auto_executed = true`
-6. Return summary of what was done vs what needs manual attention
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
 
-## Frontend Changes: `src/pages/TodoList.tsx`
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
 
-1. After voice transcription or text entry, add an "AI Process" button that sends text to `process-todo-actions`
-2. Show processing state with spinner and results summary (e.g., "Scheduled appointment for Faith Akeno. Created prescription for Georgia Adams. 1 task needs manual action.")
-3. Auto-executed todos display with strikethrough + green "Auto-executed" badge with Zap icon
-4. Add `is_auto_executed` to `TodoItem` interface
-5. Refresh todo list after processing
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
 
-## Config
-Add to `supabase/config.toml`:
-```toml
-[functions.process-todo-actions]
-verify_jwt = true
-```
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
 
-## Files Modified
+## Technical Summary
 
-| File | Change |
-|------|--------|
-| Migration | Add `is_auto_executed` to `todos` |
-| `supabase/functions/process-todo-actions/index.ts` | New edge function with AI parsing and auto-execution |
-| `supabase/config.toml` | Register new function |
-| `src/pages/TodoList.tsx` | AI processing flow, auto-executed badges |
+### Database Migration
+- Add `email text` column to `practice_partners` table
+
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 
