@@ -639,6 +639,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
                     <TableCell><Input className="h-8 text-sm" value={patient.employer || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], employer: e.target.value }; setParsedPatients(updated); }} /></TableCell>
                     <TableCell><Input className="h-8 text-sm" value={patient.allergies || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], allergies: e.target.value }; setParsedPatients(updated); }} /></TableCell>
                     <TableCell><Input className="h-8 text-sm" value={patient.physical_address || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], physical_address: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell><Input className="h-8 text-sm" value={patient.status || "active"} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], status: e.target.value }; setParsedPatients(updated); }} /></TableCell>
                     <TableCell>
                       <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => setParsedPatients(parsedPatients.filter((_, i) => i !== index))}>
                         <X className="h-3.5 w-3.5" />
@@ -648,6 +649,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
                 ))}
               </TableBody>
             </Table>
+            </div>
           </div>
 
           {isImporting && (
