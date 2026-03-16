@@ -131,7 +131,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     const emailResponse = await resend.emails.send({
-      from: "MediPad <onboarding@resend.dev>",
+      from: "MediPad <noreply@smartify.co.za>",
       to: [email],
       subject: `Invoice Report: ${dateFrom} to ${dateTo}`,
       html,

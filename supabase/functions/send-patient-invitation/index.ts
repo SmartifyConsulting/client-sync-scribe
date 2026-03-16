@@ -90,7 +90,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "MediPad <onboarding@resend.dev>",
+        from: "MediPad <noreply@smartify.co.za>",
         to: [patientEmail],
         subject: `${doctorName} has invited you to join MediPad`,
         html: `
