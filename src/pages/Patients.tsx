@@ -109,7 +109,7 @@ export default function Patients() {
     );
     // Move "ME" (doctor's own patient record) to top
     if (user?.id) {
-      const meIndex = sorted.findIndex(p => p.patient_user_id === user.id);
+      const meIndex = sorted.findIndex(p => p.email?.toLowerCase() === user.email?.toLowerCase());
       if (meIndex > 0) {
         const [me] = sorted.splice(meIndex, 1);
         sorted.unshift(me);
@@ -119,7 +119,7 @@ export default function Patients() {
   }, [filteredPatients, user?.id]);
 
   // Extract ME patient before grouping
-  const mePatient = sortedPatients.find(p => p.patient_user_id === user?.id) || null;
+  const mePatient = sortedPatients.find(p => p.email?.toLowerCase() === user?.email?.toLowerCase()) || null;
   const patientsForGrouping = mePatient ? sortedPatients.filter(p => p.id !== mePatient.id) : sortedPatients;
 
   // Group by first letter of surname
