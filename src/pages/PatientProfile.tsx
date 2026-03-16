@@ -432,43 +432,7 @@ export default function PatientProfile() {
           <PatientDetailsEditor patient={patient} onSave={updatePatient} />
         </TabsContent>
 
-        {/* Notes Tab */}
-        <TabsContent value="notes">
-          <div className="rounded-2xl bg-card p-6 shadow-card space-y-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-                  <StickyNote className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground text-lg">Additional Notes</h3>
-                  <p className="text-sm text-muted-foreground">Add any additional information about this patient</p>
-                </div>
-              </div>
-              <Button 
-                onClick={handleSaveNotes} 
-                disabled={savingNotes}
-                className="gap-2 h-11"
-              >
-                {savingNotes ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
-                Save Notes
-              </Button>
-            </div>
-            <Textarea
-              placeholder="Enter any additional notes, observations, or important information about this patient..."
-              value={additionalNotes}
-              onChange={(e) => setAdditionalNotes(e.target.value)}
-              className="min-h-[300px] resize-none rounded-xl"
-            />
-            <p className="text-xs text-muted-foreground">
-              Last updated: {patient.updated_at ? format(new Date(patient.updated_at), "MMM d, yyyy 'at' h:mm a") : "Never"}
-            </p>
-          </div>
-        </TabsContent>
+        {/* Notes tab removed - notes now in General Notes frame under Details */}
 
         {/* Round Table Tab */}
         <TabsContent value="roundtable">
