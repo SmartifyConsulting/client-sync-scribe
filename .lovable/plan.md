@@ -1,59 +1,44 @@
 
 
-# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
+# UI & Search Fixes
 
-## 1. Increase Logo Size by 130%
+## 1. Auto-Populate User Search (InviteUserDialog)
 
-Scale all logo instances by 130%:
+**File: `src/components/InviteUserDialog.tsx`**
 
-| Location | Current | New (130%) |
-|---|---|---|
-| Sidebar | h-10 (40px) | h-[52px] |
-| Mobile Header | h-8 (32px) | h-[42px] |
-| Auth page | h-12 (48px) | h-[62px] |
-| Forgot/Reset Password | h-12 (48px) | h-[62px] |
-| Landing page | h-10 (40px) | h-[52px] |
+The search currently requires clicking a button. Change to auto-search as the user types (debounced 300ms), same pattern as Patients.tsx. Replace the manual `handleSearch` with a `useEffect` that triggers on `searchQuery` changes when length >= 2. Remove the search button entirely and show results inline as user types.
 
-**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
+The existing query `.or('full_name.ilike.%${searchQuery}%')` should work for partial matches like "Pierre" finding "Pierre Dubois". No role filter needed here since this is a general user invite.
 
-## 2. Fix Practice Number Not Persisting
+## 2. Session Selection for Download
 
-**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
+**File: `src/pages/Sessions.tsx`** (lines 1158-1177)
 
-**Fix in `src/pages/Profile.tsx`:**
-- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
-- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
-- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
-- This prevents the race condition where autosave fires with stale/initial data
+Currently the checkbox only shows when `session.audio_url` exists. Change logic:
+- Show checkbox for ALL completed sessions
+- Disable checkbox (grayed out) for sessions older than 7 days with a tooltip "Recording expired"
+- Sessions without audio_url get a download of the session summary/transcript instead (or just skip the audio download gracefully)
 
-## 3. Make Partner Email Required and Create Pending Users
+## 3. More Terracotta Color Usage
 
-**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+### 3a. CompactTodoList Mic Button
+**File: `src/components/dashboard/CompactTodoList.tsx`** (line 296)
 
-**Fix:**
-- Add an `email` column to the `practice_partners` table via migration
-- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
-- Ensure the `addPartner` function validates email is provided before saving
-- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+Change the non-recording state from `bg-secondary hover:bg-secondary/90` to `bg-terracotta hover:bg-terracotta-dark` with `text-white` to match the dashboard header mic button.
 
-**Database Migration:**
-- `ALTER TABLE practice_partners ADD COLUMN email text;`
+### 3b. Calendar Patient Initials Badges
+**File: `src/pages/CalendarView.tsx`** (line 406)
 
-**Changes in `src/pages/Profile.tsx`:**
-- Make email field required in validation (alongside name and registration number)
-- Show validation error if email is missing
+Change the patient initials circle from `bg-primary text-primary-foreground` to `bg-terracotta text-white`. This applies to both the grid view badges and the sidebar "Today's Schedule" badges.
 
-## Technical Summary
+Search for all instances of `bg-primary` used for initials in CalendarView and replace with `bg-terracotta`.
 
-### Database Migration
-- Add `email text` column to `practice_partners` table
+## Files Modified
 
-### Files Modified
-- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
-- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
-- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
-- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
+| File | Change |
+|------|--------|
+| `src/components/InviteUserDialog.tsx` | Auto-search on type with debounce, remove manual search button |
+| `src/pages/Sessions.tsx` | Show checkboxes on all completed sessions; disable for 7+ day old |
+| `src/components/dashboard/CompactTodoList.tsx` | Mic button: `bg-secondary` → `bg-terracotta` |
+| `src/pages/CalendarView.tsx` | Patient initials badges: `bg-primary` → `bg-terracotta` |
 
