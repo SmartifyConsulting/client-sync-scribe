@@ -192,6 +192,7 @@ const completeSession = async (
         prescription: summaryData?.prescription || null,
         invoice: summaryData?.invoice || null,
         referral: summaryData?.referral || null,
+        hospital_admission: summaryData?.hospital_admission || null,
       };
 
       let sessionId = id;
