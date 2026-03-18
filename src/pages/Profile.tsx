@@ -941,7 +941,7 @@ function MailboxSection({ userId }: { userId?: string }) {
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-0 flex-1">
                     <Input value={aliasInput} onChange={(e) => setAliasInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} placeholder="your-name" className="rounded-r-none max-w-[160px] h-8 text-sm" />
-                    <span className="px-2 py-1.5 border border-l-0 border-border rounded-r-lg bg-muted text-xs text-muted-foreground">@medipad.com</span>
+                    <span className="px-2 py-1.5 border border-l-0 border-border rounded-r-lg bg-muted text-xs text-muted-foreground">@holarc.com</span>
                   </div>
                   <Button size="sm" className="h-8" onClick={handleSaveAlias} disabled={isSavingAlias}>{isSavingAlias ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}</Button>
                   <Button size="sm" variant="ghost" className="h-8" onClick={() => setEditingAlias(false)}>Cancel</Button>
