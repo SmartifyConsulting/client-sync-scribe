@@ -134,6 +134,29 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
     setShowSuggestions(false);
   };
 
+  const handleSendDoctorInvite = async () => {
+    if (!inviteEmail.trim()) {
+      toast({ title: "Email required", description: "Please enter the doctor's email.", variant: "destructive" });
+      return;
+    }
+    setSendingInvite(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-user-invitation", {
+        body: {
+          recipientEmail: inviteEmail.trim(),
+          senderName: profile?.full_name || "A patient",
+          message: `${profile?.full_name || "A patient"} has invited you to join Holarc Health. Sign up to connect and manage patient care.`,
+        },
+      });
+      if (error) throw error;
+      toast({ title: "Invitation sent", description: `An invitation has been sent to ${inviteEmail}.` });
+      setInviteEmail("");
+    } catch (error: any) {
+      toast({ title: "Failed to send invitation", description: error.message || "Please try again.", variant: "destructive" });
+    } finally {
+      setSendingInvite(false);
+    }
+  };
   const handlePermissionToggle = (permission: AccessPermission) => {
     setSelectedPermissions((prev) =>
       prev.includes(permission) ? prev.filter((p) => p !== permission) : [...prev, permission]
