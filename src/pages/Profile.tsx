@@ -696,7 +696,7 @@ export default function Profile() {
                             <Button variant="ghost" size="icon" title="Invite" onClick={async () => {
                               const partnerEmail = (partner as any).email;
                               if (!partnerEmail) { toast({ title: "No email", variant: "destructive" }); return; }
-                              try { await supabase.functions.invoke('send-user-invitation', { body: { recipientEmail: partnerEmail, senderName: profile?.full_name || 'A colleague', message: 'You have been invited to join MediPad as a practice partner.', isPracticePartner: true, partnerName: partner.full_name } }); toast({ title: "Invitation sent" }); } catch { toast({ title: "Error", variant: "destructive" }); }
+                              try { await supabase.functions.invoke('send-user-invitation', { body: { recipientEmail: partnerEmail, senderName: profile?.full_name || 'A colleague', message: 'You have been invited to join Holarc as a practice partner.', isPracticePartner: true, partnerName: partner.full_name } }); toast({ title: "Invitation sent" }); } catch { toast({ title: "Error", variant: "destructive" }); }
                             }} className="h-7 w-7 text-primary"><UserPlus className="h-3.5 w-3.5" /></Button>
                             <Button variant="ghost" size="icon" onClick={() => removePartner(partner.id)} className="h-7 w-7 text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
                           </>
