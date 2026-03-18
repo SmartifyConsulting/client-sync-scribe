@@ -631,7 +631,7 @@ export default function PatientProfile() {
                             await (supabase.from('documents').update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any).eq('id', doc.id);
                             // Refresh docs
                             const { data: updatedDocs } = await supabase.from('documents').select('*').eq('patient_id', doc.patient_id!).order('created_at', { ascending: false });
-                            if (updatedDocs) setPatientDocuments(updatedDocs as any);
+                            if (updatedDocs) fetchDocuments();
                           } catch {}
                         }}
                       >
