@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import medipadLogo from "@/assets/medipad-logo.jpg";
+import holarcLogo from "@/assets/holarc-logo.png";
 import {
   Mail, Lock, Loader2, User, Building2, MapPin, Plus, Trash2, Phone,
   Stethoscope, PenTool, UserCircle, Camera, ChevronLeft, ChevronRight, Globe,
