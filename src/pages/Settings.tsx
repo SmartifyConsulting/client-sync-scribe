@@ -39,6 +39,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSearchParams } from "react-router-dom";
+import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import {
   AlertDialog,
   AlertDialogAction,
