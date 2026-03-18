@@ -129,6 +129,7 @@ const renderFormattedContent = (content: string): string => {
 };
 
 export default function Documents() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const {
     templates: dbTemplates,
