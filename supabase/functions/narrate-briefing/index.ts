@@ -35,7 +35,8 @@ serve(async (req) => {
         model: 'tts-1',
         input: text,
         voice: voice || 'nova',
-        response_format: 'mp3',
+        response_format: 'opus',
+        speed: 1.1,
       }),
     });
 
