@@ -39,7 +39,7 @@ serve(async (req) => {
     });
 
     // Extract the mailbox ID from the recipient email
-    // Format: docs-{mailbox_id}@inbox.medipad.health OR {alias}@medipad.com
+    // Format: docs-{mailbox_id}@inbox.holarc.health OR {alias}@holarc.com
     const recipientEmail = payload.to?.toLowerCase();
     
     if (!recipientEmail) {
