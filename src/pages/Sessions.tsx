@@ -32,6 +32,7 @@ import {
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
 import { VisitCategoryDialog } from "@/components/sessions/VisitCategoryDialog";
+import { StarRatingDialog } from "@/components/sessions/StarRatingDialog";
 import { SessionNotepad } from "@/components/sessions/SessionNotepad";
 import {
   MedCertReviewDialog,
