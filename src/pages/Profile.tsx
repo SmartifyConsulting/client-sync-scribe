@@ -492,12 +492,12 @@ export default function Profile() {
         </Tabs>
       ) : (
         <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="personal">Personal</TabsTrigger>
-            <TabsTrigger value="practice">Practice</TabsTrigger>
-            <TabsTrigger value="partners">Partners</TabsTrigger>
-            <TabsTrigger value="pricing">Pricing</TabsTrigger>
-            <TabsTrigger value="certificates">Certificates{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 bg-primary">
+            <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Personal</TabsTrigger>
+            <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Practice</TabsTrigger>
+            <TabsTrigger value="partners" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Partners</TabsTrigger>
+            <TabsTrigger value="pricing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Pricing</TabsTrigger>
+            <TabsTrigger value="certificates" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Certificates{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}</TabsTrigger>
           </TabsList>
 
           {/* === PERSONAL TAB === */}
