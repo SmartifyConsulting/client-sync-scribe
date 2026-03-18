@@ -123,7 +123,7 @@ const handler = async (req: Request): Promise<Response> => {
         </table>
 
         <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #9ca3af; font-size: 12px;">
-          <p>This report was generated automatically by MediPad.</p>
+          <p>This report was generated automatically by Holarc Health.</p>
           <p>Generated on ${new Date().toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
         </div>
       </body>
@@ -131,7 +131,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     const emailResponse = await resend.emails.send({
-      from: "MediPad <noreply@smartify.co.za>",
+      from: "Holarc Health <noreply@smartify.co.za>",
       to: [email],
       subject: `Invoice Report: ${dateFrom} to ${dateTo}`,
       html,

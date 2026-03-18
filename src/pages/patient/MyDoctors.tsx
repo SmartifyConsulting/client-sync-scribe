@@ -178,7 +178,7 @@ export default function MyDoctors() {
       {/* Doctor Search */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Find a Doctor on MediPad</CardTitle>
+          <CardTitle className="text-base">Find a Doctor on Holarc</CardTitle>
           <CardDescription>Search by full name or practice number</CardDescription>
         </CardHeader>
         <CardContent>

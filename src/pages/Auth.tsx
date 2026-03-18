@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import medipadLogo from "@/assets/medipad-logo.jpg";
+import holarcLogo from "@/assets/holarc-logo.png";
 import {
   Mail, Lock, Loader2, User, Building2, MapPin, Plus, Trash2, Phone,
   Stethoscope, PenTool, UserCircle, Camera, ChevronLeft, ChevronRight, Globe,
@@ -62,7 +62,7 @@ type UserRole = "doctor" | "patient";
 const DOCTOR_STEPS = ["Account", "Profile", "Practice Info", "Partners", "Terms & Payment"];
 const PATIENT_STEPS = ["Account", "Personal Info", "Employment", "Insurance", "Next of Kin", "Terms & Payment"];
 
-const STORAGE_KEY = "medipad_signup_draft";
+const STORAGE_KEY = "holarc_signup_draft";
 
 function saveDraft(data: any) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}
@@ -416,7 +416,7 @@ export default function Auth() {
       } catch {}
 
       clearDraft();
-      toast({ title: "Account created!", description: "Welcome to MediPad!" });
+      toast({ title: "Account created!", description: "Welcome to Holarc!" });
       navigate("/dashboard");
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -819,9 +819,9 @@ export default function Auth() {
           <div className="w-full max-w-md">
             <div className="text-center mb-8">
               <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
-                <img src={medipadLogo} alt="MediPad" className="h-[62px] w-auto" />
+                <img src={holarcLogo} alt="Holarc Health" className="h-[62px] w-auto" />
               </button>
-              <h1 className="text-2xl font-bold text-foreground">MediPad</h1>
+              <h1 className="text-2xl font-bold text-foreground">Holarc</h1>
               <p className="text-muted-foreground mt-2">Sign In</p>
             </div>
             <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
@@ -865,9 +865,9 @@ export default function Auth() {
         <div className="w-full max-w-md">
           <div className="text-center mb-6">
             <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
-              <img src={medipadLogo} alt="MediPad" className="h-[62px] w-auto" />
+              <img src={holarcLogo} alt="Holarc Health" className="h-[62px] w-auto" />
             </button>
-            <h1 className="text-2xl font-bold text-foreground">MediPad</h1>
+            <h1 className="text-2xl font-bold text-foreground">Holarc</h1>
             <p className="text-muted-foreground mt-1">{userRole === "doctor" ? "Healthcare Provider" : "Patient"} Registration</p>
           </div>
 

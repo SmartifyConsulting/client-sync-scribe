@@ -39,7 +39,7 @@ serve(async (req) => {
     });
 
     // Extract the mailbox ID from the recipient email
-    // Format: docs-{mailbox_id}@inbox.medipad.health OR {alias}@medipad.com
+    // Format: docs-{mailbox_id}@inbox.holarc.health OR {alias}@holarc.com
     const recipientEmail = payload.to?.toLowerCase();
     
     if (!recipientEmail) {
@@ -53,8 +53,8 @@ serve(async (req) => {
     let profile = null;
     let profileError = null;
 
-    // Check if it's a custom alias format: {alias}@medipad.com
-    const aliasMatch = recipientEmail.match(/^([a-z0-9-]+)@medipad\.com$/i);
+    // Check if it's a custom alias format: {alias}@holarc.com
+    const aliasMatch = recipientEmail.match(/^([a-z0-9-]+)@holarc\.com$/i);
     
     if (aliasMatch) {
       const alias = aliasMatch[1];
@@ -69,7 +69,7 @@ serve(async (req) => {
       profile = result.data;
       profileError = result.error;
     } else {
-      // Try legacy format: docs-{mailbox_id}@inbox.medipad.health
+      // Try legacy format: docs-{mailbox_id}@inbox.holarc.health
       const mailboxMatch = recipientEmail.match(/^docs-([a-f0-9-]+)@/i);
       
       if (!mailboxMatch) {

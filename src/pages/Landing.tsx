@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import medipadLogo from "@/assets/medipad-logo.jpg";
+import holarcLogo from "@/assets/holarc-logo.png";
 import { motion } from "framer-motion";
 import {
   Stethoscope,
@@ -107,7 +107,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <img src={medipadLogo} alt="MediPad" className="h-[52px] w-auto" />
+              <img src={holarcLogo} alt="Holarc Health" className="h-[52px] w-auto" />
             </div>
             <div className="flex items-center gap-3">
               <Button
@@ -215,7 +215,7 @@ export default function Landing() {
               Your Health. <span className="text-primary">360°</span> View.
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              MediPad gives you a complete 360-degree view of your health profile—every consultation, prescription, and clinical note from every provider, unified in one place and entirely under your control.
+              Holarc gives you a complete 360-degree view of your health profile—every consultation, prescription, and clinical note from every provider, unified in one place and entirely under your control.
             </p>
           </motion.div>
 
@@ -322,7 +322,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-border">
         <div className="max-w-7xl mx-auto text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} MediPad. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Holarc Health. All rights reserved.</p>
         </div>
       </footer>
 
@@ -330,7 +330,7 @@ export default function Landing() {
       <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-center text-2xl">Join MediPad</DialogTitle>
+            <DialogTitle className="text-center text-2xl">Join Holarc</DialogTitle>
             <DialogDescription className="text-center">
               How will you use the platform?
             </DialogDescription>

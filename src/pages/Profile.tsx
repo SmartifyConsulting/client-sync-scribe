@@ -62,34 +62,34 @@ const LANGUAGES = [
 ];
 
 const SAMPLE_TEXTS: Record<string, string> = {
-  af: "Hallo, dit is jou MediPad-briefingstem. Hier is 'n voorskou van hoe jou vertellings sal klink.",
-  ar: "مرحبًا، هذا هو صوت إحاطة MediPad الخاص بك. إليك معاينة لكيفية صوت رواياتك.",
-  nl: "Hallo, dit is je MediPad-briefingstem. Hier is een voorbeeld van hoe je vertellingen zullen klinken.",
-  en: "Hello, this is your MediPad briefing voice. Here is a preview of how your narrations will sound.",
-  fr: "Bonjour, ceci est votre voix de briefing MediPad. Voici un aperçu de la façon dont vos narrations sonneront.",
-  de: "Hallo, dies ist Ihre MediPad-Briefingstimme. Hier ist eine Vorschau, wie Ihre Erzählungen klingen werden.",
-  el: "Γεια σας, αυτή είναι η φωνή ενημέρωσης MediPad. Ακολουθεί μια προεπισκόπηση του πώς θα ακούγονται οι αφηγήσεις σας.",
-  he: "שלום, זהו קול התדרוך של MediPad שלך. הנה תצוגה מקדימה של איך הקריינויות שלך יישמעו.",
-  hi: "नमस्ते, यह आपकी MediPad ब्रीफिंग आवाज़ है। यहाँ एक पूर्वावलोकन है कि आपकी कथाएँ कैसी लगेंगी।",
-  id: "Halo, ini adalah suara briefing MediPad Anda. Berikut pratinjau bagaimana narasi Anda akan terdengar.",
-  it: "Ciao, questa è la tua voce di briefing MediPad. Ecco un'anteprima di come suoneranno le tue narrazioni.",
-  ja: "こんにちは、これはあなたのMediPadブリーフィングの声です。ナレーションがどのように聞こえるかのプレビューです。",
-  ko: "안녕하세요, 이것은 MediPad 브리핑 음성입니다. 내레이션이 어떻게 들릴지 미리 들어보세요.",
-  ms: "Halo, ini adalah suara taklimat MediPad anda. Berikut ialah pratonton bagaimana narasi anda akan berbunyi.",
-  zh: "您好，这是您的MediPad简报语音。以下是您的旁白听起来的预览。",
-  pl: "Cześć, to jest Twój głos briefingowy MediPad. Oto podgląd tego, jak będą brzmieć Twoje narracje.",
-  pt: "Olá, esta é a sua voz de briefing do MediPad. Aqui está uma prévia de como suas narrações soarão.",
-  ru: "Здравствуйте, это ваш голос брифинга MediPad. Вот предварительный просмотр того, как будут звучать ваши повествования.",
-  st: "Lumela, ena ke lentsoe la hao la MediPad. Sena ke ponelopele ea hore na litšoantšiso tsa hao li tla utloahala joang.",
-  es: "Hola, esta es tu voz de briefing de MediPad. Aquí tienes una vista previa de cómo sonarán tus narraciones.",
-  sw: "Habari, hii ni sauti yako ya muhtasari wa MediPad. Hapa kuna hakikisho la jinsi masimulizi yako yatasikika.",
-  th: "สวัสดี นี่คือเสียงบรรยายสรุปของ MediPad ของคุณ นี่คือตัวอย่างของเสียงบรรยายของคุณ",
-  tn: "Dumelang, eno ke lentswe la gago la MediPad. Se ke ponelopele ya gore dipolelo tsa gago di tla utlwala jang.",
-  tr: "Merhaba, bu sizin MediPad brifing sesinizdir. İşte anlatımlarınızın nasıl duyulacağına dair bir önizleme.",
-  uk: "Привіт, це ваш голос брифінгу MediPad. Ось попередній перегляд того, як звучатимуть ваші нарації.",
-  vi: "Xin chào, đây là giọng tóm tắt MediPad của bạn. Đây là bản xem trước về cách tường thuật của bạn sẽ phát ra.",
-  xh: "Molo, eli lilizwi lakho le-MediPad. Nantsi imboniso yokuba iibalisi zakho ziya kuvakalisa njani.",
-  zu: "Sawubona, leli yizwi lakho le-MediPad. Nansi isibonelo sokuthi izindaba zakho zizozwakala kanjani.",
+  af: "Hallo, dit is jou Holarc-briefingstem. Hier is 'n voorskou van hoe jou vertellings sal klink.",
+  ar: "مرحبًا، هذا هو صوت إحاطة Holarc الخاص بك. إليك معاينة لكيفية صوت رواياتك.",
+  nl: "Hallo, dit is je Holarc-briefingstem. Hier is een voorbeeld van hoe je vertellingen zullen klinken.",
+  en: "Hello, this is your Holarc briefing voice. Here is a preview of how your narrations will sound.",
+  fr: "Bonjour, ceci est votre voix de briefing Holarc. Voici un aperçu de la façon dont vos narrations sonneront.",
+  de: "Hallo, dies ist Ihre Holarc-Briefingstimme. Hier ist eine Vorschau, wie Ihre Erzählungen klingen werden.",
+  el: "Γεια σας, αυτή είναι η φωνή ενημέρωσης Holarc. Ακολουθεί μια προεπισκόπηση του πώς θα ακούγονται οι αφηγήσεις σας.",
+  he: "שלום, זהו קול התדרוך של Holarc שלך. הנה תצוגה מקדימה של איך הקריינויות שלך יישמעו.",
+  hi: "नमस्ते, यह आपकी Holarc ब्रीफिंग आवाज़ है। यहाँ एक पूर्वावलोकन है कि आपकी कथाएँ कैसी लगेंगी।",
+  id: "Halo, ini adalah suara briefing Holarc Anda. Berikut pratinjau bagaimana narasi Anda akan terdengar.",
+  it: "Ciao, questa è la tua voce di briefing Holarc. Ecco un'anteprima di come suoneranno le tue narrazioni.",
+  ja: "こんにちは、これはあなたのHolarcブリーフィングの声です。ナレーションがどのように聞こえるかのプレビューです。",
+  ko: "안녕하세요, 이것은 Holarc 브리핑 음성입니다. 내레이션이 어떻게 들릴지 미리 들어보세요.",
+  ms: "Halo, ini adalah suara taklimat Holarc anda. Berikut ialah pratonton bagaimana narasi anda akan berbunyi.",
+  zh: "您好，这是您的Holarc简报语音。以下是您的旁白听起来的预览。",
+  pl: "Cześć, to jest Twój głos briefingowy Holarc. Oto podgląd tego, jak będą brzmieć Twoje narracje.",
+  pt: "Olá, esta é a sua voz de briefing do Holarc. Aqui está uma prévia de como suas narrações soarão.",
+  ru: "Здравствуйте, это ваш голос брифинга Holarc. Вот предварительный просмотр того, как будут звучать ваши повествования.",
+  st: "Lumela, ena ke lentsoe la hao la Holarc. Sena ke ponelopele ea hore na litšoantšiso tsa hao li tla utloahala joang.",
+  es: "Hola, esta es tu voz de briefing de Holarc. Aquí tienes una vista previa de cómo sonarán tus narraciones.",
+  sw: "Habari, hii ni sauti yako ya muhtasari wa Holarc. Hapa kuna hakikisho la jinsi masimulizi yako yatasikika.",
+  th: "สวัสดี นี่คือเสียงบรรยายสรุปของ Holarc ของคุณ นี่คือตัวอย่างของเสียงบรรยายของคุณ",
+  tn: "Dumelang, eno ke lentswe la gago la Holarc. Se ke ponelopele ya gore dipolelo tsa gago di tla utlwala jang.",
+  tr: "Merhaba, bu sizin Holarc brifing sesinizdir. İşte anlatımlarınızın nasıl duyulacağına dair bir önizleme.",
+  uk: "Привіт, це ваш голос брифінгу Holarc. Ось попередній перегляд того, як звучатимуть ваші нарації.",
+  vi: "Xin chào, đây là giọng tóm tắt Holarc của bạn. Đây là bản xem trước về cách tường thuật của bạn sẽ phát ra.",
+  xh: "Molo, eli lilizwi lakho le-Holarc. Nantsi imboniso yokuba iibalisi zakho ziya kuvakalisa njani.",
+  zu: "Sawubona, leli yizwi lakho le-Holarc. Nansi isibonelo sokuthi izindaba zakho zizozwakala kanjani.",
 };
 
 const CURRENCIES = [
@@ -696,7 +696,7 @@ export default function Profile() {
                             <Button variant="ghost" size="icon" title="Invite" onClick={async () => {
                               const partnerEmail = (partner as any).email;
                               if (!partnerEmail) { toast({ title: "No email", variant: "destructive" }); return; }
-                              try { await supabase.functions.invoke('send-user-invitation', { body: { recipientEmail: partnerEmail, senderName: profile?.full_name || 'A colleague', message: 'You have been invited to join MediPad as a practice partner.', isPracticePartner: true, partnerName: partner.full_name } }); toast({ title: "Invitation sent" }); } catch { toast({ title: "Error", variant: "destructive" }); }
+                              try { await supabase.functions.invoke('send-user-invitation', { body: { recipientEmail: partnerEmail, senderName: profile?.full_name || 'A colleague', message: 'You have been invited to join Holarc as a practice partner.', isPracticePartner: true, partnerName: partner.full_name } }); toast({ title: "Invitation sent" }); } catch { toast({ title: "Error", variant: "destructive" }); }
                             }} className="h-7 w-7 text-primary"><UserPlus className="h-3.5 w-3.5" /></Button>
                             <Button variant="ghost" size="icon" onClick={() => removePartner(partner.id)} className="h-7 w-7 text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
                           </>
@@ -908,7 +908,7 @@ function MailboxSection({ userId }: { userId?: string }) {
     fetchMailboxInfo();
   }, [userId]);
 
-  const displayEmail = mailboxAlias ? `${mailboxAlias}@medipad.com` : mailboxId ? `docs-${mailboxId.slice(0, 8)}@inbox.medipad.health` : null;
+  const displayEmail = mailboxAlias ? `${mailboxAlias}@holarc.com` : mailboxId ? `docs-${mailboxId.slice(0, 8)}@inbox.holarc.health` : null;
   const handleCopy = async () => { if (!displayEmail) return; await navigator.clipboard.writeText(displayEmail); setCopied(true); toast({ title: "Copied" }); setTimeout(() => setCopied(false), 2000); };
   const handleSaveAlias = async () => {
     if (!userId) return;
@@ -918,8 +918,8 @@ function MailboxSection({ userId }: { userId?: string }) {
     setIsSavingAlias(true);
     const { error } = await supabase.from('profiles').update({ mailbox_alias: cleanAlias }).eq('id', userId);
     setIsSavingAlias(false);
-    if (error) { toast({ title: error.code === '23505' ? "Alias taken" : "Error", description: error.code === '23505' ? `"${cleanAlias}@medipad.com" is already in use` : "Failed to save", variant: "destructive" }); }
-    else { setMailboxAlias(cleanAlias); setEditingAlias(false); toast({ title: "Alias saved", description: `${cleanAlias}@medipad.com` }); }
+    if (error) { toast({ title: error.code === '23505' ? "Alias taken" : "Error", description: error.code === '23505' ? `"${cleanAlias}@holarc.com" is already in use` : "Failed to save", variant: "destructive" }); }
+    else { setMailboxAlias(cleanAlias); setEditingAlias(false); toast({ title: "Alias saved", description: `${cleanAlias}@holarc.com` }); }
   };
 
   return (
@@ -941,7 +941,7 @@ function MailboxSection({ userId }: { userId?: string }) {
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-0 flex-1">
                     <Input value={aliasInput} onChange={(e) => setAliasInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} placeholder="your-name" className="rounded-r-none max-w-[160px] h-8 text-sm" />
-                    <span className="px-2 py-1.5 border border-l-0 border-border rounded-r-lg bg-muted text-xs text-muted-foreground">@medipad.com</span>
+                    <span className="px-2 py-1.5 border border-l-0 border-border rounded-r-lg bg-muted text-xs text-muted-foreground">@holarc.com</span>
                   </div>
                   <Button size="sm" className="h-8" onClick={handleSaveAlias} disabled={isSavingAlias}>{isSavingAlias ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}</Button>
                   <Button size="sm" variant="ghost" className="h-8" onClick={() => setEditingAlias(false)}>Cancel</Button>
