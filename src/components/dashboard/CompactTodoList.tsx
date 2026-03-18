@@ -384,7 +384,7 @@ export function CompactTodoList() {
                 ) : (
                   <>
                     {todo.is_auto_executed && (
-                      <Sparkles className="h-3 w-3 text-primary shrink-0" title="AI-generated task" />
+                      <Sparkles className="h-3 w-3 text-primary shrink-0" />
                     )}
                     <span
                       className={cn(

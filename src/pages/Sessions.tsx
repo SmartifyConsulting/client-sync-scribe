@@ -120,6 +120,8 @@ export default function Sessions() {
   const { sessions, loading: sessionsLoading, createSession, completeSession } = useSessions();
   const [selectedRecordings, setSelectedRecordings] = useState<Set<string>>(new Set());
   const [isDownloading, setIsDownloading] = useState(false);
+  const [playingSessionId, setPlayingSessionId] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   
   const currentPatient = patients.find(p => p.id === patientId);
 
