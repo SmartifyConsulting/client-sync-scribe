@@ -59,3 +59,15 @@ verify_jwt = false
 
 [functions.lookup-medical-codes]
 verify_jwt = false
+
+[functions.process-todo-actions]
+verify_jwt = false
+
+[functions.admin-reset-passwords]
+verify_jwt = false
+
+[functions.remind-audio-retention]
+verify_jwt = false
+
+[functions.validate-medication-video]
+verify_jwt = false

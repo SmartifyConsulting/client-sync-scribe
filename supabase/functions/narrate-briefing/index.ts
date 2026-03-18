@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 serve(async (req) => {
@@ -35,7 +35,7 @@ serve(async (req) => {
         model: 'tts-1',
         input: text,
         voice: voice || 'nova',
-        response_format: 'opus',
+        response_format: 'mp3',
         speed: 1.1,
       }),
     });
@@ -52,7 +52,7 @@ serve(async (req) => {
     return new Response(response.body, {
       headers: {
         ...corsHeaders,
-        'Content-Type': 'audio/ogg',
+        'Content-Type': 'audio/mpeg',
         'Transfer-Encoding': 'chunked',
       },
     });

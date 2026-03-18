@@ -161,7 +161,8 @@ const completeSession = async (
         console.error('AI summary error:', summaryError);
       }
 
-      console.log('Summary data received:', summaryData);
+      console.log('Summary data received:', JSON.stringify(summaryData, null, 2));
+      console.log('Action points from summary:', summaryData?.action_points);
 
       const now = new Date().toISOString();
       const startedAt = creationData?.started_at || now;

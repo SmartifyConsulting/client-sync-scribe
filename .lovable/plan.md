@@ -1,50 +1,59 @@
 
 
-# Fix: Auto-Generated Tasks Not Working After Session Completion
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## Root Cause
+## 1. Increase Logo Size by 130%
 
-The `process-todo-actions` edge function is **not listed in `supabase/config.toml`**. Without an entry, the function may not be deployed or may have default JWT verification that silently fails. Additionally, `summarize-session` has outdated CORS headers missing the newer Supabase client headers.
+Scale all logo instances by 130%:
 
-The flow is: `completeSession` → calls `summarize-session` → gets `action_points` → calls `process-todo-actions`. The second call never fires (zero logs for `process-todo-actions`).
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-## Fix
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-### 1. Add `process-todo-actions` to config.toml
+## 2. Fix Practice Number Not Persisting
 
-Add the missing entry. The function already validates auth internally, so set `verify_jwt = false` to match other similar functions:
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-```toml
-[functions.process-todo-actions]
-verify_jwt = false
-```
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
 
-Also add other missing functions that exist in the codebase:
-- `admin-reset-passwords`
-- `remind-audio-retention`
-- `validate-medication-video`
+## 3. Make Partner Email Required and Create Pending Users
 
-### 2. Update CORS headers in `summarize-session`
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
 
-The current CORS headers are missing the newer Supabase client headers. Update to match the standard pattern used in `process-todo-actions`:
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
 
-```
-"authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version"
-```
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
 
-### 3. Add logging in `useSessions.ts` for better debugging
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
 
-Add a `console.log` before calling `process-todo-actions` to confirm `action_points` is populated and the call is being made. Also log `summaryData` structure to verify the response.
+## Technical Summary
 
-### 4. Deploy and verify
+### Database Migration
+- Add `email text` column to `practice_partners` table
 
-After changes, test the `process-todo-actions` function to confirm it boots and responds correctly.
-
-## Files Modified
-
-| File | Change |
-|------|--------|
-| `supabase/config.toml` | Add `process-todo-actions` (and other missing functions) |
-| `supabase/functions/summarize-session/index.ts` | Update CORS headers |
-| `src/hooks/useSessions.ts` | Add diagnostic logging around action_points check |
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 
