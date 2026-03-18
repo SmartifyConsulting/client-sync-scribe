@@ -11,7 +11,8 @@ import {
   Download,
   Printer,
   Loader2,
-  Mail,
+  Send,
+  ArrowUpRight,
   LayoutTemplate,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
