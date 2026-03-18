@@ -1137,7 +1137,7 @@ export default function Documents() {
                 </>
               ) : (
                 <>
-                  <Mail className="h-4 w-4" />
+                  <Send className="h-4 w-4" />
                   Send Email
                 </>
               )}
