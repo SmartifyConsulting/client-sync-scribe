@@ -438,19 +438,35 @@ export default function CalendarView() {
           </div>
           <div className="divide-y divide-border">
             {todayEvents.length > 0 ? (
-              todayEvents.map((event) => (
+              todayEvents.map((event) => {
+                const patientName = event.patientId
+                  ? patients.find(p => p.id === event.patientId)?.name
+                  : null;
+                const initials = patientName
+                  ? patientName.split(/\s+/).map(w => w[0]).join("").toUpperCase().slice(0, 2)
+                  : null;
+                return (
                 <div
                   key={event.id}
                   onClick={() => handleEventClick(event)}
                   className="flex items-center gap-3 p-4 hover:bg-muted/30 transition-colors cursor-pointer"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                    {event.type === "session" ? (
-                      <User className="h-5 w-5 text-accent-foreground" />
-                    ) : (
+                  {initials ? (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground shrink-0">
+                            {initials}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>{patientName}</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
                       <Clock className="h-5 w-5 text-accent-foreground" />
-                    )}
-                  </div>
+                    </div>
+                  )}
                   <div className="flex-1">
                     <p className="font-medium text-foreground">{event.title}</p>
                     <p className="text-sm text-muted-foreground">{event.time}</p>
