@@ -793,24 +793,24 @@ export default function Patients() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead>
+               <thead>
                 <tr className="bg-primary">
-                  <th className="px-6 py-4 text-left text-sm font-medium text-primary-foreground">
+                  <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Patient
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-primary-foreground">
+                  <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Contact
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-primary-foreground">
-                    Last Seen On
+                  <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                    Last Seen
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-primary-foreground">
-                    Patient Since
+                  <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                    Since
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-primary-foreground">
+                  <th className="px-3 py-2.5 text-center text-xs font-medium text-primary-foreground">
                     Status
                   </th>
-                  <th className="px-6 py-4 text-right text-sm font-medium text-primary-foreground">
+                  <th className="px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">
                     Actions
                   </th>
                 </tr>
