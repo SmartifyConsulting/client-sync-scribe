@@ -915,6 +915,11 @@ export default function Profile() {
               )}
             </div>
           </TabsContent>
+
+          {/* === MOOLAS TAB === */}
+          <TabsContent value="moolas">
+            <DoctorMoolasTab userId={user?.id} />
+          </TabsContent>
         </Tabs>
       )}
 
