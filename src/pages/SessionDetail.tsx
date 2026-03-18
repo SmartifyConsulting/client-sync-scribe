@@ -476,6 +476,55 @@ export default function SessionDetail() {
         )}
       </div>
 
+      {/* Session Documents */}
+      {sessionDocs.length > 0 && (
+        <div className="rounded-xl border border-primary bg-card p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <FileText className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-foreground">Session Documents</h2>
+              <p className="text-xs text-muted-foreground">Auto-generated documents from this session</p>
+            </div>
+          </div>
+          <div className="space-y-2">
+            {sessionDocs.map((doc) => (
+              <div key={doc.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                <FileText className="h-4 w-4 text-primary shrink-0" />
+                <span className="flex-1 text-sm font-medium text-foreground truncate">{doc.name}</span>
+                {doc.is_draft && !doc.email_sent_at && (
+                  <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30 text-[10px]">
+                    DRAFT
+                  </Badge>
+                )}
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7"
+                  onClick={() => navigate(`/documents?view=${doc.id}`)}
+                >
+                  <Edit3 className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className={`h-7 w-7 ${doc.email_sent_at ? 'text-muted-foreground' : 'text-green-600 hover:text-green-700'}`}
+                  disabled={!!doc.email_sent_at || sendingDocId === doc.id}
+                  onClick={() => handleSendDocument(doc)}
+                >
+                  {sendingDocId === doc.id ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Send className="h-3.5 w-3.5" />
+                  )}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Action Points / TO-DO List */}
       {session.action_points && session.action_points.length > 0 && (
         <div className="rounded-xl border border-primary bg-card p-6">
