@@ -85,6 +85,25 @@ export default function SessionDetail() {
   const [translatedSummary, setTranslatedSummary] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
+  const [showStarRating, setShowStarRating] = useState(false);
+  const [hasRated, setHasRated] = useState(false);
+
+  // Check if user has already rated this session
+  useEffect(() => {
+    if (!id) return;
+    const checkRating = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from('visit_ratings' as any)
+        .select('id')
+        .eq('session_id', id)
+        .eq('rater_id', user.id)
+        .maybeSingle();
+      setHasRated(!!data);
+    };
+    checkRating();
+  }, [id]);
 
   const handleTranslate = async (langCode: string) => {
     if (!session?.summary || !langCode) return;
