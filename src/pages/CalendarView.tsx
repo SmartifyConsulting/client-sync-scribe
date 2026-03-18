@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar, MapPin, Video, Play, Trash2, Link, Unlink, Loader2 } from "lucide-react";
 import { AppointmentRequestsPanel } from "@/components/appointments/AppointmentRequestsPanel";
@@ -23,9 +23,10 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { usePatients } from "@/hooks/usePatients";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
+import { supabase } from "@/integrations/supabase/client";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const currentDate = new Date();
 
 interface CalendarEvent {
   id: string;
@@ -37,15 +38,6 @@ interface CalendarEvent {
   notes?: string;
   location?: string;
 }
-
-const mockEvents: CalendarEvent[] = [
-  { id: "1", title: "Sarah Johnson", time: "9:00 AM", day: 3, type: "session", patientId: "1", location: "Video Call" },
-  { id: "2", title: "Michael Chen", time: "10:30 AM", day: 3, type: "session", patientId: "2", location: "In Person" },
-  { id: "3", title: "Team Meeting", time: "2:00 PM", day: 3, type: "internal", notes: "Weekly team sync" },
-  { id: "4", title: "Emma Williams", time: "4:00 PM", day: 4, type: "session", patientId: "3", location: "Video Call" },
-  { id: "5", title: "Follow-up: David Brown", time: "11:00 AM", day: 5, type: "followup", patientId: "4", notes: "Review progress" },
-  { id: "6", title: "Lisa Anderson", time: "9:30 AM", day: 6, type: "session", patientId: "5", location: "In Person" },
-];
 
 function getDaysInMonth(date: Date) {
   const year = date.getFullYear();
@@ -60,13 +52,14 @@ export default function CalendarView() {
   const navigate = useNavigate();
   const { patients } = usePatients();
   const { isConnected, isConnecting, connect, disconnect, loading: calendarLoading } = useGoogleCalendar();
-  const [selectedDate, setSelectedDate] = useState(currentDate);
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isEventDetailOpen, setIsEventDetailOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedEvent, setEditedEvent] = useState<CalendarEvent | null>(null);
-  const [events, setEvents] = useState<CalendarEvent[]>(mockEvents);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
   const [newAppointment, setNewAppointment] = useState({
     patientId: "",
     date: "",
@@ -75,6 +68,50 @@ export default function CalendarView() {
     notes: "",
   });
   const { firstDay, daysInMonth } = getDaysInMonth(selectedDate);
+
+  // Fetch real appointments for the current month
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      setEventsLoading(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const monthStart = startOfMonth(selectedDate);
+        const monthEnd = endOfMonth(selectedDate);
+
+        const { data, error } = await supabase
+          .from('appointments')
+          .select('id, title, start_time, type, location, patient_id, description')
+          .eq('user_id', user.id)
+          .gte('start_time', monthStart.toISOString())
+          .lte('start_time', monthEnd.toISOString())
+          .order('start_time', { ascending: true });
+
+        if (error) throw error;
+
+        if (data) {
+          const mapped: CalendarEvent[] = data.map(apt => ({
+            id: apt.id,
+            title: apt.title,
+            time: format(new Date(apt.start_time), "h:mm a"),
+            day: new Date(apt.start_time).getDate(),
+            type: apt.type === "followup" ? "followup" : apt.type === "internal" ? "internal" : "session",
+            patientId: apt.patient_id || undefined,
+            notes: apt.description || undefined,
+            location: apt.location || undefined,
+          }));
+          setEvents(mapped);
+        }
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+      } finally {
+        setEventsLoading(false);
+      }
+    };
+
+    fetchAppointments();
+  }, [selectedDate]);
 
   const monthName = selectedDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
