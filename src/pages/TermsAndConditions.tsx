@@ -27,7 +27,7 @@ export default function TermsAndConditions() {
 
           <h2>1. Acceptance of Terms</h2>
           <p>
-            By creating an account, accessing, or using MediPad (the "Platform"), you agree to be bound by these Terms and Conditions ("Terms"). Your use of the Platform constitutes your acceptance of these Terms. If you do not agree to these Terms, you must not access or use the Platform.
+            By creating an account, accessing, or using Holarc (the "Platform"), you agree to be bound by these Terms and Conditions ("Terms"). Your use of the Platform constitutes your acceptance of these Terms. If you do not agree to these Terms, you must not access or use the Platform.
           </p>
           <p>
             <strong>By clicking "I Accept," "Sign Up," "Create Account," or by accessing or using the Platform, you acknowledge that you have read, understood, and agree to be bound by these Terms.</strong>
