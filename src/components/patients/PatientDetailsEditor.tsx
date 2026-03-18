@@ -249,6 +249,36 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
   const bmi = calculateBMI();
   const primaryPharmacy = pharmacies.find(p => p.is_primary) || pharmacies[0];
 
+  // Reusable CollapsibleFrame component for view mode
+  const CollapsibleFrame = ({ icon, title, children, defaultOpen = false, extra }: { icon: React.ReactNode; title: string; children: React.ReactNode; defaultOpen?: boolean; extra?: React.ReactNode }) => {
+    const [open, setOpen] = useState(defaultOpen);
+    return (
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
+          <CollapsibleTrigger asChild>
+            <button className="flex items-center justify-between w-full p-5 hover:bg-muted/30 transition-colors text-left">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                  {icon}
+                </div>
+                <h3 className="font-semibold text-foreground">{title}</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                {extra}
+                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+              </div>
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="px-5 pb-5">
+              {children}
+            </div>
+          </CollapsibleContent>
+        </div>
+      </Collapsible>
+    );
+  };
+
   // ==================== VIEW MODE ====================
   if (!isEditing) {
     return (

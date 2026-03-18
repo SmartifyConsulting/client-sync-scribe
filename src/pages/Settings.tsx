@@ -538,15 +538,15 @@ Holarc
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {googleConnected && <CheckCircle className="h-5 w-5 text-success" />}
+              {googleRealConnected && <CheckCircle className="h-5 w-5 text-success" />}
               <div>
                 <p className="font-medium text-foreground">Google Calendar</p>
                 <p className="text-sm text-muted-foreground">
-                  {googleConnected ? "Connected - Appointments syncing" : "Sync appointments with Google Calendar"}
+                  {googleRealConnected ? "Connected - Appointments syncing" : "Sync appointments with Google Calendar"}
                 </p>
               </div>
             </div>
-            {googleConnected ? (
+            {googleRealConnected ? (
               <Button
                 variant="outline"
                 onClick={() => handleDisconnect("google")}
@@ -555,8 +555,8 @@ Holarc
                 Disconnect
               </Button>
             ) : (
-              <Button variant="outline" onClick={() => handleConnect("google")} disabled={isConnecting === "google"}>
-                {isConnecting === "google" ? "Connecting..." : "Connect"}
+              <Button variant="outline" onClick={() => handleConnect("google")} disabled={googleRealConnecting}>
+                {googleRealConnecting ? "Connecting..." : "Connect"}
               </Button>
             )}
           </div>

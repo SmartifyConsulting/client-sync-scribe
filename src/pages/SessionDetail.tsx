@@ -293,38 +293,77 @@ export default function SessionDetail() {
       {/* AI Summary */}
       {session.summary && (
         <div className="rounded-xl border border-primary bg-card p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Sparkles className="h-5 w-5 text-primary" />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-foreground">AI Summary</h2>
+                <p className="text-xs text-muted-foreground">Generated from session content</p>
+              </div>
             </div>
-            <div>
-              <h2 className="font-semibold text-foreground">AI Summary</h2>
-              <p className="text-xs text-muted-foreground">Generated from session content</p>
+            <div className="flex items-center gap-2">
+              {isTranslating && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+              <Select value={selectedLanguage} onValueChange={handleTranslate}>
+                <SelectTrigger className="w-[160px] h-8 text-xs">
+                  <Languages className="h-3.5 w-3.5 mr-1.5" />
+                  <SelectValue placeholder="Translate..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {LANGUAGES.map(lang => (
+                    <SelectItem key={lang.code} value={lang.code} className="text-xs">
+                      {lang.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {translatedSummary && (
+                <Button variant="ghost" size="sm" className="text-xs h-8" onClick={() => { setTranslatedSummary(null); setSelectedLanguage(""); }}>
+                  Original
+                </Button>
+              )}
             </div>
           </div>
-          <p className="text-foreground leading-relaxed">{session.summary}</p>
+          <p className="text-foreground leading-relaxed">{translatedSummary || session.summary}</p>
         </div>
       )}
 
       {/* Audio Recording */}
       <div className="rounded-xl border border-border bg-card p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10">
-            <Volume2 className="h-5 w-5 text-purple-600" />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10">
+              <Volume2 className="h-5 w-5 text-purple-600" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-foreground">Session Recording</h2>
+              <p className="text-xs text-muted-foreground">Audio from the consultation</p>
+            </div>
           </div>
-          <div>
-            <h2 className="font-semibold text-foreground">Session Recording</h2>
-            <p className="text-xs text-muted-foreground">Audio from the consultation</p>
-          </div>
+          {session.audio_url && (
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={handleDownloadAudio}>
+              <Download className="h-3.5 w-3.5" /> Download
+            </Button>
+          )}
         </div>
         {session.audio_url ? (
-          <audio 
-            controls 
-            className="w-full"
-            src={session.audio_url}
-          >
-            Your browser does not support the audio element.
-          </audio>
+          <>
+            <audio 
+              controls 
+              className="w-full"
+              src={session.audio_url}
+            >
+              Your browser does not support the audio element.
+            </audio>
+            <Alert className="mt-4 border-amber-500/30 bg-amber-500/5">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-xs text-amber-700">
+                Voice recordings are automatically deleted after 7 days. Download recordings you wish to keep.
+                Transcriptions will remain available permanently.
+              </AlertDescription>
+            </Alert>
+          </>
         ) : (
           <div className="bg-muted/30 rounded-lg p-4 text-center">
             <p className="text-sm text-muted-foreground">
