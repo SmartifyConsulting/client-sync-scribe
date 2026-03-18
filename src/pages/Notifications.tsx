@@ -20,6 +20,7 @@ import {
   UserX,
   Volume2,
   VolumeX,
+  MessageCircle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -619,6 +620,10 @@ function NotificationList({
         return <UserPlus className="h-5 w-5 text-primary" />;
       case 'invitation_accepted':
         return <UserCheck className="h-5 w-5 text-green-500" />;
+      case 'emoticon_received':
+        return <MessageCircle className="h-5 w-5 text-pink-500" />;
+      case 'task_completed':
+        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
       default:
         return <Bell className="h-5 w-5 text-primary" />;
     }

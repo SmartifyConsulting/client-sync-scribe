@@ -32,6 +32,7 @@ import {
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
 import { VisitCategoryDialog } from "@/components/sessions/VisitCategoryDialog";
+import { StarRatingDialog } from "@/components/sessions/StarRatingDialog";
 import { SessionNotepad } from "@/components/sessions/SessionNotepad";
 import {
   MedCertReviewDialog,
@@ -98,6 +99,7 @@ export default function Sessions() {
   const pendingCompletionRef = useRef(false);
   const latestTranscriptRef = useRef<string>("");
   const currentSessionIdRef = useRef<string | null>(null);
+  const [showStarRating, setShowStarRating] = useState(false);
   const notesRef = useRef<string>("");
   const sessionStartTimeRef = useRef<Date | null>(null);
 
@@ -227,10 +229,10 @@ export default function Sessions() {
   }, [notes]);
 
   // Callback to handle session completion after transcription
-  const handleSessionComplete = useCallback(async (transcriptText: string, visitCategory?: string | null) => {
+  const handleSessionComplete = useCallback(async (transcriptText: string, visitCategories?: string[] | null) => {
     console.log("=== handleSessionComplete START ===");
     console.log("transcriptText length:", transcriptText?.length);
-    console.log("visitCategory:", visitCategory);
+    console.log("visitCategories:", visitCategories);
     
     setSessionState("processing");
     
@@ -245,7 +247,7 @@ export default function Sessions() {
         null, // no existing session ID
         fullContent || '',
         currentNotes,
-        visitCategory || undefined,
+        visitCategories?.[0] || undefined,
         {
           patient_id: patientId!,
           title: `Session - ${new Date().toLocaleDateString()}`,
@@ -289,11 +291,13 @@ export default function Sessions() {
     console.log("=== handleSessionComplete END ===");
   }, [completeSession, patientId]);
 
-  // Handle visit category selection
-  const handleVisitCategoryConfirm = async (category: string | null) => {
+  // Handle visit category selection (multi-select)
+  const handleVisitCategoryConfirm = async (categories: string[] | null) => {
     setShowVisitCategoryDialog(false);
-    await handleSessionComplete(pendingTranscript, category);
+    await handleSessionComplete(pendingTranscript, categories);
     setPendingTranscript("");
+    // Show star rating after session completes
+    setTimeout(() => setShowStarRating(true), 500);
   };
 
   const { 
@@ -533,6 +537,18 @@ export default function Sessions() {
         transcript={pendingTranscript}
       />
 
+      {/* Star Rating Dialog - shown after session completion */}
+      {currentSessionId && currentPatient && (
+        <StarRatingDialog
+          open={showStarRating}
+          onOpenChange={setShowStarRating}
+          sessionId={currentSessionId}
+          ratedUserId={currentPatient.patient_user_id || currentPatient.id}
+          ratedUserName={currentPatient.name}
+          raterRole="doctor"
+        />
+      )}
+
       {/* AI-Extracted Document Review Dialogs */}
       {extractedMedCert && (
         <MedCertReviewDialog
@@ -586,7 +602,7 @@ export default function Sessions() {
       </div>
 
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Session Mode</h1>
+        <h1 className="text-2xl font-bold text-foreground">Session Mode</h1>
         <p className="mt-1 text-muted-foreground">
           Record, transcribe, and generate AI summaries for patient sessions
         </p>
@@ -594,26 +610,26 @@ export default function Sessions() {
 
       {/* Session States */}
       {sessionState === "idle" && (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card p-12 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent mb-4">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card p-6 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent mb-3">
             {currentPatient ? (
-              <Play className="h-8 w-8 text-accent-foreground" />
+              <Play className="h-6 w-6 text-accent-foreground" />
             ) : (
-              <Users className="h-8 w-8 text-accent-foreground" />
+              <Users className="h-6 w-6 text-accent-foreground" />
             )}
           </div>
-          <h2 className="text-xl font-semibold text-foreground mb-2">
+          <h2 className="text-lg font-semibold text-foreground mb-1">
             {currentPatient ? "Ready to Start" : "Select a Patient"}
           </h2>
-          <p className="text-muted-foreground mb-6 max-w-md">
+          <p className="text-muted-foreground mb-4 max-w-md text-sm">
             {currentPatient 
-              ? "Begin a new consultation session to capture notes, record audio, and generate AI-powered summaries and action points."
+              ? "Begin a consultation to capture notes, record audio, and generate AI summaries."
               : "Choose a patient to start a new consultation session."}
           </p>
           
           {/* Patient Selector with Search */}
           {!currentPatient && (
-            <div className="w-full max-w-xs mb-6">
+            <div className="w-full max-w-xs mb-4">
               <Popover open={patientSelectorOpen} onOpenChange={setPatientSelectorOpen}>
                 <PopoverTrigger asChild>
                   <Button

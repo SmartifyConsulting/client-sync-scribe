@@ -35,7 +35,8 @@ serve(async (req) => {
         model: 'tts-1',
         input: text,
         voice: voice || 'nova',
-        response_format: 'mp3',
+        response_format: 'opus',
+        speed: 1.1,
       }),
     });
 
@@ -51,7 +52,7 @@ serve(async (req) => {
     return new Response(response.body, {
       headers: {
         ...corsHeaders,
-        'Content-Type': 'audio/mpeg',
+        'Content-Type': 'audio/ogg',
         'Transfer-Encoding': 'chunked',
       },
     });
