@@ -69,7 +69,7 @@ serve(async (req) => {
       profile = result.data;
       profileError = result.error;
     } else {
-      // Try legacy format: docs-{mailbox_id}@inbox.medipad.health
+      // Try legacy format: docs-{mailbox_id}@inbox.holarc.health
       const mailboxMatch = recipientEmail.match(/^docs-([a-f0-9-]+)@/i);
       
       if (!mailboxMatch) {

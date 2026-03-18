@@ -84,7 +84,7 @@ serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "MediPad <noreply@smartify.co.za>",
+        from: "Holarc Health <noreply@smartify.co.za>",
         to: [to],
         subject: subject,
         html: htmlContent,
