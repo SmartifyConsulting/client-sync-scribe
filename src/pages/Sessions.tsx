@@ -1160,21 +1160,36 @@ export default function Sessions() {
                 key={session.id}
                 className="flex items-center justify-between p-4 rounded-lg border border-border bg-background hover:bg-accent/50 transition-colors"
               >
-                {session.audio_url && (
-                  <div className="mr-3" onClick={(e) => e.stopPropagation()}>
-                    <Checkbox
-                      checked={selectedRecordings.has(session.id)}
-                      onCheckedChange={(checked) => {
-                        setSelectedRecordings(prev => {
-                          const next = new Set(prev);
-                          if (checked) next.add(session.id);
-                          else next.delete(session.id);
-                          return next;
-                        });
-                      }}
-                    />
-                  </div>
-                )}
+                {(() => {
+                  const daysSinceCreation = Math.floor((Date.now() - new Date(session.created_at).getTime()) / (1000 * 60 * 60 * 24));
+                  const isExpired = daysSinceCreation > 7;
+                  return (
+                    <div className="mr-3" onClick={(e) => e.stopPropagation()}>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <Checkbox
+                                checked={selectedRecordings.has(session.id)}
+                                disabled={isExpired}
+                                className={isExpired ? "opacity-40" : ""}
+                                onCheckedChange={(checked) => {
+                                  setSelectedRecordings(prev => {
+                                    const next = new Set(prev);
+                                    if (checked) next.add(session.id);
+                                    else next.delete(session.id);
+                                    return next;
+                                  });
+                                }}
+                              />
+                            </span>
+                          </TooltipTrigger>
+                          {isExpired && <TooltipContent>Recording expired</TooltipContent>}
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                  );
+                })()}
                 <div className="flex items-center gap-4 flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/sessions/${session.id}`)}>
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 shrink-0">
                     <User className="h-5 w-5 text-primary" />

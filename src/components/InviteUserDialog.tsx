@@ -191,20 +191,15 @@ export function InviteUserDialog() {
           {/* Search Section */}
           <div className="space-y-2">
             <Label>Search for user</Label>
-            <div className="flex gap-2">
+            <div className="relative">
               <Input
-                placeholder="Search by name..."
+                placeholder="Start typing a name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               />
-              <Button onClick={handleSearch} disabled={isSearching} variant="secondary">
-                {isSearching ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Search className="h-4 w-4" />
-                )}
-              </Button>
+              {isSearching && (
+                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+              )}
             </div>
           </div>
 
