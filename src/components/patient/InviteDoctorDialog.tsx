@@ -279,6 +279,31 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
                 ))}
               </div>
             )}
+            {/* Invite fallback when doctor not found */}
+            {nameSearch.length >= 3 && !searchingDoctors && suggestions.length === 0 && (
+              <div className="mt-3 rounded-lg border border-dashed border-border p-4 space-y-3 bg-muted/30">
+                <p className="text-sm text-muted-foreground">Doctor not found on Holarc? Send an invitation via email</p>
+                <div className="flex gap-2">
+                  <Input
+                    type="email"
+                    placeholder="doctor@example.com"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={!inviteEmail || sendingInvite}
+                    onClick={handleSendDoctorInvite}
+                    className="gap-1"
+                  >
+                    {sendingInvite ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+                    Invite
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Doctor Details */}
