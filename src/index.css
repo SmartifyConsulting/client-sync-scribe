@@ -22,8 +22,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 12%;
 
-    /* Healthcare teal - trustworthy & calming */
-    --primary: 172 66% 50%;
+    /* Healthcare teal - trustworthy & calming (darkened for legibility) */
+    --primary: 172 66% 40%;
     --primary-foreground: 0 0% 100%;
     --primary-glow: 172 66% 60%;
     --primary-dark: 176 75% 38%;
