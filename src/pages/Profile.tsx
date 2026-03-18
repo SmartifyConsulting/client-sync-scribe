@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy, Clock, Mail, Save, Award, Volume2, UserPlus, ExternalLink, Bold, Italic } from "lucide-react";
+import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy, Clock, Mail, Save, Award, Volume2, UserPlus, ExternalLink, Bold, Italic, Send, ArrowRightLeft } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Toggle } from "@/components/ui/toggle";
