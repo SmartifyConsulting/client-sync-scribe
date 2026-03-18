@@ -16,6 +16,7 @@ import {
   Loader2,
   ArrowLeft,
   Volume2,
+  VolumeX,
   Calendar,
   Pill,
   Receipt,
