@@ -420,8 +420,7 @@ export default function Profile() {
 
   const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   const getSignatureFontFamily = (v: string) => SIGNATURE_FONTS.find(f => f.value === v)?.fontFamily || SIGNATURE_FONTS[0].fontFamily;
-  const getSignatureFontSize = (v: string) => SIGNATURE_FONTS.find(f => f.value === v)?.fontSize || '20px';
-  const getSignatureFontWeight = (v: string) => SIGNATURE_FONTS.find(f => f.value === v)?.fontWeight || 'normal';
+  const getSignatureColor = (v: string) => SIGNATURE_COLORS.find(c => c.value === v)?.color || "#000000";
 
   const isDoctor = profile?.role === 'doctor' || (!profile?.role && !isAdmin);
   const isPatient = profile?.role === 'patient';
