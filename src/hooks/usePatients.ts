@@ -175,6 +175,14 @@ export function usePatients() {
         })
       );
 
+      // Sort by last name, then first name
+      patientsWithLastVisit.sort((a, b) => {
+        const aLast = a.name.trim().split(/\s+/).pop()?.toLowerCase() || '';
+        const bLast = b.name.trim().split(/\s+/).pop()?.toLowerCase() || '';
+        if (aLast !== bLast) return aLast.localeCompare(bLast);
+        return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+      });
+
       setPatients(patientsWithLastVisit);
     } catch (error: any) {
       console.error('Error fetching patients:', error);

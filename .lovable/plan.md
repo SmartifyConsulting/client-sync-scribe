@@ -1,60 +1,59 @@
 
 
-# Multi-Feature Update Plan
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## 1. Patient Initials Badge on Calendar Events
+## 1. Increase Logo Size by 130%
 
-**File: `src/pages/CalendarView.tsx`**
+Scale all logo instances by 130%:
 
-In the calendar grid (lines 381-401), replace the plain time text with a small circular badge showing patient initials (derived from `patientId` → look up patient name from `patients` array). Wrap the badge in a `Tooltip` (from `@/components/ui/tooltip`) so hovering shows the full patient name. Show time alongside the badge. For events without a patient (internal meetings), show just the time as before.
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-Also apply to Today's Schedule sidebar (lines 419-451): add initials badge next to event title with tooltip.
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-## 2. Green Send Icon / Grey Sent Icon on Documents
+## 2. Fix Practice Number Not Persisting
 
-**Database migration:** Add `email_sent_at` column (nullable `timestamptz`) to the `documents` table to track when a document was emailed.
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-**File: `src/pages/Documents.tsx`**
-- Import `Send`, `SendHorizontal` (or `ArrowUpRight`) from lucide-react instead of `Mail`
-- On each document row (line 637-645): if `doc.email_sent_at` is set, show a greyed-out send icon (`text-muted-foreground`); otherwise show a green send icon (`text-green-600`)
-- After successful email send (line 296-302), update the document's `email_sent_at` in the DB and refresh local state
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
 
-**File: `src/hooks/useDocuments.ts`**
-- Add `email_sent_at` to `Document` interface
+## 3. Make Partner Email Required and Create Pending Users
 
-## 3. Sort Patients by Last Name, First Name in All Dropdowns
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
 
-**File: `src/hooks/usePatients.ts`**
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
 
-After fetching patients (line 178), sort the `patientsWithLastVisit` array by surname (last word of name) then first name before calling `setPatients`. This ensures all consumers (CalendarView patient select, DocumentEditor patient select, Invoices patient select, etc.) get alphabetically sorted patients automatically.
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
 
-```typescript
-patientsWithLastVisit.sort((a, b) => {
-  const aLast = a.name.trim().split(/\s+/).pop()?.toLowerCase() || '';
-  const bLast = b.name.trim().split(/\s+/).pop()?.toLowerCase() || '';
-  if (aLast !== bLast) return aLast.localeCompare(bLast);
-  return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-});
-```
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
 
-## 4. Procedure Field in Hospital Admission Form with AI Auto-Fill
+## Technical Summary
 
-**File: `src/components/sessions/HospitalAdmissionEditor.tsx`**
+### Database Migration
+- Add `email text` column to `practice_partners` table
 
-Between the Admission Details section and the ICD-10 codes section (around line 453), add a new "Procedure" text input field (`procedureDescription` state already exists but has no visible input in the form — it's only used in template replacement). Add a visible `<Input>` or `<Textarea>` for it. When the field value changes or on blur with 3+ characters, call the `lookup-medical-codes` edge function with `codeSystem: "procedure"` and `country` to fetch relevant procedure codes. Auto-populate the NHRPL code system entries with the returned codes.
-
-The `procedureDescription` is already wired into `generateContent()` at line 347 (`[PROCEDURE_DESCRIPTION]`), so the main work is:
-- Adding the visible Procedure input field in the form UI
-- On procedure entry, trigger a code lookup and auto-fill NHRPL entries
-
-## Files Modified
-
-| File | Change |
-|------|--------|
-| `src/pages/CalendarView.tsx` | Patient initials badge with tooltip on calendar events |
-| `src/pages/Documents.tsx` | Green send icon / grey sent icon based on `email_sent_at` |
-| `src/hooks/useDocuments.ts` | Add `email_sent_at` to Document interface |
-| `src/hooks/usePatients.ts` | Sort patients by Last Name, First Name |
-| `src/components/sessions/HospitalAdmissionEditor.tsx` | Add Procedure input field with AI code auto-fill |
-| **DB migration** | Add `email_sent_at timestamptz` column to `documents` table |
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 

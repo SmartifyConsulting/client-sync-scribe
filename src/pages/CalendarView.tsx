@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar, MapPin, Video, Play, Trash2, Link, Unlink, Loader2 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AppointmentRequestsPanel } from "@/components/appointments/AppointmentRequestsPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -380,20 +381,40 @@ export default function CalendarView() {
                   </div>
                   {dayEvents.length > 0 && (
                     <div className="mt-1 space-y-0.5">
-                      {dayEvents.slice(0, 2).map((event) => (
-                        <div
-                          key={event.id}
-                          onClick={() => handleEventClick(event)}
-                          className={cn(
-                            "truncate rounded px-1 py-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity",
-                            event.type === "session" && "bg-primary/20 text-primary",
-                            event.type === "internal" && "bg-muted text-muted-foreground",
-                            event.type === "followup" && "bg-warning/20 text-warning"
-                          )}
-                        >
-                          {event.time}
-                        </div>
-                      ))}
+                      {dayEvents.slice(0, 2).map((event) => {
+                        const patientName = event.patientId
+                          ? patients.find(p => p.id === event.patientId)?.name
+                          : null;
+                        const initials = patientName
+                          ? patientName.split(/\s+/).map(w => w[0]).join("").toUpperCase().slice(0, 2)
+                          : null;
+                        return (
+                          <div
+                            key={event.id}
+                            onClick={() => handleEventClick(event)}
+                            className={cn(
+                              "flex items-center gap-1 truncate rounded px-1 py-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity",
+                              event.type === "session" && "bg-primary/20 text-primary",
+                              event.type === "internal" && "bg-muted text-muted-foreground",
+                              event.type === "followup" && "bg-warning/20 text-warning"
+                            )}
+                          >
+                            {initials ? (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground shrink-0">
+                                      {initials}
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>{patientName}</TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            ) : null}
+                            <span className="truncate">{event.time}</span>
+                          </div>
+                        );
+                      })}
                       {dayEvents.length > 2 && (
                         <div className="text-xs text-muted-foreground pl-1">
                           +{dayEvents.length - 2} more
@@ -417,19 +438,35 @@ export default function CalendarView() {
           </div>
           <div className="divide-y divide-border">
             {todayEvents.length > 0 ? (
-              todayEvents.map((event) => (
+              todayEvents.map((event) => {
+                const patientName = event.patientId
+                  ? patients.find(p => p.id === event.patientId)?.name
+                  : null;
+                const initials = patientName
+                  ? patientName.split(/\s+/).map(w => w[0]).join("").toUpperCase().slice(0, 2)
+                  : null;
+                return (
                 <div
                   key={event.id}
                   onClick={() => handleEventClick(event)}
                   className="flex items-center gap-3 p-4 hover:bg-muted/30 transition-colors cursor-pointer"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                    {event.type === "session" ? (
-                      <User className="h-5 w-5 text-accent-foreground" />
-                    ) : (
+                  {initials ? (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground shrink-0">
+                            {initials}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>{patientName}</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
                       <Clock className="h-5 w-5 text-accent-foreground" />
-                    )}
-                  </div>
+                    </div>
+                  )}
                   <div className="flex-1">
                     <p className="font-medium text-foreground">{event.title}</p>
                     <p className="text-sm text-muted-foreground">{event.time}</p>
@@ -441,7 +478,8 @@ export default function CalendarView() {
                     {event.type}
                   </span>
                 </div>
-              ))
+                );
+              })
             ) : (
               <div className="p-8 text-center text-muted-foreground">
                 No appointments scheduled for today

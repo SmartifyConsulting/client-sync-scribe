@@ -11,7 +11,8 @@ import {
   Download,
   Printer,
   Loader2,
-  Mail,
+  Send,
+  ArrowUpRight,
   LayoutTemplate,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -142,7 +143,7 @@ export default function Documents() {
     updateTemplate: updateHFTemplate,
     deleteTemplate: deleteHFTemplate,
   } = useHeaderFooterTemplates();
-  const { documents, loading: documentsLoading, deleteDocument, updateDocument } = useDocuments();
+  const { documents, loading: documentsLoading, deleteDocument, updateDocument, fetchDocuments } = useDocuments();
   const { profile } = useProfile();
 
   const [activeTab, setActiveTab] = useState("content");
@@ -293,6 +294,15 @@ export default function Documents() {
       });
 
       if (error) throw error;
+
+      // Mark document as sent
+      await supabase
+        .from('documents')
+        .update({ email_sent_at: new Date().toISOString() })
+        .eq('id', shareDocument.id);
+
+      // Refresh documents list
+      await fetchDocuments();
 
       toast({
         title: "Document Sent",
@@ -639,9 +649,13 @@ export default function Documents() {
                         size="icon"
                         className="h-8 w-8"
                         onClick={() => setShareDocument(doc)}
-                        title="Share via Email"
+                        title={(doc as any).email_sent_at ? "Already sent" : "Share via Email"}
                       >
-                        <Mail className="h-4 w-4" />
+                        {(doc as any).email_sent_at ? (
+                          <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Send className="h-4 w-4 text-green-600" />
+                        )}
                       </Button>
                       <Button
                         variant="ghost"
@@ -1021,7 +1035,7 @@ export default function Documents() {
                   }}
                   className="gap-2"
                 >
-                  <Mail className="h-4 w-4" />
+                  <Send className="h-4 w-4" />
                   Share
                 </Button>
                 <Button
@@ -1123,7 +1137,7 @@ export default function Documents() {
                 </>
               ) : (
                 <>
-                  <Mail className="h-4 w-4" />
+                  <Send className="h-4 w-4" />
                   Send Email
                 </>
               )}

@@ -14,6 +14,7 @@ export interface Document {
   patient_name: string | null;
   created_at: string;
   updated_at: string;
+  email_sent_at: string | null;
 }
 
 export interface DocumentInput {
