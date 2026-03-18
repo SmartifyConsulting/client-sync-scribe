@@ -1,59 +1,55 @@
 
 
-# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
+# Search-First Add Flow & Alphabet Filter Fix
 
-## 1. Increase Logo Size by 130%
+## Overview
 
-Scale all logo instances by 130%:
+Three areas of change: (1) Referral Doctors page gets search-first with invite fallback, (2) Patients page Add Patient dialog gets invite fallback when not found, (3) Patient Invite Doctor dialog gets email invite fallback. All three retain a "manual add" fallback. Additionally, the alphabet filter on Patients is fixed to show only the selected letter's records.
 
-| Location | Current | New (130%) |
-|---|---|---|
-| Sidebar | h-10 (40px) | h-[52px] |
-| Mobile Header | h-8 (32px) | h-[42px] |
-| Auth page | h-12 (48px) | h-[62px] |
-| Forgot/Reset Password | h-12 (48px) | h-[62px] |
-| Landing page | h-10 (40px) | h-[52px] |
+## 1. Referral Doctors — Search-First with Invite & Manual Fallback
 
-**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
+**File: `src/pages/ReferralDoctors.tsx`**
 
-## 2. Fix Practice Number Not Persisting
+Replace the current "Add Doctor" form with a two-step flow:
 
-**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
+- **Step 1 (Search)**: When clicking "Add Doctor", show a search input that queries `profiles` filtered to doctor-role users (same pattern as `InviteDoctorDialog`). Display suggestions with name, specialty, practice number.
+- **Step 2a (Found)**: Selecting a suggestion auto-fills the form fields (first_name, last_name from full_name split; specialty, practice_number, etc. from profile). Save creates the referral_doctors record pre-populated.
+- **Step 2b (Not Found → Invite)**: Show "Doctor not on Holarc? Send an invitation" with an email input. Calls `send-user-invitation` edge function with a message like "Dr. X has invited you to join Holarc Health for referrals."
+- **Step 2c (Manual Fallback)**: A "Add manually" link below search reveals the existing form fields for manual entry.
 
-**Fix in `src/pages/Profile.tsx`:**
-- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
-- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
-- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
-- This prevents the race condition where autosave fires with stale/initial data
+## 2. Patients Page — Add Invite Fallback When Patient Not Found
 
-## 3. Make Partner Email Required and Create Pending Users
+**File: `src/pages/Patients.tsx`**
 
-**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+The Add Patient dialog already searches existing patient-role users. Add:
 
-**Fix:**
-- Add an `email` column to the `practice_partners` table via migration
-- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
-- Ensure the `addPartner` function validates email is provided before saving
-- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+- When search yields no results after typing 3+ characters, show: "Patient not found on Holarc? Send an invitation" with an email input field and a "Send Invite" button that calls `send-patient-invitation`.
+- Keep the existing manual form fields always visible below (they serve as the manual fallback).
 
-**Database Migration:**
-- `ALTER TABLE practice_partners ADD COLUMN email text;`
+## 3. Patient Invite Doctor — Email Invite Fallback
 
-**Changes in `src/pages/Profile.tsx`:**
-- Make email field required in validation (alongside name and registration number)
-- Show validation error if email is missing
+**File: `src/components/patient/InviteDoctorDialog.tsx`**
 
-## Technical Summary
+The dialog already searches for doctors. Add:
 
-### Database Migration
-- Add `email text` column to `practice_partners` table
+- When `nameSearch` has 3+ characters and `suggestions` is empty and `searchingDoctors` is false, show: "Doctor not on Holarc? Send an invitation via email" with an email input and send button.
+- Call `send-user-invitation` with `recipientEmail` and message "Patient X has invited you to join Holarc Health."
 
-### Files Modified
-- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
-- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
-- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
-- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
+## 4. Alphabet Filter — Show Only Selected Letter
+
+**File: `src/pages/Patients.tsx`** (lines 700-960)
+
+Currently clicking a letter scrolls to it but shows all groups. Change:
+
+- When `selectedLetter` is set, filter the rendered groups to only show that letter. The ME record always shows.
+- Allow clicking the same letter again to deselect (show all).
+- Stretch the alphabet bar to full width: change buttons from `w-7` to `flex-1` and the container from `flex gap-0.5` to `flex w-full gap-0.5`.
+
+## Files Modified
+
+| File | Change |
+|------|--------|
+| `src/pages/ReferralDoctors.tsx` | Search-first flow with profile search, invite fallback, manual fallback |
+| `src/pages/Patients.tsx` | Add invite fallback in Add Patient dialog; fix alphabet filter to show only selected letter; stretch alphabet bar |
+| `src/components/patient/InviteDoctorDialog.tsx` | Add email invite fallback when doctor not found |
 
