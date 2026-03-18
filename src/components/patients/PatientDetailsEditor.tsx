@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill } from "lucide-react";
+import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { Patient, Surgery, Pharmacy } from "@/hooks/usePatients";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
 
 interface PatientDetailsEditorProps {
@@ -248,6 +249,36 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
   const bmi = calculateBMI();
   const primaryPharmacy = pharmacies.find(p => p.is_primary) || pharmacies[0];
 
+  // Reusable CollapsibleFrame component for view mode
+  const CollapsibleFrame = ({ icon, title, children, defaultOpen = false, extra }: { icon: React.ReactNode; title: string; children: React.ReactNode; defaultOpen?: boolean; extra?: React.ReactNode }) => {
+    const [open, setOpen] = useState(defaultOpen);
+    return (
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
+          <CollapsibleTrigger asChild>
+            <button className="flex items-center justify-between w-full p-5 hover:bg-muted/30 transition-colors text-left">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                  {icon}
+                </div>
+                <h3 className="font-semibold text-foreground">{title}</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                {extra}
+                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+              </div>
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="px-5 pb-5">
+              {children}
+            </div>
+          </CollapsibleContent>
+        </div>
+      </Collapsible>
+    );
+  };
+
   // ==================== VIEW MODE ====================
   if (!isEditing) {
     return (
@@ -259,14 +290,8 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
           </Button>
         </div>
 
-        {/* 1. Personal Information */}
-        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <Pencil className="h-4 w-4 text-primary" />
-            </div>
-            <h3 className="font-semibold text-foreground">Personal Information</h3>
-          </div>
+        {/* 1. Personal Information - open by default */}
+        <CollapsibleFrame icon={<Pencil className="h-4 w-4 text-primary" />} title="Personal Information" defaultOpen>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div><p className="text-sm text-muted-foreground">Full Name</p><p className="mt-1 text-foreground">{patient.name}</p></div>
             <div><p className="text-sm text-muted-foreground">ID/Passport Number</p><p className="mt-1 text-foreground">{patient.id_passport_number || "Not provided"}</p></div>
@@ -277,61 +302,37 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             <div><p className="text-sm text-muted-foreground">Marital Status</p><p className="mt-1 text-foreground">{patient.marital_status || "Not provided"}</p></div>
             <div><p className="text-sm text-muted-foreground">Referred By</p><p className="mt-1 text-foreground">{patient.referred_by || "Not provided"}</p></div>
           </div>
-        </div>
+        </CollapsibleFrame>
 
         {/* 2. Addresses */}
-        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <StickyNote className="h-4 w-4 text-primary" />
-            </div>
-            <h3 className="font-semibold text-foreground">Addresses</h3>
-          </div>
+        <CollapsibleFrame icon={<StickyNote className="h-4 w-4 text-primary" />} title="Addresses">
           <div className="grid gap-4 sm:grid-cols-2">
             <div><p className="text-sm text-muted-foreground">Physical Address</p><p className="mt-1 text-foreground">{patient.physical_address || patient.address || "Not provided"}</p></div>
             <div><p className="text-sm text-muted-foreground">Postal Address</p><p className="mt-1 text-foreground">{patient.same_as_physical ? "Same as physical address" : (patient.postal_address || "Not provided")}</p></div>
           </div>
-        </div>
+        </CollapsibleFrame>
 
         {/* 3. Next of Kin */}
-        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <Pencil className="h-4 w-4 text-primary" />
-            </div>
-            <h3 className="font-semibold text-foreground">Next of Kin</h3>
-          </div>
+        <CollapsibleFrame icon={<Pencil className="h-4 w-4 text-primary" />} title="Next of Kin">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div><p className="text-sm text-muted-foreground">Name</p><p className="mt-1 text-foreground">{patient.next_of_kin_name || "Not provided"}</p></div>
             <div><p className="text-sm text-muted-foreground">Relationship</p><p className="mt-1 text-foreground">{patient.next_of_kin_relationship || "Not provided"}</p></div>
             <div><p className="text-sm text-muted-foreground">Phone</p><p className="mt-1 text-foreground">{patient.next_of_kin_phone || "Not provided"}</p></div>
             <div><p className="text-sm text-muted-foreground">Email</p><p className="mt-1 text-foreground">{patient.next_of_kin_email || "Not provided"}</p></div>
           </div>
-        </div>
+        </CollapsibleFrame>
 
         {/* 4. Employer */}
-        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <Pencil className="h-4 w-4 text-primary" />
-            </div>
-            <h3 className="font-semibold text-foreground">Employer</h3>
-          </div>
+        <CollapsibleFrame icon={<Pencil className="h-4 w-4 text-primary" />} title="Employer">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div><p className="text-sm text-muted-foreground">Employer</p><p className="mt-1 text-foreground">{patient.employer || "Not provided"}</p></div>
             <div><p className="text-sm text-muted-foreground">Occupation</p><p className="mt-1 text-foreground">{patient.occupation || "Not provided"}</p></div>
             <div><p className="text-sm text-muted-foreground">Reporting To (Email)</p><p className="mt-1 text-foreground">{patient.reporting_to_email || "Not provided"}</p></div>
           </div>
-        </div>
+        </CollapsibleFrame>
 
         {/* 5. Medical Insurance */}
-        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <Pencil className="h-4 w-4 text-primary" />
-            </div>
-            <h3 className="font-semibold text-foreground">Medical Insurance</h3>
-          </div>
+        <CollapsibleFrame icon={<Pencil className="h-4 w-4 text-primary" />} title="Medical Insurance">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div><p className="text-sm text-muted-foreground">Insurance Provider</p><p className="mt-1 text-foreground">{patient.medical_aid || "Not provided"}</p></div>
             <div><p className="text-sm text-muted-foreground">Insurance Product</p><p className="mt-1 text-foreground">{patient.medical_insurance_product || "Not provided"}</p></div>
@@ -340,16 +341,10 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
             <div><p className="text-sm text-muted-foreground">Claims Email</p><p className="mt-1 text-foreground">{patient.claims_email || "Not provided"}</p></div>
             <div><p className="text-sm text-muted-foreground">General Practitioner</p><p className="mt-1 text-foreground">{patient.general_practitioner || "Not provided"}</p></div>
           </div>
-        </div>
+        </CollapsibleFrame>
 
         {/* 6. Pharmacies */}
-        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <Pencil className="h-4 w-4 text-primary" />
-            </div>
-            <h3 className="font-semibold text-foreground">Pharmacies</h3>
-          </div>
+        <CollapsibleFrame icon={<Pencil className="h-4 w-4 text-primary" />} title="Pharmacies">
           {pharmacies.length === 0 ? (
             <p className="text-sm text-muted-foreground">No pharmacies recorded</p>
           ) : (
@@ -367,16 +362,10 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
               ))}
             </div>
           )}
-        </div>
+        </CollapsibleFrame>
 
         {/* 7. Physical Measurements */}
-        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <Ruler className="h-4 w-4 text-primary" />
-            </div>
-            <h3 className="font-semibold text-foreground">Physical Measurements</h3>
-          </div>
+        <CollapsibleFrame icon={<Ruler className="h-4 w-4 text-primary" />} title="Physical Measurements">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
               <Ruler className="h-5 w-5 text-primary" />
@@ -392,53 +381,34 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
               </div>
             )}
           </div>
-        </div>
+        </CollapsibleFrame>
 
         {/* 8. Allergies */}
-        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <AlertCircle className="h-4 w-4 text-primary" />
-            </div>
-            <h3 className="font-semibold text-foreground">Allergies</h3>
-          </div>
+        <CollapsibleFrame icon={<AlertCircle className="h-4 w-4 text-primary" />} title="Allergies">
           <div className="rounded-lg bg-muted/30 p-4 border border-border/50">
             <p className="text-foreground">{patient.allergies || "None recorded"}</p>
           </div>
-        </div>
+        </CollapsibleFrame>
 
         {/* Chronic Medication Status */}
-        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
+        <CollapsibleFrame icon={<Pill className="h-4 w-4 text-primary" />} title="Chronic Medication">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-terracotta/10">
-                <Pill className="h-4 w-4 text-terracotta" />
-              </div>
-              <h3 className="font-semibold text-foreground">Chronic Medication</h3>
-            </div>
             {patient.is_chronic ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-terracotta/10 px-3 py-1 text-xs font-bold text-terracotta">
+              <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-3 py-1 text-xs font-bold text-destructive">
                 <Pill className="h-3 w-3" />Chronic
               </span>
             ) : (
               <span className="text-sm text-muted-foreground">Not on chronic medication</span>
             )}
           </div>
-        </div>
+        </CollapsibleFrame>
 
         {/* 9. Surgeries and Dates */}
-        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <Pencil className="h-4 w-4 text-primary" />
-              </div>
-              <h3 className="font-semibold text-foreground">Surgeries and Dates</h3>
-            </div>
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { setIsEditing(true); setShowAddSurgery(true); }}>
-              <Plus className="h-3.5 w-3.5" /> Add Surgery
-            </Button>
-          </div>
+        <CollapsibleFrame icon={<Pencil className="h-4 w-4 text-primary" />} title="Surgeries and Dates" extra={
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={(e) => { e.stopPropagation(); setIsEditing(true); setShowAddSurgery(true); }}>
+            <Plus className="h-3.5 w-3.5" /> Add Surgery
+          </Button>
+        }>
           {surgeries.length === 0 ? (
             <p className="text-sm text-muted-foreground">No surgeries recorded</p>
           ) : (
@@ -454,20 +424,14 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
               ))}
             </div>
           )}
-        </div>
+        </CollapsibleFrame>
 
         {/* 10. General Notes */}
-        <div className="rounded-xl border border-primary bg-card p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <StickyNote className="h-4 w-4 text-primary" />
-            </div>
-            <h3 className="font-semibold text-foreground">General Notes</h3>
-          </div>
+        <CollapsibleFrame icon={<StickyNote className="h-4 w-4 text-primary" />} title="General Notes">
           <div className="rounded-lg bg-muted/30 p-4 border border-border/50 min-h-[80px]">
             <p className="text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
           </div>
-        </div>
+        </CollapsibleFrame>
       </div>
     );
   }

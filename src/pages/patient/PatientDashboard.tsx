@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Calendar, FileText, Receipt, Clock, User, Loader2, Bell, Pill, Award, LogOut, Settings, ListChecks, ArrowRight } from "lucide-react";
+import { Calendar, FileText, Receipt, Clock, User, Loader2, Bell, Pill, Award, LogOut, Settings, ListChecks, ArrowRight, Info } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -488,56 +488,72 @@ export default function PatientDashboard() {
           <CardDescription>Doctors who have access to your health information</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {doctors.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">No doctors connected yet.</p>
-                <Link to="/patient/access" className="text-primary hover:underline text-sm">
-                  Invite a doctor to get started
-                </Link>
+          {doctors.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No doctors connected yet.</p>
+              <Link to="/patient/access" className="text-primary hover:underline text-sm">
+                Invite a doctor to get started
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {/* Table Header */}
+              <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                <span>Doctor</span>
+                <span>Specialty</span>
+                <span>Practice #</span>
+                <span></span>
               </div>
-            ) : (
-              <>
-                {doctors.map((doctor) => (
-                  <div
-                    key={doctor.id}
-                    className="flex items-center justify-between p-4 rounded-xl border border-border"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                        <User className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium">
-                          {doctor.doctor_profile?.full_name || "Unknown Doctor"}
-                        </p>
-                        {doctor.doctor_profile?.specialty && (
-                          <Badge className={`mt-1 text-xs font-medium border-0 ${getSpecialtyColor(doctor.doctor_profile.specialty)}`}>
-                            {doctor.doctor_profile.specialty}
-                          </Badge>
-                        )}
-                        <p className="text-sm text-muted-foreground mt-0.5">
-                          Practice: {doctor.doctor_profile?.practice_number || "N/A"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-muted-foreground">Connected since</p>
-                      <p className="text-sm font-medium">
-                        {format(parseISO(doctor.granted_at), "MMM yyyy")}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                <Link
-                  to="/patient/access"
-                  className="block text-center text-sm text-muted-foreground hover:text-primary py-2"
+              {doctors.map((doctor) => (
+                <div
+                  key={doctor.id}
+                  className="grid grid-cols-[1fr_auto_auto_auto] gap-4 items-center px-3 py-3 rounded-lg border border-border hover:bg-muted/30 transition-colors"
                 >
-                  Manage access or invite another doctor
-                </Link>
-              </>
-            )}
-          </div>
+                  <p className="font-medium text-sm text-foreground truncate">
+                    {doctor.doctor_profile?.full_name || "Unknown Doctor"}
+                  </p>
+                  <div>
+                    {doctor.doctor_profile?.specialty ? (
+                      <Badge className={`text-xs font-medium border-0 ${getSpecialtyColor(doctor.doctor_profile.specialty)}`}>
+                        {doctor.doctor_profile.specialty}
+                      </Badge>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {doctor.doctor_profile?.practice_number || "N/A"}
+                  </span>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted transition-colors">
+                        <Info className="h-4 w-4 text-muted-foreground" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-56 p-3" align="end">
+                      <p className="text-xs font-medium text-foreground mb-2">Access Details</p>
+                      <div className="space-y-1.5 text-xs text-muted-foreground">
+                        <div className="flex justify-between">
+                          <span>Connected since</span>
+                          <span className="font-medium text-foreground">{format(parseISO(doctor.granted_at), "MMM d, yyyy")}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Status</span>
+                          <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0 text-[10px]">Active</Badge>
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              ))}
+              <Link
+                to="/patient/access"
+                className="block text-center text-sm text-muted-foreground hover:text-primary py-2"
+              >
+                Manage access or invite another doctor
+              </Link>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -39,6 +39,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSearchParams } from "react-router-dom";
+import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -99,6 +100,7 @@ export default function Settings() {
   const { user } = useAuth();
   const { role } = useUserRole();
   const [searchParams] = useSearchParams();
+  const { isConnected: googleRealConnected, isConnecting: googleRealConnecting, connect: googleConnect, disconnect: googleDisconnect } = useGoogleCalendar();
 
   const [googleConnected, setGoogleConnected] = useState(false);
   const [outlookConnected, setOutlookConnected] = useState(false);
@@ -322,36 +324,30 @@ export default function Settings() {
   };
 
   const handleConnect = async (provider: "google" | "outlook") => {
-    setIsConnecting(provider);
-
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
     if (provider === "google") {
-      setGoogleConnected(true);
-      toast({
-        title: "Google Calendar Connected",
-        description: "Your appointments will now sync with Google Calendar",
-      });
-    } else {
-      setOutlookConnected(true);
-      toast({
-        title: "Outlook Calendar Connected",
-        description: "Your appointments will now sync with Outlook",
-      });
+      await googleConnect();
+      return;
     }
-
+    
+    setIsConnecting(provider);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setOutlookConnected(true);
+    toast({
+      title: "Outlook Calendar Connected",
+      description: "Your appointments will now sync with Outlook",
+    });
     setIsConnecting(null);
   };
 
-  const handleDisconnect = (provider: "google" | "outlook") => {
+  const handleDisconnect = async (provider: "google" | "outlook") => {
     if (provider === "google") {
-      setGoogleConnected(false);
-    } else {
-      setOutlookConnected(false);
+      await googleDisconnect();
+      return;
     }
+    setOutlookConnected(false);
     toast({
       title: "Calendar Disconnected",
-      description: `${provider === "google" ? "Google" : "Outlook"} Calendar has been disconnected`,
+      description: "Outlook Calendar has been disconnected",
     });
   };
 
@@ -542,15 +538,15 @@ Holarc
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {googleConnected && <CheckCircle className="h-5 w-5 text-success" />}
+              {googleRealConnected && <CheckCircle className="h-5 w-5 text-success" />}
               <div>
                 <p className="font-medium text-foreground">Google Calendar</p>
                 <p className="text-sm text-muted-foreground">
-                  {googleConnected ? "Connected - Appointments syncing" : "Sync appointments with Google Calendar"}
+                  {googleRealConnected ? "Connected - Appointments syncing" : "Sync appointments with Google Calendar"}
                 </p>
               </div>
             </div>
-            {googleConnected ? (
+            {googleRealConnected ? (
               <Button
                 variant="outline"
                 onClick={() => handleDisconnect("google")}
@@ -559,8 +555,8 @@ Holarc
                 Disconnect
               </Button>
             ) : (
-              <Button variant="outline" onClick={() => handleConnect("google")} disabled={isConnecting === "google"}>
-                {isConnecting === "google" ? "Connecting..." : "Connect"}
+              <Button variant="outline" onClick={() => handleConnect("google")} disabled={googleRealConnecting}>
+                {googleRealConnecting ? "Connecting..." : "Connect"}
               </Button>
             )}
           </div>

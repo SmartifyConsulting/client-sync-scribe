@@ -27,6 +27,7 @@ import {
   ShieldAlert,
   PenTool,
   FileText as FileTextIcon,
+  Download,
 } from "lucide-react";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
@@ -48,6 +49,8 @@ import { AudioWaveform } from "@/components/sessions/AudioWaveform";
 import { useSessions } from "@/hooks/useSessions";
 import { usePatients } from "@/hooks/usePatients";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Popover,
   PopoverContent,
@@ -111,6 +114,8 @@ export default function Sessions() {
   const navigate = useNavigate();
   const { patients, loading: patientsLoading } = usePatients();
   const { sessions, loading: sessionsLoading, createSession, completeSession } = useSessions();
+  const [selectedRecordings, setSelectedRecordings] = useState<Set<string>>(new Set());
+  const [isDownloading, setIsDownloading] = useState(false);
   
   const currentPatient = patients.find(p => p.id === patientId);
 
@@ -1097,13 +1102,50 @@ export default function Sessions() {
 
       {/* All Sessions List */}
       <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <Calendar className="h-5 w-5 text-primary" />
             <h2 className="text-xl font-semibold text-foreground">All Sessions</h2>
           </div>
-          <Badge variant="secondary">{sessions.filter(s => s.status !== 'in_progress').length} sessions</Badge>
+          <div className="flex items-center gap-2">
+            {selectedRecordings.size > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                disabled={isDownloading}
+                onClick={async () => {
+                  setIsDownloading(true);
+                  const selectedSessions = sessions.filter(s => selectedRecordings.has(s.id) && s.audio_url);
+                  for (const s of selectedSessions) {
+                    try {
+                      const link = document.createElement('a');
+                      link.href = s.audio_url!;
+                      link.download = `session-${format(new Date(s.started_at), 'yyyy-MM-dd')}.webm`;
+                      link.click();
+                      // Clear audio_url after download
+                      await supabase.from('sessions').update({ audio_url: null }).eq('id', s.id);
+                    } catch (e) { console.error('Download error:', e); }
+                  }
+                  setSelectedRecordings(new Set());
+                  setIsDownloading(false);
+                  toast({ title: "Downloads started", description: `${selectedSessions.length} recording(s) downloaded. They will be removed from servers.` });
+                }}
+              >
+                {isDownloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+                Download {selectedRecordings.size} Recording{selectedRecordings.size > 1 ? 's' : ''}
+              </Button>
+            )}
+            <Badge variant="secondary">{sessions.filter(s => s.status !== 'in_progress').length} sessions</Badge>
+          </div>
         </div>
+
+        <Alert className="mb-4 border-amber-500/30 bg-amber-500/5">
+          <AlertCircle className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-xs text-amber-700">
+            Voice recordings are deleted after 7 days. Select and download recordings you wish to keep. Transcriptions remain permanently.
+          </AlertDescription>
+        </Alert>
         
         {sessionsLoading ? (
           <div className="flex items-center justify-center py-8">
@@ -1116,21 +1158,36 @@ export default function Sessions() {
             {sessions.filter(s => s.status !== 'in_progress').map((session) => (
               <div
                 key={session.id}
-                onClick={() => navigate(`/sessions/${session.id}`)}
-                className="flex items-center justify-between p-4 rounded-lg border border-border bg-background hover:bg-accent/50 cursor-pointer transition-colors"
+                className="flex items-center justify-between p-4 rounded-lg border border-border bg-background hover:bg-accent/50 transition-colors"
               >
-                <div className="flex items-center gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                {session.audio_url && (
+                  <div className="mr-3" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={selectedRecordings.has(session.id)}
+                      onCheckedChange={(checked) => {
+                        setSelectedRecordings(prev => {
+                          const next = new Set(prev);
+                          if (checked) next.add(session.id);
+                          else next.delete(session.id);
+                          return next;
+                        });
+                      }}
+                    />
+                  </div>
+                )}
+                <div className="flex items-center gap-4 flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/sessions/${session.id}`)}>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 shrink-0">
                     <User className="h-5 w-5 text-primary" />
                   </div>
-                  <div>
-                    <p className="font-medium text-foreground">{session.title || 'Untitled Session'}</p>
+                  <div className="min-w-0">
+                    <p className="font-medium text-foreground truncate">{session.title || 'Untitled Session'}</p>
                     <p className="text-sm text-muted-foreground">
                       {session.patient?.name || 'Unknown Patient'} • {format(new Date(session.started_at), 'MMM d, yyyy h:mm a')}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 shrink-0">
+                  {session.audio_url && <Volume2 className="h-4 w-4 text-muted-foreground" />}
                   {session.duration_minutes && (
                     <span className="text-sm text-muted-foreground">
                       {session.duration_minutes} min

@@ -19,6 +19,9 @@ import {
   FileEdit,
   PenTool,
   Hospital,
+  Languages,
+  Download,
+  AlertTriangle,
 } from "lucide-react";
 import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
@@ -29,6 +32,8 @@ import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
 import { DrawingPad } from "@/components/drawings/DrawingPad";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/useSessions";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,6 +53,20 @@ import {
 } from "@/components/ui/dialog";
 import { useSessions } from "@/hooks/useSessions";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+const LANGUAGES = [
+  { code: "en", label: "English" }, { code: "af", label: "Afrikaans" }, { code: "zu", label: "Zulu" },
+  { code: "xh", label: "Xhosa" }, { code: "st", label: "Sesotho" }, { code: "tn", label: "Setswana" },
+  { code: "ts", label: "Tsonga" }, { code: "ss", label: "Swati" }, { code: "ve", label: "Venda" },
+  { code: "nr", label: "Ndebele" }, { code: "nso", label: "Sepedi" }, { code: "fr", label: "French" },
+  { code: "de", label: "German" }, { code: "es", label: "Spanish" }, { code: "pt", label: "Portuguese" },
+  { code: "it", label: "Italian" }, { code: "nl", label: "Dutch" }, { code: "ar", label: "Arabic" },
+  { code: "hi", label: "Hindi" }, { code: "zh", label: "Chinese" }, { code: "ja", label: "Japanese" },
+  { code: "ko", label: "Korean" }, { code: "ru", label: "Russian" }, { code: "sw", label: "Swahili" },
+  { code: "yo", label: "Yoruba" }, { code: "ig", label: "Igbo" }, { code: "ha", label: "Hausa" },
+  { code: "am", label: "Amharic" },
+];
 
 export default function SessionDetail() {
   const { id } = useParams<{ id: string }>();
@@ -62,6 +81,42 @@ export default function SessionDetail() {
   const [showGeneralLetterEditor, setShowGeneralLetterEditor] = useState(false);
   const [showDrawingPad, setShowDrawingPad] = useState(false);
   const [showHospitalAdmissionEditor, setShowHospitalAdmissionEditor] = useState(false);
+  const [translatedSummary, setTranslatedSummary] = useState<string | null>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("");
+
+  const handleTranslate = async (langCode: string) => {
+    if (!session?.summary || !langCode) return;
+    const lang = LANGUAGES.find(l => l.code === langCode);
+    if (!lang) return;
+    
+    setIsTranslating(true);
+    setSelectedLanguage(langCode);
+    try {
+      const { data, error } = await supabase.functions.invoke('summarize-session', {
+        body: {
+          action: 'translate',
+          text: session.summary,
+          targetLanguage: lang.label,
+        },
+      });
+      if (error) throw error;
+      setTranslatedSummary(data?.translatedText || data?.summary || session.summary);
+    } catch (err) {
+      console.error('Translation error:', err);
+      toast({ title: "Translation failed", description: "Could not translate the summary", variant: "destructive" });
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  const handleDownloadAudio = () => {
+    if (!session?.audio_url) return;
+    const link = document.createElement('a');
+    link.href = session.audio_url;
+    link.download = `session-recording-${format(new Date(session.started_at), 'yyyy-MM-dd')}.webm`;
+    link.click();
+  };
 
   const handleDelete = async () => {
     if (!id) return;
@@ -238,38 +293,77 @@ export default function SessionDetail() {
       {/* AI Summary */}
       {session.summary && (
         <div className="rounded-xl border border-primary bg-card p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Sparkles className="h-5 w-5 text-primary" />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-foreground">AI Summary</h2>
+                <p className="text-xs text-muted-foreground">Generated from session content</p>
+              </div>
             </div>
-            <div>
-              <h2 className="font-semibold text-foreground">AI Summary</h2>
-              <p className="text-xs text-muted-foreground">Generated from session content</p>
+            <div className="flex items-center gap-2">
+              {isTranslating && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+              <Select value={selectedLanguage} onValueChange={handleTranslate}>
+                <SelectTrigger className="w-[160px] h-8 text-xs">
+                  <Languages className="h-3.5 w-3.5 mr-1.5" />
+                  <SelectValue placeholder="Translate..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {LANGUAGES.map(lang => (
+                    <SelectItem key={lang.code} value={lang.code} className="text-xs">
+                      {lang.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {translatedSummary && (
+                <Button variant="ghost" size="sm" className="text-xs h-8" onClick={() => { setTranslatedSummary(null); setSelectedLanguage(""); }}>
+                  Original
+                </Button>
+              )}
             </div>
           </div>
-          <p className="text-foreground leading-relaxed">{session.summary}</p>
+          <p className="text-foreground leading-relaxed">{translatedSummary || session.summary}</p>
         </div>
       )}
 
       {/* Audio Recording */}
       <div className="rounded-xl border border-border bg-card p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10">
-            <Volume2 className="h-5 w-5 text-purple-600" />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10">
+              <Volume2 className="h-5 w-5 text-purple-600" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-foreground">Session Recording</h2>
+              <p className="text-xs text-muted-foreground">Audio from the consultation</p>
+            </div>
           </div>
-          <div>
-            <h2 className="font-semibold text-foreground">Session Recording</h2>
-            <p className="text-xs text-muted-foreground">Audio from the consultation</p>
-          </div>
+          {session.audio_url && (
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={handleDownloadAudio}>
+              <Download className="h-3.5 w-3.5" /> Download
+            </Button>
+          )}
         </div>
         {session.audio_url ? (
-          <audio 
-            controls 
-            className="w-full"
-            src={session.audio_url}
-          >
-            Your browser does not support the audio element.
-          </audio>
+          <>
+            <audio 
+              controls 
+              className="w-full"
+              src={session.audio_url}
+            >
+              Your browser does not support the audio element.
+            </audio>
+            <Alert className="mt-4 border-amber-500/30 bg-amber-500/5">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-xs text-amber-700">
+                Voice recordings are automatically deleted after 7 days. Download recordings you wish to keep.
+                Transcriptions will remain available permanently.
+              </AlertDescription>
+            </Alert>
+          </>
         ) : (
           <div className="bg-muted/30 rounded-lg p-4 text-center">
             <p className="text-sm text-muted-foreground">
