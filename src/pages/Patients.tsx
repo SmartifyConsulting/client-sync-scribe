@@ -820,12 +820,7 @@ export default function Patients() {
                 {/* ME patient row - always at top */}
                 {mePatient && (
                   <>
-                    <tr>
-                      <td colSpan={6} className="px-4 py-1.5 bg-gray-100 dark:bg-gray-800/30 sticky top-0">
-                        <span className="text-xs font-bold text-[#E53935] dark:text-red-400">MY RECORD</span>
-                      </td>
-                    </tr>
-                    <tr className="group transition-colors bg-gray-50/40 hover:bg-gray-100/40 dark:bg-gray-900/10 dark:hover:bg-gray-800/20 border-l-2 border-[#E53935]">
+                    <tr className="group transition-colors bg-gray-100 hover:bg-gray-200/60 dark:bg-gray-800/20 dark:hover:bg-gray-800/30">
                       <td className="px-4 py-2.5">
                         <Link to={`/patients/${mePatient.id}`} className="flex items-center gap-2.5">
                           <div className="flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs bg-[#E53935] text-white">
