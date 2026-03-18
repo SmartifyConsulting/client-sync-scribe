@@ -1,59 +1,54 @@
 
 
-# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
+# Fix: Voice Recordings Not Being Saved
 
-## 1. Increase Logo Size by 130%
+## Root Cause
 
-Scale all logo instances by 130%:
+The `useAudioRecording` hook only uploads audio to storage when a `sessionId` is provided (line 103 of `useAudioRecording.ts`). However, in the current flow:
 
-| Location | Current | New (130%) |
-|---|---|---|
-| Sidebar | h-10 (40px) | h-[52px] |
-| Mobile Header | h-8 (32px) | h-[42px] |
-| Auth page | h-12 (48px) | h-[62px] |
-| Forgot/Reset Password | h-12 (48px) | h-[62px] |
-| Landing page | h-10 (40px) | h-[52px] |
+1. `startSession()` sets `currentSessionId = null` (line 484 of Sessions.tsx)
+2. Recording starts immediately via `startRecording()`
+3. `useAudioRecording` receives `sessionId: currentSessionId || undefined` = `undefined`
+4. When recording stops, the hook checks `if (currentSessionId)` — it's falsy, so **audio is never uploaded**
+5. The session record is only created in `completeSession()`, which passes `audio_url: savedAudioUrlRef.current` — but that was never set
 
-**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
+The session DB record is created at completion time, not at start time, so there's no session ID available during recording.
 
-## 2. Fix Practice Number Not Persisting
+## Fix
 
-**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
+**File: `src/hooks/useAudioRecording.ts`**
+- Instead of uploading immediately on recording stop, **store the audio blob in a ref** and expose an `uploadAudio(sessionId)` method
+- The hook returns `pendingAudioBlob` and `uploadPendingAudio(sessionId)` so the caller can trigger upload after the session ID is known
 
-**Fix in `src/pages/Profile.tsx`:**
-- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
-- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
-- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
-- This prevents the race condition where autosave fires with stale/initial data
+**File: `src/pages/Sessions.tsx`**
+- After `completeSession()` returns the new session ID, call `uploadPendingAudio(sessionId)` to upload the stored blob and then update the session record's `audio_url`
 
-## 3. Make Partner Email Required and Create Pending Users
+Alternatively (simpler approach):
 
-**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+**File: `src/pages/Sessions.tsx`** — Generate a temporary UUID at session start to use as the storage path prefix, then after the session record is created, update it with the audio URL.
 
-**Fix:**
-- Add an `email` column to the `practice_partners` table via migration
-- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
-- Ensure the `addPartner` function validates email is provided before saving
-- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+**Simplest fix — File: `src/hooks/useAudioRecording.ts`**:
+- On `mediaRecorder.onstop`, always upload audio using a generated UUID as the file key (not requiring a pre-existing session ID)
+- Remove the `if (currentSessionId)` guard on upload
+- Use `crypto.randomUUID()` or `Date.now()` as the filename when no sessionId is available
 
-**Database Migration:**
-- `ALTER TABLE practice_partners ADD COLUMN email text;`
+**File: `src/pages/Sessions.tsx`** (line 484):
+- Generate a temporary ID (`crypto.randomUUID()`) and set it as `currentSessionId` at session start so the hook has a valid value for the storage path
+- Pass this as part of `creationData` to `completeSession` so it can be used as the session ID or the audio can be associated
 
-**Changes in `src/pages/Profile.tsx`:**
-- Make email field required in validation (alongside name and registration number)
-- Show validation error if email is missing
+### Recommended approach (simplest, least disruptive):
 
-## Technical Summary
+**File: `src/pages/Sessions.tsx`** `startSession()`:
+- Generate a temp audio key: `const audioKey = crypto.randomUUID()`
+- Set `currentSessionId` to this key so `useAudioRecording` has a valid `sessionId` for upload
+- This means audio gets uploaded during recording, and `savedAudioUrlRef` gets populated
+- `completeSession` already reads `savedAudioUrlRef.current` and stores it in the DB
 
-### Database Migration
-- Add `email text` column to `practice_partners` table
+This is a one-line fix: change line 484 from `setCurrentSessionId(null)` to `setCurrentSessionId(crypto.randomUUID())`.
 
-### Files Modified
-- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
-- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
-- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
-- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
+## Files Modified
+
+| File | Change |
+|------|--------|
+| `src/pages/Sessions.tsx` | Generate a UUID for `currentSessionId` at session start instead of `null` |
 
