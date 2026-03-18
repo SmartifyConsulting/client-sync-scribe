@@ -633,15 +633,6 @@ export default function PatientProfile() {
           </div>
         </TabsContent>
 
-        {/* Drawing Pad Tab */}
-        <TabsContent value="drawings">
-          <div className="rounded-2xl bg-card shadow-card overflow-hidden h-[600px]">
-            <DrawingPad 
-              patientId={patient.id} 
-              patientName={patient.name}
-            />
-          </div>
-        </TabsContent>
       </Tabs>
 
       {/* Template Selector Dialog */}
