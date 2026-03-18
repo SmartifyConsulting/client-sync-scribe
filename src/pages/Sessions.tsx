@@ -49,6 +49,8 @@ import { AudioWaveform } from "@/components/sessions/AudioWaveform";
 import { useSessions } from "@/hooks/useSessions";
 import { usePatients } from "@/hooks/usePatients";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Popover,
   PopoverContent,
