@@ -22,26 +22,29 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 12%;
 
-    /* Healthcare teal - trustworthy & calming */
-    --primary: 172 66% 50%;
+    /* Primary Teal - Holarc Health */
+    --primary: 180 100% 35%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 172 66% 60%;
-    --primary-dark: 176 75% 38%;
+    --primary-glow: 180 100% 45%;
+    --primary-dark: 180 100% 28%;
 
-    /* Neutral grays */
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 0 0% 25%;
+    /* Secondary (Red) */
+    --secondary: 354 77% 50%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 0 0% 45%;
+    /* Muted (Soft Lavender) */
+    --muted: 260 20% 96%;
+    --muted-foreground: 260 10% 45%;
 
-    --accent: 172 50% 95%;
-    --accent-foreground: 172 66% 35%;
+    /* Accent (Deep Plum) */
+    --accent: 339 43% 34%;
+    --accent-foreground: 0 0% 100%;
 
-    /* Status colors */
-    --destructive: 0 84% 60%;
+    /* Destructive (Lilac Hue) */
+    --destructive: 260 10% 58%;
     --destructive-foreground: 0 0% 100%;
 
+    /* Status colors */
     --success: 152 69% 45%;
     --success-foreground: 0 0% 100%;
 
@@ -49,15 +52,15 @@
     --warning-foreground: 0 0% 100%;
 
     /* Holarc red accent (from logo heart) */
-    --terracotta: 350 78% 55%;
+    --terracotta: 354 77% 50%;
     --terracotta-foreground: 0 0% 100%;
-    --terracotta-light: 350 78% 65%;
-    --terracotta-dark: 350 78% 45%;
+    --terracotta-light: 354 77% 60%;
+    --terracotta-dark: 354 77% 40%;
 
     /* Borders - very subtle */
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 172 66% 50%;
+    --border: 260 10% 91%;
+    --input: 260 10% 91%;
+    --ring: 180 100% 35%;
 
     --radius: 1rem;
 
