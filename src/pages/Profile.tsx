@@ -604,27 +604,48 @@ export default function Profile() {
               <div className="space-y-2">
                 <Label>Digital Signature</Label>
                 <div className="p-3 border border-border rounded-lg bg-background">
-                  <p style={{ fontFamily: getSignatureFontFamily(formData.signature_font), color: formData.signature_color === 'teal' ? '#104861' : '#000000', fontSize: getSignatureFontSize(formData.signature_font), fontWeight: getSignatureFontWeight(formData.signature_font) as any }}>{combinedFullName || "Your Name"}</p>
+                  <p style={{ fontFamily: getSignatureFontFamily(formData.signature_font), color: getSignatureColor(formData.signature_color), fontSize: `${formData.signature_font_size}px`, fontWeight: formData.signature_bold ? 'bold' : 'normal', fontStyle: formData.signature_italic ? 'italic' : 'normal' }}>{combinedFullName || "Your Name"}</p>
                   <p className="text-xs text-muted-foreground mt-1">{new Date().toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 </div>
+                {/* Font selector - full width */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Font</Label>
+                  <Select value={formData.signature_font} onValueChange={(v) => setFormData({ ...formData, signature_font: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{SIGNATURE_FONTS.map(f => <SelectItem key={f.value} value={f.value}><span style={{ fontFamily: f.fontFamily, fontSize: '18px' }}>{f.label}</span></SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                {/* Color + Size */}
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Font</Label>
-                    <Select value={formData.signature_font} onValueChange={(v) => setFormData({ ...formData, signature_font: v })}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>{SIGNATURE_FONTS.map(f => <SelectItem key={f.value} value={f.value}><span style={{ fontFamily: f.fontFamily, fontSize: f.fontSize, fontWeight: f.fontWeight as any }}>{f.label}</span></SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs">Color</Label>
                     <Select value={formData.signature_color} onValueChange={(v) => setFormData({ ...formData, signature_color: v })}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="black"><span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-black border border-border" />Black</span></SelectItem>
-                        <SelectItem value="teal"><span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: '#104861' }} />Teal</span></SelectItem>
+                        {SIGNATURE_COLORS.map(c => (
+                          <SelectItem key={c.value} value={c.value}>
+                            <span className="flex items-center gap-2">
+                              <span className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: c.color }} />
+                              {c.label}
+                            </span>
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Size: {formData.signature_font_size}px</Label>
+                    <Slider min={16} max={48} step={2} value={[formData.signature_font_size]} onValueChange={([v]) => setFormData({ ...formData, signature_font_size: v })} />
+                  </div>
+                </div>
+                {/* Bold + Italic toggles */}
+                <div className="flex gap-2">
+                  <Toggle pressed={formData.signature_bold} onPressedChange={(v) => setFormData({ ...formData, signature_bold: v })} size="sm" aria-label="Bold" className="h-8 w-8 p-0">
+                    <Bold className="h-4 w-4" />
+                  </Toggle>
+                  <Toggle pressed={formData.signature_italic} onPressedChange={(v) => setFormData({ ...formData, signature_italic: v })} size="sm" aria-label="Italic" className="h-8 w-8 p-0">
+                    <Italic className="h-4 w-4" />
+                  </Toggle>
                 </div>
               </div>
 
