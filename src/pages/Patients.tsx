@@ -145,6 +145,28 @@ export default function Patients() {
     setShowPatientSuggestions(false);
   };
 
+  const handleSendPatientInvite = async () => {
+    if (!newPatient.email) return;
+    setInvitingPatient(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-patient-invitation", {
+        body: {
+          patientEmail: newPatient.email,
+          patientName: newPatient.name,
+          patientId: null,
+          doctorName: profile?.full_name || "Your Doctor",
+          practiceName: profile?.practice_address || "Medical Practice",
+        },
+      });
+      if (error) throw error;
+      toast({ title: "Invitation sent", description: `An invitation has been sent to ${newPatient.email}.` });
+    } catch (error: any) {
+      toast({ title: "Failed to send invitation", description: error.message || "Please try again.", variant: "destructive" });
+    } finally {
+      setInvitingPatient(false);
+    }
+  };
+
   // Auto-create "ME" patient record for doctors who don't have one
   useEffect(() => {
     if (loading || !user?.email || meAutoCreated.current) return;
