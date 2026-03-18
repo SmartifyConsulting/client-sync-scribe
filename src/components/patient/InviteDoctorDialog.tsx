@@ -12,8 +12,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { UserPlus, Loader2, Stethoscope, Search } from "lucide-react";
+import { UserPlus, Loader2, Stethoscope, Search, Mail, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -58,8 +59,11 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
     "patient_info", "calendar", "session_summaries", "prescription_history",
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [sendingInvite, setSendingInvite] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { profile } = useProfile();
 
   useEffect(() => {
     if (open) {
@@ -130,6 +134,29 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
     setShowSuggestions(false);
   };
 
+  const handleSendDoctorInvite = async () => {
+    if (!inviteEmail.trim()) {
+      toast({ title: "Email required", description: "Please enter the doctor's email.", variant: "destructive" });
+      return;
+    }
+    setSendingInvite(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-user-invitation", {
+        body: {
+          recipientEmail: inviteEmail.trim(),
+          senderName: profile?.full_name || "A patient",
+          message: `${profile?.full_name || "A patient"} has invited you to join Holarc Health. Sign up to connect and manage patient care.`,
+        },
+      });
+      if (error) throw error;
+      toast({ title: "Invitation sent", description: `An invitation has been sent to ${inviteEmail}.` });
+      setInviteEmail("");
+    } catch (error: any) {
+      toast({ title: "Failed to send invitation", description: error.message || "Please try again.", variant: "destructive" });
+    } finally {
+      setSendingInvite(false);
+    }
+  };
   const handlePermissionToggle = (permission: AccessPermission) => {
     setSelectedPermissions((prev) =>
       prev.includes(permission) ? prev.filter((p) => p !== permission) : [...prev, permission]
@@ -250,6 +277,31 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
                     </p>
                   </button>
                 ))}
+              </div>
+            )}
+            {/* Invite fallback when doctor not found */}
+            {nameSearch.length >= 3 && !searchingDoctors && suggestions.length === 0 && (
+              <div className="mt-3 rounded-lg border border-dashed border-border p-4 space-y-3 bg-muted/30">
+                <p className="text-sm text-muted-foreground">Doctor not found on Holarc? Send an invitation via email</p>
+                <div className="flex gap-2">
+                  <Input
+                    type="email"
+                    placeholder="doctor@example.com"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={!inviteEmail || sendingInvite}
+                    onClick={handleSendDoctorInvite}
+                    className="gap-1"
+                  >
+                    {sendingInvite ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+                    Invite
+                  </Button>
+                </div>
               </div>
             )}
           </div>

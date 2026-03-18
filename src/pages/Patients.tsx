@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock, X, CalendarIcon, Upload, Pill } from "lucide-react";
+import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock, X, CalendarIcon, Upload, Pill, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -79,6 +79,7 @@ export default function Patients() {
     claims_email: "",
   });
   const [creating, setCreating] = useState(false);
+  const [invitingPatient, setInvitingPatient] = useState(false);
   const meAutoCreated = useRef(false);
 
   // Autofind patient state
@@ -142,6 +143,28 @@ export default function Patients() {
     }));
     setSelectedPatientUserId(suggestion.id);
     setShowPatientSuggestions(false);
+  };
+
+  const handleSendPatientInvite = async () => {
+    if (!newPatient.email) return;
+    setInvitingPatient(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-patient-invitation", {
+        body: {
+          patientEmail: newPatient.email,
+          patientName: newPatient.name,
+          patientId: null,
+          doctorName: profile?.full_name || "Your Doctor",
+          practiceName: profile?.practice_address || "Medical Practice",
+        },
+      });
+      if (error) throw error;
+      toast({ title: "Invitation sent", description: `An invitation has been sent to ${newPatient.email}.` });
+    } catch (error: any) {
+      toast({ title: "Failed to send invitation", description: error.message || "Please try again.", variant: "destructive" });
+    } finally {
+      setInvitingPatient(false);
+    }
   };
 
   // Auto-create "ME" patient record for doctors who don't have one
@@ -401,6 +424,31 @@ export default function Patients() {
                               {s.mobile_number && <p className="text-xs text-muted-foreground">{s.mobile_number}</p>}
                             </button>
                           ))}
+                        </div>
+                      )}
+                      {/* Invite fallback when patient not found */}
+                      {newPatient.name.length >= 3 && !searchingPatients && patientSuggestions.length === 0 && !selectedPatientUserId && (
+                        <div className="mt-3 rounded-lg border border-dashed border-border p-4 space-y-3 bg-muted/30">
+                          <p className="text-sm text-muted-foreground">Patient not found on Holarc? Send an invitation</p>
+                          <div className="flex gap-2">
+                            <Input
+                              type="email"
+                              placeholder="patient@email.com"
+                              value={newPatient.email}
+                              onChange={(e) => setNewPatient({ ...newPatient, email: e.target.value })}
+                              className="flex-1"
+                            />
+                            <Button
+                              type="button"
+                              size="sm"
+                              disabled={!newPatient.email || invitingPatient}
+                              onClick={handleSendPatientInvite}
+                              className="gap-1"
+                            >
+                              {invitingPatient ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+                              Invite
+                            </Button>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -698,7 +746,18 @@ export default function Patients() {
 
       {/* Alphabet Jump Bar */}
       {sortedPatients.length > 0 && (
-        <div className="flex gap-0.5 overflow-x-auto pb-1">
+        <div className="flex w-full gap-0.5 overflow-x-auto pb-1">
+          <button
+            onClick={() => setSelectedLetter(null)}
+            className={cn(
+              "flex-1 min-w-0 h-7 rounded-lg text-[11px] font-semibold transition-colors",
+              selectedLetter === null
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-foreground hover:bg-primary/20"
+            )}
+          >
+            All
+          </button>
           {alphabet.map((letter) => {
             const hasPatients = availableLetters.includes(letter);
             return (
@@ -706,13 +765,11 @@ export default function Patients() {
                 key={letter}
                 onClick={() => {
                   if (hasPatients) {
-                    setSelectedLetter(letter);
-                    const el = document.getElementById(`patient-group-${letter}`);
-                    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    setSelectedLetter(selectedLetter === letter ? null : letter);
                   }
                 }}
                 className={cn(
-                  "w-7 h-7 flex-shrink-0 rounded-lg text-[11px] font-semibold transition-colors",
+                  "flex-1 min-w-0 h-7 rounded-lg text-[11px] font-semibold transition-colors",
                   hasPatients
                     ? selectedLetter === letter
                       ? "bg-primary text-primary-foreground"
@@ -821,7 +878,7 @@ export default function Patients() {
                     </tr>
                   </>
                 )}
-                {availableLetters.sort().map((letter) => (
+                {(selectedLetter ? availableLetters.filter(l => l === selectedLetter) : availableLetters.sort()).map((letter) => (
                   <React.Fragment key={letter}>
                     <tr id={`patient-group-${letter}`}>
                       <td colSpan={6} className={cn(
