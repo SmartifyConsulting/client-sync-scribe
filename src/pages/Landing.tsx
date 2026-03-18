@@ -215,7 +215,7 @@ export default function Landing() {
               Your Health. <span className="text-primary">360°</span> View.
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              MediPad gives you a complete 360-degree view of your health profile—every consultation, prescription, and clinical note from every provider, unified in one place and entirely under your control.
+              Holarc gives you a complete 360-degree view of your health profile—every consultation, prescription, and clinical note from every provider, unified in one place and entirely under your control.
             </p>
           </motion.div>
 
