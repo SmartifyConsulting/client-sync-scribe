@@ -1,56 +1,59 @@
 
 
-# Patient Experience Improvements
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## Issues to Fix
+## 1. Increase Logo Size by 130%
 
-1. **My Doctors page missing specialty badge** — The `DoctorAccess` interface in `MyDoctors.tsx` fetches `specialty` from profiles and displays it with `getSpecialtyColor`, so this should work. Need to verify the query is correct (it does select `specialty`). The issue is likely working — will double-check.
+Scale all logo instances by 130%:
 
-2. **Patient Dashboard missing specialty badge on Healthcare Providers** — The `DoctorAccess` interface (line 28-35) only fetches `full_name` and `practice_number` from profiles. It does NOT fetch `specialty`. Need to add `specialty` to the profile query and display the color-coded specialty badge.
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-3. **Patient Calendar appointments should show doctor name, appointment type, and cost** — Currently `PatientCalendar.tsx` only fetches `appointments.*`. Need to join with doctor profile (via `user_id`) to show doctor name, and join with `appointment_requests` + `service_prices` to show service type and cost.
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-4. **Moolas count should be most prominent on dashboard** — Currently the Moolas badge is small in the header. Make the Moolas stat a prominent, visually distinct card at the top of the stats grid.
+## 2. Fix Practice Number Not Persisting
 
-5. **Assigned Tasks section on dashboard** — Add a compact "Assigned Tasks" section to the patient dashboard so patients see pending tasks from doctors immediately, with a link to the full rewards page.
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-6. **Dashboard buttons inconsistent styling** — The Quick Actions cards use plain Card styling. Update to use consistent button/card styling matching the brand (primary color accents, consistent rounded corners).
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
 
-## Plan
+## 3. Make Partner Email Required and Create Pending Users
 
-### File: `src/pages/patient/PatientDashboard.tsx`
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
 
-**A. Fetch specialty in doctor profiles query (line 155)**
-Change `select("full_name, practice_number")` to `select("full_name, practice_number, specialty")`. Update the `DoctorAccess` interface to include `specialty: string | null`.
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
 
-**B. Display specialty badge on each doctor card (lines 414-438)**
-After the doctor's name, render a color-coded `Badge` with specialty text (reuse the `getSpecialtyColor` function from `MyDoctors.tsx` — extract or duplicate).
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
 
-**C. Make Moolas prominent**
-Replace the current small header badge with a large, visually prominent Moolas card as the first item in the stats grid (or as a separate hero-style card above the stats). Show the count large with the Ⓜ️ icon and a "View Rewards" link.
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
 
-**D. Add Assigned Tasks section**
-After the Moolas section, add a compact card showing pending tasks assigned by doctors (fetch from `todos` where `patient_id` matches and `status = 'pending'`). Show task title, moolas reward, and due date. Link to `/patient/rewards` for full view.
+## Technical Summary
 
-**E. Consistent button/card styling**
-Update Quick Action cards to use `border-primary/20` accent, ensure hover states and rounded corners match the brand standard.
+### Database Migration
+- Add `email text` column to `practice_partners` table
 
-### File: `src/pages/patient/PatientCalendar.tsx`
-
-**A. Fetch doctor name for each appointment**
-After fetching appointments, look up the doctor's profile using `user_id` from each appointment. Display "with Dr. [Name]" on each appointment card.
-
-**B. Show appointment type and cost**
-Join with `appointment_requests` (matching by time/patient) to get `service_id`, then look up `service_prices` for service name and cost. Display as badges/text on the appointment card.
-
-### File: `src/pages/patient/MyDoctors.tsx`
-
-Verify the specialty badge is rendering — the code already has `getSpecialtyColor` and renders the badge. The issue may be that doctors don't have a specialty set in their profile, or the `role` filter in search prevents display. No code change likely needed here since the existing code already shows specialty badges on `DoctorCard`.
-
-## Files Modified
-
-| File | Change |
-|------|--------|
-| `src/pages/patient/PatientDashboard.tsx` | Add specialty to doctor query; show specialty badges; make Moolas prominent; add Assigned Tasks section; fix button styling |
-| `src/pages/patient/PatientCalendar.tsx` | Show doctor name, appointment type, and cost on appointment cards |
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 

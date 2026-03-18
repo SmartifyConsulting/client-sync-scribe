@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Calendar, FileText, Receipt, Clock, User, Loader2, Bell, Pill, Award, LogOut, Settings } from "lucide-react";
+import { Calendar, FileText, Receipt, Clock, User, Loader2, Bell, Pill, Award, LogOut, Settings, ListChecks, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,8 +31,35 @@ interface DoctorAccess {
   doctor_profile?: {
     full_name: string | null;
     practice_number: string | null;
+    specialty: string | null;
   };
 }
+
+interface AssignedTask {
+  id: string;
+  title: string;
+  description: string | null;
+  moolas_reward: number;
+  due_date: string | null;
+  status: string;
+}
+
+const getSpecialtyColor = (specialty: string): string => {
+  const s = specialty.toLowerCase();
+  if (s.includes("cardio")) return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300";
+  if (s.includes("dent")) return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300";
+  if (s.includes("derma")) return "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300";
+  if (s.includes("ortho")) return "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300";
+  if (s.includes("neuro")) return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300";
+  if (s.includes("paed") || s.includes("pedia")) return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300";
+  if (s.includes("psych")) return "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300";
+  if (s.includes("general") || s.includes("gp") || s.includes("family")) return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300";
+  if (s.includes("obst") || s.includes("gyn")) return "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300";
+  if (s.includes("ophthal") || s.includes("eye")) return "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300";
+  if (s.includes("ent") || s.includes("ear")) return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300";
+  if (s.includes("surg")) return "bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300";
+  return "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300";
+};
 
 export default function PatientDashboard() {
   const { user } = useAuth();
@@ -48,11 +75,28 @@ export default function PatientDashboard() {
       if (!user) return null;
       const { data } = await supabase
         .from("patients")
-        .select("is_chronic")
+        .select("id, is_chronic")
         .eq("patient_user_id", user.id)
         .maybeSingle();
       return data;
     },
+  });
+
+  // Fetch assigned tasks
+  const { data: assignedTasks = [] } = useQuery({
+    queryKey: ["assigned-tasks-dashboard", patientRecord?.id],
+    queryFn: async () => {
+      if (!patientRecord?.id) return [];
+      const { data } = await supabase
+        .from("todos")
+        .select("id, title, description, moolas_reward, due_date, status")
+        .eq("patient_id", patientRecord.id)
+        .eq("status", "pending")
+        .order("due_date", { ascending: true })
+        .limit(5);
+      return (data || []) as AssignedTask[];
+    },
+    enabled: !!patientRecord?.id,
   });
 
   const { data: unreadNotifCount = 0 } = useQuery({
@@ -152,7 +196,7 @@ export default function PatientDashboard() {
       for (const access of accessData || []) {
         const { data: profile } = await supabase
           .from("profiles")
-          .select("full_name, practice_number")
+          .select("full_name, practice_number, specialty")
           .eq("id", access.doctor_id)
           .maybeSingle();
 
@@ -166,7 +210,7 @@ export default function PatientDashboard() {
       setStats({
         upcomingAppointments: upcomingAppointments.length,
         activePrescriptions: (prescriptions || []).length,
-        recentSessions: 0, // Sessions are doctor-owned
+        recentSessions: 0,
         pendingInvoices: (invoices || []).length,
         pendingAmount,
         nextAppointment: upcomingAppointments[0]
@@ -216,11 +260,6 @@ export default function PatientDashboard() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          {/* Moolas Badge */}
-          <Link to="/patient/rewards" className="flex items-center gap-1.5 rounded-full bg-secondary px-4 py-2 text-sm font-bold text-white hover:bg-secondary/90 transition-colors shadow-md">
-            <Award className="h-5 w-5" />
-            <span className="text-base">{lollipopCount} Ⓜ️</span>
-          </Link>
           {/* Notification Bell */}
           <Popover>
             <PopoverTrigger asChild>
@@ -302,66 +341,110 @@ export default function PatientDashboard() {
         </div>
       )}
 
-      {/* Quick Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Moolas Hero Card + Stats */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        {/* Moolas Hero */}
+        <Link to="/patient/rewards" className="lg:col-span-2">
+          <Card className="h-full border-primary/20 bg-gradient-to-br from-primary/5 via-card to-secondary/5 hover:shadow-lg transition-all cursor-pointer">
+            <CardContent className="flex items-center gap-5 p-6">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+                <Award className="h-8 w-8 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">My Moolas Balance</p>
+                <p className="text-4xl font-bold text-foreground">{lollipopCount} <span className="text-2xl">Ⓜ️</span></p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
+        </Link>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Upcoming Appointments</CardTitle>
+            <CardTitle className="text-sm font-medium">Appointments</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.upcomingAppointments}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.nextAppointment
-                ? `Next: ${stats.nextAppointment.date}`
-                : "No upcoming appointments"}
+              {stats.nextAppointment ? `Next: ${stats.nextAppointment.date}` : "None scheduled"}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Prescriptions</CardTitle>
+            <CardTitle className="text-sm font-medium">Prescriptions</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.activePrescriptions}</div>
-            <p className="text-xs text-muted-foreground">Current medications</p>
+            <p className="text-xs text-muted-foreground">Active medications</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Connected Doctors</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{doctors.length}</div>
-            <p className="text-xs text-muted-foreground">Healthcare providers</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Invoices</CardTitle>
+            <CardTitle className="text-sm font-medium">Invoices</CardTitle>
             <Receipt className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(stats.pendingAmount)}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.pendingInvoices} invoice(s) pending
-            </p>
+            <p className="text-xs text-muted-foreground">{stats.pendingInvoices} pending</p>
           </CardContent>
         </Card>
       </div>
 
+      {/* Assigned Tasks */}
+      {assignedTasks.length > 0 && (
+        <Card className="border-primary/20">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ListChecks className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">Assigned Tasks</CardTitle>
+              </div>
+              <Link to="/patient/rewards">
+                <Button variant="ghost" size="sm" className="text-primary gap-1">
+                  View All <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              </Link>
+            </div>
+            <CardDescription>Tasks from your doctors — complete them to earn Moolas</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {assignedTasks.map((task) => (
+                <div key={task.id} className="flex items-center justify-between p-3 rounded-xl border border-border hover:bg-muted/50 transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{task.title}</p>
+                    {task.due_date && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Due: {format(parseISO(task.due_date), "MMM d, yyyy")}
+                      </p>
+                    )}
+                  </div>
+                  {task.moolas_reward > 0 && (
+                    <Badge className="ml-2 bg-primary/10 text-primary border-0 font-bold">
+                      +{task.moolas_reward} Ⓜ️
+                    </Badge>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Quick Actions */}
       <div className="grid gap-4 md:grid-cols-3">
         <Link to="/patient/calendar">
-          <Card className="cursor-pointer hover:bg-muted/50 transition-colors h-full">
+          <Card className="cursor-pointer border-primary/10 hover:border-primary/30 hover:shadow-md transition-all h-full">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-primary" />
+              <CardTitle className="flex items-center gap-2 text-base">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+                  <Calendar className="h-5 w-5 text-primary" />
+                </div>
                 My Calendar
               </CardTitle>
               <CardDescription>View and manage your appointments</CardDescription>
@@ -370,10 +453,12 @@ export default function PatientDashboard() {
         </Link>
 
         <Link to="/patient/documentation">
-          <Card className="cursor-pointer hover:bg-muted/50 transition-colors h-full">
+          <Card className="cursor-pointer border-primary/10 hover:border-primary/30 hover:shadow-md transition-all h-full">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-primary" />
+              <CardTitle className="flex items-center gap-2 text-base">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+                  <FileText className="h-5 w-5 text-primary" />
+                </div>
                 Documentation
               </CardTitle>
               <CardDescription>View your documents and records</CardDescription>
@@ -382,10 +467,12 @@ export default function PatientDashboard() {
         </Link>
 
         <Link to="/patient/invoices">
-          <Card className="cursor-pointer hover:bg-muted/50 transition-colors h-full">
+          <Card className="cursor-pointer border-primary/10 hover:border-primary/30 hover:shadow-md transition-all h-full">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Receipt className="h-5 w-5 text-primary" />
+              <CardTitle className="flex items-center gap-2 text-base">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+                  <Receipt className="h-5 w-5 text-primary" />
+                </div>
                 Invoices
               </CardTitle>
               <CardDescription>View and pay your invoices</CardDescription>
@@ -414,7 +501,7 @@ export default function PatientDashboard() {
                 {doctors.map((doctor) => (
                   <div
                     key={doctor.id}
-                    className="flex items-center justify-between p-4 rounded-lg border border-border"
+                    className="flex items-center justify-between p-4 rounded-xl border border-border"
                   >
                     <div className="flex items-center gap-4">
                       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
@@ -424,7 +511,12 @@ export default function PatientDashboard() {
                         <p className="font-medium">
                           {doctor.doctor_profile?.full_name || "Unknown Doctor"}
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        {doctor.doctor_profile?.specialty && (
+                          <Badge className={`mt-1 text-xs font-medium border-0 ${getSpecialtyColor(doctor.doctor_profile.specialty)}`}>
+                            {doctor.doctor_profile.specialty}
+                          </Badge>
+                        )}
+                        <p className="text-sm text-muted-foreground mt-0.5">
                           Practice: {doctor.doctor_profile?.practice_number || "N/A"}
                         </p>
                       </div>
