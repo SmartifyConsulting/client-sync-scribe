@@ -232,7 +232,7 @@ export default function Sessions() {
   const handleSessionComplete = useCallback(async (transcriptText: string, visitCategories?: string[] | null) => {
     console.log("=== handleSessionComplete START ===");
     console.log("transcriptText length:", transcriptText?.length);
-    console.log("visitCategory:", visitCategory);
+    console.log("visitCategories:", visitCategories);
     
     setSessionState("processing");
     
