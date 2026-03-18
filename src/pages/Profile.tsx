@@ -915,7 +915,6 @@ export default function Profile() {
         </Tabs>
       )}
 
-      <PatientImport />
     </div>
   );
 }
