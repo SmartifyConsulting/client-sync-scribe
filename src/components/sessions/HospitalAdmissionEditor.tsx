@@ -452,6 +452,49 @@ export function HospitalAdmissionEditor({
             </div>
           </div>
 
+          {/* Procedure Description */}
+          <div>
+            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-3">Procedure</h3>
+            <div className="space-y-2">
+              <Input
+                placeholder="Enter procedure description (e.g. Total Knee Replacement)"
+                value={procedureDescription}
+                onChange={(e) => setProcedureDescription(e.target.value)}
+                onBlur={async () => {
+                  if (procedureDescription.trim().length >= 3) {
+                    try {
+                      const { data, error } = await supabase.functions.invoke('lookup-medical-codes', {
+                        body: { query: procedureDescription, codeSystem: 'NHRPL', country },
+                      });
+                      if (!error && Array.isArray(data) && data.length > 0) {
+                        const nhrplIndex = codeSystems.findIndex(s => s.key === 'nhrpl');
+                        if (nhrplIndex >= 0) {
+                          const updated = [...codeSystems];
+                          const existingCodes = new Set(updated[nhrplIndex].entries.map(e => e.code).filter(Boolean));
+                          const newEntries = data
+                            .filter((d: any) => !existingCodes.has(d.code))
+                            .map((d: any) => ({ code: d.code, description: d.description }));
+                          if (newEntries.length > 0) {
+                            // Replace empty first entry or append
+                            if (updated[nhrplIndex].entries.length === 1 && !updated[nhrplIndex].entries[0].code) {
+                              updated[nhrplIndex].entries = newEntries;
+                            } else {
+                              updated[nhrplIndex].entries = [...updated[nhrplIndex].entries, ...newEntries];
+                            }
+                            setCodeSystems(updated);
+                          }
+                        }
+                      }
+                    } catch (e) {
+                      console.error("Procedure code lookup error:", e);
+                    }
+                  }
+                }}
+              />
+              <p className="text-xs text-muted-foreground">NHRPL codes will be auto-filled based on the procedure</p>
+            </div>
+          </div>
+
           {/* Dynamic Code Systems */}
           {codeSystems.map((sys, sysIndex) => (
             <div key={sys.key}>

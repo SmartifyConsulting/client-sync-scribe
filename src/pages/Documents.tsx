@@ -649,9 +649,13 @@ export default function Documents() {
                         size="icon"
                         className="h-8 w-8"
                         onClick={() => setShareDocument(doc)}
-                        title="Share via Email"
+                        title={(doc as any).email_sent_at ? "Already sent" : "Share via Email"}
                       >
-                        <Mail className="h-4 w-4" />
+                        {(doc as any).email_sent_at ? (
+                          <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Send className="h-4 w-4 text-green-600" />
+                        )}
                       </Button>
                       <Button
                         variant="ghost"

@@ -478,7 +478,8 @@ export default function CalendarView() {
                     {event.type}
                   </span>
                 </div>
-              ))
+                );
+              })
             ) : (
               <div className="p-8 text-center text-muted-foreground">
                 No appointments scheduled for today
