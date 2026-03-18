@@ -29,7 +29,7 @@ export default function PatientConsent() {
             <strong>BY CREATING A PATIENT ACCOUNT, CLICKING "I ACCEPT," "SIGN UP," OR BY USING THE PLATFORM IN ANY WAY, YOU AUTOMATICALLY ACCEPT AND AGREE TO THIS PATIENT CONSENT AND AUTHORIZATION.</strong>
           </p>
           <p>
-            This Patient Consent and Authorization ("Patient Consent") explains how MediPad (the "Platform") works and what you are agreeing to when you use it. Your use of the Platform constitutes your binding acceptance of all terms herein.
+            This Patient Consent and Authorization ("Patient Consent") explains how Holarc (the "Platform") works and what you are agreeing to when you use it. Your use of the Platform constitutes your binding acceptance of all terms herein.
           </p>
 
           <h2>1. Introduction and Purpose</h2>
