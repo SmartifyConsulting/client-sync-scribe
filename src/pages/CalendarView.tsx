@@ -25,7 +25,15 @@ import { useToast } from "@/hooks/use-toast";
 import { usePatients } from "@/hooks/usePatients";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { Label } from "@/components/ui/label";
 import { format, startOfMonth, endOfMonth } from "date-fns";
+
+interface AppointmentTypeColor {
+  id: string;
+  type_name: string;
+  color: string;
+}
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
