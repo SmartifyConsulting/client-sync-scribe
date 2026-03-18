@@ -81,6 +81,42 @@ export default function SessionDetail() {
   const [showGeneralLetterEditor, setShowGeneralLetterEditor] = useState(false);
   const [showDrawingPad, setShowDrawingPad] = useState(false);
   const [showHospitalAdmissionEditor, setShowHospitalAdmissionEditor] = useState(false);
+  const [translatedSummary, setTranslatedSummary] = useState<string | null>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("");
+
+  const handleTranslate = async (langCode: string) => {
+    if (!session?.summary || !langCode) return;
+    const lang = LANGUAGES.find(l => l.code === langCode);
+    if (!lang) return;
+    
+    setIsTranslating(true);
+    setSelectedLanguage(langCode);
+    try {
+      const { data, error } = await supabase.functions.invoke('summarize-session', {
+        body: {
+          action: 'translate',
+          text: session.summary,
+          targetLanguage: lang.label,
+        },
+      });
+      if (error) throw error;
+      setTranslatedSummary(data?.translatedText || data?.summary || session.summary);
+    } catch (err) {
+      console.error('Translation error:', err);
+      toast({ title: "Translation failed", description: "Could not translate the summary", variant: "destructive" });
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  const handleDownloadAudio = () => {
+    if (!session?.audio_url) return;
+    const link = document.createElement('a');
+    link.href = session.audio_url;
+    link.download = `session-recording-${format(new Date(session.started_at), 'yyyy-MM-dd')}.webm`;
+    link.click();
+  };
 
   const handleDelete = async () => {
     if (!id) return;
