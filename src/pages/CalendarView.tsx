@@ -381,20 +381,40 @@ export default function CalendarView() {
                   </div>
                   {dayEvents.length > 0 && (
                     <div className="mt-1 space-y-0.5">
-                      {dayEvents.slice(0, 2).map((event) => (
-                        <div
-                          key={event.id}
-                          onClick={() => handleEventClick(event)}
-                          className={cn(
-                            "truncate rounded px-1 py-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity",
-                            event.type === "session" && "bg-primary/20 text-primary",
-                            event.type === "internal" && "bg-muted text-muted-foreground",
-                            event.type === "followup" && "bg-warning/20 text-warning"
-                          )}
-                        >
-                          {event.time}
-                        </div>
-                      ))}
+                      {dayEvents.slice(0, 2).map((event) => {
+                        const patientName = event.patientId
+                          ? patients.find(p => p.id === event.patientId)?.name
+                          : null;
+                        const initials = patientName
+                          ? patientName.split(/\s+/).map(w => w[0]).join("").toUpperCase().slice(0, 2)
+                          : null;
+                        return (
+                          <div
+                            key={event.id}
+                            onClick={() => handleEventClick(event)}
+                            className={cn(
+                              "flex items-center gap-1 truncate rounded px-1 py-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity",
+                              event.type === "session" && "bg-primary/20 text-primary",
+                              event.type === "internal" && "bg-muted text-muted-foreground",
+                              event.type === "followup" && "bg-warning/20 text-warning"
+                            )}
+                          >
+                            {initials ? (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground shrink-0">
+                                      {initials}
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>{patientName}</TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            ) : null}
+                            <span className="truncate">{event.time}</span>
+                          </div>
+                        );
+                      })}
                       {dayEvents.length > 2 && (
                         <div className="text-xs text-muted-foreground pl-1">
                           +{dayEvents.length - 2} more
