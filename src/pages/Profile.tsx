@@ -918,8 +918,8 @@ function MailboxSection({ userId }: { userId?: string }) {
     setIsSavingAlias(true);
     const { error } = await supabase.from('profiles').update({ mailbox_alias: cleanAlias }).eq('id', userId);
     setIsSavingAlias(false);
-    if (error) { toast({ title: error.code === '23505' ? "Alias taken" : "Error", description: error.code === '23505' ? `"${cleanAlias}@medipad.com" is already in use` : "Failed to save", variant: "destructive" }); }
-    else { setMailboxAlias(cleanAlias); setEditingAlias(false); toast({ title: "Alias saved", description: `${cleanAlias}@medipad.com` }); }
+    if (error) { toast({ title: error.code === '23505' ? "Alias taken" : "Error", description: error.code === '23505' ? `"${cleanAlias}@holarc.com" is already in use` : "Failed to save", variant: "destructive" }); }
+    else { setMailboxAlias(cleanAlias); setEditingAlias(false); toast({ title: "Alias saved", description: `${cleanAlias}@holarc.com` }); }
   };
 
   return (
