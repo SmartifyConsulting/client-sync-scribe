@@ -114,6 +114,8 @@ export default function Sessions() {
   const navigate = useNavigate();
   const { patients, loading: patientsLoading } = usePatients();
   const { sessions, loading: sessionsLoading, createSession, completeSession } = useSessions();
+  const [selectedRecordings, setSelectedRecordings] = useState<Set<string>>(new Set());
+  const [isDownloading, setIsDownloading] = useState(false);
   
   const currentPatient = patients.find(p => p.id === patientId);
 
