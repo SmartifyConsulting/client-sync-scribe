@@ -77,6 +77,30 @@ export type Database = {
           },
         ]
       }
+      appointment_type_colors: {
+        Row: {
+          color: string
+          created_at: string | null
+          id: string
+          type_name: string
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string | null
+          id?: string
+          type_name: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string | null
+          id?: string
+          type_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       appointments: {
         Row: {
           created_at: string
