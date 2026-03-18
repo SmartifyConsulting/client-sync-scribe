@@ -59,6 +59,7 @@ function getDaysInMonth(date: Date) {
 export default function CalendarView() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { patients } = usePatients();
   const { isConnected, isConnecting, connect, disconnect, loading: calendarLoading } = useGoogleCalendar();
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -69,6 +70,10 @@ export default function CalendarView() {
   const [editedEvent, setEditedEvent] = useState<CalendarEvent | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
+  const [typeColors, setTypeColors] = useState<AppointmentTypeColor[]>([]);
+  const [isColorDialogOpen, setIsColorDialogOpen] = useState(false);
+  const [newColorType, setNewColorType] = useState("");
+  const [newColorValue, setNewColorValue] = useState("#3b82f6");
   const [newAppointment, setNewAppointment] = useState({
     patientId: "",
     date: "",
@@ -76,6 +81,46 @@ export default function CalendarView() {
     type: "session",
     notes: "",
   });
+
+  // Fetch appointment type colors
+  useEffect(() => {
+    const fetchTypeColors = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("appointment_type_colors")
+        .select("id, type_name, color")
+        .eq("user_id", user.id);
+      if (data) setTypeColors(data);
+    };
+    fetchTypeColors();
+  }, [user]);
+
+  const getTypeColor = (type: string): string | null => {
+    const match = typeColors.find(tc => tc.type_name.toLowerCase() === type.toLowerCase());
+    return match?.color || null;
+  };
+
+  const addTypeColor = async () => {
+    if (!user || !newColorType.trim()) return;
+    const { data, error } = await supabase
+      .from("appointment_type_colors")
+      .upsert({ user_id: user.id, type_name: newColorType.trim(), color: newColorValue }, { onConflict: "user_id,type_name" })
+      .select()
+      .single();
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    setTypeColors(prev => {
+      const filtered = prev.filter(tc => tc.type_name.toLowerCase() !== newColorType.trim().toLowerCase());
+      return [...filtered, data];
+    });
+    setNewColorType("");
+    setNewColorValue("#3b82f6");
+    toast({ title: "Color saved" });
+  };
+
+  const removeTypeColor = async (id: string) => {
+    await supabase.from("appointment_type_colors").delete().eq("id", id);
+    setTypeColors(prev => prev.filter(tc => tc.id !== id));
+  };
   const { firstDay, daysInMonth } = getDaysInMonth(selectedDate);
 
   // Fetch real appointments for the current month
