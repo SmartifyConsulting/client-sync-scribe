@@ -1,59 +1,73 @@
 
 
-# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
+# Appointment Color Coding, Profile Patients Tab & UI Refinements
 
-## 1. Increase Logo Size by 130%
+## 1. Doctor Appointment Type Color Coding
 
-Scale all logo instances by 130%:
+**Database**: Create `appointment_type_colors` table to let doctors define custom colors per appointment type.
 
-| Location | Current | New (130%) |
-|---|---|---|
-| Sidebar | h-10 (40px) | h-[52px] |
-| Mobile Header | h-8 (32px) | h-[42px] |
-| Auth page | h-12 (48px) | h-[62px] |
-| Forgot/Reset Password | h-12 (48px) | h-[62px] |
-| Landing page | h-10 (40px) | h-[52px] |
+```sql
+CREATE TABLE appointment_type_colors (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  type_name text NOT NULL,
+  color text NOT NULL DEFAULT '#3b82f6',
+  created_at timestamptz DEFAULT now(),
+  UNIQUE(user_id, type_name)
+);
+ALTER TABLE appointment_type_colors ENABLE ROW LEVEL SECURITY;
+-- RLS: users manage their own
+```
 
-**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
+**File: `src/pages/CalendarView.tsx`**
+- Fetch `appointment_type_colors` for the current doctor
+- Replace hardcoded `getEventTypeColor` with lookup against the doctor's color map
+- Change the initials badge `bg-terracotta` to use the appointment type's color dynamically via inline `style={{ backgroundColor: color }}`
+- Add a small "Manage Colors" dialog accessible from the calendar header where doctors can add/edit type→color mappings (color picker + type name input)
 
-## 2. Fix Practice Number Not Persisting
+**File: `src/pages/patient/PatientCalendar.tsx`**
+- Similarly apply appointment type colors to patient-facing calendar badges
 
-**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
+## 2. New "Patients" Tab in Doctor Profile (after Partners)
 
-**Fix in `src/pages/Profile.tsx`:**
-- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
-- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
-- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
-- This prevents the race condition where autosave fires with stale/initial data
+**File: `src/pages/Profile.tsx`**
+- Change `grid-cols-5` to `grid-cols-6` on TabsList (line 495)
+- Add a new `TabsTrigger value="patients"` after Partners and before Pricing
+- Add `TabsContent value="patients"` containing the existing `PatientImport` component (already imported at line 4)
+- Remove the drag-and-drop import UI from wherever else it currently appears (if duplicated)
+- Ensure drag-and-drop only renders inside this Patients tab
 
-## 3. Make Partner Email Required and Create Pending Users
+## 3. ME Record Badge Color Change (Terracotta → Plum/Lilac)
 
-**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+**File: `src/pages/Patients.tsx`**
+- Change the ME badge from `bg-terracotta text-terracotta-foreground` to a plum/lilac color: `bg-purple-200 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300`
+- Change the ME row header from `bg-terracotta/20` to `bg-purple-100/60 dark:bg-purple-950/30`
+- Change border accent from `border-terracotta` to `border-purple-400`
+- Update the inline "ME" pill badge similarly
 
-**Fix:**
-- Add an `email` column to the `practice_partners` table via migration
-- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
-- Ensure the `addPartner` function validates email is provided before saving
-- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+## 4. Patient Table Compactness & Status Dots
 
-**Database Migration:**
-- `ALTER TABLE practice_partners ADD COLUMN email text;`
+**File: `src/pages/Patients.tsx`**
+- Reduce font size across all table cells: change `text-sm` to `text-xs` for contact, dates, status
+- Reduce padding from `px-6 py-4` to `px-4 py-2.5` on all `td` and `th` elements
+- Ensure patient names render on one line with `whitespace-nowrap truncate`
+- Replace the Status text badges ("Active"/"Inactive") with a colored dot: green `bg-emerald-500` for active, red `bg-red-400` for inactive — just a `h-2.5 w-2.5 rounded-full` element with a tooltip
+- Move the Status column closer to Actions by removing extra padding
 
-**Changes in `src/pages/Profile.tsx`:**
-- Make email field required in validation (alongside name and registration number)
-- Show validation error if email is missing
+## 5. Connections Page Tab Styling — Teal
 
-## Technical Summary
+**File: `src/pages/Connections.tsx`** (lines 354-375)
+- Apply the standardized teal tab styling to the TabsList: add `bg-primary` class
+- Update TabsTrigger classes to match doctor profile tabs: `data-[state=active]:bg-white data-[state=active]:text-black text-white`
 
-### Database Migration
-- Add `email text` column to `practice_partners` table
+## Files Modified
 
-### Files Modified
-- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
-- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
-- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
-- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
+| File | Change |
+|------|--------|
+| `src/pages/CalendarView.tsx` | Dynamic appointment type colors on initials badges; color management dialog |
+| `src/pages/patient/PatientCalendar.tsx` | Apply appointment type colors |
+| `src/pages/Profile.tsx` | Add "Patients" tab (6th) after Partners with PatientImport |
+| `src/pages/Patients.tsx` | ME badge → plum; compact table (smaller font, tighter padding, dot status) |
+| `src/pages/Connections.tsx` | Teal tab styling on Connected/Pending tabs |
+| Database migration | Create `appointment_type_colors` table with RLS |
 
