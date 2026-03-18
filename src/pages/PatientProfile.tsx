@@ -34,6 +34,7 @@ import { SessionCard } from "@/components/patients/SessionCard";
 import { SessionHistoryTable } from "@/components/patients/SessionHistoryTable";
 import { PatientOverview } from "@/components/patients/PatientOverview";
 import { InvitePatientDialog } from "@/components/patients/InvitePatientDialog";
+import { EmoticonSender } from "@/components/patients/EmoticonSender";
 import { DoctorsOnProfile } from "@/components/patients/DoctorsOnProfile";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { RequestConnectionButton } from "@/components/patients/RequestConnectionButton";
