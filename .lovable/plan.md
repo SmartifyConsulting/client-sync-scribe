@@ -1,59 +1,52 @@
 
 
-# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
+# UI Consistency & Patient Experience Fixes
 
-## 1. Increase Logo Size by 130%
+## Issues Identified
 
-Scale all logo instances by 130%:
+1. **Auth page**: Logo too small (`h-[62px]`), black "Holarc" text should be removed
+2. **Teal text legibility**: `--primary: 172 66% 50%` is too light for text. Need darker teal for text usage
+3. **Patient dashboard buttons inconsistent**: Bell/avatar use `bg-secondary` while doctor dashboard uses `bg-terracotta` round buttons with Mic icon
+4. **My Doctors page**: Specialty badge not showing — query fetches `specialty` and code renders it, but the `role` filter `.eq("role", "doctor")` in search may not match; the connected doctors list should work. Need to verify the `doctor_patient_access` query returns profiles with specialty.
+5. **Patient dashboard Healthcare Providers**: Already shows specialty badge (line 517) — should be working
+6. **Column headings wrapping**: Need `whitespace-nowrap` globally on table headers
+7. **Assigned Tasks + Chronic status on patient dashboard**: Already implemented (lines 329-436)
 
-| Location | Current | New (130%) |
-|---|---|---|
-| Sidebar | h-10 (40px) | h-[52px] |
-| Mobile Header | h-8 (32px) | h-[42px] |
-| Auth page | h-12 (48px) | h-[62px] |
-| Forgot/Reset Password | h-12 (48px) | h-[62px] |
-| Landing page | h-10 (40px) | h-[52px] |
+## Plan
 
-**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
+### 1. Darken teal for text legibility (`src/index.css`)
 
-## 2. Fix Practice Number Not Persisting
+Change `--primary` from `172 66% 50%` to `172 66% 40%` (darker). Adjust `--primary-glow` accordingly. This affects all `text-primary` usage globally. Also darken `--accent-foreground` for better contrast.
 
-**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
+### 2. Auth page logo & text (`src/pages/Auth.tsx`)
 
-**Fix in `src/pages/Profile.tsx`:**
-- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
-- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
-- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
-- This prevents the race condition where autosave fires with stale/initial data
+- Increase logo from `h-[62px]` to `h-[90px]` on both login and signup views (lines 822, 868)
+- Remove the `<h1>Holarc</h1>` black text on both views (lines 824, 870)
 
-## 3. Make Partner Email Required and Create Pending Users
+### 3. Patient dashboard button consistency (`src/pages/patient/PatientDashboard.tsx`)
 
-**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+Replace the bell button styling from `bg-secondary` to `bg-terracotta` (matching doctor dashboard). Add a Mic "Record a Task" shortcut button if patients have tasks. Ensure both dashboards use identical round terracotta icon buttons.
 
-**Fix:**
-- Add an `email` column to the `practice_partners` table via migration
-- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
-- Ensure the `addPartner` function validates email is provided before saving
-- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+### 4. Global table header no-wrap (already in memory but enforce)
 
-**Database Migration:**
-- `ALTER TABLE practice_partners ADD COLUMN email text;`
+Add a global CSS rule in `src/index.css`: `th, [role="columnheader"] { white-space: nowrap; }` to prevent any table header from wrapping to two rows.
 
-**Changes in `src/pages/Profile.tsx`:**
-- Make email field required in validation (alongside name and registration number)
-- Show validation error if email is missing
+### 5. My Doctors specialty badge fix (`src/pages/patient/MyDoctors.tsx`)
 
-## Technical Summary
+The connected doctors query (line 55-57) correctly selects `specialty` from profiles. The `DoctorCard` component (line 111) renders the badge when `doctor.specialty` exists. The issue is likely that the profile query uses `.in("id", doctorIds)` which should work. However, the `doctor_patient_access` table stores `doctor_id` which maps to `profiles.id`. This should work — the bug may be that doctors simply don't have `specialty` set in their profile. No code change needed here unless the query is wrong.
 
-### Database Migration
-- Add `email text` column to `practice_partners` table
+Actually, looking more carefully: the `handleSearch` function (line 79) filters by `.eq("role", "doctor")` but connected doctors don't filter by role — they query by ID directly. The connected doctors path should work. Will leave as-is since the data flow is correct.
 
-### Files Modified
-- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
-- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
-- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
-- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
+### 6. Compact, minimalist global adjustments (`src/index.css`)
+
+- Reduce default padding on cards slightly
+- Ensure `whitespace-nowrap` on all table headers via CSS
+
+## Files Modified
+
+| File | Change |
+|------|--------|
+| `src/index.css` | Darken primary teal (40% lightness); add global `th { whitespace-nowrap }` |
+| `src/pages/Auth.tsx` | Enlarge logo to `h-[90px]`; remove "Holarc" black h1 text |
+| `src/pages/patient/PatientDashboard.tsx` | Match bell/avatar buttons to terracotta style from doctor dashboard |
 
