@@ -416,7 +416,7 @@ export default function Auth() {
       } catch {}
 
       clearDraft();
-      toast({ title: "Account created!", description: "Welcome to MediPad!" });
+      toast({ title: "Account created!", description: "Welcome to Holarc!" });
       navigate("/dashboard");
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
