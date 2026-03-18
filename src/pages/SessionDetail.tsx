@@ -98,10 +98,10 @@ export default function SessionDetail() {
   useEffect(() => {
     if (!id) return;
     const fetchDocs = async () => {
-      const { data } = await supabase
+      const { data } = await (supabase
         .from('documents')
-        .select('*')
-        .eq('session_id' as any, id)
+        .select('*') as any)
+        .eq('session_id', id)
         .order('created_at', { ascending: false });
       setSessionDocs(data || []);
     };
