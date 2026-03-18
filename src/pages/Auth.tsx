@@ -864,7 +864,7 @@ export default function Auth() {
         <div className="w-full max-w-md">
           <div className="text-center mb-6">
             <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
-              <img src={holarcLogo} alt="Holarc Health" className="h-[90px] w-auto" />
+              <img src={holarcLogo} alt="Holarc Health" className="h-[117px] w-auto" />
             </button>
             <p className="text-muted-foreground mt-1">{userRole === "doctor" ? "Healthcare Provider" : "Patient"} Registration</p>
           </div>

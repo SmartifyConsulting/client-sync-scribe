@@ -42,6 +42,7 @@ const doctorNavItems: NavItem[] = [
   { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: Users, label: "Patients", to: "/patients" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
+  { icon: CheckSquare, label: "To-Do List", to: "/todos" },
   { icon: Receipt, label: "Invoices", to: "/invoices" },
   { icon: UserPlus, label: "Referrals", to: "/referral-doctors" },
   { icon: FileText, label: "Templates", to: "/documents" },

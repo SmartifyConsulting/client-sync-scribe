@@ -53,7 +53,7 @@ export default function ForgotPassword() {
               onClick={() => navigate("/")}
               className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity"
             >
-              <img src={holarcLogo} alt="Holarc Health" className="h-[62px] w-auto" />
+              <img src={holarcLogo} alt="Holarc Health" className="h-[81px] w-auto" />
             </button>
             <h1 className="text-2xl font-bold text-foreground">Holarc</h1>
             <p className="text-muted-foreground mt-2">Reset your password</p>
