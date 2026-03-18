@@ -208,6 +208,7 @@ Respond using the provided tool/function schema.`,
       console.log("Prescription detected:", !!result.prescription);
       console.log("Invoice detected:", !!result.invoice);
       console.log("Referral detected:", !!result.referral);
+      console.log("Hospital admission detected:", !!result.hospital_admission);
       return new Response(JSON.stringify(result), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
