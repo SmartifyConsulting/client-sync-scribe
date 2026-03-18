@@ -350,6 +350,24 @@ export function useTemplates() {
         ...t,
         logo_position: t.logo_position as { x: number; y: number } | null,
       }));
+
+      // Check for missing default templates and seed them
+      const existingNames = new Set(data.map(t => t.name));
+      const missingDefaults = defaultTemplates.filter(dt => !existingNames.has(dt.name));
+
+      if (missingDefaults.length > 0) {
+        const toInsert = missingDefaults.map(t => ({ ...t, user_id: user.id }));
+        const { data: newData } = await supabase.from("templates").insert(toInsert).select();
+        if (newData) {
+          const newParsed = newData.map(t => ({
+            ...t,
+            logo_position: t.logo_position as { x: number; y: number } | null,
+          }));
+          setTemplates([...parsedTemplates, ...newParsed]);
+          return;
+        }
+      }
+
       setTemplates(parsedTemplates);
     } else {
       // No templates yet, seed with defaults
