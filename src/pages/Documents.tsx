@@ -295,6 +295,15 @@ export default function Documents() {
 
       if (error) throw error;
 
+      // Mark document as sent
+      await supabase
+        .from('documents')
+        .update({ email_sent_at: new Date().toISOString() })
+        .eq('id', shareDocument.id);
+
+      // Refresh documents list
+      fetchDocuments();
+
       toast({
         title: "Document Sent",
         description: `"${shareDocument.name}" has been emailed to ${shareEmail}`,
