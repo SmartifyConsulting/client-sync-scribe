@@ -424,7 +424,12 @@ export default function TodoList() {
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
                                   <p className={cn("font-medium text-foreground", todo.completed && "line-through text-muted-foreground")}>{todo.title}</p>
-                                  {todo.is_auto_executed && <Badge className="bg-success/10 text-success border-success/20 text-[10px] px-1.5 py-0"><Zap className="h-3 w-3 mr-0.5" />Auto</Badge>}
+                                   {(todo.is_auto_executed || todo.task_type === 'document_review') && (
+                                     <span className="inline-flex items-center gap-0.5">
+                                       <Badge className="bg-success/10 text-success border-success/20 text-[10px] px-1.5 py-0"><Zap className="h-3 w-3 mr-0.5" />AI</Badge>
+                                       {todo.document_id && <Send className="h-3 w-3 text-green-600" />}
+                                     </span>
+                                   )}
                                 </div>
                                 {/* Description */}
                                 {todo.description && (

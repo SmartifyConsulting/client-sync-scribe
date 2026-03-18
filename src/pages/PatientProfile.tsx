@@ -240,22 +240,28 @@ export default function PatientProfile() {
               patientUserId={(patient as any).patient_user_id} 
               patientName={patient.name} 
             />
-            <InvitePatientDialog patientId={patient.id} patientName={patient.name} />
-            {(patient as any).patient_user_id && (
-              <EmoticonSender
-                recipientId={(patient as any).patient_user_id}
-                patientId={patient.id}
-                recipientName={patient.name}
-              />
+            {(patient as any).patient_user_id !== currentUserId && (
+              <>
+                <InvitePatientDialog patientId={patient.id} patientName={patient.name} />
+                {(patient as any).patient_user_id && (
+                  <EmoticonSender
+                    recipientId={(patient as any).patient_user_id}
+                    patientId={patient.id}
+                    recipientName={patient.name}
+                  />
+                )}
+              </>
             )}
             <Button variant="outline" size="sm" className="gap-1.5" onClick={handleScheduleAppointment}>
               <Calendar className="h-3.5 w-3.5" />
               Schedule
             </Button>
-            <Button size="sm" className="gap-1.5" onClick={handleStartSession}>
-              <Clock className="h-3.5 w-3.5" />
-              Start Session
-            </Button>
+            {(patient as any).patient_user_id !== currentUserId && (
+              <Button size="sm" className="gap-1.5" onClick={handleStartSession}>
+                <Clock className="h-3.5 w-3.5" />
+                Start Session
+              </Button>
+            )}
           </div>
         </div>
       </div>
