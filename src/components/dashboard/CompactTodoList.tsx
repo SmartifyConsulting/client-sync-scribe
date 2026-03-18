@@ -61,6 +61,7 @@ export function CompactTodoList() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
   const [filter, setFilter] = useState<"active" | "completed">("active");
+  const [sendingDocId, setSendingDocId] = useState<string | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
