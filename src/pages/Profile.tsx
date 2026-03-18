@@ -450,9 +450,9 @@ export default function Profile() {
       {/* Tabbed content */}
       {isPatient ? (
         <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="personal">Personal</TabsTrigger>
-            <TabsTrigger value="preferences">Preferences</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 bg-primary">
+            <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Personal</TabsTrigger>
+            <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Preferences</TabsTrigger>
           </TabsList>
           <TabsContent value="personal">
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
