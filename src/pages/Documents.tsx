@@ -625,6 +625,19 @@ export default function Documents() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
+                        onClick={() => {
+                          setEditingDocument(doc);
+                          setEditDocName(doc.name);
+                          setEditDocContent(doc.content);
+                        }}
+                        title="Edit"
+                      >
+                        <Edit3 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
                         onClick={() => setShareDocument(doc)}
                         title="Share via Email"
                       >
