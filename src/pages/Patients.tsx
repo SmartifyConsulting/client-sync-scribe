@@ -878,7 +878,7 @@ export default function Patients() {
                     </tr>
                   </>
                 )}
-                {availableLetters.sort().map((letter) => (
+                {(selectedLetter ? availableLetters.filter(l => l === selectedLetter) : availableLetters.sort()).map((letter) => (
                   <React.Fragment key={letter}>
                     <tr id={`patient-group-${letter}`}>
                       <td colSpan={6} className={cn(
