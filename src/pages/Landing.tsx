@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import medipadLogo from "@/assets/medipad-logo.jpg";
+import holarcLogo from "@/assets/holarc-logo.png";
 import { motion } from "framer-motion";
 import {
   Stethoscope,
