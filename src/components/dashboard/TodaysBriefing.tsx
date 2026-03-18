@@ -536,10 +536,10 @@ export function TodaysBriefing() {
               className="gap-2 bg-white text-primary border border-white/50 hover:bg-accent hover:text-primary"
             >
               {isNarrating ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Generating...
-                </>
+                 <>
+                   <Loader2 className="h-4 w-4 animate-spin" />
+                   Preparing audio...
+                 </>
               ) : (
                 <>
                   <Volume2 className="h-4 w-4" />
