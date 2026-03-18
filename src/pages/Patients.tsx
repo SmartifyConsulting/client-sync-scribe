@@ -746,7 +746,18 @@ export default function Patients() {
 
       {/* Alphabet Jump Bar */}
       {sortedPatients.length > 0 && (
-        <div className="flex gap-0.5 overflow-x-auto pb-1">
+        <div className="flex w-full gap-0.5 overflow-x-auto pb-1">
+          <button
+            onClick={() => setSelectedLetter(null)}
+            className={cn(
+              "flex-1 min-w-0 h-7 rounded-lg text-[11px] font-semibold transition-colors",
+              selectedLetter === null
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-foreground hover:bg-primary/20"
+            )}
+          >
+            All
+          </button>
           {alphabet.map((letter) => {
             const hasPatients = availableLetters.includes(letter);
             return (
@@ -754,13 +765,11 @@ export default function Patients() {
                 key={letter}
                 onClick={() => {
                   if (hasPatients) {
-                    setSelectedLetter(letter);
-                    const el = document.getElementById(`patient-group-${letter}`);
-                    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    setSelectedLetter(selectedLetter === letter ? null : letter);
                   }
                 }}
                 className={cn(
-                  "w-7 h-7 flex-shrink-0 rounded-lg text-[11px] font-semibold transition-colors",
+                  "flex-1 min-w-0 h-7 rounded-lg text-[11px] font-semibold transition-colors",
                   hasPatients
                     ? selectedLetter === letter
                       ? "bg-primary text-primary-foreground"
