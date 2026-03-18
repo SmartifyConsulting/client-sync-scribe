@@ -210,7 +210,7 @@ const handler = async (req: Request): Promise<Response> => {
           method: "POST",
           headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            from: "MediPad <noreply@smartify.co.za>",
+            from: "Holarc Health <noreply@smartify.co.za>",
             to: [finalRecipientEmail || recipientEmail],
             subject: isPracticePartner
               ? `${senderName} added you as a practice partner on MediPad`
