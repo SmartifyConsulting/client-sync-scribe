@@ -70,19 +70,19 @@
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
-    --shadow-glow: 0 0 0 3px hsl(172 66% 50% / 0.1);
+    --shadow-glow: 0 0 0 3px hsl(180 100% 35% / 0.1);
     --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 6px 16px rgb(0 0 0 / 0.04);
     --shadow-card-hover: 0 2px 8px 0 rgb(0 0 0 / 0.06), 0 12px 24px rgb(0 0 0 / 0.08);
 
     /* Sidebar - clean white */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 35%;
-    --sidebar-primary: 172 66% 50%;
+    --sidebar-foreground: 260 10% 35%;
+    --sidebar-primary: 180 100% 35%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 172 50% 96%;
-    --sidebar-accent-foreground: 172 66% 35%;
-    --sidebar-border: 220 13% 93%;
-    --sidebar-ring: 172 66% 50%;
+    --sidebar-accent: 339 43% 94%;
+    --sidebar-accent-foreground: 339 43% 34%;
+    --sidebar-border: 260 10% 93%;
+    --sidebar-ring: 180 100% 35%;
   }
 
   .dark {
