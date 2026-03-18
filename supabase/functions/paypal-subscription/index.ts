@@ -257,14 +257,14 @@ serve(async (req) => {
 
           await sendSubscriptionEmail(
             userEmail,
-            "Your MediPad Subscription Has Been Cancelled",
+            "Your Holarc Subscription Has Been Cancelled",
             `
               <h1>Subscription Cancelled</h1>
               <p>We're sorry to see you go!</p>
-              <p>Your MediPad subscription has been cancelled. You will continue to have access to all features until <strong>${endDate}</strong>.</p>
+              <p>Your Holarc subscription has been cancelled. You will continue to have access to all features until <strong>${endDate}</strong>.</p>
               <p>If you change your mind, you can reactivate your subscription at any time from your Settings page.</p>
-              <p>Thank you for being a MediPad user.</p>
-              <p>Best regards,<br>The MediPad Team</p>
+              <p>Thank you for being a Holarc user.</p>
+              <p>Best regards,<br>The Holarc Team</p>
             `,
           );
         }
