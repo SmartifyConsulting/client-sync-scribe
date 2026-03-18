@@ -143,7 +143,7 @@ export default function Documents() {
     updateTemplate: updateHFTemplate,
     deleteTemplate: deleteHFTemplate,
   } = useHeaderFooterTemplates();
-  const { documents, loading: documentsLoading, deleteDocument, updateDocument } = useDocuments();
+  const { documents, loading: documentsLoading, deleteDocument, updateDocument, fetchDocuments } = useDocuments();
   const { profile } = useProfile();
 
   const [activeTab, setActiveTab] = useState("content");
