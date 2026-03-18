@@ -242,6 +242,8 @@ export default function Profile() {
         doctor_number: formData.doctor_number, practice_address: formData.practice_address,
         specialty: formData.specialty, mobile_number: fullMobileNumber,
         signature_font: formData.signature_font, signature_color: formData.signature_color,
+        signature_font_size: formData.signature_font_size, signature_bold: formData.signature_bold,
+        signature_italic: formData.signature_italic,
       } as any);
       if (error) { setSavedStatus('idle'); toast({ title: "Error", description: "Failed to save profile changes", variant: "destructive" }); }
       else { setSavedStatus('saved'); setTimeout(() => setSavedStatus('idle'), 2000); }
