@@ -349,7 +349,7 @@ export default function TermsAndConditions() {
           <p>For questions about these Terms, please contact us at:</p>
           <p>
             <strong>Smartify Solutions</strong><br />
-            Email: support@medipad.com
+            Email: support@holarc.com
           </p>
 
           <h2>28. Special Provisions for Specific Jurisdictions</h2>

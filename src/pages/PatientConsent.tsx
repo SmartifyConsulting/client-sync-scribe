@@ -447,7 +447,7 @@ export default function PatientConsent() {
           <p>For questions about this Patient Consent, contact:</p>
           <p>
             <strong>Smartify Solutions</strong><br />
-            Email: support@medipad.com
+            Email: support@holarc.com
           </p>
           <p>For privacy questions, contact our Privacy Officer.</p>
 
