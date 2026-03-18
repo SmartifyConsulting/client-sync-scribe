@@ -820,18 +820,13 @@ export default function Patients() {
                 {/* ME patient row - always at top */}
                 {mePatient && (
                   <>
-                    <tr>
-                      <td colSpan={6} className="px-4 py-1.5 bg-gray-100 dark:bg-gray-800/30 sticky top-0">
-                        <span className="text-xs font-bold text-[#E53935] dark:text-red-400">MY RECORD</span>
-                      </td>
-                    </tr>
-                    <tr className="group transition-colors bg-gray-50/40 hover:bg-gray-100/40 dark:bg-gray-900/10 dark:hover:bg-gray-800/20 border-l-2 border-[#E53935]">
+                    <tr className="group transition-colors bg-gray-100 hover:bg-gray-200/60 dark:bg-gray-800/20 dark:hover:bg-gray-800/30">
                       <td className="px-4 py-2.5">
                         <Link to={`/patients/${mePatient.id}`} className="flex items-center gap-2.5">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs bg-[#E53935] text-white">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs bg-[#E01837] text-white">
                             ME
                           </div>
-                          <span className="font-medium text-sm text-foreground group-hover:text-[#E53935] dark:group-hover:text-red-400 transition-colors whitespace-nowrap">
+                          <span className="font-medium text-sm text-foreground group-hover:text-[#E01837] dark:group-hover:text-red-400 transition-colors whitespace-nowrap">
                             {mePatient.name.includes(',') ? mePatient.name : (() => {
                               const parts = mePatient.name.trim().split(/\s+/);
                               if (parts.length <= 1) return mePatient.name;
@@ -886,19 +881,8 @@ export default function Patients() {
                 {(selectedLetter ? availableLetters.filter(l => l === selectedLetter) : availableLetters.sort()).map((letter) => (
                   <React.Fragment key={letter}>
                     <tr id={`patient-group-${letter}`}>
-                      <td colSpan={6} className={cn(
-                        "px-4 py-1.5 sticky top-0",
-                        (() => {
-                          const idx = availableLetters.indexOf(letter);
-                          const colors = [
-                            "bg-teal-50/60 dark:bg-teal-950/30",
-                            "bg-amber-50/60 dark:bg-amber-950/30",
-                            "bg-orange-50/60 dark:bg-orange-950/30",
-                          ];
-                          return colors[idx % 3];
-                        })()
-                      )}>
-                        <span className="text-xs font-bold text-primary">{letter}</span>
+                      <td colSpan={6} className="px-4 py-1.5 sticky top-0 bg-[#E01837]">
+                        <span className="text-xs font-bold text-white">{letter}</span>
                       </td>
                     </tr>
                     {groupedPatients[letter].map((patient) => (

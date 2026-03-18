@@ -1,34 +1,59 @@
 
 
-# Update Secondary Color, Remove MY RECORD Header, Restyle Alphabet Letter Breaks
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## 1. Update Secondary Color (#E53935 → #E01837)
+## 1. Increase Logo Size by 130%
 
-**`src/index.css`** — Update terracotta CSS variables to match `#E01837` (HSL ~351 81% 49%):
-- Light: `--terracotta: 351 81% 49%`, light/dark variants adjusted
-- Dark: slightly lifted for visibility
+Scale all logo instances by 130%:
 
-**`src/pages/Patients.tsx`** — Replace all 14 hardcoded `#E53935` references with `#E01837`.
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-## 2. Remove MY RECORD Header Row, Keep ME Row Highlighted
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-**`src/pages/Patients.tsx`** (lines 823–827):
-- **Delete** the entire `<tr>` containing "MY RECORD" header
-- Keep the ME row (line 828+) but change its background to `bg-gray-100 dark:bg-gray-800/20` (light grey highlight) — remove the left border accent
-- The red "ME" circle badge is already intuitive enough on its own
+## 2. Fix Practice Number Not Persisting
 
-## 3. Alphabet Letter Break Rows — Use #E01837 Background with White Font
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-**`src/pages/Patients.tsx`** (lines 886–902):
-- Replace the rotating teal/amber/orange backgrounds with a single consistent style: `bg-[#E01837]`
-- Change the letter text from `text-xs font-bold text-primary` to `text-xs font-bold text-white`
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
 
-This gives each letter section header a bold red bar with white text, adding more of the secondary brand color throughout the patient list.
+## 3. Make Partner Email Required and Create Pending Users
 
-## Files Modified
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
 
-| File | Change |
-|------|--------|
-| `src/index.css` | Update terracotta HSL to match #E01837 |
-| `src/pages/Patients.tsx` | Remove MY RECORD row, grey ME highlight, red alphabet headers with white text, replace all #E53935 |
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
+
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
+
+## Technical Summary
+
+### Database Migration
+- Add `email text` column to `practice_partners` table
+
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 
