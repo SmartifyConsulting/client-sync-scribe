@@ -51,6 +51,7 @@ const actionTypeLabels: Record<string, string> = {
 
 export function CompactTodoList() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [newTaskText, setNewTaskText] = useState("");

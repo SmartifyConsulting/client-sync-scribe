@@ -129,15 +129,15 @@ export default function SessionDetail() {
       }
 
       // Update document status
-      await supabase.from('documents').update({ 
+      await (supabase.from('documents').update({ 
         email_sent_at: new Date().toISOString(),
         is_draft: false,
-      } as any).eq('id', doc.id);
+      } as any) as any).eq('id', doc.id);
 
       // Mark corresponding todo as completed
-      await supabase.from('todos')
-        .update({ status: 'completed', completed_at: new Date().toISOString() })
-        .eq('document_id' as any, doc.id);
+      await (supabase.from('todos')
+        .update({ status: 'completed', completed_at: new Date().toISOString() }) as any)
+        .eq('document_id', doc.id);
 
       setSessionDocs(prev => prev.map(d => 
         d.id === doc.id ? { ...d, email_sent_at: new Date().toISOString(), is_draft: false } : d
