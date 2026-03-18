@@ -302,7 +302,7 @@ export default function Documents() {
         .eq('id', shareDocument.id);
 
       // Refresh documents list
-      fetchDocuments();
+      await fetchDocuments();
 
       toast({
         title: "Document Sent",
