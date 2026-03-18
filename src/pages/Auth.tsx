@@ -62,7 +62,7 @@ type UserRole = "doctor" | "patient";
 const DOCTOR_STEPS = ["Account", "Profile", "Practice Info", "Partners", "Terms & Payment"];
 const PATIENT_STEPS = ["Account", "Personal Info", "Employment", "Insurance", "Next of Kin", "Terms & Payment"];
 
-const STORAGE_KEY = "medipad_signup_draft";
+const STORAGE_KEY = "holarc_signup_draft";
 
 function saveDraft(data: any) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}
