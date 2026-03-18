@@ -1,60 +1,59 @@
 
 
-# Doctor Dashboard Enhancements, MY RECORD Styling, Drawing Hide, Document Viewing
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## 1. Doctor Rating & Moolas on Dashboard
+## 1. Increase Logo Size by 130%
 
-**File: `src/pages/Dashboard.tsx`**
+Scale all logo instances by 130%:
 
-Add two new queries:
-- **Average rating**: Query `visit_ratings` where `rated_user_id = user.id`, compute average
-- **Doctor moolas**: Query `doctor_rewards` where `doctor_id = user.id`, sum `moolas_count`
-- **Patient moolas**: Query the patient record linked to the doctor (via `patients.patient_user_id = user.id`), then query `gamification_config` visit rewards earned — or simpler: sum from the existing patient rewards system
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-Display in the stats grid:
-- Replace one of the hardcoded stats cards (or add new ones) showing: Star Rating (avg out of 5), Doctor Moolas (Ⓜ), Patient Moolas (Ⓜ), Total Moolas (sum)
-- The doctor should see combined moolas and be able to transfer them from a Moolas tab
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-**File: `src/pages/Profile.tsx`** — Add a "Moolas" tab to the doctor's profile with transfer functionality (similar to `MyRewards.tsx` patient transfer UI). Query both `doctor_rewards` and patient rewards tables, sum them, and allow transfers via `moola_transfers`.
+## 2. Fix Practice Number Not Persisting
 
-## 2. Fix MY RECORD Styling — Remove Duplicate "ME", Change Colors
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-**File: `src/pages/Patients.tsx`** (lines 823–843)
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
 
-- Change `bg-purple-100/60` header row to `bg-gray-100 dark:bg-gray-800/30` (light grey)
-- Change `text-purple-700` to the logo red color `text-[#E53935]` (Holarc Red/terracotta)
-- Change first ME badge circle from `bg-purple-200 text-purple-800` to `bg-[#E53935] text-white`
-- **Remove** the second inline `ME` badge (line 842) — the `<span className="ml-2 ...">ME</span>` after the name
-- Update hover colors and border from purple to match
+## 3. Make Partner Email Required and Create Pending Users
 
-## 3. Hide Drawing Functionality
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
 
-**File: `src/components/sessions/SessionNotepad.tsx`**
-- Remove the Draw toggle button and DrawingPad rendering — only show the text notepad
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
 
-**File: `src/pages/PatientProfile.tsx`**
-- Remove the "Drawing Pad" tab trigger (line 325–328)
-- Remove the drawings `TabsContent` (lines 640–648)
-- Remove `DrawingPad` import
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
 
-## 4. Fix Document Viewing from Patient Profile
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
 
-**File: `src/pages/Documents.tsx`**
-- On mount, read `?view=` URL param via `useSearchParams`
-- If a `view` doc ID is present, switch to "documents" tab and auto-open the document preview dialog (`setPreviewDocument`)
-- Match the ID against the loaded `documents` array
+## Technical Summary
 
-**File: `src/pages/PatientProfile.tsx`** (line 599)
-- The navigation `onClick={() => navigate(`/documents?view=${doc.id}`)}` is correct — the Documents page just needs to handle it
+### Database Migration
+- Add `email text` column to `practice_partners` table
 
-## Files Modified
-
-| File | Change |
-|------|--------|
-| `src/pages/Dashboard.tsx` | Add doctor avg rating query, doctor moolas + patient moolas queries, display in stats |
-| `src/pages/Profile.tsx` | Add Moolas tab for doctors with combined balance & transfer |
-| `src/pages/Patients.tsx` | Restyle MY RECORD: grey bg, red text/badges, remove duplicate ME badge |
-| `src/components/sessions/SessionNotepad.tsx` | Remove Draw toggle & DrawingPad — text only |
-| `src/pages/PatientProfile.tsx` | Remove Drawing Pad tab and content |
-| `src/pages/Documents.tsx` | Handle `?view=docId` param to auto-preview a document |
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 

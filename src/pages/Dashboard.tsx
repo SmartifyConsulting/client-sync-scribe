@@ -1,4 +1,4 @@
-import { Users, Calendar, TrendingUp, LogOut, Award, Bell, Mic, User, Settings } from "lucide-react";
+import { Users, Calendar, TrendingUp, LogOut, Award, Bell, Mic, User, Settings, Star } from "lucide-react";
 import { CompactTodoList } from "@/components/dashboard/CompactTodoList";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -125,6 +125,61 @@ export default function Dashboard() {
 
       if (error) return 0;
       return data.reduce((sum, cert) => sum + (cert.cpd_points || 0), 0);
+    },
+    refetchInterval: 60000,
+  });
+
+  // Query for doctor average rating
+  const { data: avgRating = 0 } = useQuery({
+    queryKey: ["doctor-avg-rating"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return 0;
+      const { data, error } = await supabase
+        .from("visit_ratings")
+        .select("rating")
+        .eq("rated_user_id", user.id);
+      if (error || !data || data.length === 0) return 0;
+      return data.reduce((sum, r) => sum + r.rating, 0) / data.length;
+    },
+    refetchInterval: 60000,
+  });
+
+  // Query for doctor moolas (from doctor_rewards)
+  const { data: doctorMoolas = 0 } = useQuery({
+    queryKey: ["doctor-moolas-dashboard"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return 0;
+      const { data, error } = await supabase
+        .from("doctor_rewards")
+        .select("moolas_count")
+        .eq("doctor_id", user.id);
+      if (error || !data) return 0;
+      return data.reduce((sum, r) => sum + (r.moolas_count || 0), 0);
+    },
+    refetchInterval: 60000,
+  });
+
+  // Query for patient moolas (from patient_rewards where patient is linked to this user)
+  const { data: patientMoolas = 0 } = useQuery({
+    queryKey: ["patient-moolas-dashboard"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return 0;
+      // Find patient record linked to this user
+      const { data: patient } = await supabase
+        .from("patients")
+        .select("id")
+        .eq("patient_user_id", user.id)
+        .maybeSingle();
+      if (!patient) return 0;
+      const { data: rewards, error } = await supabase
+        .from("patient_rewards")
+        .select("lollipops_count")
+        .eq("patient_id", patient.id);
+      if (error || !rewards) return 0;
+      return rewards.reduce((sum, r) => sum + (r.lollipops_count || 0), 0);
     },
     refetchInterval: 60000,
   });
@@ -266,6 +321,24 @@ export default function Dashboard() {
 
       {/* Stats Grid */}
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {isDoctor && (
+          <StatsCard
+            title="Doctor Rating"
+            value={avgRating > 0 ? `${avgRating.toFixed(1)} ★` : "—"}
+            change={avgRating > 0 ? "Average from patients" : "No ratings yet"}
+            trend="neutral"
+            icon={Star}
+          />
+        )}
+        {isDoctor && (
+          <StatsCard
+            title="Total Moolas"
+            value={doctorMoolas + patientMoolas}
+            change={`Doctor: ${doctorMoolas} · Patient: ${patientMoolas}`}
+            trend="up"
+            icon={Award}
+          />
+        )}
         <StatsCard
           title="Total Patients"
           value={128}

@@ -821,17 +821,17 @@ export default function Patients() {
                 {mePatient && (
                   <>
                     <tr>
-                      <td colSpan={6} className="px-4 py-1.5 bg-purple-100/60 dark:bg-purple-950/30 sticky top-0">
-                        <span className="text-xs font-bold text-purple-700 dark:text-purple-300">MY RECORD</span>
+                      <td colSpan={6} className="px-4 py-1.5 bg-gray-100 dark:bg-gray-800/30 sticky top-0">
+                        <span className="text-xs font-bold text-[#E53935] dark:text-red-400">MY RECORD</span>
                       </td>
                     </tr>
-                    <tr className="group transition-colors bg-purple-50/40 hover:bg-purple-100/40 dark:bg-purple-950/10 dark:hover:bg-purple-950/20 border-l-2 border-purple-400">
+                    <tr className="group transition-colors bg-gray-50/40 hover:bg-gray-100/40 dark:bg-gray-900/10 dark:hover:bg-gray-800/20 border-l-2 border-[#E53935]">
                       <td className="px-4 py-2.5">
                         <Link to={`/patients/${mePatient.id}`} className="flex items-center gap-2.5">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs bg-purple-200 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs bg-[#E53935] text-white">
                             ME
                           </div>
-                          <span className="font-medium text-sm text-foreground group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors whitespace-nowrap">
+                          <span className="font-medium text-sm text-foreground group-hover:text-[#E53935] dark:group-hover:text-red-400 transition-colors whitespace-nowrap">
                             {mePatient.name.includes(',') ? mePatient.name : (() => {
                               const parts = mePatient.name.trim().split(/\s+/);
                               if (parts.length <= 1) return mePatient.name;
@@ -839,7 +839,6 @@ export default function Patients() {
                               const firstNames = parts.slice(0, -1).join(" ");
                               return `${lastName}, ${firstNames}`;
                             })()}
-                            <span className="ml-2 inline-flex items-center rounded-full bg-purple-200 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 px-1.5 py-0.5 text-[10px] font-bold">ME</span>
                           </span>
                         </Link>
                       </td>

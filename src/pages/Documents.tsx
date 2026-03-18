@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   FileText,
   Plus,
@@ -128,6 +129,7 @@ const renderFormattedContent = (content: string): string => {
 };
 
 export default function Documents() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const {
     templates: dbTemplates,
@@ -167,7 +169,22 @@ export default function Documents() {
   const [editDocName, setEditDocName] = useState("");
   const [editDocContent, setEditDocContent] = useState("");
 
-  // Transform database templates to display format
+  // Auto-open document preview from ?view= param
+  useEffect(() => {
+    const viewDocId = searchParams.get("view");
+    if (viewDocId && documents.length > 0) {
+      const doc = documents.find((d) => d.id === viewDocId);
+      if (doc) {
+        setActiveTab("documents");
+        setPreviewDocument(doc);
+        // Clear the param so refreshing doesn't re-open
+        searchParams.delete("view");
+        setSearchParams(searchParams, { replace: true });
+      }
+    }
+  }, [documents, searchParams]);
+
+
   const templates: DisplayTemplate[] = dbTemplates.map((t) => ({
     ...t,
     lastModified: t.updated_at ? formatDate(t.updated_at) : "Just now",
