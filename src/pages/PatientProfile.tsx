@@ -79,6 +79,17 @@ export default function PatientProfile() {
       });
   }, [user?.id]);
 
+  // Log profile view for engagement tracking
+  useEffect(() => {
+    if (!user?.id || !id) return;
+    supabase.from('profile_view_log' as any).insert({
+      viewer_id: user.id,
+      patient_id: id,
+    }).then(() => {
+      console.log('Profile view logged');
+    });
+  }, [user?.id, id]);
+
   const displayEmail = mailboxAlias
      ? `${mailboxAlias}@holarc.com`
      : mailboxId
