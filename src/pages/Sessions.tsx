@@ -16,6 +16,7 @@ import {
   Loader2,
   ArrowLeft,
   Volume2,
+  VolumeX,
   Calendar,
   Pill,
   Receipt,
@@ -119,6 +120,8 @@ export default function Sessions() {
   const { sessions, loading: sessionsLoading, createSession, completeSession } = useSessions();
   const [selectedRecordings, setSelectedRecordings] = useState<Set<string>>(new Set());
   const [isDownloading, setIsDownloading] = useState(false);
+  const [playingSessionId, setPlayingSessionId] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   
   const currentPatient = patients.find(p => p.id === patientId);
 
@@ -1219,7 +1222,33 @@ export default function Sessions() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                  {session.audio_url && <Volume2 className="h-4 w-4 text-muted-foreground" />}
+                  {session.audio_url && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (playingSessionId === session.id) {
+                          audioRef.current?.pause();
+                          audioRef.current = null;
+                          setPlayingSessionId(null);
+                        } else {
+                          audioRef.current?.pause();
+                          const audio = new Audio(session.audio_url!);
+                          audio.onended = () => setPlayingSessionId(null);
+                          audio.play();
+                          audioRef.current = audio;
+                          setPlayingSessionId(session.id);
+                        }
+                      }}
+                      className="text-primary hover:text-primary/80 transition-colors"
+                      title={playingSessionId === session.id ? "Stop recording" : "Play recording"}
+                    >
+                      {playingSessionId === session.id ? (
+                        <VolumeX className="h-4 w-4" />
+                      ) : (
+                        <Volume2 className="h-4 w-4" />
+                      )}
+                    </button>
+                  )}
                   {session.duration_minutes && (
                     <span className="text-sm text-muted-foreground">
                       {session.duration_minutes} min

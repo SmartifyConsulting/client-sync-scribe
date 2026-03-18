@@ -42,6 +42,7 @@ const doctorNavItems: NavItem[] = [
   { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: Users, label: "Patients", to: "/patients" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
+  { icon: CheckSquare, label: "To-Do List", to: "/todos" },
   { icon: Receipt, label: "Invoices", to: "/invoices" },
   { icon: UserPlus, label: "Referrals", to: "/referral-doctors" },
   { icon: FileText, label: "Templates", to: "/documents" },
@@ -105,7 +106,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     <aside className="fixed left-0 top-0 z-40 h-screen w-[210px] bg-sidebar border-r border-sidebar-border">
       <div className="flex h-full flex-col">
         <div className="flex h-20 items-center gap-3 px-6">
-          <img src={holarcLogo} alt="Holarc Health" className="h-[52px] w-auto" />
+          <img src={holarcLogo} alt="Holarc Health" className="h-[62px] w-auto" />
         </div>
 
         {/* Navigation */}

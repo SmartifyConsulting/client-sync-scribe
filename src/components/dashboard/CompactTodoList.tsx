@@ -8,6 +8,7 @@ import {
   X,
   Check,
   Loader2,
+  Sparkles,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -277,7 +278,12 @@ export function CompactTodoList() {
     }
   };
 
-  const filteredTodos = todos.filter((t) => (filter === "active" ? !t.completed : t.completed));
+  const twoWeeksAgo = new Date();
+  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+  const filteredTodos = todos.filter((t) => {
+    if (filter === "active") return !t.completed;
+    return t.completed && new Date(t.created_at) >= twoWeeksAgo;
+  });
   const activeCount = todos.filter((t) => !t.completed).length;
   const completedCount = todos.filter((t) => t.completed).length;
 
@@ -377,6 +383,9 @@ export function CompactTodoList() {
                   </div>
                 ) : (
                   <>
+                    {todo.is_auto_executed && (
+                      <Sparkles className="h-3 w-3 text-primary shrink-0" />
+                    )}
                     <span
                       className={cn(
                         "flex-1 text-[11px] truncate",
