@@ -206,15 +206,15 @@ export default function HealthAlbum() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="gym" className="gap-1">
+            <TabsList className="mb-4 bg-primary">
+              <TabsTrigger value="all" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">All</TabsTrigger>
+              <TabsTrigger value="gym" className="gap-1 data-[state=active]:bg-white data-[state=active]:text-black text-white">
                 <Dumbbell className="h-3 w-3" /> Gym
               </TabsTrigger>
-              <TabsTrigger value="healthy_meal" className="gap-1">
+              <TabsTrigger value="healthy_meal" className="gap-1 data-[state=active]:bg-white data-[state=active]:text-black text-white">
                 <Utensils className="h-3 w-3" /> Meals
               </TabsTrigger>
-              <TabsTrigger value="medication" className="gap-1">
+              <TabsTrigger value="medication" className="gap-1 data-[state=active]:bg-white data-[state=active]:text-black text-white">
                 <Pill className="h-3 w-3" /> Medication
               </TabsTrigger>
             </TabsList>

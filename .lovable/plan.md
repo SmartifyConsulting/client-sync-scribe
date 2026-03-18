@@ -1,51 +1,59 @@
 
 
-# Fix Dashboard Icons & Standardize Tab Styling
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## 1. Dashboard Icon Backgrounds
+## 1. Increase Logo Size by 130%
 
-**Problem:** Mic and Bell buttons use `bg-secondary` (light grey `hsl(220 14% 96%)`) with `text-white` icons — invisible.
+Scale all logo instances by 130%:
 
-**Fix in `src/pages/Dashboard.tsx` (lines 187, 198):**
-- Replace `bg-secondary` → `bg-terracotta`
-- Replace `hover:bg-secondary/90` → `hover:bg-terracotta-dark`
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-## 2. Standardize All Tabs to Teal Style
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-Currently tabs are inconsistent:
+## 2. Fix Practice Number Not Persisting
 
-| File | Current Style |
-|------|--------------|
-| `PatientProfile.tsx` | `bg-primary` (teal) with white text — correct |
-| `MyRewards.tsx` | `bg-primary` (teal) — correct |
-| `GamificationAdmin.tsx` | `bg-primary` (teal) — correct |
-| `Documents.tsx` | `bg-primary` (teal) — correct |
-| **`Profile.tsx`** | **Default grey (no bg class)** — needs fix |
-| **`HealthAlbum.tsx`** | **Default grey (no bg class)** — needs fix |
-| **`CompactTodoList.tsx`** | **`bg-muted/50` (grey)** — needs fix |
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-**Fix:** Update the three inconsistent files to match the established teal tab pattern:
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
 
-- **`Profile.tsx` (lines 453, 495):** Add `bg-primary` to `TabsList`, add `data-[state=active]:bg-white data-[state=active]:text-black text-white` to each `TabsTrigger`
-- **`HealthAlbum.tsx` (line 209):** Same teal pattern on `TabsList` and triggers
-- **`CompactTodoList.tsx` (line 331):** Same teal pattern (compact sizing preserved)
+## 3. Make Partner Email Required and Create Pending Users
 
-### Standard Tab Classes
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
 
-```tsx
-// TabsList
-className="bg-primary"
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
 
-// TabsTrigger
-className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
-```
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
 
-## Files Modified
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
 
-| File | Change |
-|------|--------|
-| `src/pages/Dashboard.tsx` | Icon backgrounds → `bg-terracotta` |
-| `src/pages/Profile.tsx` | Tabs → teal style |
-| `src/pages/patient/HealthAlbum.tsx` | Tabs → teal style |
-| `src/components/dashboard/CompactTodoList.tsx` | Tabs → teal style |
+## Technical Summary
+
+### Database Migration
+- Add `email text` column to `practice_partners` table
+
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 

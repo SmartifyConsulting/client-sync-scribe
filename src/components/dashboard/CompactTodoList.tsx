@@ -328,11 +328,11 @@ export function CompactTodoList() {
 
         {/* Tabs */}
         <Tabs value={filter} onValueChange={(v) => setFilter(v as "active" | "completed")}>
-          <TabsList className="h-7 w-full bg-muted/50 p-0.5">
-            <TabsTrigger value="active" className="text-[11px] h-6 flex-1 data-[state=active]:bg-background">
+          <TabsList className="h-7 w-full bg-primary p-0.5">
+            <TabsTrigger value="active" className="text-[11px] h-6 flex-1 data-[state=active]:bg-white data-[state=active]:text-black text-white">
               Active ({activeCount})
             </TabsTrigger>
-            <TabsTrigger value="completed" className="text-[11px] h-6 flex-1 data-[state=active]:bg-background">
+            <TabsTrigger value="completed" className="text-[11px] h-6 flex-1 data-[state=active]:bg-white data-[state=active]:text-black text-white">
               Done ({completedCount})
             </TabsTrigger>
           </TabsList>
