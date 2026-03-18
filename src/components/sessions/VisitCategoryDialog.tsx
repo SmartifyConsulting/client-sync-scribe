@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,11 +18,38 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const CATEGORY_KEYWORDS: { category: string; keywords: string[] }[] = [
+  { category: "GP Visit", keywords: ["general", "consultation", "check-up", "checkup", "gp visit", "general practitioner"] },
+  { category: "Optometrist", keywords: ["eye", "vision", "optom", "ophthal", "glasses", "sight"] },
+  { category: "Vital Signs Check", keywords: ["vital signs", "blood pressure", "bp check", "heart rate", "temperature"] },
+  { category: "Cholesterol Test", keywords: ["cholesterol", "lipid", "ldl", "hdl", "triglyceride"] },
+  { category: "Blood Sugar Test", keywords: ["blood sugar", "glucose", "diabetes", "hba1c", "insulin", "diabetic"] },
+  { category: "HIV Test", keywords: ["hiv", "aids", "antiretroviral"] },
+  { category: "Pap Smear", keywords: ["pap smear", "cervical", "pap test"] },
+  { category: "Mammogram", keywords: ["mammogram", "breast exam", "breast cancer", "breast screen"] },
+  { category: "Prostate Exam", keywords: ["prostate", "psa"] },
+  { category: "Vaccination", keywords: ["vaccin", "immuniz", "immunis", "inject", "booster", "flu shot", "jab"] },
+  { category: "Annual Physical", keywords: ["annual", "physical", "wellness check", "yearly"] },
+  { category: "Health Screening", keywords: ["screening", "health screen", "preventive", "preventative"] },
+];
+
+function guessCategory(transcript: string): string | null {
+  if (!transcript) return null;
+  const lower = transcript.toLowerCase();
+  for (const { category, keywords } of CATEGORY_KEYWORDS) {
+    if (keywords.some(kw => lower.includes(kw))) {
+      return category;
+    }
+  }
+  return null;
+}
+
 interface VisitCategoryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: (category: string | null) => void;
   patientName?: string;
+  transcript?: string;
 }
 
 export function VisitCategoryDialog({
@@ -30,10 +57,26 @@ export function VisitCategoryDialog({
   onOpenChange,
   onConfirm,
   patientName,
+  transcript,
 }: VisitCategoryDialogProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [customCategory, setCustomCategory] = useState("");
   const [showCustom, setShowCustom] = useState(false);
+  const confirmRef = useRef<HTMLButtonElement>(null);
+
+  // Auto-guess category from transcript when dialog opens
+  useEffect(() => {
+    if (open && transcript) {
+      const guess = guessCategory(transcript);
+      if (guess) {
+        setSelectedCategory(guess);
+        setShowCustom(false);
+        setCustomCategory("");
+      }
+      // Auto-focus confirm button after a short delay
+      setTimeout(() => confirmRef.current?.focus(), 150);
+    }
+  }, [open, transcript]);
 
   const handleConfirm = () => {
     const category = showCustom ? customCategory : selectedCategory;
@@ -116,6 +159,7 @@ export function VisitCategoryDialog({
             Skip (No moola)
           </Button>
           <Button
+            ref={confirmRef}
             onClick={handleConfirm}
             disabled={!selectedCategory && !customCategory}
             className="bg-pink-500 hover:bg-pink-600 text-white"

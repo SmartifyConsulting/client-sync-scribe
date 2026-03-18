@@ -524,6 +524,7 @@ export default function Sessions() {
         onOpenChange={setShowVisitCategoryDialog}
         onConfirm={handleVisitCategoryConfirm}
         patientName={currentPatient?.name}
+        transcript={pendingTranscript}
       />
 
       {/* AI-Extracted Document Review Dialogs */}
