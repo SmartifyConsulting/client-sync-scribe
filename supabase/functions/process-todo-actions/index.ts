@@ -308,7 +308,22 @@ Rules:
           }
 
           case "write_referral_letter": {
-            const referralContent = `<h2>Referral Letter</h2>
+            const refReplacements: Record<string, string> = {
+              "ClientName": patientRecord?.name || action.patient_name || "",
+              "PatientName": patientRecord?.name || action.patient_name || "",
+              "Patient Name": patientRecord?.name || action.patient_name || "",
+              "Date": today,
+              "SessionDate": today,
+              "DoctorName": profile?.full_name || "",
+              "PracticeNumber": profile?.practice_number || "",
+              "RegistrationNumber": profile?.doctor_number || "",
+              "PracticeAddress": profile?.practice_address || "",
+              "Specialty": profile?.specialty || "",
+              "ReferralDoctor": action.referral_doctor || "Colleague",
+              "ReferralReason": action.referral_reason || "Further assessment and management",
+            };
+            const refTemplateContent = getTemplateContent("Referral Letter", refReplacements);
+            const referralContent = refTemplateContent || `<h2>Referral Letter</h2>
 <p><strong>Date:</strong> ${today}</p>
 <p><strong>From:</strong> ${profile?.full_name || ""} (${profile?.specialty || ""})</p>
 <p><strong>Practice Number:</strong> ${profile?.practice_number || ""}</p>
