@@ -537,6 +537,18 @@ export default function Sessions() {
         transcript={pendingTranscript}
       />
 
+      {/* Star Rating Dialog - shown after session completion */}
+      {currentSessionId && currentPatient && (
+        <StarRatingDialog
+          open={showStarRating}
+          onOpenChange={setShowStarRating}
+          sessionId={currentSessionId}
+          ratedUserId={currentPatient.patient_user_id || currentPatient.id}
+          ratedUserName={currentPatient.name}
+          raterRole="doctor"
+        />
+      )}
+
       {/* AI-Extracted Document Review Dialogs */}
       {extractedMedCert && (
         <MedCertReviewDialog
