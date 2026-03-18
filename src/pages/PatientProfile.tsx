@@ -240,7 +240,8 @@ export default function PatientProfile() {
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards - hide when doctor views their own patient record */}
+      {(patient as any).patient_user_id !== currentUserId && (
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
         <div className="rounded-xl bg-card p-4 shadow-sm border border-border/50">
           <div className="flex items-center justify-between">
