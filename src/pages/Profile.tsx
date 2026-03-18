@@ -193,7 +193,8 @@ export default function Profile() {
   const [formData, setFormData] = useState({
     first_name: "", last_name: "", practice_number: "", doctor_number: "",
     practice_address: "", specialty: "", mobile_number: "", country_code: "+27",
-    signature_font: "fave-script", signature_color: "black",
+    signature_font: "allura", signature_color: "black",
+    signature_font_size: 24, signature_bold: false, signature_italic: false,
   });
 
   useEffect(() => {
