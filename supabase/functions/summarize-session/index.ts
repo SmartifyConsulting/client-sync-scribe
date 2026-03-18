@@ -16,7 +16,42 @@ serve(async (req) => {
     const body = await req.json();
     console.log("Request body received:", JSON.stringify(body).substring(0, 200));
     
-    const { notes, transcript } = body;
+    const { notes, transcript, action, text, targetLanguage } = body;
+
+    // Handle translation request
+    if (action === 'translate' && text && targetLanguage) {
+      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+      if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+      const translationResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: `You are a professional medical translator. Translate the following medical summary to ${targetLanguage}. Preserve all medical terminology accuracy. Return ONLY the translated text, no explanations.` },
+            { role: "user", content: text },
+          ],
+        }),
+      });
+
+      if (!translationResponse.ok) {
+        const errText = await translationResponse.text();
+        console.error("Translation API error:", translationResponse.status, errText);
+        throw new Error("Translation API error");
+      }
+
+      const translationData = await translationResponse.json();
+      const translatedText = translationData.choices?.[0]?.message?.content || text;
+
+      return new Response(
+        JSON.stringify({ translatedText }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
     
     if (!notes && !transcript) {
       console.log("No notes or transcript provided");
