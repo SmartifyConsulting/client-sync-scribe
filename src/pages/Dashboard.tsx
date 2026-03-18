@@ -321,6 +321,24 @@ export default function Dashboard() {
 
       {/* Stats Grid */}
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {isDoctor && (
+          <StatsCard
+            title="Doctor Rating"
+            value={avgRating > 0 ? `${avgRating.toFixed(1)} ★` : "—"}
+            change={avgRating > 0 ? "Average from patients" : "No ratings yet"}
+            trend="neutral"
+            icon={Star}
+          />
+        )}
+        {isDoctor && (
+          <StatsCard
+            title="Total Moolas"
+            value={doctorMoolas + patientMoolas}
+            change={`Doctor: ${doctorMoolas} · Patient: ${patientMoolas}`}
+            trend="up"
+            icon={Award}
+          />
+        )}
         <StatsCard
           title="Total Patients"
           value={128}
