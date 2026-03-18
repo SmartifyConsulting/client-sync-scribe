@@ -481,7 +481,7 @@ export default function Sessions() {
     setPrescription(null);
     setInvoice(null);
     setAiDiagnosis(null);
-    setCurrentSessionId(null);
+    setCurrentSessionId(crypto.randomUUID());
     clearTranscript();
     sessionStartTimeRef.current = new Date();
     savedAudioUrlRef.current = null;
