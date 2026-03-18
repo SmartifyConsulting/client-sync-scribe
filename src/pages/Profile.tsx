@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy, Clock, Mail, Save, Award, Volume2, UserPlus, ExternalLink } from "lucide-react";
+import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy, Clock, Mail, Save, Award, Volume2, UserPlus, ExternalLink, Bold, Italic } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { Toggle } from "@/components/ui/toggle";
 import { PatientImport } from "@/components/patients/PatientImport";
 import { useToast as useGlobalToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -104,11 +106,25 @@ const CURRENCIES = [
 ];
 
 const SIGNATURE_FONTS = [
-  { value: "fave-script", label: "Fave Script Bold", fontFamily: "'Fave Script', 'Segoe Script', cursive", fontSize: "25px", fontWeight: "bold" },
-  { value: "lucida-calligraphy", label: "Lucida Calligraphy", fontFamily: "'Lucida Calligraphy', 'Lucida Handwriting', 'Apple Chancery', cursive", fontSize: "16px", fontWeight: "normal" },
-  { value: "rastanty-cortez", label: "Rastanty Cortez", fontFamily: "'Rastanty Cortez', 'Brush Script MT', cursive", fontSize: "28px", fontWeight: "bold" },
-  { value: "rochester", label: "Rochester", fontFamily: "'Rochester', cursive", fontSize: "18px", fontWeight: "normal" },
-  { value: "edwardian-script", label: "Edwardian Script", fontFamily: "'Edwardian Script ITC', 'Segoe Script', cursive", fontSize: "26px", fontWeight: "bold" },
+  { value: "allura", label: "Allura", fontFamily: "'Allura', cursive" },
+  { value: "great-vibes", label: "Great Vibes", fontFamily: "'Great Vibes', cursive" },
+  { value: "herr-von-muellerhoff", label: "Herr Von Muellerhoff", fontFamily: "'Herr Von Muellerhoff', cursive" },
+  { value: "homemade-apple", label: "Homemade Apple", fontFamily: "'Homemade Apple', cursive" },
+  { value: "kalam", label: "Kalam", fontFamily: "'Kalam', cursive" },
+  { value: "mr-dafoe", label: "Mr Dafoe", fontFamily: "'Mr Dafoe', cursive" },
+  { value: "petit-formal-script", label: "Petit Formal Script", fontFamily: "'Petit Formal Script', cursive" },
+  { value: "pinyon-script", label: "Pinyon Script", fontFamily: "'Pinyon Script', cursive" },
+  { value: "reenie-beanie", label: "Reenie Beanie", fontFamily: "'Reenie Beanie', cursive" },
+  { value: "rock-salt", label: "Rock Salt", fontFamily: "'Rock Salt', cursive" },
+  { value: "sacramento", label: "Sacramento", fontFamily: "'Sacramento', cursive" },
+];
+
+const SIGNATURE_COLORS = [
+  { value: "black", label: "Black", color: "#000000" },
+  { value: "teal", label: "Teal", color: "#104861" },
+  { value: "navy", label: "Navy", color: "#1a2744" },
+  { value: "dark-red", label: "Dark Red", color: "#8B0000" },
+  { value: "dark-green", label: "Dark Green", color: "#006400" },
 ];
 
 interface Partner {
@@ -179,7 +195,8 @@ export default function Profile() {
   const [formData, setFormData] = useState({
     first_name: "", last_name: "", practice_number: "", doctor_number: "",
     practice_address: "", specialty: "", mobile_number: "", country_code: "+27",
-    signature_font: "fave-script", signature_color: "black",
+    signature_font: "allura", signature_color: "black",
+    signature_font_size: 24, signature_bold: false, signature_italic: false,
   });
 
   useEffect(() => {
@@ -197,8 +214,11 @@ export default function Profile() {
         practice_number: profile.practice_number || "", doctor_number: profile.doctor_number || "",
         practice_address: profile.practice_address || "", specialty: (profile as any).specialty || "",
         mobile_number: mobileNumber, country_code: countryCode,
-        signature_font: (profile as any).signature_font || "fave-script",
-        signature_color: ((profile as any).signature_color === 'navy' ? 'teal' : (profile as any).signature_color) || "black",
+        signature_font: (profile as any).signature_font || "allura",
+        signature_color: (profile as any).signature_color || "black",
+        signature_font_size: (profile as any).signature_font_size ?? 24,
+        signature_bold: (profile as any).signature_bold ?? false,
+        signature_italic: (profile as any).signature_italic ?? false,
       };
       isSettingFromProfile.current = true;
       profileLoadedData.current = newFormData;
@@ -224,6 +244,8 @@ export default function Profile() {
         doctor_number: formData.doctor_number, practice_address: formData.practice_address,
         specialty: formData.specialty, mobile_number: fullMobileNumber,
         signature_font: formData.signature_font, signature_color: formData.signature_color,
+        signature_font_size: formData.signature_font_size, signature_bold: formData.signature_bold,
+        signature_italic: formData.signature_italic,
       } as any);
       if (error) { setSavedStatus('idle'); toast({ title: "Error", description: "Failed to save profile changes", variant: "destructive" }); }
       else { setSavedStatus('saved'); setTimeout(() => setSavedStatus('idle'), 2000); }
@@ -400,8 +422,7 @@ export default function Profile() {
 
   const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   const getSignatureFontFamily = (v: string) => SIGNATURE_FONTS.find(f => f.value === v)?.fontFamily || SIGNATURE_FONTS[0].fontFamily;
-  const getSignatureFontSize = (v: string) => SIGNATURE_FONTS.find(f => f.value === v)?.fontSize || '20px';
-  const getSignatureFontWeight = (v: string) => SIGNATURE_FONTS.find(f => f.value === v)?.fontWeight || 'normal';
+  const getSignatureColor = (v: string) => SIGNATURE_COLORS.find(c => c.value === v)?.color || "#000000";
 
   const isDoctor = profile?.role === 'doctor' || (!profile?.role && !isAdmin);
   const isPatient = profile?.role === 'patient';
@@ -585,27 +606,48 @@ export default function Profile() {
               <div className="space-y-2">
                 <Label>Digital Signature</Label>
                 <div className="p-3 border border-border rounded-lg bg-background">
-                  <p style={{ fontFamily: getSignatureFontFamily(formData.signature_font), color: formData.signature_color === 'teal' ? '#104861' : '#000000', fontSize: getSignatureFontSize(formData.signature_font), fontWeight: getSignatureFontWeight(formData.signature_font) as any }}>{combinedFullName || "Your Name"}</p>
+                  <p style={{ fontFamily: getSignatureFontFamily(formData.signature_font), color: getSignatureColor(formData.signature_color), fontSize: `${formData.signature_font_size}px`, fontWeight: formData.signature_bold ? 'bold' : 'normal', fontStyle: formData.signature_italic ? 'italic' : 'normal' }}>{combinedFullName || "Your Name"}</p>
                   <p className="text-xs text-muted-foreground mt-1">{new Date().toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 </div>
+                {/* Font selector - full width */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Font</Label>
+                  <Select value={formData.signature_font} onValueChange={(v) => setFormData({ ...formData, signature_font: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{SIGNATURE_FONTS.map(f => <SelectItem key={f.value} value={f.value}><span style={{ fontFamily: f.fontFamily, fontSize: '18px' }}>{f.label}</span></SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                {/* Color + Size */}
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Font</Label>
-                    <Select value={formData.signature_font} onValueChange={(v) => setFormData({ ...formData, signature_font: v })}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>{SIGNATURE_FONTS.map(f => <SelectItem key={f.value} value={f.value}><span style={{ fontFamily: f.fontFamily, fontSize: f.fontSize, fontWeight: f.fontWeight as any }}>{f.label}</span></SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs">Color</Label>
                     <Select value={formData.signature_color} onValueChange={(v) => setFormData({ ...formData, signature_color: v })}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="black"><span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-black border border-border" />Black</span></SelectItem>
-                        <SelectItem value="teal"><span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: '#104861' }} />Teal</span></SelectItem>
+                        {SIGNATURE_COLORS.map(c => (
+                          <SelectItem key={c.value} value={c.value}>
+                            <span className="flex items-center gap-2">
+                              <span className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: c.color }} />
+                              {c.label}
+                            </span>
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Size: {formData.signature_font_size}px</Label>
+                    <Slider min={16} max={48} step={2} value={[formData.signature_font_size]} onValueChange={([v]) => setFormData({ ...formData, signature_font_size: v })} />
+                  </div>
+                </div>
+                {/* Bold + Italic toggles */}
+                <div className="flex gap-2">
+                  <Toggle pressed={formData.signature_bold} onPressedChange={(v) => setFormData({ ...formData, signature_bold: v })} size="sm" aria-label="Bold" className="h-8 w-8 p-0">
+                    <Bold className="h-4 w-4" />
+                  </Toggle>
+                  <Toggle pressed={formData.signature_italic} onPressedChange={(v) => setFormData({ ...formData, signature_italic: v })} size="sm" aria-label="Italic" className="h-8 w-8 p-0">
+                    <Italic className="h-4 w-4" />
+                  </Toggle>
                 </div>
               </div>
 
@@ -875,7 +917,6 @@ export default function Profile() {
         </Tabs>
       )}
 
-      <PatientImport />
     </div>
   );
 }

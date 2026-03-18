@@ -1,64 +1,59 @@
 
 
-# Digital Signature Fonts, Styling Controls & Drag-Drop Cleanup
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## 1. Replace Signature Fonts
+## 1. Increase Logo Size by 130%
 
-Replace `SIGNATURE_FONTS` array in `Profile.tsx` with 11 new Google Fonts. Each font now only defines `value`, `label`, and `fontFamily` — size/weight/italic are user-controlled separately.
+Scale all logo instances by 130%:
 
-New fonts: Allura, Great Vibes, Herr Von Muellerhoff, Homemade Apple, Kalam, Mr Dafoe, Petit Formal Script, Pinyon Script, Reenie Beanie, Rock Salt, Sacramento.
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-**`index.html`**: Update the Google Fonts `<link>` to include all 11 fonts (with italic variants for those that support it):
-```
-family=Allura&family=Great+Vibes&family=Herr+Von+Muellerhoff&family=Homemade+Apple&family=Kalam:wght@400;700&family=Mr+Dafoe&family=Petit+Formal+Script&family=Pinyon+Script&family=Reenie+Beanie&family=Rock+Salt&family=Sacramento
-```
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-## 2. Add Size, Bold, Italic Controls
+## 2. Fix Practice Number Not Persisting
+
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
+
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
+
+## 3. Make Partner Email Required and Create Pending Users
+
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
+
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
+
+## Technical Summary
 
 ### Database Migration
-Add 3 new columns to `profiles`:
-```sql
-ALTER TABLE public.profiles 
-  ADD COLUMN IF NOT EXISTS signature_font_size integer DEFAULT 24,
-  ADD COLUMN IF NOT EXISTS signature_bold boolean DEFAULT false,
-  ADD COLUMN IF NOT EXISTS signature_italic boolean DEFAULT false;
-```
+- Add `email text` column to `practice_partners` table
 
-### Profile.tsx Changes
-
-- Add `signature_font_size`, `signature_bold`, `signature_italic` to `formData` state (defaults: 24, false, false)
-- Load from profile, save via autosave (same debounce pattern)
-- **Color**: Keep the existing dropdown but add more options: Black, Teal (#104861), Navy (#1a2744), Dark Red (#8B0000), Dark Green (#006400)
-- **Size**: Add a slider (range 16–48, step 2) with the current size displayed
-- **Bold/Italic**: Two toggle buttons (B and I) next to the size slider
-- **Preview**: Update the signature preview `<p>` to use all dynamic styles:
-  ```
-  fontSize: `${formData.signature_font_size}px`
-  fontWeight: formData.signature_bold ? 'bold' : 'normal'
-  fontStyle: formData.signature_italic ? 'italic' : 'normal'
-  ```
-
-### Layout
-Reorganize the signature controls from 2-column grid to:
-- Row 1: Font selector (full width) — each option rendered in its own font
-- Row 2: Color selector | Size slider with value label
-- Row 3: Bold toggle | Italic toggle
-
-## 3. Remove Drag-and-Drop from Non-Patient Tabs
-
-The `TemplateSectionEditor.tsx` component has drag-and-drop for image uploads. It's used in `HeaderFooterTemplateForm.tsx` and `TemplateForm.tsx` (document templates, not patient-related).
-
-The component already has a `showImageUpload` prop. The drag-drop zone only renders when `showImageUpload && !value.imageUrl`. The simplest approach: no changes needed to `TemplateSectionEditor` — just pass `showImageUpload={false}` from template forms.
-
-However, re-reading the request: "Remove the drag and drop feature from all the tabs except the Patient tab" — this refers to the **Profile page tabs**. The Patient tab has `PatientImport` which uses drag-and-drop for CSV import. There is no drag-and-drop on other Profile tabs (Practice, Pricing, Certificates). The `TemplateSectionEditor` drag-drop is on a different page (Documents). So this part is already satisfied — no drag-and-drop exists on non-Patient Profile tabs. No changes needed here.
-
-Actually, let me re-check: there's a stray `<PatientImport />` at line 878 outside the tabs. That should be removed as it duplicates the one inside the Patients tab.
-
-## Files Modified
-
-| File | Change |
-|------|--------|
-| `index.html` | Add 11 Google Fonts to the fonts link |
-| `src/pages/Profile.tsx` | Replace `SIGNATURE_FONTS`, add size/bold/italic/color controls, remove stray `<PatientImport />` at line 878 |
-| Database migration | Add `signature_font_size`, `signature_bold`, `signature_italic` columns |
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 
