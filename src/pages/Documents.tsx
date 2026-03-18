@@ -1035,7 +1035,7 @@ export default function Documents() {
                   }}
                   className="gap-2"
                 >
-                  <Mail className="h-4 w-4" />
+                  <Send className="h-4 w-4" />
                   Share
                 </Button>
                 <Button
