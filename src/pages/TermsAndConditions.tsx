@@ -35,7 +35,7 @@ export default function TermsAndConditions() {
 
           <h2>2. Description of Service</h2>
           <p>
-            MediPad is a healthcare communication platform that enables doctors and patients to interact through a unified patient profile. The Platform facilitates information sharing, communication, and healthcare coordination but does not provide medical advice, diagnosis, or treatment.
+            Holarc is a healthcare communication platform that enables doctors and patients to interact through a unified patient profile. The Platform facilitates information sharing, communication, and healthcare coordination but does not provide medical advice, diagnosis, or treatment.
           </p>
 
           <h2>3. Not a Medical Service Provider</h2>
