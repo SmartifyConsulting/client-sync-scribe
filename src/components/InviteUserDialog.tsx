@@ -40,13 +40,10 @@ export function InviteUserDialog() {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim() || searchQuery.length < 2) {
-      toast({
-        title: "Search query too short",
-        description: "Please enter at least 2 characters to search",
-        variant: "destructive",
-      });
+  const handleSearch = useCallback(async (query: string) => {
+    if (!query.trim() || query.length < 2) {
+      setSearchResults([]);
+      setSearchMode("search");
       return;
     }
 
@@ -58,7 +55,7 @@ export function InviteUserDialog() {
         .from("profiles")
         .select("id, full_name, avatar_url, specialty, role")
         .neq("id", user?.id)
-        .or(`full_name.ilike.%${searchQuery}%`)
+        .or(`full_name.ilike.%${query}%`)
         .limit(10);
 
       if (error) throw error;
@@ -67,6 +64,8 @@ export function InviteUserDialog() {
       
       if (!data || data.length === 0) {
         setSearchMode("email");
+      } else {
+        setSearchMode("search");
       }
     } catch (error: any) {
       console.error("Search error:", error);
@@ -78,7 +77,17 @@ export function InviteUserDialog() {
     } finally {
       setIsSearching(false);
     }
-  };
+  }, [user?.id, toast]);
+
+  useEffect(() => {
+    if (searchQuery.length < 2) {
+      setSearchResults([]);
+      setSearchMode("search");
+      return;
+    }
+    const timer = setTimeout(() => handleSearch(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, handleSearch]);
 
   const handleSendInvitation = async () => {
     if (!user) return;
