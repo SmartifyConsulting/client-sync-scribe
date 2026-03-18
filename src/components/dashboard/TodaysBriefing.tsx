@@ -346,66 +346,16 @@ export function TodaysBriefing() {
         throw new Error(errorData.error || 'Failed to generate speech');
       }
 
-      // Create a MediaSource for streaming playback
-      const mediaSource = new MediaSource();
-      const audioUrl = URL.createObjectURL(mediaSource);
+      // Collect response as blob and play directly (MP3 is universally supported)
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
       
       if (audioRef.current) {
         audioRef.current.src = audioUrl;
-        
-        mediaSource.addEventListener('sourceopen', async () => {
-          try {
-            const sourceBuffer = mediaSource.addSourceBuffer('audio/ogg; codecs=opus');
-            const reader = response.body?.getReader();
-            
-            if (!reader) throw new Error('No response body');
-
-            // Start playing as soon as we have some data
-            let hasStartedPlaying = false;
-            
-            const processChunk = async () => {
-              const { done, value } = await reader.read();
-              
-              if (done) {
-                if (mediaSource.readyState === 'open') {
-                  mediaSource.endOfStream();
-                }
-                return;
-              }
-              
-              // Wait for buffer to be ready
-              if (sourceBuffer.updating) {
-                await new Promise(resolve => {
-                  sourceBuffer.addEventListener('updateend', resolve, { once: true });
-                });
-              }
-              
-              sourceBuffer.appendBuffer(value);
-              
-              // Start playback after first chunk
-              if (!hasStartedPlaying && audioRef.current) {
-                await new Promise(resolve => {
-                  sourceBuffer.addEventListener('updateend', resolve, { once: true });
-                });
-                audioRef.current.play();
-                setIsPlaying(true);
-                setIsPaused(false);
-                setIsNarrating(false);
-                hasStartedPlaying = true;
-              }
-              
-              // Process next chunk
-              await processChunk();
-            };
-            
-            await processChunk();
-          } catch (err) {
-            console.error('Error streaming audio:', err);
-            if (mediaSource.readyState === 'open') {
-              mediaSource.endOfStream('decode');
-            }
-          }
-        });
+        await audioRef.current.play();
+        setIsPlaying(true);
+        setIsPaused(false);
+        setIsNarrating(false);
       }
     } catch (error: any) {
       console.error('Error narrating briefing:', error);

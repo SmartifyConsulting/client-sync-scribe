@@ -52,7 +52,7 @@ serve(async (req) => {
     return new Response(response.body, {
       headers: {
         ...corsHeaders,
-        'Content-Type': 'audio/ogg',
+        'Content-Type': 'audio/mpeg',
         'Transfer-Encoding': 'chunked',
       },
     });
