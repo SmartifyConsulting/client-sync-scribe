@@ -43,7 +43,7 @@ import { LollipopDisplay } from "@/components/gamification/LollipopDisplay"; // 
 import { useTemplates } from "@/hooks/useTemplates";
 import { useDocuments } from "@/hooks/useDocuments";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
-import { DrawingPad } from "@/components/drawings/DrawingPad";
+// DrawingPad hidden for later phase
 import {
   Dialog,
   DialogContent,
