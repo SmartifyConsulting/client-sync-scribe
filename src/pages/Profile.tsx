@@ -104,11 +104,25 @@ const CURRENCIES = [
 ];
 
 const SIGNATURE_FONTS = [
-  { value: "fave-script", label: "Fave Script Bold", fontFamily: "'Fave Script', 'Segoe Script', cursive", fontSize: "25px", fontWeight: "bold" },
-  { value: "lucida-calligraphy", label: "Lucida Calligraphy", fontFamily: "'Lucida Calligraphy', 'Lucida Handwriting', 'Apple Chancery', cursive", fontSize: "16px", fontWeight: "normal" },
-  { value: "rastanty-cortez", label: "Rastanty Cortez", fontFamily: "'Rastanty Cortez', 'Brush Script MT', cursive", fontSize: "28px", fontWeight: "bold" },
-  { value: "rochester", label: "Rochester", fontFamily: "'Rochester', cursive", fontSize: "18px", fontWeight: "normal" },
-  { value: "edwardian-script", label: "Edwardian Script", fontFamily: "'Edwardian Script ITC', 'Segoe Script', cursive", fontSize: "26px", fontWeight: "bold" },
+  { value: "allura", label: "Allura", fontFamily: "'Allura', cursive" },
+  { value: "great-vibes", label: "Great Vibes", fontFamily: "'Great Vibes', cursive" },
+  { value: "herr-von-muellerhoff", label: "Herr Von Muellerhoff", fontFamily: "'Herr Von Muellerhoff', cursive" },
+  { value: "homemade-apple", label: "Homemade Apple", fontFamily: "'Homemade Apple', cursive" },
+  { value: "kalam", label: "Kalam", fontFamily: "'Kalam', cursive" },
+  { value: "mr-dafoe", label: "Mr Dafoe", fontFamily: "'Mr Dafoe', cursive" },
+  { value: "petit-formal-script", label: "Petit Formal Script", fontFamily: "'Petit Formal Script', cursive" },
+  { value: "pinyon-script", label: "Pinyon Script", fontFamily: "'Pinyon Script', cursive" },
+  { value: "reenie-beanie", label: "Reenie Beanie", fontFamily: "'Reenie Beanie', cursive" },
+  { value: "rock-salt", label: "Rock Salt", fontFamily: "'Rock Salt', cursive" },
+  { value: "sacramento", label: "Sacramento", fontFamily: "'Sacramento', cursive" },
+];
+
+const SIGNATURE_COLORS = [
+  { value: "black", label: "Black", color: "#000000" },
+  { value: "teal", label: "Teal", color: "#104861" },
+  { value: "navy", label: "Navy", color: "#1a2744" },
+  { value: "dark-red", label: "Dark Red", color: "#8B0000" },
+  { value: "dark-green", label: "Dark Green", color: "#006400" },
 ];
 
 interface Partner {
