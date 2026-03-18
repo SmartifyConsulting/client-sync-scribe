@@ -349,7 +349,21 @@ Rules:
           }
 
           case "write_general_letter": {
-            const letterContent = `<h2>${action.letter_subject || "General Letter"}</h2>
+            const letterReplacements: Record<string, string> = {
+              "ClientName": patientRecord?.name || action.patient_name || "",
+              "PatientName": patientRecord?.name || action.patient_name || "",
+              "Patient Name": patientRecord?.name || action.patient_name || "",
+              "Date": today,
+              "SessionDate": today,
+              "DoctorName": profile?.full_name || "",
+              "PracticeNumber": profile?.practice_number || "",
+              "RegistrationNumber": profile?.doctor_number || "",
+              "PracticeAddress": profile?.practice_address || "",
+              "Subject": action.letter_subject || "General Letter",
+              "Content": action.letter_content || action.description,
+            };
+            const letterTemplateContent = getTemplateContent("General Letterhead", letterReplacements);
+            const letterContent = letterTemplateContent || `<h2>${action.letter_subject || "General Letter"}</h2>
 <p><strong>Date:</strong> ${today}</p>
 <p><strong>From:</strong> ${profile?.full_name || ""}</p>
 <p><strong>Practice Number:</strong> ${profile?.practice_number || ""}</p>
