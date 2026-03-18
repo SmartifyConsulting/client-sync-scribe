@@ -22,8 +22,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 12%;
 
-    /* Healthcare teal - trustworthy & calming */
-    --primary: 172 66% 50%;
+    /* Healthcare teal - trustworthy & calming (darkened for legibility) */
+    --primary: 172 66% 40%;
     --primary-foreground: 0 0% 100%;
     --primary-glow: 172 66% 60%;
     --primary-dark: 176 75% 38%;
@@ -36,7 +36,7 @@
     --muted-foreground: 0 0% 45%;
 
     --accent: 172 50% 95%;
-    --accent-foreground: 172 66% 35%;
+    --accent-foreground: 172 66% 30%;
 
     /* Status colors */
     --destructive: 0 84% 60%;
@@ -165,6 +165,13 @@
   /* Smooth focus states */
   *:focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer base {
+  th,
+  [role="columnheader"] {
+    white-space: nowrap;
   }
 }
 

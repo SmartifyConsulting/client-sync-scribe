@@ -819,9 +819,8 @@ export default function Auth() {
           <div className="w-full max-w-md">
             <div className="text-center mb-8">
               <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
-                <img src={holarcLogo} alt="Holarc Health" className="h-[62px] w-auto" />
+                <img src={holarcLogo} alt="Holarc Health" className="h-[90px] w-auto" />
               </button>
-              <h1 className="text-2xl font-bold text-foreground">Holarc</h1>
               <p className="text-muted-foreground mt-2">Sign In</p>
             </div>
             <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
@@ -865,9 +864,8 @@ export default function Auth() {
         <div className="w-full max-w-md">
           <div className="text-center mb-6">
             <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
-              <img src={holarcLogo} alt="Holarc Health" className="h-[62px] w-auto" />
+              <img src={holarcLogo} alt="Holarc Health" className="h-[90px] w-auto" />
             </button>
-            <h1 className="text-2xl font-bold text-foreground">Holarc</h1>
             <p className="text-muted-foreground mt-1">{userRole === "doctor" ? "Healthcare Provider" : "Patient"} Registration</p>
           </div>
 
