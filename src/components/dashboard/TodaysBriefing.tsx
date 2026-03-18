@@ -355,7 +355,7 @@ export function TodaysBriefing() {
         
         mediaSource.addEventListener('sourceopen', async () => {
           try {
-            const sourceBuffer = mediaSource.addSourceBuffer('audio/mpeg');
+            const sourceBuffer = mediaSource.addSourceBuffer('audio/ogg; codecs=opus');
             const reader = response.body?.getReader();
             
             if (!reader) throw new Error('No response body');

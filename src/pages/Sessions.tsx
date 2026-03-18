@@ -613,7 +613,7 @@ export default function Sessions() {
           
           {/* Patient Selector with Search */}
           {!currentPatient && (
-            <div className="w-full max-w-xs mb-6">
+            <div className="w-full max-w-xs mb-4">
               <Popover open={patientSelectorOpen} onOpenChange={setPatientSelectorOpen}>
                 <PopoverTrigger asChild>
                   <Button
