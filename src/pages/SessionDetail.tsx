@@ -23,6 +23,8 @@ import {
   Download,
   AlertTriangle,
   Star,
+  Edit3,
+  Send,
 } from "lucide-react";
 import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
@@ -32,6 +34,7 @@ import { ReferralLetterEditor } from "@/components/sessions/ReferralLetterEditor
 import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
 import { DrawingPad } from "@/components/drawings/DrawingPad";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useSession } from "@/hooks/useSessions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
