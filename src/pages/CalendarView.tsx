@@ -113,6 +113,7 @@ export default function CalendarView() {
     fetchAppointments();
   }, [selectedDate]);
 
+  const currentDate = new Date();
   const monthName = selectedDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
   const prevMonth = () => {
