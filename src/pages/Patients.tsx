@@ -906,13 +906,13 @@ export default function Patients() {
                         key={patient.id}
                         className="group transition-colors hover:bg-muted/30"
                       >
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-2.5">
                           <Link
                             to={`/patients/${patient.id}`}
-                            className="flex items-center gap-3"
+                            className="flex items-center gap-2.5"
                           >
                             <div className={cn(
-                              "flex h-10 w-10 items-center justify-center rounded-full font-medium",
+                              "flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs",
                               (() => {
                                 const letterIdx = availableLetters.indexOf(letter);
                                 const avatarColors = [
@@ -925,7 +925,7 @@ export default function Patients() {
                             )}>
                               {patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                             </div>
-                            <span className="font-medium text-foreground group-hover:text-primary transition-colors">
+                            <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors whitespace-nowrap">
                               {patient.name.includes(',') ? patient.name : (() => {
                                 const parts = patient.name.trim().split(/\s+/);
                                 if (parts.length <= 1) return patient.name;
@@ -934,58 +934,56 @@ export default function Patients() {
                                 return `${lastName}, ${firstNames}`;
                               })()}
                               {patient.is_chronic && (
-                                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-terracotta/10 px-2 py-0.5 text-[10px] font-bold text-terracotta">
+                                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-terracotta/10 px-1.5 py-0.5 text-[10px] font-bold text-terracotta">
                                   <Pill className="h-2.5 w-2.5" />Chronic
                                 </span>
                               )}
                             </span>
                           </Link>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="space-y-1">
+                        <td className="px-4 py-2.5">
+                          <div className="space-y-0.5">
                             {patient.email && (
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Mail className="h-3.5 w-3.5" />
-                                {patient.email}
+                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <Mail className="h-3 w-3" />
+                                <span className="truncate max-w-[160px]">{patient.email}</span>
                               </div>
                             )}
                             {patient.phone && (
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Phone className="h-3.5 w-3.5" />
+                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <Phone className="h-3 w-3" />
                                 {patient.phone}
                               </div>
                             )}
                             {!patient.email && !patient.phone && (
-                              <span className="text-sm text-muted-foreground">No contact info</span>
+                              <span className="text-xs text-muted-foreground">—</span>
                             )}
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-sm text-muted-foreground">
+                        <td className="px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
                           {patient.last_visit 
                             ? new Date(patient.last_visit).toLocaleDateString() 
-                            : <span className="text-muted-foreground/50">No visits yet</span>
+                            : <span className="text-muted-foreground/50">—</span>
                           }
                         </td>
-                        <td className="px-6 py-4 text-sm text-muted-foreground">
+                        <td className="px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
                           {new Date(patient.created_at).toLocaleDateString()}
                         </td>
-                        <td className="px-6 py-4">
-                          <span
-                            className={cn(
-                              "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
-                              patient.status === "active"
-                                ? "bg-success/10 text-success"
-                                : "bg-muted text-muted-foreground"
-                            )}
-                          >
-                            {patient.status === "active" ? "Active" : "Inactive"}
-                          </span>
+                        <td className="px-3 py-2.5 text-center">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className={cn("mx-auto h-2.5 w-2.5 rounded-full", patient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
+                              </TooltipTrigger>
+                              <TooltipContent>{patient.status === "active" ? "Active" : "Inactive"}</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </td>
-                        <td className="px-6 py-4 text-right">
+                        <td className="px-4 py-2.5 text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreVertical className="h-4 w-4" />
+                              <Button variant="ghost" size="icon" className="h-7 w-7">
+                                <MoreVertical className="h-3.5 w-3.5" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
