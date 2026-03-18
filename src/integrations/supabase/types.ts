@@ -1306,8 +1306,11 @@ export type Database = {
           preferred_language: string | null
           role: Database["public"]["Enums"]["user_role"] | null
           round_table_enabled: boolean | null
+          signature_bold: boolean | null
           signature_color: string | null
           signature_font: string | null
+          signature_font_size: number | null
+          signature_italic: boolean | null
           signature_url: string | null
           specialty: string | null
           status: string | null
@@ -1334,8 +1337,11 @@ export type Database = {
           preferred_language?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           round_table_enabled?: boolean | null
+          signature_bold?: boolean | null
           signature_color?: string | null
           signature_font?: string | null
+          signature_font_size?: number | null
+          signature_italic?: boolean | null
           signature_url?: string | null
           specialty?: string | null
           status?: string | null
@@ -1362,8 +1368,11 @@ export type Database = {
           preferred_language?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           round_table_enabled?: boolean | null
+          signature_bold?: boolean | null
           signature_color?: string | null
           signature_font?: string | null
+          signature_font_size?: number | null
+          signature_italic?: boolean | null
           signature_url?: string | null
           specialty?: string | null
           status?: string | null
