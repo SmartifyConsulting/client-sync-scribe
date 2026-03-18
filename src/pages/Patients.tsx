@@ -888,7 +888,7 @@ export default function Patients() {
                   <React.Fragment key={letter}>
                     <tr id={`patient-group-${letter}`}>
                       <td colSpan={6} className={cn(
-                        "px-6 py-2 sticky top-0",
+                        "px-4 py-1.5 sticky top-0",
                         (() => {
                           const idx = availableLetters.indexOf(letter);
                           const colors = [
@@ -899,7 +899,7 @@ export default function Patients() {
                           return colors[idx % 3];
                         })()
                       )}>
-                        <span className="text-sm font-bold text-primary">{letter}</span>
+                        <span className="text-xs font-bold text-primary">{letter}</span>
                       </td>
                     </tr>
                     {groupedPatients[letter].map((patient) => (
