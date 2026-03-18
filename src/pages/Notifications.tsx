@@ -20,6 +20,7 @@ import {
   UserX,
   Volume2,
   VolumeX,
+  MessageCircle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
