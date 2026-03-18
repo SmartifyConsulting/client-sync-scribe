@@ -179,7 +179,7 @@
 @layer components {
   /* Airbnb-style cards */
   .card-modern {
-    @apply rounded-2xl bg-card border-0 transition-all duration-300;
+    @apply rounded-2xl bg-card border border-border transition-all duration-300 px-8 py-6;
     box-shadow: var(--shadow-card);
   }
 
@@ -190,7 +190,7 @@
 
   /* Clean stat cards */
   .stat-card {
-    @apply rounded-2xl bg-card p-6 transition-all duration-200;
+    @apply rounded-2xl bg-card p-8 transition-all duration-200 border border-border;
     box-shadow: var(--shadow-sm);
   }
 
@@ -200,7 +200,7 @@
 
   /* Modern input styles */
   .input-modern {
-    @apply rounded-xl border-2 border-transparent bg-secondary/50 px-4 py-3 transition-all duration-200;
+    @apply rounded-xl border border-border bg-muted/50 px-4 py-3 transition-all duration-200;
   }
 
   .input-modern:focus {
@@ -219,7 +219,7 @@
   }
 
   .nav-item:hover {
-    @apply bg-secondary;
+    @apply bg-muted;
   }
 
   .nav-item.active {
