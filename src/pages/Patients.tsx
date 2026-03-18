@@ -823,10 +823,10 @@ export default function Patients() {
                     <tr className="group transition-colors bg-gray-100 hover:bg-gray-200/60 dark:bg-gray-800/20 dark:hover:bg-gray-800/30">
                       <td className="px-4 py-2.5">
                         <Link to={`/patients/${mePatient.id}`} className="flex items-center gap-2.5">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs bg-[#E53935] text-white">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs bg-[#E01837] text-white">
                             ME
                           </div>
-                          <span className="font-medium text-sm text-foreground group-hover:text-[#E53935] dark:group-hover:text-red-400 transition-colors whitespace-nowrap">
+                          <span className="font-medium text-sm text-foreground group-hover:text-[#E01837] dark:group-hover:text-red-400 transition-colors whitespace-nowrap">
                             {mePatient.name.includes(',') ? mePatient.name : (() => {
                               const parts = mePatient.name.trim().split(/\s+/);
                               if (parts.length <= 1) return mePatient.name;
