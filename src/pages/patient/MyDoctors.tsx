@@ -90,7 +90,27 @@ export default function MyDoctors() {
     }
   };
 
-  const DoctorCard = ({ doctor, permissions, isSearchResult }: { doctor: DoctorProfile; permissions?: string[]; isSearchResult?: boolean }) => (
+  const getSpecialtyColor = (specialty: string): string => {
+    const s = specialty.toLowerCase();
+    if (s.includes("cardio")) return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300";
+    if (s.includes("dent")) return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300";
+    if (s.includes("derma")) return "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300";
+    if (s.includes("ortho")) return "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300";
+    if (s.includes("neuro")) return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300";
+    if (s.includes("paed") || s.includes("pedia")) return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300";
+    if (s.includes("psych")) return "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300";
+    if (s.includes("general") || s.includes("gp") || s.includes("family")) return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300";
+    if (s.includes("obst") || s.includes("gyn")) return "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300";
+    if (s.includes("ophthal") || s.includes("eye")) return "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300";
+    if (s.includes("ent") || s.includes("ear")) return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300";
+    if (s.includes("surg")) return "bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300";
+    return "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300";
+  };
+
+  const DoctorCard = ({ doctor, permissions, isSearchResult }: { doctor: DoctorProfile; permissions?: string[]; isSearchResult?: boolean }) => {
+    const filteredPermissions = permissions?.filter(p => p !== 'patient_info' && p !== 'patient_information');
+
+    return (
     <Card className="overflow-hidden">
       <CardHeader className="pb-3">
         <div className="flex items-start gap-4">
@@ -109,9 +129,9 @@ export default function MyDoctors() {
               {doctor.full_name || "Unknown Doctor"}
             </CardTitle>
             {doctor.specialty && (
-              <CardDescription className="mt-0.5">
+              <Badge className={`mt-1 text-xs font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
                 {doctor.specialty}
-              </CardDescription>
+              </Badge>
             )}
           </div>
         </div>
