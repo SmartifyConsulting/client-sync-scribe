@@ -269,7 +269,22 @@ Rules:
           }
 
           case "write_medical_certificate": {
-            const certContent = `<h2>Medical Certificate</h2>
+            const certReplacements: Record<string, string> = {
+              "ClientName": patientRecord?.name || action.patient_name || "",
+              "PatientName": patientRecord?.name || action.patient_name || "",
+              "Patient Name": patientRecord?.name || action.patient_name || "",
+              "Date": today,
+              "SessionDate": today,
+              "DoctorName": profile?.full_name || "",
+              "PracticeNumber": profile?.practice_number || "",
+              "RegistrationNumber": profile?.doctor_number || "",
+              "PracticeAddress": profile?.practice_address || "",
+              "Reason": action.certificate_reason || "Medical condition",
+              "StartDate": action.leave_start || today,
+              "EndDate": action.leave_end || today,
+            };
+            const templateContent = getTemplateContent("Medical Certificate", certReplacements);
+            const certContent = templateContent || `<h2>Medical Certificate</h2>
 <p><strong>Patient:</strong> ${patientRecord?.name || action.patient_name}</p>
 <p><strong>Date:</strong> ${today}</p>
 <p><strong>Doctor:</strong> ${profile?.full_name || ""}</p>
