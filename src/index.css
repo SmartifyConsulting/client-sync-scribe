@@ -150,6 +150,7 @@
 @layer base {
   * {
     @apply border-border;
+    border-width: 1px;
   }
 
   html {
@@ -167,6 +168,11 @@
   /* Smooth focus states */
   *:focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Table nowrap + horizontal scroll */
+  th, td {
+    white-space: nowrap;
   }
 }
 
