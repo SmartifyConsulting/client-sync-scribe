@@ -724,6 +724,14 @@ export default function Profile() {
             </div>
           </TabsContent>
 
+          {/* === PATIENTS TAB === */}
+          <TabsContent value="patients">
+            <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+              <p className="text-sm text-muted-foreground">Import patients from a spreadsheet file. Drag and drop or browse to upload.</p>
+              <PatientImport />
+            </div>
+          </TabsContent>
+
           {/* === PRICING TAB === */}
           <TabsContent value="pricing">
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">

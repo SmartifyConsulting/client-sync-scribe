@@ -550,7 +550,7 @@ export default function CalendarView() {
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-terracotta text-sm font-bold text-white shrink-0">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white shrink-0" style={{ backgroundColor: getTypeColor(event.type) || 'hsl(350, 78%, 55%)' }}>
                             {initials}
                           </div>
                         </TooltipTrigger>

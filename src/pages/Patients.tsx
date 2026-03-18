@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock, X, CalendarIcon, Upload, Pill, Send } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

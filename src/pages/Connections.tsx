@@ -353,8 +353,8 @@ export default function Connections() {
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "connections" | "pending")}>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <TabsList>
-            <TabsTrigger value="connections" className="gap-2">
+          <TabsList className="bg-primary">
+            <TabsTrigger value="connections" className="gap-2 data-[state=active]:bg-white data-[state=active]:text-black text-white">
               <UserCheck className="h-4 w-4" />
               Connected
               {connections.length > 0 && (
@@ -363,11 +363,11 @@ export default function Connections() {
                 </Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="pending" className="gap-2">
+            <TabsTrigger value="pending" className="gap-2 data-[state=active]:bg-white data-[state=active]:text-black text-white">
               <Clock className="h-4 w-4" />
               Pending
               {pendingInvitations.length > 0 && (
-                <Badge variant="outline" className="ml-1">
+                <Badge variant="outline" className="ml-1 border-white/50 text-white data-[state=active]:border-border data-[state=active]:text-foreground">
                   {pendingInvitations.length}
                 </Badge>
               )}
