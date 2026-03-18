@@ -229,7 +229,7 @@ export default function Sessions() {
   }, [notes]);
 
   // Callback to handle session completion after transcription
-  const handleSessionComplete = useCallback(async (transcriptText: string, visitCategory?: string | null) => {
+  const handleSessionComplete = useCallback(async (transcriptText: string, visitCategories?: string[] | null) => {
     console.log("=== handleSessionComplete START ===");
     console.log("transcriptText length:", transcriptText?.length);
     console.log("visitCategory:", visitCategory);
