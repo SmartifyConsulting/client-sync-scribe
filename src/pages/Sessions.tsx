@@ -99,6 +99,7 @@ export default function Sessions() {
   const pendingCompletionRef = useRef(false);
   const latestTranscriptRef = useRef<string>("");
   const currentSessionIdRef = useRef<string | null>(null);
+  const [showStarRating, setShowStarRating] = useState(false);
   const notesRef = useRef<string>("");
   const sessionStartTimeRef = useRef<Date | null>(null);
 
