@@ -325,6 +325,36 @@ export type Database = {
         }
         Relationships: []
       }
+      doctor_rewards: {
+        Row: {
+          awarded_at: string | null
+          description: string | null
+          doctor_id: string
+          id: string
+          moolas_count: number
+          reference_id: string | null
+          reward_type: string
+        }
+        Insert: {
+          awarded_at?: string | null
+          description?: string | null
+          doctor_id: string
+          id?: string
+          moolas_count?: number
+          reference_id?: string | null
+          reward_type: string
+        }
+        Update: {
+          awarded_at?: string | null
+          description?: string | null
+          doctor_id?: string
+          id?: string
+          moolas_count?: number
+          reference_id?: string | null
+          reward_type?: string
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           content: string
@@ -384,6 +414,50 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      emoticon_messages: {
+        Row: {
+          created_at: string | null
+          emoticon: string
+          id: string
+          is_ai_flagged: boolean | null
+          moolas_awarded: number | null
+          patient_id: string
+          profile_viewed: boolean | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          emoticon: string
+          id?: string
+          is_ai_flagged?: boolean | null
+          moolas_awarded?: number | null
+          patient_id: string
+          profile_viewed?: boolean | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string | null
+          emoticon?: string
+          id?: string
+          is_ai_flagged?: boolean | null
+          moolas_awarded?: number | null
+          patient_id?: string
+          profile_viewed?: boolean | null
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emoticon_messages_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
             referencedColumns: ["id"]
           },
         ]
@@ -1189,6 +1263,27 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_view_log: {
+        Row: {
+          id: string
+          patient_id: string
+          viewed_at: string | null
+          viewer_id: string
+        }
+        Insert: {
+          id?: string
+          patient_id: string
+          viewed_at?: string | null
+          viewer_id: string
+        }
+        Update: {
+          id?: string
+          patient_id?: string
+          viewed_at?: string | null
+          viewer_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           auto_email_certificate_to_employer: boolean | null
@@ -1802,6 +1897,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      visit_ratings: {
+        Row: {
+          created_at: string | null
+          id: string
+          rated_user_id: string
+          rater_id: string
+          rater_role: string
+          rating: number
+          session_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          rated_user_id: string
+          rater_id: string
+          rater_role: string
+          rating: number
+          session_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          rated_user_id?: string
+          rater_id?: string
+          rater_role?: string
+          rating?: number
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visit_ratings_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
