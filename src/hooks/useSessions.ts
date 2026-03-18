@@ -337,15 +337,31 @@ const completeSession = async (
 <p>${admission.special_instructions || 'None'}</p>`;
           }
 
-          await supabase.from('documents').insert({
+          const { data: admissionDoc } = await supabase.from('documents').insert({
             user_id: user.id,
             patient_id: patientId,
             name: `Hospital Admission - ${patientRecord?.name || 'Patient'} - ${today}`,
             content: admissionContent,
             template_name: 'Hospital Admission Form',
             patient_name: patientRecord?.name || null,
-          });
+            is_draft: true,
+            session_id: sessionId,
+          } as any).select('id').single();
           console.log('Hospital admission document auto-created');
+
+          // Create review todo for the draft document
+          if (admissionDoc) {
+            await supabase.from('todos').insert({
+              user_id: user.id,
+              session_id: sessionId,
+              patient_id: patientId,
+              title: `Review & Send: Hospital Admission - ${patientRecord?.name || 'Patient'}`,
+              document_id: admissionDoc.id,
+              task_type: 'document_review',
+              priority: 'high',
+              status: 'pending',
+            } as any);
+          }
           toast({ title: '🏥 Admission Form Created', description: 'Hospital admission form was auto-generated from the session' });
         } catch (admError) {
           console.error('Error creating admission document:', admError);

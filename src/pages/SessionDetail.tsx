@@ -91,6 +91,64 @@ export default function SessionDetail() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [showStarRating, setShowStarRating] = useState(false);
   const [hasRated, setHasRated] = useState(false);
+  const [sessionDocs, setSessionDocs] = useState<any[]>([]);
+  const [sendingDocId, setSendingDocId] = useState<string | null>(null);
+
+  // Fetch session documents
+  useEffect(() => {
+    if (!id) return;
+    const fetchDocs = async () => {
+      const { data } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('session_id' as any, id)
+        .order('created_at', { ascending: false });
+      setSessionDocs(data || []);
+    };
+    fetchDocs();
+  }, [id]);
+
+  const handleSendDocument = async (doc: any) => {
+    setSendingDocId(doc.id);
+    try {
+      // Get patient email for sending
+      const { data: patient } = await supabase
+        .from('patients')
+        .select('email, pharmacy_email, name')
+        .eq('id', doc.patient_id)
+        .maybeSingle();
+      
+      const recipientEmail = doc.template_name?.toLowerCase().includes('prescription')
+        ? patient?.pharmacy_email || patient?.email
+        : patient?.email;
+
+      if (recipientEmail) {
+        await supabase.functions.invoke('send-document-email', {
+          body: { documentId: doc.id, recipientEmail },
+        });
+      }
+
+      // Update document status
+      await supabase.from('documents').update({ 
+        email_sent_at: new Date().toISOString(),
+        is_draft: false,
+      } as any).eq('id', doc.id);
+
+      // Mark corresponding todo as completed
+      await supabase.from('todos')
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
+        .eq('document_id' as any, doc.id);
+
+      setSessionDocs(prev => prev.map(d => 
+        d.id === doc.id ? { ...d, email_sent_at: new Date().toISOString(), is_draft: false } : d
+      ));
+      toast({ title: "Document sent", description: `${doc.name} has been sent successfully.` });
+    } catch (err) {
+      toast({ title: "Send failed", variant: "destructive" });
+    } finally {
+      setSendingDocId(null);
+    }
+  };
 
   // Check if user has already rated this session
   useEffect(() => {
