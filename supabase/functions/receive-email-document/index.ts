@@ -53,8 +53,8 @@ serve(async (req) => {
     let profile = null;
     let profileError = null;
 
-    // Check if it's a custom alias format: {alias}@medipad.com
-    const aliasMatch = recipientEmail.match(/^([a-z0-9-]+)@medipad\.com$/i);
+    // Check if it's a custom alias format: {alias}@holarc.com
+    const aliasMatch = recipientEmail.match(/^([a-z0-9-]+)@holarc\.com$/i);
     
     if (aliasMatch) {
       const alias = aliasMatch[1];
