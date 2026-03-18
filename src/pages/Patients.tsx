@@ -881,19 +881,8 @@ export default function Patients() {
                 {(selectedLetter ? availableLetters.filter(l => l === selectedLetter) : availableLetters.sort()).map((letter) => (
                   <React.Fragment key={letter}>
                     <tr id={`patient-group-${letter}`}>
-                      <td colSpan={6} className={cn(
-                        "px-4 py-1.5 sticky top-0",
-                        (() => {
-                          const idx = availableLetters.indexOf(letter);
-                          const colors = [
-                            "bg-teal-50/60 dark:bg-teal-950/30",
-                            "bg-amber-50/60 dark:bg-amber-950/30",
-                            "bg-orange-50/60 dark:bg-orange-950/30",
-                          ];
-                          return colors[idx % 3];
-                        })()
-                      )}>
-                        <span className="text-xs font-bold text-primary">{letter}</span>
+                      <td colSpan={6} className="px-4 py-1.5 sticky top-0 bg-[#E01837]">
+                        <span className="text-xs font-bold text-white">{letter}</span>
                       </td>
                     </tr>
                     {groupedPatients[letter].map((patient) => (

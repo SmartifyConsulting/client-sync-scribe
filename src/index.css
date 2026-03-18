@@ -115,11 +115,11 @@
     --warning: 38 80% 55%;
     --warning-foreground: 0 0% 100%;
 
-    /* Holarc red accent (from logo heart) */
-    --terracotta: 350 72% 62%;
+    /* Holarc red accent (from logo heart) — #E01837 */
+    --terracotta: 351 75% 57%;
     --terracotta-foreground: 0 0% 100%;
-    --terracotta-light: 350 72% 72%;
-    --terracotta-dark: 350 72% 52%;
+    --terracotta-light: 351 75% 67%;
+    --terracotta-dark: 351 75% 47%;
 
     --border: 0 0% 18%;
     --input: 0 0% 18%;
