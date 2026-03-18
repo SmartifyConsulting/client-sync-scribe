@@ -247,7 +247,7 @@ export default function Sessions() {
         null, // no existing session ID
         fullContent || '',
         currentNotes,
-        visitCategory || undefined,
+        visitCategories?.[0] || undefined,
         {
           patient_id: patientId!,
           title: `Session - ${new Date().toLocaleDateString()}`,
