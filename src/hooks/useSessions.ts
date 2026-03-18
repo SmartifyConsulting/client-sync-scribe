@@ -276,20 +276,46 @@ const completeSession = async (
       if (summaryData?.hospital_admission && patientId) {
         try {
           const admission = summaryData.hospital_admission;
-          const { data: patientRecord } = await supabase
-            .from('patients')
-            .select('name')
-            .eq('id', patientId)
-            .maybeSingle();
-          
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('full_name, practice_number, doctor_number, specialty')
-            .eq('id', user.id)
-            .maybeSingle();
+          const [patientRes, profileRes, templateRes] = await Promise.all([
+            supabase.from('patients').select('name').eq('id', patientId).maybeSingle(),
+            supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty').eq('id', user.id).maybeSingle(),
+            supabase.from('templates').select('id, name, content, header_footer_template_id').eq('user_id', user.id),
+          ]);
+
+          const patientRecord = patientRes.data;
+          const profileData = profileRes.data;
+          const doctorTemplates = templateRes.data || [];
 
           const today = new Date().toISOString().split('T')[0];
-          const admissionContent = `<h2>Hospital Admission Form</h2>
+
+          // Try to use doctor's Hospital Admission template
+          const admissionTemplate = doctorTemplates.find(t => 
+            t.name.toLowerCase().includes('hospital admission') || t.name.toLowerCase().includes('admission')
+          );
+
+          let admissionContent: string;
+          if (admissionTemplate) {
+            const replacements: Record<string, string> = {
+              'ClientName': patientRecord?.name || 'Unknown',
+              'PatientName': patientRecord?.name || 'Unknown',
+              'Patient Name': patientRecord?.name || 'Unknown',
+              'Date': today,
+              'SessionDate': today,
+              'DoctorName': profileData?.full_name || '',
+              'PracticeNumber': profileData?.practice_number || '',
+              'RegistrationNumber': profileData?.doctor_number || '',
+              'AdmissionDate': admission.admission_date || 'TBD',
+              'Hospital': admission.hospital_name || 'TBD',
+              'Diagnosis': admission.diagnosis || '',
+              'Procedure': admission.procedure || 'To be determined',
+              'SpecialInstructions': admission.special_instructions || 'None',
+            };
+            admissionContent = admissionTemplate.content;
+            for (const [key, value] of Object.entries(replacements)) {
+              admissionContent = admissionContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
+            }
+          } else {
+            admissionContent = `<h2>Hospital Admission Form</h2>
 <p><strong>Date:</strong> ${today}</p>
 <p><strong>Patient:</strong> ${patientRecord?.name || 'Unknown'}</p>
 <p><strong>Doctor:</strong> ${profileData?.full_name || ''}</p>
@@ -308,6 +334,7 @@ const completeSession = async (
 <br/>
 <h3>Special Instructions</h3>
 <p>${admission.special_instructions || 'None'}</p>`;
+          }
 
           await supabase.from('documents').insert({
             user_id: user.id,

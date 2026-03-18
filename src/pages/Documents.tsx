@@ -142,7 +142,7 @@ export default function Documents() {
     updateTemplate: updateHFTemplate,
     deleteTemplate: deleteHFTemplate,
   } = useHeaderFooterTemplates();
-  const { documents, loading: documentsLoading, deleteDocument } = useDocuments();
+  const { documents, loading: documentsLoading, deleteDocument, updateDocument } = useDocuments();
   const { profile } = useProfile();
 
   const [activeTab, setActiveTab] = useState("content");
@@ -162,6 +162,9 @@ export default function Documents() {
   const [shareDocument, setShareDocument] = useState<Document | null>(null);
   const [shareEmail, setShareEmail] = useState("");
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [editingDocument, setEditingDocument] = useState<Document | null>(null);
+  const [editDocName, setEditDocName] = useState("");
+  const [editDocContent, setEditDocContent] = useState("");
 
   // Transform database templates to display format
   const templates: DisplayTemplate[] = dbTemplates.map((t) => ({
