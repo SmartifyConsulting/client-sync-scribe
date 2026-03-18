@@ -48,11 +48,11 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    /* Terracotta secondary accent */
-    --terracotta: 16 76% 52%;
+    /* Holarc red accent (from logo heart) */
+    --terracotta: 350 78% 55%;
     --terracotta-foreground: 0 0% 100%;
-    --terracotta-light: 16 76% 62%;
-    --terracotta-dark: 16 76% 42%;
+    --terracotta-light: 350 78% 65%;
+    --terracotta-dark: 350 78% 45%;
 
     /* Borders - very subtle */
     --border: 220 13% 91%;
