@@ -27,6 +27,7 @@ import {
   ShieldAlert,
   PenTool,
   FileText as FileTextIcon,
+  Download,
 } from "lucide-react";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
