@@ -199,7 +199,7 @@ const handler = async (req: Request): Promise<Response> => {
           <div style="text-align: center; margin: 30px 0;"><a href="${appUrl}" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block; font-size: 16px;">${isPracticePartner ? "Log In & Set Password" : "Join Holarc Now"}</a></div>
           <p style="color: #64748b; font-size: 14px;">This invitation expires in 7 days.</p>
           <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
-          <p style="color: #94a3b8; font-size: 12px; margin-bottom: 0;">MediPad - Secure Healthcare Management</p>
+          <p style="color: #94a3b8; font-size: 12px; margin-bottom: 0;">Holarc Health - Secure Healthcare Management</p>
         </div>
       </body></html>
     `;
