@@ -15,31 +15,33 @@
     --background: 0 0% 100%;
     --foreground: 0 0% 12%;
 
-    /* Elevated surfaces with subtle warmth */
+    /* Elevated surfaces */
     --card: 0 0% 100%;
     --card-foreground: 0 0% 12%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 12%;
 
-    /* Healthcare teal - trustworthy & calming */
-    --primary: 172 66% 50%;
+    /* Primary Teal — Holarc Health */
+    --primary: 180 100% 35%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 172 66% 60%;
-    --primary-dark: 176 75% 38%;
+    --primary-glow: 180 80% 45%;
+    --primary-dark: 180 100% 28%;
 
-    /* Neutral grays */
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 0 0% 25%;
+    /* Secondary — Lilac Hue */
+    --secondary: 260 10% 58%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 0 0% 45%;
+    /* Muted — Soft Lavender */
+    --muted: 260 20% 96%;
+    --muted-foreground: 260 10% 45%;
 
-    --accent: 172 50% 95%;
-    --accent-foreground: 172 66% 35%;
+    /* Accent — Deep Plum */
+    --accent: 339 43% 34%;
+    --accent-foreground: 0 0% 100%;
 
     /* Status colors */
-    --destructive: 0 84% 60%;
+    --destructive: 354 77% 50%;
     --destructive-foreground: 0 0% 100%;
 
     --success: 152 69% 45%;
@@ -54,32 +56,32 @@
     --terracotta-light: 350 78% 65%;
     --terracotta-dark: 350 78% 45%;
 
-    /* Borders - very subtle */
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 172 66% 50%;
+    /* Borders — light lilac */
+    --border: 260 20% 91%;
+    --input: 260 20% 91%;
+    --ring: 180 100% 35%;
 
     --radius: 1rem;
 
-    /* Modern shadows - soft & diffused */
+    /* Modern shadows */
     --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.03);
     --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
-    --shadow-glow: 0 0 0 3px hsl(172 66% 50% / 0.1);
+    --shadow-glow: 0 0 0 3px hsl(180 100% 35% / 0.1);
     --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 6px 16px rgb(0 0 0 / 0.04);
     --shadow-card-hover: 0 2px 8px 0 rgb(0 0 0 / 0.06), 0 12px 24px rgb(0 0 0 / 0.08);
 
-    /* Sidebar - clean white */
+    /* Sidebar */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 35%;
-    --sidebar-primary: 172 66% 50%;
+    --sidebar-foreground: 260 10% 35%;
+    --sidebar-primary: 180 100% 35%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 172 50% 96%;
-    --sidebar-accent-foreground: 172 66% 35%;
-    --sidebar-border: 220 13% 93%;
-    --sidebar-ring: 172 66% 50%;
+    --sidebar-accent: 260 20% 96%;
+    --sidebar-accent-foreground: 180 100% 28%;
+    --sidebar-border: 260 20% 93%;
+    --sidebar-ring: 180 100% 35%;
   }
 
   .dark {
