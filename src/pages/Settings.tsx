@@ -100,6 +100,7 @@ export default function Settings() {
   const { user } = useAuth();
   const { role } = useUserRole();
   const [searchParams] = useSearchParams();
+  const { isConnected: googleRealConnected, isConnecting: googleRealConnecting, connect: googleConnect, disconnect: googleDisconnect } = useGoogleCalendar();
 
   const [googleConnected, setGoogleConnected] = useState(false);
   const [outlookConnected, setOutlookConnected] = useState(false);
