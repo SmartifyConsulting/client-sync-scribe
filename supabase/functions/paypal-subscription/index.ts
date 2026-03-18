@@ -432,27 +432,27 @@ serve(async (req) => {
           const userEmail = await getUserEmail(supabase, subscription.user_id);
           if (userEmail) {
             const emailSubject = isTrial 
-              ? "Welcome to MediPad - Your 7-Day Free Trial Has Started!"
-              : "Welcome to MediPad - Subscription Activated!";
+              ? "Welcome to Holarc - Your 7-Day Free Trial Has Started!"
+              : "Welcome to Holarc - Subscription Activated!";
             
             const trialEndDate = trialEndsAt?.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
             const billingDate = periodEnd?.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
             const emailContent = isTrial ? `
               <h1>Your Free Trial Has Started!</h1>
-              <p>Welcome to MediPad! Your 7-day free trial is now active.</p>
+              <p>Welcome to Holarc! Your 7-day free trial is now active.</p>
               <p><strong>Trial ends:</strong> ${trialEndDate}</p>
               <p><strong>Plan:</strong> ${plan?.name || "Subscription"}</p>
               <p><strong>After trial:</strong> $${plan?.price.toFixed(2) || "0.00"} USD/month</p>
-              <p>You have full access to all MediPad features during your trial. If you wish to cancel, please do so before ${trialEndDate} to avoid being charged.</p>
-              <p>Best regards,<br>The MediPad Team</p>
+              <p>You have full access to all Holarc features during your trial. If you wish to cancel, please do so before ${trialEndDate} to avoid being charged.</p>
+              <p>Best regards,<br>The Holarc Team</p>
             ` : `
               <h1>Your Subscription is Active!</h1>
-              <p>Thank you for subscribing to MediPad!</p>
+              <p>Thank you for subscribing to Holarc!</p>
               <p><strong>Plan:</strong> ${plan?.name || "Subscription"}</p>
               <p><strong>Amount:</strong> $${plan?.price.toFixed(2) || "0.00"} USD</p>
               <p><strong>Next billing date:</strong> ${billingDate}</p>
-              <p>Best regards,<br>The MediPad Team</p>
+              <p>Best regards,<br>The Holarc Team</p>
             `;
 
             await sendSubscriptionEmail(userEmail, emailSubject, emailContent);
