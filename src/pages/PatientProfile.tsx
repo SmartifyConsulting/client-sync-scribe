@@ -240,6 +240,13 @@ export default function PatientProfile() {
               patientName={patient.name} 
             />
             <InvitePatientDialog patientId={patient.id} patientName={patient.name} />
+            {(patient as any).patient_user_id && (
+              <EmoticonSender
+                recipientId={(patient as any).patient_user_id}
+                patientId={patient.id}
+                recipientName={patient.name}
+              />
+            )}
             <Button variant="outline" size="sm" className="gap-1.5" onClick={handleScheduleAppointment}>
               <Calendar className="h-3.5 w-3.5" />
               Schedule
