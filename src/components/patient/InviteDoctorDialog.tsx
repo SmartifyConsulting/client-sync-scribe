@@ -58,8 +58,11 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
     "patient_info", "calendar", "session_summaries", "prescription_history",
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [sendingInvite, setSendingInvite] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { profile } = useProfile();
 
   useEffect(() => {
     if (open) {
