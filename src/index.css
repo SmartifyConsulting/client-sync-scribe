@@ -15,33 +15,31 @@
     --background: 0 0% 100%;
     --foreground: 0 0% 12%;
 
-    /* Elevated surfaces */
+    /* Elevated surfaces with subtle warmth */
     --card: 0 0% 100%;
     --card-foreground: 0 0% 12%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 12%;
 
-    /* Primary Teal — Holarc Health */
-    --primary: 180 100% 35%;
+    /* Healthcare teal - trustworthy & calming */
+    --primary: 172 66% 50%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 180 80% 45%;
-    --primary-dark: 180 100% 28%;
+    --primary-glow: 172 66% 60%;
+    --primary-dark: 176 75% 38%;
 
-    /* Secondary — Lilac Hue */
-    --secondary: 260 10% 58%;
-    --secondary-foreground: 0 0% 100%;
+    /* Neutral grays */
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 0 0% 25%;
 
-    /* Muted — Soft Lavender */
-    --muted: 260 20% 96%;
-    --muted-foreground: 260 10% 45%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    /* Accent — Deep Plum */
-    --accent: 339 43% 34%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 172 50% 95%;
+    --accent-foreground: 172 66% 35%;
 
     /* Status colors */
-    --destructive: 354 77% 50%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --success: 152 69% 45%;
@@ -56,32 +54,32 @@
     --terracotta-light: 350 78% 65%;
     --terracotta-dark: 350 78% 45%;
 
-    /* Borders — light lilac */
-    --border: 260 20% 91%;
-    --input: 260 20% 91%;
-    --ring: 180 100% 35%;
+    /* Borders - very subtle */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 172 66% 50%;
 
     --radius: 1rem;
 
-    /* Modern shadows */
+    /* Modern shadows - soft & diffused */
     --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.03);
     --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
-    --shadow-glow: 0 0 0 3px hsl(180 100% 35% / 0.1);
+    --shadow-glow: 0 0 0 3px hsl(172 66% 50% / 0.1);
     --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 6px 16px rgb(0 0 0 / 0.04);
     --shadow-card-hover: 0 2px 8px 0 rgb(0 0 0 / 0.06), 0 12px 24px rgb(0 0 0 / 0.08);
 
-    /* Sidebar */
+    /* Sidebar - clean white */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 260 10% 35%;
-    --sidebar-primary: 180 100% 35%;
+    --sidebar-foreground: 0 0% 35%;
+    --sidebar-primary: 172 66% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 260 20% 96%;
-    --sidebar-accent-foreground: 180 100% 28%;
-    --sidebar-border: 260 20% 93%;
-    --sidebar-ring: 180 100% 35%;
+    --sidebar-accent: 172 50% 96%;
+    --sidebar-accent-foreground: 172 66% 35%;
+    --sidebar-border: 220 13% 93%;
+    --sidebar-ring: 172 66% 50%;
   }
 
   .dark {
@@ -94,21 +92,21 @@
     --popover: 0 0% 10%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 180 80% 45%;
+    --primary: 172 60% 55%;
     --primary-foreground: 0 0% 5%;
-    --primary-glow: 180 70% 55%;
-    --primary-dark: 180 90% 35%;
+    --primary-glow: 172 60% 65%;
+    --primary-dark: 176 70% 45%;
 
-    --secondary: 260 10% 30%;
-    --secondary-foreground: 260 10% 85%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 90%;
 
-    --muted: 260 10% 15%;
-    --muted-foreground: 260 10% 55%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 55%;
 
-    --accent: 339 35% 25%;
-    --accent-foreground: 339 30% 75%;
+    --accent: 172 40% 15%;
+    --accent-foreground: 172 60% 70%;
 
-    --destructive: 354 70% 55%;
+    --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
     --success: 152 55% 50%;
@@ -123,34 +121,33 @@
     --terracotta-light: 350 72% 72%;
     --terracotta-dark: 350 72% 52%;
 
-    --border: 260 10% 18%;
-    --input: 260 10% 18%;
-    --ring: 180 80% 45%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 172 60% 55%;
 
     --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.2);
     --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.3);
-    --shadow-glow: 0 0 0 3px hsl(180 80% 45% / 0.2);
+    --shadow-glow: 0 0 0 3px hsl(172 60% 55% / 0.2);
     --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 6px 16px rgb(0 0 0 / 0.3);
     --shadow-card-hover: 0 2px 8px 0 rgb(0 0 0 / 0.4), 0 12px 24px rgb(0 0 0 / 0.4);
 
     --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 260 10% 75%;
-    --sidebar-primary: 180 80% 45%;
+    --sidebar-foreground: 0 0% 75%;
+    --sidebar-primary: 172 60% 55%;
     --sidebar-primary-foreground: 0 0% 5%;
-    --sidebar-accent: 339 30% 15%;
-    --sidebar-accent-foreground: 180 70% 65%;
-    --sidebar-border: 260 10% 15%;
-    --sidebar-ring: 180 80% 45%;
+    --sidebar-accent: 172 40% 12%;
+    --sidebar-accent-foreground: 172 60% 70%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 172 60% 55%;
   }
 }
 
 @layer base {
   * {
     @apply border-border;
-    border-width: 1px;
   }
 
   html {
@@ -169,17 +166,12 @@
   *:focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
-
-  /* Table nowrap + horizontal scroll */
-  th, td {
-    white-space: nowrap;
-  }
 }
 
 @layer components {
   /* Airbnb-style cards */
   .card-modern {
-    @apply rounded-2xl bg-card border border-border transition-all duration-300 px-8 py-6;
+    @apply rounded-2xl bg-card border-0 transition-all duration-300;
     box-shadow: var(--shadow-card);
   }
 
@@ -190,7 +182,7 @@
 
   /* Clean stat cards */
   .stat-card {
-    @apply rounded-2xl bg-card p-8 transition-all duration-200 border border-border;
+    @apply rounded-2xl bg-card p-6 transition-all duration-200;
     box-shadow: var(--shadow-sm);
   }
 
@@ -200,7 +192,7 @@
 
   /* Modern input styles */
   .input-modern {
-    @apply rounded-xl border border-border bg-muted/50 px-4 py-3 transition-all duration-200;
+    @apply rounded-xl border-2 border-transparent bg-secondary/50 px-4 py-3 transition-all duration-200;
   }
 
   .input-modern:focus {
@@ -219,7 +211,7 @@
   }
 
   .nav-item:hover {
-    @apply bg-muted;
+    @apply bg-secondary;
   }
 
   .nav-item.active {
