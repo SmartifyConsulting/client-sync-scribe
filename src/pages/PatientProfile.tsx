@@ -13,11 +13,12 @@ import {
   AlertCircle,
   Star,
   Plus,
-  
+  Send,
   Mic,
   Video,
   FilePlus,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -592,22 +593,50 @@ export default function PatientProfile() {
                     <div
                       key={doc.id}
                       className="flex items-center gap-4 p-5 hover:bg-muted/30 transition-all duration-200 cursor-pointer"
-                      onClick={() => navigate(`/documents?view=${doc.id}`)}
                     >
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10" onClick={() => navigate(`/documents?view=${doc.id}`)}>
                         <FileText className="h-6 w-6 text-primary" />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1" onClick={() => navigate(`/documents?view=${doc.id}`)}>
                         <p className="font-semibold text-foreground">{doc.name}</p>
                         <p className="text-sm text-muted-foreground">
                           {format(new Date(doc.created_at), "MMM d, yyyy")}
                         </p>
                       </div>
+                      {(doc as any).is_draft && !(doc as any).email_sent_at && (
+                        <span className="rounded-full bg-warning/10 px-2 py-0.5 text-[10px] font-medium text-warning border border-warning/30">
+                          DRAFT
+                        </span>
+                      )}
                       {doc.template_name && (
                         <span className="rounded-full bg-muted/70 px-3 py-1.5 text-xs font-medium text-muted-foreground">
                           {doc.template_name}
                         </span>
                       )}
+                      <button
+                        className={cn(
+                          "h-8 w-8 rounded-full flex items-center justify-center transition-colors",
+                          (doc as any).email_sent_at
+                            ? "text-muted-foreground cursor-default"
+                            : "text-green-600 hover:text-green-700 hover:bg-green-50"
+                        )}
+                        disabled={!!(doc as any).email_sent_at}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          if ((doc as any).email_sent_at) return;
+                          try {
+                            const { data: patient } = await supabase.from('patients').select('email, pharmacy_email').eq('id', doc.patient_id!).maybeSingle();
+                            const email = doc.template_name?.toLowerCase().includes('prescription') ? patient?.pharmacy_email || patient?.email : patient?.email;
+                            if (email) await supabase.functions.invoke('send-document-email', { body: { documentId: doc.id, recipientEmail: email } });
+                            await (supabase.from('documents').update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any).eq('id', doc.id);
+                            // Refresh docs
+                            const { data: updatedDocs } = await supabase.from('documents').select('*').eq('patient_id', doc.patient_id!).order('created_at', { ascending: false });
+                            if (updatedDocs) fetchDocuments();
+                          } catch {}
+                        }}
+                      >
+                        <Send className="h-4 w-4" />
+                      </button>
                     </div>
                   ))}
                 </div>

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Mic,
   MicOff,
@@ -9,6 +10,8 @@ import {
   Check,
   Loader2,
   Sparkles,
+  Send,
+  FileText,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -25,6 +28,8 @@ interface TodoItem {
   priority: "low" | "medium" | "high";
   created_at: string;
   is_auto_executed?: boolean;
+  document_id?: string | null;
+  task_type?: string;
 }
 
 const priorityColors = {
@@ -41,10 +46,12 @@ const actionTypeLabels: Record<string, string> = {
   write_referral_letter: "✉️ Created referral letter",
   write_general_letter: "📝 Created general letter",
   manual_task: "📌 Manual task created",
+  document_review: "📄 Review & send document",
 };
 
 export function CompactTodoList() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [newTaskText, setNewTaskText] = useState("");
@@ -54,6 +61,7 @@ export function CompactTodoList() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
   const [filter, setFilter] = useState<"active" | "completed">("active");
+  const [sendingDocId, setSendingDocId] = useState<string | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -72,11 +80,13 @@ export function CompactTodoList() {
       if (error) throw error;
 
       setTodos(
-        (data || []).map((todo) => ({
+        (data || []).map((todo: any) => ({
           ...todo,
           completed: todo.status === "completed",
           priority: todo.priority as "low" | "medium" | "high",
-          is_auto_executed: (todo as any).is_auto_executed || false,
+          is_auto_executed: todo.is_auto_executed || false,
+          document_id: todo.document_id || null,
+          task_type: todo.task_type || 'standard',
         }))
       );
     } catch (error) {
@@ -398,6 +408,34 @@ export function CompactTodoList() {
                       {todo.priority[0].toUpperCase()}
                     </Badge>
                     <div className="hidden group-hover:flex gap-0.5">
+                      {todo.document_id && (
+                        <>
+                          <button onClick={() => navigate(`/documents?view=${todo.document_id}`)} className="text-primary hover:text-primary/80">
+                            <FileText className="h-3 w-3" />
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (!todo.document_id) return;
+                              setSendingDocId(todo.document_id);
+                              try {
+                                const { data: doc } = await (supabase.from('documents').select('*') as any).eq('id', todo.document_id).maybeSingle();
+                                if (!doc) return;
+                                const { data: patient } = await supabase.from('patients').select('email, pharmacy_email').eq('id', doc.patient_id).maybeSingle();
+                                const email = doc.template_name?.toLowerCase().includes('prescription') ? patient?.pharmacy_email || patient?.email : patient?.email;
+                                if (email) await supabase.functions.invoke('send-document-email', { body: { documentId: todo.document_id, recipientEmail: email } });
+                                await (supabase.from('documents').update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any).eq('id', todo.document_id);
+                                await supabase.from('todos').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', todo.id);
+                                setTodos(prev => prev.map(t => t.id === todo.id ? { ...t, completed: true } : t));
+                                toast({ title: "Document sent" });
+                              } catch { toast({ title: "Send failed", variant: "destructive" }); } finally { setSendingDocId(null); }
+                            }}
+                            disabled={todo.completed || sendingDocId === todo.document_id}
+                            className={cn(todo.completed ? "text-muted-foreground" : "text-green-600 hover:text-green-700")}
+                          >
+                            {sendingDocId === todo.document_id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+                          </button>
+                        </>
+                      )}
                       <button onClick={() => { setEditingId(todo.id); setEditText(todo.title); }} className="text-muted-foreground hover:text-foreground">
                         <Edit3 className="h-3 w-3" />
                       </button>

@@ -361,11 +361,13 @@ export type Database = {
           created_at: string
           email_sent_at: string | null
           id: string
+          is_draft: boolean | null
           media_type: string | null
           media_url: string | null
           name: string
           patient_id: string | null
           patient_name: string | null
+          session_id: string | null
           template_id: string | null
           template_name: string | null
           updated_at: string
@@ -376,11 +378,13 @@ export type Database = {
           created_at?: string
           email_sent_at?: string | null
           id?: string
+          is_draft?: boolean | null
           media_type?: string | null
           media_url?: string | null
           name: string
           patient_id?: string | null
           patient_name?: string | null
+          session_id?: string | null
           template_id?: string | null
           template_name?: string | null
           updated_at?: string
@@ -391,11 +395,13 @@ export type Database = {
           created_at?: string
           email_sent_at?: string | null
           id?: string
+          is_draft?: boolean | null
           media_type?: string | null
           media_url?: string | null
           name?: string
           patient_id?: string | null
           patient_name?: string | null
+          session_id?: string | null
           template_id?: string | null
           template_name?: string | null
           updated_at?: string
@@ -1783,6 +1789,7 @@ export type Database = {
           completed_at: string | null
           created_at: string
           description: string | null
+          document_id: string | null
           due_date: string | null
           id: string
           is_auto_executed: boolean | null
@@ -1801,6 +1808,7 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           description?: string | null
+          document_id?: string | null
           due_date?: string | null
           id?: string
           is_auto_executed?: boolean | null
@@ -1819,6 +1827,7 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           description?: string | null
+          document_id?: string | null
           due_date?: string | null
           id?: string
           is_auto_executed?: boolean | null

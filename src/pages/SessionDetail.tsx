@@ -23,6 +23,8 @@ import {
   Download,
   AlertTriangle,
   Star,
+  Edit3,
+  Send,
 } from "lucide-react";
 import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
@@ -32,6 +34,7 @@ import { ReferralLetterEditor } from "@/components/sessions/ReferralLetterEditor
 import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
 import { DrawingPad } from "@/components/drawings/DrawingPad";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useSession } from "@/hooks/useSessions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -88,6 +91,64 @@ export default function SessionDetail() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [showStarRating, setShowStarRating] = useState(false);
   const [hasRated, setHasRated] = useState(false);
+  const [sessionDocs, setSessionDocs] = useState<any[]>([]);
+  const [sendingDocId, setSendingDocId] = useState<string | null>(null);
+
+  // Fetch session documents
+  useEffect(() => {
+    if (!id) return;
+    const fetchDocs = async () => {
+      const { data } = await (supabase
+        .from('documents')
+        .select('*') as any)
+        .eq('session_id', id)
+        .order('created_at', { ascending: false });
+      setSessionDocs(data || []);
+    };
+    fetchDocs();
+  }, [id]);
+
+  const handleSendDocument = async (doc: any) => {
+    setSendingDocId(doc.id);
+    try {
+      // Get patient email for sending
+      const { data: patient } = await supabase
+        .from('patients')
+        .select('email, pharmacy_email, name')
+        .eq('id', doc.patient_id)
+        .maybeSingle();
+      
+      const recipientEmail = doc.template_name?.toLowerCase().includes('prescription')
+        ? patient?.pharmacy_email || patient?.email
+        : patient?.email;
+
+      if (recipientEmail) {
+        await supabase.functions.invoke('send-document-email', {
+          body: { documentId: doc.id, recipientEmail },
+        });
+      }
+
+      // Update document status
+      await (supabase.from('documents').update({ 
+        email_sent_at: new Date().toISOString(),
+        is_draft: false,
+      } as any) as any).eq('id', doc.id);
+
+      // Mark corresponding todo as completed
+      await (supabase.from('todos')
+        .update({ status: 'completed', completed_at: new Date().toISOString() }) as any)
+        .eq('document_id', doc.id);
+
+      setSessionDocs(prev => prev.map(d => 
+        d.id === doc.id ? { ...d, email_sent_at: new Date().toISOString(), is_draft: false } : d
+      ));
+      toast({ title: "Document sent", description: `${doc.name} has been sent successfully.` });
+    } catch (err) {
+      toast({ title: "Send failed", variant: "destructive" });
+    } finally {
+      setSendingDocId(null);
+    }
+  };
 
   // Check if user has already rated this session
   useEffect(() => {
@@ -414,6 +475,55 @@ export default function SessionDetail() {
           </div>
         )}
       </div>
+
+      {/* Session Documents */}
+      {sessionDocs.length > 0 && (
+        <div className="rounded-xl border border-primary bg-card p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <FileText className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-foreground">Session Documents</h2>
+              <p className="text-xs text-muted-foreground">Auto-generated documents from this session</p>
+            </div>
+          </div>
+          <div className="space-y-2">
+            {sessionDocs.map((doc) => (
+              <div key={doc.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                <FileText className="h-4 w-4 text-primary shrink-0" />
+                <span className="flex-1 text-sm font-medium text-foreground truncate">{doc.name}</span>
+                {doc.is_draft && !doc.email_sent_at && (
+                  <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30 text-[10px]">
+                    DRAFT
+                  </Badge>
+                )}
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7"
+                  onClick={() => navigate(`/documents?view=${doc.id}`)}
+                >
+                  <Edit3 className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className={`h-7 w-7 ${doc.email_sent_at ? 'text-muted-foreground' : 'text-green-600 hover:text-green-700'}`}
+                  disabled={!!doc.email_sent_at || sendingDocId === doc.id}
+                  onClick={() => handleSendDocument(doc)}
+                >
+                  {sendingDocId === doc.id ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Send className="h-3.5 w-3.5" />
+                  )}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Action Points / TO-DO List */}
       {session.action_points && session.action_points.length > 0 && (
