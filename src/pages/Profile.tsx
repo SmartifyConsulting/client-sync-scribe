@@ -908,7 +908,7 @@ function MailboxSection({ userId }: { userId?: string }) {
     fetchMailboxInfo();
   }, [userId]);
 
-  const displayEmail = mailboxAlias ? `${mailboxAlias}@medipad.com` : mailboxId ? `docs-${mailboxId.slice(0, 8)}@inbox.medipad.health` : null;
+  const displayEmail = mailboxAlias ? `${mailboxAlias}@holarc.com` : mailboxId ? `docs-${mailboxId.slice(0, 8)}@inbox.holarc.health` : null;
   const handleCopy = async () => { if (!displayEmail) return; await navigator.clipboard.writeText(displayEmail); setCopied(true); toast({ title: "Copied" }); setTimeout(() => setCopied(false), 2000); };
   const handleSaveAlias = async () => {
     if (!userId) return;
