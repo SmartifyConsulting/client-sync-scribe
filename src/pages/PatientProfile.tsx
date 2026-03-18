@@ -293,6 +293,7 @@ export default function PatientProfile() {
           </p>
         </div>
       </div>
+      )}
 
       {/* Tabs */}
       <Tabs defaultValue="details" className="space-y-6">

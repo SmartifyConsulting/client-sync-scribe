@@ -160,11 +160,11 @@ export default function MyDoctors() {
           </div>
         )}
         
-        {permissions ? (
+        {filteredPermissions && filteredPermissions.length > 0 ? (
           <div className="pt-2 border-t border-border">
             <p className="text-xs text-muted-foreground mb-2">Access granted to:</p>
             <div className="flex flex-wrap gap-1">
-              {permissions.map((permission) => (
+              {filteredPermissions.map((permission) => (
                 <Badge key={permission} variant="secondary" className="text-xs">
                   {permission.replace(/_/g, " ")}
                 </Badge>
@@ -181,7 +181,8 @@ export default function MyDoctors() {
         ) : null}
       </CardContent>
     </Card>
-  );
+    );
+  };
 
   return (
     <div className="space-y-6">

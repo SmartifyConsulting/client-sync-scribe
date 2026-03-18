@@ -376,11 +376,11 @@ export default function MyRewards() {
           <TabsTrigger value="streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
             Streaks
           </TabsTrigger>
-          <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-            Transfers
-          </TabsTrigger>
           <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
             History
+          </TabsTrigger>
+          <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+            Moolas
           </TabsTrigger>
         </TabsList>
 
