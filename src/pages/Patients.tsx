@@ -820,17 +820,17 @@ export default function Patients() {
                 {mePatient && (
                   <>
                     <tr>
-                      <td colSpan={6} className="px-6 py-2 bg-terracotta/20 sticky top-0">
-                        <span className="text-sm font-bold text-terracotta">MY RECORD</span>
+                      <td colSpan={6} className="px-4 py-1.5 bg-purple-100/60 dark:bg-purple-950/30 sticky top-0">
+                        <span className="text-xs font-bold text-purple-700 dark:text-purple-300">MY RECORD</span>
                       </td>
                     </tr>
-                    <tr className="group transition-colors bg-terracotta/5 hover:bg-terracotta/10 border-l-2 border-terracotta">
-                      <td className="px-6 py-4">
-                        <Link to={`/patients/${mePatient.id}`} className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full font-medium bg-terracotta text-terracotta-foreground">
+                    <tr className="group transition-colors bg-purple-50/40 hover:bg-purple-100/40 dark:bg-purple-950/10 dark:hover:bg-purple-950/20 border-l-2 border-purple-400">
+                      <td className="px-4 py-2.5">
+                        <Link to={`/patients/${mePatient.id}`} className="flex items-center gap-2.5">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs bg-purple-200 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300">
                             ME
                           </div>
-                          <span className="font-medium text-foreground group-hover:text-terracotta transition-colors">
+                          <span className="font-medium text-sm text-foreground group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors whitespace-nowrap">
                             {mePatient.name.includes(',') ? mePatient.name : (() => {
                               const parts = mePatient.name.trim().split(/\s+/);
                               if (parts.length <= 1) return mePatient.name;
@@ -838,41 +838,46 @@ export default function Patients() {
                               const firstNames = parts.slice(0, -1).join(" ");
                               return `${lastName}, ${firstNames}`;
                             })()}
-                            <span className="ml-2 inline-flex items-center rounded-full bg-terracotta px-2 py-0.5 text-[10px] font-bold text-white">ME</span>
+                            <span className="ml-2 inline-flex items-center rounded-full bg-purple-200 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 px-1.5 py-0.5 text-[10px] font-bold">ME</span>
                           </span>
                         </Link>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="space-y-1">
+                      <td className="px-4 py-2.5">
+                        <div className="space-y-0.5">
                           {mePatient.email && (
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Mail className="h-3.5 w-3.5" /> {mePatient.email}
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <Mail className="h-3 w-3" /> <span className="truncate">{mePatient.email}</span>
                             </div>
                           )}
                           {mePatient.phone && (
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Phone className="h-3.5 w-3.5" /> {mePatient.phone}
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <Phone className="h-3 w-3" /> {mePatient.phone}
                             </div>
                           )}
                           {!mePatient.email && !mePatient.phone && (
-                            <span className="text-sm text-muted-foreground">No contact info</span>
+                            <span className="text-xs text-muted-foreground">—</span>
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-muted-foreground">
-                        {mePatient.last_visit ? new Date(mePatient.last_visit).toLocaleDateString() : <span className="text-muted-foreground/50">No visits yet</span>}
+                      <td className="px-4 py-2.5 text-xs text-muted-foreground">
+                        {mePatient.last_visit ? new Date(mePatient.last_visit).toLocaleDateString() : <span className="text-muted-foreground/50">—</span>}
                       </td>
-                      <td className="px-6 py-4 text-sm text-muted-foreground">
+                      <td className="px-4 py-2.5 text-xs text-muted-foreground">
                         {new Date(mePatient.created_at).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4">
-                        <span className={cn("inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium", mePatient.status === "active" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>
-                          {mePatient.status === "active" ? "Active" : "Inactive"}
-                        </span>
+                      <td className="px-3 py-2.5 text-center">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className={cn("mx-auto h-2.5 w-2.5 rounded-full", mePatient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
+                            </TooltipTrigger>
+                            <TooltipContent>{mePatient.status === "active" ? "Active" : "Inactive"}</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </td>
-                      <td className="px-6 py-4 text-right">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/patients/${mePatient.id}`)}>
-                          <Edit3 className="h-4 w-4" />
+                      <td className="px-4 py-2.5 text-right">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => navigate(`/patients/${mePatient.id}`)}>
+                          <Edit3 className="h-3.5 w-3.5" />
                         </Button>
                       </td>
                     </tr>
