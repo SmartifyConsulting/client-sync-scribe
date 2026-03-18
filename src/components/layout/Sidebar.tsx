@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import medipadLogo from "@/assets/medipad-logo.jpg";
+import holarcLogo from "@/assets/holarc-logo.png";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
