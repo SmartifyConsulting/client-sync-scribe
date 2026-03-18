@@ -322,7 +322,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-border">
         <div className="max-w-7xl mx-auto text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} MediPad. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Holarc Health. All rights reserved.</p>
         </div>
       </footer>
 
