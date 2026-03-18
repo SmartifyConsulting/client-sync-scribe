@@ -80,11 +80,13 @@ export function CompactTodoList() {
       if (error) throw error;
 
       setTodos(
-        (data || []).map((todo) => ({
+        (data || []).map((todo: any) => ({
           ...todo,
           completed: todo.status === "completed",
           priority: todo.priority as "low" | "medium" | "high",
-          is_auto_executed: (todo as any).is_auto_executed || false,
+          is_auto_executed: todo.is_auto_executed || false,
+          document_id: todo.document_id || null,
+          task_type: todo.task_type || 'standard',
         }))
       );
     } catch (error) {
