@@ -71,7 +71,7 @@ async function createPayPalOrder(accessToken: string, planType: string, billingC
         },
       ],
       application_context: {
-        brand_name: "MediPad",
+        brand_name: "Holarc Health",
         landing_page: "NO_PREFERENCE",
         user_action: "PAY_NOW",
         return_url: `${Deno.env.get("SUPABASE_URL")}/functions/v1/paypal-subscription?action=capture`,
