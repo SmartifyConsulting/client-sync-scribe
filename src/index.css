@@ -168,6 +168,13 @@
   }
 }
 
+@layer base {
+  th,
+  [role="columnheader"] {
+    white-space: nowrap;
+  }
+}
+
 @layer components {
   /* Airbnb-style cards */
   .card-modern {
