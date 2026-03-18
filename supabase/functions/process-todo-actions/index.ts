@@ -34,11 +34,27 @@ serve(async (req) => {
     // Service role client for DB operations
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch doctor's patients and profile in parallel
-    const [patientsRes, profileRes] = await Promise.all([
+    // Fetch doctor's patients, profile, and templates in parallel
+    const [patientsRes, profileRes, templatesRes] = await Promise.all([
       supabase.from("patients").select("id, name, email, phone, patient_user_id").eq("user_id", user.id),
       supabase.from("profiles").select("full_name, practice_number, doctor_number, practice_address, specialty").eq("id", user.id).single(),
+      supabase.from("templates").select("id, name, content, header_footer_template_id").eq("user_id", user.id),
     ]);
+
+    const doctorTemplates = templatesRes.data || [];
+
+    // Helper: get template content with placeholders replaced
+    const getTemplateContent = (templateName: string, replacements: Record<string, string>): string | null => {
+      const template = doctorTemplates.find((t) =>
+        t.name.toLowerCase().includes(templateName.toLowerCase())
+      );
+      if (!template) return null;
+      let content = template.content;
+      for (const [key, value] of Object.entries(replacements)) {
+        content = content.replace(new RegExp(`\\[${key}\\]`, "gi"), value);
+      }
+      return content;
+    };
 
     const patients = patientsRes.data || [];
     const profile = profileRes.data;
