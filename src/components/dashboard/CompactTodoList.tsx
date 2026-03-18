@@ -277,7 +277,12 @@ export function CompactTodoList() {
     }
   };
 
-  const filteredTodos = todos.filter((t) => (filter === "active" ? !t.completed : t.completed));
+  const twoWeeksAgo = new Date();
+  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+  const filteredTodos = todos.filter((t) => {
+    if (filter === "active") return !t.completed;
+    return t.completed && new Date(t.created_at) >= twoWeeksAgo;
+  });
   const activeCount = todos.filter((t) => !t.completed).length;
   const completedCount = todos.filter((t) => t.completed).length;
 
