@@ -291,11 +291,13 @@ export default function Sessions() {
     console.log("=== handleSessionComplete END ===");
   }, [completeSession, patientId]);
 
-  // Handle visit category selection
-  const handleVisitCategoryConfirm = async (category: string | null) => {
+  // Handle visit category selection (multi-select)
+  const handleVisitCategoryConfirm = async (categories: string[] | null) => {
     setShowVisitCategoryDialog(false);
-    await handleSessionComplete(pendingTranscript, category);
+    await handleSessionComplete(pendingTranscript, categories);
     setPendingTranscript("");
+    // Show star rating after session completes
+    setTimeout(() => setShowStarRating(true), 500);
   };
 
   const { 
