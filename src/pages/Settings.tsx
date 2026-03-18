@@ -324,36 +324,30 @@ export default function Settings() {
   };
 
   const handleConnect = async (provider: "google" | "outlook") => {
-    setIsConnecting(provider);
-
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
     if (provider === "google") {
-      setGoogleConnected(true);
-      toast({
-        title: "Google Calendar Connected",
-        description: "Your appointments will now sync with Google Calendar",
-      });
-    } else {
-      setOutlookConnected(true);
-      toast({
-        title: "Outlook Calendar Connected",
-        description: "Your appointments will now sync with Outlook",
-      });
+      await googleConnect();
+      return;
     }
-
+    
+    setIsConnecting(provider);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setOutlookConnected(true);
+    toast({
+      title: "Outlook Calendar Connected",
+      description: "Your appointments will now sync with Outlook",
+    });
     setIsConnecting(null);
   };
 
-  const handleDisconnect = (provider: "google" | "outlook") => {
+  const handleDisconnect = async (provider: "google" | "outlook") => {
     if (provider === "google") {
-      setGoogleConnected(false);
-    } else {
-      setOutlookConnected(false);
+      await googleDisconnect();
+      return;
     }
+    setOutlookConnected(false);
     toast({
       title: "Calendar Disconnected",
-      description: `${provider === "google" ? "Google" : "Outlook"} Calendar has been disconnected`,
+      description: "Outlook Calendar has been disconnected",
     });
   };
 
