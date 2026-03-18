@@ -284,7 +284,7 @@ export default function Documents() {
           subject: shareDocument.name,
           documentName: shareDocument.name,
           documentContent: shareDocument.content,
-          senderName: profile?.full_name || "MediPad User",
+          senderName: profile?.full_name || "Holarc User",
           practiceName: profile?.practice_address ? `Practice #${profile.practice_number}` : undefined,
         },
       });

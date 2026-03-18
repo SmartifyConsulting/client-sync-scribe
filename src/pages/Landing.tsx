@@ -330,7 +330,7 @@ export default function Landing() {
       <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-center text-2xl">Join MediPad</DialogTitle>
+            <DialogTitle className="text-center text-2xl">Join Holarc</DialogTitle>
             <DialogDescription className="text-center">
               How will you use the platform?
             </DialogDescription>

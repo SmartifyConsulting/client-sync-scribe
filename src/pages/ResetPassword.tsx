@@ -88,9 +88,9 @@ export default function ResetPassword() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <img src={medipadLogo} alt="MediPad" className="h-[62px] w-auto" />
+              <img src={holarcLogo} alt="Holarc Health" className="h-[62px] w-auto" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">MediPad</h1>
+            <h1 className="text-2xl font-bold text-foreground">Holarc</h1>
             <p className="text-muted-foreground mt-2">Set your new password</p>
           </div>
 
