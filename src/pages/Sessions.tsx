@@ -586,7 +586,7 @@ export default function Sessions() {
       </div>
 
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Session Mode</h1>
+        <h1 className="text-2xl font-bold text-foreground">Session Mode</h1>
         <p className="mt-1 text-muted-foreground">
           Record, transcribe, and generate AI summaries for patient sessions
         </p>
@@ -594,20 +594,20 @@ export default function Sessions() {
 
       {/* Session States */}
       {sessionState === "idle" && (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card p-12 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent mb-4">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card p-6 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent mb-3">
             {currentPatient ? (
-              <Play className="h-8 w-8 text-accent-foreground" />
+              <Play className="h-6 w-6 text-accent-foreground" />
             ) : (
-              <Users className="h-8 w-8 text-accent-foreground" />
+              <Users className="h-6 w-6 text-accent-foreground" />
             )}
           </div>
-          <h2 className="text-xl font-semibold text-foreground mb-2">
+          <h2 className="text-lg font-semibold text-foreground mb-1">
             {currentPatient ? "Ready to Start" : "Select a Patient"}
           </h2>
-          <p className="text-muted-foreground mb-6 max-w-md">
+          <p className="text-muted-foreground mb-4 max-w-md text-sm">
             {currentPatient 
-              ? "Begin a new consultation session to capture notes, record audio, and generate AI-powered summaries and action points."
+              ? "Begin a consultation to capture notes, record audio, and generate AI summaries."
               : "Choose a patient to start a new consultation session."}
           </p>
           
