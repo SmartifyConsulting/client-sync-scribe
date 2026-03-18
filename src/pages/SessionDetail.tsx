@@ -22,6 +22,7 @@ import {
   Languages,
   Download,
   AlertTriangle,
+  Star,
 } from "lucide-react";
 import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
