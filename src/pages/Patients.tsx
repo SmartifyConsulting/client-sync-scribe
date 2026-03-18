@@ -79,6 +79,7 @@ export default function Patients() {
     claims_email: "",
   });
   const [creating, setCreating] = useState(false);
+  const [invitingPatient, setInvitingPatient] = useState(false);
   const meAutoCreated = useRef(false);
 
   // Autofind patient state

@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Plus, Trash2, Pencil, Loader2, Search } from "lucide-react";
+import { Plus, Trash2, Pencil, Loader2, Search, Mail, Send, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -60,9 +61,20 @@ interface ReferralDoctor {
   specialty: string | null;
 }
 
+interface DoctorProfileSuggestion {
+  id: string;
+  full_name: string | null;
+  specialty: string | null;
+  practice_number: string | null;
+  mobile_number: string | null;
+}
+
+type AddMode = "search" | "manual" | "invite";
+
 export default function ReferralDoctors() {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { profile } = useProfile();
   const [doctors, setDoctors] = useState<ReferralDoctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -74,9 +86,103 @@ export default function ReferralDoctors() {
     first_name: "", last_name: "", practice_number: "", address: "", email: "", phone: "", specialty: "",
   });
 
+  // Search-first state
+  const [addMode, setAddMode] = useState<AddMode>("search");
+  const [profileSearch, setProfileSearch] = useState("");
+  const [profileSuggestions, setProfileSuggestions] = useState<DoctorProfileSuggestion[]>([]);
+  const [searchingProfiles, setSearchingProfiles] = useState(false);
+  const [showProfileSuggestions, setShowProfileSuggestions] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [sendingInvite, setSendingInvite] = useState(false);
+
   useEffect(() => {
     if (user) fetchDoctors();
   }, [user]);
+
+  // Debounced profile search
+  useEffect(() => {
+    if (profileSearch.length < 2) {
+      setProfileSuggestions([]);
+      setShowProfileSuggestions(false);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setSearchingProfiles(true);
+      try {
+        const { data: doctorRoles } = await supabase
+          .from("user_roles")
+          .select("user_id")
+          .eq("role", "doctor");
+        const doctorIds = (doctorRoles || []).map(r => r.user_id);
+        if (doctorIds.length === 0) {
+          setProfileSuggestions([]);
+          setShowProfileSuggestions(false);
+          setSearchingProfiles(false);
+          return;
+        }
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, specialty, practice_number, mobile_number")
+          .ilike("full_name", `%${profileSearch}%`)
+          .in("id", doctorIds)
+          .limit(5);
+        setProfileSuggestions(profiles || []);
+        setShowProfileSuggestions(true);
+      } catch (e) {
+        console.error("Profile search error:", e);
+      } finally {
+        setSearchingProfiles(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [profileSearch]);
+
+  const handleSelectProfile = (doc: DoctorProfileSuggestion) => {
+    const fullName = doc.full_name || "";
+    const parts = fullName.trim().split(/\s+/);
+    const firstName = parts.slice(0, -1).join(" ") || fullName;
+    const lastName = parts.length > 1 ? parts[parts.length - 1] : "";
+    setForm({
+      first_name: firstName,
+      last_name: lastName,
+      practice_number: doc.practice_number || "",
+      address: "",
+      email: "",
+      phone: doc.mobile_number || "",
+      specialty: doc.specialty && SPECIALTIES.includes(doc.specialty) ? doc.specialty : (doc.specialty ? "__other__" : ""),
+    });
+    if (doc.specialty && !SPECIALTIES.includes(doc.specialty)) {
+      setCustomSpecialty(doc.specialty);
+    }
+    setShowProfileSuggestions(false);
+    setAddMode("manual"); // Show the form pre-filled
+  };
+
+  const handleSendInvite = async () => {
+    if (!inviteEmail.trim()) {
+      toast({ title: "Email required", description: "Please enter the doctor's email address.", variant: "destructive" });
+      return;
+    }
+    setSendingInvite(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-user-invitation", {
+        body: {
+          recipientEmail: inviteEmail.trim(),
+          senderName: profile?.full_name || "A colleague",
+          message: `${profile?.full_name || "A colleague"} has invited you to join Holarc Health for referrals. Sign up to connect and collaborate on patient care.`,
+        },
+      });
+      if (error) throw error;
+      toast({ title: "Invitation sent", description: `An invitation has been sent to ${inviteEmail}.` });
+      setInviteEmail("");
+      setAddMode("search");
+    } catch (error: any) {
+      console.error("Failed to send invitation:", error);
+      toast({ title: "Failed to send invitation", description: error.message || "Please try again.", variant: "destructive" });
+    } finally {
+      setSendingInvite(false);
+    }
+  };
 
   const fetchDoctors = async () => {
     setLoading(true);
@@ -110,11 +216,19 @@ export default function ReferralDoctors() {
       else toast({ title: "Added", description: "Referral doctor added" });
     }
     setSaving(false);
+    resetForm();
+    fetchDoctors();
+  };
+
+  const resetForm = () => {
     setShowForm(false);
     setEditingId(null);
     setForm({ first_name: "", last_name: "", practice_number: "", address: "", email: "", phone: "", specialty: "" });
     setCustomSpecialty("");
-    fetchDoctors();
+    setAddMode("search");
+    setProfileSearch("");
+    setProfileSuggestions([]);
+    setInviteEmail("");
   };
 
   const handleEdit = (doc: ReferralDoctor) => {
@@ -127,6 +241,7 @@ export default function ReferralDoctors() {
       specialty: isCustom ? "__other__" : (doc.specialty || ""),
     });
     if (isCustom) setCustomSpecialty(doc.specialty || "");
+    setAddMode("manual");
     setShowForm(true);
   };
 
@@ -142,6 +257,8 @@ export default function ReferralDoctors() {
     `${d.first_name} ${d.last_name}`.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const noSearchResults = profileSearch.length >= 3 && !searchingProfiles && profileSuggestions.length === 0;
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -149,14 +266,144 @@ export default function ReferralDoctors() {
           <h1 className="text-3xl font-bold text-foreground">Referrals</h1>
           <p className="mt-1 text-muted-foreground">Manage doctors you refer patients to</p>
         </div>
-        <Button onClick={() => { setShowForm(true); setEditingId(null); setForm({ first_name: "", last_name: "", practice_number: "", address: "", email: "", phone: "", specialty: "" }); setCustomSpecialty(""); }} className="gap-2">
+        <Button onClick={() => { resetForm(); setShowForm(true); }} className="gap-2">
           <Plus className="h-4 w-4" /> Add Doctor
         </Button>
       </div>
 
-      {showForm && (
+      {showForm && !editingId && (
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4">
-          <h3 className="font-semibold text-foreground">{editingId ? "Edit" : "Add"} Referral Doctor</h3>
+          <h3 className="font-semibold text-foreground">Add Referral Doctor</h3>
+
+          {/* Search Step */}
+          {addMode === "search" && (
+            <div className="space-y-4">
+              <div className="relative">
+                <Label>Search for a doctor on Holarc</Label>
+                <div className="relative mt-1">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Type doctor name..."
+                    value={profileSearch}
+                    onChange={(e) => setProfileSearch(e.target.value)}
+                    onFocus={() => profileSuggestions.length > 0 && setShowProfileSuggestions(true)}
+                    className="pl-10"
+                  />
+                  {searchingProfiles && <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />}
+                </div>
+                {showProfileSuggestions && profileSuggestions.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                    {profileSuggestions.map((doc) => (
+                      <button
+                        key={doc.id}
+                        type="button"
+                        className="w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors border-b border-border/50 last:border-0"
+                        onClick={() => handleSelectProfile(doc)}
+                      >
+                        <p className="font-medium text-foreground text-sm">{doc.full_name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {doc.specialty && `${doc.specialty} · `}
+                          {doc.practice_number && `PR: ${doc.practice_number}`}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Not found → invite or manual */}
+              {noSearchResults && (
+                <div className="rounded-lg border border-dashed border-border p-4 space-y-3 bg-muted/30">
+                  <p className="text-sm text-muted-foreground">Doctor not found on Holarc</p>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setAddMode("invite")} className="gap-2">
+                      <Mail className="h-4 w-4" /> Send Invitation
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setAddMode("manual")} className="gap-2">
+                      <UserPlus className="h-4 w-4" /> Add Manually
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Always show manual fallback link */}
+              {!noSearchResults && (
+                <button
+                  type="button"
+                  className="text-sm text-primary hover:underline"
+                  onClick={() => setAddMode("manual")}
+                >
+                  Or add manually without searching
+                </button>
+              )}
+
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={resetForm}>Cancel</Button>
+              </div>
+            </div>
+          )}
+
+          {/* Invite Step */}
+          {addMode === "invite" && (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">Send an email invitation to join Holarc Health</p>
+              <div className="space-y-2">
+                <Label>Doctor's Email</Label>
+                <Input
+                  type="email"
+                  placeholder="doctor@example.com"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleSendInvite} disabled={sendingInvite} className="gap-2">
+                  {sendingInvite ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  Send Invitation
+                </Button>
+                <Button variant="outline" onClick={() => setAddMode("search")}>Back</Button>
+                <Button variant="ghost" size="sm" onClick={() => setAddMode("manual")}>Add manually instead</Button>
+              </div>
+            </div>
+          )}
+
+          {/* Manual Form */}
+          {addMode === "manual" && (
+            <>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="space-y-2"><Label>First Name *</Label><Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} /></div>
+                <div className="space-y-2"><Label>Last Name *</Label><Input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} /></div>
+                <div className="space-y-2">
+                  <Label>Specialty</Label>
+                  <Select value={form.specialty} onValueChange={(v) => { setForm({ ...form, specialty: v }); if (v !== "__other__") setCustomSpecialty(""); }}>
+                    <SelectTrigger><SelectValue placeholder="Select specialty" /></SelectTrigger>
+                    <SelectContent>
+                      {SPECIALTIES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                      <SelectItem value="__other__">Other...</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {form.specialty === "__other__" && (
+                    <Input value={customSpecialty} onChange={(e) => setCustomSpecialty(e.target.value)} placeholder="Enter specialty" className="mt-2" />
+                  )}
+                </div>
+                <div className="space-y-2"><Label>Practice Number</Label><Input value={form.practice_number} onChange={(e) => setForm({ ...form, practice_number: e.target.value })} /></div>
+                <div className="space-y-2"><Label>Address</Label><Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
+                <div className="space-y-2"><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
+                <div className="space-y-2"><Label>Phone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleSave} disabled={saving}>{saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}Save</Button>
+                <Button variant="outline" onClick={resetForm}>Cancel</Button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Edit form (always manual) */}
+      {showForm && editingId && (
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4">
+          <h3 className="font-semibold text-foreground">Edit Referral Doctor</h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-2"><Label>First Name *</Label><Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} /></div>
             <div className="space-y-2"><Label>Last Name *</Label><Input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} /></div>
@@ -179,8 +426,8 @@ export default function ReferralDoctors() {
             <div className="space-y-2"><Label>Phone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
           </div>
           <div className="flex gap-2">
-            <Button onClick={handleSave} disabled={saving}>{saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}{editingId ? "Update" : "Save"}</Button>
-            <Button variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancel</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}Update</Button>
+            <Button variant="outline" onClick={resetForm}>Cancel</Button>
           </div>
         </div>
       )}
