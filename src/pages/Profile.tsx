@@ -212,8 +212,11 @@ export default function Profile() {
         practice_number: profile.practice_number || "", doctor_number: profile.doctor_number || "",
         practice_address: profile.practice_address || "", specialty: (profile as any).specialty || "",
         mobile_number: mobileNumber, country_code: countryCode,
-        signature_font: (profile as any).signature_font || "fave-script",
-        signature_color: ((profile as any).signature_color === 'navy' ? 'teal' : (profile as any).signature_color) || "black",
+        signature_font: (profile as any).signature_font || "allura",
+        signature_color: (profile as any).signature_color || "black",
+        signature_font_size: (profile as any).signature_font_size ?? 24,
+        signature_bold: (profile as any).signature_bold ?? false,
+        signature_italic: (profile as any).signature_italic ?? false,
       };
       isSettingFromProfile.current = true;
       profileLoadedData.current = newFormData;
