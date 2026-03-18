@@ -492,10 +492,11 @@ export default function Profile() {
         </Tabs>
       ) : (
         <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 bg-primary">
+          <TabsList className="grid w-full grid-cols-6 bg-primary">
             <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Personal</TabsTrigger>
             <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Practice</TabsTrigger>
             <TabsTrigger value="partners" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Partners</TabsTrigger>
+            <TabsTrigger value="patients" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Patients</TabsTrigger>
             <TabsTrigger value="pricing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Pricing</TabsTrigger>
             <TabsTrigger value="certificates" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Certificates{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}</TabsTrigger>
           </TabsList>
@@ -720,6 +721,14 @@ export default function Profile() {
                   </div>
                 </div>
               )}
+            </div>
+          </TabsContent>
+
+          {/* === PATIENTS TAB === */}
+          <TabsContent value="patients">
+            <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+              <p className="text-sm text-muted-foreground">Import patients from a spreadsheet file. Drag and drop or browse to upload.</p>
+              <PatientImport />
             </div>
           </TabsContent>
 

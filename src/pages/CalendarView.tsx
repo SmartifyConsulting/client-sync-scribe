@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar, MapPin, Video, Play, Trash2, Link, Unlink, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar, MapPin, Video, Play, Trash2, Link, Unlink, Loader2, Palette, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AppointmentRequestsPanel } from "@/components/appointments/AppointmentRequestsPanel";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,15 @@ import { useToast } from "@/hooks/use-toast";
 import { usePatients } from "@/hooks/usePatients";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { Label } from "@/components/ui/label";
 import { format, startOfMonth, endOfMonth } from "date-fns";
+
+interface AppointmentTypeColor {
+  id: string;
+  type_name: string;
+  color: string;
+}
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -51,6 +59,7 @@ function getDaysInMonth(date: Date) {
 export default function CalendarView() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { patients } = usePatients();
   const { isConnected, isConnecting, connect, disconnect, loading: calendarLoading } = useGoogleCalendar();
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -61,6 +70,10 @@ export default function CalendarView() {
   const [editedEvent, setEditedEvent] = useState<CalendarEvent | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
+  const [typeColors, setTypeColors] = useState<AppointmentTypeColor[]>([]);
+  const [isColorDialogOpen, setIsColorDialogOpen] = useState(false);
+  const [newColorType, setNewColorType] = useState("");
+  const [newColorValue, setNewColorValue] = useState("#3b82f6");
   const [newAppointment, setNewAppointment] = useState({
     patientId: "",
     date: "",
@@ -68,6 +81,46 @@ export default function CalendarView() {
     type: "session",
     notes: "",
   });
+
+  // Fetch appointment type colors
+  useEffect(() => {
+    const fetchTypeColors = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("appointment_type_colors")
+        .select("id, type_name, color")
+        .eq("user_id", user.id);
+      if (data) setTypeColors(data);
+    };
+    fetchTypeColors();
+  }, [user]);
+
+  const getTypeColor = (type: string): string | null => {
+    const match = typeColors.find(tc => tc.type_name.toLowerCase() === type.toLowerCase());
+    return match?.color || null;
+  };
+
+  const addTypeColor = async () => {
+    if (!user || !newColorType.trim()) return;
+    const { data, error } = await supabase
+      .from("appointment_type_colors")
+      .upsert({ user_id: user.id, type_name: newColorType.trim(), color: newColorValue }, { onConflict: "user_id,type_name" })
+      .select()
+      .single();
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    setTypeColors(prev => {
+      const filtered = prev.filter(tc => tc.type_name.toLowerCase() !== newColorType.trim().toLowerCase());
+      return [...filtered, data];
+    });
+    setNewColorType("");
+    setNewColorValue("#3b82f6");
+    toast({ title: "Color saved" });
+  };
+
+  const removeTypeColor = async (id: string) => {
+    await supabase.from("appointment_type_colors").delete().eq("id", id);
+    setTypeColors(prev => prev.filter(tc => tc.id !== id));
+  };
   const { firstDay, daysInMonth } = getDaysInMonth(selectedDate);
 
   // Fetch real appointments for the current month
@@ -215,7 +268,49 @@ export default function CalendarView() {
             Manage your appointments and schedule
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Dialog open={isColorDialogOpen} onOpenChange={setIsColorDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Palette className="h-4 w-4" />
+                Manage Colors
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Appointment Type Colors</DialogTitle>
+                <DialogDescription>Assign colors to appointment types for easy visual identification</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                {typeColors.length > 0 && (
+                  <div className="space-y-2">
+                    {typeColors.map(tc => (
+                      <div key={tc.id} className="flex items-center justify-between p-2 rounded-lg border border-border">
+                        <div className="flex items-center gap-3">
+                          <div className="h-6 w-6 rounded-full border border-border" style={{ backgroundColor: tc.color }} />
+                          <span className="text-sm font-medium capitalize">{tc.type_name}</span>
+                        </div>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeTypeColor(tc.id)}>
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="flex items-end gap-2">
+                  <div className="flex-1 space-y-1.5">
+                    <Label>Type Name</Label>
+                    <Input value={newColorType} onChange={e => setNewColorType(e.target.value)} placeholder="e.g., session, followup" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Color</Label>
+                    <input type="color" value={newColorValue} onChange={e => setNewColorValue(e.target.value)} className="h-10 w-12 rounded border border-border cursor-pointer" />
+                  </div>
+                  <Button onClick={addTypeColor} disabled={!newColorType.trim()}>Add</Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
           {!calendarLoading && (
             isConnected ? (
               <Button variant="outline" onClick={disconnect} className="gap-2">
@@ -403,7 +498,7 @@ export default function CalendarView() {
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-terracotta text-[9px] font-bold text-white shrink-0">
+                                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold text-white shrink-0" style={{ backgroundColor: getTypeColor(event.type) || 'hsl(350, 78%, 55%)' }}>
                                       {initials}
                                     </span>
                                   </TooltipTrigger>
@@ -455,7 +550,7 @@ export default function CalendarView() {
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-terracotta text-sm font-bold text-white shrink-0">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white shrink-0" style={{ backgroundColor: getTypeColor(event.type) || 'hsl(350, 78%, 55%)' }}>
                             {initials}
                           </div>
                         </TooltipTrigger>
