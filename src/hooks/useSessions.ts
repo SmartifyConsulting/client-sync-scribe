@@ -192,6 +192,7 @@ const completeSession = async (
         prescription: summaryData?.prescription || null,
         invoice: summaryData?.invoice || null,
         referral: summaryData?.referral || null,
+        hospital_admission: summaryData?.hospital_admission || null,
       };
 
       let sessionId = id;
@@ -226,20 +227,101 @@ const completeSession = async (
         return [transformedData, ...prev];
       });
 
-      // Auto-add action points to todos
+      // Auto-execute action points via process-todo-actions
       if (summaryData?.action_points?.length > 0) {
-        const todosToInsert = summaryData.action_points.map((point: string) => ({
-          user_id: user.id,
-          session_id: sessionId,
-          patient_id: patientId || null,
-          title: point,
-          priority: 'medium',
-          status: 'pending',
-        }));
+        const actionPointsText = summaryData.action_points.join('. ');
+        console.log('Auto-executing action points via process-todo-actions:', actionPointsText);
         
-        const { error: todoError } = await supabase.from('todos').insert(todosToInsert);
-        if (todoError) console.error('Error adding todos:', todoError);
-        else console.log('Added', todosToInsert.length, 'todos from session');
+        try {
+          const { data: processResult, error: processError } = await supabase.functions.invoke('process-todo-actions', {
+            body: { text: actionPointsText },
+          });
+          
+          if (processError) {
+            console.error('Error auto-executing action points:', processError);
+            // Fallback: save as pending todos
+            const todosToInsert = summaryData.action_points.map((point: string) => ({
+              user_id: user.id,
+              session_id: sessionId,
+              patient_id: patientId || null,
+              title: point,
+              priority: 'medium',
+              status: 'pending',
+            }));
+            await supabase.from('todos').insert(todosToInsert);
+          } else {
+            console.log('Auto-execution result:', processResult);
+            const autoCount = processResult?.results?.filter((r: any) => r.auto_executed).length || 0;
+            const manualCount = processResult?.results?.filter((r: any) => !r.auto_executed).length || 0;
+            if (autoCount > 0) {
+              toast({ title: `✅ ${autoCount} task(s) auto-completed`, description: `${manualCount > 0 ? `${manualCount} task(s) need manual attention` : 'All tasks handled automatically'}` });
+            }
+          }
+        } catch (execError) {
+          console.error('Failed to invoke process-todo-actions:', execError);
+          // Fallback: save as pending todos
+          const todosToInsert = summaryData.action_points.map((point: string) => ({
+            user_id: user.id,
+            session_id: sessionId,
+            patient_id: patientId || null,
+            title: point,
+            priority: 'medium',
+            status: 'pending',
+          }));
+          await supabase.from('todos').insert(todosToInsert);
+        }
+      }
+
+      // Auto-create hospital admission document if detected
+      if (summaryData?.hospital_admission && patientId) {
+        try {
+          const admission = summaryData.hospital_admission;
+          const { data: patientRecord } = await supabase
+            .from('patients')
+            .select('name')
+            .eq('id', patientId)
+            .maybeSingle();
+          
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('full_name, practice_number, doctor_number, specialty')
+            .eq('id', user.id)
+            .maybeSingle();
+
+          const today = new Date().toISOString().split('T')[0];
+          const admissionContent = `<h2>Hospital Admission Form</h2>
+<p><strong>Date:</strong> ${today}</p>
+<p><strong>Patient:</strong> ${patientRecord?.name || 'Unknown'}</p>
+<p><strong>Doctor:</strong> ${profileData?.full_name || ''}</p>
+<p><strong>Practice Number:</strong> ${profileData?.practice_number || ''}</p>
+<p><strong>Registration Number:</strong> ${profileData?.doctor_number || ''}</p>
+<br/>
+<h3>Admission Details</h3>
+<p><strong>Admission Date:</strong> ${admission.admission_date || 'TBD'}</p>
+<p><strong>Hospital:</strong> ${admission.hospital_name || 'TBD'}</p>
+<br/>
+<h3>Diagnosis</h3>
+<p>${admission.diagnosis}</p>
+<br/>
+<h3>Procedure</h3>
+<p>${admission.procedure || 'To be determined'}</p>
+<br/>
+<h3>Special Instructions</h3>
+<p>${admission.special_instructions || 'None'}</p>`;
+
+          await supabase.from('documents').insert({
+            user_id: user.id,
+            patient_id: patientId,
+            name: `Hospital Admission - ${patientRecord?.name || 'Patient'} - ${today}`,
+            content: admissionContent,
+            template_name: 'Hospital Admission Form',
+            patient_name: patientRecord?.name || null,
+          });
+          console.log('Hospital admission document auto-created');
+          toast({ title: '🏥 Admission Form Created', description: 'Hospital admission form was auto-generated from the session' });
+        } catch (admError) {
+          console.error('Error creating admission document:', admError);
+        }
       }
 
       // Award moola for qualifying visits

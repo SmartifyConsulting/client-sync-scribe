@@ -155,6 +155,18 @@ Respond using the provided tool/function schema.`,
                     },
                     required: ["specialist_type", "reason"],
                   },
+                  hospital_admission: {
+                    type: "object",
+                    description: "Hospital admission details if admission/hospitalization was discussed. Null/omit if not discussed.",
+                    properties: {
+                      diagnosis: { type: "string", description: "Primary diagnosis for admission" },
+                      procedure: { type: "string", description: "Planned procedure or surgery" },
+                      admission_date: { type: "string", description: "Planned admission date (YYYY-MM-DD)" },
+                      hospital_name: { type: "string", description: "Hospital name if mentioned" },
+                      special_instructions: { type: "string", description: "Pre-admission or special instructions" },
+                    },
+                    required: ["diagnosis"],
+                  },
                 },
                 required: ["summary", "action_points"],
                 additionalProperties: false,
@@ -196,6 +208,7 @@ Respond using the provided tool/function schema.`,
       console.log("Prescription detected:", !!result.prescription);
       console.log("Invoice detected:", !!result.invoice);
       console.log("Referral detected:", !!result.referral);
+      console.log("Hospital admission detected:", !!result.hospital_admission);
       return new Response(JSON.stringify(result), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
