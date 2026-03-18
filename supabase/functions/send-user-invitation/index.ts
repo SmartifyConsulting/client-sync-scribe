@@ -213,10 +213,10 @@ const handler = async (req: Request): Promise<Response> => {
             from: "Holarc Health <noreply@smartify.co.za>",
             to: [finalRecipientEmail || recipientEmail],
             subject: isPracticePartner
-              ? `${senderName} added you as a practice partner on MediPad`
-              : finalRecipientId
-                ? `${senderName} wants to connect with you on MediPad`
-                : `${senderName} has invited you to join MediPad`,
+               ? `${senderName} added you as a practice partner on Holarc`
+               : finalRecipientId
+                 ? `${senderName} wants to connect with you on Holarc`
+                 : `${senderName} has invited you to join Holarc`,
             html: emailHtml,
           }),
         });

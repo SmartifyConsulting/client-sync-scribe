@@ -80,9 +80,9 @@ export default function PatientProfile() {
   }, [user?.id]);
 
   const displayEmail = mailboxAlias
-    ? `${mailboxAlias}@medipad.com`
-    : mailboxId
-      ? `docs-${mailboxId.slice(0, 8)}@inbox.medipad.health`
+     ? `${mailboxAlias}@holarc.com`
+     : mailboxId
+       ? `docs-${mailboxId.slice(0, 8)}@inbox.holarc.health`
       : '';
   
   const [additionalNotes, setAdditionalNotes] = useState("");
