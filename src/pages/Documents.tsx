@@ -142,7 +142,7 @@ export default function Documents() {
     updateTemplate: updateHFTemplate,
     deleteTemplate: deleteHFTemplate,
   } = useHeaderFooterTemplates();
-  const { documents, loading: documentsLoading, deleteDocument } = useDocuments();
+  const { documents, loading: documentsLoading, deleteDocument, updateDocument } = useDocuments();
   const { profile } = useProfile();
 
   const [activeTab, setActiveTab] = useState("content");
@@ -162,6 +162,9 @@ export default function Documents() {
   const [shareDocument, setShareDocument] = useState<Document | null>(null);
   const [shareEmail, setShareEmail] = useState("");
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [editingDocument, setEditingDocument] = useState<Document | null>(null);
+  const [editDocName, setEditDocName] = useState("");
+  const [editDocContent, setEditDocContent] = useState("");
 
   // Transform database templates to display format
   const templates: DisplayTemplate[] = dbTemplates.map((t) => ({
@@ -622,6 +625,19 @@ export default function Documents() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
+                        onClick={() => {
+                          setEditingDocument(doc);
+                          setEditDocName(doc.name);
+                          setEditDocContent(doc.content);
+                        }}
+                        title="Edit"
+                      >
+                        <Edit3 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
                         onClick={() => setShareDocument(doc)}
                         title="Share via Email"
                       >
@@ -932,11 +948,65 @@ export default function Documents() {
           </DialogHeader>
           {previewDocument && (
             <div className="space-y-4">
-              <div className="border border-border rounded-lg p-6 bg-card/50">
+              <div className="border border-border rounded-lg p-6 bg-white">
+                {/* Header from matched template */}
+                {(() => {
+                  const matchedTemplate = templates.find(
+                    (t) => t.name === previewDocument.template_name
+                  );
+                  const linkedHF = matchedTemplate
+                    ? headerFooterTemplates.find((hf) => hf.id === matchedTemplate.header_footer_template_id)
+                    : headerFooterTemplates.find((hf) => hf.is_default);
+                  if (linkedHF) {
+                    const header = linkedHF.header as {
+                      left?: { text: string; alignment: string; imageUrl?: string };
+                      center?: { text: string; alignment: string; imageUrl?: string };
+                      right?: { text: string; alignment: string; imageUrl?: string };
+                    };
+                    return (
+                      <div className="pb-4 border-b border-border mb-4">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div>{header?.left && renderHFSectionPreview(header.left)}</div>
+                          <div>{header?.center && renderHFSectionPreview(header.center)}</div>
+                          <div>{header?.right && renderHFSectionPreview(header.right)}</div>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+
                 <div
-                  className="whitespace-pre-wrap text-sm text-foreground"
+                  className="whitespace-pre-wrap text-sm text-foreground min-h-[100px]"
                   dangerouslySetInnerHTML={{ __html: renderFormattedContent(previewDocument.content) }}
                 />
+
+                {/* Footer from matched template */}
+                {(() => {
+                  const matchedTemplate = templates.find(
+                    (t) => t.name === previewDocument.template_name
+                  );
+                  const linkedHF = matchedTemplate
+                    ? headerFooterTemplates.find((hf) => hf.id === matchedTemplate.header_footer_template_id)
+                    : headerFooterTemplates.find((hf) => hf.is_default);
+                  if (linkedHF) {
+                    const footer = linkedHF.footer as {
+                      left?: { text: string; alignment: string; imageUrl?: string };
+                      center?: { text: string; alignment: string; imageUrl?: string };
+                      right?: { text: string; alignment: string; imageUrl?: string };
+                    };
+                    return (
+                      <div className="pt-4 border-t border-border mt-4">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div>{footer?.left && renderHFSectionPreview(footer.left)}</div>
+                          <div>{footer?.center && renderHFSectionPreview(footer.center)}</div>
+                          <div>{footer?.right && renderHFSectionPreview(footer.right)}</div>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
 
               <div className="flex gap-3 pt-4 border-t border-border">
@@ -1057,6 +1127,70 @@ export default function Documents() {
                   Send Email
                 </>
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Document Dialog */}
+      <Dialog
+        open={!!editingDocument}
+        onOpenChange={(open) => {
+          if (!open) setEditingDocument(null);
+        }}
+      >
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Document</DialogTitle>
+            <DialogDescription>Update the document name and content</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-doc-name">Document Name</Label>
+              <Input
+                id="edit-doc-name"
+                value={editDocName}
+                onChange={(e) => setEditDocName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-doc-content">Content (HTML)</Label>
+              <textarea
+                id="edit-doc-content"
+                value={editDocContent}
+                onChange={(e) => setEditDocContent(e.target.value)}
+                className="flex min-h-[300px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono"
+              />
+            </div>
+            {editDocContent && (
+              <div className="space-y-2">
+                <Label>Preview</Label>
+                <div className="border border-border rounded-lg p-4 bg-white">
+                  <div
+                    className="whitespace-pre-wrap text-sm text-foreground"
+                    dangerouslySetInnerHTML={{ __html: renderFormattedContent(editDocContent) }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingDocument(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={async () => {
+                if (editingDocument) {
+                  const success = await updateDocument(editingDocument.id, {
+                    name: editDocName,
+                    content: editDocContent,
+                  });
+                  if (success) setEditingDocument(null);
+                }
+              }}
+              disabled={!editDocName.trim()}
+            >
+              Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>

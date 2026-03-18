@@ -34,11 +34,27 @@ serve(async (req) => {
     // Service role client for DB operations
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch doctor's patients and profile in parallel
-    const [patientsRes, profileRes] = await Promise.all([
+    // Fetch doctor's patients, profile, and templates in parallel
+    const [patientsRes, profileRes, templatesRes] = await Promise.all([
       supabase.from("patients").select("id, name, email, phone, patient_user_id").eq("user_id", user.id),
       supabase.from("profiles").select("full_name, practice_number, doctor_number, practice_address, specialty").eq("id", user.id).single(),
+      supabase.from("templates").select("id, name, content, header_footer_template_id").eq("user_id", user.id),
     ]);
+
+    const doctorTemplates = templatesRes.data || [];
+
+    // Helper: get template content with placeholders replaced
+    const getTemplateContent = (templateName: string, replacements: Record<string, string>): string | null => {
+      const template = doctorTemplates.find((t) =>
+        t.name.toLowerCase().includes(templateName.toLowerCase())
+      );
+      if (!template) return null;
+      let content = template.content;
+      for (const [key, value] of Object.entries(replacements)) {
+        content = content.replace(new RegExp(`\\[${key}\\]`, "gi"), value);
+      }
+      return content;
+    };
 
     const patients = patientsRes.data || [];
     const profile = profileRes.data;
@@ -253,7 +269,22 @@ Rules:
           }
 
           case "write_medical_certificate": {
-            const certContent = `<h2>Medical Certificate</h2>
+            const certReplacements: Record<string, string> = {
+              "ClientName": patientRecord?.name || action.patient_name || "",
+              "PatientName": patientRecord?.name || action.patient_name || "",
+              "Patient Name": patientRecord?.name || action.patient_name || "",
+              "Date": today,
+              "SessionDate": today,
+              "DoctorName": profile?.full_name || "",
+              "PracticeNumber": profile?.practice_number || "",
+              "RegistrationNumber": profile?.doctor_number || "",
+              "PracticeAddress": profile?.practice_address || "",
+              "Reason": action.certificate_reason || "Medical condition",
+              "StartDate": action.leave_start || today,
+              "EndDate": action.leave_end || today,
+            };
+            const templateContent = getTemplateContent("Medical Certificate", certReplacements);
+            const certContent = templateContent || `<h2>Medical Certificate</h2>
 <p><strong>Patient:</strong> ${patientRecord?.name || action.patient_name}</p>
 <p><strong>Date:</strong> ${today}</p>
 <p><strong>Doctor:</strong> ${profile?.full_name || ""}</p>
@@ -277,7 +308,22 @@ Rules:
           }
 
           case "write_referral_letter": {
-            const referralContent = `<h2>Referral Letter</h2>
+            const refReplacements: Record<string, string> = {
+              "ClientName": patientRecord?.name || action.patient_name || "",
+              "PatientName": patientRecord?.name || action.patient_name || "",
+              "Patient Name": patientRecord?.name || action.patient_name || "",
+              "Date": today,
+              "SessionDate": today,
+              "DoctorName": profile?.full_name || "",
+              "PracticeNumber": profile?.practice_number || "",
+              "RegistrationNumber": profile?.doctor_number || "",
+              "PracticeAddress": profile?.practice_address || "",
+              "Specialty": profile?.specialty || "",
+              "ReferralDoctor": action.referral_doctor || "Colleague",
+              "ReferralReason": action.referral_reason || "Further assessment and management",
+            };
+            const refTemplateContent = getTemplateContent("Referral Letter", refReplacements);
+            const referralContent = refTemplateContent || `<h2>Referral Letter</h2>
 <p><strong>Date:</strong> ${today}</p>
 <p><strong>From:</strong> ${profile?.full_name || ""} (${profile?.specialty || ""})</p>
 <p><strong>Practice Number:</strong> ${profile?.practice_number || ""}</p>
@@ -303,7 +349,21 @@ Rules:
           }
 
           case "write_general_letter": {
-            const letterContent = `<h2>${action.letter_subject || "General Letter"}</h2>
+            const letterReplacements: Record<string, string> = {
+              "ClientName": patientRecord?.name || action.patient_name || "",
+              "PatientName": patientRecord?.name || action.patient_name || "",
+              "Patient Name": patientRecord?.name || action.patient_name || "",
+              "Date": today,
+              "SessionDate": today,
+              "DoctorName": profile?.full_name || "",
+              "PracticeNumber": profile?.practice_number || "",
+              "RegistrationNumber": profile?.doctor_number || "",
+              "PracticeAddress": profile?.practice_address || "",
+              "Subject": action.letter_subject || "General Letter",
+              "Content": action.letter_content || action.description,
+            };
+            const letterTemplateContent = getTemplateContent("General Letterhead", letterReplacements);
+            const letterContent = letterTemplateContent || `<h2>${action.letter_subject || "General Letter"}</h2>
 <p><strong>Date:</strong> ${today}</p>
 <p><strong>From:</strong> ${profile?.full_name || ""}</p>
 <p><strong>Practice Number:</strong> ${profile?.practice_number || ""}</p>
