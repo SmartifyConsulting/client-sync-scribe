@@ -403,6 +403,31 @@ export default function Patients() {
                           ))}
                         </div>
                       )}
+                      {/* Invite fallback when patient not found */}
+                      {newPatient.name.length >= 3 && !searchingPatients && patientSuggestions.length === 0 && !selectedPatientUserId && (
+                        <div className="mt-3 rounded-lg border border-dashed border-border p-4 space-y-3 bg-muted/30">
+                          <p className="text-sm text-muted-foreground">Patient not found on Holarc? Send an invitation</p>
+                          <div className="flex gap-2">
+                            <Input
+                              type="email"
+                              placeholder="patient@email.com"
+                              value={newPatient.email}
+                              onChange={(e) => setNewPatient({ ...newPatient, email: e.target.value })}
+                              className="flex-1"
+                            />
+                            <Button
+                              type="button"
+                              size="sm"
+                              disabled={!newPatient.email || invitingPatient}
+                              onClick={handleSendPatientInvite}
+                              className="gap-1"
+                            >
+                              {invitingPatient ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+                              Invite
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div>
                       <label className="text-sm font-medium text-foreground">Email</label>
