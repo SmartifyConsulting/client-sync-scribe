@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Mic,
   MicOff,
@@ -9,6 +10,8 @@ import {
   Check,
   Loader2,
   Sparkles,
+  Send,
+  FileText,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -25,6 +28,8 @@ interface TodoItem {
   priority: "low" | "medium" | "high";
   created_at: string;
   is_auto_executed?: boolean;
+  document_id?: string | null;
+  task_type?: string;
 }
 
 const priorityColors = {
@@ -41,6 +46,7 @@ const actionTypeLabels: Record<string, string> = {
   write_referral_letter: "✉️ Created referral letter",
   write_general_letter: "📝 Created general letter",
   manual_task: "📌 Manual task created",
+  document_review: "📄 Review & send document",
 };
 
 export function CompactTodoList() {
