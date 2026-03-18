@@ -1,68 +1,59 @@
 
 
-# To-Do Metadata, ME Profile Buttons, Dashboard Layout, Task Icons & Moolas Logo
+# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
 
-## 1. To-Do List — All Tasks Show Description, Date, Patient
+## 1. Increase Logo Size by 130%
 
-Currently the description, date, and patient name are already rendered in the task rows (lines 429-458 of TodoList.tsx). However, the completed tasks filter only shows items from the last 14 days. No code change needed here — the metadata already displays for both active and completed tasks.
+Scale all logo instances by 130%:
 
-**Verification**: Confirm all three metadata fields (description, created date, patient badge) render for every task regardless of filter state. If any are conditionally hidden, remove the condition.
+| Location | Current | New (130%) |
+|---|---|---|
+| Sidebar | h-10 (40px) | h-[52px] |
+| Mobile Header | h-8 (32px) | h-[42px] |
+| Auth page | h-12 (48px) | h-[62px] |
+| Forgot/Reset Password | h-12 (48px) | h-[62px] |
+| Landing page | h-10 (40px) | h-[52px] |
 
-## 2. ME Profile — Only Show Connect + Schedule Buttons
+**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
 
-**`src/pages/PatientProfile.tsx`** (lines 238-259):
+## 2. Fix Practice Number Not Persisting
 
-When the doctor is viewing their own ME record (`patient.patient_user_id === currentUserId`), hide the following buttons:
-- `InvitePatientDialog`
-- `EmoticonSender`
-- `Start Session`
+**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
 
-Only keep:
-- `RequestConnectionButton` (Connect)
-- `Schedule` button
+**Fix in `src/pages/Profile.tsx`:**
+- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
+- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
+- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
+- This prevents the race condition where autosave fires with stale/initial data
 
-Wrap the hidden buttons in a condition: `{(patient as any).patient_user_id !== currentUserId && ( ... )}`.
+## 3. Make Partner Email Required and Create Pending Users
 
-## 3. Dashboard Stats Cards — Each in Own Row
+**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
 
-**`src/pages/Dashboard.tsx`** (lines 322-363):
+**Fix:**
+- Add an `email` column to the `practice_partners` table via migration
+- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
+- Ensure the `addPartner` function validates email is provided before saving
+- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
 
-Change the stats grid from `grid-cols-2 lg:grid-cols-3` to a single-column layout for doctors. Each `StatsCard` will occupy its own full-width row:
+**Database Migration:**
+- `ALTER TABLE practice_partners ADD COLUMN email text;`
 
-```
-grid gap-5 grid-cols-1
-```
+**Changes in `src/pages/Profile.tsx`:**
+- Make email field required in validation (alongside name and registration number)
+- Show validation error if email is missing
 
-This gives each card (Doctor Rating, Total Moolas, Total Patients, Appointments Today, This Week) its own row.
+## Technical Summary
 
-## 4. Active Tasks — AI Diamond Icon Logic
+### Database Migration
+- Add `email text` column to `practice_partners` table
 
-**`src/pages/TodoList.tsx`** (lines 424-481):
-
-Current behavior: tasks with `is_auto_executed` show a Zap/diamond "Auto" badge. Manual tasks show nothing.
-
-New behavior:
-- Remove the "M" / manual indicator entirely (there is none currently, but confirm)
-- Only show the AI diamond icon (Zap/sparkles) for auto-generated tasks (`is_auto_executed === true` or `task_type === 'document_review'`)
-- For AI-generated tasks, always show a Send arrow icon next to the diamond badge — these are tasks that were auto-created and need to be reviewed/sent
-- Manual tasks (no `is_auto_executed`, no `document_id`) show no special icon — they are obviously manual by the absence of the AI indicator
-
-Update the task row rendering:
-- Keep the existing `is_auto_executed` badge with diamond icon
-- For tasks with `document_id` (auto-generated document tasks): show the AI diamond + Send arrow together
-- For tasks without `document_id` but `is_auto_executed`: show AI diamond only
-- For manual tasks: no special icon
-
-## 5. Moolas Logo Asset
-
-Copy the uploaded Moolas logo (`user-uploads://2.jpg`) to `src/assets/moolas-logo.jpg` for use across the app wherever the Moolas branding appears (patient dashboard hero card, profile Moolas display, reward sections).
-
-## Files Modified
-
-| File | Change |
-|------|--------|
-| `src/pages/PatientProfile.tsx` | Hide Invite/Emoticon/Start Session buttons when viewing ME record |
-| `src/pages/Dashboard.tsx` | Change stats grid to single-column (`grid-cols-1`) |
-| `src/pages/TodoList.tsx` | Ensure AI diamond + send arrow for auto-generated tasks; no icon for manual |
-| `src/assets/moolas-logo.jpg` | Copy Moolas logo asset |
+### Files Modified
+- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
+- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
+- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
+- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
+- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
 
