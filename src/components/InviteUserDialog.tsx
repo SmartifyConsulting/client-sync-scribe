@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { UserPlus, Search, Loader2, Send, Mail } from "lucide-react";
+import { UserPlus, Loader2, Send, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -40,13 +40,10 @@ export function InviteUserDialog() {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim() || searchQuery.length < 2) {
-      toast({
-        title: "Search query too short",
-        description: "Please enter at least 2 characters to search",
-        variant: "destructive",
-      });
+  const handleSearch = useCallback(async (query: string) => {
+    if (!query.trim() || query.length < 2) {
+      setSearchResults([]);
+      setSearchMode("search");
       return;
     }
 
@@ -58,7 +55,7 @@ export function InviteUserDialog() {
         .from("profiles")
         .select("id, full_name, avatar_url, specialty, role")
         .neq("id", user?.id)
-        .or(`full_name.ilike.%${searchQuery}%`)
+        .or(`full_name.ilike.%${query}%`)
         .limit(10);
 
       if (error) throw error;
@@ -67,6 +64,8 @@ export function InviteUserDialog() {
       
       if (!data || data.length === 0) {
         setSearchMode("email");
+      } else {
+        setSearchMode("search");
       }
     } catch (error: any) {
       console.error("Search error:", error);
@@ -78,7 +77,17 @@ export function InviteUserDialog() {
     } finally {
       setIsSearching(false);
     }
-  };
+  }, [user?.id, toast]);
+
+  useEffect(() => {
+    if (searchQuery.length < 2) {
+      setSearchResults([]);
+      setSearchMode("search");
+      return;
+    }
+    const timer = setTimeout(() => handleSearch(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, handleSearch]);
 
   const handleSendInvitation = async () => {
     if (!user) return;
@@ -182,20 +191,15 @@ export function InviteUserDialog() {
           {/* Search Section */}
           <div className="space-y-2">
             <Label>Search for user</Label>
-            <div className="flex gap-2">
+            <div className="relative">
               <Input
-                placeholder="Search by name..."
+                placeholder="Start typing a name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               />
-              <Button onClick={handleSearch} disabled={isSearching} variant="secondary">
-                {isSearching ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Search className="h-4 w-4" />
-                )}
-              </Button>
+              {isSearching && (
+                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+              )}
             </div>
           </div>
 

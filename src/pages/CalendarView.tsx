@@ -403,7 +403,7 @@ export default function CalendarView() {
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground shrink-0">
+                                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-terracotta text-[9px] font-bold text-white shrink-0">
                                       {initials}
                                     </span>
                                   </TooltipTrigger>
@@ -455,7 +455,7 @@ export default function CalendarView() {
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground shrink-0">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-terracotta text-sm font-bold text-white shrink-0">
                             {initials}
                           </div>
                         </TooltipTrigger>

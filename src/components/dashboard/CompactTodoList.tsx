@@ -293,7 +293,7 @@ export function CompactTodoList() {
             "h-7 w-7 rounded-full flex items-center justify-center transition-colors",
             isRecording
               ? "bg-destructive hover:bg-destructive/90"
-              : "bg-secondary hover:bg-secondary/90"
+              : "bg-terracotta hover:bg-terracotta-dark"
           )}
         >
           {isProcessing || isAiProcessing ? (
