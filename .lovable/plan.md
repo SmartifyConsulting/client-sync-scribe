@@ -1,59 +1,68 @@
 
 
-# Fix Logo Size, Practice Number Persistence, and Partner Pending Status
+# Alphabet Separator, Moolas Logo, Hospital Admission Procedure Dropdown, Dashboard Stats Row
 
-## 1. Increase Logo Size by 130%
+## 1. Alphabet Separator — Letter Badge Instead of Full-Width Bar
 
-Scale all logo instances by 130%:
+**`src/pages/Patients.tsx`** (lines 883-887):
 
-| Location | Current | New (130%) |
-|---|---|---|
-| Sidebar | h-10 (40px) | h-[52px] |
-| Mobile Header | h-8 (32px) | h-[42px] |
-| Auth page | h-12 (48px) | h-[62px] |
-| Forgot/Reset Password | h-12 (48px) | h-[62px] |
-| Landing page | h-10 (40px) | h-[52px] |
+Replace the full-width red bar with a compact letter badge. The `<tr>` row stays but with a minimal cell containing a small red circular badge with white text:
 
-**Files:** `Sidebar.tsx`, `MobileHeader.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `Landing.tsx`
+```tsx
+<tr id={`patient-group-${letter}`}>
+  <td colSpan={6} className="px-4 py-1">
+    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#E01837] text-white text-xs font-bold">
+      {letter}
+    </span>
+  </td>
+</tr>
+```
 
-## 2. Fix Practice Number Not Persisting
+## 2. Moolas Logo — Display Uploaded Logo Where Moolas Is Shown
 
-**Root Cause:** The autosave `useEffect` depends on `[formData]`. When the profile loads and sets formData via `isSettingFromProfile`, a 100ms timeout resets the flag. However, React batching can cause the autosave effect to fire during this window with the initial (empty) form data, sending an empty `practice_number` back to the database.
+The Moolas logo (`src/assets/moolas-logo.jpg`) is not currently imported anywhere. Add it as the icon in the key Moolas display areas:
 
-**Fix in `src/pages/Profile.tsx`:**
-- Instead of using a 100ms `setTimeout` to reset the `isSettingFromProfile` flag, use a more robust approach: track the previous profile data and skip autosave when formData hasn't actually changed from the profile-loaded values
-- Add a `profileLoadedData` ref that stores the formData snapshot when profile loads
-- In the autosave effect, compare current formData against `profileLoadedData` -- only save if values actually differ
-- This prevents the race condition where autosave fires with stale/initial data
+- **`src/pages/patient/PatientDashboard.tsx`** (line 350-351): Replace the `<Award>` icon in the Moolas Hero Card with the Moolas logo image
+- **`src/pages/Dashboard.tsx`** (line 334-339): Replace the `Award` icon in the Total Moolas StatsCard — pass a custom rendered image instead, or show the logo alongside the stat
+- **`src/pages/PatientProfile.tsx`** (line 315): Replace the `Ⓜ` emoji with the Moolas logo image
+- **`src/pages/patient/MyRewards.tsx`**: Add Moolas logo in the rewards header area
 
-## 3. Make Partner Email Required and Create Pending Users
+## 3. Hospital Admission — Procedure Dropdown with AI Auto-Population
 
-**Problem:** The `practice_partners` table has no `email` column, so when partners are added without entering an email, no invitation or pending user is ever created.
+**`src/components/sessions/HospitalAdmissionEditor.tsx`** (lines 456-496):
 
-**Fix:**
-- Add an `email` column to the `practice_partners` table via migration
-- Make the email field visually required in the "Add New Partner" form (it already exists in the UI but is optional)
-- Ensure the `addPartner` function validates email is provided before saving
-- When a partner is added with an email, the existing flow already calls `send-user-invitation` with `isPracticePartner: true`, which creates the pending user record
+Replace the plain text `<Input>` for procedure description with a searchable dropdown that:
+- Calls `lookup-medical-codes` with `codeSystem: 'NHRPL'` as the user types (debounced)
+- Shows an alphabetically sorted dropdown list of procedure suggestions
+- AI auto-populates the selection when `sessionId` is provided — on mount, fetch the session transcript/summary and invoke AI to extract the likely procedure, then pre-select it
+- Selected procedure still triggers NHRPL code auto-fill as it does currently
 
-**Database Migration:**
-- `ALTER TABLE practice_partners ADD COLUMN email text;`
+Implementation:
+- Add state for procedure suggestions and a loading indicator
+- Use the existing `useCodeSearch` hook pattern for debounced search
+- On component mount with `sessionId`, call `summarize-session` or read session notes to extract procedure context, then auto-search and pre-select the best match
+- Sort suggestions alphabetically by description
 
-**Changes in `src/pages/Profile.tsx`:**
-- Make email field required in validation (alongside name and registration number)
-- Show validation error if email is missing
+## 4. Dashboard Stats — Single Row (Not Single Column)
 
-## Technical Summary
+**`src/pages/Dashboard.tsx`** (line 323):
 
-### Database Migration
-- Add `email text` column to `practice_partners` table
+Change `grid-cols-1` to a horizontal single-row layout:
 
-### Files Modified
-- `src/components/layout/Sidebar.tsx` -- logo h-10 to h-[52px]
-- `src/components/layout/MobileHeader.tsx` -- logo h-8 to h-[42px]
-- `src/pages/Auth.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ForgotPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/ResetPassword.tsx` -- logo h-12 to h-[62px]
-- `src/pages/Landing.tsx` -- logo h-10 to h-[52px]
-- `src/pages/Profile.tsx` -- fix autosave race condition, make partner email required
+```tsx
+<div className="grid gap-5 grid-cols-2 lg:grid-cols-5">
+```
+
+This puts all 5 stats cards in one row on large screens, 2 per row on medium.
+
+## Files Modified
+
+| File | Change |
+|------|--------|
+| `src/pages/Patients.tsx` | Red badge letter instead of full-width red bar |
+| `src/pages/Dashboard.tsx` | Stats grid to `grid-cols-2 lg:grid-cols-5`, Moolas logo |
+| `src/pages/patient/PatientDashboard.tsx` | Moolas logo in hero card |
+| `src/pages/PatientProfile.tsx` | Moolas logo replacing emoji |
+| `src/pages/patient/MyRewards.tsx` | Moolas logo in rewards header |
+| `src/components/sessions/HospitalAdmissionEditor.tsx` | Searchable procedure dropdown with AI auto-populate |
 
