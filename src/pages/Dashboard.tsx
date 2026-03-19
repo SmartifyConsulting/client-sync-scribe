@@ -1,4 +1,5 @@
 import { Users, Calendar, TrendingUp, LogOut, Award, Bell, Mic, User, Settings, Star } from "lucide-react";
+import moolasLogo from "@/assets/moolas-logo.jpg";
 import { CompactTodoList } from "@/components/dashboard/CompactTodoList";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
