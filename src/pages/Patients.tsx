@@ -881,8 +881,10 @@ export default function Patients() {
                 {(selectedLetter ? availableLetters.filter(l => l === selectedLetter) : availableLetters.sort()).map((letter) => (
                   <React.Fragment key={letter}>
                     <tr id={`patient-group-${letter}`}>
-                      <td colSpan={6} className="px-4 py-1.5 sticky top-0 bg-[#E01837]">
-                        <span className="text-xs font-bold text-white">{letter}</span>
+                      <td colSpan={6} className="px-4 py-1">
+                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-white text-xs font-bold">
+                          {letter}
+                        </span>
                       </td>
                     </tr>
                     {groupedPatients[letter].map((patient) => (

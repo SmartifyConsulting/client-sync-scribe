@@ -7,6 +7,7 @@ interface StatsCardProps {
   change?: string;
   trend?: "up" | "down" | "neutral";
   icon: LucideIcon;
+  imageUrl?: string;
   className?: string;
 }
 
@@ -16,6 +17,7 @@ export function StatsCard({
   change,
   trend = "neutral",
   icon: Icon,
+  imageUrl,
   className,
 }: StatsCardProps) {
   return (
@@ -42,8 +44,12 @@ export function StatsCard({
             </p>
           )}
         </div>
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 transition-all duration-300 group-hover:bg-primary/15 group-hover:scale-105">
-          <Icon className="h-7 w-7 text-primary" />
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 transition-all duration-300 group-hover:bg-primary/15 group-hover:scale-105 overflow-hidden">
+          {imageUrl ? (
+            <img src={imageUrl} alt={title} className="h-10 w-10 object-contain" />
+          ) : (
+            <Icon className="h-7 w-7 text-primary" />
+          )}
         </div>
       </div>
     </div>

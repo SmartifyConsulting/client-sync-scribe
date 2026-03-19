@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Calendar, FileText, Receipt, Clock, User, Loader2, Bell, Pill, Award, LogOut, Settings, ListChecks, ArrowRight, Info } from "lucide-react";
+import { Calendar, FileText, Receipt, Clock, User, Loader2, Bell, Pill, LogOut, Settings, ListChecks, ArrowRight, Info } from "lucide-react";
+import moolasLogo from "@/assets/moolas-logo.jpg";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -347,12 +348,12 @@ export default function PatientDashboard() {
         <Link to="/patient/rewards" className="lg:col-span-2">
           <Card className="h-full border-primary/20 bg-gradient-to-br from-primary/5 via-card to-secondary/5 hover:shadow-lg transition-all cursor-pointer">
             <CardContent className="flex items-center gap-5 p-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-                <Award className="h-8 w-8 text-primary" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 overflow-hidden">
+                <img src={moolasLogo} alt="Moolas" className="h-12 w-12 object-contain" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-muted-foreground">My Moolas Balance</p>
-                <p className="text-4xl font-bold text-foreground">{lollipopCount} <span className="text-2xl">Ⓜ️</span></p>
+                <p className="text-4xl font-bold text-foreground">{lollipopCount}</p>
               </div>
               <ArrowRight className="h-5 w-5 text-muted-foreground" />
             </CardContent>

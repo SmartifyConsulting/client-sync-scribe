@@ -1,4 +1,5 @@
 import { Users, Calendar, TrendingUp, LogOut, Award, Bell, Mic, User, Settings, Star } from "lucide-react";
+import moolasLogo from "@/assets/moolas-logo.jpg";
 import { CompactTodoList } from "@/components/dashboard/CompactTodoList";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -320,7 +321,7 @@ export default function Dashboard() {
       <DoctorAccessRequests />
 
       {/* Stats Grid */}
-      <div className="grid gap-5 grid-cols-1">
+      <div className="grid gap-5 grid-cols-2 lg:grid-cols-5">
         {isDoctor && (
           <StatsCard
             title="Doctor Rating"
@@ -337,6 +338,7 @@ export default function Dashboard() {
             change={`Doctor: ${doctorMoolas} · Patient: ${patientMoolas}`}
             trend="up"
             icon={Award}
+            imageUrl={moolasLogo}
           />
         )}
         <StatsCard

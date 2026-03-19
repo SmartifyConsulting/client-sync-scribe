@@ -254,6 +254,54 @@ export function HospitalAdmissionEditor({
   const [newSystemName, setNewSystemName] = useState("");
 
   const { suggestions, loading, search, clearSuggestions } = useCodeSearch(country);
+  const procedureCodeSearch = useCodeSearch(country);
+  const [showProcedureDropdown, setShowProcedureDropdown] = useState(false);
+  const procedureDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close procedure dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (procedureDropdownRef.current && !procedureDropdownRef.current.contains(e.target as Node)) {
+        setShowProcedureDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // AI auto-populate procedure from session
+  useEffect(() => {
+    if (!sessionId) return;
+    (async () => {
+      try {
+        const { data: session } = await supabase
+          .from("sessions")
+          .select("summary, notes, transcript")
+          .eq("id", sessionId)
+          .maybeSingle();
+        if (!session) return;
+        const context = session.summary || session.notes || session.transcript || "";
+        if (context.length < 10) return;
+        const { data, error } = await supabase.functions.invoke('lookup-medical-codes', {
+          body: { query: context.slice(0, 300), codeSystem: 'NHRPL', country },
+        });
+        if (!error && Array.isArray(data) && data.length > 0) {
+          const best = data[0];
+          setProcedureDescription(best.description);
+          const nhrplIndex = codeSystems.findIndex(s => s.key === 'nhrpl');
+          if (nhrplIndex >= 0) {
+            const updated = [...codeSystems];
+            if (updated[nhrplIndex].entries.length === 1 && !updated[nhrplIndex].entries[0].code) {
+              updated[nhrplIndex].entries = [{ code: best.code, description: best.description }];
+            }
+            setCodeSystems(updated);
+          }
+        }
+      } catch (e) {
+        console.error("AI procedure auto-populate error:", e);
+      }
+    })();
+  }, [sessionId]);
 
   const addCodeSystem = () => {
     if (!newSystemName.trim()) return;
@@ -456,41 +504,90 @@ export function HospitalAdmissionEditor({
           <div>
             <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-3">Procedure</h3>
             <div className="space-y-2">
-              <Input
-                placeholder="Enter procedure description (e.g. Total Knee Replacement)"
-                value={procedureDescription}
-                onChange={(e) => setProcedureDescription(e.target.value)}
-                onBlur={async () => {
-                  if (procedureDescription.trim().length >= 3) {
-                    try {
-                      const { data, error } = await supabase.functions.invoke('lookup-medical-codes', {
-                        body: { query: procedureDescription, codeSystem: 'NHRPL', country },
-                      });
-                      if (!error && Array.isArray(data) && data.length > 0) {
-                        const nhrplIndex = codeSystems.findIndex(s => s.key === 'nhrpl');
-                        if (nhrplIndex >= 0) {
-                          const updated = [...codeSystems];
-                          const existingCodes = new Set(updated[nhrplIndex].entries.map(e => e.code).filter(Boolean));
-                          const newEntries = data
-                            .filter((d: any) => !existingCodes.has(d.code))
-                            .map((d: any) => ({ code: d.code, description: d.description }));
-                          if (newEntries.length > 0) {
-                            // Replace empty first entry or append
-                            if (updated[nhrplIndex].entries.length === 1 && !updated[nhrplIndex].entries[0].code) {
-                              updated[nhrplIndex].entries = newEntries;
-                            } else {
-                              updated[nhrplIndex].entries = [...updated[nhrplIndex].entries, ...newEntries];
+              <div className="relative" ref={procedureDropdownRef}>
+                <Input
+                  placeholder="Search procedure (e.g. Total Knee Replacement)"
+                  value={procedureDescription}
+                  onChange={(e) => {
+                    setProcedureDescription(e.target.value);
+                    procedureCodeSearch.search(e.target.value, 'NHRPL', 'procedure');
+                    setShowProcedureDropdown(true);
+                  }}
+                  onFocus={() => {
+                    if ((procedureCodeSearch.suggestions['procedure'] || []).length > 0) setShowProcedureDropdown(true);
+                  }}
+                  onBlur={async () => {
+                    // Delay to allow click on dropdown
+                    setTimeout(async () => {
+                      if (procedureDescription.trim().length >= 3) {
+                        try {
+                          const { data, error } = await supabase.functions.invoke('lookup-medical-codes', {
+                            body: { query: procedureDescription, codeSystem: 'NHRPL', country },
+                          });
+                          if (!error && Array.isArray(data) && data.length > 0) {
+                            const nhrplIndex = codeSystems.findIndex(s => s.key === 'nhrpl');
+                            if (nhrplIndex >= 0) {
+                              const updated = [...codeSystems];
+                              const existingCodes = new Set(updated[nhrplIndex].entries.map(e => e.code).filter(Boolean));
+                              const newEntries = data
+                                .filter((d: any) => !existingCodes.has(d.code))
+                                .map((d: any) => ({ code: d.code, description: d.description }));
+                              if (newEntries.length > 0) {
+                                if (updated[nhrplIndex].entries.length === 1 && !updated[nhrplIndex].entries[0].code) {
+                                  updated[nhrplIndex].entries = newEntries;
+                                } else {
+                                  updated[nhrplIndex].entries = [...updated[nhrplIndex].entries, ...newEntries];
+                                }
+                                setCodeSystems(updated);
+                              }
                             }
-                            setCodeSystems(updated);
                           }
+                        } catch (e) {
+                          console.error("Procedure code lookup error:", e);
                         }
                       }
-                    } catch (e) {
-                      console.error("Procedure code lookup error:", e);
-                    }
-                  }
-                }}
-              />
+                    }, 200);
+                  }}
+                />
+                {procedureCodeSearch.loading['procedure'] && (
+                  <Loader2 className="absolute right-2 top-3 h-4 w-4 animate-spin text-muted-foreground" />
+                )}
+                {showProcedureDropdown && (procedureCodeSearch.suggestions['procedure'] || []).length > 0 && (
+                  <div className="absolute z-50 top-full left-0 mt-1 w-full max-h-48 overflow-y-auto rounded-md border border-border bg-popover shadow-md">
+                    {[...(procedureCodeSearch.suggestions['procedure'] || [])]
+                      .sort((a, b) => a.description.localeCompare(b.description))
+                      .map((s, si) => (
+                        <button
+                          key={si}
+                          type="button"
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex gap-2"
+                          onClick={() => {
+                            setProcedureDescription(s.description);
+                            setShowProcedureDropdown(false);
+                            procedureCodeSearch.clearSuggestions('procedure');
+                            // Auto-fill NHRPL code
+                            const nhrplIndex = codeSystems.findIndex(sys => sys.key === 'nhrpl');
+                            if (nhrplIndex >= 0) {
+                              const updated = [...codeSystems];
+                              const existingCodes = new Set(updated[nhrplIndex].entries.map(e => e.code).filter(Boolean));
+                              if (!existingCodes.has(s.code)) {
+                                if (updated[nhrplIndex].entries.length === 1 && !updated[nhrplIndex].entries[0].code) {
+                                  updated[nhrplIndex].entries = [{ code: s.code, description: s.description }];
+                                } else {
+                                  updated[nhrplIndex].entries.push({ code: s.code, description: s.description });
+                                }
+                                setCodeSystems(updated);
+                              }
+                            }
+                          }}
+                        >
+                          <span className="font-mono font-medium shrink-0">{s.code}</span>
+                          <span className="text-muted-foreground truncate">{s.description}</span>
+                        </button>
+                      ))}
+                  </div>
+                )}
+              </div>
               <p className="text-xs text-muted-foreground">NHRPL codes will be auto-filled based on the procedure</p>
             </div>
           </div>
