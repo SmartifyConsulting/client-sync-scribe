@@ -320,7 +320,7 @@ export default function Dashboard() {
       <DoctorAccessRequests />
 
       {/* Stats Grid */}
-      <div className="grid gap-5 grid-cols-1">
+      <div className="grid gap-5 grid-cols-2 lg:grid-cols-5">
         {isDoctor && (
           <StatsCard
             title="Doctor Rating"

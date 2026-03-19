@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Calendar, FileText, Receipt, Clock, User, Loader2, Bell, Pill, Award, LogOut, Settings, ListChecks, ArrowRight, Info } from "lucide-react";
+import { Calendar, FileText, Receipt, Clock, User, Loader2, Bell, Pill, LogOut, Settings, ListChecks, ArrowRight, Info } from "lucide-react";
+import moolasLogo from "@/assets/moolas-logo.jpg";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
