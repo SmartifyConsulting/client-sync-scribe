@@ -37,6 +37,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ActivityProofCapture } from "@/components/rewards/ActivityProofCapture";
 import { MedicationAdherenceTab } from "@/components/rewards/MedicationAdherenceTab";
 import { useToast } from "@/hooks/use-toast";
+import moolasLogo from "@/assets/moolas-logo.jpg";
 
 const MILESTONES = [
   { count: 5, label: "First Steps", icon: "🌟", color: "text-yellow-500" },
