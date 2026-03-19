@@ -254,6 +254,54 @@ export function HospitalAdmissionEditor({
   const [newSystemName, setNewSystemName] = useState("");
 
   const { suggestions, loading, search, clearSuggestions } = useCodeSearch(country);
+  const procedureCodeSearch = useCodeSearch(country);
+  const [showProcedureDropdown, setShowProcedureDropdown] = useState(false);
+  const procedureDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close procedure dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (procedureDropdownRef.current && !procedureDropdownRef.current.contains(e.target as Node)) {
+        setShowProcedureDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // AI auto-populate procedure from session
+  useEffect(() => {
+    if (!sessionId) return;
+    (async () => {
+      try {
+        const { data: session } = await supabase
+          .from("sessions")
+          .select("summary, notes, transcript")
+          .eq("id", sessionId)
+          .maybeSingle();
+        if (!session) return;
+        const context = session.summary || session.notes || session.transcript || "";
+        if (context.length < 10) return;
+        const { data, error } = await supabase.functions.invoke('lookup-medical-codes', {
+          body: { query: context.slice(0, 300), codeSystem: 'NHRPL', country },
+        });
+        if (!error && Array.isArray(data) && data.length > 0) {
+          const best = data[0];
+          setProcedureDescription(best.description);
+          const nhrplIndex = codeSystems.findIndex(s => s.key === 'nhrpl');
+          if (nhrplIndex >= 0) {
+            const updated = [...codeSystems];
+            if (updated[nhrplIndex].entries.length === 1 && !updated[nhrplIndex].entries[0].code) {
+              updated[nhrplIndex].entries = [{ code: best.code, description: best.description }];
+            }
+            setCodeSystems(updated);
+          }
+        }
+      } catch (e) {
+        console.error("AI procedure auto-populate error:", e);
+      }
+    })();
+  }, [sessionId]);
 
   const addCodeSystem = () => {
     if (!newSystemName.trim()) return;
