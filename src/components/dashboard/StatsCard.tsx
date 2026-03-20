@@ -46,10 +46,10 @@ export function StatsCard({
         </div>
         <div className={cn(
           "flex h-14 w-14 items-center justify-center transition-all duration-300 group-hover:scale-105 overflow-hidden",
-          imageUrl ? "rounded-full" : "rounded-2xl bg-primary/10 group-hover:bg-primary/15"
+          imageUrl ? "rounded-full bg-white shadow-sm p-1" : "rounded-2xl bg-primary/10 group-hover:bg-primary/15"
         )}>
           {imageUrl ? (
-            <img src={imageUrl} alt={title} className="h-14 w-14 object-cover rounded-full" />
+            <img src={imageUrl} alt={title} className="h-10 w-10 object-cover rounded-full" />
           ) : (
             <Icon className="h-7 w-7 text-primary" />
           )}
