@@ -3,7 +3,7 @@ import { Calendar as CalendarIcon, Clock, MapPin, Loader2, Plus, User, DollarSig
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { format, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isToday, parseISO } from "date-fns";
+import { format, addDays, addMonths, subMonths, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isToday, parseISO, startOfMonth, endOfMonth, eachMonthOfInterval, startOfYear, endOfYear, getDaysInMonth } from "date-fns";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,13 +24,17 @@ interface Appointment {
   service_price?: number;
 }
 
+type CalendarViewMode = "week" | "month" | "year";
+
 export default function PatientCalendar() {
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [bookDialogOpen, setBookDialogOpen] = useState(false);
+  const [calendarView, setCalendarView] = useState<CalendarViewMode>("month");
 
   useEffect(() => {
     if (user) fetchAppointments();
@@ -165,79 +169,223 @@ export default function PatientCalendar() {
     </div>
   );
 
+  // Month view helpers
+  const monthStart = startOfMonth(currentMonth);
+  const monthEnd = endOfMonth(currentMonth);
+  const firstDayOfMonth = monthStart.getDay();
+  const daysInCurrentMonth = getDaysInMonth(currentMonth);
+
+  // Year view helpers
+  const yearStart = startOfYear(currentMonth);
+  const yearEnd = endOfYear(currentMonth);
+  const monthsInYear = eachMonthOfInterval({ start: yearStart, end: yearEnd });
+
+  const ViewToggle = () => (
+    <div className="flex rounded-lg border border-border overflow-hidden">
+      {(["week", "month", "year"] as CalendarViewMode[]).map((view) => (
+        <button
+          key={view}
+          onClick={() => setCalendarView(view)}
+          className={cn(
+            "px-3 py-1.5 text-sm font-medium transition-colors capitalize",
+            calendarView === view
+              ? "bg-primary text-primary-foreground"
+              : "hover:bg-muted text-muted-foreground"
+          )}
+        >
+          {view}
+        </button>
+      ))}
+    </div>
+  );
+
+  const renderWeekView = () => (
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">
+            {format(currentWeekStart, "MMMM yyyy")}
+          </CardTitle>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))}>Previous</Button>
+            <Button variant="outline" size="sm" onClick={() => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}>Today</Button>
+            <Button variant="outline" size="sm" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))}>Next</Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-7 gap-2">
+          {weekDays.map((day) => {
+            const dayAppointments = appointments.filter((apt) => isSameDay(parseISO(apt.start_time), day));
+            const isSelected = isSameDay(day, selectedDate);
+            return (
+              <button
+                key={day.toISOString()}
+                onClick={() => setSelectedDate(day)}
+                className={cn(
+                  "flex flex-col items-center p-3 rounded-lg transition-colors",
+                  isSelected ? "bg-primary text-primary-foreground" : isToday(day) ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                )}
+              >
+                <span className="text-xs font-medium">{format(day, "EEE")}</span>
+                <span className="text-lg font-semibold">{format(day, "d")}</span>
+                {dayAppointments.length > 0 && (
+                  <div className={cn("mt-1 h-1.5 w-1.5 rounded-full", isSelected ? "bg-primary-foreground" : "bg-primary")} />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const renderMonthView = () => (
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">{format(currentMonth, "MMMM yyyy")}</CardTitle>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>Previous</Button>
+            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(new Date())}>Today</Button>
+            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>Next</Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-7 mb-2">
+          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+            <div key={d} className="py-2 text-center text-sm font-medium text-muted-foreground">{d}</div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7 gap-1">
+          {Array.from({ length: (firstDayOfMonth + 6) % 7 }).map((_, i) => (
+            <div key={`empty-${i}`} className="aspect-square p-1" />
+          ))}
+          {Array.from({ length: daysInCurrentMonth }).map((_, i) => {
+            const day = i + 1;
+            const dayDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+            const dayApts = appointments.filter((apt) => isSameDay(parseISO(apt.start_time), dayDate));
+            const isTodayDay = isToday(dayDate);
+            const isSelected = isSameDay(dayDate, selectedDate);
+            return (
+              <button
+                key={day}
+                onClick={() => setSelectedDate(dayDate)}
+                className={cn(
+                  "aspect-square p-1 rounded-lg transition-colors flex flex-col items-center justify-start",
+                  isSelected ? "bg-primary/20 ring-1 ring-primary" : isTodayDay ? "bg-primary/10" : "hover:bg-muted"
+                )}
+              >
+                <span className={cn(
+                  "flex h-7 w-7 items-center justify-center rounded-full text-sm",
+                  isTodayDay && "bg-primary text-primary-foreground font-semibold"
+                )}>
+                  {day}
+                </span>
+                {dayApts.length > 0 && (
+                  <div className="flex gap-0.5 mt-0.5">
+                    {dayApts.slice(0, 3).map((_, idx) => (
+                      <div key={idx} className="h-1 w-1 rounded-full bg-primary" />
+                    ))}
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const renderYearView = () => (
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">{format(currentMonth, "yyyy")}</CardTitle>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(subMonths(currentMonth, 12))}>Previous</Button>
+            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(new Date())}>This Year</Button>
+            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(addMonths(currentMonth, 12))}>Next</Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
+          {monthsInYear.map((month) => {
+            const mStart = startOfMonth(month);
+            const mEnd = endOfMonth(month);
+            const monthApts = appointments.filter((apt) => {
+              const d = parseISO(apt.start_time);
+              return d >= mStart && d <= mEnd;
+            });
+            const isCurrent = month.getMonth() === new Date().getMonth() && month.getFullYear() === new Date().getFullYear();
+            return (
+              <button
+                key={month.toISOString()}
+                onClick={() => { setCurrentMonth(month); setCalendarView("month"); }}
+                className={cn(
+                  "rounded-xl border border-border p-3 text-left transition-colors hover:bg-muted/50",
+                  isCurrent && "border-primary bg-primary/5"
+                )}
+              >
+                <p className={cn("text-sm font-semibold", isCurrent && "text-primary")}>{format(month, "MMMM")}</p>
+                {monthApts.length > 0 ? (
+                  <p className="text-xs text-primary mt-1">{monthApts.length} appointment{monthApts.length !== 1 ? "s" : ""}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-1">No appointments</p>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground">My Calendar</h1>
           <p className="text-muted-foreground">View and manage your appointments</p>
         </div>
-        <Button onClick={() => setBookDialogOpen(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Book Appointment
-        </Button>
+        <div className="flex items-center gap-3">
+          <ViewToggle />
+          <Button onClick={() => setBookDialogOpen(true)} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Book Appointment
+          </Button>
+        </div>
       </div>
 
       <PatientRequestsBadge />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">
-                  {format(currentWeekStart, "MMMM yyyy")}
-                </CardTitle>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))}>Previous</Button>
-                  <Button variant="outline" size="sm" onClick={() => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}>Today</Button>
-                  <Button variant="outline" size="sm" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))}>Next</Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-7 gap-2">
-                {weekDays.map((day) => {
-                  const dayAppointments = appointments.filter((apt) => isSameDay(parseISO(apt.start_time), day));
-                  const isSelected = isSameDay(day, selectedDate);
-                  return (
-                    <button
-                      key={day.toISOString()}
-                      onClick={() => setSelectedDate(day)}
-                      className={cn(
-                        "flex flex-col items-center p-3 rounded-lg transition-colors",
-                        isSelected ? "bg-primary text-primary-foreground" : isToday(day) ? "bg-primary/10 text-primary" : "hover:bg-muted"
-                      )}
-                    >
-                      <span className="text-xs font-medium">{format(day, "EEE")}</span>
-                      <span className="text-lg font-semibold">{format(day, "d")}</span>
-                      {dayAppointments.length > 0 && (
-                        <div className={cn("mt-1 h-1.5 w-1.5 rounded-full", isSelected ? "bg-primary-foreground" : "bg-primary")} />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
+          {calendarView === "week" && renderWeekView()}
+          {calendarView === "month" && renderMonthView()}
+          {calendarView === "year" && renderYearView()}
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">{format(selectedDate, "EEEE, MMMM d")}</CardTitle>
-              <CardDescription>{selectedDayAppointments.length} appointment(s)</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {selectedDayAppointments.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No appointments scheduled for this day</p>
-              ) : (
-                <div className="space-y-3">
-                  {selectedDayAppointments.map((apt) => (
-                    <AppointmentCard key={apt.id} apt={apt} />
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {calendarView !== "year" && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">{format(selectedDate, "EEEE, MMMM d")}</CardTitle>
+                <CardDescription>{selectedDayAppointments.length} appointment(s)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {selectedDayAppointments.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">No appointments scheduled for this day</p>
+                ) : (
+                  <div className="space-y-3">
+                    {selectedDayAppointments.map((apt) => (
+                      <AppointmentCard key={apt.id} apt={apt} />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Upcoming Appointments Sidebar */}

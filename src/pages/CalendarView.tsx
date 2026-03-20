@@ -27,7 +27,9 @@ import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Label } from "@/components/ui/label";
-import { format, startOfMonth, endOfMonth } from "date-fns";
+import { format, startOfMonth, endOfMonth, addMonths, startOfYear, endOfYear, eachMonthOfInterval, parseISO, isSameDay, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isToday as isTodayFn } from "date-fns";
+
+
 
 interface AppointmentTypeColor {
   id: string;
@@ -36,6 +38,7 @@ interface AppointmentTypeColor {
 }
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+type CalendarViewMode = "week" | "month" | "year";
 
 interface CalendarEvent {
   id: string;
@@ -81,6 +84,7 @@ export default function CalendarView() {
     type: "session",
     notes: "",
   });
+  const [calendarView, setCalendarView] = useState<CalendarViewMode>("month");
 
   // Fetch appointment type colors
   useEffect(() => {
@@ -413,6 +417,22 @@ export default function CalendarView() {
           </DialogContent>
         </Dialog>
         </div>
+        <div className="flex rounded-lg border border-border overflow-hidden">
+          {(["week", "month", "year"] as CalendarViewMode[]).map((view) => (
+            <button
+              key={view}
+              onClick={() => setCalendarView(view)}
+              className={cn(
+                "px-3 py-1.5 text-sm font-medium transition-colors capitalize",
+                calendarView === view
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-muted text-muted-foreground"
+              )}
+            >
+              {view}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Appointment Requests from Patients */}
@@ -421,106 +441,204 @@ export default function CalendarView() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Calendar */}
         <div className="lg:col-span-2 rounded-xl border border-primary bg-card p-6 shadow-sm">
-          {/* Month Navigation */}
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-foreground">{monthName}</h2>
-            <div className="flex gap-2">
-              <Button variant="outline" size="icon" onClick={prevMonth}>
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon" onClick={nextMonth}>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Days of Week */}
-          <div className="grid grid-cols-7 mb-2">
-            {daysOfWeek.map((day) => (
-              <div
-                key={day}
-                className="py-2 text-center text-sm font-medium text-muted-foreground"
-              >
-                {day}
-              </div>
-            ))}
-          </div>
-
-          {/* Calendar Grid */}
-          <div className="grid grid-cols-7 gap-1">
-            {Array.from({ length: firstDay }).map((_, i) => (
-              <div key={`empty-${i}`} className="aspect-square p-2" />
-            ))}
-            {Array.from({ length: daysInMonth }).map((_, i) => {
-              const day = i + 1;
-              const isToday = day === currentDate.getDate() && 
-                selectedDate.getMonth() === currentDate.getMonth() &&
-                selectedDate.getFullYear() === currentDate.getFullYear();
-              const dayEvents = events.filter((e) => e.day === day);
-
-              return (
-                <div
-                  key={day}
-                  className={cn(
-                    "aspect-square p-1 rounded-lg transition-colors",
-                    isToday && "bg-primary/10"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "flex h-7 w-7 items-center justify-center rounded-full text-sm",
-                      isToday && "bg-primary text-primary-foreground font-semibold"
-                    )}
-                  >
-                    {day}
+          {calendarView === "week" && (() => {
+            const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
+            const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 });
+            const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
+            return (
+              <>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-foreground">{format(weekStart, "MMM d")} – {format(weekEnd, "MMM d, yyyy")}</h2>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="icon" onClick={() => setSelectedDate(addDays(selectedDate, -7))}>
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>Today</Button>
+                    <Button variant="outline" size="icon" onClick={() => setSelectedDate(addDays(selectedDate, 7))}>
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
                   </div>
-                  {dayEvents.length > 0 && (
-                    <div className="mt-1 space-y-0.5">
-                      {dayEvents.slice(0, 2).map((event) => {
-                        const patientName = event.patientId
-                          ? patients.find(p => p.id === event.patientId)?.name
-                          : null;
-                        const initials = patientName
-                          ? patientName.split(/\s+/).map(w => w[0]).join("").toUpperCase().slice(0, 2)
-                          : null;
-                        return (
-                          <div
-                            key={event.id}
-                            onClick={() => handleEventClick(event)}
-                            className={cn(
-                              "flex items-center gap-1 truncate rounded px-1 py-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity",
-                              event.type === "session" && "bg-primary/20 text-primary",
-                              event.type === "internal" && "bg-muted text-muted-foreground",
-                              event.type === "followup" && "bg-warning/20 text-warning"
-                            )}
-                          >
-                            {initials ? (
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold text-white shrink-0" style={{ backgroundColor: getTypeColor(event.type) || 'hsl(350, 78%, 55%)' }}>
-                                      {initials}
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent>{patientName}</TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            ) : null}
-                            <span className="truncate">{event.time}</span>
+                </div>
+                <div className="grid grid-cols-7 gap-2">
+                  {weekDays.map((day) => {
+                    const dayNum = day.getDate();
+                    const dayEvents = events.filter((e) => e.day === dayNum && day.getMonth() === selectedDate.getMonth());
+                    const today = isTodayFn(day);
+                    return (
+                      <div
+                        key={day.toISOString()}
+                        onClick={() => setSelectedDate(day)}
+                        className={cn(
+                          "flex flex-col items-center p-3 rounded-lg transition-colors cursor-pointer min-h-[100px]",
+                          isSameDay(day, selectedDate) ? "bg-primary text-primary-foreground" : today ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                        )}
+                      >
+                        <span className="text-xs font-medium">{format(day, "EEE")}</span>
+                        <span className="text-lg font-semibold">{format(day, "d")}</span>
+                        {dayEvents.length > 0 && (
+                          <div className="mt-2 space-y-1 w-full">
+                            {dayEvents.slice(0, 2).map((event) => (
+                              <div key={event.id} className="text-[10px] truncate text-center opacity-80">
+                                {event.time}
+                              </div>
+                            ))}
+                            {dayEvents.length > 2 && <div className="text-[10px] text-center opacity-60">+{dayEvents.length - 2}</div>}
                           </div>
-                        );
-                      })}
-                      {dayEvents.length > 2 && (
-                        <div className="text-xs text-muted-foreground pl-1">
-                          +{dayEvents.length - 2} more
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            );
+          })()}
+
+          {calendarView === "month" && (
+            <>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-foreground">{monthName}</h2>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="icon" onClick={prevMonth}>
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" onClick={nextMonth}>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-7 mb-2">
+                {daysOfWeek.map((day) => (
+                  <div key={day} className="py-2 text-center text-sm font-medium text-muted-foreground">{day}</div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-7 gap-1">
+                {Array.from({ length: firstDay }).map((_, i) => (
+                  <div key={`empty-${i}`} className="aspect-square p-2" />
+                ))}
+                {Array.from({ length: daysInMonth }).map((_, i) => {
+                  const day = i + 1;
+                  const isToday = day === currentDate.getDate() && 
+                    selectedDate.getMonth() === currentDate.getMonth() &&
+                    selectedDate.getFullYear() === currentDate.getFullYear();
+                  const dayEvents = events.filter((e) => e.day === day);
+
+                  return (
+                    <div
+                      key={day}
+                      className={cn(
+                        "aspect-square p-1 rounded-lg transition-colors",
+                        isToday && "bg-primary/10"
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "flex h-7 w-7 items-center justify-center rounded-full text-sm",
+                          isToday && "bg-primary text-primary-foreground font-semibold"
+                        )}
+                      >
+                        {day}
+                      </div>
+                      {dayEvents.length > 0 && (
+                        <div className="mt-1 space-y-0.5">
+                          {dayEvents.slice(0, 2).map((event) => {
+                            const patientName = event.patientId
+                              ? patients.find(p => p.id === event.patientId)?.name
+                              : null;
+                            const initials = patientName
+                              ? patientName.split(/\s+/).map(w => w[0]).join("").toUpperCase().slice(0, 2)
+                              : null;
+                            return (
+                              <div
+                                key={event.id}
+                                onClick={() => handleEventClick(event)}
+                                className={cn(
+                                  "flex items-center gap-1 truncate rounded px-1 py-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity",
+                                  event.type === "session" && "bg-primary/20 text-primary",
+                                  event.type === "internal" && "bg-muted text-muted-foreground",
+                                  event.type === "followup" && "bg-warning/20 text-warning"
+                                )}
+                              >
+                                {initials ? (
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold text-white shrink-0" style={{ backgroundColor: getTypeColor(event.type) || 'hsl(350, 78%, 55%)' }}>
+                                          {initials}
+                                        </span>
+                                      </TooltipTrigger>
+                                      <TooltipContent>{patientName}</TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                ) : null}
+                                <span className="truncate">{event.time}</span>
+                              </div>
+                            );
+                          })}
+                          {dayEvents.length > 2 && (
+                            <div className="text-xs text-muted-foreground pl-1">
+                              +{dayEvents.length - 2} more
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
-                  )}
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {calendarView === "year" && (() => {
+            const yearStart = startOfYear(selectedDate);
+            const yearEnd = endOfYear(selectedDate);
+            const months = eachMonthOfInterval({ start: yearStart, end: yearEnd });
+            return (
+              <>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-foreground">{selectedDate.getFullYear()}</h2>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="icon" onClick={() => setSelectedDate(new Date(selectedDate.getFullYear() - 1, selectedDate.getMonth()))}>
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>This Year</Button>
+                    <Button variant="outline" size="icon" onClick={() => setSelectedDate(new Date(selectedDate.getFullYear() + 1, selectedDate.getMonth()))}>
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-              );
-            })}
-          </div>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
+                  {months.map((month) => {
+                    const mStart = startOfMonth(month);
+                    const mEnd = endOfMonth(month);
+                    // Count events in this month
+                    const monthEvents = events.filter((e) => {
+                      const eventDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), e.day);
+                      return month.getMonth() === selectedDate.getMonth() ? true : false;
+                    });
+                    // Better: check appointments fetched for the month range
+                    const isCurrent = month.getMonth() === new Date().getMonth() && month.getFullYear() === new Date().getFullYear();
+                    return (
+                      <button
+                        key={month.toISOString()}
+                        onClick={() => { setSelectedDate(month); setCalendarView("month"); }}
+                        className={cn(
+                          "rounded-xl border border-border p-3 text-left transition-colors hover:bg-muted/50",
+                          isCurrent && "border-primary bg-primary/5"
+                        )}
+                      >
+                        <p className={cn("text-sm font-semibold", isCurrent && "text-primary")}>{format(month, "MMMM")}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {isCurrent ? "Current month" : format(month, "MMM yyyy")}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            );
+          })()}
         </div>
 
         {/* Today's Schedule */}

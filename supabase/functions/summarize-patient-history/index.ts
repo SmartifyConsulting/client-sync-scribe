@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { patient, sessions } = await req.json();
+    const { patient, sessions, language } = await req.json();
     
     if (!patient) {
       return new Response(
@@ -57,7 +57,7 @@ ${sessionSummaries}
         messages: [
           {
             role: "system",
-            content: `You are a professional medical/clinical assistant that creates comprehensive patient history summaries.
+            content: `You are a professional medical/clinical assistant that creates comprehensive patient history summaries.${language ? `\n\nIMPORTANT: Respond entirely in ${language}. All summaries, symptoms, conditions, medications, allergies, and conflict descriptions must be written in ${language}.` : ''}
 
 Your task is to analyze patient records and session history to provide:
 1. A comprehensive narrative summary of the patient's history from first visit to present

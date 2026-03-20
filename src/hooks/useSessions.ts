@@ -152,9 +152,17 @@ const completeSession = async (
 
       console.log('Completing session with content length:', fullContent?.length);
 
+      // Fetch user's preferred language for AI responses
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('preferred_language')
+        .eq('id', user.id)
+        .maybeSingle();
+      const preferredLanguage = profileData?.preferred_language || undefined;
+
       // Generate AI summary from transcript/notes
       const { data: summaryData, error: summaryError } = await supabase.functions.invoke('summarize-session', {
-        body: { notes: additionalNotes, transcript: content },
+        body: { notes: additionalNotes, transcript: content, language: preferredLanguage },
       });
 
       if (summaryError) {

@@ -16,7 +16,7 @@ serve(async (req) => {
     const body = await req.json();
     console.log("Request body received:", JSON.stringify(body).substring(0, 200));
     
-    const { notes, transcript, action, text, targetLanguage } = body;
+    const { notes, transcript, action, text, targetLanguage, language } = body;
 
     // Handle translation request
     if (action === 'translate' && text && targetLanguage) {
@@ -81,7 +81,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a professional medical/clinical assistant that creates detailed session summaries and detects clinical documents discussed in the session.
+            content: `You are a professional medical/clinical assistant that creates detailed session summaries and detects clinical documents discussed in the session.${language ? `\n\nIMPORTANT: Respond entirely in ${language}. All summaries, action points, and extracted document content must be written in ${language}.` : ''}
 
 Your task is to analyze the session transcript or notes and provide:
 1. A comprehensive professional summary (2-4 sentences)
