@@ -71,3 +71,6 @@ verify_jwt = false
 
 [functions.validate-medication-video]
 verify_jwt = false
+
+[functions.analyze-medical-image]
+verify_jwt = false
