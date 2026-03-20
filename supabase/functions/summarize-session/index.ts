@@ -16,7 +16,7 @@ serve(async (req) => {
     const body = await req.json();
     console.log("Request body received:", JSON.stringify(body).substring(0, 200));
     
-    const { notes, transcript, action, text, targetLanguage } = body;
+    const { notes, transcript, action, text, targetLanguage, language } = body;
 
     // Handle translation request
     if (action === 'translate' && text && targetLanguage) {
