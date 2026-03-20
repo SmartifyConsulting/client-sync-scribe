@@ -992,6 +992,8 @@ export type Database = {
           next_of_kin_relationship: string | null
           notes: string | null
           occupation: string | null
+          organ_donor: boolean | null
+          organ_donor_organs: Json | null
           patient_user_id: string | null
           pharmacies: Json | null
           pharmacy_email: string | null
@@ -1036,6 +1038,8 @@ export type Database = {
           next_of_kin_relationship?: string | null
           notes?: string | null
           occupation?: string | null
+          organ_donor?: boolean | null
+          organ_donor_organs?: Json | null
           patient_user_id?: string | null
           pharmacies?: Json | null
           pharmacy_email?: string | null
@@ -1080,6 +1084,8 @@ export type Database = {
           next_of_kin_relationship?: string | null
           notes?: string | null
           occupation?: string | null
+          organ_donor?: boolean | null
+          organ_donor_organs?: Json | null
           patient_user_id?: string | null
           pharmacies?: Json | null
           pharmacy_email?: string | null
