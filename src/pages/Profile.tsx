@@ -159,6 +159,8 @@ export default function Profile() {
   const { user } = useAuth();
   const { isAdmin } = useUserRole();
   const { profile, loading, fetchProfile, updateProfile, uploadLogo } = useProfile();
+  const [patientRecord, setPatientRecord] = useState<Patient | null>(null);
+  const [patientLoading, setPatientLoading] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [partners, setPartners] = useState<Partner[]>([]);
