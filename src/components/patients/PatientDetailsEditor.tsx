@@ -6,15 +6,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
-import { Patient, Surgery, Pharmacy } from "@/hooks/usePatients";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Patient, Surgery, Pharmacy, FamilyHistoryEntry } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
 
 interface PatientDetailsEditorProps {
   patient: Patient;
   onSave: (updates: Partial<Patient>) => Promise<any>;
 }
+
+const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorProps) {
   const { toast } = useToast();
@@ -53,13 +55,17 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
     pharmacy_name: "",
     pharmacy_email: "",
     notes: "",
+    blood_type: "",
   });
   const [surgeries, setSurgeries] = useState<Surgery[]>([]);
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
+  const [familyHistory, setFamilyHistory] = useState<FamilyHistoryEntry[]>([]);
   const [newSurgery, setNewSurgery] = useState({ name: "", date: "", notes: "" });
   const [showAddSurgery, setShowAddSurgery] = useState(false);
   const [newPharmacy, setNewPharmacy] = useState({ name: "", email: "" });
   const [showAddPharmacy, setShowAddPharmacy] = useState(false);
+  const [newFamilyEntry, setNewFamilyEntry] = useState({ relation: "", condition: "" });
+  const [showAddFamily, setShowAddFamily] = useState(false);
 
   useEffect(() => {
     if (patient) {
@@ -94,9 +100,10 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         pharmacy_name: patient.pharmacy_name || "",
         pharmacy_email: patient.pharmacy_email || "",
         notes: patient.notes || "",
+        blood_type: patient.blood_type || "",
       });
       setSurgeries(patient.surgeries || []);
-      // Migrate legacy single pharmacy into pharmacies array if needed
+      setFamilyHistory(patient.family_history || []);
       const existingPharmacies = patient.pharmacies || [];
       if (existingPharmacies.length === 0 && (patient.pharmacy_name || patient.pharmacy_email)) {
         setPharmacies([{ id: crypto.randomUUID(), name: patient.pharmacy_name || "", email: patient.pharmacy_email || "", is_primary: true }]);
@@ -109,7 +116,6 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
 
   const performSave = useCallback(async (data: typeof formData, surgeriesData: Surgery[]) => {
     if (!data.name.trim()) return;
-    
     setSaving(true);
     await onSave({
       name: data.name,
@@ -144,10 +150,12 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
       pharmacy_name: pharmacies.find(p => p.is_primary)?.name || data.pharmacy_name || null,
       pharmacy_email: pharmacies.find(p => p.is_primary)?.email || data.pharmacy_email || null,
       notes: data.notes || null,
+      blood_type: data.blood_type || null,
+      family_history: familyHistory,
     });
     setSaving(false);
     setHasChanges(false);
-  }, [onSave, pharmacies]);
+  }, [onSave, pharmacies, familyHistory]);
 
   useEffect(() => {
     if (!isEditing || !hasChanges) return;
@@ -156,7 +164,7 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
       performSave(formData, surgeries);
     }, 1500);
     return () => { if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current); };
-  }, [formData, surgeries, pharmacies, isEditing, hasChanges, performSave]);
+  }, [formData, surgeries, pharmacies, familyHistory, isEditing, hasChanges, performSave]);
 
   const updateFormData = (updates: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
@@ -213,6 +221,22 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
     setHasChanges(true);
   };
 
+  const handleAddFamilyEntry = () => {
+    if (!newFamilyEntry.relation.trim() || !newFamilyEntry.condition.trim()) {
+      toast({ title: "Required", description: "Both relation and condition are required", variant: "destructive" });
+      return;
+    }
+    setFamilyHistory(prev => [...prev, { id: crypto.randomUUID(), relation: newFamilyEntry.relation.trim(), condition: newFamilyEntry.condition.trim() }]);
+    setNewFamilyEntry({ relation: "", condition: "" });
+    setShowAddFamily(false);
+    setHasChanges(true);
+  };
+
+  const handleRemoveFamilyEntry = (id: string) => {
+    setFamilyHistory(prev => prev.filter(f => f.id !== id));
+    setHasChanges(true);
+  };
+
   const handleCancel = () => {
     setFormData({
       name: patient.name || "", email: patient.email || "", phone: patient.phone || "",
@@ -231,8 +255,10 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
       height_cm: patient.height_cm?.toString() || "", weight_kg: patient.weight_kg?.toString() || "",
       pharmacy_name: patient.pharmacy_name || "", pharmacy_email: patient.pharmacy_email || "",
       notes: patient.notes || "",
+      blood_type: patient.blood_type || "",
     });
     setSurgeries(patient.surgeries || []);
+    setFamilyHistory(patient.family_history || []);
     setIsEditing(false);
   };
 
@@ -247,42 +273,19 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
   };
 
   const bmi = calculateBMI();
-  const primaryPharmacy = pharmacies.find(p => p.is_primary) || pharmacies[0];
 
-  // Reusable CollapsibleFrame component for view mode
-  const CollapsibleFrame = ({ icon, title, children, defaultOpen = false, extra }: { icon: React.ReactNode; title: string; children: React.ReactNode; defaultOpen?: boolean; extra?: React.ReactNode }) => {
-    const [open, setOpen] = useState(defaultOpen);
-    return (
-      <Collapsible open={open} onOpenChange={setOpen}>
-        <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
-          <CollapsibleTrigger asChild>
-            <button className="flex items-center justify-between w-full p-5 hover:bg-muted/30 transition-colors text-left">
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                  {icon}
-                </div>
-                <h3 className="font-semibold text-foreground">{title}</h3>
-              </div>
-              <div className="flex items-center gap-2">
-                {extra}
-                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
-              </div>
-            </button>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <div className="px-5 pb-5">
-              {children}
-            </div>
-          </CollapsibleContent>
-        </div>
-      </Collapsible>
-    );
-  };
+  // Shared field renderer for view mode
+  const ViewField = ({ label, value }: { label: string; value: string | null | undefined }) => (
+    <div>
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className="mt-1 text-foreground">{value || "Not provided"}</p>
+    </div>
+  );
 
   // ==================== VIEW MODE ====================
   if (!isEditing) {
     return (
-      <div className="rounded-xl border border-border bg-card p-6 space-y-8">
+      <div className="rounded-xl border border-border bg-card p-6 space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-foreground">Patient Details</h2>
           <Button variant="outline" size="sm" className="gap-2" onClick={() => setIsEditing(true)}>
@@ -290,155 +293,184 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
           </Button>
         </div>
 
-        {/* 1. Personal Information - open by default */}
-        <CollapsibleFrame icon={<Pencil className="h-4 w-4 text-primary" />} title="Personal Information" defaultOpen>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div><p className="text-sm text-muted-foreground">Full Name</p><p className="mt-1 text-foreground">{patient.name}</p></div>
-            <div><p className="text-sm text-muted-foreground">ID/Passport Number</p><p className="mt-1 text-foreground">{patient.id_passport_number || "Not provided"}</p></div>
-            <div><p className="text-sm text-muted-foreground">Gender</p><p className="mt-1 text-foreground">{patient.gender || "Not provided"}</p></div>
-            <div><p className="text-sm text-muted-foreground">Date of Birth</p><p className="mt-1 text-foreground">{patient.dob ? format(new Date(patient.dob), "MMMM d, yyyy") : "Not provided"}</p></div>
-            <div><p className="text-sm text-muted-foreground">Email</p><p className="mt-1 text-foreground">{patient.email || "Not provided"}</p></div>
-            <div><p className="text-sm text-muted-foreground">Phone</p><p className="mt-1 text-foreground">{patient.phone || "Not provided"}</p></div>
-            <div><p className="text-sm text-muted-foreground">Marital Status</p><p className="mt-1 text-foreground">{patient.marital_status || "Not provided"}</p></div>
-            <div><p className="text-sm text-muted-foreground">Referred By</p><p className="mt-1 text-foreground">{patient.referred_by || "Not provided"}</p></div>
-          </div>
-        </CollapsibleFrame>
+        <Tabs defaultValue="personal">
+          <TabsList className="bg-primary">
+            <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Personal Information</TabsTrigger>
+            <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Medical Information</TabsTrigger>
+            <TabsTrigger value="notes" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">General Notes</TabsTrigger>
+          </TabsList>
 
-        {/* 2. Addresses */}
-        <CollapsibleFrame icon={<StickyNote className="h-4 w-4 text-primary" />} title="Addresses">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div><p className="text-sm text-muted-foreground">Physical Address</p><p className="mt-1 text-foreground">{patient.physical_address || patient.address || "Not provided"}</p></div>
-            <div><p className="text-sm text-muted-foreground">Postal Address</p><p className="mt-1 text-foreground">{patient.same_as_physical ? "Same as physical address" : (patient.postal_address || "Not provided")}</p></div>
-          </div>
-        </CollapsibleFrame>
-
-        {/* 3. Next of Kin */}
-        <CollapsibleFrame icon={<Pencil className="h-4 w-4 text-primary" />} title="Next of Kin">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div><p className="text-sm text-muted-foreground">Name</p><p className="mt-1 text-foreground">{patient.next_of_kin_name || "Not provided"}</p></div>
-            <div><p className="text-sm text-muted-foreground">Relationship</p><p className="mt-1 text-foreground">{patient.next_of_kin_relationship || "Not provided"}</p></div>
-            <div><p className="text-sm text-muted-foreground">Phone</p><p className="mt-1 text-foreground">{patient.next_of_kin_phone || "Not provided"}</p></div>
-            <div><p className="text-sm text-muted-foreground">Email</p><p className="mt-1 text-foreground">{patient.next_of_kin_email || "Not provided"}</p></div>
-          </div>
-        </CollapsibleFrame>
-
-        {/* 4. Employer */}
-        <CollapsibleFrame icon={<Pencil className="h-4 w-4 text-primary" />} title="Employer">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div><p className="text-sm text-muted-foreground">Employer</p><p className="mt-1 text-foreground">{patient.employer || "Not provided"}</p></div>
-            <div><p className="text-sm text-muted-foreground">Occupation</p><p className="mt-1 text-foreground">{patient.occupation || "Not provided"}</p></div>
-            <div><p className="text-sm text-muted-foreground">Reporting To (Email)</p><p className="mt-1 text-foreground">{patient.reporting_to_email || "Not provided"}</p></div>
-          </div>
-        </CollapsibleFrame>
-
-        {/* 5. Medical Insurance */}
-        <CollapsibleFrame icon={<Pencil className="h-4 w-4 text-primary" />} title="Medical Insurance">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div><p className="text-sm text-muted-foreground">Insurance Provider</p><p className="mt-1 text-foreground">{patient.medical_aid || "Not provided"}</p></div>
-            <div><p className="text-sm text-muted-foreground">Insurance Product</p><p className="mt-1 text-foreground">{patient.medical_insurance_product || "Not provided"}</p></div>
-            <div><p className="text-sm text-muted-foreground">Insurance Number</p><p className="mt-1 text-foreground">{patient.medical_aid_number || "Not provided"}</p></div>
-            <div><p className="text-sm text-muted-foreground">Primary Member</p><p className="mt-1 text-foreground">{patient.primary_member || "Not provided"}</p></div>
-            <div><p className="text-sm text-muted-foreground">Claims Email</p><p className="mt-1 text-foreground">{patient.claims_email || "Not provided"}</p></div>
-            <div><p className="text-sm text-muted-foreground">General Practitioner</p><p className="mt-1 text-foreground">{patient.general_practitioner || "Not provided"}</p></div>
-          </div>
-        </CollapsibleFrame>
-
-        {/* 6. Pharmacies */}
-        <CollapsibleFrame icon={<Pencil className="h-4 w-4 text-primary" />} title="Pharmacies">
-          {pharmacies.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No pharmacies recorded</p>
-          ) : (
-            <div className="space-y-2">
-              {pharmacies.map((pharmacy) => (
-                <div key={pharmacy.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
-                  <div>
-                    <p className="font-medium text-foreground flex items-center gap-2">
-                      {pharmacy.name}
-                      {pharmacy.is_primary && <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">Primary</span>}
-                    </p>
-                    {pharmacy.email && <p className="text-sm text-muted-foreground">{pharmacy.email}</p>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CollapsibleFrame>
-
-        {/* 7. Physical Measurements */}
-        <CollapsibleFrame icon={<Ruler className="h-4 w-4 text-primary" />} title="Physical Measurements">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-              <Ruler className="h-5 w-5 text-primary" />
-              <div><p className="text-sm text-muted-foreground">Height</p><p className="font-medium text-foreground">{patient.height_cm ? `${patient.height_cm} cm` : "Not recorded"}</p></div>
-            </div>
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-              <Scale className="h-5 w-5 text-primary" />
-              <div><p className="text-sm text-muted-foreground">Weight</p><p className="font-medium text-foreground">{patient.weight_kg ? `${patient.weight_kg} kg` : "Not recorded"}</p></div>
-            </div>
-            {bmi && (
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 sm:col-span-2">
-                <div><p className="text-sm text-muted-foreground">BMI</p><p className="font-medium text-foreground">{bmi}</p></div>
+          {/* === PERSONAL INFORMATION TAB === */}
+          <TabsContent value="personal" className="space-y-6 mt-4">
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">Personal Details</h3>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <ViewField label="Full Name" value={patient.name} />
+                <ViewField label="ID/Passport Number" value={patient.id_passport_number} />
+                <ViewField label="Gender" value={patient.gender} />
+                <ViewField label="Date of Birth" value={patient.dob ? format(new Date(patient.dob), "MMMM d, yyyy") : null} />
+                <ViewField label="Email" value={patient.email} />
+                <ViewField label="Phone" value={patient.phone} />
+                <ViewField label="Marital Status" value={patient.marital_status} />
+                <ViewField label="Referred By" value={patient.referred_by} />
               </div>
-            )}
-          </div>
-        </CollapsibleFrame>
-
-        {/* 8. Allergies */}
-        <CollapsibleFrame icon={<AlertCircle className="h-4 w-4 text-primary" />} title="Allergies">
-          <div className="rounded-lg bg-muted/30 p-4 border border-border/50">
-            <p className="text-foreground">{patient.allergies || "None recorded"}</p>
-          </div>
-        </CollapsibleFrame>
-
-        {/* Chronic Medication Status */}
-        <CollapsibleFrame icon={<Pill className="h-4 w-4 text-primary" />} title="Chronic Medication">
-          <div className="flex items-center justify-between">
-            {patient.is_chronic ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-3 py-1 text-xs font-bold text-destructive">
-                <Pill className="h-3 w-3" />Chronic
-              </span>
-            ) : (
-              <span className="text-sm text-muted-foreground">Not on chronic medication</span>
-            )}
-          </div>
-        </CollapsibleFrame>
-
-        {/* 9. Surgeries and Dates */}
-        <CollapsibleFrame icon={<Pencil className="h-4 w-4 text-primary" />} title="Surgeries and Dates" extra={
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={(e) => { e.stopPropagation(); setIsEditing(true); setShowAddSurgery(true); }}>
-            <Plus className="h-3.5 w-3.5" /> Add Surgery
-          </Button>
-        }>
-          {surgeries.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No surgeries recorded</p>
-          ) : (
-            <div className="space-y-2">
-              {surgeries.map((surgery) => (
-                <div key={surgery.id} className="flex items-start justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
-                  <div>
-                    <p className="font-medium text-foreground">{surgery.name}</p>
-                    <p className="text-sm text-muted-foreground">{format(new Date(surgery.date), "MMMM d, yyyy")}</p>
-                    {surgery.notes && <p className="text-sm text-muted-foreground mt-1">{surgery.notes}</p>}
-                  </div>
-                </div>
-              ))}
             </div>
-          )}
-        </CollapsibleFrame>
 
-        {/* 10. General Notes */}
-        <CollapsibleFrame icon={<StickyNote className="h-4 w-4 text-primary" />} title="General Notes">
-          <div className="rounded-lg bg-muted/30 p-4 border border-border/50 min-h-[80px]">
-            <p className="text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
-          </div>
-        </CollapsibleFrame>
+            <div className="border-t border-border pt-4">
+              <h3 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">Addresses</h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <ViewField label="Physical Address" value={patient.physical_address || patient.address} />
+                <ViewField label="Postal Address" value={patient.same_as_physical ? "Same as physical address" : patient.postal_address} />
+              </div>
+            </div>
+
+            <div className="border-t border-border pt-4">
+              <h3 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">Next of Kin</h3>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <ViewField label="Name" value={patient.next_of_kin_name} />
+                <ViewField label="Relationship" value={patient.next_of_kin_relationship} />
+                <ViewField label="Phone" value={patient.next_of_kin_phone} />
+                <ViewField label="Email" value={patient.next_of_kin_email} />
+              </div>
+            </div>
+
+            <div className="border-t border-border pt-4">
+              <h3 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">Employer</h3>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <ViewField label="Employer" value={patient.employer} />
+                <ViewField label="Occupation" value={patient.occupation} />
+                <ViewField label="Reporting To (Email)" value={patient.reporting_to_email} />
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* === MEDICAL INFORMATION TAB === */}
+          <TabsContent value="medical" className="space-y-6 mt-4">
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">Physical Measurements</h3>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                  <Ruler className="h-5 w-5 text-primary" />
+                  <div><p className="text-sm text-muted-foreground">Height</p><p className="font-medium text-foreground">{patient.height_cm ? `${patient.height_cm} cm` : "Not recorded"}</p></div>
+                </div>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                  <Scale className="h-5 w-5 text-primary" />
+                  <div><p className="text-sm text-muted-foreground">Weight</p><p className="font-medium text-foreground">{patient.weight_kg ? `${patient.weight_kg} kg` : "Not recorded"}</p></div>
+                </div>
+                {bmi && (
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                    <div><p className="text-sm text-muted-foreground">BMI</p><p className="font-medium text-foreground">{bmi}</p></div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="border-t border-border pt-4">
+              <h3 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">Blood Type</h3>
+              <p className="text-foreground">{patient.blood_type || "Not recorded"}</p>
+            </div>
+
+            <div className="border-t border-border pt-4">
+              <h3 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-4 w-4" /> Allergies</h3>
+              <div className="rounded-lg bg-muted/30 p-4 border border-border/50">
+                <p className="text-foreground">{patient.allergies || "None recorded"}</p>
+              </div>
+            </div>
+
+            <div className="border-t border-border pt-4">
+              <h3 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-4 w-4" /> Chronic Medication</h3>
+              {patient.is_chronic ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-3 py-1 text-xs font-bold text-destructive"><Pill className="h-3 w-3" />Chronic</span>
+              ) : (
+                <span className="text-sm text-muted-foreground">Not on chronic medication</span>
+              )}
+            </div>
+
+            <div className="border-t border-border pt-4">
+              <h3 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">Surgeries and Dates</h3>
+              {surgeries.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No surgeries recorded</p>
+              ) : (
+                <div className="space-y-2">
+                  {surgeries.map((surgery) => (
+                    <div key={surgery.id} className="flex items-start justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
+                      <div>
+                        <p className="font-medium text-foreground">{surgery.name}</p>
+                        <p className="text-sm text-muted-foreground">{format(new Date(surgery.date), "MMMM d, yyyy")}</p>
+                        {surgery.notes && <p className="text-sm text-muted-foreground mt-1">{surgery.notes}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="border-t border-border pt-4">
+              <h3 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">Family History</h3>
+              {familyHistory.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No family history recorded</p>
+              ) : (
+                <div className="space-y-2">
+                  {familyHistory.map((entry) => (
+                    <div key={entry.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
+                      <div>
+                        <p className="font-medium text-foreground">{entry.relation}</p>
+                        <p className="text-sm text-muted-foreground">{entry.condition}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="border-t border-border pt-4">
+              <h3 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">Medical Insurance</h3>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <ViewField label="Insurance Provider" value={patient.medical_aid} />
+                <ViewField label="Insurance Product" value={patient.medical_insurance_product} />
+                <ViewField label="Insurance Number" value={patient.medical_aid_number} />
+                <ViewField label="Primary Member" value={patient.primary_member} />
+                <ViewField label="Claims Email" value={patient.claims_email} />
+                <ViewField label="General Practitioner" value={patient.general_practitioner} />
+              </div>
+            </div>
+
+            <div className="border-t border-border pt-4">
+              <h3 className="text-sm font-semibold text-foreground mb-3 uppercase tracking-wide">Pharmacies</h3>
+              {pharmacies.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No pharmacies recorded</p>
+              ) : (
+                <div className="space-y-2">
+                  {pharmacies.map((pharmacy) => (
+                    <div key={pharmacy.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
+                      <div>
+                        <p className="font-medium text-foreground flex items-center gap-2">
+                          {pharmacy.name}
+                          {pharmacy.is_primary && <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">Primary</span>}
+                        </p>
+                        {pharmacy.email && <p className="text-sm text-muted-foreground">{pharmacy.email}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* === GENERAL NOTES TAB === */}
+          <TabsContent value="notes" className="mt-4">
+            <div className="rounded-lg bg-muted/30 p-4 border border-border/50 min-h-[120px]">
+              <p className="text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     );
   }
 
   // ==================== EDIT MODE ====================
   return (
-    <div className="rounded-xl border border-border bg-card p-6 space-y-8">
+    <div className="rounded-xl border border-border bg-card p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h2 className="text-lg font-semibold text-foreground">Edit Patient Details</h2>
@@ -448,198 +480,239 @@ export function PatientDetailsEditor({ patient, onSave }: PatientDetailsEditorPr
         <Button variant="outline" size="sm" className="gap-2" onClick={handleCancel} disabled={saving}><X className="h-4 w-4" />Done</Button>
       </div>
 
-      {/* 1. Personal Information */}
-      <div>
-        <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Personal Information</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="space-y-2"><Label htmlFor="name">Full Name *</Label><Input id="name" value={formData.name} onChange={(e) => updateFormData({ name: e.target.value })} placeholder="Patient name" /></div>
-          <div className="space-y-2"><Label htmlFor="id_passport_number">ID/Passport Number</Label><Input id="id_passport_number" value={formData.id_passport_number} onChange={(e) => updateFormData({ id_passport_number: e.target.value })} placeholder="ID or passport number" /></div>
-          <div className="space-y-2"><Label htmlFor="gender">Gender</Label>
-            <Select value={formData.gender} onValueChange={(value) => updateFormData({ gender: value })}>
-              <SelectTrigger id="gender"><SelectValue placeholder="Select gender" /></SelectTrigger>
-              <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem><SelectItem value="Other">Other</SelectItem></SelectContent>
-            </Select></div>
-          <div className="space-y-2"><Label htmlFor="dob">Date of Birth</Label><Input id="dob" type="date" value={formData.dob} onChange={(e) => updateFormData({ dob: e.target.value })} /></div>
-          <div className="space-y-2"><Label htmlFor="email">Email</Label><Input id="email" type="email" value={formData.email} onChange={(e) => updateFormData({ email: e.target.value })} placeholder="patient@email.com" /></div>
-          <div className="space-y-2"><Label htmlFor="phone">Phone</Label><Input id="phone" value={formData.phone} onChange={(e) => updateFormData({ phone: e.target.value })} placeholder="+1 (555) 123-4567" /></div>
-          <div className="space-y-2"><Label htmlFor="marital_status">Marital Status</Label>
-            <Select value={formData.marital_status} onValueChange={(value) => updateFormData({ marital_status: value })}>
-              <SelectTrigger id="marital_status"><SelectValue placeholder="Select status" /></SelectTrigger>
-              <SelectContent><SelectItem value="Single">Single</SelectItem><SelectItem value="Married">Married</SelectItem><SelectItem value="Divorced">Divorced</SelectItem><SelectItem value="Widowed">Widowed</SelectItem></SelectContent>
-            </Select></div>
-          <div className="space-y-2"><Label htmlFor="referred_by">Referred By</Label><Input id="referred_by" value={formData.referred_by} onChange={(e) => updateFormData({ referred_by: e.target.value })} placeholder="Referral source" /></div>
-        </div>
-      </div>
+      <Tabs defaultValue="personal">
+        <TabsList className="bg-primary">
+          <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Personal Information</TabsTrigger>
+          <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Medical Information</TabsTrigger>
+          <TabsTrigger value="notes" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">General Notes</TabsTrigger>
+        </TabsList>
 
-      {/* 2. Addresses */}
-      <div>
-        <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Addresses</h3>
-        <div className="space-y-4">
-          <div className="space-y-2"><Label htmlFor="physical_address">Physical Address</Label><Textarea id="physical_address" value={formData.physical_address} onChange={(e) => updateFormData({ physical_address: e.target.value })} placeholder="Enter physical address" rows={2} /></div>
-          <div className="flex items-center space-x-2"><Checkbox id="same_as_physical" checked={formData.same_as_physical} onCheckedChange={(checked) => updateFormData({ same_as_physical: checked as boolean })} /><Label htmlFor="same_as_physical" className="text-sm">Postal address same as physical address</Label></div>
-          {!formData.same_as_physical && (<div className="space-y-2"><Label htmlFor="postal_address">Postal Address</Label><Textarea id="postal_address" value={formData.postal_address} onChange={(e) => updateFormData({ postal_address: e.target.value })} placeholder="Enter postal address" rows={2} /></div>)}
-        </div>
-      </div>
-
-      {/* 3. Next of Kin */}
-      <div>
-        <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Next of Kin</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="space-y-2"><Label htmlFor="next_of_kin_name">Name</Label><Input id="next_of_kin_name" value={formData.next_of_kin_name} onChange={(e) => updateFormData({ next_of_kin_name: e.target.value })} placeholder="Full name" /></div>
-          <div className="space-y-2"><Label htmlFor="next_of_kin_relationship">Relationship</Label><Input id="next_of_kin_relationship" value={formData.next_of_kin_relationship} onChange={(e) => updateFormData({ next_of_kin_relationship: e.target.value })} placeholder="e.g. Spouse, Parent" /></div>
-          <div className="space-y-2"><Label htmlFor="next_of_kin_phone">Phone</Label><Input id="next_of_kin_phone" value={formData.next_of_kin_phone} onChange={(e) => updateFormData({ next_of_kin_phone: e.target.value })} placeholder="Phone number" /></div>
-          <div className="space-y-2"><Label htmlFor="next_of_kin_email">Email</Label><Input id="next_of_kin_email" type="email" value={formData.next_of_kin_email} onChange={(e) => updateFormData({ next_of_kin_email: e.target.value })} placeholder="Email address" /></div>
-        </div>
-      </div>
-
-      {/* 4. Employer */}
-      <div>
-        <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Employer</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="space-y-2"><Label htmlFor="employer">Employer</Label><Input id="employer" value={formData.employer} onChange={(e) => updateFormData({ employer: e.target.value })} placeholder="Company name" /></div>
-          <div className="space-y-2"><Label htmlFor="occupation">Occupation</Label><Input id="occupation" value={formData.occupation} onChange={(e) => updateFormData({ occupation: e.target.value })} placeholder="Job title" /></div>
-          <div className="space-y-2"><Label htmlFor="reporting_to_email">Reporting To (Email)</Label><Input id="reporting_to_email" type="email" value={formData.reporting_to_email} onChange={(e) => updateFormData({ reporting_to_email: e.target.value })} placeholder="manager@company.com" /></div>
-        </div>
-      </div>
-
-      {/* 5. Medical Insurance */}
-      <div>
-        <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Medical Insurance</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="space-y-2"><Label htmlFor="medical_aid">Insurance Provider</Label><Input id="medical_aid" value={formData.medical_aid} onChange={(e) => updateFormData({ medical_aid: e.target.value })} placeholder="Insurance provider" /></div>
-          <div className="space-y-2"><Label htmlFor="medical_insurance_product">Insurance Product</Label><Input id="medical_insurance_product" value={formData.medical_insurance_product} onChange={(e) => updateFormData({ medical_insurance_product: e.target.value })} placeholder="e.g., Executive Plan" /></div>
-          <div className="space-y-2"><Label htmlFor="medical_aid_number">Insurance Number</Label><Input id="medical_aid_number" value={formData.medical_aid_number} onChange={(e) => updateFormData({ medical_aid_number: e.target.value })} placeholder="Member number" /></div>
-          <div className="space-y-2"><Label htmlFor="primary_member">Primary Member</Label><Input id="primary_member" value={formData.primary_member} onChange={(e) => updateFormData({ primary_member: e.target.value })} placeholder="Primary member name" /></div>
-          <div className="space-y-2"><Label htmlFor="claims_email">Claims Email</Label><Input id="claims_email" type="email" value={formData.claims_email} onChange={(e) => updateFormData({ claims_email: e.target.value })} placeholder="claims@insurance.com" /></div>
-          <div className="space-y-2"><Label htmlFor="general_practitioner">General Practitioner</Label><Input id="general_practitioner" value={formData.general_practitioner} onChange={(e) => updateFormData({ general_practitioner: e.target.value })} placeholder="GP name" /></div>
-        </div>
-      </div>
-
-      {/* 6. Pharmacies */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">Pharmacies</h3>
-          {!showAddPharmacy && <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowAddPharmacy(true)}><Plus className="h-3.5 w-3.5" />Add Pharmacy</Button>}
-        </div>
-
-        {showAddPharmacy && (
-          <div className="p-4 rounded-lg border border-primary/30 bg-primary/5 mb-4 space-y-3">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-2"><Label>Pharmacy Name *</Label><Input value={newPharmacy.name} onChange={(e) => setNewPharmacy(prev => ({ ...prev, name: e.target.value }))} placeholder="e.g., Clicks Pharmacy" /></div>
-              <div className="space-y-2"><Label>Pharmacy Email</Label><Input type="email" value={newPharmacy.email} onChange={(e) => setNewPharmacy(prev => ({ ...prev, email: e.target.value }))} placeholder="pharmacy@email.com" /></div>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="ghost" size="sm" onClick={() => { setShowAddPharmacy(false); setNewPharmacy({ name: "", email: "" }); }}>Cancel</Button>
-              <Button size="sm" onClick={handleAddPharmacy}>Add Pharmacy</Button>
+        {/* === PERSONAL TAB (EDIT) === */}
+        <TabsContent value="personal" className="space-y-8 mt-4">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Personal Information</h3>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="space-y-2"><Label htmlFor="name">Full Name *</Label><Input id="name" value={formData.name} onChange={(e) => updateFormData({ name: e.target.value })} placeholder="Patient name" /></div>
+              <div className="space-y-2"><Label htmlFor="id_passport_number">ID/Passport Number</Label><Input id="id_passport_number" value={formData.id_passport_number} onChange={(e) => updateFormData({ id_passport_number: e.target.value })} placeholder="ID or passport number" /></div>
+              <div className="space-y-2"><Label htmlFor="gender">Gender</Label>
+                <Select value={formData.gender} onValueChange={(value) => updateFormData({ gender: value })}>
+                  <SelectTrigger id="gender"><SelectValue placeholder="Select gender" /></SelectTrigger>
+                  <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem><SelectItem value="Other">Other</SelectItem></SelectContent>
+                </Select></div>
+              <div className="space-y-2"><Label htmlFor="dob">Date of Birth</Label><Input id="dob" type="date" value={formData.dob} onChange={(e) => updateFormData({ dob: e.target.value })} /></div>
+              <div className="space-y-2"><Label htmlFor="email">Email</Label><Input id="email" type="email" value={formData.email} onChange={(e) => updateFormData({ email: e.target.value })} placeholder="patient@email.com" /></div>
+              <div className="space-y-2"><Label htmlFor="phone">Phone</Label><Input id="phone" value={formData.phone} onChange={(e) => updateFormData({ phone: e.target.value })} placeholder="+1 (555) 123-4567" /></div>
+              <div className="space-y-2"><Label htmlFor="marital_status">Marital Status</Label>
+                <Select value={formData.marital_status} onValueChange={(value) => updateFormData({ marital_status: value })}>
+                  <SelectTrigger id="marital_status"><SelectValue placeholder="Select status" /></SelectTrigger>
+                  <SelectContent><SelectItem value="Single">Single</SelectItem><SelectItem value="Married">Married</SelectItem><SelectItem value="Divorced">Divorced</SelectItem><SelectItem value="Widowed">Widowed</SelectItem></SelectContent>
+                </Select></div>
+              <div className="space-y-2"><Label htmlFor="referred_by">Referred By</Label><Input id="referred_by" value={formData.referred_by} onChange={(e) => updateFormData({ referred_by: e.target.value })} placeholder="Referral source" /></div>
             </div>
           </div>
-        )}
 
-        {pharmacies.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No pharmacies recorded</p>
-        ) : (
-          <div className="space-y-2">
-            {pharmacies.map((pharmacy) => (
-              <div key={pharmacy.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
-                <div className="flex items-center gap-3">
-                  <button onClick={() => handleSetPrimaryPharmacy(pharmacy.id)} className="shrink-0" title="Set as primary">
-                    <Star className={`h-4 w-4 ${pharmacy.is_primary ? 'fill-primary text-primary' : 'text-muted-foreground hover:text-primary'}`} />
-                  </button>
-                  <div>
-                    <p className="font-medium text-foreground flex items-center gap-2">
-                      {pharmacy.name}
-                      {pharmacy.is_primary && <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">Primary</span>}
-                    </p>
-                    {pharmacy.email && <p className="text-sm text-muted-foreground">{pharmacy.email}</p>}
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Addresses</h3>
+            <div className="space-y-4">
+              <div className="space-y-2"><Label htmlFor="physical_address">Physical Address</Label><Textarea id="physical_address" value={formData.physical_address} onChange={(e) => updateFormData({ physical_address: e.target.value })} placeholder="Enter physical address" rows={2} /></div>
+              <div className="flex items-center space-x-2"><Checkbox id="same_as_physical" checked={formData.same_as_physical} onCheckedChange={(checked) => updateFormData({ same_as_physical: checked as boolean })} /><Label htmlFor="same_as_physical" className="text-sm">Postal address same as physical address</Label></div>
+              {!formData.same_as_physical && (<div className="space-y-2"><Label htmlFor="postal_address">Postal Address</Label><Textarea id="postal_address" value={formData.postal_address} onChange={(e) => updateFormData({ postal_address: e.target.value })} placeholder="Enter postal address" rows={2} /></div>)}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Next of Kin</h3>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="space-y-2"><Label htmlFor="next_of_kin_name">Name</Label><Input id="next_of_kin_name" value={formData.next_of_kin_name} onChange={(e) => updateFormData({ next_of_kin_name: e.target.value })} placeholder="Full name" /></div>
+              <div className="space-y-2"><Label htmlFor="next_of_kin_relationship">Relationship</Label><Input id="next_of_kin_relationship" value={formData.next_of_kin_relationship} onChange={(e) => updateFormData({ next_of_kin_relationship: e.target.value })} placeholder="e.g. Spouse, Parent" /></div>
+              <div className="space-y-2"><Label htmlFor="next_of_kin_phone">Phone</Label><Input id="next_of_kin_phone" value={formData.next_of_kin_phone} onChange={(e) => updateFormData({ next_of_kin_phone: e.target.value })} placeholder="Phone number" /></div>
+              <div className="space-y-2"><Label htmlFor="next_of_kin_email">Email</Label><Input id="next_of_kin_email" type="email" value={formData.next_of_kin_email} onChange={(e) => updateFormData({ next_of_kin_email: e.target.value })} placeholder="Email address" /></div>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Employer</h3>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="space-y-2"><Label htmlFor="employer">Employer</Label><Input id="employer" value={formData.employer} onChange={(e) => updateFormData({ employer: e.target.value })} placeholder="Company name" /></div>
+              <div className="space-y-2"><Label htmlFor="occupation">Occupation</Label><Input id="occupation" value={formData.occupation} onChange={(e) => updateFormData({ occupation: e.target.value })} placeholder="Job title" /></div>
+              <div className="space-y-2"><Label htmlFor="reporting_to_email">Reporting To (Email)</Label><Input id="reporting_to_email" type="email" value={formData.reporting_to_email} onChange={(e) => updateFormData({ reporting_to_email: e.target.value })} placeholder="manager@company.com" /></div>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* === MEDICAL TAB (EDIT) === */}
+        <TabsContent value="medical" className="space-y-8 mt-4">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Physical Measurements</h3>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="space-y-2"><Label htmlFor="height_cm">Height (cm)</Label><Input id="height_cm" type="number" step="0.1" value={formData.height_cm} onChange={(e) => updateFormData({ height_cm: e.target.value })} placeholder="e.g., 175" /></div>
+              <div className="space-y-2"><Label htmlFor="weight_kg">Weight (kg)</Label><Input id="weight_kg" type="number" step="0.1" value={formData.weight_kg} onChange={(e) => updateFormData({ weight_kg: e.target.value })} placeholder="e.g., 70" /></div>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Blood Type</h3>
+            <Select value={formData.blood_type} onValueChange={(value) => updateFormData({ blood_type: value })}>
+              <SelectTrigger className="w-[200px]"><SelectValue placeholder="Select blood type" /></SelectTrigger>
+              <SelectContent>
+                {BLOOD_TYPES.map(bt => <SelectItem key={bt} value={bt}>{bt}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-4 w-4" />Allergies</h3>
+            <Textarea id="allergies" value={formData.allergies} onChange={(e) => updateFormData({ allergies: e.target.value })} placeholder="List any allergies (medications, food, etc.)" rows={2} />
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-4 w-4" />Chronic Medication</h3>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="is_chronic"
+                checked={patient.is_chronic || false}
+                onCheckedChange={(checked) => { onSave({ is_chronic: checked as boolean }); }}
+              />
+              <Label htmlFor="is_chronic" className="text-sm">Patient is on chronic medication</Label>
+              {patient.is_chronic && (
+                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive">
+                  <Pill className="h-2.5 w-2.5" />Chronic
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">Surgeries and Dates</h3>
+              {!showAddSurgery && <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowAddSurgery(true)}><Plus className="h-3.5 w-3.5" />Add Surgery</Button>}
+            </div>
+            {showAddSurgery && (
+              <div className="p-4 rounded-lg border border-primary/30 bg-primary/5 mb-4 space-y-3">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-2"><Label>Surgery Name *</Label><Input value={newSurgery.name} onChange={(e) => setNewSurgery(prev => ({ ...prev, name: e.target.value }))} placeholder="e.g., Appendectomy" /></div>
+                  <div className="space-y-2"><Label>Date *</Label><Input type="date" value={newSurgery.date} onChange={(e) => setNewSurgery(prev => ({ ...prev, date: e.target.value }))} /></div>
+                </div>
+                <div className="space-y-2"><Label>Notes (optional)</Label><Input value={newSurgery.notes} onChange={(e) => setNewSurgery(prev => ({ ...prev, notes: e.target.value }))} placeholder="Additional notes" /></div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => { setShowAddSurgery(false); setNewSurgery({ name: "", date: "", notes: "" }); }}>Cancel</Button>
+                  <Button size="sm" onClick={handleAddSurgery}>Add Surgery</Button>
+                </div>
+              </div>
+            )}
+            {surgeries.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No surgeries recorded</p>
+            ) : (
+              <div className="space-y-2">
+                {surgeries.map((surgery) => (
+                  <div key={surgery.id} className="flex items-start justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
+                    <div>
+                      <p className="font-medium text-foreground">{surgery.name}</p>
+                      <p className="text-sm text-muted-foreground">{format(new Date(surgery.date), "MMMM d, yyyy")}</p>
+                      {surgery.notes && <p className="text-sm text-muted-foreground mt-1">{surgery.notes}</p>}
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleRemoveSurgery(surgery.id)}><Trash2 className="h-4 w-4" /></Button>
                   </div>
-                </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleRemovePharmacy(pharmacy.id)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                ))}
               </div>
-            ))}
+            )}
           </div>
-        )}
-      </div>
 
-      {/* 7. Physical Measurements */}
-      <div>
-        <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Physical Measurements</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="space-y-2"><Label htmlFor="height_cm">Height (cm)</Label><Input id="height_cm" type="number" step="0.1" value={formData.height_cm} onChange={(e) => updateFormData({ height_cm: e.target.value })} placeholder="e.g., 175" /></div>
-          <div className="space-y-2"><Label htmlFor="weight_kg">Weight (kg)</Label><Input id="weight_kg" type="number" step="0.1" value={formData.weight_kg} onChange={(e) => updateFormData({ weight_kg: e.target.value })} placeholder="e.g., 70" /></div>
-        </div>
-      </div>
-
-      {/* 8. Allergies */}
-      <div>
-        <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-4 w-4" />Allergies</h3>
-        <Textarea id="allergies" value={formData.allergies} onChange={(e) => updateFormData({ allergies: e.target.value })} placeholder="List any allergies (medications, food, etc.)" rows={2} />
-      </div>
-
-      {/* Chronic Medication Toggle */}
-      <div>
-        <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-4 w-4" />Chronic Medication</h3>
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="is_chronic"
-            checked={patient.is_chronic || false}
-            onCheckedChange={(checked) => {
-              onSave({ is_chronic: checked as boolean });
-            }}
-          />
-          <Label htmlFor="is_chronic" className="text-sm">Patient is on chronic medication</Label>
-          {patient.is_chronic && (
-            <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-terracotta/10 px-2 py-0.5 text-[10px] font-bold text-terracotta">
-              <Pill className="h-2.5 w-2.5" />Chronic
-            </span>
-          )}
-        </div>
-        <p className="text-xs text-muted-foreground mt-2">Chronic patients can earn medication adherence rewards (moolas) by logging daily medication intake.</p>
-      </div>
-
-      {/* 9. Surgeries and Dates */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">Surgeries and Dates</h3>
-          {!showAddSurgery && <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowAddSurgery(true)}><Plus className="h-3.5 w-3.5" />Add Surgery</Button>}
-        </div>
-        {showAddSurgery && (
-          <div className="p-4 rounded-lg border border-primary/30 bg-primary/5 mb-4 space-y-3">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-2"><Label>Surgery Name *</Label><Input value={newSurgery.name} onChange={(e) => setNewSurgery(prev => ({ ...prev, name: e.target.value }))} placeholder="e.g., Appendectomy" /></div>
-              <div className="space-y-2"><Label>Date *</Label><Input type="date" value={newSurgery.date} onChange={(e) => setNewSurgery(prev => ({ ...prev, date: e.target.value }))} /></div>
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">Family History</h3>
+              {!showAddFamily && <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowAddFamily(true)}><Plus className="h-3.5 w-3.5" />Add Entry</Button>}
             </div>
-            <div className="space-y-2"><Label>Notes (optional)</Label><Input value={newSurgery.notes} onChange={(e) => setNewSurgery(prev => ({ ...prev, notes: e.target.value }))} placeholder="Additional notes" /></div>
-            <div className="flex justify-end gap-2">
-              <Button variant="ghost" size="sm" onClick={() => { setShowAddSurgery(false); setNewSurgery({ name: "", date: "", notes: "" }); }}>Cancel</Button>
-              <Button size="sm" onClick={handleAddSurgery}>Add Surgery</Button>
+            {showAddFamily && (
+              <div className="p-4 rounded-lg border border-primary/30 bg-primary/5 mb-4 space-y-3">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-2"><Label>Relation *</Label><Input value={newFamilyEntry.relation} onChange={(e) => setNewFamilyEntry(prev => ({ ...prev, relation: e.target.value }))} placeholder="e.g., Mother, Father" /></div>
+                  <div className="space-y-2"><Label>Illness/Condition *</Label><Input value={newFamilyEntry.condition} onChange={(e) => setNewFamilyEntry(prev => ({ ...prev, condition: e.target.value }))} placeholder="e.g., Diabetes, Hypertension" /></div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => { setShowAddFamily(false); setNewFamilyEntry({ relation: "", condition: "" }); }}>Cancel</Button>
+                  <Button size="sm" onClick={handleAddFamilyEntry}>Add Entry</Button>
+                </div>
+              </div>
+            )}
+            {familyHistory.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No family history recorded</p>
+            ) : (
+              <div className="space-y-2">
+                {familyHistory.map((entry) => (
+                  <div key={entry.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
+                    <div>
+                      <p className="font-medium text-foreground">{entry.relation}</p>
+                      <p className="text-sm text-muted-foreground">{entry.condition}</p>
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleRemoveFamilyEntry(entry.id)}><Trash2 className="h-4 w-4" /></Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">Medical Insurance</h3>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="space-y-2"><Label htmlFor="medical_aid">Insurance Provider</Label><Input id="medical_aid" value={formData.medical_aid} onChange={(e) => updateFormData({ medical_aid: e.target.value })} placeholder="Insurance provider" /></div>
+              <div className="space-y-2"><Label htmlFor="medical_insurance_product">Insurance Product</Label><Input id="medical_insurance_product" value={formData.medical_insurance_product} onChange={(e) => updateFormData({ medical_insurance_product: e.target.value })} placeholder="e.g., Executive Plan" /></div>
+              <div className="space-y-2"><Label htmlFor="medical_aid_number">Insurance Number</Label><Input id="medical_aid_number" value={formData.medical_aid_number} onChange={(e) => updateFormData({ medical_aid_number: e.target.value })} placeholder="Member number" /></div>
+              <div className="space-y-2"><Label htmlFor="primary_member">Primary Member</Label><Input id="primary_member" value={formData.primary_member} onChange={(e) => updateFormData({ primary_member: e.target.value })} placeholder="Primary member name" /></div>
+              <div className="space-y-2"><Label htmlFor="claims_email">Claims Email</Label><Input id="claims_email" type="email" value={formData.claims_email} onChange={(e) => updateFormData({ claims_email: e.target.value })} placeholder="claims@insurance.com" /></div>
+              <div className="space-y-2"><Label htmlFor="general_practitioner">General Practitioner</Label><Input id="general_practitioner" value={formData.general_practitioner} onChange={(e) => updateFormData({ general_practitioner: e.target.value })} placeholder="GP name" /></div>
             </div>
           </div>
-        )}
-        {surgeries.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No surgeries recorded</p>
-        ) : (
-          <div className="space-y-2">
-            {surgeries.map((surgery) => (
-              <div key={surgery.id} className="flex items-start justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
-                <div>
-                  <p className="font-medium text-foreground">{surgery.name}</p>
-                  <p className="text-sm text-muted-foreground">{format(new Date(surgery.date), "MMMM d, yyyy")}</p>
-                  {surgery.notes && <p className="text-sm text-muted-foreground mt-1">{surgery.notes}</p>}
-                </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleRemoveSurgery(surgery.id)}><Trash2 className="h-4 w-4" /></Button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
-      {/* 10. General Notes */}
-      <div>
-        <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide flex items-center gap-2"><StickyNote className="h-4 w-4" />General Notes</h3>
-        <Textarea id="notes" value={formData.notes} onChange={(e) => updateFormData({ notes: e.target.value })} placeholder="Enter any additional notes..." className="min-h-[120px] resize-none rounded-xl" rows={4} />
-      </div>
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">Pharmacies</h3>
+              {!showAddPharmacy && <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowAddPharmacy(true)}><Plus className="h-3.5 w-3.5" />Add Pharmacy</Button>}
+            </div>
+            {showAddPharmacy && (
+              <div className="p-4 rounded-lg border border-primary/30 bg-primary/5 mb-4 space-y-3">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-2"><Label>Pharmacy Name *</Label><Input value={newPharmacy.name} onChange={(e) => setNewPharmacy(prev => ({ ...prev, name: e.target.value }))} placeholder="e.g., Clicks Pharmacy" /></div>
+                  <div className="space-y-2"><Label>Pharmacy Email</Label><Input type="email" value={newPharmacy.email} onChange={(e) => setNewPharmacy(prev => ({ ...prev, email: e.target.value }))} placeholder="pharmacy@email.com" /></div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => { setShowAddPharmacy(false); setNewPharmacy({ name: "", email: "" }); }}>Cancel</Button>
+                  <Button size="sm" onClick={handleAddPharmacy}>Add Pharmacy</Button>
+                </div>
+              </div>
+            )}
+            {pharmacies.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No pharmacies recorded</p>
+            ) : (
+              <div className="space-y-2">
+                {pharmacies.map((pharmacy) => (
+                  <div key={pharmacy.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
+                    <div className="flex items-center gap-3">
+                      <button onClick={() => handleSetPrimaryPharmacy(pharmacy.id)} className="shrink-0" title="Set as primary">
+                        <Star className={`h-4 w-4 ${pharmacy.is_primary ? 'fill-primary text-primary' : 'text-muted-foreground hover:text-primary'}`} />
+                      </button>
+                      <div>
+                        <p className="font-medium text-foreground flex items-center gap-2">
+                          {pharmacy.name}
+                          {pharmacy.is_primary && <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">Primary</span>}
+                        </p>
+                        {pharmacy.email && <p className="text-sm text-muted-foreground">{pharmacy.email}</p>}
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleRemovePharmacy(pharmacy.id)}><Trash2 className="h-4 w-4" /></Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        {/* === NOTES TAB (EDIT) === */}
+        <TabsContent value="notes" className="mt-4">
+          <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide flex items-center gap-2"><StickyNote className="h-4 w-4" />General Notes</h3>
+          <Textarea id="notes" value={formData.notes} onChange={(e) => updateFormData({ notes: e.target.value })} placeholder="Enter any additional notes..." className="min-h-[120px] resize-none rounded-xl" rows={4} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
