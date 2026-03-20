@@ -50,7 +50,7 @@ export function LollipopDisplay({
     <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 dark:from-secondary/20 dark:to-secondary/10 border-secondary/30">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <span className="text-2xl font-bold text-secondary">Ⓜ</span>
+          <img src={moolasLogo} alt="Moolas" className="h-8 w-8 rounded-full object-cover" />
           Moola Rewards
         </CardTitle>
       </CardHeader>
