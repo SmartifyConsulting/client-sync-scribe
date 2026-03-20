@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { Upload, FileSpreadsheet, Check, AlertCircle, Loader2, X, Sparkles, FileText } from "lucide-react";
+// @ts-ignore
 import readXlsxFile from 'read-excel-file';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
