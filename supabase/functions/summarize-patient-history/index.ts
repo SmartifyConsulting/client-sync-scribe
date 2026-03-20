@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { patient, sessions } = await req.json();
+    const { patient, sessions, language } = await req.json();
     
     if (!patient) {
       return new Response(
