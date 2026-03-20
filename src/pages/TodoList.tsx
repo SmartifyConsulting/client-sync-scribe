@@ -178,7 +178,7 @@ export default function TodoList() {
         if (!analyserRef.current) return;
         analyserRef.current.getByteFrequencyData(dataArray);
         const avg = dataArray.reduce((s, v) => s + v, 0) / dataArray.length;
-        if (avg < 10) { silenceTimerRef.current += 200; if (silenceTimerRef.current >= 3000 && mediaRecorderRef.current?.state === 'recording') { mediaRecorderRef.current.stop(); setIsRecording(false); } } else { silenceTimerRef.current = 0; }
+        if (avg < 10) { silenceTimerRef.current += 200; if (silenceTimerRef.current >= 8000 && mediaRecorderRef.current?.state === 'recording') { mediaRecorderRef.current.stop(); setIsRecording(false); } } else { silenceTimerRef.current = 0; }
       }, 200);
       toast({ title: "Listening...", description: "Speak your task — recording stops automatically after a pause" });
     } catch { toast({ title: "Microphone access denied", variant: "destructive" }); }

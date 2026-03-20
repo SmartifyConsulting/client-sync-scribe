@@ -398,15 +398,12 @@ export function CompactTodoList() {
                     )}
                     <span
                       className={cn(
-                        "flex-1 text-[11px] truncate",
+                        "flex-1 text-xs",
                         todo.completed && "line-through text-muted-foreground"
                       )}
                     >
                       {todo.title}
                     </span>
-                    <Badge className={cn("text-[9px] px-1 py-0 h-4 leading-none", priorityColors[todo.priority])}>
-                      {todo.priority[0].toUpperCase()}
-                    </Badge>
                     <div className="hidden group-hover:flex gap-0.5">
                       {todo.document_id && (
                         <>
