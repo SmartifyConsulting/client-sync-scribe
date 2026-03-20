@@ -24,7 +24,7 @@ const doctorNavItems = [
 
 const patientNavItems = [
   { icon: LayoutDashboard, label: "Home", to: "/dashboard" },
-  { icon: Stethoscope, label: "My Holarc", to: "/patient/details" },
+  { icon: Stethoscope, label: "My Holarchive", to: "/patient/details" },
   { icon: Calendar, label: "Calendar", to: "/patient/calendar" },
   { icon: Settings, label: "Settings", to: "/settings" },
 ];

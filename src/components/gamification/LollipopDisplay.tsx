@@ -7,14 +7,14 @@ import moolasLogo from "@/assets/moolas-logo.png";
 
 export function MoolaLogoBadge({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   const sizeClasses = {
-    sm: "h-7 w-7 p-0.5",
-    md: "h-9 w-9 p-1",
-    lg: "h-14 w-14 p-1.5",
+    sm: "h-9 w-9 p-0.5",
+    md: "h-12 w-12 p-1",
+    lg: "h-[72px] w-[72px] p-1.5",
   };
   const imgClasses = {
-    sm: "h-5 w-5",
-    md: "h-7 w-7",
-    lg: "h-10 w-10",
+    sm: "h-7 w-7",
+    md: "h-9 w-9",
+    lg: "h-14 w-14",
   };
   return (
     <div className={`${sizeClasses[size]} rounded-full bg-white shadow-sm flex items-center justify-center`}>
