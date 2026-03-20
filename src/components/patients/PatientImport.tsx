@@ -365,7 +365,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
       
       if (!hasNameColumn && !hasFirstName && !hasLastName) {
         // Try AI parsing when columns can't be mapped
-        const textContent = XLSX.utils.sheet_to_csv(firstSheet);
+        const textContent = jsonData.map(row => row.join(',')).join('\n');
         setIsProcessing(false);
         await processWithAI(textContent, 'csv');
         return;
