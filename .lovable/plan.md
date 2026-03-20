@@ -1,21 +1,24 @@
 
 
-# Plan: Update Patient Email Addresses
+# Plan: Fix Profile Picture Update & Clarify Holarchive Tabs
 
-Two patient records need email updates in the database.
+## Issue 1: Profile Picture Not Visually Updating
 
-## Changes
+The upload succeeds (confirmed in network requests — status 200, profile patched with new cache-busted URL). The problem is that `fetchProfile` updates the `profile` state, but the `AvatarImage` component may not visually refresh because the browser caches the previous image despite the timestamp query parameter.
 
-| Patient | Current Email | New Email |
-|---------|--------------|-----------|
-| Lisa Anderson (id: `4d85050f-...`) | lisa.a@email.com | developer@smartify.co.za |
-| James Anderson (id: `d03197b0-...`) | j.anderson@email.com | director@smartify.co.za |
+**Fix**: Add a `key` prop to the `AvatarImage` component that includes the avatar URL (or timestamp), forcing React to unmount/remount the image element when the URL changes. Also apply the same fix to the sidebar avatar.
 
-## Implementation
+### Files to modify:
+- `src/pages/Profile.tsx` (line ~450): Add `key={profile?.avatar_url}` to `AvatarImage`
+- `src/components/layout/Sidebar.tsx`: Add `key={profile?.avatar_url}` to the sidebar `AvatarImage`
 
-Use the database insert tool to run two UPDATE statements on the `patients` table to set the new email addresses. No schema changes or code changes needed.
+## Issue 2: Holarchive Tabs Not All Visible
 
-## Files Modified
+This is **not a bug**. Georgia is currently on the `/profile` page, which for patients shows only 2 tabs: "Personal" and "Preferences". The full 4-tab Holarchive (Personal Information, Medical Information, My Documents, My Doctors) is accessed via the **"My Holarchive"** link in the sidebar, which navigates to `/patient/details`.
 
-None — this is a data-only update in the backend.
+No code change needed — just navigating to "My Holarchive" in the sidebar will show all 4 tabs.
+
+## Technical Details
+
+The `AvatarImage` uses Radix UI's `Avatar.Image`, which renders a native `<img>`. When the `src` changes only by query parameter, the browser may serve the cached version. Using a React `key` forces a fresh DOM element.
 
