@@ -447,7 +447,7 @@ export default function Profile() {
         <div className="flex items-center gap-4">
           <div className="relative group">
             <Avatar className="h-16 w-16 border-2 border-[hsl(351,81%,49%)]">
-              <AvatarImage src={(profile as any)?.avatar_url} alt={combinedFullName || "Profile"} />
+              <AvatarImage key={(profile as any)?.avatar_url} src={(profile as any)?.avatar_url} alt={combinedFullName || "Profile"} />
               <AvatarFallback className="text-base bg-primary/10 text-primary">{combinedFullName ? getInitials(combinedFullName) : "U"}</AvatarFallback>
             </Avatar>
             <label htmlFor="avatar-upload" className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
