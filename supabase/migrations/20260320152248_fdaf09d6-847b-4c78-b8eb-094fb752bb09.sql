@@ -1,0 +1,1 @@
+ALTER TABLE public.documents ADD COLUMN ai_analysis text, ADD COLUMN ai_analyzed_at timestamptz;

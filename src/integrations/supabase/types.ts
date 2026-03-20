@@ -357,6 +357,8 @@ export type Database = {
       }
       documents: {
         Row: {
+          ai_analysis: string | null
+          ai_analyzed_at: string | null
           content: string
           created_at: string
           email_sent_at: string | null
@@ -374,6 +376,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ai_analysis?: string | null
+          ai_analyzed_at?: string | null
           content: string
           created_at?: string
           email_sent_at?: string | null
@@ -391,6 +395,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          ai_analysis?: string | null
+          ai_analyzed_at?: string | null
           content?: string
           created_at?: string
           email_sent_at?: string | null
