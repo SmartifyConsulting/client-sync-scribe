@@ -320,25 +320,6 @@ export default function Dashboard() {
 
       {/* Stats Grid */}
       <div className="grid gap-5 grid-cols-2 lg:grid-cols-5">
-        {isDoctor && (
-          <StatsCard
-            title="Doctor Rating"
-            value={avgRating > 0 ? `${avgRating.toFixed(1)} ★` : "—"}
-            change={avgRating > 0 ? "Average from patients" : "No ratings yet"}
-            trend="neutral"
-            icon={Star}
-          />
-        )}
-        {isDoctor && (
-          <StatsCard
-            title="Total Moolas"
-            value={doctorMoolas + patientMoolas}
-            change={`Doctor: ${doctorMoolas} · Patient: ${patientMoolas}`}
-            trend="up"
-            icon={Award}
-            imageUrl={moolasLogo}
-          />
-        )}
         <StatsCard
           title="Total Patients"
           value={128}
@@ -360,16 +341,35 @@ export default function Dashboard() {
           trend="up"
           icon={TrendingUp}
         />
+        {isDoctor && (
+          <StatsCard
+            title="Doctor Rating"
+            value={avgRating > 0 ? `${avgRating.toFixed(1)} ★` : "—"}
+            change={avgRating > 0 ? "Average from patients" : "No ratings yet"}
+            trend="neutral"
+            icon={Star}
+          />
+        )}
+        {isDoctor && (
+          <StatsCard
+            title="Total Moolas"
+            value={doctorMoolas + patientMoolas}
+            change={`Doctor: ${doctorMoolas} · Patient: ${patientMoolas}`}
+            trend="up"
+            icon={Award}
+            imageUrl={moolasLogo}
+          />
+        )}
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-5">
+        <div className="lg:col-span-3 space-y-6">
           <TodaysBriefing />
+          <RecentActivity />
         </div>
-        <div>
+        <div className="lg:col-span-2">
           {isDoctor && <CompactTodoList />}
-          <div className="mt-4"><RecentActivity /></div>
         </div>
       </div>
     </div>

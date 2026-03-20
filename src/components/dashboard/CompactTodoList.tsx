@@ -144,7 +144,7 @@ export function CompactTodoList() {
 
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
       const SILENCE_THRESHOLD = 10;
-      const SILENCE_DURATION_MS = 3000;
+      const SILENCE_DURATION_MS = 8000;
       const POLL_INTERVAL_MS = 200;
 
       silenceIntervalRef.current = setInterval(() => {
@@ -355,7 +355,7 @@ export function CompactTodoList() {
         </Tabs>
 
         {/* Task list */}
-        <div className="max-h-64 overflow-y-auto space-y-1">
+        <div className="max-h-96 overflow-y-auto space-y-1">
           {loading ? (
             <div className="flex justify-center py-4">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
@@ -398,15 +398,12 @@ export function CompactTodoList() {
                     )}
                     <span
                       className={cn(
-                        "flex-1 text-[11px] truncate",
+                        "flex-1 text-xs",
                         todo.completed && "line-through text-muted-foreground"
                       )}
                     >
                       {todo.title}
                     </span>
-                    <Badge className={cn("text-[9px] px-1 py-0 h-4 leading-none", priorityColors[todo.priority])}>
-                      {todo.priority[0].toUpperCase()}
-                    </Badge>
                     <div className="hidden group-hover:flex gap-0.5">
                       {todo.document_id && (
                         <>
