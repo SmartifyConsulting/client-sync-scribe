@@ -232,6 +232,35 @@ export default function Profile() {
     }
   }, [profile]);
 
+  // Fetch patient record for Holarchive tab
+  useEffect(() => {
+    if (!user) return;
+    const fetchPatientRecord = async () => {
+      setPatientLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("patients")
+          .select("*")
+          .eq("patient_user_id", user.id)
+          .maybeSingle();
+        if (error) throw error;
+        if (data) {
+          setPatientRecord({
+            ...data,
+            surgeries: Array.isArray(data.surgeries) ? data.surgeries as unknown as Patient["surgeries"] : [],
+            pharmacies: Array.isArray(data.pharmacies) ? data.pharmacies as unknown as Patient["pharmacies"] : [],
+            family_history: Array.isArray(data.family_history) ? data.family_history as unknown as Patient["family_history"] : [],
+          } as Patient);
+        }
+      } catch (err) {
+        console.error("Error fetching patient record:", err);
+      } finally {
+        setPatientLoading(false);
+      }
+    };
+    fetchPatientRecord();
+  }, [user]);
+
   const combinedFullName = `${formData.first_name} ${formData.last_name}`.trim();
 
   useEffect(() => {
