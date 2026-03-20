@@ -17,6 +17,10 @@ import {
   FileCheck,
   Send,
   File,
+  Image,
+  Sparkles,
+  X,
+  RotateCw,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -26,6 +30,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const STORAGE_LIMIT_MB = 100;
 
@@ -38,6 +50,7 @@ type DocType =
   | "hospital_admission"
   | "audio"
   | "video"
+  | "image"
   | "file";
 
 interface UnifiedDocument {
@@ -49,6 +62,8 @@ interface UnifiedDocument {
   source: "documents" | "prescriptions" | "invoices";
   content?: string;
   mediaUrl?: string;
+  aiAnalysis?: string | null;
+  aiAnalyzedAt?: string | null;
 }
 
 const DOC_TYPE_CONFIG: Record<
@@ -95,6 +110,11 @@ const DOC_TYPE_CONFIG: Record<
     color: "bg-muted text-muted-foreground",
     icon: Video,
   },
+  image: {
+    label: "Image",
+    color: "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-400",
+    icon: Image,
+  },
   file: {
     label: "File",
     color: "bg-muted text-muted-foreground",
@@ -110,6 +130,7 @@ const FILTER_OPTIONS: { value: DocType | "all"; label: string }[] = [
   { value: "referral_letter", label: "Referrals" },
   { value: "general_letter", label: "Letters" },
   { value: "hospital_admission", label: "Admissions" },
+  { value: "image", label: "Images" },
   { value: "audio", label: "Audio" },
   { value: "video", label: "Video" },
 ];
@@ -120,6 +141,7 @@ function deriveDocType(
 ): DocType {
   if (mediaType === "audio") return "audio";
   if (mediaType === "video") return "video";
+  if (mediaType === "image") return "image";
   const lower = (templateName || "").toLowerCase();
   if (lower.includes("prescription")) return "prescription";
   if (lower.includes("invoice")) return "invoice";
@@ -143,9 +165,7 @@ export default function PatientDocuments() {
   const [patientName, setPatientName] = useState("");
 
   // Media recording state
-  const [recordingMode, setRecordingMode] = useState<
-    "audio" | "video" | null
-  >(null);
+  const [recordingMode, setRecordingMode] = useState<"audio" | "video" | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
@@ -156,6 +176,10 @@ export default function PatientDocuments() {
   const videoPreviewRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // AI Analysis state
+  const [analyzingDocId, setAnalyzingDocId] = useState<string | null>(null);
+  const [analysisDialog, setAnalysisDialog] = useState<UnifiedDocument | null>(null);
 
   useEffect(() => {
     if (user) fetchAll();
@@ -179,11 +203,10 @@ export default function PatientDocuments() {
     setPatientIds(ids);
     setPatientName(patients[0]?.name || "");
 
-    // Fetch documents, prescriptions, invoices in parallel
     const [docsRes, rxRes, invRes] = await Promise.all([
       supabase
         .from("documents")
-        .select("id, name, content, template_name, created_at, media_type, media_url")
+        .select("id, name, content, template_name, created_at, media_type, media_url, ai_analysis, ai_analyzed_at")
         .in("patient_id", ids)
         .order("created_at", { ascending: false }),
       supabase
@@ -200,7 +223,6 @@ export default function PatientDocuments() {
 
     const unified: UnifiedDocument[] = [];
 
-    // Documents
     for (const doc of docsRes.data || []) {
       const sizeBytes = new Blob([doc.content]).size;
       unified.push({
@@ -212,10 +234,11 @@ export default function PatientDocuments() {
         source: "documents",
         content: doc.content,
         mediaUrl: doc.media_url,
+        aiAnalysis: (doc as any).ai_analysis,
+        aiAnalyzedAt: (doc as any).ai_analyzed_at,
       });
     }
 
-    // Prescriptions
     for (const rx of rxRes.data || []) {
       const desc = `${rx.medication} – ${rx.dosage} (${rx.frequency})`;
       unified.push({
@@ -229,7 +252,6 @@ export default function PatientDocuments() {
       });
     }
 
-    // Invoices
     for (const inv of invRes.data || []) {
       const desc = `${inv.invoice_number}: ${inv.description} – R${inv.amount}`;
       unified.push({
@@ -243,14 +265,12 @@ export default function PatientDocuments() {
       });
     }
 
-    // Sort by date desc
     unified.sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
 
     setDocuments(unified);
 
-    // Storage: only count documents table content
     const totalBytes = (docsRes.data || []).reduce(
       (acc, doc) => acc + new Blob([doc.content]).size,
       0
@@ -335,10 +355,59 @@ export default function PatientDocuments() {
     }
     const isVideo = file.type.startsWith("video/");
     const isAudio = file.type.startsWith("audio/");
+    const isImage = file.type.startsWith("image/");
+
+    if (isImage) {
+      // Handle image upload directly
+      handleImageUpload(file);
+      return;
+    }
+
     setRecordingMode(isVideo ? "video" : isAudio ? "audio" : "audio");
     setRecordedBlob(file);
     setRecordedUrl(URL.createObjectURL(file));
     if (!mediaTitle) setMediaTitle(file.name.replace(/\.[^/.]+$/, ""));
+  };
+
+  const handleImageUpload = async (file: globalThis.File) => {
+    if (!patientIds[0]) return;
+    setIsSaving(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const fileName = `${patientIds[0]}/${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("patient-media")
+        .upload(fileName, file, { contentType: file.type });
+      if (uploadError) throw uploadError;
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("patient-media").getPublicUrl(fileName);
+
+      const docName = file.name.replace(/\.[^/.]+$/, "");
+      const { error: docError } = await supabase.from("documents").insert({
+        name: docName,
+        content: `[IMAGE] ${docName}`,
+        user_id: user!.id,
+        patient_id: patientIds[0],
+        patient_name: patientName,
+        media_url: publicUrl,
+        media_type: "image",
+      });
+      if (docError) throw docError;
+
+      toast({ title: "Image Uploaded", description: "Image saved to your documents" });
+      fetchAll();
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message || "Failed to upload image",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   const handleSaveMedia = async () => {
@@ -388,6 +457,77 @@ export default function PatientDocuments() {
     }
   };
 
+  const handleAIAnalysis = async (doc: UnifiedDocument) => {
+    if (doc.aiAnalysis) {
+      setAnalysisDialog(doc);
+      return;
+    }
+
+    setAnalyzingDocId(doc.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("analyze-medical-image", {
+        body: { imageUrl: doc.mediaUrl, documentId: doc.id },
+      });
+
+      if (error) throw error;
+
+      const updatedDoc = {
+        ...doc,
+        aiAnalysis: data.analysis,
+        aiAnalyzedAt: data.analyzedAt,
+      };
+
+      setDocuments((prev) =>
+        prev.map((d) => (d.id === doc.id ? updatedDoc : d))
+      );
+      setAnalysisDialog(updatedDoc);
+
+      toast({ title: "Analysis Complete", description: "AI interpretation is ready" });
+    } catch (err: any) {
+      toast({
+        title: "Analysis Failed",
+        description: err.message || "Could not analyse the image",
+        variant: "destructive",
+      });
+    } finally {
+      setAnalyzingDocId(null);
+    }
+  };
+
+  const handleReAnalyse = async () => {
+    if (!analysisDialog) return;
+    setAnalysisDialog({ ...analysisDialog, aiAnalysis: null, aiAnalyzedAt: null });
+    setAnalyzingDocId(analysisDialog.id);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("analyze-medical-image", {
+        body: { imageUrl: analysisDialog.mediaUrl, documentId: analysisDialog.id },
+      });
+
+      if (error) throw error;
+
+      const updatedDoc = {
+        ...analysisDialog,
+        aiAnalysis: data.analysis,
+        aiAnalyzedAt: data.analyzedAt,
+      };
+
+      setDocuments((prev) =>
+        prev.map((d) => (d.id === analysisDialog.id ? updatedDoc : d))
+      );
+      setAnalysisDialog(updatedDoc);
+      toast({ title: "Re-analysis Complete" });
+    } catch (err: any) {
+      toast({
+        title: "Re-analysis Failed",
+        description: err.message || "Could not re-analyse",
+        variant: "destructive",
+      });
+    } finally {
+      setAnalyzingDocId(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -398,7 +538,6 @@ export default function PatientDocuments() {
           </p>
         </div>
 
-        {/* Media action buttons */}
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -425,7 +564,7 @@ export default function PatientDocuments() {
             size="icon"
             className="h-10 w-10 rounded-full"
             onClick={() => fileInputRef.current?.click()}
-            disabled={isRecording}
+            disabled={isRecording || isSaving}
             title="Upload File"
           >
             <Upload className="h-4 w-4" />
@@ -434,7 +573,7 @@ export default function PatientDocuments() {
             ref={fileInputRef}
             type="file"
             className="hidden"
-            accept="audio/*,video/*,.pdf,.doc,.docx,.jpg,.jpeg,.png"
+            accept="audio/*,video/*,.pdf,.doc,.docx,.jpg,.jpeg,.png,.bmp,.dicom,image/*"
             onChange={handleFileUpload}
           />
         </div>
@@ -607,37 +746,151 @@ export default function PatientDocuments() {
           {filteredDocs.map((doc) => {
             const config = DOC_TYPE_CONFIG[doc.type];
             const IconComponent = config.icon;
+            const isAnalyzing = analyzingDocId === doc.id;
+            const isImageDoc = doc.type === "image" && doc.mediaUrl;
             return (
               <Card key={`${doc.source}-${doc.id}`} className="hover:shadow-sm transition-shadow">
                 <CardContent className="flex items-center gap-4 py-4">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <IconComponent className="h-5 w-5 text-primary" />
+                    {isImageDoc ? (
+                      <img
+                        src={doc.mediaUrl}
+                        alt={doc.name}
+                        className="h-10 w-10 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <IconComponent className="h-5 w-5 text-primary" />
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-foreground truncate">
                       {doc.name}
                     </p>
-                    <div className="flex items-center gap-2 mt-0.5">
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                       <Badge
                         variant="secondary"
                         className={`text-xs border-0 ${config.color}`}
                       >
                         {config.label}
                       </Badge>
+                      {doc.aiAnalysis && (
+                        <Badge variant="secondary" className="text-xs border-0 bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400 gap-1">
+                          <Sparkles className="h-3 w-3" />
+                          AI Analysed
+                        </Badge>
+                      )}
                       <span className="text-xs text-muted-foreground">
                         {format(new Date(doc.date), "dd MMM yyyy")}
                       </span>
                     </div>
                   </div>
-                  <span className="text-xs text-muted-foreground shrink-0">
-                    {(doc.sizeBytes / 1024).toFixed(1)} KB
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {isImageDoc && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1.5 text-xs"
+                        onClick={() => handleAIAnalysis(doc)}
+                        disabled={isAnalyzing}
+                      >
+                        {isAnalyzing ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-3.5 w-3.5" />
+                        )}
+                        {doc.aiAnalysis ? "View Analysis" : "AI Analyse"}
+                      </Button>
+                    )}
+                    <span className="text-xs text-muted-foreground">
+                      {(doc.sizeBytes / 1024).toFixed(1)} KB
+                    </span>
+                  </div>
                 </CardContent>
               </Card>
             );
           })}
         </div>
       )}
+
+      {/* AI Analysis Dialog */}
+      <Dialog open={!!analysisDialog} onOpenChange={(open) => !open && setAnalysisDialog(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-violet-600" />
+              AI Image Analysis
+            </DialogTitle>
+            <DialogDescription>
+              {analysisDialog?.name}
+            </DialogDescription>
+          </DialogHeader>
+
+          <ScrollArea className="max-h-[60vh]">
+            <div className="space-y-4 pr-4">
+              {/* Image Preview */}
+              {analysisDialog?.mediaUrl && (
+                <div className="rounded-lg overflow-hidden border bg-muted">
+                  <img
+                    src={analysisDialog.mediaUrl}
+                    alt={analysisDialog.name}
+                    className="w-full max-h-64 object-contain"
+                  />
+                </div>
+              )}
+
+              {/* Analysis Content */}
+              {analysisDialog?.aiAnalysis ? (
+                <div className="space-y-3">
+                  <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap">
+                    {analysisDialog.aiAnalysis}
+                  </div>
+
+                  {analysisDialog.aiAnalyzedAt && (
+                    <p className="text-xs text-muted-foreground">
+                      Analysed on {format(new Date(analysisDialog.aiAnalyzedAt), "dd MMM yyyy 'at' HH:mm")}
+                    </p>
+                  )}
+                </div>
+              ) : analyzingDocId === analysisDialog?.id ? (
+                <div className="flex items-center justify-center py-12 gap-3">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  <span className="text-sm text-muted-foreground">Analysing image...</span>
+                </div>
+              ) : null}
+
+              {/* Disclaimer */}
+              <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 p-3">
+                <div className="flex gap-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <p className="text-xs text-amber-800 dark:text-amber-300">
+                    This AI analysis is for informational purposes only and does not constitute a medical diagnosis. Always consult a qualified healthcare professional for clinical interpretation and treatment decisions.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </ScrollArea>
+
+          {/* Re-analyse button */}
+          {analysisDialog?.aiAnalysis && (
+            <div className="flex justify-end pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleReAnalyse}
+                disabled={analyzingDocId === analysisDialog?.id}
+                className="gap-1.5"
+              >
+                {analyzingDocId === analysisDialog?.id ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <RotateCw className="h-3.5 w-3.5" />
+                )}
+                Re-analyse
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
