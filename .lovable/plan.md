@@ -1,52 +1,99 @@
 
 
-# Fix SheetJS (xlsx) Security Vulnerabilities
+# Multi-Issue Fix Plan
 
-## Problem
+## Issues to Address
 
-The `xlsx` package (v0.18.5) has two known vulnerabilities:
-- **Prototype Pollution** (GHSA-4r6h-8v6p-xvw6)
-- **Regular Expression Denial of Service** (GHSA-5pgg-2g8v-p4x9)
+1. **Build error**: `read-excel-file` package has incorrect exports, preventing build
+2. **Build error**: CSS `@import` statements must precede `@tailwind` directives
+3. **Dual currency symbol**: Invoice service selector shows DollarSign icon + currency symbol (e.g., "$ R 1500")
+4. **Moola logo**: Make it fit nicely in a white circle badge, consistent app-wide
+5. **Rewards cards**: Use fun bright cartoon colours
+6. **My Details (patient)**: Replace collapsible frames with tabs (Personal Info, Medical Info, General Notes)
+7. **My Doctors**: Replace cards with table rows; show lock icon with tooltip for access permissions
 
-The `xlsx` package is unmaintained and these vulnerabilities have no fix in the npm package. It is only used in `src/components/patients/PatientImport.tsx` for reading Excel/CSV files.
+---
 
-## Solution
+## 1. Fix `read-excel-file` Build Error
 
-Replace `xlsx` with `read-excel-file`, a lightweight, actively maintained alternative with no known vulnerabilities. It handles `.xlsx` reading well. For CSV files, we'll use manual parsing (already partially handled by the AI fallback).
+**File: `src/components/patients/PatientImport.tsx`**
+- Replace `read-excel-file` with a direct browser-compatible import: `import readXlsxFile from 'read-excel-file/browser'` (or switch to using the `web` subpath)
+- If that also fails, fall back to reading the file as ArrayBuffer and using a dynamic import
 
-### Changes
+**File: `package.json`**
+- Verify `read-excel-file` is listed; may need version pin
 
-**`package.json`**
-- Remove `xlsx` dependency
-- Add `read-excel-file` (~50KB, no vulnerabilities)
+## 2. Fix CSS @import Order
 
-**`src/components/patients/PatientImport.tsx`**
-- Replace `import * as XLSX from "xlsx"` with `import readXlsxFile from 'read-excel-file'`
-- Update `processExcelFile()`:
-  - Use `readXlsxFile(file)` which returns rows as arrays (same shape as current `jsonData`)
-  - For CSV fallback content, parse manually or send directly to AI
-- The core logic (column mapping, AI fallback) stays the same — only the Excel reading layer changes
+**File: `src/index.css`**
+- Move `@import "@fontsource/inter/..."` statements above `@tailwind base` directives
 
-### Migration Detail
+## 3. Fix Dual Currency Display
 
-Current:
-```ts
-const data = await file.arrayBuffer();
-const workbook = XLSX.read(data, { type: "array", cellDates: true });
-const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-```
+**File: `src/pages/doctor/Invoices.tsx`**
+- Line ~926: Remove `<DollarSign>` icon from the service selector display when a currency symbol already exists
+- Replace with just the currency symbol text, no icon
 
-New:
-```ts
-const rows = await readXlsxFile(file);
-// rows is already an array of arrays — same shape as jsonData
-```
+## 4. Moola Logo — Consistent White Circle Badge
 
-For CSV fallback (where `XLSX.utils.sheet_to_csv` was used), we'll read the file as text and pass it directly to AI parsing.
+**File: `src/components/gamification/LollipopDisplay.tsx`**
+- Wrap the Moola logo `<img>` in a white circle container (`bg-white rounded-full p-1 shadow-sm`) across all variants (badge, compact, card)
+- Ensure consistent sizing: small (h-6 w-6 with p-0.5), medium (h-8 w-8 with p-1), large (h-12 w-12 with p-1.5)
+
+**Files using moolasLogo directly**: `MyRewards.tsx`, `PatientDashboard.tsx`, `PatientProfile.tsx`, `StatsCard.tsx`
+- Apply the same white-circle wrapper pattern everywhere the logo appears
+
+## 5. Rewards Cards — Bright Cartoon Colours
+
+**File: `src/pages/patient/MyRewards.tsx`**
+- Update the 4 hero stat cards to use vivid, playful gradients:
+  - Total Moolas: bright yellow/lime gradient
+  - Current Level: vibrant purple/pink gradient
+  - Active Streaks: hot orange/red gradient
+  - Transferred: sky blue/cyan gradient
+- Use bolder border colours and slightly rounded card styling for a fun feel
+
+## 6. My Details — Tabs Instead of Frames
+
+**File: `src/components/patients/PatientDetailsEditor.tsx`**
+- Replace the 10 `CollapsibleFrame` sections in VIEW mode with 3 tabs:
+  - **Personal Information**: Name, ID, Gender, DOB, Email, Phone, Marital Status, Referred By, Addresses, Next of Kin, Employer
+  - **Medical Information**: Physical Measurements, Blood Type (new field), Allergies, Chronic Medication, Surgeries & Dates, Family History (new section — Relation + Condition), Medical Insurance, Pharmacies
+  - **General Notes**: Notes textarea
+- Add `blood_type` field to formData state and save logic
+- Add `family_history` as a JSON array field (relation, condition) with add/remove UI
+- EDIT mode: similarly reorganise into the same 3 tab groupings
+
+**Database migration needed**: Add `blood_type` (text, nullable) and `family_history` (jsonb, nullable, default `[]`) columns to the `patients` table.
+
+**File: `src/hooks/usePatients.ts`**
+- Add `blood_type` and `family_history` to the `Patient` interface
+
+## 7. My Doctors — Table Rows with Lock Tooltip
+
+**File: `src/pages/patient/MyDoctors.tsx`**
+- Replace `DoctorCard` component with table rows in a `<Table>`:
+  - Columns: Avatar+Name, Specialty (badge), Phone, Practice #, Lock icon
+  - Lock icon: `<Lock>` with `<Tooltip>` showing granted permissions on hover
+- Search results also display as rows
+- Remove the Card-based layout entirely
+
+---
+
+## Files Modified
 
 | File | Change |
 |------|--------|
-| `package.json` | Swap `xlsx` → `read-excel-file` |
-| `src/components/patients/PatientImport.tsx` | Update imports and Excel reading logic |
+| `src/index.css` | Move @import above @tailwind |
+| `src/components/patients/PatientImport.tsx` | Fix read-excel-file import path |
+| `src/pages/doctor/Invoices.tsx` | Remove DollarSign icon duplication |
+| `src/components/gamification/LollipopDisplay.tsx` | White circle logo wrapper |
+| `src/pages/patient/MyRewards.tsx` | Cartoon colours for hero cards, consistent logo |
+| `src/pages/patient/PatientDashboard.tsx` | Consistent logo styling |
+| `src/pages/PatientProfile.tsx` | Consistent logo styling |
+| `src/components/dashboard/StatsCard.tsx` | Consistent logo styling |
+| `src/components/patients/PatientDetailsEditor.tsx` | Tabs layout + blood type + family history |
+| `src/hooks/usePatients.ts` | Add blood_type, family_history to Patient interface |
+| `src/pages/patient/MyDoctors.tsx` | Table rows + lock tooltip |
+| **Database migration** | Add blood_type, family_history columns |
 
