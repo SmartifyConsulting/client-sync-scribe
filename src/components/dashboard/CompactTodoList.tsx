@@ -144,7 +144,7 @@ export function CompactTodoList() {
 
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
       const SILENCE_THRESHOLD = 10;
-      const SILENCE_DURATION_MS = 3000;
+      const SILENCE_DURATION_MS = 8000;
       const POLL_INTERVAL_MS = 200;
 
       silenceIntervalRef.current = setInterval(() => {
