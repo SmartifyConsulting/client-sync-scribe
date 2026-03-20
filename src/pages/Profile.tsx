@@ -505,8 +505,9 @@ export default function Profile() {
       {/* Tabbed content */}
       {isPatient ? (
         <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-primary">
+          <TabsList className="grid w-full grid-cols-3 bg-primary">
             <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Personal</TabsTrigger>
+            <TabsTrigger value="holarchive" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">My Holarchive</TabsTrigger>
             <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Preferences</TabsTrigger>
           </TabsList>
           <TabsContent value="personal">
@@ -536,6 +537,34 @@ export default function Profile() {
                 </div>
               </div>
             </div>
+          </TabsContent>
+          <TabsContent value="holarchive">
+            {patientLoading ? (
+              <div className="flex h-40 items-center justify-center">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : patientRecord ? (
+              <PatientDetailsEditor
+                patient={patientRecord}
+                onSave={async (updates: Partial<Patient>) => {
+                  const { error } = await supabase
+                    .from("patients")
+                    .update(updates as any)
+                    .eq("id", patientRecord.id);
+                  if (error) {
+                    toast({ title: "Error saving", description: error.message, variant: "destructive" });
+                    throw error;
+                  }
+                  setPatientRecord((prev) => prev ? { ...prev, ...updates } : prev);
+                  toast({ title: "Saved", description: "Your details have been updated." });
+                }}
+                isSelfService
+              />
+            ) : (
+              <div className="p-6 text-center text-muted-foreground">
+                <p>No patient record found. Please ask your doctor to create your profile.</p>
+              </div>
+            )}
           </TabsContent>
           <TabsContent value="preferences">
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-3">
