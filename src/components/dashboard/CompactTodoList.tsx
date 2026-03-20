@@ -355,7 +355,7 @@ export function CompactTodoList() {
         </Tabs>
 
         {/* Task list */}
-        <div className="max-h-64 overflow-y-auto space-y-1">
+        <div className="max-h-96 overflow-y-auto space-y-1">
           {loading ? (
             <div className="flex justify-center py-4">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
