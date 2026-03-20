@@ -1,41 +1,52 @@
 
 
-# Add Procedure Dropdown to DocumentEditor for Hospital Admission Templates
+# Fix SheetJS (xlsx) Security Vulnerabilities
 
 ## Problem
 
-The searchable procedure dropdown (with AI auto-population and NHRPL code lookup) only exists in `HospitalAdmissionEditor`, which is accessed from a session context. When a doctor creates a Hospital Admission form from the **Documents page** or **Patient Profile** using the generic `DocumentEditor`, there is no procedure dropdown — just a plain text area.
+The `xlsx` package (v0.18.5) has two known vulnerabilities:
+- **Prototype Pollution** (GHSA-4r6h-8v6p-xvw6)
+- **Regular Expression Denial of Service** (GHSA-5pgg-2g8v-p4x9)
+
+The `xlsx` package is unmaintained and these vulnerabilities have no fix in the npm package. It is only used in `src/components/patients/PatientImport.tsx` for reading Excel/CSV files.
 
 ## Solution
 
-Enhance `DocumentEditor` to detect when the template is a Hospital Admission type (by name or category containing "admission") and render a searchable procedure dropdown above the content textarea.
+Replace `xlsx` with `read-excel-file`, a lightweight, actively maintained alternative with no known vulnerabilities. It handles `.xlsx` reading well. For CSV files, we'll use manual parsing (already partially handled by the AI fallback).
 
-### Changes to `src/components/documents/DocumentEditor.tsx`
+### Changes
 
-1. **Detect admission template**: Check if `template.name` contains "Hospital Admission" or "Admission"
-2. **Add procedure search state**: `procedureDescription`, `procedureSuggestions`, `loading`, dropdown visibility
-3. **Add debounced search**: Call `lookup-medical-codes` with `codeSystem: 'NHRPL'` as user types (300ms debounce)
-4. **Render dropdown**: When admission template detected, show a searchable procedure input with alphabetically sorted suggestions above the content area
-5. **On selection**: Insert/replace `[ProcedureDescription]` placeholder in the content with the selected procedure, and also replace any `[ProcedureCode]` with the NHRPL code
-6. **Pass template category**: Update the `Template` interface to include an optional `category` field for more reliable detection
+**`package.json`**
+- Remove `xlsx` dependency
+- Add `read-excel-file` (~50KB, no vulnerabilities)
 
-### UI Flow
+**`src/components/patients/PatientImport.tsx`**
+- Replace `import * as XLSX from "xlsx"` with `import readXlsxFile from 'read-excel-file'`
+- Update `processExcelFile()`:
+  - Use `readXlsxFile(file)` which returns rows as arrays (same shape as current `jsonData`)
+  - For CSV fallback content, parse manually or send directly to AI
+- The core logic (column mapping, AI fallback) stays the same — only the Excel reading layer changes
 
-```text
-DocumentEditor (Hospital Admission template)
-├── Patient Selection (existing)
-├── Document Name (existing)
-├── Procedure Search Input  ← NEW
-│   └── Alphabetical dropdown of NHRPL procedures
-├── Content Textarea (existing, with procedure auto-filled)
-└── Save Button (existing)
+### Migration Detail
+
+Current:
+```ts
+const data = await file.arrayBuffer();
+const workbook = XLSX.read(data, { type: "array", cellDates: true });
+const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
 ```
 
-### Files Modified
+New:
+```ts
+const rows = await readXlsxFile(file);
+// rows is already an array of arrays — same shape as jsonData
+```
+
+For CSV fallback (where `XLSX.utils.sheet_to_csv` was used), we'll read the file as text and pass it directly to AI parsing.
 
 | File | Change |
 |------|--------|
-| `src/components/documents/DocumentEditor.tsx` | Add procedure dropdown for admission templates |
-| `src/pages/Documents.tsx` | Pass `category` to DocumentEditor template prop |
-| `src/pages/PatientProfile.tsx` | Pass `category` to DocumentEditor template prop |
+| `package.json` | Swap `xlsx` → `read-excel-file` |
+| `src/components/patients/PatientImport.tsx` | Update imports and Excel reading logic |
 
