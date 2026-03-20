@@ -27,6 +27,33 @@ import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Label } from "@/components/ui/label";
+import { format, startOfMonth, endOfMonth, addMonths, startOfYear, endOfYear, eachMonthOfInterval, parseISO, isSameDay, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isToday as isTodayFn } from "date-fns";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { AppointmentRequestsPanel } from "@/components/appointments/AppointmentRequestsPanel";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { usePatients } from "@/hooks/usePatients";
+import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { Label } from "@/components/ui/label";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 
 interface AppointmentTypeColor {
