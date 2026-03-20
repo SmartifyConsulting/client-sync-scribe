@@ -38,6 +38,7 @@ interface AppointmentTypeColor {
 }
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+type CalendarViewMode = "week" | "month" | "year";
 
 interface CalendarEvent {
   id: string;
