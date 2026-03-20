@@ -39,7 +39,7 @@ export function LollipopDisplay({
   if (variant === "compact") {
     return (
       <div className="flex items-center gap-2 text-sm">
-        <span className="text-xl font-bold text-secondary">Ⓜ</span>
+        <img src={moolasLogo} alt="Moolas" className="h-6 w-6 rounded-full object-cover" />
         <span className="font-semibold text-foreground">{count}</span>
         <span className="text-muted-foreground">Moola{count !== 1 ? 's' : ''}</span>
       </div>
