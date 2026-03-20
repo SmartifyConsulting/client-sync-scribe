@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { PatientReward } from "@/hooks/usePatientRewards";
 import { format, parseISO } from "date-fns";
+import moolasLogo from "@/assets/moolas-logo.jpg";
 
 interface LollipopDisplayProps {
   count: number;
