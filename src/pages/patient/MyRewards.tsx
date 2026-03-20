@@ -309,7 +309,7 @@ export default function MyRewards() {
                 <p className="text-sm text-muted-foreground">Total Moolas</p>
                 <p className="text-4xl font-bold text-emerald-600 dark:text-emerald-400">{lollipopCount}</p>
               </div>
-              <img src={moolasLogo} alt="Moolas" className="h-12 w-12 object-contain rounded" />
+              <img src={moolasLogo} alt="Moolas" className="h-12 w-12 object-cover rounded-full" />
             </div>
           </CardContent>
         </Card>
