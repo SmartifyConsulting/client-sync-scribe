@@ -13,6 +13,7 @@ import { Patient, Surgery, Pharmacy, FamilyHistoryEntry } from "@/hooks/usePatie
 import { useToast } from "@/hooks/use-toast";
 
 const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
+const MyDoctors = lazy(() => import("@/pages/patient/MyDoctors"));
 
 interface PatientDetailsEditorProps {
   patient: Patient;
@@ -25,6 +26,8 @@ const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const ORGAN_OPTIONS = [
   "Heart", "Lungs", "Kidneys", "Liver", "Pancreas", "Corneas", "Skin", "Bone Marrow", "Intestines",
 ];
+
+const sectionFrame = "rounded-xl border border-border bg-card p-4 shadow-sm";
 
 export function PatientDetailsEditor({ patient, onSave, isSelfService = false }: PatientDetailsEditorProps) {
   const { toast } = useToast();
@@ -304,7 +307,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
   // Shared organ donor display
   const OrganDonorView = () => (
-    <div className="border-t border-border pt-4">
+    <div>
       <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Heart className="h-3.5 w-3.5" /> Organ Donor</h3>
       {patient.organ_donor ? (
         <div>
@@ -339,12 +342,12 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
             <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Personal Information</TabsTrigger>
             <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Medical Information</TabsTrigger>
             {isSelfService && <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Documents</TabsTrigger>}
-            <TabsTrigger value="notes" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">General Notes</TabsTrigger>
+            {isSelfService && <TabsTrigger value="doctors" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Doctors</TabsTrigger>}
           </TabsList>
 
           {/* === PERSONAL INFORMATION TAB === */}
           <TabsContent value="personal" className="space-y-4 mt-4">
-            <div>
+            <div className={sectionFrame}>
               <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Personal Details</h3>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <ViewField label="Full Name" value={patient.name} />
@@ -358,7 +361,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
               </div>
             </div>
 
-            <div className="border-t border-border pt-4">
+            <div className={sectionFrame}>
               <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Addresses</h3>
               <div className="grid gap-3 sm:grid-cols-2">
                 <ViewField label="Physical Address" value={patient.physical_address || patient.address} />
@@ -366,7 +369,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
               </div>
             </div>
 
-            <div className="border-t border-border pt-4">
+            <div className={sectionFrame}>
               <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Next of Kin</h3>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <ViewField label="Name" value={patient.next_of_kin_name} />
@@ -376,7 +379,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
               </div>
             </div>
 
-            <div className="border-t border-border pt-4">
+            <div className={sectionFrame}>
               <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Employer</h3>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <ViewField label="Employer" value={patient.employer} />
@@ -384,14 +387,21 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
                 <ViewField label="Reporting To (Email)" value={patient.reporting_to_email} />
               </div>
             </div>
+
+            <div className={sectionFrame}>
+              <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
+                <StickyNote className="h-3.5 w-3.5" /> General Notes
+              </h3>
+              <p className="text-sm text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
+            </div>
           </TabsContent>
 
           {/* === MEDICAL INFORMATION TAB — TWO COLUMNS === */}
           <TabsContent value="medical" className="mt-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Column 1: Medical Insurance & Pharmacies */}
               <div className="space-y-4">
-                <div>
+                <div className={sectionFrame}>
                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Medical Insurance</h3>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <ViewField label="Insurance Provider" value={patient.medical_aid} />
@@ -403,7 +413,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
                   </div>
                 </div>
 
-                <div className="border-t border-border pt-4">
+                <div className={sectionFrame}>
                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Pharmacies</h3>
                   {pharmacies.length === 0 ? (
                     <p className="text-xs text-muted-foreground">No pharmacies recorded</p>
@@ -427,7 +437,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
               {/* Column 2: Physical, Blood, Allergies, Surgeries, Family History, Organ Donor */}
               <div className="space-y-4">
-                <div>
+                <div className={sectionFrame}>
                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Physical Measurements</h3>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
@@ -446,19 +456,19 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
                   </div>
                 </div>
 
-                <div className="border-t border-border pt-4">
+                <div className={sectionFrame}>
                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Blood Type</h3>
                   <p className="text-sm text-foreground">{patient.blood_type || "Not recorded"}</p>
                 </div>
 
-                <div className="border-t border-border pt-4">
+                <div className={sectionFrame}>
                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</h3>
                   <div className="rounded-lg bg-muted/30 p-3 border border-border/50">
                     <p className="text-sm text-foreground">{patient.allergies || "None recorded"}</p>
                   </div>
                 </div>
 
-                <div className="border-t border-border pt-4">
+                <div className={sectionFrame}>
                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Chronic Medication</h3>
                   {patient.is_chronic ? (
                     <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive"><Pill className="h-3 w-3" />Chronic</span>
@@ -467,7 +477,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
                   )}
                 </div>
 
-                <div className="border-t border-border pt-4">
+                <div className={sectionFrame}>
                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Surgeries and Dates</h3>
                   {surgeries.length === 0 ? (
                     <p className="text-xs text-muted-foreground">No surgeries recorded</p>
@@ -484,7 +494,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
                   )}
                 </div>
 
-                <div className="border-t border-border pt-4">
+                <div className={sectionFrame}>
                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Family History</h3>
                   {familyHistory.length === 0 ? (
                     <p className="text-xs text-muted-foreground">No family history recorded</p>
@@ -500,7 +510,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
                   )}
                 </div>
 
-                <OrganDonorView />
+                <div className={sectionFrame}>
+                  <OrganDonorView />
+                </div>
               </div>
             </div>
           </TabsContent>
@@ -514,12 +526,14 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
             </TabsContent>
           )}
 
-          {/* === GENERAL NOTES TAB === */}
-          <TabsContent value="notes" className="mt-4">
-            <div className="rounded-lg bg-muted/30 p-3 border border-border/50 min-h-[120px]">
-              <p className="text-sm text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
-            </div>
-          </TabsContent>
+          {/* === MY DOCTORS TAB (only for self-service) === */}
+          {isSelfService && (
+            <TabsContent value="doctors" className="mt-4">
+              <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                <MyDoctors />
+              </Suspense>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     );
@@ -542,12 +556,12 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
           <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Personal Information</TabsTrigger>
           <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Medical Information</TabsTrigger>
           {isSelfService && <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Documents</TabsTrigger>}
-          <TabsTrigger value="notes" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">General Notes</TabsTrigger>
+          {isSelfService && <TabsTrigger value="doctors" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Doctors</TabsTrigger>}
         </TabsList>
 
         {/* === PERSONAL TAB (EDIT) === */}
-        <TabsContent value="personal" className="space-y-6 mt-4">
-          <div>
+        <TabsContent value="personal" className="space-y-4 mt-4">
+          <div className={sectionFrame}>
             <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide">Personal Information</h3>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <div className="space-y-1"><Label className="text-xs" htmlFor="name">Full Name *</Label><Input id="name" className="text-sm" value={formData.name} onChange={(e) => updateFormData({ name: e.target.value })} placeholder="Patient name" /></div>
@@ -569,7 +583,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
             </div>
           </div>
 
-          <div>
+          <div className={sectionFrame}>
             <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide">Addresses</h3>
             <div className="space-y-3">
               <div className="space-y-1"><Label className="text-xs" htmlFor="physical_address">Physical Address</Label><Textarea id="physical_address" className="text-sm" value={formData.physical_address} onChange={(e) => updateFormData({ physical_address: e.target.value })} placeholder="Enter physical address" rows={2} /></div>
@@ -578,7 +592,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
             </div>
           </div>
 
-          <div>
+          <div className={sectionFrame}>
             <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide">Next of Kin</h3>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div className="space-y-1"><Label className="text-xs" htmlFor="next_of_kin_name">Name</Label><Input id="next_of_kin_name" className="text-sm" value={formData.next_of_kin_name} onChange={(e) => updateFormData({ next_of_kin_name: e.target.value })} placeholder="Full name" /></div>
@@ -588,7 +602,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
             </div>
           </div>
 
-          <div>
+          <div className={sectionFrame}>
             <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide">Employer</h3>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <div className="space-y-1"><Label className="text-xs" htmlFor="employer">Employer</Label><Input id="employer" className="text-sm" value={formData.employer} onChange={(e) => updateFormData({ employer: e.target.value })} placeholder="Company name" /></div>
@@ -596,14 +610,27 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
               <div className="space-y-1"><Label className="text-xs" htmlFor="reporting_to_email">Reporting To (Email)</Label><Input id="reporting_to_email" className="text-sm" type="email" value={formData.reporting_to_email} onChange={(e) => updateFormData({ reporting_to_email: e.target.value })} placeholder="manager@company.com" /></div>
             </div>
           </div>
+
+          <div className={sectionFrame}>
+            <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5">
+              <StickyNote className="h-3.5 w-3.5" /> General Notes
+            </h3>
+            <Textarea
+              value={formData.notes}
+              onChange={(e) => updateFormData({ notes: e.target.value })}
+              placeholder="General notes about this patient..."
+              rows={4}
+              className="text-sm"
+            />
+          </div>
         </TabsContent>
 
         {/* === MEDICAL TAB (EDIT) — TWO COLUMNS === */}
         <TabsContent value="medical" className="mt-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Column 1: Insurance & Pharmacies */}
-            <div className="space-y-6">
-              <div>
+            <div className="space-y-4">
+              <div className={sectionFrame}>
                 <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide">Medical Insurance</h3>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1"><Label className="text-xs">Insurance Provider</Label><Input className="text-sm" value={formData.medical_aid} onChange={(e) => updateFormData({ medical_aid: e.target.value })} placeholder="Insurance provider" /></div>
@@ -615,7 +642,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
                 </div>
               </div>
 
-              <div>
+              <div className={sectionFrame}>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">Pharmacies</h3>
                   {!showAddPharmacy && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddPharmacy(true)}><Plus className="h-3 w-3" />Add</Button>}
@@ -656,8 +683,8 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
             </div>
 
             {/* Column 2: Physical, Blood, Allergies, Chronic, Surgeries, Family History, Organ Donor */}
-            <div className="space-y-6">
-              <div>
+            <div className="space-y-4">
+              <div className={sectionFrame}>
                 <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide">Physical Measurements</h3>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1"><Label className="text-xs" htmlFor="height_cm">Height (cm)</Label><Input id="height_cm" className="text-sm" type="number" step="0.1" value={formData.height_cm} onChange={(e) => updateFormData({ height_cm: e.target.value })} placeholder="e.g., 175" /></div>
@@ -665,7 +692,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
                 </div>
               </div>
 
-              <div>
+              <div className={sectionFrame}>
                 <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide">Blood Type</h3>
                 <Select value={formData.blood_type} onValueChange={(value) => updateFormData({ blood_type: value })}>
                   <SelectTrigger className="w-[180px] text-sm"><SelectValue placeholder="Select blood type" /></SelectTrigger>
@@ -675,12 +702,12 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
                 </Select>
               </div>
 
-              <div>
+              <div className={sectionFrame}>
                 <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" />Allergies</h3>
                 <Textarea id="allergies" className="text-sm" value={formData.allergies} onChange={(e) => updateFormData({ allergies: e.target.value })} placeholder="List any allergies (medications, food, etc.)" rows={2} />
               </div>
 
-              <div>
+              <div className={sectionFrame}>
                 <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" />Chronic Medication</h3>
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -697,7 +724,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
                 </div>
               </div>
 
-              <div>
+              <div className={sectionFrame}>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">Surgeries and Dates</h3>
                   {!showAddSurgery && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddSurgery(true)}><Plus className="h-3 w-3" />Add</Button>}
@@ -733,7 +760,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
                 )}
               </div>
 
-              <div>
+              <div className={sectionFrame}>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">Family History</h3>
                   {!showAddFamily && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddFamily(true)}><Plus className="h-3 w-3" />Add</Button>}
@@ -768,7 +795,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
               </div>
 
               {/* Organ Donor */}
-              <div>
+              <div className={sectionFrame}>
                 <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><Heart className="h-3.5 w-3.5" /> Organ Donor</h3>
                 <div className="flex items-center gap-3 mb-3">
                   <Switch
@@ -811,16 +838,14 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
           </TabsContent>
         )}
 
-        {/* === NOTES TAB (EDIT) === */}
-        <TabsContent value="notes" className="mt-4">
-          <Textarea
-            value={formData.notes}
-            onChange={(e) => updateFormData({ notes: e.target.value })}
-            placeholder="General notes about this patient..."
-            rows={6}
-            className="text-sm"
-          />
-        </TabsContent>
+        {/* === MY DOCTORS TAB (EDIT — same as view) === */}
+        {isSelfService && (
+          <TabsContent value="doctors" className="mt-4">
+            <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+              <MyDoctors />
+            </Suspense>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
