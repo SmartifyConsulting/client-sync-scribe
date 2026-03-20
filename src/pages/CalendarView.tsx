@@ -84,6 +84,7 @@ export default function CalendarView() {
     type: "session",
     notes: "",
   });
+  const [calendarView, setCalendarView] = useState<CalendarViewMode>("month");
 
   // Fetch appointment type colors
   useEffect(() => {
