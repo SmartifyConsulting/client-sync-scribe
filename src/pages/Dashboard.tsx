@@ -185,21 +185,19 @@ export default function Dashboard() {
     refetchInterval: 60000,
   });
   
-  // Format display name based on role - return empty string while loading
-  const getDisplayName = () => {
+  // Format display name based on role - compute once to avoid flicker
+  const displayName = (() => {
     if (profileLoading || roleLoading) return '';
     if (!profile?.full_name) return isDoctor ? 'Doctor' : '';
     
     const nameParts = profile.full_name.split(' ');
     if (isDoctor) {
-      // For doctors: "Dr. [Surname]"
       const surname = nameParts.length > 1 ? nameParts[nameParts.length - 1] : nameParts[0];
       return `Dr. ${surname}`;
     } else {
-      // For patients: First name
       return nameParts[0];
     }
-  };
+  })();
 
   const getInitials = () => {
     if (!profile?.full_name) return "U";
