@@ -223,6 +223,8 @@ export default function Patients() {
         reporting_to_email: null,
         blood_type: null,
         family_history: null,
+        organ_donor: false,
+        organ_donor_organs: null,
         patient_user_id: user.id,
       });
     }

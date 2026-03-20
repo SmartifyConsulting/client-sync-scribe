@@ -19,7 +19,7 @@ import {
   FilePlus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import moolasLogo from "@/assets/moolas-logo.jpg";
+import moolasLogo from "@/assets/moolas-logo.png";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";

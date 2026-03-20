@@ -76,10 +76,10 @@ export default function MyDetails() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">My Details</h1>
+        <h1 className="text-2xl font-bold text-foreground">My Holarc</h1>
         <p className="text-sm text-muted-foreground">View and update your personal and medical information</p>
       </div>
-      <PatientDetailsEditor patient={patient} onSave={handleSave} />
+      <PatientDetailsEditor patient={patient} onSave={handleSave} isSelfService />
     </div>
   );
 }

@@ -49,7 +49,7 @@ export function StatsCard({
           imageUrl ? "rounded-full bg-white shadow-sm p-1" : "rounded-2xl bg-primary/10 group-hover:bg-primary/15"
         )}>
           {imageUrl ? (
-            <img src={imageUrl} alt={title} className="h-10 w-10 object-cover rounded-full" />
+            <img src={imageUrl} alt={title} className="h-10 w-10 object-contain" />
           ) : (
             <Icon className="h-7 w-7 text-primary" />
           )}

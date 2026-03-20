@@ -37,7 +37,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ActivityProofCapture } from "@/components/rewards/ActivityProofCapture";
 import { MedicationAdherenceTab } from "@/components/rewards/MedicationAdherenceTab";
 import { useToast } from "@/hooks/use-toast";
-import moolasLogo from "@/assets/moolas-logo.jpg";
+import moolasLogo from "@/assets/moolas-logo.png";
 
 const MILESTONES = [
   { count: 5, label: "First Steps", icon: "🌟", color: "text-yellow-500" },
@@ -310,7 +310,7 @@ export default function MyRewards() {
                 <p className="text-4xl font-bold text-yellow-900 dark:text-yellow-100">{lollipopCount}</p>
               </div>
               <div className="h-14 w-14 rounded-full bg-white shadow-sm flex items-center justify-center">
-                <img src={moolasLogo} alt="Moolas" className="h-10 w-10 object-cover rounded-full" />
+                <img src={moolasLogo} alt="Moolas" className="h-10 w-10 object-contain" />
               </div>
             </div>
           </CardContent>
