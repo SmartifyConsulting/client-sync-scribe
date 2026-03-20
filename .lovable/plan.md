@@ -1,51 +1,49 @@
 
 
-# Updated Multi-Change Plan
+# AI Document Analysis Feature
 
-All items from the previous approved plan, plus these additions:
+## Overview
+Add the ability to upload medical images (X-rays, MRIs, scans, etc.) to patient documents and request AI-powered interpretation. The interpretation is stored alongside the document for future reference.
 
-## Additional Changes
+## Changes
 
-### A. Rename "My Details" to "My Holarc" in Sidebar
+### 1. New Edge Function: `analyze-medical-image`
+**File: `supabase/functions/analyze-medical-image/index.ts`**
+- Accepts `imageUrl` and `documentId`
+- Uses Lovable AI (Gemini 2.5 Pro — best for image+text reasoning) to analyze the medical image
+- Returns structured analysis: findings, observations, disclaimers
+- Saves the AI interpretation back to the document record via a new `ai_analysis` column
+- Includes medical disclaimer that this is not a substitute for professional diagnosis
 
-**File: `src/components/layout/Sidebar.tsx`** (line 53)
-- Change `label: "My Details"` to `label: "My Holarc"`
+### 2. Database Migration
+- Add `ai_analysis` (text, nullable) and `ai_analyzed_at` (timestamptz, nullable) columns to the `documents` table
 
-**File: `src/pages/patient/MyDetails.tsx`**
-- Update the page heading from "My Details" to "My Holarc"
+### 3. Update File Upload in `PatientDocuments.tsx`
+- Expand the file upload `accept` to include image types (`.jpg,.jpeg,.png,.dicom,.bmp`)
+- When an image file is uploaded (not audio/video), save it to `patient-media` storage and create a document record with `media_type: 'image'`
+- Add `image` to the `DocType` union and `DOC_TYPE_CONFIG` with an Image icon
 
-### B. Remove "My Documents" from Sidebar Nav
+### 4. AI Analysis Button on Document Cards
+- On document cards where `mediaUrl` exists and is an image type, show a "AI Analyse" button (sparkles icon)
+- Clicking it calls the edge function, shows a loading spinner
+- Once complete, the analysis text is displayed in an expandable section below the card
+- If `ai_analysis` already exists, show "View Analysis" instead, displaying the stored result
+- Add a badge "AI Analysed" for documents that have been interpreted
 
-**File: `src/components/layout/Sidebar.tsx`** (line 56)
-- Remove `{ icon: FileText, label: "My Documents", to: "/patient/documents" }` from `patientNavItems` since documents will now live as a tab inside My Holarc
+### 5. Analysis Display Dialog
+- A dialog/sheet that shows:
+  - The uploaded image (thumbnail)
+  - The AI interpretation text
+  - Timestamp of analysis
+  - Medical disclaimer banner
+  - Option to re-analyse
 
-### C. Add "My Documents" as a Tab in PatientDetailsEditor
+## Files Modified
 
-**File: `src/components/patients/PatientDetailsEditor.tsx`**
-- Add a 4th tab: **My Documents** — positioned between Medical Information and General Notes
-- Tab order: Personal Information | Medical Information | My Documents | General Notes
-- The Documents tab will embed the patient documents list (reuse content from `src/pages/patient/PatientDocuments.tsx`)
-
-**File: `src/pages/patient/MyDetails.tsx`**
-- Pass any needed props for the documents tab
-
-### D. Update Bottom Nav (Mobile)
-
-**File: `src/components/layout/BottomNav.tsx`** (line 29)
-- Remove or update the "Docs" entry since documents now live under My Holarc
-
----
-
-## Full Plan Summary (Previous + New)
-
-| # | Change | Files |
-|---|--------|-------|
-| 1 | Replace Moola logo with transparent PNG | 6 files + new asset |
-| 2 | Medical Info tab — two-column layout | `PatientDetailsEditor.tsx` |
-| 3 | Organ Donor field + DB migration | `PatientDetailsEditor.tsx`, `usePatients.ts`, migration |
-| 4 | Font size normalization | `PatientDetailsEditor.tsx` |
-| 5 | Dashboard revamp with new brand style | `Dashboard.tsx` |
-| 6 | Rename "My Details" → "My Holarc" | `Sidebar.tsx`, `MyDetails.tsx` |
-| 7 | Remove "My Documents" from sidebar | `Sidebar.tsx`, `BottomNav.tsx` |
-| 8 | Add "My Documents" tab before General Notes | `PatientDetailsEditor.tsx`, `MyDetails.tsx` |
+| File | Change |
+|------|--------|
+| `supabase/functions/analyze-medical-image/index.ts` | New edge function |
+| `supabase/config.toml` | Add function config with `verify_jwt = false` |
+| Database migration | Add `ai_analysis`, `ai_analyzed_at` to `documents` |
+| `src/pages/patient/PatientDocuments.tsx` | Image upload support, AI button on cards, analysis display |
 
