@@ -18,7 +18,7 @@ export function MoolaLogoBadge({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   };
   return (
     <div className={`${sizeClasses[size]} rounded-full bg-white shadow-sm flex items-center justify-center`}>
-      <img src={moolasLogo} alt="Moolas" className={`${imgClasses[size]} rounded-full object-cover`} />
+      <img src={moolasLogo} alt="Moolas" className={`${imgClasses[size]} object-contain`} />
     </div>
   );
 }

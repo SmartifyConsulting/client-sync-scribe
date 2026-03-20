@@ -310,7 +310,7 @@ export default function MyRewards() {
                 <p className="text-4xl font-bold text-yellow-900 dark:text-yellow-100">{lollipopCount}</p>
               </div>
               <div className="h-14 w-14 rounded-full bg-white shadow-sm flex items-center justify-center">
-                <img src={moolasLogo} alt="Moolas" className="h-10 w-10 object-cover rounded-full" />
+                <img src={moolasLogo} alt="Moolas" className="h-10 w-10 object-contain" />
               </div>
             </div>
           </CardContent>
