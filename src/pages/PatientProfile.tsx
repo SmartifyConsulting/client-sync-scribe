@@ -313,7 +313,7 @@ export default function PatientProfile() {
         <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-4 shadow-sm border border-emerald-200 dark:border-emerald-800/30">
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-muted-foreground">Moolas</p>
-            <img src={moolasLogo} alt="Moolas" className="h-6 w-6 object-contain rounded" />
+            <img src={moolasLogo} alt="Moolas" className="h-6 w-6 object-cover rounded-full" />
           </div>
           <p className="mt-2 text-2xl font-bold text-emerald-600 dark:text-emerald-400">
             {lollipopCount}

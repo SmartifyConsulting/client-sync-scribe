@@ -185,21 +185,19 @@ export default function Dashboard() {
     refetchInterval: 60000,
   });
   
-  // Format display name based on role - return empty string while loading
-  const getDisplayName = () => {
+  // Format display name based on role - compute once to avoid flicker
+  const displayName = (() => {
     if (profileLoading || roleLoading) return '';
     if (!profile?.full_name) return isDoctor ? 'Doctor' : '';
     
     const nameParts = profile.full_name.split(' ');
     if (isDoctor) {
-      // For doctors: "Dr. [Surname]"
       const surname = nameParts.length > 1 ? nameParts[nameParts.length - 1] : nameParts[0];
       return `Dr. ${surname}`;
     } else {
-      // For patients: First name
       return nameParts[0];
     }
-  };
+  })();
 
   const getInitials = () => {
     if (!profile?.full_name) return "U";
@@ -229,7 +227,7 @@ export default function Dashboard() {
       {/* Header with Profile */}
       <div className="flex items-start justify-between pb-2">
         <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">{greeting}, {getDisplayName()}</h1>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">{greeting}{displayName ? `, ${displayName}` : ''}</h1>
           <p className="mt-2 text-muted-foreground text-[12px]">
             Here's what's happening with your practice today, {formattedDate}
           </p>

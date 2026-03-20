@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { PatientReward } from "@/hooks/usePatientRewards";
 import { format, parseISO } from "date-fns";
+import moolasLogo from "@/assets/moolas-logo.jpg";
 
 interface LollipopDisplayProps {
   count: number;
@@ -23,7 +24,7 @@ export function LollipopDisplay({
         <Tooltip>
           <TooltipTrigger asChild>
             <Badge variant="secondary" className="gap-1.5 px-3 py-1.5 bg-secondary text-white hover:bg-secondary/90 border-secondary/20">
-              <span className="text-lg font-bold">Ⓜ</span>
+              <img src={moolasLogo} alt="Moolas" className="h-5 w-5 rounded-full object-cover" />
               <span className="font-bold">{count}</span>
             </Badge>
           </TooltipTrigger>
@@ -38,7 +39,7 @@ export function LollipopDisplay({
   if (variant === "compact") {
     return (
       <div className="flex items-center gap-2 text-sm">
-        <span className="text-xl font-bold text-secondary">Ⓜ</span>
+        <img src={moolasLogo} alt="Moolas" className="h-6 w-6 rounded-full object-cover" />
         <span className="font-semibold text-foreground">{count}</span>
         <span className="text-muted-foreground">Moola{count !== 1 ? 's' : ''}</span>
       </div>
@@ -49,7 +50,7 @@ export function LollipopDisplay({
     <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 dark:from-secondary/20 dark:to-secondary/10 border-secondary/30">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <span className="text-2xl font-bold text-secondary">Ⓜ</span>
+          <img src={moolasLogo} alt="Moolas" className="h-8 w-8 rounded-full object-cover" />
           Moola Rewards
         </CardTitle>
       </CardHeader>
