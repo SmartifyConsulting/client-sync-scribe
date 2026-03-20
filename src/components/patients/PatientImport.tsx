@@ -307,14 +307,37 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
     setImportResults(null);
 
     try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: "array", cellDates: true });
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 }) as any[][];
+      const extension = file.name.split('.').pop()?.toLowerCase();
+      let jsonData: any[][];
+
+      if (extension === 'csv') {
+        const text = await file.text();
+        const lines = text.split('\n').map(line => {
+          const result: string[] = [];
+          let current = '';
+          let inQuotes = false;
+          for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+              result.push(current.trim());
+              current = '';
+            } else {
+              current += char;
+            }
+          }
+          result.push(current.trim());
+          return result;
+        }).filter(row => row.some(cell => cell !== ''));
+        jsonData = lines;
+      } else {
+        const rows = await readXlsxFile(file);
+        jsonData = rows.map(row => row.map(cell => cell === null ? '' : cell));
+      }
 
       if (jsonData.length < 2) {
-        // Try AI parsing for sparse/unusual formats
-        const textContent = XLSX.utils.sheet_to_csv(firstSheet);
+        const textContent = jsonData.map(row => row.join(',')).join('\n');
         setIsProcessing(false);
         await processWithAI(textContent, 'csv');
         return;
