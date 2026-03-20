@@ -1,49 +1,45 @@
 
 
-# AI Document Analysis Feature
-
-## Overview
-Add the ability to upload medical images (X-rays, MRIs, scans, etc.) to patient documents and request AI-powered interpretation. The interpretation is stored alongside the document for future reference.
+# Plan: My Holarchive Restructure
 
 ## Changes
 
-### 1. New Edge Function: `analyze-medical-image`
-**File: `supabase/functions/analyze-medical-image/index.ts`**
-- Accepts `imageUrl` and `documentId`
-- Uses Lovable AI (Gemini 2.5 Pro — best for image+text reasoning) to analyze the medical image
-- Returns structured analysis: findings, observations, disclaimers
-- Saves the AI interpretation back to the document record via a new `ai_analysis` column
-- Includes medical disclaimer that this is not a substitute for professional diagnosis
+### 1. Rename "My Holarc" → "My Holarchive"
+- **Sidebar.tsx** (line 54): Change label from `"My Holarc"` to `"My Holarchive"`
+- **BottomNav.tsx** (line 29): Change label from `"My Holarc"` to `"My Holarchive"`
+- **MyDetails.tsx**: Update page heading from "My Holarc" to "My Holarchive"
 
-### 2. Database Migration
-- Add `ai_analysis` (text, nullable) and `ai_analyzed_at` (timestamptz, nullable) columns to the `documents` table
+### 2. Move General Notes from tab to section under Employer (Personal Info tab)
+- **PatientDetailsEditor.tsx**: Remove the "General Notes" tab trigger and `TabsContent` from both VIEW and EDIT modes
+- In VIEW mode: Add a "General Notes" section after the Employer section (line ~386) inside the Personal Information tab
+- In EDIT mode: Add a Notes textarea after the Employer section (line ~598) inside the Personal tab
+- Tab order becomes: Personal Information | Medical Information | My Documents | My Doctors
 
-### 3. Update File Upload in `PatientDocuments.tsx`
-- Expand the file upload `accept` to include image types (`.jpg,.jpeg,.png,.dicom,.bmp`)
-- When an image file is uploaded (not audio/video), save it to `patient-media` storage and create a document record with `media_type: 'image'`
-- Add `image` to the `DocType` union and `DOC_TYPE_CONFIG` with an Image icon
+### 3. Move "My Doctors" from sidebar nav to a tab
+- **Sidebar.tsx**: Remove `{ icon: Users, label: "My Doctors", to: "/patient/doctors" }` from `patientNavItems`
+- **PatientDetailsEditor.tsx**: Add a new "My Doctors" tab after "My Documents"
+- Lazy-import `MyDoctors` component and render it inside a new `TabsContent value="doctors"`
+- Pass the patient's user ID if needed for context
 
-### 4. AI Analysis Button on Document Cards
-- On document cards where `mediaUrl` exists and is an image type, show a "AI Analyse" button (sparkles icon)
-- Clicking it calls the edge function, shows a loading spinner
-- Once complete, the analysis text is displayed in an expandable section below the card
-- If `ai_analysis` already exists, show "View Analysis" instead, displaying the stored result
-- Add a badge "AI Analysed" for documents that have been interpreted
+### 4. Add bordered section frames (consistent with Doctor Profile)
+Each section group within each tab will be wrapped in `rounded-xl border border-border bg-card p-4 shadow-sm` — matching the Doctor Profile screen pattern. This applies to:
+- VIEW mode: Personal Details, Addresses, Next of Kin, Employer, General Notes sections
+- VIEW mode: Medical Insurance, Pharmacies, Physical Measurements, etc.
+- EDIT mode: Same sections wrapped in bordered cards
 
-### 5. Analysis Display Dialog
-- A dialog/sheet that shows:
-  - The uploaded image (thumbnail)
-  - The AI interpretation text
-  - Timestamp of analysis
-  - Medical disclaimer banner
-  - Option to re-analyse
+### 5. Enlarge Moola icon in the circle badge
+- **LollipopDisplay.tsx**: Increase `MoolaLogoBadge` sizes:
+  - `sm`: circle `h-9 w-9`, img `h-7 w-7`
+  - `md`: circle `h-12 w-12`, img `h-9 w-9`
+  - `lg`: circle `h-18 w-18`, img `h-14 w-14`
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `supabase/functions/analyze-medical-image/index.ts` | New edge function |
-| `supabase/config.toml` | Add function config with `verify_jwt = false` |
-| Database migration | Add `ai_analysis`, `ai_analyzed_at` to `documents` |
-| `src/pages/patient/PatientDocuments.tsx` | Image upload support, AI button on cards, analysis display |
+| `src/components/layout/Sidebar.tsx` | Rename to "My Holarchive", remove My Doctors nav item |
+| `src/components/layout/BottomNav.tsx` | Rename to "My Holarchive" |
+| `src/pages/patient/MyDetails.tsx` | Update heading |
+| `src/components/patients/PatientDetailsEditor.tsx` | Move notes to Personal tab section, add My Doctors tab, add bordered frames |
+| `src/components/gamification/LollipopDisplay.tsx` | Enlarge Moola icon sizes |
 
