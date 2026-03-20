@@ -6,9 +6,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, Stethoscope, MapPin, Phone, Search } from "lucide-react";
+import { Loader2, Stethoscope, Search, Lock } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { InviteDoctorDialog } from "@/components/patient/InviteDoctorDialog";
-import { useToast } from "@/hooks/use-toast";
 
 interface DoctorProfile {
   id: string;
@@ -80,7 +81,6 @@ export default function MyDoctors() {
 
       if (error) throw error;
 
-      // Filter out doctors already connected
       const connectedIds = doctors?.map((d) => d.doctor_id) || [];
       setSearchResults((data || []).filter((d) => !connectedIds.includes(d.id)));
     } catch (err) {
@@ -100,87 +100,56 @@ export default function MyDoctors() {
     if (s.includes("paed") || s.includes("pedia")) return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300";
     if (s.includes("psych")) return "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300";
     if (s.includes("general") || s.includes("gp") || s.includes("family")) return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300";
-    if (s.includes("obst") || s.includes("gyn")) return "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300";
-    if (s.includes("ophthal") || s.includes("eye")) return "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300";
-    if (s.includes("ent") || s.includes("ear")) return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300";
-    if (s.includes("surg")) return "bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300";
     return "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300";
   };
 
-  const DoctorCard = ({ doctor, permissions, isSearchResult }: { doctor: DoctorProfile; permissions?: string[]; isSearchResult?: boolean }) => {
-    const filteredPermissions = permissions?.filter(p => p !== 'patient_info' && p !== 'patient_information');
+  const formatPermission = (p: string) => p.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+
+  const DoctorTableRow = ({ doctor, permissions }: { doctor: DoctorProfile; permissions?: string[] }) => {
+    const filteredPermissions = permissions?.filter(p => p !== 'patient_info' && p !== 'patient_information') || [];
 
     return (
-    <Card className="overflow-hidden">
-      <CardHeader className="pb-3">
-        <div className="flex items-start gap-4">
-          <Avatar className="h-14 w-14">
-            <AvatarImage src={doctor.avatar_url || undefined} />
-            <AvatarFallback className="bg-primary/10 text-primary text-lg">
-              {doctor.full_name
-                ?.split(" ")
-                .map((n) => n[0])
-                .join("")
-                .toUpperCase() || "DR"}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <CardTitle className="text-base truncate">
-              {doctor.full_name || "Unknown Doctor"}
-            </CardTitle>
-            {doctor.specialty && (
-              <Badge className={`mt-1 text-xs font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
-                {doctor.specialty}
-              </Badge>
-            )}
+      <TableRow>
+        <TableCell>
+          <div className="flex items-center gap-3">
+            <Avatar className="h-9 w-9">
+              <AvatarImage src={doctor.avatar_url || undefined} />
+              <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                {doctor.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
+              </AvatarFallback>
+            </Avatar>
+            <span className="font-medium text-foreground">{doctor.full_name || "Unknown Doctor"}</span>
           </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {doctor.practice_address && (
-          <div className="flex items-start gap-2 text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-            <span className="line-clamp-2">{doctor.practice_address}</span>
-          </div>
-        )}
-        {doctor.mobile_number && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Phone className="h-4 w-4 flex-shrink-0" />
-            <span>{doctor.mobile_number}</span>
-          </div>
-        )}
-        {doctor.practice_number && (
-          <div className="text-xs text-muted-foreground">
-            Practice #: {doctor.practice_number}
-          </div>
-        )}
-        {doctor.doctor_number && (
-          <div className="text-xs text-muted-foreground">
-            Registration #: {doctor.doctor_number}
-          </div>
-        )}
-        
-        {filteredPermissions && filteredPermissions.length > 0 ? (
-          <div className="pt-2 border-t border-border">
-            <p className="text-xs text-muted-foreground mb-2">Access granted to:</p>
-            <div className="flex flex-wrap gap-1">
-              {filteredPermissions.map((permission) => (
-                <Badge key={permission} variant="secondary" className="text-xs">
-                  {permission.replace(/_/g, " ")}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        ) : isSearchResult ? (
-          <div className="pt-3 border-t border-border">
-            <InviteDoctorDialog
-              prefillPracticeNumber={doctor.practice_number || ""}
-              prefillRegistrationNumber={doctor.doctor_number || ""}
-            />
-          </div>
-        ) : null}
-      </CardContent>
-    </Card>
+        </TableCell>
+        <TableCell>
+          {doctor.specialty && (
+            <Badge className={`text-xs font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
+              {doctor.specialty}
+            </Badge>
+          )}
+        </TableCell>
+        <TableCell className="text-muted-foreground">{doctor.mobile_number || "—"}</TableCell>
+        <TableCell className="text-muted-foreground">{doctor.practice_number || "—"}</TableCell>
+        <TableCell>
+          {filteredPermissions.length > 0 && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Lock className="h-4 w-4 text-primary cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent side="left" className="max-w-[200px]">
+                  <p className="text-xs font-semibold mb-1">Access granted:</p>
+                  <ul className="text-xs space-y-0.5">
+                    {filteredPermissions.map(p => (
+                      <li key={p}>• {formatPermission(p)}</li>
+                    ))}
+                  </ul>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </TableCell>
+      </TableRow>
     );
   };
 
@@ -226,11 +195,49 @@ export default function MyDoctors() {
                   No doctors found matching your search.
                 </p>
               ) : (
-                <div className="grid gap-3 md:grid-cols-2">
-                  {searchResults.map((doctor) => (
-                    <DoctorCard key={doctor.id} doctor={doctor} isSearchResult />
-                  ))}
-                </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Doctor</TableHead>
+                      <TableHead>Specialty</TableHead>
+                      <TableHead>Phone</TableHead>
+                      <TableHead>Practice #</TableHead>
+                      <TableHead>Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {searchResults.map((doctor) => (
+                      <TableRow key={doctor.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-9 w-9">
+                              <AvatarImage src={doctor.avatar_url || undefined} />
+                              <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                                {doctor.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="font-medium text-foreground">{doctor.full_name || "Unknown"}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {doctor.specialty && (
+                            <Badge className={`text-xs font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
+                              {doctor.specialty}
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{doctor.mobile_number || "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{doctor.practice_number || "—"}</TableCell>
+                        <TableCell>
+                          <InviteDoctorDialog
+                            prefillPracticeNumber={doctor.practice_number || ""}
+                            prefillRegistrationNumber={doctor.doctor_number || ""}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
             </div>
           )}
@@ -253,13 +260,28 @@ export default function MyDoctors() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {doctors.map((access) =>
-            access.doctor ? (
-              <DoctorCard key={access.id} doctor={access.doctor} permissions={access.permissions} />
-            ) : null
-          )}
-        </div>
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Doctor</TableHead>
+                  <TableHead>Specialty</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Practice #</TableHead>
+                  <TableHead className="w-[50px]">Access</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {doctors.map((access) =>
+                  access.doctor ? (
+                    <DoctorTableRow key={access.id} doctor={access.doctor} permissions={access.permissions} />
+                  ) : null
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

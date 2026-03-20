@@ -5,6 +5,24 @@ import type { PatientReward } from "@/hooks/usePatientRewards";
 import { format, parseISO } from "date-fns";
 import moolasLogo from "@/assets/moolas-logo.jpg";
 
+export function MoolaLogoBadge({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
+  const sizeClasses = {
+    sm: "h-7 w-7 p-0.5",
+    md: "h-9 w-9 p-1",
+    lg: "h-14 w-14 p-1.5",
+  };
+  const imgClasses = {
+    sm: "h-5 w-5",
+    md: "h-7 w-7",
+    lg: "h-10 w-10",
+  };
+  return (
+    <div className={`${sizeClasses[size]} rounded-full bg-white shadow-sm flex items-center justify-center`}>
+      <img src={moolasLogo} alt="Moolas" className={`${imgClasses[size]} rounded-full object-cover`} />
+    </div>
+  );
+}
+
 interface LollipopDisplayProps {
   count: number;
   rewards?: PatientReward[];
@@ -24,7 +42,7 @@ export function LollipopDisplay({
         <Tooltip>
           <TooltipTrigger asChild>
             <Badge variant="secondary" className="gap-1.5 px-3 py-1.5 bg-secondary text-white hover:bg-secondary/90 border-secondary/20">
-              <img src={moolasLogo} alt="Moolas" className="h-5 w-5 rounded-full object-cover" />
+              <MoolaLogoBadge size="sm" />
               <span className="font-bold">{count}</span>
             </Badge>
           </TooltipTrigger>
@@ -39,7 +57,7 @@ export function LollipopDisplay({
   if (variant === "compact") {
     return (
       <div className="flex items-center gap-2 text-sm">
-        <img src={moolasLogo} alt="Moolas" className="h-6 w-6 rounded-full object-cover" />
+        <MoolaLogoBadge size="sm" />
         <span className="font-semibold text-foreground">{count}</span>
         <span className="text-muted-foreground">Moola{count !== 1 ? 's' : ''}</span>
       </div>
@@ -50,7 +68,7 @@ export function LollipopDisplay({
     <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 dark:from-secondary/20 dark:to-secondary/10 border-secondary/30">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <img src={moolasLogo} alt="Moolas" className="h-8 w-8 rounded-full object-cover" />
+          <MoolaLogoBadge size="md" />
           Moola Rewards
         </CardTitle>
       </CardHeader>

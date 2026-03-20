@@ -221,6 +221,8 @@ export default function Patients() {
         pharmacies: null,
         is_chronic: false,
         reporting_to_email: null,
+        blood_type: null,
+        family_history: null,
         patient_user_id: user.id,
       });
     }

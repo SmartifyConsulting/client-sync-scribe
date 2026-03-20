@@ -302,24 +302,26 @@ export default function MyRewards() {
 
       {/* Hero Stats */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950/30 dark:to-teal-900/20 border-emerald-200 dark:border-emerald-800/30">
+        <Card className="bg-gradient-to-br from-yellow-300 to-lime-400 dark:from-yellow-600/40 dark:to-lime-700/30 border-yellow-400 dark:border-yellow-600/40">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Moolas</p>
-                <p className="text-4xl font-bold text-emerald-600 dark:text-emerald-400">{lollipopCount}</p>
+                <p className="text-sm font-medium text-yellow-900 dark:text-yellow-200">Total Moolas</p>
+                <p className="text-4xl font-bold text-yellow-900 dark:text-yellow-100">{lollipopCount}</p>
               </div>
-              <img src={moolasLogo} alt="Moolas" className="h-12 w-12 object-cover rounded-full" />
+              <div className="h-14 w-14 rounded-full bg-white shadow-sm flex items-center justify-center">
+                <img src={moolasLogo} alt="Moolas" className="h-10 w-10 object-cover rounded-full" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/20 border-purple-200 dark:border-purple-800/30">
+        <Card className="bg-gradient-to-br from-fuchsia-400 to-pink-500 dark:from-fuchsia-700/40 dark:to-pink-800/30 border-fuchsia-400 dark:border-fuchsia-600/40">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Current Level</p>
-                <p className="text-xl font-bold text-purple-600 dark:text-purple-400">
+                <p className="text-sm font-medium text-fuchsia-100">Current Level</p>
+                <p className="text-xl font-bold text-white">
                   {currentMilestone?.label || "Beginner"}
                 </p>
               </div>
@@ -328,26 +330,26 @@ export default function MyRewards() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/30 dark:to-orange-900/20 border-orange-200 dark:border-orange-800/30">
+        <Card className="bg-gradient-to-br from-orange-400 to-red-500 dark:from-orange-700/40 dark:to-red-800/30 border-orange-400 dark:border-orange-600/40">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Active Streaks</p>
-                <p className="text-4xl font-bold text-orange-600 dark:text-orange-400">{activeStreaks.length}</p>
+                <p className="text-sm font-medium text-orange-100">Active Streaks</p>
+                <p className="text-4xl font-bold text-white">{activeStreaks.length}</p>
               </div>
-              <Flame className="h-12 w-12 text-orange-500" />
+              <Flame className="h-12 w-12 text-white/90" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 border-blue-200 dark:border-blue-800/30">
+        <Card className="bg-gradient-to-br from-sky-400 to-cyan-500 dark:from-sky-700/40 dark:to-cyan-800/30 border-sky-400 dark:border-sky-600/40">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Transferred</p>
-                <p className="text-4xl font-bold text-blue-600 dark:text-blue-400">{totalTransferred}</p>
+                <p className="text-sm font-medium text-sky-100">Transferred</p>
+                <p className="text-4xl font-bold text-white">{totalTransferred}</p>
               </div>
-              <ArrowRightLeft className="h-12 w-12 text-blue-500" />
+              <ArrowRightLeft className="h-12 w-12 text-white/90" />
             </div>
           </CardContent>
         </Card>

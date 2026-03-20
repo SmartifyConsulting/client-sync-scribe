@@ -17,6 +17,12 @@ export interface Pharmacy {
   is_primary: boolean;
 }
 
+export interface FamilyHistoryEntry {
+  id: string;
+  relation: string;
+  condition: string;
+}
+
 export interface Patient {
   id: string;
   user_id: string;
@@ -57,6 +63,8 @@ export interface Patient {
   pharmacies: Pharmacy[] | null;
   is_chronic: boolean | null;
   reporting_to_email: string | null;
+  blood_type: string | null;
+  family_history: FamilyHistoryEntry[] | null;
   last_visit?: string | null;
   patient_user_id?: string | null;
 }
@@ -79,21 +87,30 @@ const parsePharmacies = (pharmacies: Json | null): Pharmacy[] | null => {
   return null;
 };
 
+// Helper to parse family history from JSON
+const parseFamilyHistory = (fh: Json | null): FamilyHistoryEntry[] | null => {
+  if (!fh) return null;
+  if (Array.isArray(fh)) return fh as unknown as FamilyHistoryEntry[];
+  return null;
+};
+
 // Helper to convert patient from DB to typed Patient
 const toPatient = (data: any, lastVisit?: string | null): Patient => ({
   ...data,
   surgeries: parseSurgeries(data.surgeries),
   pharmacies: parsePharmacies(data.pharmacies),
+  family_history: parseFamilyHistory(data.family_history),
   last_visit: lastVisit ?? data.last_visit ?? null,
 });
 
 // Helper to prepare patient data for DB (convert surgeries/pharmacies to JSON)
 const toDbPatient = (updates: Partial<Patient>): Record<string, any> => {
-  const { surgeries, pharmacies, last_visit, ...rest } = updates;
+  const { surgeries, pharmacies, family_history, last_visit, ...rest } = updates;
   return {
     ...rest,
     ...(surgeries !== undefined ? { surgeries: surgeries as unknown as Json } : {}),
     ...(pharmacies !== undefined ? { pharmacies: pharmacies as unknown as Json } : {}),
+    ...(family_history !== undefined ? { family_history: family_history as unknown as Json } : {}),
   };
 };
 
