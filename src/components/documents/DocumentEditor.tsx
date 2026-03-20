@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   X,
   Save,
   User,
+  Search,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { usePatients } from "@/hooks/usePatients";
 import { useProfile } from "@/hooks/useProfile";
 import { useDocuments } from "@/hooks/useDocuments";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Select,
   SelectContent,
@@ -29,6 +32,7 @@ interface Template {
   logoUrl?: string;
   logoPosition?: { x: number; y: number };
   fontFamily?: string;
+  category?: string;
 }
 
 interface DocumentEditorProps {
@@ -36,6 +40,107 @@ interface DocumentEditorProps {
   preSelectedPatientId?: string;
   onClose: () => void;
   onSave: (document: { name: string; content: string }) => void;
+}
+
+interface ProcedureSuggestion {
+  code: string;
+  description: string;
+}
+
+function ProcedureSearchInput({
+  onSelect,
+}: {
+  onSelect: (procedure: ProcedureSuggestion) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<ProcedureSuggestion[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const searchProcedures = useCallback(async (searchQuery: string) => {
+    if (searchQuery.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("lookup-medical-codes", {
+        body: { query: searchQuery, codeSystem: "NHRPL", country: "ZA" },
+      });
+      if (!error && Array.isArray(data)) {
+        const sorted = [...data].sort((a, b) =>
+          (a.description || "").localeCompare(b.description || "")
+        );
+        setSuggestions(sorted);
+        setShowDropdown(sorted.length > 0);
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => searchProcedures(query), 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [query, searchProcedures]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={containerRef} className="space-y-2 relative">
+      <Label>Search Procedure (NHRPL)</Label>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Type to search procedures..."
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setShowDropdown(true);
+          }}
+          onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
+          className="pl-9"
+        />
+        {loading && (
+          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+        )}
+      </div>
+      {showDropdown && suggestions.length > 0 && (
+        <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-border bg-popover shadow-md">
+          {suggestions.map((s) => (
+            <button
+              key={s.code}
+              type="button"
+              className="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors"
+              onClick={() => {
+                onSelect(s);
+                setQuery(s.description);
+                setShowDropdown(false);
+              }}
+            >
+              <span className="font-medium">{s.code}</span>
+              <span className="text-muted-foreground ml-2">— {s.description}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave }: DocumentEditorProps) {
@@ -48,11 +153,14 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
   const [selectedPatientId, setSelectedPatientId] = useState<string>(preSelectedPatientId || "");
   const [isSaving, setIsSaving] = useState(false);
 
+  const isAdmissionTemplate =
+    template.name?.toLowerCase().includes("admission") ||
+    template.category?.toLowerCase().includes("admission");
+
   // Auto-fill placeholders when patient or profile changes
   useEffect(() => {
     let updatedContent = template.content;
     
-    // Fill in profile/doctor placeholders
     if (profile) {
       updatedContent = updatedContent
         .replace(/\[PracticeNumber\]/g, profile.practice_number || "[PracticeNumber]")
@@ -61,7 +169,6 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
         .replace(/\[PracticeAddress\]/g, profile.practice_address || "[PracticeAddress]");
     }
 
-    // Fill in patient placeholders if a patient is selected
     if (selectedPatientId && selectedPatientId !== "none") {
       const patient = patients.find(p => p.id === selectedPatientId);
       if (patient) {
@@ -74,12 +181,10 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
           .replace(/\[MedicalAid\]/g, patient.medical_aid || "[MedicalAid]")
           .replace(/\[MedicalAidNumber\]/g, patient.medical_aid_number || "[MedicalAidNumber]");
         
-        // Update document name with patient name
         setDocumentName(`${template.name} - ${patient.name} - ${new Date().toLocaleDateString()}`);
       }
     }
 
-    // Fill in date placeholders
     const today = new Date().toLocaleDateString();
     const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     updatedContent = updatedContent
@@ -95,12 +200,20 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
     setContent(updatedContent);
   }, [selectedPatientId, profile, patients, template.content]);
 
+  const handleProcedureSelect = (procedure: ProcedureSuggestion) => {
+    setContent((prev) =>
+      prev
+        .replace(/\[ProcedureDescription\]/g, procedure.description)
+        .replace(/\[ProcedureCode\]/g, procedure.code)
+    );
+    toast({ title: "Procedure selected", description: `${procedure.code} — ${procedure.description}` });
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     
     const selectedPatient = patients.find(p => p.id === selectedPatientId);
     
-    // Save to database
     const result = await createDocument({
       patient_id: selectedPatientId || undefined,
       template_id: template.id,
@@ -117,7 +230,6 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
     }
   };
 
-  // Get remaining unfilled placeholders
   const unfilledPlaceholders = template.placeholders.filter(p => 
     content.includes(`[${p}]`)
   );
@@ -172,6 +284,11 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
               onChange={(e) => setDocumentName(e.target.value)}
             />
           </div>
+
+          {/* Procedure Search — only for admission templates */}
+          {isAdmissionTemplate && (
+            <ProcedureSearchInput onSelect={handleProcedureSelect} />
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="content">Content</Label>
