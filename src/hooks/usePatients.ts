@@ -65,6 +65,8 @@ export interface Patient {
   reporting_to_email: string | null;
   blood_type: string | null;
   family_history: FamilyHistoryEntry[] | null;
+  organ_donor: boolean | null;
+  organ_donor_organs: string[] | null;
   last_visit?: string | null;
   patient_user_id?: string | null;
 }
