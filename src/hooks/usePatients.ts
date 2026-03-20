@@ -105,11 +105,12 @@ const toPatient = (data: any, lastVisit?: string | null): Patient => ({
 
 // Helper to prepare patient data for DB (convert surgeries/pharmacies to JSON)
 const toDbPatient = (updates: Partial<Patient>): Record<string, any> => {
-  const { surgeries, pharmacies, last_visit, ...rest } = updates;
+  const { surgeries, pharmacies, family_history, last_visit, ...rest } = updates;
   return {
     ...rest,
     ...(surgeries !== undefined ? { surgeries: surgeries as unknown as Json } : {}),
     ...(pharmacies !== undefined ? { pharmacies: pharmacies as unknown as Json } : {}),
+    ...(family_history !== undefined ? { family_history: family_history as unknown as Json } : {}),
   };
 };
 
