@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy, Clock, Mail, Save, Award, Volume2, UserPlus, ExternalLink, Bold, Italic, Send, ArrowRightLeft } from "lucide-react";
+import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy, Clock, Mail, Save, Award, Volume2, UserPlus, ExternalLink, Bold, Italic, Send, ArrowRightLeft, FileText } from "lucide-react";
+import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
+import { Patient } from "@/hooks/usePatients";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Toggle } from "@/components/ui/toggle";
@@ -157,6 +159,8 @@ export default function Profile() {
   const { user } = useAuth();
   const { isAdmin } = useUserRole();
   const { profile, loading, fetchProfile, updateProfile, uploadLogo } = useProfile();
+  const [patientRecord, setPatientRecord] = useState<Patient | null>(null);
+  const [patientLoading, setPatientLoading] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [partners, setPartners] = useState<Partner[]>([]);
@@ -227,6 +231,35 @@ export default function Profile() {
       requestAnimationFrame(() => { hasInitialized.current = true; isSettingFromProfile.current = false; });
     }
   }, [profile]);
+
+  // Fetch patient record for Holarchive tab
+  useEffect(() => {
+    if (!user) return;
+    const fetchPatientRecord = async () => {
+      setPatientLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("patients")
+          .select("*")
+          .eq("patient_user_id", user.id)
+          .maybeSingle();
+        if (error) throw error;
+        if (data) {
+          setPatientRecord({
+            ...data,
+            surgeries: Array.isArray(data.surgeries) ? data.surgeries as unknown as Patient["surgeries"] : [],
+            pharmacies: Array.isArray(data.pharmacies) ? data.pharmacies as unknown as Patient["pharmacies"] : [],
+            family_history: Array.isArray(data.family_history) ? data.family_history as unknown as Patient["family_history"] : [],
+          } as Patient);
+        }
+      } catch (err) {
+        console.error("Error fetching patient record:", err);
+      } finally {
+        setPatientLoading(false);
+      }
+    };
+    fetchPatientRecord();
+  }, [user]);
 
   const combinedFullName = `${formData.first_name} ${formData.last_name}`.trim();
 
@@ -472,8 +505,9 @@ export default function Profile() {
       {/* Tabbed content */}
       {isPatient ? (
         <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-primary">
+          <TabsList className="grid w-full grid-cols-3 bg-primary">
             <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Personal</TabsTrigger>
+            <TabsTrigger value="holarchive" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">My Holarchive</TabsTrigger>
             <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Preferences</TabsTrigger>
           </TabsList>
           <TabsContent value="personal">
@@ -503,6 +537,34 @@ export default function Profile() {
                 </div>
               </div>
             </div>
+          </TabsContent>
+          <TabsContent value="holarchive">
+            {patientLoading ? (
+              <div className="flex h-40 items-center justify-center">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : patientRecord ? (
+              <PatientDetailsEditor
+                patient={patientRecord}
+                onSave={async (updates: Partial<Patient>) => {
+                  const { error } = await supabase
+                    .from("patients")
+                    .update(updates as any)
+                    .eq("id", patientRecord.id);
+                  if (error) {
+                    toast({ title: "Error saving", description: error.message, variant: "destructive" });
+                    throw error;
+                  }
+                  setPatientRecord((prev) => prev ? { ...prev, ...updates } : prev);
+                  toast({ title: "Saved", description: "Your details have been updated." });
+                }}
+                isSelfService
+              />
+            ) : (
+              <div className="p-6 text-center text-muted-foreground">
+                <p>No patient record found. Please ask your doctor to create your profile.</p>
+              </div>
+            )}
           </TabsContent>
           <TabsContent value="preferences">
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-3">
