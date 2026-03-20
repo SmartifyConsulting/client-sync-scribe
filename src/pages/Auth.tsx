@@ -538,7 +538,7 @@ export default function Auth() {
           <div className="space-y-4">
             <h3 className="text-sm font-medium text-foreground">Profile Photo</h3>
             <div className="flex items-center gap-4">
-              <Avatar className="h-20 w-20">
+              <Avatar className="h-20 w-20 border-2 border-[hsl(351,81%,49%)]">
                 <AvatarImage src={avatarPreview || undefined} />
                 <AvatarFallback className="text-lg bg-muted">
                   {fullName ? fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'DR'}

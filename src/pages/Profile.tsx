@@ -446,7 +446,7 @@ export default function Profile() {
       <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="relative group">
-            <Avatar className="h-16 w-16 border-2 border-border">
+            <Avatar className="h-16 w-16 border-2 border-[hsl(351,81%,49%)]">
               <AvatarImage src={(profile as any)?.avatar_url} alt={combinedFullName || "Profile"} />
               <AvatarFallback className="text-base bg-primary/10 text-primary">{combinedFullName ? getInitials(combinedFullName) : "U"}</AvatarFallback>
             </Avatar>

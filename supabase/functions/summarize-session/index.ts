@@ -81,7 +81,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a professional medical/clinical assistant that creates detailed session summaries and detects clinical documents discussed in the session.
+            content: `You are a professional medical/clinical assistant that creates detailed session summaries and detects clinical documents discussed in the session.${language ? `\n\nIMPORTANT: Respond entirely in ${language}. All summaries, action points, and extracted document content must be written in ${language}.` : ''}
 
 Your task is to analyze the session transcript or notes and provide:
 1. A comprehensive professional summary (2-4 sentences)

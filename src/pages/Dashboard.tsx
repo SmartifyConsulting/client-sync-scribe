@@ -285,7 +285,7 @@ export default function Dashboard() {
           <Popover>
             <PopoverTrigger asChild>
               <button className="rounded-xl p-2 hover:bg-accent transition-colors relative">
-                <Avatar className="h-10 w-10 border-2 border-primary/20">
+                <Avatar className="h-10 w-10 border-2 border-[hsl(351,81%,49%)]">
                   <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} className="object-cover" />
                   <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                     {getInitials()}
