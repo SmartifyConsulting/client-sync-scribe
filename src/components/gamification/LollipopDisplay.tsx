@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { PatientReward } from "@/hooks/usePatientRewards";
 import { format, parseISO } from "date-fns";
-import moolasLogo from "@/assets/moolas-logo.jpg";
+import moolasLogo from "@/assets/moolas-logo.png";
 
 export function MoolaLogoBadge({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   const sizeClasses = {
