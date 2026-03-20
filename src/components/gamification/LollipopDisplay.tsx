@@ -24,7 +24,7 @@ export function LollipopDisplay({
         <Tooltip>
           <TooltipTrigger asChild>
             <Badge variant="secondary" className="gap-1.5 px-3 py-1.5 bg-secondary text-white hover:bg-secondary/90 border-secondary/20">
-              <span className="text-lg font-bold">Ⓜ</span>
+              <img src={moolasLogo} alt="Moolas" className="h-5 w-5 rounded-full object-cover" />
               <span className="font-bold">{count}</span>
             </Badge>
           </TooltipTrigger>
