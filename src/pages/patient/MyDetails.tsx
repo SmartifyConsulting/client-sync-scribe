@@ -31,6 +31,7 @@ export default function MyDetails() {
           ...data,
           surgeries: Array.isArray(data.surgeries) ? data.surgeries as unknown as Patient["surgeries"] : [],
           pharmacies: Array.isArray(data.pharmacies) ? data.pharmacies as unknown as Patient["pharmacies"] : [],
+          family_history: Array.isArray(data.family_history) ? data.family_history as unknown as Patient["family_history"] : [],
         } as Patient);
       }
     } catch (err) {

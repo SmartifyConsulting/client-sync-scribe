@@ -87,11 +87,19 @@ const parsePharmacies = (pharmacies: Json | null): Pharmacy[] | null => {
   return null;
 };
 
+// Helper to parse family history from JSON
+const parseFamilyHistory = (fh: Json | null): FamilyHistoryEntry[] | null => {
+  if (!fh) return null;
+  if (Array.isArray(fh)) return fh as unknown as FamilyHistoryEntry[];
+  return null;
+};
+
 // Helper to convert patient from DB to typed Patient
 const toPatient = (data: any, lastVisit?: string | null): Patient => ({
   ...data,
   surgeries: parseSurgeries(data.surgeries),
   pharmacies: parsePharmacies(data.pharmacies),
+  family_history: parseFamilyHistory(data.family_history),
   last_visit: lastVisit ?? data.last_visit ?? null,
 });
 
