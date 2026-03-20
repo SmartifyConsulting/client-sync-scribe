@@ -731,6 +731,7 @@ export default function Documents() {
             description: selectedTemplate.description || "",
             content: selectedTemplate.content,
             placeholders: selectedTemplate.placeholders,
+            category: selectedTemplate.category || undefined,
           }}
           onClose={handleCloseEditor}
           onSave={handleSaveDocument}
