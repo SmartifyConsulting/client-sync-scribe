@@ -17,6 +17,12 @@ export interface Pharmacy {
   is_primary: boolean;
 }
 
+export interface FamilyHistoryEntry {
+  id: string;
+  relation: string;
+  condition: string;
+}
+
 export interface Patient {
   id: string;
   user_id: string;
@@ -57,6 +63,8 @@ export interface Patient {
   pharmacies: Pharmacy[] | null;
   is_chronic: boolean | null;
   reporting_to_email: string | null;
+  blood_type: string | null;
+  family_history: FamilyHistoryEntry[] | null;
   last_visit?: string | null;
   patient_user_id?: string | null;
 }
