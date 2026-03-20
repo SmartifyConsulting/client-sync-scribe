@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Upload, FileSpreadsheet, Check, AlertCircle, Loader2, X, Sparkles, FileText } from "lucide-react";
-import * as XLSX from "xlsx";
+import readXlsxFile from 'read-excel-file';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
