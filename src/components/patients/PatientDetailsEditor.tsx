@@ -926,7 +926,46 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, p
             </Suspense>
           </TabsContent>
         )}
+
+        {/* === MY ROUND TABLE TAB (EDIT) === */}
+        {isSelfService && (
+          <TabsContent value="roundtable" className="mt-4">
+            <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+              <PatientRoundTable />
+            </Suspense>
+          </TabsContent>
+        )}
+
+        {/* === MY REWARDS TAB (EDIT) === */}
+        {isSelfService && (
+          <TabsContent value="rewards" className="mt-4">
+            <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+              <MyRewards />
+            </Suspense>
+          </TabsContent>
+        )}
+
+        {/* === MY CALENDAR TAB (EDIT) === */}
+        {isSelfService && (
+          <TabsContent value="calendar" className="mt-4">
+            <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+              <PatientCalendar />
+            </Suspense>
+          </TabsContent>
+        )}
       </Tabs>
+    </div>
+  );
+}
+
+function AutoEmailToggleInline({ label, description, checked, onCheckedChange }: { label: string; description: string; checked: boolean; onCheckedChange: (checked: boolean) => void }) {
+  return (
+    <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+      <div className="flex-1 mr-3">
+        <p className="text-sm font-medium text-foreground">{label}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+      </div>
+      <Switch checked={checked} onCheckedChange={onCheckedChange} />
     </div>
   );
 }
