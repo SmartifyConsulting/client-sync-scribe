@@ -41,7 +41,7 @@ const ORGAN_OPTIONS = [
 
 const sectionFrame = "rounded-xl border border-border bg-card p-4 shadow-sm";
 
-export function PatientDetailsEditor({ patient, onSave, isSelfService = false }: PatientDetailsEditorProps) {
+export function PatientDetailsEditor({ patient, onSave, isSelfService = false, preferences, onUpdatePreference }: PatientDetailsEditorProps) {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
