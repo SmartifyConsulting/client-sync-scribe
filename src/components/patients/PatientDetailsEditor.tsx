@@ -349,12 +349,16 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, p
           </Button>
         </div>
 
-        <Tabs defaultValue="personal">
-          <TabsList className="bg-primary">
+         <Tabs defaultValue="personal">
+          <TabsList className="flex w-full flex-wrap bg-primary">
             <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Personal Information</TabsTrigger>
             <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Medical Information</TabsTrigger>
             {isSelfService && <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Documents</TabsTrigger>}
             {isSelfService && <TabsTrigger value="doctors" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Doctors</TabsTrigger>}
+            {isSelfService && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Round Table</TabsTrigger>}
+            {isSelfService && <TabsTrigger value="rewards" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Rewards</TabsTrigger>}
+            {isSelfService && <TabsTrigger value="calendar" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Calendar</TabsTrigger>}
+          </TabsList>
           </TabsList>
 
           {/* === PERSONAL INFORMATION TAB === */}
