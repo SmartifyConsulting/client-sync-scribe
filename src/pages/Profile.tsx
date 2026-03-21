@@ -839,6 +839,10 @@ export default function Profile() {
               <PatientImport />
             </div>
           </TabsContent>
+          {/* === REFERRALS TAB === */}
+          <TabsContent value="referrals">
+            <ReferralDoctors />
+          </TabsContent>
 
           {/* === PRICING TAB === */}
           <TabsContent value="pricing">
