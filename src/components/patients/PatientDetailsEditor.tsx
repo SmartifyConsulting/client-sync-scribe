@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
-import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart } from "lucide-react";
+import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,12 +8,16 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import { Patient, Surgery, Pharmacy, FamilyHistoryEntry } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
 
 const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
 const MyDoctors = lazy(() => import("@/pages/patient/MyDoctors"));
+const PatientRoundTable = lazy(() => import("@/pages/patient/PatientRoundTable"));
+const MyRewards = lazy(() => import("@/pages/patient/MyRewards"));
+const PatientCalendar = lazy(() => import("@/pages/patient/PatientCalendar"));
 
 interface PatientDetailsEditorProps {
   patient: Patient;
