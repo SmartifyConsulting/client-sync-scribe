@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { User, Building2, Upload, Plus, Trash2, Users, Camera, Loader2, DollarSign, Pencil, X, Check, Phone, Copy, Clock, Mail, Save, Award, Volume2, UserPlus, ExternalLink, Bold, Italic, Send, ArrowRightLeft, FileText } from "lucide-react";
+import ReferralDoctors from "@/pages/ReferralDoctors";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { Patient } from "@/hooks/usePatients";
 import { Switch } from "@/components/ui/switch";
@@ -576,11 +577,12 @@ export default function Profile() {
         </Tabs>
       ) : (
         <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-7 bg-primary">
+          <TabsList className="flex w-full flex-wrap bg-primary">
             <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Personal</TabsTrigger>
             <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Practice</TabsTrigger>
             <TabsTrigger value="partners" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Partners</TabsTrigger>
             <TabsTrigger value="patients" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Patients</TabsTrigger>
+            <TabsTrigger value="referrals" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Referrals</TabsTrigger>
             <TabsTrigger value="pricing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Pricing</TabsTrigger>
             <TabsTrigger value="certificates" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Certificates{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}</TabsTrigger>
             <TabsTrigger value="moolas" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Moolas</TabsTrigger>
@@ -836,6 +838,10 @@ export default function Profile() {
               <p className="text-sm text-muted-foreground">Import patients from a spreadsheet file. Drag and drop or browse to upload.</p>
               <PatientImport />
             </div>
+          </TabsContent>
+          {/* === REFERRALS TAB === */}
+          <TabsContent value="referrals">
+            <ReferralDoctors />
           </TabsContent>
 
           {/* === PRICING TAB === */}

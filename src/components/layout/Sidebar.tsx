@@ -38,13 +38,13 @@ interface NavItem {
 
 const doctorNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard" },
+  { icon: User, label: "My Holarchive", to: "/profile" },
   { icon: Users2, label: "Connections", to: "/connections" },
   { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: Users, label: "Patients", to: "/patients" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
   { icon: CheckSquare, label: "To-Do List", to: "/todos" },
   { icon: Receipt, label: "Invoices", to: "/invoices" },
-  { icon: UserPlus, label: "Referrals", to: "/referral-doctors" },
   { icon: FileText, label: "Templates", to: "/documents" },
 ];
 
@@ -52,7 +52,7 @@ const patientNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard" },
   { icon: User, label: "My Holarchive", to: "/patient/details" },
   { icon: Calendar, label: "My Calendar", to: "/patient/calendar" },
-  { icon: MessageSquare, label: "Round Table", to: "/patient/round-table" },
+  { icon: MessageSquare, label: "My Round Table", to: "/patient/round-table" },
   { icon: Gift, label: "My Rewards", to: "/patient/rewards" },
 ];
 
@@ -153,7 +153,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               {loading ? (
                 <div className="h-3 w-20 rounded bg-muted animate-pulse" />
               ) : (
-                <p className="text-xs font-medium text-primary truncate hover:underline">My Profile</p>
+                <p className="text-xs font-medium text-primary truncate hover:underline">{profile?.full_name || "My Profile"}</p>
               )}
             </NavLink>
           </div>
