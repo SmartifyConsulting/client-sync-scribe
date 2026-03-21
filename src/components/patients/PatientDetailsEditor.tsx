@@ -585,6 +585,33 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, p
               </Suspense>
             </TabsContent>
           )}
+
+          {/* === MY ROUND TABLE TAB === */}
+          {isSelfService && (
+            <TabsContent value="roundtable" className="mt-4">
+              <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                <PatientRoundTable />
+              </Suspense>
+            </TabsContent>
+          )}
+
+          {/* === MY REWARDS TAB === */}
+          {isSelfService && (
+            <TabsContent value="rewards" className="mt-4">
+              <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                <MyRewards />
+              </Suspense>
+            </TabsContent>
+          )}
+
+          {/* === MY CALENDAR TAB === */}
+          {isSelfService && (
+            <TabsContent value="calendar" className="mt-4">
+              <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                <PatientCalendar />
+              </Suspense>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     );
