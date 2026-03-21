@@ -506,9 +506,10 @@ export default function Profile() {
       {/* Tabbed content */}
       {isPatient ? (
         <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-primary">
+          <TabsList className="grid w-full grid-cols-3 bg-primary">
             <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Personal</TabsTrigger>
             <TabsTrigger value="holarchive" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">My Holarchive</TabsTrigger>
+            <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Preferences</TabsTrigger>
           </TabsList>
           <TabsContent value="personal">
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
@@ -559,21 +560,19 @@ export default function Profile() {
                   toast({ title: "Saved", description: "Your details have been updated." });
                 }}
                 isSelfService
-                preferences={{
-                  auto_email_invoice_to_insurance: (profile as any)?.auto_email_invoice_to_insurance || false,
-                  auto_email_prescription_to_pharmacy: (profile as any)?.auto_email_prescription_to_pharmacy || false,
-                  auto_email_certificate_to_employer: (profile as any)?.auto_email_certificate_to_employer || false,
-                }}
-                onUpdatePreference={async (key, value) => {
-                  await updateProfile({ [key]: value } as any);
-                  toast({ title: "Preference updated" });
-                }}
               />
             ) : (
               <div className="p-6 text-center text-muted-foreground">
                 <p>No patient record found. Please ask your doctor to create your profile.</p>
               </div>
             )}
+          </TabsContent>
+          <TabsContent value="preferences">
+            <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-3">
+              <AutoEmailToggle label="Auto-email invoice to medical aid" description="When your doctor marks an invoice as paid, it will be sent to your insurance claims email." checked={(profile as any)?.auto_email_invoice_to_insurance || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_invoice_to_insurance: c } as any); toast({ title: "Preference updated" }); }} />
+              <AutoEmailToggle label="Auto-email prescription to pharmacy" description="When your doctor saves a prescription, it will be sent to your primary pharmacy." checked={(profile as any)?.auto_email_prescription_to_pharmacy || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_prescription_to_pharmacy: c } as any); toast({ title: "Preference updated" }); }} />
+              <AutoEmailToggle label="Auto-email certificate to employer" description="When your doctor saves a medical certificate, it will be sent to your employer." checked={(profile as any)?.auto_email_certificate_to_employer || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_certificate_to_employer: c } as any); toast({ title: "Preference updated" }); }} />
+            </div>
           </TabsContent>
         </Tabs>
       ) : (
