@@ -451,86 +451,121 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, p
                 </div>
               </div>
 
-              {/* Column 2: Physical, Blood, Allergies, Surgeries, Family History, Organ Donor */}
+              {/* Column 2: Clinical Details (consolidated) */}
               <div className="space-y-4">
                 <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Physical Measurements</h3>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
-                      <Ruler className="h-4 w-4 text-primary" />
-                      <div><p className="text-xs text-muted-foreground">Height</p><p className="text-sm font-medium text-foreground">{patient.height_cm ? `${patient.height_cm} cm` : "—"}</p></div>
-                    </div>
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
-                      <Scale className="h-4 w-4 text-primary" />
-                      <div><p className="text-xs text-muted-foreground">Weight</p><p className="text-sm font-medium text-foreground">{patient.weight_kg ? `${patient.weight_kg} kg` : "—"}</p></div>
-                    </div>
-                    {bmi && (
+                  <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide">Clinical Details</h3>
+                  
+                  {/* Physical Measurements */}
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Physical Measurements</p>
+                    <div className="grid gap-3 sm:grid-cols-2">
                       <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
-                        <div><p className="text-xs text-muted-foreground">BMI</p><p className="text-sm font-medium text-foreground">{bmi}</p></div>
+                        <Ruler className="h-4 w-4 text-primary" />
+                        <div><p className="text-xs text-muted-foreground">Height</p><p className="text-sm font-medium text-foreground">{patient.height_cm ? `${patient.height_cm} cm` : "—"}</p></div>
+                      </div>
+                      <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
+                        <Scale className="h-4 w-4 text-primary" />
+                        <div><p className="text-xs text-muted-foreground">Weight</p><p className="text-sm font-medium text-foreground">{patient.weight_kg ? `${patient.weight_kg} kg` : "—"}</p></div>
+                      </div>
+                      {bmi && (
+                        <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
+                          <div><p className="text-xs text-muted-foreground">BMI</p><p className="text-sm font-medium text-foreground">{bmi}</p></div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <Separator className="my-3" />
+
+                  {/* Blood Type */}
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Blood Type</p>
+                    <p className="text-sm text-foreground">{patient.blood_type || "Not recorded"}</p>
+                  </div>
+
+                  <Separator className="my-3" />
+
+                  {/* Allergies */}
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</p>
+                    <div className="rounded-lg bg-muted/30 p-3 border border-border/50">
+                      <p className="text-sm text-foreground">{patient.allergies || "None recorded"}</p>
+                    </div>
+                  </div>
+
+                  <Separator className="my-3" />
+
+                  {/* Chronic Medication */}
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Chronic Medication</p>
+                    {patient.is_chronic ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive"><Pill className="h-3 w-3" />Chronic</span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Not on chronic medication</span>
+                    )}
+                  </div>
+
+                  <Separator className="my-3" />
+
+                  {/* Surgeries */}
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Surgeries and Dates</p>
+                    {surgeries.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No surgeries recorded</p>
+                    ) : (
+                      <div className="space-y-1.5">
+                        {surgeries.map((surgery) => (
+                          <div key={surgery.id} className="p-2 rounded-lg bg-muted/30 border border-border/50">
+                            <p className="text-sm font-medium text-foreground">{surgery.name}</p>
+                            <p className="text-xs text-muted-foreground">{format(new Date(surgery.date), "MMMM d, yyyy")}</p>
+                            {surgery.notes && <p className="text-xs text-muted-foreground mt-0.5">{surgery.notes}</p>}
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
-                </div>
 
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Blood Type</h3>
-                  <p className="text-sm text-foreground">{patient.blood_type || "Not recorded"}</p>
-                </div>
+                  <Separator className="my-3" />
 
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</h3>
-                  <div className="rounded-lg bg-muted/30 p-3 border border-border/50">
-                    <p className="text-sm text-foreground">{patient.allergies || "None recorded"}</p>
+                  {/* Family History */}
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Family History</p>
+                    {familyHistory.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No family history recorded</p>
+                    ) : (
+                      <div className="space-y-1.5">
+                        {familyHistory.map((entry) => (
+                          <div key={entry.id} className="p-2 rounded-lg bg-muted/30 border border-border/50">
+                            <p className="text-sm font-medium text-foreground">{entry.relation}</p>
+                            <p className="text-xs text-muted-foreground">{entry.condition}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
 
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Chronic Medication</h3>
-                  {patient.is_chronic ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive"><Pill className="h-3 w-3" />Chronic</span>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">Not on chronic medication</span>
-                  )}
-                </div>
+                  <Separator className="my-3" />
 
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Surgeries and Dates</h3>
-                  {surgeries.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No surgeries recorded</p>
-                  ) : (
-                    <div className="space-y-1.5">
-                      {surgeries.map((surgery) => (
-                        <div key={surgery.id} className="p-2 rounded-lg bg-muted/30 border border-border/50">
-                          <p className="text-sm font-medium text-foreground">{surgery.name}</p>
-                          <p className="text-xs text-muted-foreground">{format(new Date(surgery.date), "MMMM d, yyyy")}</p>
-                          {surgery.notes && <p className="text-xs text-muted-foreground mt-0.5">{surgery.notes}</p>}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Family History</h3>
-                  {familyHistory.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No family history recorded</p>
-                  ) : (
-                    <div className="space-y-1.5">
-                      {familyHistory.map((entry) => (
-                        <div key={entry.id} className="p-2 rounded-lg bg-muted/30 border border-border/50">
-                          <p className="text-sm font-medium text-foreground">{entry.relation}</p>
-                          <p className="text-xs text-muted-foreground">{entry.condition}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className={sectionFrame}>
+                  {/* Organ Donor */}
                   <OrganDonorView />
                 </div>
               </div>
             </div>
+
+            {/* Preferences Section (for self-service patients) */}
+            {isSelfService && preferences && onUpdatePreference && (
+              <div className={sectionFrame + " mt-4"}>
+                <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5">
+                  <Settings2 className="h-3.5 w-3.5" /> Preferences
+                </h3>
+                <div className="space-y-3">
+                  <AutoEmailToggleInline label="Auto-email invoice to medical aid" description="When your doctor marks an invoice as paid, it will be sent to your insurance claims email." checked={preferences.auto_email_invoice_to_insurance || false} onCheckedChange={(c) => onUpdatePreference("auto_email_invoice_to_insurance", c)} />
+                  <AutoEmailToggleInline label="Auto-email prescription to pharmacy" description="When your doctor saves a prescription, it will be sent to your primary pharmacy." checked={preferences.auto_email_prescription_to_pharmacy || false} onCheckedChange={(c) => onUpdatePreference("auto_email_prescription_to_pharmacy", c)} />
+                  <AutoEmailToggleInline label="Auto-email certificate to employer" description="When your doctor saves a medical certificate, it will be sent to your employer." checked={preferences.auto_email_certificate_to_employer || false} onCheckedChange={(c) => onUpdatePreference("auto_email_certificate_to_employer", c)} />
+                </div>
+              </div>
+            )}
           </TabsContent>
 
           {/* === MY DOCUMENTS TAB (only for self-service) === */}
