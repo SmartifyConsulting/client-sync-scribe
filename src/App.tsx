@@ -77,7 +77,7 @@ function RoleBasedDashboard() {
     );
   }
 
-  return isPatient ? <PatientDashboard /> : <Dashboard />;
+  return isPatient ? <MyDetails /> : <Dashboard />;
 }
 
 const App = () => (
@@ -127,12 +127,13 @@ const App = () => (
             <Route path="/patient/documentation" element={<Documentation />} />
             <Route path="/patient/invoices" element={<Invoices />} />
             <Route path="/patient/invites" element={<PatientAccessManagement />} />
-            <Route path="/patient/rewards" element={<MyRewards />} />
+            <Route path="/patient/rewards" element={<Navigate to="/dashboard" replace />} />
             <Route path="/patient/health-album" element={<Navigate to="/dashboard" replace />} />
             <Route path="/patient/tasks" element={<PatientTasks />} />
             <Route path="/patient/documents" element={<PatientDocuments />} />
-            <Route path="/patient/round-table" element={<PatientRoundTable />} />
-            <Route path="/patient/details" element={<MyDetails />} />
+            <Route path="/patient/round-table" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/patient/details" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/patient/calendar" element={<Navigate to="/dashboard" replace />} />
             
             {/* Admin routes */}
             <Route path="/admin/pricing" element={<PricingAdmin />} />

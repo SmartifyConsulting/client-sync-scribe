@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
-import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart } from "lucide-react";
+import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,17 +8,29 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import { Patient, Surgery, Pharmacy, FamilyHistoryEntry } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
 
 const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
 const MyDoctors = lazy(() => import("@/pages/patient/MyDoctors"));
+const PatientRoundTable = lazy(() => import("@/pages/patient/PatientRoundTable"));
+const MyRewards = lazy(() => import("@/pages/patient/MyRewards"));
+const PatientCalendar = lazy(() => import("@/pages/patient/PatientCalendar"));
+
+interface PreferencesProps {
+  auto_email_invoice_to_insurance?: boolean;
+  auto_email_prescription_to_pharmacy?: boolean;
+  auto_email_certificate_to_employer?: boolean;
+}
 
 interface PatientDetailsEditorProps {
   patient: Patient;
   onSave: (updates: Partial<Patient>) => Promise<any>;
   isSelfService?: boolean;
+  preferences?: PreferencesProps;
+  onUpdatePreference?: (key: string, value: boolean) => void;
 }
 
 const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -29,7 +41,7 @@ const ORGAN_OPTIONS = [
 
 const sectionFrame = "rounded-xl border border-border bg-card p-4 shadow-sm";
 
-export function PatientDetailsEditor({ patient, onSave, isSelfService = false }: PatientDetailsEditorProps) {
+export function PatientDetailsEditor({ patient, onSave, isSelfService = false, preferences, onUpdatePreference }: PatientDetailsEditorProps) {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -337,12 +349,15 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
           </Button>
         </div>
 
-        <Tabs defaultValue="personal">
-          <TabsList className="bg-primary">
+         <Tabs defaultValue="personal">
+          <TabsList className="flex w-full flex-wrap bg-primary">
             <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Personal Information</TabsTrigger>
             <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Medical Information</TabsTrigger>
             {isSelfService && <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Documents</TabsTrigger>}
             {isSelfService && <TabsTrigger value="doctors" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Doctors</TabsTrigger>}
+            {isSelfService && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Round Table</TabsTrigger>}
+            {isSelfService && <TabsTrigger value="rewards" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Rewards</TabsTrigger>}
+            {isSelfService && <TabsTrigger value="calendar" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Calendar</TabsTrigger>}
           </TabsList>
 
           {/* === PERSONAL INFORMATION TAB === */}
@@ -435,86 +450,121 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
                 </div>
               </div>
 
-              {/* Column 2: Physical, Blood, Allergies, Surgeries, Family History, Organ Donor */}
+              {/* Column 2: Clinical Details (consolidated) */}
               <div className="space-y-4">
                 <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Physical Measurements</h3>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
-                      <Ruler className="h-4 w-4 text-primary" />
-                      <div><p className="text-xs text-muted-foreground">Height</p><p className="text-sm font-medium text-foreground">{patient.height_cm ? `${patient.height_cm} cm` : "—"}</p></div>
-                    </div>
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
-                      <Scale className="h-4 w-4 text-primary" />
-                      <div><p className="text-xs text-muted-foreground">Weight</p><p className="text-sm font-medium text-foreground">{patient.weight_kg ? `${patient.weight_kg} kg` : "—"}</p></div>
-                    </div>
-                    {bmi && (
+                  <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide">Clinical Details</h3>
+                  
+                  {/* Physical Measurements */}
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Physical Measurements</p>
+                    <div className="grid gap-3 sm:grid-cols-2">
                       <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
-                        <div><p className="text-xs text-muted-foreground">BMI</p><p className="text-sm font-medium text-foreground">{bmi}</p></div>
+                        <Ruler className="h-4 w-4 text-primary" />
+                        <div><p className="text-xs text-muted-foreground">Height</p><p className="text-sm font-medium text-foreground">{patient.height_cm ? `${patient.height_cm} cm` : "—"}</p></div>
+                      </div>
+                      <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
+                        <Scale className="h-4 w-4 text-primary" />
+                        <div><p className="text-xs text-muted-foreground">Weight</p><p className="text-sm font-medium text-foreground">{patient.weight_kg ? `${patient.weight_kg} kg` : "—"}</p></div>
+                      </div>
+                      {bmi && (
+                        <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
+                          <div><p className="text-xs text-muted-foreground">BMI</p><p className="text-sm font-medium text-foreground">{bmi}</p></div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <Separator className="my-3" />
+
+                  {/* Blood Type */}
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Blood Type</p>
+                    <p className="text-sm text-foreground">{patient.blood_type || "Not recorded"}</p>
+                  </div>
+
+                  <Separator className="my-3" />
+
+                  {/* Allergies */}
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</p>
+                    <div className="rounded-lg bg-muted/30 p-3 border border-border/50">
+                      <p className="text-sm text-foreground">{patient.allergies || "None recorded"}</p>
+                    </div>
+                  </div>
+
+                  <Separator className="my-3" />
+
+                  {/* Chronic Medication */}
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Chronic Medication</p>
+                    {patient.is_chronic ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive"><Pill className="h-3 w-3" />Chronic</span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Not on chronic medication</span>
+                    )}
+                  </div>
+
+                  <Separator className="my-3" />
+
+                  {/* Surgeries */}
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Surgeries and Dates</p>
+                    {surgeries.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No surgeries recorded</p>
+                    ) : (
+                      <div className="space-y-1.5">
+                        {surgeries.map((surgery) => (
+                          <div key={surgery.id} className="p-2 rounded-lg bg-muted/30 border border-border/50">
+                            <p className="text-sm font-medium text-foreground">{surgery.name}</p>
+                            <p className="text-xs text-muted-foreground">{format(new Date(surgery.date), "MMMM d, yyyy")}</p>
+                            {surgery.notes && <p className="text-xs text-muted-foreground mt-0.5">{surgery.notes}</p>}
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
-                </div>
 
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Blood Type</h3>
-                  <p className="text-sm text-foreground">{patient.blood_type || "Not recorded"}</p>
-                </div>
+                  <Separator className="my-3" />
 
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</h3>
-                  <div className="rounded-lg bg-muted/30 p-3 border border-border/50">
-                    <p className="text-sm text-foreground">{patient.allergies || "None recorded"}</p>
+                  {/* Family History */}
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Family History</p>
+                    {familyHistory.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No family history recorded</p>
+                    ) : (
+                      <div className="space-y-1.5">
+                        {familyHistory.map((entry) => (
+                          <div key={entry.id} className="p-2 rounded-lg bg-muted/30 border border-border/50">
+                            <p className="text-sm font-medium text-foreground">{entry.relation}</p>
+                            <p className="text-xs text-muted-foreground">{entry.condition}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
 
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Chronic Medication</h3>
-                  {patient.is_chronic ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive"><Pill className="h-3 w-3" />Chronic</span>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">Not on chronic medication</span>
-                  )}
-                </div>
+                  <Separator className="my-3" />
 
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Surgeries and Dates</h3>
-                  {surgeries.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No surgeries recorded</p>
-                  ) : (
-                    <div className="space-y-1.5">
-                      {surgeries.map((surgery) => (
-                        <div key={surgery.id} className="p-2 rounded-lg bg-muted/30 border border-border/50">
-                          <p className="text-sm font-medium text-foreground">{surgery.name}</p>
-                          <p className="text-xs text-muted-foreground">{format(new Date(surgery.date), "MMMM d, yyyy")}</p>
-                          {surgery.notes && <p className="text-xs text-muted-foreground mt-0.5">{surgery.notes}</p>}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Family History</h3>
-                  {familyHistory.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No family history recorded</p>
-                  ) : (
-                    <div className="space-y-1.5">
-                      {familyHistory.map((entry) => (
-                        <div key={entry.id} className="p-2 rounded-lg bg-muted/30 border border-border/50">
-                          <p className="text-sm font-medium text-foreground">{entry.relation}</p>
-                          <p className="text-xs text-muted-foreground">{entry.condition}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className={sectionFrame}>
+                  {/* Organ Donor */}
                   <OrganDonorView />
                 </div>
               </div>
             </div>
+
+            {/* Preferences Section (for self-service patients) */}
+            {isSelfService && preferences && onUpdatePreference && (
+              <div className={sectionFrame + " mt-4"}>
+                <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5">
+                  <Settings2 className="h-3.5 w-3.5" /> Preferences
+                </h3>
+                <div className="space-y-3">
+                  <AutoEmailToggleInline label="Auto-email invoice to medical aid" description="When your doctor marks an invoice as paid, it will be sent to your insurance claims email." checked={preferences.auto_email_invoice_to_insurance || false} onCheckedChange={(c) => onUpdatePreference("auto_email_invoice_to_insurance", c)} />
+                  <AutoEmailToggleInline label="Auto-email prescription to pharmacy" description="When your doctor saves a prescription, it will be sent to your primary pharmacy." checked={preferences.auto_email_prescription_to_pharmacy || false} onCheckedChange={(c) => onUpdatePreference("auto_email_prescription_to_pharmacy", c)} />
+                  <AutoEmailToggleInline label="Auto-email certificate to employer" description="When your doctor saves a medical certificate, it will be sent to your employer." checked={preferences.auto_email_certificate_to_employer || false} onCheckedChange={(c) => onUpdatePreference("auto_email_certificate_to_employer", c)} />
+                </div>
+              </div>
+            )}
           </TabsContent>
 
           {/* === MY DOCUMENTS TAB (only for self-service) === */}
@@ -531,6 +581,33 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
             <TabsContent value="doctors" className="mt-4">
               <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
                 <MyDoctors />
+              </Suspense>
+            </TabsContent>
+          )}
+
+          {/* === MY ROUND TABLE TAB === */}
+          {isSelfService && (
+            <TabsContent value="roundtable" className="mt-4">
+              <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                <PatientRoundTable />
+              </Suspense>
+            </TabsContent>
+          )}
+
+          {/* === MY REWARDS TAB === */}
+          {isSelfService && (
+            <TabsContent value="rewards" className="mt-4">
+              <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                <MyRewards />
+              </Suspense>
+            </TabsContent>
+          )}
+
+          {/* === MY CALENDAR TAB === */}
+          {isSelfService && (
+            <TabsContent value="calendar" className="mt-4">
+              <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                <PatientCalendar />
               </Suspense>
             </TabsContent>
           )}
@@ -552,11 +629,14 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
       </div>
 
       <Tabs defaultValue="personal">
-        <TabsList className="bg-primary">
+        <TabsList className="flex w-full flex-wrap bg-primary">
           <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Personal Information</TabsTrigger>
           <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Medical Information</TabsTrigger>
           {isSelfService && <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Documents</TabsTrigger>}
           {isSelfService && <TabsTrigger value="doctors" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Doctors</TabsTrigger>}
+          {isSelfService && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Round Table</TabsTrigger>}
+          {isSelfService && <TabsTrigger value="rewards" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Rewards</TabsTrigger>}
+          {isSelfService && <TabsTrigger value="calendar" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Calendar</TabsTrigger>}
         </TabsList>
 
         {/* === PERSONAL TAB (EDIT) === */}
@@ -846,7 +926,46 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
             </Suspense>
           </TabsContent>
         )}
+
+        {/* === MY ROUND TABLE TAB (EDIT) === */}
+        {isSelfService && (
+          <TabsContent value="roundtable" className="mt-4">
+            <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+              <PatientRoundTable />
+            </Suspense>
+          </TabsContent>
+        )}
+
+        {/* === MY REWARDS TAB (EDIT) === */}
+        {isSelfService && (
+          <TabsContent value="rewards" className="mt-4">
+            <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+              <MyRewards />
+            </Suspense>
+          </TabsContent>
+        )}
+
+        {/* === MY CALENDAR TAB (EDIT) === */}
+        {isSelfService && (
+          <TabsContent value="calendar" className="mt-4">
+            <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+              <PatientCalendar />
+            </Suspense>
+          </TabsContent>
+        )}
       </Tabs>
+    </div>
+  );
+}
+
+function AutoEmailToggleInline({ label, description, checked, onCheckedChange }: { label: string; description: string; checked: boolean; onCheckedChange: (checked: boolean) => void }) {
+  return (
+    <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+      <div className="flex-1 mr-3">
+        <p className="text-sm font-medium text-foreground">{label}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+      </div>
+      <Switch checked={checked} onCheckedChange={onCheckedChange} />
     </div>
   );
 }

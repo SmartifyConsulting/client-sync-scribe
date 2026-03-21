@@ -4,11 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { Patient } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/useProfile";
 
 export default function MyDetails() {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { profile, updateProfile } = useProfile();
 
   useEffect(() => {
     fetchPatientRecord();
@@ -79,7 +81,20 @@ export default function MyDetails() {
         <h1 className="text-2xl font-bold text-foreground">My Holarchive</h1>
         <p className="text-sm text-muted-foreground">View and update your personal and medical information</p>
       </div>
-      <PatientDetailsEditor patient={patient} onSave={handleSave} isSelfService />
+      <PatientDetailsEditor
+        patient={patient}
+        onSave={handleSave}
+        isSelfService
+        preferences={{
+          auto_email_invoice_to_insurance: (profile as any)?.auto_email_invoice_to_insurance || false,
+          auto_email_prescription_to_pharmacy: (profile as any)?.auto_email_prescription_to_pharmacy || false,
+          auto_email_certificate_to_employer: (profile as any)?.auto_email_certificate_to_employer || false,
+        }}
+        onUpdatePreference={async (key, value) => {
+          await updateProfile({ [key]: value } as any);
+          toast({ title: "Preference updated" });
+        }}
+      />
     </div>
   );
 }
