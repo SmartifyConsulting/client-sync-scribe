@@ -19,10 +19,18 @@ const PatientRoundTable = lazy(() => import("@/pages/patient/PatientRoundTable")
 const MyRewards = lazy(() => import("@/pages/patient/MyRewards"));
 const PatientCalendar = lazy(() => import("@/pages/patient/PatientCalendar"));
 
+interface PreferencesProps {
+  auto_email_invoice_to_insurance?: boolean;
+  auto_email_prescription_to_pharmacy?: boolean;
+  auto_email_certificate_to_employer?: boolean;
+}
+
 interface PatientDetailsEditorProps {
   patient: Patient;
   onSave: (updates: Partial<Patient>) => Promise<any>;
   isSelfService?: boolean;
+  preferences?: PreferencesProps;
+  onUpdatePreference?: (key: string, value: boolean) => void;
 }
 
 const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
