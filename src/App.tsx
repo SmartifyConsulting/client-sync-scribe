@@ -77,7 +77,7 @@ function RoleBasedDashboard() {
     );
   }
 
-  return isPatient ? <PatientDashboard /> : <Dashboard />;
+  return isPatient ? <MyDetails /> : <Dashboard />;
 }
 
 const App = () => (

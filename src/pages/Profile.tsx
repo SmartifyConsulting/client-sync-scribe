@@ -506,10 +506,9 @@ export default function Profile() {
       {/* Tabbed content */}
       {isPatient ? (
         <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-primary">
+          <TabsList className="grid w-full grid-cols-2 bg-primary">
             <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Personal</TabsTrigger>
             <TabsTrigger value="holarchive" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">My Holarchive</TabsTrigger>
-            <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Preferences</TabsTrigger>
           </TabsList>
           <TabsContent value="personal">
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
