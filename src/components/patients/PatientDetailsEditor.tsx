@@ -359,7 +359,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, p
             {isSelfService && <TabsTrigger value="rewards" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Rewards</TabsTrigger>}
             {isSelfService && <TabsTrigger value="calendar" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Calendar</TabsTrigger>}
           </TabsList>
-          </TabsList>
 
           {/* === PERSONAL INFORMATION TAB === */}
           <TabsContent value="personal" className="space-y-4 mt-4">
