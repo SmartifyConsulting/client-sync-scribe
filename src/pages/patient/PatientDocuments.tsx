@@ -704,33 +704,32 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
         </CardContent>
       </Card>
 
-      {/* Filter Bar */}
-      <div className="flex flex-wrap gap-2">
-        {FILTER_OPTIONS.map((opt) => {
-          const isActive = filter === opt.value;
-          const config =
-            opt.value !== "all" ? DOC_TYPE_CONFIG[opt.value] : null;
-          return (
-            <button
-              key={opt.value}
-              onClick={() => setFilter(opt.value)}
-              className={`inline-flex items-center rounded-full px-2 py-0.5 text-[8px] font-medium transition-colors ${
-                isActive
-                  ? "bg-primary text-primary-foreground"
-                  : config
-                  ? config.color
-                  : "bg-muted text-muted-foreground"
-              } hover:opacity-80`}
-            >
-              {opt.label}
-              {opt.value !== "all" && (
-                <span className="ml-1.5 opacity-70">
-                  {documents.filter((d) => d.type === opt.value).length}
-                </span>
-              )}
-            </button>
-          );
-        })}
+      {/* Filter Dropdown */}
+      <div className="flex items-center gap-2">
+        <Select value={filter} onValueChange={(v) => setFilter(v as DocType | "all")}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filter by type" />
+          </SelectTrigger>
+          <SelectContent>
+            {FILTER_OPTIONS.map((opt) => {
+              const config = opt.value !== "all" ? DOC_TYPE_CONFIG[opt.value] : null;
+              const OptIcon = config?.icon;
+              return (
+                <SelectItem key={opt.value} value={opt.value}>
+                  <span className="flex items-center gap-2">
+                    {OptIcon && <OptIcon className="h-3.5 w-3.5" />}
+                    {opt.label}
+                    {opt.value !== "all" && (
+                      <span className="text-muted-foreground">
+                        ({documents.filter((d) => d.type === opt.value).length})
+                      </span>
+                    )}
+                  </span>
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Documents List */}
