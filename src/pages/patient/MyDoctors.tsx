@@ -191,7 +191,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search by name or practice number..."
+                placeholder="Search by name, practice number, or registration number..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
