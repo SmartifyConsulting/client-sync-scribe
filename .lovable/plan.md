@@ -1,32 +1,57 @@
 
 
-# Plan: Reorganize My Practice & Settings Fields
+# Plan: Heading Consistency, Moola Icon Size, Button Rename, and Share App Feature
 
 ## Changes
 
-### 1. Move Language from Settings to My Practice (under Mobile Number)
-- In `src/pages/MyPractice.tsx`, add the `LANGUAGES` constant and a Language select field after the Mobile Number field in the Personal Information frame
-- Add auto-guess logic: when the country code changes, auto-set the language based on a mapping (e.g., `+27` → `af` or `en`, `+49` → `de`, `+33` → `fr`, etc.)
-- The language field remains manually overridable
-- In `src/pages/Settings.tsx`, remove the Language select from the Preferences tab (lines ~434-440)
+### 1. Fix "My Doctors" heading to match "My Round Table"
+**File: `src/components/patients/PatientDetailsEditor.tsx`**
 
-### 2. Move Specialty next to First/Last Name (same row)
-- Currently Specialty is in its own full-width row below the 2-column grid (lines 504-510)
-- Move it into the same `grid` row as First Name and Last Name, making it a 3-column grid: First Name | Last Name | Specialty
+The "My Round Table" tab (line 569-571) wraps content with an h2 heading + description, but "My Doctors" tab (line 558-563) does not. Add the same heading wrapper around the MyDoctors component:
+```tsx
+<div className="mb-4">
+  <h2 className="text-lg font-semibold text-foreground">My Doctors</h2>
+  <p className="text-xs text-muted-foreground">Healthcare providers with access to your profile</p>
+</div>
+```
+Pass `hideHeader` to `<MyDoctors hideHeader />` (it already accepts this prop).
 
-### 3. Rename "Practice Details" to "Practice Information"
-- Line 518: Change the heading text from "Practice Details" to "Practice Information"
+### 2. Increase Moola symbol size on Dashboard StatsCard
+**File: `src/components/dashboard/StatsCard.tsx`**
 
-### 4. Move Digital Signature from Settings to My Practice
-- Cut the entire Digital Signature frame (Settings lines 537-583) including its constants (`SIGNATURE_FONTS`, `SIGNATURE_COLORS`), state variables (`sigFormData`, `savedStatus`, debounce logic), and helper functions (`getSignatureFontFamily`, `getSignatureColor`)
-- Paste into `MyPractice.tsx` as a new section frame below Practice Information (after the partners section, before the closing of the practice tab)
-- Add the same auto-save debounce logic for signature fields
-- Remove all signature-related code from Settings.tsx
+Currently when `iconSize="large"` and `imageUrl` is set, the image renders at `h-9 w-9`. The Star icon (default size) renders at `h-7 w-7`. To make the Moola symbol match the Star icon's visual prominence, increase the large image size to `h-11 w-11`.
 
-## Files Modified
+### 3. Rename "Add Patient" button to "Add New Patient"
+**File: `src/pages/Patients.tsx`**
+- Line 394: Change button text from "Add Patient" to "Add New Patient"
+- Line 656: Change submit button text from "Add Patient" to "Add New Patient"
+
+### 4. Add "Share App" button
+**File: `src/pages/Patients.tsx`**
+Add a "Share App" button next to "Add New Patient" that opens a dialog to send an app invitation email. This is distinct from adding a patient — the recipient gets an invite to join Holarc but is NOT automatically added as the doctor's patient.
+
+**File: `src/components/patients/PatientDetailsEditor.tsx`**
+Add a "Share App" button on individual patient profiles (in the header area, next to the Edit button) — only visible to doctors viewing patient profiles.
+
+**New component: `src/components/ShareAppDialog.tsx`**
+A reusable dialog that:
+- Accepts an optional email pre-fill
+- Sends an invitation via the existing `send-user-invitation` edge function
+- On acceptance by the recipient, awards Moolas to the sender
+
+**Database: Migration needed**
+Add a `referral_source_user_id` column to `user_invitations` table (or use the existing `sender_id`) to track who referred the user. When the invitation is accepted, award Moolas to the referrer via a new entry in `doctor_rewards` with `reward_type: "app_referral"`.
+
+**Edge function update: `supabase/functions/send-user-invitation/index.ts`**
+Ensure it supports a `referral` invitation type that doesn't create doctor-patient relationships on acceptance — only awards Moolas.
+
+## Files to Modify
 
 | File | Change |
 |------|--------|
-| `src/pages/MyPractice.tsx` | Add Language field with auto-guess, move Specialty to name row, rename heading, add Digital Signature section |
-| `src/pages/Settings.tsx` | Remove Language field, remove Digital Signature section and related constants/state |
+| `src/components/patients/PatientDetailsEditor.tsx` | Add h2 heading for My Doctors tab; add Share App button on patient profiles |
+| `src/components/dashboard/StatsCard.tsx` | Increase large imageUrl size from h-9 w-9 to h-11 w-11 |
+| `src/pages/Patients.tsx` | Rename button text; add Share App button |
+| `src/components/ShareAppDialog.tsx` | New reusable Share App invitation dialog |
+| `supabase/functions/send-user-invitation/index.ts` | Support referral invitation type |
 
