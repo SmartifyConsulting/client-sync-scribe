@@ -13,6 +13,7 @@ serve(async (req) => {
 
   try {
     const { videoUrl, filePath, prescriptionId, patientId } = await req.json();
+    const imageUrl = videoUrl; // Now receives image URL despite param name
 
     if (!videoUrl || !filePath || !prescriptionId || !patientId) {
       return new Response(
@@ -31,10 +32,10 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // AI vision prompt for medication ingestion detection
-    const validationPrompt = `You are a healthcare compliance validator. Analyze this video frame/thumbnail and determine if it shows a person actively taking medication.
+    const validationPrompt = `You are a healthcare compliance validator. Analyze this photo and determine if it shows a person actively taking medication.
 
 Look for ALL of these indicators:
-1. **Person visible**: A human face or person must be clearly visible in the frame
+1. **Person visible**: A human face or person must be clearly visible
 2. **Medication visible**: Pills, capsules, tablets, liquid medicine, inhaler, or medication containers must be visible
 3. **Ingestion action**: Evidence of the person putting medication in their mouth, swallowing pills, drinking medicine, or using an inhaler
 
@@ -49,10 +50,10 @@ IMPORTANT: You must respond with a JSON object in exactly this format:
   "detected_elements": ["list", "of", "relevant", "elements"]
 }
 
-The video is VALID only if ALL three criteria are met: person visible, medication visible, and ingestion action detected.
+The photo is VALID only if ALL three criteria are met: person visible, medication visible, and ingestion action detected.
 Only return the JSON, no other text.`;
 
-    console.log('Sending medication video for AI validation, patient:', patientId);
+    console.log('Sending medication photo for AI validation, patient:', patientId);
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -67,7 +68,7 @@ Only return the JSON, no other text.`;
             role: 'user',
             content: [
               { type: 'text', text: validationPrompt },
-              { type: 'image_url', image_url: { url: videoUrl } }
+              { type: 'image_url', image_url: { url: imageUrl } }
             ]
           }
         ],

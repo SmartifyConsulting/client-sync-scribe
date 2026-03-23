@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { CheckSquare, Loader2, Clock, CheckCircle2, Camera, Video, Square, Check, X, Pill } from "lucide-react";
+import { CheckSquare, Loader2, Clock, CheckCircle2, Camera, Check, X, Pill } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -127,17 +127,14 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
   const hasMoolasReward = todo.moolas_reward > 0;
   const isMedicationType = todo.task_type === "medication" || todo.title.toLowerCase().includes("medication") || todo.title.toLowerCase().includes("medic");
 
-  // Video recording state
+  // Photo capture state
   const [showRecordDialog, setShowRecordDialog] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
+  const [capturedBlob, setCapturedBlob] = useState<Blob | null>(null);
+  const [capturedUrl, setCapturedUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [countdown, setCountdown] = useState(30);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const priorityColors: Record<string, string> = {
     high: "bg-destructive/10 text-destructive",
@@ -161,7 +158,6 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
   const stopCamera = useCallback(() => {
     stream?.getTracks().forEach((t) => t.stop());
     setStream(null);
-    if (timerRef.current) clearInterval(timerRef.current);
   }, [stream]);
 
   useEffect(() => {
@@ -169,55 +165,42 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
     return () => { stream?.getTracks().forEach((t) => t.stop()); };
   }, [showRecordDialog]);
 
-  const startRecording = () => {
-    if (!stream) return;
-    chunksRef.current = [];
-    const mr = new MediaRecorder(stream, { mimeType: "video/webm" });
-    mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-    mr.onstop = () => setRecordedBlob(new Blob(chunksRef.current, { type: "video/webm" }));
-    mr.start();
-    mediaRecorderRef.current = mr;
-    setIsRecording(true);
-    setCountdown(30);
-    timerRef.current = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) { mr.stop(); setIsRecording(false); if (timerRef.current) clearInterval(timerRef.current); return 0; }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  const stopRecording = () => {
-    mediaRecorderRef.current?.stop();
-    setIsRecording(false);
-    if (timerRef.current) clearInterval(timerRef.current);
+  const capturePhoto = () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0);
+    canvas.toBlob((blob) => {
+      if (blob) {
+        setCapturedBlob(blob);
+        setCapturedUrl(URL.createObjectURL(blob));
+      }
+    }, "image/jpeg", 0.85);
   };
 
   const handleCloseRecording = () => {
     stopCamera();
     setShowRecordDialog(false);
-    setRecordedBlob(null);
-    setIsRecording(false);
-    setCountdown(30);
+    setCapturedBlob(null);
+    setCapturedUrl(null);
   };
 
   const handleSubmitProof = async () => {
-    if (!recordedBlob || !todo.patient_id) return;
-
-    if (recordedBlob.size > 5 * 1024 * 1024) {
-      toast({ title: "File too large", description: "Recording must be under 5MB.", variant: "destructive" });
-      return;
-    }
+    if (!capturedBlob || !todo.patient_id) return;
 
     setIsUploading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const filePath = `task-proof/${user.id}/${Date.now()}.webm`;
+      const filePath = `task-proof/${user.id}/${Date.now()}.jpg`;
       const { error: uploadError } = await supabase.storage
         .from("patient-media")
-        .upload(filePath, recordedBlob, { contentType: "video/webm" });
+        .upload(filePath, capturedBlob, { contentType: "image/jpeg" });
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage.from("patient-media").getPublicUrl(filePath);
@@ -267,7 +250,8 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
         queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
         onComplete();
       } else {
-        setRecordedBlob(null);
+        setCapturedBlob(null);
+        setCapturedUrl(null);
         startCamera();
         const reason = validation?.description || "Could not verify task completion.";
         const missing: string[] = [];
@@ -343,45 +327,35 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
         </div>
       </div>
 
-      {/* Video Recording Dialog */}
+      {/* Photo Capture Dialog */}
       <Dialog open={showRecordDialog} onOpenChange={(open) => { if (!open) handleCloseRecording(); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Video className="h-5 w-5 text-primary" />
-              Record Proof
+              <Camera className="h-5 w-5 text-primary" />
+              Capture Proof Photo
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Film yourself completing the task. Show the medication and take it on camera. Max 30 seconds.
+              Take a photo showing yourself taking the medication. Make sure both you and the medication are clearly visible.
             </p>
             <div className="relative rounded-lg overflow-hidden bg-black aspect-video">
-              {recordedBlob ? (
-                <video src={URL.createObjectURL(recordedBlob)} controls className="w-full h-full object-cover" />
+              {capturedUrl ? (
+                <img src={capturedUrl} alt="Captured proof" className="w-full h-full object-cover" />
               ) : (
                 <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" style={{ transform: "scaleX(-1)" }} />
               )}
-              {isRecording && (
-                <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground px-2 py-1 rounded-full text-xs font-bold animate-pulse">
-                  REC {countdown}s
-                </div>
-              )}
             </div>
+            <canvas ref={canvasRef} className="hidden" />
             <div className="flex gap-2 justify-center">
-              {!recordedBlob ? (
-                !isRecording ? (
-                  <Button onClick={startRecording} disabled={!stream} className="gap-2">
-                    <Video className="h-4 w-4" /> Start Recording
-                  </Button>
-                ) : (
-                  <Button onClick={stopRecording} variant="destructive" className="gap-2">
-                    <Square className="h-4 w-4" /> Stop
-                  </Button>
-                )
+              {!capturedBlob ? (
+                <Button onClick={capturePhoto} disabled={!stream} className="gap-2">
+                  <Camera className="h-4 w-4" /> Take Photo
+                </Button>
               ) : (
                 <>
-                  <Button variant="outline" onClick={() => { setRecordedBlob(null); startCamera(); }}>
+                  <Button variant="outline" onClick={() => { setCapturedBlob(null); setCapturedUrl(null); startCamera(); }}>
                     Retake
                   </Button>
                   <Button onClick={handleSubmitProof} disabled={isUploading} className="gap-2">
