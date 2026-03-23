@@ -1,36 +1,32 @@
 
 
-# Plan: Fix Missing Headings, Replace Filter Badges with Dropdown, Add Document Type Icons to Rows
+# Plan: Reset Body Font Size & Reduce Muted Description Text
 
-## 1. Restore H1 Headings for My Documents, My Doctors, My Round Table
+## 1. Reset Body Font Size
 
-Currently these components are rendered with `hideHeader` prop, which suppresses their built-in `<h1>` headings. Remove `hideHeader` from all 6 usages in `PatientDetailsEditor.tsx` (lines 543, 552, 561, 862, 871, 880) so the components render their own headings.
+**File**: `src/index.css` (line 162)
 
-**File**: `src/components/patients/PatientDetailsEditor.tsx`
+Remove `font-size: 7.35px;` from the `body` rule, restoring the browser default of **16px**. This will affect all `rem`-based sizes across the app (everything will scale up proportionally).
 
-## 2. Replace Filter Badge Bar with Dropdown Select
+## 2. Reduce `text-sm text-muted-foreground` Globally
 
-Remove the badge-based filter bar (lines 700-727 in `PatientDocuments.tsx`) and replace with a `<Select>` dropdown using the existing `FILTER_OPTIONS` array. The dropdown will show "Filter by type" as placeholder and list all document types.
+With 856 occurrences across 59 files, a per-file find-and-replace is impractical. Instead, add a CSS utility rule in `src/index.css` that targets the combination:
 
-**File**: `src/pages/patient/PatientDocuments.tsx`
+```css
+.text-muted-foreground.text-sm {
+  font-size: 0.625rem; /* ~10px at 16px base, two steps below text-sm (0.875rem) */
+}
+```
 
-## 3. Add Document Type Icon to Each Document Row
-
-The document rows already show a generic icon in the left circle (line 756). Update each row to also show a small color-coded icon badge next to the document name (replacing the text Badge with an icon-only badge). The `DOC_TYPE_CONFIG` already maps each type to an icon and color.
-
-Changes to document row (lines 771-777):
-- Replace the text `Badge` showing `config.label` with an icon-only badge: just the `IconComponent` from `DOC_TYPE_CONFIG` rendered inside a small colored circle, using `config.color` as background.
-
-## 4. Color-Code Uploaded Documents
-
-Documents that are uploaded (source from media/file uploads, i.e. types `image`, `audio`, `video`, `file`) will get a distinct left-border accent color on the Card to visually distinguish them from system-generated documents (prescriptions, invoices, etc.). Use `border-l-4` with a color derived from `DOC_TYPE_CONFIG`.
-
-**File**: `src/pages/patient/PatientDocuments.tsx`
+This single rule downsizes all `text-sm text-muted-foreground` elements by two steps without touching any component files.
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/components/patients/PatientDetailsEditor.tsx` | Remove `hideHeader` from PatientDocuments, MyDoctors, PatientRoundTable (6 places) |
-| `src/pages/patient/PatientDocuments.tsx` | Replace filter badges with Select dropdown; replace text Badge with icon-only badge; add color-coded left border to uploaded docs |
+| `src/index.css` | Remove `font-size: 7.35px` from body; add CSS override for `.text-muted-foreground.text-sm` |
+
+## Risk Note
+
+Resetting to 16px base will significantly enlarge all rem-based text and spacing. If the 7.35px was set to achieve a compact clinical UI, this change will alter the entire look. Button sizes, padding, and layout will all scale up.
 
