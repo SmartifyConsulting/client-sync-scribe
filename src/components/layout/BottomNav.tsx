@@ -16,7 +16,6 @@ import { useUserRole } from "@/hooks/useUserRole";
 
 const doctorNavItems = [
   { icon: LayoutDashboard, label: "Home", to: "/dashboard" },
-  { icon: Users, label: "Patients", to: "/patients" },
   { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
   { icon: Settings, label: "Settings", to: "/settings" },
