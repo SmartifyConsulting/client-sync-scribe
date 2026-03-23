@@ -118,6 +118,8 @@ const App = () => (
             <Route path="/sessions/:id" element={<SessionDetail />} />
             <Route path="/documents" element={<Documents />} />
             <Route path="/invoices" element={<DoctorInvoices />} />
+            <Route path="/practice" element={<MyPractice />} />
+            <Route path="/doctor/rewards" element={<DoctorRewards />} />
             <Route path="/referral-doctors" element={<ReferralDoctors />} />
             <Route path="/cpd-certificates" element={<Navigate to="/profile" replace />} />
             {/* Notifications removed from route - now a dashboard badge */}

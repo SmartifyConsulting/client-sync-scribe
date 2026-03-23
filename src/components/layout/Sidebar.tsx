@@ -7,6 +7,7 @@ import {
   Calendar,
   FileText,
   Settings,
+  Settings2,
   Mic,
   LogOut,
   CheckSquare,
