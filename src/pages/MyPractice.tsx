@@ -318,9 +318,9 @@ export default function MyPractice() {
   const addServicePrice = async () => {
     if (!user || !newService.service_name.trim() || !newService.default_price) { toast({ title: "Missing fields", description: "Service name and price are required", variant: "destructive" }); return; }
     setIsAddingService(true);
-    const { data, error } = await supabase.from('service_prices').insert({ user_id: user.id, service_name: newService.service_name, default_price: parseFloat(newService.default_price), currency: selectedCurrency, is_first_consultation: false } as any).select().single();
+    const { data, error } = await supabase.from('service_prices').insert({ user_id: user.id, service_name: newService.service_name, default_price: parseFloat(newService.default_price), currency: selectedCurrency, is_first_consultation: false, color: newService.color || null } as any).select().single();
     if (error) toast({ title: "Error", description: "Failed to add service", variant: "destructive" });
-    else { setServicePrices([...servicePrices, data]); setNewService({ service_name: "", default_price: "", currency: selectedCurrency }); toast({ title: "Service added" }); }
+    else { setServicePrices([...servicePrices, data]); setNewService({ service_name: "", default_price: "", currency: selectedCurrency, color: "#3b82f6" }); toast({ title: "Service added" }); }
     setIsAddingService(false);
   };
   const removeServicePrice = async (id: string) => { const { error } = await supabase.from('service_prices').delete().eq('id', id); if (!error) { setServicePrices(servicePrices.filter(s => s.id !== id)); toast({ title: "Service removed" }); } };
