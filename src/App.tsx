@@ -41,6 +41,8 @@ import PatientDocuments from "./pages/patient/PatientDocuments";
 import PatientRoundTable from "./pages/patient/PatientRoundTable";
 import MyDetails from "./pages/patient/MyDetails";
 import DoctorInvoices from "./pages/doctor/Invoices";
+import DoctorRewards from "./pages/doctor/DoctorRewards";
+import MyPractice from "./pages/MyPractice";
 import PricingAdmin from "./pages/admin/PricingAdmin";
 import GamificationAdmin from "./pages/admin/GamificationAdmin";
 import UserManagement from "./pages/admin/UserManagement";

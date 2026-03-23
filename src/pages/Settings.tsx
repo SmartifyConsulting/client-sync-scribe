@@ -1,17 +1,12 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Calendar, Bell, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff,
   CreditCard, Receipt, Download, Check, ExternalLink, XCircle, RotateCcw, Users,
-  User, Settings2, Camera, Upload, Plus, Trash2, Pencil, X, Phone, Copy, Clock,
-  Mail, Save, Award, Volume2, UserPlus, Bold, Italic, Send, ArrowRightLeft, FileText,
-  DollarSign,
+  Settings2, Volume2, Bold, Italic, Send,
 } from "lucide-react";
-import ReferralDoctors from "@/pages/ReferralDoctors";
-import { PatientImport } from "@/components/patients/PatientImport";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Toggle } from "@/components/ui/toggle";
@@ -21,16 +16,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { TwoFactorSetup } from "@/components/auth/TwoFactorSetup";
-import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import {
@@ -42,34 +34,6 @@ import {
 } from "@/components/ui/alert-dialog";
 
 // ── Constants ──────────────────────────────────────────────────────
-const COUNTRY_CODES = [
-  { code: "+27", country: "South Africa", flag: "🇿🇦" },
-  { code: "+1", country: "USA/Canada", flag: "🇺🇸" },
-  { code: "+44", country: "United Kingdom", flag: "🇬🇧" },
-  { code: "+267", country: "Botswana", flag: "🇧🇼" },
-  { code: "+264", country: "Namibia", flag: "🇳🇦" },
-  { code: "+268", country: "Eswatini", flag: "🇸🇿" },
-  { code: "+266", country: "Lesotho", flag: "🇱🇸" },
-  { code: "+258", country: "Mozambique", flag: "🇲🇿" },
-  { code: "+263", country: "Zimbabwe", flag: "🇿🇼" },
-  { code: "+61", country: "Australia", flag: "🇦🇺" },
-  { code: "+91", country: "India", flag: "🇮🇳" },
-  { code: "+49", country: "Germany", flag: "🇩🇪" },
-  { code: "+33", country: "France", flag: "🇫🇷" },
-  { code: "+971", country: "UAE", flag: "🇦🇪" },
-];
-
-const DOCTOR_SPECIALTIES = [
-  "General Practitioner", "Allergist/Immunologist", "Anesthesiologist", "Cardiologist",
-  "Dermatologist", "Emergency Medicine Physician", "Endocrinologist", "Family Medicine Physician",
-  "Gastroenterologist", "Geriatrician", "Hematologist", "Infectious Disease Specialist",
-  "Internist", "Nephrologist", "Neurologist", "Obstetrician/Gynecologist", "Oncologist",
-  "Ophthalmologist", "Orthopedic Surgeon", "Otolaryngologist (ENT)", "Pathologist",
-  "Pediatrician", "Physiatrist", "Plastic Surgeon", "Podiatrist", "Psychiatrist",
-  "Psychologist", "Pulmonologist", "Radiologist", "Rheumatologist",
-  "Sports Medicine Physician", "Surgeon (General)", "Urologist", "Vascular Surgeon",
-];
-
 const LANGUAGES = [
   { code: "af", name: "Afrikaans" }, { code: "ar", name: "Arabic" }, { code: "nl", name: "Dutch" },
   { code: "en", name: "English" }, { code: "fr", name: "French" }, { code: "de", name: "German" },
@@ -114,17 +78,6 @@ const SAMPLE_TEXTS: Record<string, string> = {
   zu: "Sawubona, leli yizwi lakho le-Holarc. Nansi isibonelo sokuthi izindaba zakho zizozwakala kanjani.",
 };
 
-const CURRENCIES = [
-  { code: "ZAR", symbol: "R", name: "South African Rand" },
-  { code: "USD", symbol: "$", name: "US Dollar" },
-  { code: "EUR", symbol: "€", name: "Euro" },
-  { code: "GBP", symbol: "£", name: "British Pound" },
-  { code: "BWP", symbol: "P", name: "Botswana Pula" },
-  { code: "NAD", symbol: "N$", name: "Namibian Dollar" },
-  { code: "SZL", symbol: "E", name: "Swazi Lilangeni" },
-  { code: "LSL", symbol: "M", name: "Lesotho Loti" },
-];
-
 const SIGNATURE_FONTS = [
   { value: "allura", label: "Allura", fontFamily: "'Allura', serif" },
   { value: "great-vibes", label: "Great Vibes", fontFamily: "'Great Vibes', serif" },
@@ -148,315 +101,36 @@ const SIGNATURE_COLORS = [
 ];
 
 // ── Interfaces ──────────────────────────────────────────────────────
-interface Partner {
-  id: string;
-  full_name: string;
-  registration_number: string;
-  mobile_number: string;
-}
-
-interface ServicePrice {
-  id: string;
-  service_name: string;
-  default_price: number;
-  currency: string;
-  is_first_consultation?: boolean;
-}
-
-interface CPDCertificate {
-  id: string;
-  certificate_name: string;
-  issuing_body: string | null;
-  date_earned: string;
-  cpd_points: number;
-  certificate_url: string | null;
-}
-
 interface PlanConfig { price: number; name: string; period: string; savings?: number; }
 interface PricingPlans { monthly: PlanConfig; annual: PlanConfig; }
 interface Subscription { id: string; user_id: string; plan_type: string; billing_cycle: string; status: string; paypal_subscription_id: string | null; current_period_start: string | null; current_period_end: string | null; created_at: string; }
 interface PaymentHistoryItem { id: string; user_id: string; subscription_id: string | null; paypal_transaction_id: string | null; amount: number; currency: string; description: string; status: string; created_at: string; }
-
-// ── Helper Components ───────────────────────────────────────────────
-function formatPhoneNumber(value: string): string {
-  const digits = value.replace(/\D/g, '');
-  if (digits.length <= 2) return digits;
-  if (digits.length <= 5) return `${digits.slice(0, 2)} ${digits.slice(2)}`;
-  return `${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5, 9)}`;
-}
-
-function MailboxSection({ userId }: { userId?: string }) {
-  const [mailboxId, setMailboxId] = useState<string | null>(null);
-  const [mailboxAlias, setMailboxAlias] = useState<string>("");
-  const [editingAlias, setEditingAlias] = useState(false);
-  const [aliasInput, setAliasInput] = useState("");
-  const [isSavingAlias, setIsSavingAlias] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    const fetchMailboxInfo = async () => {
-      if (!userId) return;
-      const { data: profile } = await supabase.from('profiles').select('mailbox_id, mailbox_alias').eq('id', userId).single();
-      if (profile) { setMailboxId(profile.mailbox_id); setMailboxAlias(profile.mailbox_alias || ""); }
-    };
-    fetchMailboxInfo();
-  }, [userId]);
-
-  const displayEmail = mailboxAlias ? `${mailboxAlias}@holarc.com` : mailboxId ? `docs-${mailboxId.slice(0, 8)}@inbox.holarc.health` : null;
-  const handleCopy = async () => { if (!displayEmail) return; await navigator.clipboard.writeText(displayEmail); setCopied(true); toast({ title: "Copied" }); setTimeout(() => setCopied(false), 2000); };
-  const handleSaveAlias = async () => {
-    if (!userId) return;
-    const cleanAlias = aliasInput.toLowerCase().trim().replace(/[^a-z0-9-]/g, "");
-    if (cleanAlias.length < 3) { toast({ title: "Invalid alias", description: "At least 3 characters", variant: "destructive" }); return; }
-    if (cleanAlias.length > 30) { toast({ title: "Invalid alias", description: "30 characters max", variant: "destructive" }); return; }
-    setIsSavingAlias(true);
-    const { error } = await supabase.from('profiles').update({ mailbox_alias: cleanAlias }).eq('id', userId);
-    setIsSavingAlias(false);
-    if (error) { toast({ title: error.code === '23505' ? "Alias taken" : "Error", description: error.code === '23505' ? `"${cleanAlias}@holarc.com" is already in use` : "Failed to save", variant: "destructive" }); }
-    else { setMailboxAlias(cleanAlias); setEditingAlias(false); toast({ title: "Alias saved", description: `${cleanAlias}@holarc.com` }); }
-  };
-
-  return (
-    <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
-      <div className="flex items-start gap-3">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
-          <Upload className="h-4 w-4 text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-medium text-sm text-foreground">Document Mailbox</p>
-          <p className="text-xs text-muted-foreground mt-0.5">External parties can email documents to this address.</p>
-          {displayEmail ? (
-            <div className="mt-2 space-y-2">
-              <div className="flex items-center gap-2">
-                <code className="text-xs bg-muted px-2 py-1 rounded font-mono text-foreground border border-border truncate">{displayEmail}</code>
-                <Button variant="ghost" size="icon" onClick={handleCopy} className="h-7 w-7 shrink-0">{copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}</Button>
-              </div>
-              {!mailboxAlias && (editingAlias ? (
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-0 flex-1">
-                    <Input value={aliasInput} onChange={(e) => setAliasInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))} placeholder="your-name" className="rounded-r-none max-w-[160px] h-8 text-sm" />
-                    <span className="px-2 py-1.5 border border-l-0 border-border rounded-r-lg bg-muted text-xs text-muted-foreground">@holarc.com</span>
-                  </div>
-                  <Button size="sm" className="h-8" onClick={handleSaveAlias} disabled={isSavingAlias}>{isSavingAlias ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}</Button>
-                  <Button size="sm" variant="ghost" className="h-8" onClick={() => setEditingAlias(false)}>Cancel</Button>
-                </div>
-              ) : <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => { setEditingAlias(true); setAliasInput(""); }}>Set custom alias</Button>)}
-            </div>
-          ) : <p className="text-xs text-muted-foreground mt-1">Loading...</p>}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DoctorMoolasTab({ userId }: { userId?: string }) {
-  const { toast } = useToast();
-  const [showTransferDialog, setShowTransferDialog] = useState(false);
-  const [transferAppId, setTransferAppId] = useState("");
-  const [transferAmount, setTransferAmount] = useState("");
-  const queryClient = useQueryClient();
-
-  const { data: doctorMoolas = 0 } = useQuery({
-    queryKey: ["doctor-moolas-profile"],
-    queryFn: async () => {
-      if (!userId) return 0;
-      const { data, error } = await supabase.from("doctor_rewards").select("moolas_count").eq("doctor_id", userId);
-      if (error || !data) return 0;
-      return data.reduce((sum, r) => sum + (r.moolas_count || 0), 0);
-    },
-  });
-
-  const { data: patientMoolas = 0 } = useQuery({
-    queryKey: ["patient-moolas-profile"],
-    queryFn: async () => {
-      if (!userId) return 0;
-      const { data: patient } = await supabase.from("patients").select("id").eq("patient_user_id", userId).maybeSingle();
-      if (!patient) return 0;
-      const { data: rewards, error } = await supabase.from("patient_rewards").select("lollipops_count").eq("patient_id", patient.id);
-      if (error || !rewards) return 0;
-      return rewards.reduce((sum, r) => sum + (r.lollipops_count || 0), 0);
-    },
-  });
-
-  const totalMoolas = doctorMoolas + patientMoolas;
-
-  const { data: partnerApps = [] } = useQuery({
-    queryKey: ["moola-partner-apps-doctor"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("moola_partner_apps").select("*").eq("is_active", true).order("name");
-      if (error) return [];
-      return data || [];
-    },
-  });
-
-  const { data: transfers = [] } = useQuery({
-    queryKey: ["moola-transfers-doctor"],
-    queryFn: async () => {
-      if (!userId) return [];
-      const { data, error } = await supabase.from("moola_transfers").select("*, moola_partner_apps(name, logo_url)").eq("user_id", userId).order("created_at", { ascending: false });
-      if (error) return [];
-      return data || [];
-    },
-  });
-
-  const totalTransferred = transfers.reduce((sum: number, t: any) => sum + t.amount, 0);
-
-  const handleTransfer = async () => {
-    if (!userId) return;
-    const amount = parseInt(transferAmount) || 0;
-    if (amount <= 0 || amount > totalMoolas) { toast({ title: "Invalid amount", variant: "destructive" }); return; }
-    const { data: patient } = await supabase.from("patients").select("id").eq("patient_user_id", userId).maybeSingle();
-    if (!patient) { toast({ title: "No patient record found", variant: "destructive" }); return; }
-    const { error: transferError } = await supabase.from("moola_transfers").insert({ user_id: userId, partner_app_id: transferAppId, amount });
-    if (transferError) { toast({ title: "Transfer failed", variant: "destructive" }); return; }
-    const { error: deductError } = await supabase.from("patient_rewards").insert({
-      patient_id: patient.id, awarded_by: userId, lollipops_count: -amount,
-      visit_category: "Moola Transfer", reward_type: "transfer",
-    });
-    if (deductError) { toast({ title: "Deduction failed", variant: "destructive" }); return; }
-    toast({ title: "Transfer successful", description: `${amount} Moolas transferred.` });
-    queryClient.invalidateQueries({ queryKey: ["moola-transfers-doctor"] });
-    queryClient.invalidateQueries({ queryKey: ["patient-moolas-profile"] });
-    queryClient.invalidateQueries({ queryKey: ["doctor-moolas-profile"] });
-    setShowTransferDialog(false);
-    setTransferAppId("");
-    setTransferAmount("");
-  };
-
-  return (
-    <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-6">
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-lg border border-border p-4 bg-emerald-50 dark:bg-emerald-950/20">
-          <p className="text-xs text-muted-foreground">Doctor Moolas</p>
-          <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{doctorMoolas} <span className="text-base">Ⓜ</span></p>
-        </div>
-        <div className="rounded-lg border border-border p-4 bg-blue-50 dark:bg-blue-950/20">
-          <p className="text-xs text-muted-foreground">Patient Moolas</p>
-          <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{patientMoolas} <span className="text-base">Ⓜ</span></p>
-        </div>
-        <div className="rounded-lg border border-border p-4 bg-primary/5">
-          <p className="text-xs text-muted-foreground">Combined Balance</p>
-          <p className="text-2xl font-bold text-foreground">{totalMoolas} <span className="text-base">Ⓜ</span></p>
-        </div>
-      </div>
-      {partnerApps.length > 0 && (
-        <div className="flex justify-end">
-          <Button onClick={() => setShowTransferDialog(true)} className="gap-2"><Send className="h-4 w-4" /> Transfer Moolas</Button>
-        </div>
-      )}
-      {transfers.length > 0 && (
-        <div>
-          <h4 className="text-sm font-semibold mb-2">Transfer History</h4>
-          <div className="space-y-2">
-            {transfers.map((t: any) => (
-              <div key={t.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
-                <div>
-                  <p className="text-sm font-medium">{t.moola_partner_apps?.name || "Partner App"}</p>
-                  <p className="text-xs text-muted-foreground">{format(new Date(t.created_at), "MMM d, yyyy")}</p>
-                </div>
-                <Badge variant="secondary">-{t.amount} Ⓜ</Badge>
-              </div>
-            ))}
-          </div>
-          <p className="text-xs text-muted-foreground mt-2">Total transferred: {totalTransferred} Ⓜ</p>
-        </div>
-      )}
-      {showTransferDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-card rounded-xl border border-border p-6 w-full max-w-md shadow-lg space-y-4">
-            <h3 className="text-lg font-semibold">Transfer Moolas</h3>
-            <p className="text-sm text-muted-foreground">Available balance: {totalMoolas} Ⓜ</p>
-            <div className="space-y-2">
-              <Label>Partner App</Label>
-              <Select value={transferAppId} onValueChange={setTransferAppId}>
-                <SelectTrigger><SelectValue placeholder="Select an app" /></SelectTrigger>
-                <SelectContent>{partnerApps.map((app: any) => <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Amount</Label>
-              <Input type="number" min={1} max={totalMoolas} placeholder="Enter amount" value={transferAmount} onChange={(e) => setTransferAmount(e.target.value)} />
-            </div>
-            <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => setShowTransferDialog(false)}>Cancel</Button>
-              <Button onClick={handleTransfer} disabled={!transferAppId || !transferAmount || parseInt(transferAmount) <= 0 || parseInt(transferAmount) > totalMoolas}>
-                <Send className="h-4 w-4 mr-2" /> Transfer
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 // ── Main Component ──────────────────────────────────────────────────
 export default function Settings() {
   const { toast } = useToast();
   const { user } = useAuth();
   const { role, isAdmin } = useUserRole();
-  const { profile, loading, fetchProfile, updateProfile, uploadLogo } = useProfile();
+  const { profile, loading, fetchProfile, updateProfile } = useProfile();
   const [searchParams] = useSearchParams();
   const { isConnected: googleRealConnected, isConnecting: googleRealConnecting, connect: googleConnect, disconnect: googleDisconnect } = useGoogleCalendar();
 
   const isDoctor = role === "doctor";
   const isPatientRole = role === "patient";
 
-  // ── Form state (auto-save) ──
+  // ── Signature form state (auto-save) ──
   const [savedStatus, setSavedStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasInitialized = useRef(false);
   const isSettingFromProfile = useRef(false);
   const profileLoadedData = useRef<any>(null);
 
-  const [formData, setFormData] = useState({
-    first_name: "", last_name: "", practice_number: "", doctor_number: "",
-    practice_address: "", specialty: "", mobile_number: "", country_code: "+27",
+  const [sigFormData, setSigFormData] = useState({
     signature_font: "allura", signature_color: "black",
     signature_font_size: 24, signature_bold: false, signature_italic: false,
   });
 
-  // ── Avatar / Logo upload ──
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
-
-  // ── Email editing (admin) ──
-  const [editEmail, setEditEmail] = useState("");
-  const [isEditingEmail, setIsEditingEmail] = useState(false);
-  const [isSavingEmail, setIsSavingEmail] = useState(false);
-
-  // ── Partners ──
-  const [partners, setPartners] = useState<Partner[]>([]);
-  const [newPartner, setNewPartner] = useState({ full_name: "", registration_number: "", mobile_number: "", email: "" });
-  const [isAddingPartner, setIsAddingPartner] = useState(false);
-  const [showAddPartnerForm, setShowAddPartnerForm] = useState(false);
-  const [editingPartnerId, setEditingPartnerId] = useState<string | null>(null);
-  const [editingPartner, setEditingPartner] = useState({ full_name: "", registration_number: "", mobile_number: "" });
-  const [isSavingPartner, setIsSavingPartner] = useState(false);
-
-  // ── Service Prices ──
-  const [servicePrices, setServicePrices] = useState<ServicePrice[]>([]);
-  const [newService, setNewService] = useState({ service_name: "", default_price: "", currency: "ZAR" });
-  const [isAddingService, setIsAddingService] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState("ZAR");
-  const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
-  const [editingService, setEditingService] = useState({ service_name: "", default_price: "" });
-  const [isSavingService, setIsSavingService] = useState(false);
-
-  // ── CPD Certificates ──
-  const [certs, setCerts] = useState<CPDCertificate[]>([]);
-  const [certsLoading, setCertsLoading] = useState(true);
-  const [showCertForm, setShowCertForm] = useState(false);
-  const [editingCertId, setEditingCertId] = useState<string | null>(null);
-  const [certSaving, setCertSaving] = useState(false);
-  const [certUploading, setCertUploading] = useState(false);
-  const [certificateFile, setCertificateFile] = useState<File | null>(null);
-  const certFileInputRef = useRef<HTMLInputElement>(null);
-  const [certForm, setCertForm] = useState({ certificate_name: "", issuing_body: "", date_earned: "", cpd_points: "" });
-
   // ── Calendar / Security / Billing state ──
-  const [googleConnected, setGoogleConnected] = useState(false);
   const [outlookConnected, setOutlookConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState<string | null>(null);
   const [show2FASetup, setShow2FASetup] = useState(false);
@@ -477,24 +151,11 @@ export default function Settings() {
   const [loadingPricing, setLoadingPricing] = useState(true);
   const [inactiveThreshold, setInactiveThreshold] = useState<number>(12);
   const [savingThreshold, setSavingThreshold] = useState(false);
-  const [activeBillingTab, setActiveBillingTab] = useState<"plan" | "history">("plan");
 
-  // ── Profile data sync ──
+  // ── Profile data sync (signature only) ──
   useEffect(() => {
     if (profile) {
-      let countryCode = "+27";
-      let mobileNumber = (profile as any).mobile_number || "";
-      const matchedCode = COUNTRY_CODES.find(c => mobileNumber.startsWith(c.code));
-      if (matchedCode) { countryCode = matchedCode.code; mobileNumber = mobileNumber.replace(matchedCode.code, "").trim(); }
-      const fullName = profile.full_name || "";
-      const spaceIdx = fullName.indexOf(" ");
-      const firstName = spaceIdx > -1 ? fullName.slice(0, spaceIdx) : fullName;
-      const lastName = spaceIdx > -1 ? fullName.slice(spaceIdx + 1) : "";
-      const newFormData = {
-        first_name: firstName, last_name: lastName,
-        practice_number: profile.practice_number || "", doctor_number: profile.doctor_number || "",
-        practice_address: profile.practice_address || "", specialty: (profile as any).specialty || "",
-        mobile_number: mobileNumber, country_code: countryCode,
+      const newSigData = {
         signature_font: (profile as any).signature_font || "allura",
         signature_color: (profile as any).signature_color || "black",
         signature_font_size: (profile as any).signature_font_size ?? 24,
@@ -502,44 +163,36 @@ export default function Settings() {
         signature_italic: (profile as any).signature_italic ?? false,
       };
       isSettingFromProfile.current = true;
-      profileLoadedData.current = newFormData;
-      setFormData(newFormData);
+      profileLoadedData.current = newSigData;
+      setSigFormData(newSigData);
       requestAnimationFrame(() => { hasInitialized.current = true; isSettingFromProfile.current = false; });
     }
   }, [profile]);
 
-  const combinedFullName = `${formData.first_name} ${formData.last_name}`.trim();
+  const combinedFullName = profile?.full_name || "Your Name";
 
-  // ── Auto-save debounce ──
+  // ── Auto-save signature debounce ──
   useEffect(() => {
     if (!hasInitialized.current || !user || isSettingFromProfile.current) return;
-    if (profileLoadedData.current && JSON.stringify(formData) === JSON.stringify(profileLoadedData.current)) {
+    if (profileLoadedData.current && JSON.stringify(sigFormData) === JSON.stringify(profileLoadedData.current)) {
       profileLoadedData.current = null; return;
     }
     profileLoadedData.current = null;
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(async () => {
       setSavedStatus('saving');
-      const fullMobileNumber = formData.mobile_number ? `${formData.country_code}${formData.mobile_number.replace(/^0+/, '')}` : "";
       const { error } = await updateProfile({
-        full_name: combinedFullName, practice_number: formData.practice_number,
-        doctor_number: formData.doctor_number, practice_address: formData.practice_address,
-        specialty: formData.specialty, mobile_number: fullMobileNumber,
-        signature_font: formData.signature_font, signature_color: formData.signature_color,
-        signature_font_size: formData.signature_font_size, signature_bold: formData.signature_bold,
-        signature_italic: formData.signature_italic,
+        signature_font: sigFormData.signature_font, signature_color: sigFormData.signature_color,
+        signature_font_size: sigFormData.signature_font_size, signature_bold: sigFormData.signature_bold,
+        signature_italic: sigFormData.signature_italic,
       } as any);
       if (error) { setSavedStatus('idle'); toast({ title: "Error", description: "Failed to save", variant: "destructive" }); }
       else { setSavedStatus('saved'); setTimeout(() => setSavedStatus('idle'), 2000); }
     }, 1500);
     return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
-  }, [formData]);
+  }, [sigFormData]);
 
-  // ── Fetch doctor data ──
-  useEffect(() => {
-    if (user && isDoctor) { fetchPartners(); fetchServicePrices(); fetchCerts(); }
-  }, [user, isDoctor]);
-
+  // ── Fetch data ──
   useEffect(() => {
     if (user) { fetchMfaFactors(); fetchSubscription(); fetchPaymentHistory(); if (isDoctor) fetchInactiveThreshold(); }
   }, [user, isDoctor]);
@@ -554,11 +207,8 @@ export default function Settings() {
     else if (paymentResult === "cancelled") { toast({ title: "Payment Cancelled", description: "Your payment was cancelled." }); }
   }, [searchParams]);
 
-  const totalCpdPoints = certs.reduce((sum, c) => sum + (c.cpd_points || 0), 0);
-  const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   const getSignatureFontFamily = (v: string) => SIGNATURE_FONTS.find(f => f.value === v)?.fontFamily || SIGNATURE_FONTS[0].fontFamily;
   const getSignatureColor = (v: string) => SIGNATURE_COLORS.find(c => c.value === v)?.color || "#000000";
-  const getCurrencySymbol = (code: string) => CURRENCIES.find(c => c.code === code)?.symbol || code;
   const planType = role === "patient" ? "patient" : "doctor";
 
   // ── Fetch functions ──
@@ -618,137 +268,6 @@ export default function Settings() {
       setInactiveThreshold(months);
       toast({ title: "Setting saved", description: `Patients will be marked inactive after ${months} months without a visit.` });
     } catch { toast({ title: "Error", description: "Failed to save setting", variant: "destructive" }); } finally { setSavingThreshold(false); }
-  };
-
-  // ── Partner functions ──
-  const fetchPartners = async () => {
-    if (!user) return;
-    const { data, error } = await supabase.from('practice_partners').select('*').eq('user_id', user.id).order('created_at', { ascending: true });
-    if (!error && data) setPartners(data);
-  };
-  const addPartner = async () => {
-    if (!user || !newPartner.full_name.trim() || !newPartner.registration_number.trim() || !newPartner.email.trim()) { toast({ title: "Missing fields", description: "Partner name, registration number, and email are required", variant: "destructive" }); return; }
-    setIsAddingPartner(true);
-    const { data, error } = await supabase.from('practice_partners').insert({ user_id: user.id, full_name: newPartner.full_name, registration_number: newPartner.registration_number, mobile_number: newPartner.mobile_number || null, email: newPartner.email.trim() } as any).select().single();
-    if (error) toast({ title: "Error", description: "Failed to add partner", variant: "destructive" });
-    else {
-      setPartners([...partners, data]);
-      try { await supabase.functions.invoke('send-user-invitation', { body: { recipientEmail: newPartner.email.trim(), senderName: profile?.full_name || 'A colleague', message: 'You have been added as a practice partner.', isPracticePartner: true, partnerName: newPartner.full_name } }); toast({ title: "Partner added & invited" }); } catch { toast({ title: "Partner added" }); }
-      setNewPartner({ full_name: "", registration_number: "", mobile_number: "", email: "" }); setShowAddPartnerForm(false);
-    }
-    setIsAddingPartner(false);
-  };
-  const removePartner = async (id: string) => { const { error } = await supabase.from('practice_partners').delete().eq('id', id); if (!error) { setPartners(partners.filter(p => p.id !== id)); toast({ title: "Partner removed" }); } };
-  const startEditingPartner = (partner: Partner) => { setEditingPartnerId(partner.id); setEditingPartner({ full_name: partner.full_name, registration_number: partner.registration_number, mobile_number: partner.mobile_number || "" }); };
-  const cancelEditingPartner = () => { setEditingPartnerId(null); };
-  const saveEditingPartner = async () => {
-    if (!editingPartnerId || !editingPartner.full_name.trim() || !editingPartner.registration_number.trim()) { toast({ title: "Missing fields", variant: "destructive" }); return; }
-    setIsSavingPartner(true);
-    const { error } = await supabase.from('practice_partners').update({ full_name: editingPartner.full_name, registration_number: editingPartner.registration_number, mobile_number: editingPartner.mobile_number || null }).eq('id', editingPartnerId);
-    if (error) toast({ title: "Error", variant: "destructive" });
-    else { setPartners(partners.map(p => p.id === editingPartnerId ? { ...p, ...editingPartner } : p)); setEditingPartnerId(null); toast({ title: "Partner updated" }); }
-    setIsSavingPartner(false);
-  };
-
-  // ── Service price functions ──
-  const fetchServicePrices = async () => {
-    if (!user) return;
-    const { data, error } = await supabase.from('service_prices').select('*').eq('user_id', user.id).order('created_at', { ascending: true });
-    if (!error && data) { setServicePrices(data); if (data.length > 0) { setSelectedCurrency(data[0].currency); setNewService(prev => ({ ...prev, currency: data[0].currency })); } }
-  };
-  const addServicePrice = async () => {
-    if (!user || !newService.service_name.trim() || !newService.default_price) { toast({ title: "Missing fields", description: "Service name and price are required", variant: "destructive" }); return; }
-    setIsAddingService(true);
-    const { data, error } = await supabase.from('service_prices').insert({ user_id: user.id, service_name: newService.service_name, default_price: parseFloat(newService.default_price), currency: selectedCurrency, is_first_consultation: false } as any).select().single();
-    if (error) toast({ title: "Error", description: "Failed to add service", variant: "destructive" });
-    else { setServicePrices([...servicePrices, data]); setNewService({ service_name: "", default_price: "", currency: selectedCurrency }); toast({ title: "Service added" }); }
-    setIsAddingService(false);
-  };
-  const removeServicePrice = async (id: string) => { const { error } = await supabase.from('service_prices').delete().eq('id', id); if (!error) { setServicePrices(servicePrices.filter(s => s.id !== id)); toast({ title: "Service removed" }); } };
-  const startEditingService = (service: ServicePrice) => { setEditingServiceId(service.id); setEditingService({ service_name: service.service_name, default_price: String(service.default_price) }); };
-  const cancelEditingService = () => { setEditingServiceId(null); setEditingService({ service_name: "", default_price: "" }); };
-  const saveEditingService = async () => {
-    if (!editingServiceId || !editingService.service_name.trim() || !editingService.default_price) { toast({ title: "Missing fields", variant: "destructive" }); return; }
-    setIsSavingService(true);
-    const { error } = await supabase.from('service_prices').update({ service_name: editingService.service_name, default_price: parseFloat(editingService.default_price) }).eq('id', editingServiceId);
-    if (error) toast({ title: "Error", variant: "destructive" });
-    else { setServicePrices(servicePrices.map(s => s.id === editingServiceId ? { ...s, service_name: editingService.service_name, default_price: parseFloat(editingService.default_price) } : s)); setEditingServiceId(null); toast({ title: "Service updated" }); }
-    setIsSavingService(false);
-  };
-  const updateAllServicesCurrency = async (newCurrency: string) => {
-    if (!user || servicePrices.length === 0) { setSelectedCurrency(newCurrency); setNewService(prev => ({ ...prev, currency: newCurrency })); return; }
-    const { error } = await supabase.from('service_prices').update({ currency: newCurrency }).eq('user_id', user.id);
-    if (!error) { setServicePrices(servicePrices.map(s => ({ ...s, currency: newCurrency }))); setSelectedCurrency(newCurrency); setNewService(prev => ({ ...prev, currency: newCurrency })); toast({ title: "Currency updated" }); }
-  };
-
-  // ── CPD Certificate functions ──
-  const fetchCerts = async () => {
-    setCertsLoading(true);
-    const { data, error } = await supabase.from("cpd_certificates").select("*").eq("user_id", user!.id).order("date_earned", { ascending: false });
-    if (!error && data) setCerts(data as any);
-    setCertsLoading(false);
-  };
-  const uploadCertificateFile = async (file: File): Promise<string | null> => {
-    if (!user) return null;
-    const ext = file.name.split('.').pop();
-    const filePath = `${user.id}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("cpd-certificates").upload(filePath, file);
-    if (error) { toast({ title: "Upload Error", description: error.message, variant: "destructive" }); return null; }
-    const { data: urlData } = supabase.storage.from("cpd-certificates").getPublicUrl(filePath);
-    return urlData.publicUrl;
-  };
-  const handleCertSave = async () => {
-    if (!user || !certForm.certificate_name.trim() || !certForm.date_earned) { toast({ title: "Required", description: "Certificate name and date are required", variant: "destructive" }); return; }
-    setCertSaving(true);
-    let certificateUrl: string | null = null;
-    if (certificateFile) { setCertUploading(true); certificateUrl = await uploadCertificateFile(certificateFile); setCertUploading(false); }
-    const record: any = { certificate_name: certForm.certificate_name, issuing_body: certForm.issuing_body || null, date_earned: certForm.date_earned, cpd_points: parseInt(certForm.cpd_points) || 0 };
-    if (certificateUrl) record.certificate_url = certificateUrl;
-    if (editingCertId) {
-      const { error } = await supabase.from("cpd_certificates").update(record).eq("id", editingCertId);
-      if (error) toast({ title: "Error", variant: "destructive" }); else toast({ title: "Updated" });
-    } else {
-      const { error } = await supabase.from("cpd_certificates").insert({ ...record, user_id: user.id });
-      if (error) toast({ title: "Error", variant: "destructive" }); else toast({ title: "Added" });
-    }
-    setCertSaving(false); setShowCertForm(false); setEditingCertId(null);
-    setCertForm({ certificate_name: "", issuing_body: "", date_earned: "", cpd_points: "" });
-    setCertificateFile(null); fetchCerts();
-  };
-  const handleCertEdit = (cert: CPDCertificate) => { setEditingCertId(cert.id); setCertForm({ certificate_name: cert.certificate_name, issuing_body: cert.issuing_body || "", date_earned: cert.date_earned, cpd_points: String(cert.cpd_points) }); setCertificateFile(null); setShowCertForm(true); };
-  const handleCertDelete = async (id: string) => { const { error } = await supabase.from("cpd_certificates").delete().eq("id", id); if (!error) { setCerts(certs.filter(c => c.id !== id)); toast({ title: "Removed" }); } };
-
-  // ── Upload handlers ──
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]; if (!file || !user) return;
-    if (!file.type.startsWith('image/')) { toast({ title: "Invalid file type", variant: "destructive" }); return; }
-    setIsUploadingAvatar(true);
-    const fileExt = file.name.split('.').pop();
-    const filePath = `${user.id}/avatar.${fileExt}`;
-    const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
-    if (uploadError) { toast({ title: "Upload failed", variant: "destructive" }); setIsUploadingAvatar(false); return; }
-    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
-    const { error: updateError } = await supabase.from('profiles').update({ avatar_url: `${publicUrl}?t=${Date.now()}` }).eq('id', user.id);
-    setIsUploadingAvatar(false);
-    if (updateError) toast({ title: "Error", variant: "destructive" });
-    else { toast({ title: "Profile picture updated" }); isSettingFromProfile.current = true; await fetchProfile(); setTimeout(() => { isSettingFromProfile.current = false; }, 200); }
-  };
-
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]; if (!file) return;
-    if (!file.type.startsWith('image/')) { toast({ title: "Invalid file type", variant: "destructive" }); return; }
-    setIsUploadingLogo(true);
-    const { error } = await uploadLogo(file); setIsUploadingLogo(false);
-    if (error) toast({ title: "Upload failed", variant: "destructive" });
-    else { toast({ title: "Logo uploaded" }); isSettingFromProfile.current = true; await fetchProfile(); setTimeout(() => { isSettingFromProfile.current = false; }, 200); }
-  };
-
-  const handleSaveEmail = async () => {
-    if (!user || !editEmail.trim()) return;
-    setIsSavingEmail(true);
-    const { error } = await supabase.auth.updateUser({ email: editEmail.trim() }); setIsSavingEmail(false);
-    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
-    else { toast({ title: "Email updated", description: "A confirmation email has been sent" }); setIsEditingEmail(false); }
   };
 
   // ── Calendar / MFA / Billing handlers ──
@@ -840,7 +359,7 @@ export default function Settings() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-          <p className="text-sm text-muted-foreground">Manage your personal and practice information</p>
+          <p className="text-sm text-muted-foreground">Manage your preferences, security, and billing</p>
         </div>
         <div className="text-sm text-muted-foreground flex items-center gap-1.5">
           {savedStatus === 'saving' && <><Loader2 className="h-3.5 w-3.5 animate-spin" /><span>Saving...</span></>}
@@ -848,562 +367,218 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Profile picture card */}
-      <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="relative group">
-            <Avatar className="h-16 w-16 border-2 border-[hsl(351,81%,49%)]">
-              <AvatarImage key={(profile as any)?.avatar_url} src={(profile as any)?.avatar_url} alt={combinedFullName || "Profile"} />
-              <AvatarFallback className="text-base bg-primary/10 text-primary">{combinedFullName ? getInitials(combinedFullName) : "U"}</AvatarFallback>
-            </Avatar>
-            <label htmlFor="avatar-upload-settings" className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-              <Camera className="h-5 w-5 text-white" />
-            </label>
-            <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" id="avatar-upload-settings" disabled={isUploadingAvatar} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-foreground truncate">{combinedFullName || "Your Name"}</p>
-            <p className="text-sm text-muted-foreground">{user?.email}</p>
-            {isUploadingAvatar && <p className="text-xs text-muted-foreground">Uploading...</p>}
-          </div>
-          {isDoctor && totalCpdPoints > 0 && (
-            <Badge variant="secondary" className="gap-1.5 px-3 py-1.5 shrink-0">
-              <Award className="h-3.5 w-3.5 text-amber-600" />
-              {totalCpdPoints} CPD pts
-            </Badge>
-          )}
-        </div>
-      </div>
-
       {/* Tabs */}
-      <Tabs defaultValue="personal" className="w-full">
+      <Tabs defaultValue="preferences" className="w-full">
         <TabsList className="flex w-full flex-wrap bg-primary justify-start">
-          <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Personal</TabsTrigger>
-          {isDoctor && <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Practice</TabsTrigger>}
-          {isDoctor && <TabsTrigger value="referrals" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Referrals</TabsTrigger>}
-          {isDoctor && <TabsTrigger value="pricing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Pricing</TabsTrigger>}
-          {isDoctor && <TabsTrigger value="certificates" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Certificates{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}</TabsTrigger>}
-          {isDoctor && <TabsTrigger value="moolas" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Moolas</TabsTrigger>}
+          <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Preferences</TabsTrigger>
           <TabsTrigger value="notifications" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Notifications</TabsTrigger>
           <TabsTrigger value="security" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Security</TabsTrigger>
           <TabsTrigger value="billing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Billing</TabsTrigger>
-          <TabsTrigger value="data" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Data</TabsTrigger>
         </TabsList>
 
-        {/* === PERSONAL TAB === */}
-        <TabsContent value="personal" className="mt-4">
-          <Tabs defaultValue="details" className="w-full">
-            <TabsList className="flex w-full bg-muted justify-start mb-4">
-              <TabsTrigger value="details" className="text-xs">Details</TabsTrigger>
-              <TabsTrigger value="preferences" className="text-xs">Preferences</TabsTrigger>
-            </TabsList>
+        {/* === PREFERENCES TAB === */}
+        <TabsContent value="preferences" className="mt-4">
+          <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+            <div className="flex items-center gap-3">
+              <Settings2 className="h-5 w-5 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">Preferences</h2>
+            </div>
 
-            {/* Details Sub-tab */}
-            <TabsContent value="details">
-              <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label>First Name</Label>
-                    <Input value={formData.first_name} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
+            {isPatientRole && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                  <div className="flex-1 mr-3">
+                    <p className="text-[10px] font-medium text-foreground">Auto-email invoice to medical aid</p>
+                    <p className="text-[8px] text-muted-foreground mt-0.5">When your doctor marks an invoice as paid, it will be sent to your insurance claims email.</p>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label>Last Name</Label>
-                    <Input value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
-                  </div>
-                  <div className="space-y-1.5 sm:col-span-2">
-                    <Label>Email</Label>
-                    {isAdmin && isEditingEmail ? (
-                      <div className="flex gap-2">
-                        <Input type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
-                        <Button size="icon" variant="ghost" onClick={handleSaveEmail} disabled={isSavingEmail}>{isSavingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}</Button>
-                        <Button size="icon" variant="ghost" onClick={() => setIsEditingEmail(false)}><X className="h-4 w-4" /></Button>
-                      </div>
-                    ) : (
-                      <div className="flex gap-2">
-                        <Input type="email" value={user?.email || ""} disabled className="bg-muted" />
-                        {isAdmin && <Button size="icon" variant="ghost" onClick={() => { setEditEmail(user?.email || ""); setIsEditingEmail(true); }}><Pencil className="h-4 w-4" /></Button>}
-                      </div>
-                    )}
-                  </div>
+                  <Switch checked={(profile as any)?.auto_email_invoice_to_insurance || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_invoice_to_insurance: c } as any); toast({ title: "Preference updated" }); }} />
                 </div>
-                <div className="space-y-1.5">
-                  <Label>Mobile Number</Label>
-                  <div className="flex gap-2">
-                    <Select value={formData.country_code} onValueChange={(v) => setFormData({ ...formData, country_code: v })}>
-                      <SelectTrigger className="w-[130px]"><SelectValue /></SelectTrigger>
-                      <SelectContent>{COUNTRY_CODES.map(c => <SelectItem key={c.code} value={c.code}><span className="flex items-center gap-1.5">{c.flag} {c.code}</span></SelectItem>)}</SelectContent>
-                    </Select>
-                    <Input type="tel" value={formatPhoneNumber(formData.mobile_number)} onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value.replace(/[^0-9]/g, '') })} placeholder="82 123 4567" className="flex-1" />
+                <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                  <div className="flex-1 mr-3">
+                    <p className="text-[10px] font-medium text-foreground">Auto-email prescription to pharmacy</p>
+                    <p className="text-[8px] text-muted-foreground mt-0.5">When your doctor saves a prescription, it will be sent to your primary pharmacy.</p>
                   </div>
+                  <Switch checked={(profile as any)?.auto_email_prescription_to_pharmacy || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_prescription_to_pharmacy: c } as any); toast({ title: "Preference updated" }); }} />
                 </div>
-                {isDoctor && formData.specialty && (
-                  <div className="space-y-1.5">
-                    <Label>Specialty</Label>
-                    <p className="text-[10px] text-muted-foreground">{formData.specialty}</p>
+                <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                  <div className="flex-1 mr-3">
+                    <p className="text-[10px] font-medium text-foreground">Auto-email certificate to employer</p>
+                    <p className="text-[8px] text-muted-foreground mt-0.5">When your doctor saves a medical certificate, it will be sent to your employer.</p>
                   </div>
-                )}
-                <MailboxSection userId={user?.id} />
+                  <Switch checked={(profile as any)?.auto_email_certificate_to_employer || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_certificate_to_employer: c } as any); toast({ title: "Preference updated" }); }} />
+                </div>
               </div>
-            </TabsContent>
+            )}
 
-            {/* Preferences Sub-tab */}
-            <TabsContent value="preferences">
-              <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+            {isDoctor && (
+              <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <Settings2 className="h-5 w-5 text-primary" />
-                  <h2 className="text-[10px] font-semibold text-foreground">Preferences</h2>
+                  <Users className="h-4 w-4 text-primary" />
+                  <h3 className="text-[9px] font-semibold text-foreground">Patient Management</h3>
                 </div>
-
-                {isPatientRole && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
-                      <div className="flex-1 mr-3">
-                        <p className="text-[10px] font-medium text-foreground">Auto-email invoice to medical aid</p>
-                        <p className="text-[8px] text-muted-foreground mt-0.5">When your doctor marks an invoice as paid, it will be sent to your insurance claims email.</p>
-                      </div>
-                      <Switch checked={(profile as any)?.auto_email_invoice_to_insurance || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_invoice_to_insurance: c } as any); toast({ title: "Preference updated" }); }} />
-                    </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
-                      <div className="flex-1 mr-3">
-                        <p className="text-[10px] font-medium text-foreground">Auto-email prescription to pharmacy</p>
-                        <p className="text-[8px] text-muted-foreground mt-0.5">When your doctor saves a prescription, it will be sent to your primary pharmacy.</p>
-                      </div>
-                      <Switch checked={(profile as any)?.auto_email_prescription_to_pharmacy || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_prescription_to_pharmacy: c } as any); toast({ title: "Preference updated" }); }} />
-                    </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
-                      <div className="flex-1 mr-3">
-                        <p className="text-[10px] font-medium text-foreground">Auto-email certificate to employer</p>
-                        <p className="text-[8px] text-muted-foreground mt-0.5">When your doctor saves a medical certificate, it will be sent to your employer.</p>
-                      </div>
-                      <Switch checked={(profile as any)?.auto_email_certificate_to_employer || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_certificate_to_employer: c } as any); toast({ title: "Preference updated" }); }} />
-                    </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-foreground text-[10px]">Patient Inactivity Threshold</p>
+                    <p className="text-[8px] text-muted-foreground">Automatically mark patients as inactive after this period without a visit</p>
                   </div>
-                )}
-
-                {isDoctor && (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <Users className="h-4 w-4 text-primary" />
-                      <h3 className="text-[9px] font-semibold text-foreground">Patient Management</h3>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-foreground text-[10px]">Patient Inactivity Threshold</p>
-                        <p className="text-[8px] text-muted-foreground">Automatically mark patients as inactive after this period without a visit</p>
-                      </div>
-                      <Select value={inactiveThreshold.toString()} onValueChange={(value) => saveInactiveThreshold(parseInt(value))} disabled={savingThreshold}>
-                        <SelectTrigger className="w-[180px]"><SelectValue placeholder="Select period" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="3">3 months</SelectItem>
-                          <SelectItem value="6">6 months</SelectItem>
-                          <SelectItem value="9">9 months</SelectItem>
-                          <SelectItem value="12">12 months (default)</SelectItem>
-                          <SelectItem value="18">18 months</SelectItem>
-                          <SelectItem value="24">24 months</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                )}
-
-                {/* Language Sub-frame */}
-                <Separator />
-                <div className="space-y-3">
-                  <h3 className="text-[9px] font-semibold text-foreground">Language</h3>
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    <div className="space-y-1.5">
-                      <Label>Country</Label>
-                      <Select value={(profile as any)?.country || "ZA"} onValueChange={async (v) => { await updateProfile({ country: v } as any); toast({ title: "Country updated" }); }}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="ZA">🇿🇦 South Africa</SelectItem><SelectItem value="US">🇺🇸 United States</SelectItem>
-                          <SelectItem value="GB">🇬🇧 United Kingdom</SelectItem><SelectItem value="AU">🇦🇺 Australia</SelectItem>
-                          <SelectItem value="CA">🇨🇦 Canada</SelectItem><SelectItem value="IN">🇮🇳 India</SelectItem>
-                          <SelectItem value="DE">🇩🇪 Germany</SelectItem><SelectItem value="FR">🇫🇷 France</SelectItem>
-                          <SelectItem value="AE">🇦🇪 UAE</SelectItem><SelectItem value="BW">🇧🇼 Botswana</SelectItem>
-                          <SelectItem value="NA">🇳🇦 Namibia</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Language</Label>
-                      <Select value={(profile as any)?.preferred_language || "en"} onValueChange={async (v) => { await updateProfile({ preferred_language: v } as any); toast({ title: "Language updated" }); }}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>{LANGUAGES.map(l => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}</SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Narration Voice</Label>
-                      <div className="flex gap-2">
-                        <Select value={(profile as any)?.narration_voice || "nova"} onValueChange={async (v) => { await updateProfile({ narration_voice: v } as any); toast({ title: "Voice updated" }); }}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="alloy">Alloy</SelectItem><SelectItem value="echo">Echo</SelectItem>
-                            <SelectItem value="fable">Fable</SelectItem><SelectItem value="nova">Nova</SelectItem>
-                            <SelectItem value="onyx">Onyx</SelectItem><SelectItem value="shimmer">Shimmer</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Button variant="outline" size="icon" className="shrink-0" onClick={async () => {
-                          const voice = (profile as any)?.narration_voice || "nova";
-                          toast({ title: "Generating preview..." });
-                          try {
-                            const langCode = profile?.preferred_language || "en";
-                            const sampleText = SAMPLE_TEXTS[langCode] || SAMPLE_TEXTS.en;
-                            const audio = new Audio(); audio.play().catch(() => {});
-                            const { data: { session } } = await supabase.auth.getSession();
-                            const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY }, body: JSON.stringify({ text: sampleText, voice }) });
-                            if (!response.ok) throw new Error('Failed');
-                            const blob = await response.blob(); const url = URL.createObjectURL(blob); audio.src = url; await audio.play(); audio.onended = () => URL.revokeObjectURL(url);
-                          } catch (err: any) { toast({ title: "Preview failed", description: err.message, variant: "destructive" }); }
-                        }}><Volume2 className="h-4 w-4" /></Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Calendar Integration Sub-frame */}
-                <Separator />
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-primary" />
-                    <h3 className="text-[9px] font-semibold text-foreground">Calendar Integration</h3>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        {googleRealConnected && <CheckCircle className="h-4 w-4 text-success" />}
-                        <div>
-                          <p className="font-medium text-foreground text-[10px]">Google Calendar</p>
-                          <p className="text-[8px] text-muted-foreground">{googleRealConnected ? "Connected - Appointments syncing" : "Sync appointments with Google Calendar"}</p>
-                        </div>
-                      </div>
-                      {googleRealConnected ? (
-                        <Button variant="outline" size="sm" onClick={() => handleDisconnect("google")} className="text-destructive hover:text-destructive">Disconnect</Button>
-                      ) : (
-                        <Button variant="outline" size="sm" onClick={() => handleConnect("google")} disabled={googleRealConnecting}>{googleRealConnecting ? "Connecting..." : "Connect"}</Button>
-                      )}
-                    </div>
-                    <Separator />
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        {outlookConnected && <CheckCircle className="h-4 w-4 text-success" />}
-                        <div>
-                          <p className="font-medium text-foreground text-[10px]">Outlook Calendar</p>
-                          <p className="text-[8px] text-muted-foreground">{outlookConnected ? "Connected - Appointments syncing" : "Sync appointments with Outlook"}</p>
-                        </div>
-                      </div>
-                      {outlookConnected ? (
-                        <Button variant="outline" size="sm" onClick={() => handleDisconnect("outlook")} className="text-destructive hover:text-destructive">Disconnect</Button>
-                      ) : (
-                        <Button variant="outline" size="sm" onClick={() => handleConnect("outlook")} disabled={isConnecting === "outlook"}>{isConnecting === "outlook" ? "Connecting..." : "Connect"}</Button>
-                      )}
-                    </div>
-                  </div>
+                  <Select value={inactiveThreshold.toString()} onValueChange={(value) => saveInactiveThreshold(parseInt(value))} disabled={savingThreshold}>
+                    <SelectTrigger className="w-[180px]"><SelectValue placeholder="Select period" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="3">3 months</SelectItem>
+                      <SelectItem value="6">6 months</SelectItem>
+                      <SelectItem value="9">9 months</SelectItem>
+                      <SelectItem value="12">12 months (default)</SelectItem>
+                      <SelectItem value="18">18 months</SelectItem>
+                      <SelectItem value="24">24 months</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-            </TabsContent>
-          </Tabs>
-        </TabsContent>
+            )}
 
-        {/* === PRACTICE TAB (Doctor only) === */}
-        {isDoctor && (
-          <TabsContent value="practice" className="mt-4">
-            <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
-              <p className="text-sm text-muted-foreground">This information appears on your document templates and letterheads.</p>
+            {/* Language Sub-frame */}
+            <Separator />
+            <div className="space-y-3">
+              <h3 className="text-[9px] font-semibold text-foreground">Language</h3>
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className="space-y-1.5">
-                  <Label>Practice Number</Label>
-                  <Input value={formData.practice_number} onChange={(e) => setFormData({ ...formData, practice_number: e.target.value })} placeholder="e.g., PR123456" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Registration Number</Label>
-                  <Input value={formData.doctor_number} onChange={(e) => setFormData({ ...formData, doctor_number: e.target.value })} placeholder="e.g., MP123456" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Specialty</Label>
-                  <Select value={formData.specialty} onValueChange={(v) => setFormData({ ...formData, specialty: v })}>
-                    <SelectTrigger><SelectValue placeholder="Select specialty" /></SelectTrigger>
-                    <SelectContent>{DOCTOR_SPECIALTIES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Address of Doctor's Rooms</Label>
-                <Textarea value={formData.practice_address} onChange={(e) => setFormData({ ...formData, practice_address: e.target.value })} placeholder="e.g., 123 Medical Centre, Suite 4, Cape Town" rows={2} />
-              </div>
-
-              {/* Logo */}
-              <div className="space-y-1.5">
-                <Label>Practice Logo</Label>
-                <div className="flex items-center gap-3">
-                  {profile?.logo_url && <img src={profile.logo_url} alt="Practice logo" className="h-12 w-auto object-contain rounded border border-border p-1" />}
-                  <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" id="logo-upload-settings" />
-                  <Button variant="outline" size="sm" onClick={() => document.getElementById('logo-upload-settings')?.click()} disabled={isUploadingLogo} className="gap-1.5">
-                    <Upload className="h-3.5 w-3.5" />{isUploadingLogo ? "Uploading..." : profile?.logo_url ? "Change" : "Upload"}
-                  </Button>
-                </div>
-              </div>
-
-              {/* Signature */}
-              <div className="space-y-2">
-                <Label>Digital Signature</Label>
-                <div className="p-3 border border-border rounded-lg bg-background">
-                  <p style={{ fontFamily: getSignatureFontFamily(formData.signature_font), color: getSignatureColor(formData.signature_color), fontSize: `${formData.signature_font_size}px`, fontWeight: formData.signature_bold ? 'bold' : 'normal', fontStyle: formData.signature_italic ? 'italic' : 'normal' }}>{combinedFullName || "Your Name"}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{new Date().toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Font</Label>
-                  <Select value={formData.signature_font} onValueChange={(v) => setFormData({ ...formData, signature_font: v })}>
+                  <Label>Country</Label>
+                  <Select value={(profile as any)?.country || "ZA"} onValueChange={async (v) => { await updateProfile({ country: v } as any); toast({ title: "Country updated" }); }}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{SIGNATURE_FONTS.map(f => <SelectItem key={f.value} value={f.value}><span style={{ fontFamily: f.fontFamily, fontSize: '18px' }}>{f.label}</span></SelectItem>)}</SelectContent>
+                    <SelectContent>
+                      <SelectItem value="ZA">🇿🇦 South Africa</SelectItem><SelectItem value="US">🇺🇸 United States</SelectItem>
+                      <SelectItem value="GB">🇬🇧 United Kingdom</SelectItem><SelectItem value="AU">🇦🇺 Australia</SelectItem>
+                      <SelectItem value="CA">🇨🇦 Canada</SelectItem><SelectItem value="IN">🇮🇳 India</SelectItem>
+                      <SelectItem value="DE">🇩🇪 Germany</SelectItem><SelectItem value="FR">🇫🇷 France</SelectItem>
+                      <SelectItem value="AE">🇦🇪 UAE</SelectItem><SelectItem value="BW">🇧🇼 Botswana</SelectItem>
+                      <SelectItem value="NA">🇳🇦 Namibia</SelectItem>
+                    </SelectContent>
                   </Select>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Color</Label>
-                    <Select value={formData.signature_color} onValueChange={(v) => setFormData({ ...formData, signature_color: v })}>
+                <div className="space-y-1.5">
+                  <Label>Language</Label>
+                  <Select value={(profile as any)?.preferred_language || "en"} onValueChange={async (v) => { await updateProfile({ preferred_language: v } as any); toast({ title: "Language updated" }); }}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{LANGUAGES.map(l => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Narration Voice</Label>
+                  <div className="flex gap-2">
+                    <Select value={(profile as any)?.narration_voice || "nova"} onValueChange={async (v) => { await updateProfile({ narration_voice: v } as any); toast({ title: "Voice updated" }); }}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        {SIGNATURE_COLORS.map(c => (
-                          <SelectItem key={c.value} value={c.value}>
-                            <span className="flex items-center gap-2">
-                              <span className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: c.color }} />
-                              {c.label}
-                            </span>
-                          </SelectItem>
-                        ))}
+                        <SelectItem value="alloy">Alloy</SelectItem><SelectItem value="echo">Echo</SelectItem>
+                        <SelectItem value="fable">Fable</SelectItem><SelectItem value="nova">Nova</SelectItem>
+                        <SelectItem value="onyx">Onyx</SelectItem><SelectItem value="shimmer">Shimmer</SelectItem>
                       </SelectContent>
                     </Select>
+                    <Button variant="outline" size="icon" className="shrink-0" onClick={async () => {
+                      const voice = (profile as any)?.narration_voice || "nova";
+                      toast({ title: "Generating preview..." });
+                      try {
+                        const langCode = profile?.preferred_language || "en";
+                        const sampleText = SAMPLE_TEXTS[langCode] || SAMPLE_TEXTS.en;
+                        const audio = new Audio(); audio.play().catch(() => {});
+                        const { data: { session } } = await supabase.auth.getSession();
+                        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY }, body: JSON.stringify({ text: sampleText, voice }) });
+                        if (!response.ok) throw new Error('Failed');
+                        const blob = await response.blob(); const url = URL.createObjectURL(blob); audio.src = url; await audio.play(); audio.onended = () => URL.revokeObjectURL(url);
+                      } catch (err: any) { toast({ title: "Preview failed", description: err.message, variant: "destructive" }); }
+                    }}><Volume2 className="h-4 w-4" /></Button>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Size: {formData.signature_font_size}px</Label>
-                    <Slider min={16} max={48} step={2} value={[formData.signature_font_size]} onValueChange={([v]) => setFormData({ ...formData, signature_font_size: v })} />
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Toggle pressed={formData.signature_bold} onPressedChange={(v) => setFormData({ ...formData, signature_bold: v })} size="sm" aria-label="Bold" className="h-8 w-8 p-0"><Bold className="h-4 w-4" /></Toggle>
-                  <Toggle pressed={formData.signature_italic} onPressedChange={(v) => setFormData({ ...formData, signature_italic: v })} size="sm" aria-label="Italic" className="h-8 w-8 p-0"><Italic className="h-4 w-4" /></Toggle>
                 </div>
               </div>
+            </div>
 
-              {/* Partners Section */}
-              <Separator className="my-4" />
-              <div className="space-y-4">
+            {/* Calendar Integration Sub-frame */}
+            <Separator />
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-primary" />
+                <h3 className="text-[9px] font-semibold text-foreground">Calendar Integration</h3>
+              </div>
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">Add partners of the same practice. Their information will be available on documents.</p>
-                  {!showAddPartnerForm && <Button variant="outline" size="sm" onClick={() => setShowAddPartnerForm(true)} className="gap-1.5 shrink-0"><Plus className="h-3.5 w-3.5" />Add Partner</Button>}
+                  <div className="flex items-center gap-3">
+                    {googleRealConnected && <CheckCircle className="h-4 w-4 text-success" />}
+                    <div>
+                      <p className="font-medium text-foreground text-[10px]">Google Calendar</p>
+                      <p className="text-[8px] text-muted-foreground">{googleRealConnected ? "Connected - Appointments syncing" : "Sync appointments with Google Calendar"}</p>
+                    </div>
+                  </div>
+                  {googleRealConnected ? (
+                    <Button variant="outline" size="sm" onClick={() => handleDisconnect("google")} className="text-destructive hover:text-destructive">Disconnect</Button>
+                  ) : (
+                    <Button variant="outline" size="sm" onClick={() => handleConnect("google")} disabled={googleRealConnecting}>{googleRealConnecting ? "Connecting..." : "Connect"}</Button>
+                  )}
                 </div>
-                {partners.length > 0 && (
-                  <div className="space-y-2">
-                    {partners.map((partner) => (
-                      <div key={partner.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
-                        {editingPartnerId === partner.id ? (
-                          <div className="flex-1 grid gap-2 sm:grid-cols-3 mr-3">
-                            <Input value={editingPartner.full_name} onChange={(e) => setEditingPartner({ ...editingPartner, full_name: e.target.value })} placeholder="Full name" />
-                            <Input value={editingPartner.registration_number} onChange={(e) => setEditingPartner({ ...editingPartner, registration_number: e.target.value })} placeholder="Registration number" />
-                            <Input value={editingPartner.mobile_number} onChange={(e) => setEditingPartner({ ...editingPartner, mobile_number: e.target.value })} placeholder="Mobile (optional)" />
-                          </div>
-                        ) : (
-                          <div>
-                            <p className="font-medium text-sm text-foreground">{partner.full_name}</p>
-                            <p className="text-xs text-muted-foreground">Reg: {partner.registration_number}{partner.mobile_number && ` · ${partner.mobile_number}`}</p>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-0.5">
-                          {editingPartnerId === partner.id ? (
-                            <>
-                              <Button variant="ghost" size="icon" onClick={saveEditingPartner} disabled={isSavingPartner} className="h-7 w-7 text-success">{isSavingPartner ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}</Button>
-                              <Button variant="ghost" size="icon" onClick={cancelEditingPartner} className="h-7 w-7"><X className="h-3.5 w-3.5" /></Button>
-                            </>
-                          ) : (
-                            <>
-                              <Button variant="ghost" size="icon" onClick={() => startEditingPartner(partner)} className="h-7 w-7"><Pencil className="h-3.5 w-3.5" /></Button>
-                              <Button variant="ghost" size="icon" title="Invite" onClick={async () => {
-                                const partnerEmail = (partner as any).email;
-                                if (!partnerEmail) { toast({ title: "No email", variant: "destructive" }); return; }
-                                try { await supabase.functions.invoke('send-user-invitation', { body: { recipientEmail: partnerEmail, senderName: profile?.full_name || 'A colleague', message: 'You have been invited to join Holarc as a practice partner.', isPracticePartner: true, partnerName: partner.full_name } }); toast({ title: "Invitation sent" }); } catch { toast({ title: "Error", variant: "destructive" }); }
-                              }} className="h-7 w-7 text-primary"><UserPlus className="h-3.5 w-3.5" /></Button>
-                              <Button variant="ghost" size="icon" onClick={() => removePartner(partner.id)} className="h-7 w-7 text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {showAddPartnerForm && (
-                  <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-1.5"><Label>Full Name *</Label><Input value={newPartner.full_name} onChange={(e) => setNewPartner({ ...newPartner, full_name: e.target.value })} placeholder="Dr. Jane Doe" /></div>
-                      <div className="space-y-1.5"><Label>Registration Number *</Label><Input value={newPartner.registration_number} onChange={(e) => setNewPartner({ ...newPartner, registration_number: e.target.value })} placeholder="e.g., MP654321" /></div>
-                      <div className="space-y-1.5"><Label>Mobile (Optional)</Label><Input value={newPartner.mobile_number} onChange={(e) => setNewPartner({ ...newPartner, mobile_number: e.target.value })} /></div>
-                      <div className="space-y-1.5"><Label>Email *</Label><Input type="email" value={newPartner.email} onChange={(e) => setNewPartner({ ...newPartner, email: e.target.value })} placeholder="partner@example.com" /></div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" onClick={addPartner} disabled={isAddingPartner} className="gap-1.5"><Save className="h-3.5 w-3.5" />{isAddingPartner ? "Saving..." : "Save"}</Button>
-                      <Button size="sm" variant="outline" onClick={() => { setShowAddPartnerForm(false); setNewPartner({ full_name: "", registration_number: "", mobile_number: "", email: "" }); }}>Cancel</Button>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {outlookConnected && <CheckCircle className="h-4 w-4 text-success" />}
+                    <div>
+                      <p className="font-medium text-foreground text-[10px]">Outlook Calendar</p>
+                      <p className="text-[8px] text-muted-foreground">{outlookConnected ? "Connected - Appointments syncing" : "Sync appointments with Outlook"}</p>
                     </div>
                   </div>
-                )}
+                  {outlookConnected ? (
+                    <Button variant="outline" size="sm" onClick={() => handleDisconnect("outlook")} className="text-destructive hover:text-destructive">Disconnect</Button>
+                  ) : (
+                    <Button variant="outline" size="sm" onClick={() => handleConnect("outlook")} disabled={isConnecting === "outlook"}>{isConnecting === "outlook" ? "Connecting..." : "Connect"}</Button>
+                  )}
+                </div>
               </div>
             </div>
-          </TabsContent>
-        )}
 
-
-        {/* === REFERRALS TAB (Doctor only) === */}
-        {isDoctor && (
-          <TabsContent value="referrals" className="mt-4">
-            <ReferralDoctors />
-          </TabsContent>
-        )}
-
-        {/* === PRICING TAB (Doctor only) === */}
-        {isDoctor && (
-          <TabsContent value="pricing" className="mt-4">
-            <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
-              <p className="text-sm text-muted-foreground">Define your service types and default prices for invoicing.</p>
-              <div className="space-y-1.5">
-                <Label>Currency</Label>
-                <Select value={selectedCurrency} onValueChange={updateAllServicesCurrency}>
-                  <SelectTrigger className="w-[240px]"><SelectValue /></SelectTrigger>
-                  <SelectContent>{CURRENCIES.map(c => <SelectItem key={c.code} value={c.code}>{c.symbol} - {c.name}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              {servicePrices.length > 0 && (
+            {/* Digital Signature Sub-frame */}
+            {isDoctor && (
+              <>
+                <Separator />
                 <div className="space-y-2">
-                  {servicePrices.map((service) => (
-                    <div key={service.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
-                      {editingServiceId === service.id ? (
-                        <div className="flex-1 grid gap-2 sm:grid-cols-2 mr-3">
-                          <Input value={editingService.service_name} onChange={(e) => setEditingService({ ...editingService, service_name: e.target.value })} />
-                          <div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{getCurrencySymbol(selectedCurrency)}</span><Input type="number" step="0.01" min="0" value={editingService.default_price} onChange={(e) => setEditingService({ ...editingService, default_price: e.target.value })} className="pl-8" /></div>
-                        </div>
-                      ) : (
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium text-sm text-foreground">{service.service_name}</p>
-                            {(service as any).is_first_consultation && <Badge variant="secondary" className="text-xs">1st Consult</Badge>}
-                          </div>
-                          <p className="text-xs text-muted-foreground">{getCurrencySymbol(service.currency)} {Number(service.default_price).toFixed(2)}</p>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-0.5">
-                        {editingServiceId === service.id ? (
-                          <>
-                            <Button variant="ghost" size="icon" onClick={saveEditingService} disabled={isSavingService} className="h-7 w-7 text-success">{isSavingService ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}</Button>
-                            <Button variant="ghost" size="icon" onClick={cancelEditingService} className="h-7 w-7"><X className="h-3.5 w-3.5" /></Button>
-                          </>
-                        ) : (
-                          <>
-                            <Button variant="ghost" size="icon" title={(service as any).is_first_consultation ? "Remove first consult" : "Set as first consult"} onClick={async () => {
-                              if (!(service as any).is_first_consultation) { const f = servicePrices.find((s: any) => s.is_first_consultation); if (f) await supabase.from('service_prices').update({ is_first_consultation: false } as any).eq('id', f.id); }
-                              const nv = !(service as any).is_first_consultation;
-                              await supabase.from('service_prices').update({ is_first_consultation: nv } as any).eq('id', service.id);
-                              setServicePrices(servicePrices.map(s => ({ ...s, is_first_consultation: s.id === service.id ? nv : (nv ? false : (s as any).is_first_consultation) })));
-                              toast({ title: nv ? "First consultation fee set" : "Removed" });
-                            }} className={cn("h-7 w-7", (service as any).is_first_consultation ? "text-primary" : "text-muted-foreground")}><Award className="h-3.5 w-3.5" /></Button>
-                            <Button variant="ghost" size="icon" onClick={() => startEditingService(service)} className="h-7 w-7"><Pencil className="h-3.5 w-3.5" /></Button>
-                            <Button variant="ghost" size="icon" onClick={() => removeServicePrice(service.id)} className="h-7 w-7 text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
-                <p className="text-sm font-medium text-foreground">Add New Service</p>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-1.5"><Label>Service Name *</Label><Input value={newService.service_name} onChange={(e) => setNewService({ ...newService, service_name: e.target.value })} placeholder="e.g., Consultation" /></div>
-                  <div className="space-y-1.5">
-                    <Label>Price ({getCurrencySymbol(selectedCurrency)}) *</Label>
-                    <div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{getCurrencySymbol(selectedCurrency)}</span><Input type="number" step="0.01" min="0" value={newService.default_price} onChange={(e) => setNewService({ ...newService, default_price: e.target.value })} className="pl-8" /></div>
+                  <Label className="text-sm font-semibold">Digital Signature</Label>
+                  <div className="p-3 border border-border rounded-lg bg-background">
+                    <p style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), color: getSignatureColor(sigFormData.signature_color), fontSize: `${sigFormData.signature_font_size}px`, fontWeight: sigFormData.signature_bold ? 'bold' : 'normal', fontStyle: sigFormData.signature_italic ? 'italic' : 'normal' }}>{combinedFullName}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{new Date().toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                   </div>
-                </div>
-                <Button size="sm" onClick={addServicePrice} disabled={isAddingService} className="gap-1.5"><Plus className="h-3.5 w-3.5" />{isAddingService ? "Adding..." : "Add Service"}</Button>
-              </div>
-            </div>
-          </TabsContent>
-        )}
-
-        {/* === CERTIFICATES TAB (Doctor only) === */}
-        {isDoctor && (
-          <TabsContent value="certificates" className="mt-4">
-            <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">Track your continuing professional development certificates and CPD points.</p>
-                <Button size="sm" onClick={() => { setShowCertForm(true); setEditingCertId(null); setCertForm({ certificate_name: "", issuing_body: "", date_earned: "", cpd_points: "" }); setCertificateFile(null); }} className="gap-1.5 shrink-0"><Plus className="h-3.5 w-3.5" />Add Certificate</Button>
-              </div>
-              {showCertForm && (
-                <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
-                  <p className="text-sm font-medium">{editingCertId ? "Edit" : "Add"} Certificate</p>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Font</Label>
+                    <Select value={sigFormData.signature_font} onValueChange={(v) => setSigFormData({ ...sigFormData, signature_font: v })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>{SIGNATURE_FONTS.map(f => <SelectItem key={f.value} value={f.value}><span style={{ fontFamily: f.fontFamily, fontSize: '18px' }}>{f.label}</span></SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-1.5"><Label>Certificate Name *</Label><Input value={certForm.certificate_name} onChange={(e) => setCertForm({ ...certForm, certificate_name: e.target.value })} placeholder="e.g., Advanced Cardiac Life Support" /></div>
-                    <div className="space-y-1.5"><Label>Issuing Body</Label><Input value={certForm.issuing_body} onChange={(e) => setCertForm({ ...certForm, issuing_body: e.target.value })} placeholder="e.g., HPCSA" /></div>
-                    <div className="space-y-1.5"><Label>Date Earned *</Label><Input type="date" value={certForm.date_earned} onChange={(e) => setCertForm({ ...certForm, date_earned: e.target.value })} /></div>
-                    <div className="space-y-1.5"><Label>CPD Points</Label><Input type="number" min="0" value={certForm.cpd_points} onChange={(e) => setCertForm({ ...certForm, cpd_points: e.target.value })} /></div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Attach Certificate</Label>
-                    <div className="flex items-center gap-2">
-                      <input ref={certFileInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" className="hidden" onChange={(e) => setCertificateFile(e.target.files?.[0] || null)} />
-                      <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => certFileInputRef.current?.click()}><Upload className="h-3.5 w-3.5" />{certificateFile ? certificateFile.name : "Choose File"}</Button>
-                      {certificateFile && <Button type="button" variant="ghost" size="sm" onClick={() => setCertificateFile(null)}>Remove</Button>}
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Color</Label>
+                      <Select value={sigFormData.signature_color} onValueChange={(v) => setSigFormData({ ...sigFormData, signature_color: v })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {SIGNATURE_COLORS.map(c => (
+                            <SelectItem key={c.value} value={c.value}>
+                              <span className="flex items-center gap-2">
+                                <span className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: c.color }} />
+                                {c.label}
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Size: {sigFormData.signature_font_size}px</Label>
+                      <Slider min={16} max={48} step={2} value={[sigFormData.signature_font_size]} onValueChange={([v]) => setSigFormData({ ...sigFormData, signature_font_size: v })} />
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={handleCertSave} disabled={certSaving || certUploading}>{(certSaving || certUploading) && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}{certUploading ? "Uploading..." : editingCertId ? "Update" : "Save"}</Button>
-                    <Button size="sm" variant="outline" onClick={() => { setShowCertForm(false); setEditingCertId(null); setCertificateFile(null); }}>Cancel</Button>
+                    <Toggle pressed={sigFormData.signature_bold} onPressedChange={(v) => setSigFormData({ ...sigFormData, signature_bold: v })} size="sm" aria-label="Bold" className="h-8 w-8 p-0"><Bold className="h-4 w-4" /></Toggle>
+                    <Toggle pressed={sigFormData.signature_italic} onPressedChange={(v) => setSigFormData({ ...sigFormData, signature_italic: v })} size="sm" aria-label="Italic" className="h-8 w-8 p-0"><Italic className="h-4 w-4" /></Toggle>
                   </div>
                 </div>
-              )}
-              {certsLoading ? (
-                <div className="py-8 text-center"><Loader2 className="h-5 w-5 animate-spin mx-auto text-primary" /></div>
-              ) : certs.length === 0 ? (
-                <div className="py-8 text-center text-muted-foreground text-sm">No certificates recorded yet</div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Certificate</TableHead><TableHead>Issuing Body</TableHead><TableHead>Date</TableHead>
-                      <TableHead className="text-center">Points</TableHead><TableHead>File</TableHead><TableHead className="w-[80px]"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {certs.map((cert) => (
-                      <TableRow key={cert.id}>
-                        <TableCell className="font-medium text-sm">{cert.certificate_name}</TableCell>
-                        <TableCell className="text-sm">{cert.issuing_body || "-"}</TableCell>
-                        <TableCell className="text-sm">{format(new Date(cert.date_earned), "MMM d, yyyy")}</TableCell>
-                        <TableCell className="text-center"><Badge variant="outline">{cert.cpd_points}</Badge></TableCell>
-                        <TableCell>
-                          {cert.certificate_url ? (
-                            <a href={cert.certificate_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline"><ExternalLink className="h-3 w-3" />View</a>
-                          ) : <span className="text-muted-foreground text-xs">-</span>}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-0.5">
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleCertEdit(cert)}><Pencil className="h-3.5 w-3.5" /></Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleCertDelete(cert.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </div>
-          </TabsContent>
-        )}
-
-        {/* === MOOLAS TAB (Doctor only) === */}
-        {isDoctor && (
-          <TabsContent value="moolas" className="mt-4">
-            <DoctorMoolasTab userId={user?.id} />
-          </TabsContent>
-        )}
-
+              </>
+            )}
+          </div>
+        </TabsContent>
 
         {/* === NOTIFICATIONS TAB === */}
         <TabsContent value="notifications" className="mt-4">
@@ -1431,8 +606,8 @@ export default function Settings() {
           </div>
         </TabsContent>
 
-        {/* === SECURITY TAB === */}
-        <TabsContent value="security" className="mt-4">
+        {/* === SECURITY TAB (with Data Management) === */}
+        <TabsContent value="security" className="mt-4 space-y-4">
           <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <Shield className="h-5 w-5 text-primary" />
@@ -1457,79 +632,8 @@ export default function Settings() {
               <div><Button variant="outline" onClick={() => (window.location.href = "/forgot-password")}>Change Password</Button></div>
             </div>
           </div>
-        </TabsContent>
 
-        {/* === BILLING TAB === */}
-        <TabsContent value="billing" className="mt-4 space-y-4">
-          <div className="flex gap-2 mb-2">
-            <Button variant={activeBillingTab === "plan" ? "default" : "outline"} size="sm" onClick={() => setActiveBillingTab("plan")}>Subscription</Button>
-            <Button variant={activeBillingTab === "history" ? "default" : "outline"} size="sm" onClick={() => setActiveBillingTab("history")}>Payment History</Button>
-          </div>
-          {activeBillingTab === "plan" && (
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-6">
-                <CreditCard className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold text-foreground">Billing</h2>
-              </div>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div><p className="font-medium text-foreground">Current Plan</p><p className="text-sm text-muted-foreground">{loadingSubscription ? "Loading..." : getCurrentPlanName()}</p></div>
-                  {subscription?.status === "active" ? <Badge variant="default" className="bg-green-600">Active</Badge> : subscription?.status === "cancelled" ? <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">Cancelled</Badge> : <Badge variant="secondary">Inactive</Badge>}
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <div><p className="font-medium text-foreground">Subscription Status</p><p className="text-sm text-muted-foreground">{loadingSubscription ? "Loading..." : getSubscriptionStatus()}</p></div>
-                  <div className="flex gap-2">
-                    {subscription?.status === "active" && <Button variant="outline" onClick={() => setShowCancelDialog(true)} className="text-destructive hover:text-destructive">Cancel</Button>}
-                    {subscription?.status === "cancelled" && (
-                      <Button variant="outline" onClick={handleReactivateSubscription} disabled={reactivatingSubscription} className="text-green-600 hover:text-green-700">
-                        {reactivatingSubscription ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Reactivating...</> : <><RotateCcw className="h-4 w-4 mr-2" />Reactivate</>}
-                      </Button>
-                    )}
-                    <Button variant="outline" onClick={() => setShowManagePlan(true)}>{subscription?.status === "active" ? "Change Plan" : subscription?.status === "cancelled" ? "Change Plan" : "Subscribe"}</Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-          {activeBillingTab === "history" && (
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-6">
-                <Receipt className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold text-foreground">Payment History</h2>
-              </div>
-              {loadingPaymentHistory ? (
-                <div className="flex items-center justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
-              ) : paymentHistory.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No payment history yet</p>
-              ) : (
-                <div className="rounded-lg border border-border overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-muted/50">
-                        <TableHead>Date</TableHead><TableHead>Description</TableHead><TableHead>Amount</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Receipt</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {paymentHistory.map((payment) => (
-                        <TableRow key={payment.id}>
-                          <TableCell className="font-medium">{format(new Date(payment.created_at), "MMM d, yyyy")}</TableCell>
-                          <TableCell>{payment.description}</TableCell>
-                          <TableCell>${payment.amount.toFixed(2)}</TableCell>
-                          <TableCell><Badge variant={payment.status === "completed" ? "default" : "destructive"} className="capitalize">{payment.status}</Badge></TableCell>
-                          <TableCell className="text-right"><Button variant="ghost" size="sm" onClick={() => handleDownloadReceipt(payment)}><Download className="h-4 w-4 mr-1" />Download</Button></TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </div>
-          )}
-        </TabsContent>
-
-        {/* === DATA MANAGEMENT TAB === */}
-        <TabsContent value="data" className="mt-4">
+          {/* Data Management frame */}
           <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <Database className="h-5 w-5 text-primary" />
@@ -1539,6 +643,70 @@ export default function Settings() {
               <Button variant="outline">Export All Data</Button>
               <p className="text-sm text-muted-foreground">Download all your client data, documents, and session records</p>
             </div>
+          </div>
+        </TabsContent>
+
+        {/* === BILLING TAB (two distinct frames) === */}
+        <TabsContent value="billing" className="mt-4 space-y-4">
+          {/* Subscription Frame */}
+          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-6">
+              <CreditCard className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold text-foreground">Subscription</h2>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div><p className="font-medium text-foreground">Current Plan</p><p className="text-sm text-muted-foreground">{loadingSubscription ? "Loading..." : getCurrentPlanName()}</p></div>
+                {subscription?.status === "active" ? <Badge variant="default" className="bg-green-600">Active</Badge> : subscription?.status === "cancelled" ? <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">Cancelled</Badge> : <Badge variant="secondary">Inactive</Badge>}
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div><p className="font-medium text-foreground">Subscription Status</p><p className="text-sm text-muted-foreground">{loadingSubscription ? "Loading..." : getSubscriptionStatus()}</p></div>
+                <div className="flex gap-2">
+                  {subscription?.status === "active" && <Button variant="outline" onClick={() => setShowCancelDialog(true)} className="text-destructive hover:text-destructive">Cancel</Button>}
+                  {subscription?.status === "cancelled" && (
+                    <Button variant="outline" onClick={handleReactivateSubscription} disabled={reactivatingSubscription} className="text-green-600 hover:text-green-700">
+                      {reactivatingSubscription ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Reactivating...</> : <><RotateCcw className="h-4 w-4 mr-2" />Reactivate</>}
+                    </Button>
+                  )}
+                  <Button variant="outline" onClick={() => setShowManagePlan(true)}>{subscription?.status === "active" ? "Change Plan" : subscription?.status === "cancelled" ? "Change Plan" : "Subscribe"}</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Payment History Frame */}
+          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-6">
+              <Receipt className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold text-foreground">Payment History</h2>
+            </div>
+            {loadingPaymentHistory ? (
+              <div className="flex items-center justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+            ) : paymentHistory.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No payment history yet</p>
+            ) : (
+              <div className="rounded-lg border border-border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead>Date</TableHead><TableHead>Description</TableHead><TableHead>Amount</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Receipt</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paymentHistory.map((payment) => (
+                      <TableRow key={payment.id}>
+                        <TableCell className="font-medium">{format(new Date(payment.created_at), "MMM d, yyyy")}</TableCell>
+                        <TableCell>{payment.description}</TableCell>
+                        <TableCell>${payment.amount.toFixed(2)}</TableCell>
+                        <TableCell><Badge variant={payment.status === "completed" ? "default" : "destructive"} className="capitalize">{payment.status}</Badge></TableCell>
+                        <TableCell className="text-right"><Button variant="ghost" size="sm" onClick={() => handleDownloadReceipt(payment)}><Download className="h-4 w-4 mr-1" />Download</Button></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </div>
         </TabsContent>
       </Tabs>
