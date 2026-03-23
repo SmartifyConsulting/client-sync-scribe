@@ -66,6 +66,8 @@ interface PartnerApp {
   name: string;
   logo_url: string | null;
   is_active: boolean;
+  creator: string | null;
+  signup_url: string | null;
 }
 
 interface MoolaTransfer {
