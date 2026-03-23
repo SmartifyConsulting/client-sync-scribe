@@ -24,7 +24,7 @@ interface RoundTableProps {
   hideHeader?: boolean;
 }
 
-export function RoundTable({ patientId, patientName, onUnreadCountChange }: RoundTableProps) {
+export function RoundTable({ patientId, patientName, onUnreadCountChange, hideHeader = false }: RoundTableProps) {
   const { toast } = useToast();
   const [notes, setNotes] = useState<RoundTableNote[]>([]);
   const [loading, setLoading] = useState(true);
