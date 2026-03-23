@@ -250,7 +250,8 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
         queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
         onComplete();
       } else {
-        setRecordedBlob(null);
+        setCapturedBlob(null);
+        setCapturedUrl(null);
         startCamera();
         const reason = validation?.description || "Could not verify task completion.";
         const missing: string[] = [];
