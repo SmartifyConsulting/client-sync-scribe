@@ -26,6 +26,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -68,56 +75,66 @@ interface UnifiedDocument {
 
 const DOC_TYPE_CONFIG: Record<
   DocType,
-  { label: string; color: string; icon: typeof FileText }
+  { label: string; color: string; borderColor: string; icon: typeof FileText }
 > = {
   prescription: {
     label: "Prescription",
     color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
+    borderColor: "border-emerald-400",
     icon: Pill,
   },
   invoice: {
     label: "Invoice",
     color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
+    borderColor: "border-amber-400",
     icon: Receipt,
   },
   medical_certificate: {
     label: "Medical Certificate",
     color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+    borderColor: "border-blue-400",
     icon: FileCheck,
   },
   referral_letter: {
     label: "Referral Letter",
     color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+    borderColor: "border-purple-400",
     icon: Send,
   },
   general_letter: {
     label: "General Letter",
     color: "bg-slate-100 text-slate-700 dark:bg-slate-800/50 dark:text-slate-300",
+    borderColor: "border-slate-400",
     icon: FileText,
   },
   hospital_admission: {
     label: "Hospital Admission",
     color: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400",
+    borderColor: "border-rose-400",
     icon: FileText,
   },
   audio: {
     label: "Audio",
     color: "bg-muted text-muted-foreground",
+    borderColor: "border-muted-foreground/50",
     icon: Mic,
   },
   video: {
     label: "Video",
     color: "bg-muted text-muted-foreground",
+    borderColor: "border-muted-foreground/50",
     icon: Video,
   },
   image: {
     label: "Image",
     color: "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-400",
+    borderColor: "border-sky-400",
     icon: Image,
   },
   file: {
     label: "File",
     color: "bg-muted text-muted-foreground",
+    borderColor: "border-muted-foreground/50",
     icon: File,
   },
 };
@@ -697,33 +714,32 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
         </CardContent>
       </Card>
 
-      {/* Filter Bar */}
-      <div className="flex flex-wrap gap-2">
-        {FILTER_OPTIONS.map((opt) => {
-          const isActive = filter === opt.value;
-          const config =
-            opt.value !== "all" ? DOC_TYPE_CONFIG[opt.value] : null;
-          return (
-            <button
-              key={opt.value}
-              onClick={() => setFilter(opt.value)}
-              className={`inline-flex items-center rounded-full px-2 py-0.5 text-[8px] font-medium transition-colors ${
-                isActive
-                  ? "bg-primary text-primary-foreground"
-                  : config
-                  ? config.color
-                  : "bg-muted text-muted-foreground"
-              } hover:opacity-80`}
-            >
-              {opt.label}
-              {opt.value !== "all" && (
-                <span className="ml-1.5 opacity-70">
-                  {documents.filter((d) => d.type === opt.value).length}
-                </span>
-              )}
-            </button>
-          );
-        })}
+      {/* Filter Dropdown */}
+      <div className="flex items-center gap-2">
+        <Select value={filter} onValueChange={(v) => setFilter(v as DocType | "all")}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filter by type" />
+          </SelectTrigger>
+          <SelectContent>
+            {FILTER_OPTIONS.map((opt) => {
+              const config = opt.value !== "all" ? DOC_TYPE_CONFIG[opt.value] : null;
+              const OptIcon = config?.icon;
+              return (
+                <SelectItem key={opt.value} value={opt.value}>
+                  <span className="flex items-center gap-2">
+                    {OptIcon && <OptIcon className="h-3.5 w-3.5" />}
+                    {opt.label}
+                    {opt.value !== "all" && (
+                      <span className="text-muted-foreground">
+                        ({documents.filter((d) => d.type === opt.value).length})
+                      </span>
+                    )}
+                  </span>
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Documents List */}
@@ -751,7 +767,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
             const isAnalyzing = analyzingDocId === doc.id;
             const isImageDoc = doc.type === "image" && doc.mediaUrl;
             return (
-              <Card key={`${doc.source}-${doc.id}`} className="hover:shadow-sm transition-shadow">
+              <Card key={`${doc.source}-${doc.id}`} className={`hover:shadow-sm transition-shadow border-l-4 ${config.borderColor}`}>
                 <CardContent className="flex items-center gap-4 py-4">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                     {isImageDoc ? (
@@ -769,12 +785,9 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                       {doc.name}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                      <Badge
-                        variant="secondary"
-                        className={`text-xs border-0 ${config.color}`}
-                      >
-                        {config.label}
-                      </Badge>
+                      <span className={`inline-flex items-center justify-center h-5 w-5 rounded-full ${config.color}`} title={config.label}>
+                        <IconComponent className="h-3 w-3" />
+                      </span>
                       {doc.aiAnalysis && (
                         <Badge variant="secondary" className="text-xs border-0 bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400 gap-1">
                           <Sparkles className="h-3 w-3" />
