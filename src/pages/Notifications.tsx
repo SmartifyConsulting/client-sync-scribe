@@ -21,7 +21,9 @@ import {
   Volume2,
   VolumeX,
   MessageCircle,
+  Star,
 } from "lucide-react";
+import { StarRatingDialog } from "@/components/sessions/StarRatingDialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
