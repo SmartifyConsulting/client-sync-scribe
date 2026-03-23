@@ -137,6 +137,51 @@ export default function Settings() {
   const [inactiveThreshold, setInactiveThreshold] = useState<number>(12);
   const [savingThreshold, setSavingThreshold] = useState(false);
 
+  // Personal info state
+  const [personalFirstName, setPersonalFirstName] = useState("");
+  const [personalLastName, setPersonalLastName] = useState("");
+  const [personalMobile, setPersonalMobile] = useState("");
+  const [personalCountryCode, setPersonalCountryCode] = useState("+27");
+  const [savingPersonal, setSavingPersonal] = useState(false);
+
+  const COUNTRY_CODES = [
+    { code: "+27", country: "South Africa", flag: "🇿🇦" },
+    { code: "+1", country: "USA/Canada", flag: "🇺🇸" },
+    { code: "+44", country: "United Kingdom", flag: "🇬🇧" },
+    { code: "+61", country: "Australia", flag: "🇦🇺" },
+    { code: "+49", country: "Germany", flag: "🇩🇪" },
+    { code: "+33", country: "France", flag: "🇫🇷" },
+    { code: "+91", country: "India", flag: "🇮🇳" },
+    { code: "+971", country: "UAE", flag: "🇦🇪" },
+  ];
+
+  // Load personal info from profile
+  useEffect(() => {
+    if (profile) {
+      const fullName = profile.full_name || "";
+      const spaceIdx = fullName.indexOf(" ");
+      setPersonalFirstName(spaceIdx > -1 ? fullName.slice(0, spaceIdx) : fullName);
+      setPersonalLastName(spaceIdx > -1 ? fullName.slice(spaceIdx + 1) : "");
+      let mobile = (profile as any).mobile_number || "";
+      const matchedCode = COUNTRY_CODES.find(c => mobile.startsWith(c.code));
+      if (matchedCode) {
+        setPersonalCountryCode(matchedCode.code);
+        mobile = mobile.replace(matchedCode.code, "").trim();
+      }
+      setPersonalMobile(mobile);
+    }
+  }, [profile]);
+
+  const savePersonalInfo = async () => {
+    if (!user) return;
+    setSavingPersonal(true);
+    const fullName = `${personalFirstName} ${personalLastName}`.trim();
+    const fullMobile = personalMobile ? `${personalCountryCode}${personalMobile.replace(/^0+/, '')}` : "";
+    await updateProfile({ full_name: fullName, mobile_number: fullMobile } as any);
+    setSavingPersonal(false);
+    toast({ title: "Personal info saved" });
+  };
+
   // Get the appropriate plan type based on user role
   const planType = role === "patient" ? "patient" : "doctor";
 
