@@ -71,7 +71,11 @@ interface DoctorProfileSuggestion {
 
 type AddMode = "search" | "manual" | "invite";
 
-export default function ReferralDoctors() {
+interface ReferralDoctorsProps {
+  hideHeader?: boolean;
+}
+
+export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const { profile } = useProfile();
@@ -260,16 +264,26 @@ export default function ReferralDoctors() {
   const noSearchResults = profileSearch.length >= 3 && !searchingProfiles && profileSuggestions.length === 0;
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Referrals</h1>
-          <p className="mt-1 text-muted-foreground">Manage doctors you refer patients to</p>
+    <div className={hideHeader ? "space-y-4 animate-fade-in" : "space-y-6 animate-fade-in"}>
+      {!hideHeader && (
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Referrals</h1>
+            <p className="mt-1 text-muted-foreground">Manage doctors you refer patients to</p>
+          </div>
+          <Button onClick={() => { resetForm(); setShowForm(true); }} className="gap-2">
+            <Plus className="h-4 w-4" /> Add Doctor
+          </Button>
         </div>
-        <Button onClick={() => { resetForm(); setShowForm(true); }} className="gap-2">
-          <Plus className="h-4 w-4" /> Add Doctor
-        </Button>
-      </div>
+      )}
+      {hideHeader && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">Manage doctors you refer patients to</p>
+          <Button size="sm" onClick={() => { resetForm(); setShowForm(true); }} className="gap-1.5">
+            <Plus className="h-3.5 w-3.5" /> Add Doctor
+          </Button>
+        </div>
+      )}
 
       {showForm && !editingId && (
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4">

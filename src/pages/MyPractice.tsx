@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Loader2, Check, Camera, Upload, Plus, Trash2, Pencil, X, Phone, Copy,
-  Mail, Save, Award, Bold, Italic, UserPlus, ExternalLink,
+  Mail, Save, Award, Bold, Italic, UserPlus, ExternalLink, User, Building2,
+  DollarSign, GraduationCap, Stethoscope,
 } from "lucide-react";
 import ReferralDoctors from "@/pages/ReferralDoctors";
 import { Button } from "@/components/ui/button";
@@ -448,18 +449,22 @@ export default function MyPractice() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="personal" className="w-full">
+      <Tabs defaultValue="practice" className="w-full">
         <TabsList className="flex w-full flex-wrap bg-primary justify-start">
-          <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Personal</TabsTrigger>
           <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Practice</TabsTrigger>
           <TabsTrigger value="referrals" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Referrals</TabsTrigger>
           <TabsTrigger value="pricing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Pricing</TabsTrigger>
           <TabsTrigger value="certificates" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Certificates{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}</TabsTrigger>
         </TabsList>
 
-        {/* === PERSONAL TAB === */}
-        <TabsContent value="personal" className="mt-4">
+        {/* === PRACTICE TAB (Personal + Practice merged) === */}
+        <TabsContent value="practice" className="mt-4 space-y-4">
+          {/* Personal Information Frame */}
           <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">Personal Information</h3>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label>First Name</Label>
@@ -495,11 +500,13 @@ export default function MyPractice() {
             </div>
             <MailboxSection userId={user?.id} />
           </div>
-        </TabsContent>
 
-        {/* === PRACTICE TAB === */}
-        <TabsContent value="practice" className="mt-4">
+          {/* Practice Details Frame */}
           <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">Practice Details</h3>
+            </div>
             <p className="text-sm text-muted-foreground">This information appears on your document templates and letterheads.</p>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
@@ -592,13 +599,23 @@ export default function MyPractice() {
         </TabsContent>
 
         {/* === REFERRALS TAB === */}
-        <TabsContent value="referrals" className="mt-4">
-          <ReferralDoctors />
+        <TabsContent value="referrals" className="mt-4 space-y-4">
+          <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+            <div className="flex items-center gap-2">
+              <Stethoscope className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">Referral Doctors</h3>
+            </div>
+            <ReferralDoctors hideHeader />
+          </div>
         </TabsContent>
 
         {/* === PRICING TAB === */}
         <TabsContent value="pricing" className="mt-4">
           <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+            <div className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">Pricing</h3>
+            </div>
             <p className="text-sm text-muted-foreground">Define your service types and default prices for invoicing.</p>
             <div className="space-y-1.5">
               <Label>Currency</Label>
@@ -666,6 +683,10 @@ export default function MyPractice() {
         {/* === CERTIFICATES TAB === */}
         <TabsContent value="certificates" className="mt-4">
           <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+            <div className="flex items-center gap-2">
+              <GraduationCap className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">Certificates</h3>
+            </div>
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">Track your continuing professional development certificates and CPD points.</p>
               <Button size="sm" onClick={() => { setShowCertForm(true); setEditingCertId(null); setCertForm({ certificate_name: "", issuing_body: "", date_earned: "", cpd_points: "" }); setCertificateFile(null); }} className="gap-1.5 shrink-0"><Plus className="h-3.5 w-3.5" />Add Certificate</Button>
