@@ -75,9 +75,28 @@ export default function Sessions() {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlPatientId = searchParams.get("patient");
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(urlPatientId);
+  const [doctorName, setDoctorName] = useState<string>("Doctor");
   
   // Use URL param if provided, otherwise use selected patient
   const patientId = urlPatientId || selectedPatientId;
+
+  // Fetch logged-in doctor's name for transcription
+  useEffect(() => {
+    const fetchDoctorName = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .maybeSingle();
+        if (profile?.full_name) {
+          setDoctorName(profile.full_name);
+        }
+      }
+    };
+    fetchDoctorName();
+  }, []);
   
   const [sessionState, setSessionState] = useState<SessionState>("idle");
   const [notes, setNotes] = useState("");
