@@ -72,10 +72,7 @@ export default function CalendarView() {
   const [editedEvent, setEditedEvent] = useState<CalendarEvent | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
-  const [typeColors, setTypeColors] = useState<AppointmentTypeColor[]>([]);
-  const [isColorDialogOpen, setIsColorDialogOpen] = useState(false);
-  const [newColorType, setNewColorType] = useState("");
-  const [newColorValue, setNewColorValue] = useState("#3b82f6");
+  const [serviceColors, setServiceColors] = useState<ServicePriceColor[]>([]);
   const [newAppointment, setNewAppointment] = useState({
     patientId: "",
     date: "",
