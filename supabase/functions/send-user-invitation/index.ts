@@ -15,6 +15,7 @@ interface InvitationRequest {
   senderName?: string | null;
   isPracticePartner?: boolean;
   partnerName?: string | null;
+  isReferral?: boolean;
 }
 
 const handler = async (req: Request): Promise<Response> => {
