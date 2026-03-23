@@ -35,6 +35,8 @@ interface PartnerApp {
   logo_url: string | null;
   is_active: boolean;
   created_at: string;
+  creator: string | null;
+  signup_url: string | null;
 }
 
 export default function GamificationAdmin() {
