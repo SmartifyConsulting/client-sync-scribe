@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Loader2, Plus, Pencil, Trash2, Save, X, Gift, Flame, Calendar, Globe } from "lucide-react";
+import { useState, useRef } from "react";
+import { Loader2, Plus, Pencil, Trash2, Save, X, Gift, Flame, Calendar, Globe, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
