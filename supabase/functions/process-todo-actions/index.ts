@@ -82,6 +82,7 @@ Doctor's patients: ${patientList || "None"}
 Rules:
 - Match patient names fuzzy (e.g. "Faith" matches "Faith Akeno")
 - For scheduling: extract date, time, and duration (default 30min)
+- For the "description" field: ALWAYS include the specific date, time, and patient name. Example: "Schedule appointment with Lisa Anderson on 2026-03-25 at 14:00 (30 min)". NEVER use a vague description like "Schedule appointment".
 - For prescriptions: extract medication, dosage, frequency, instructions
 - For invoices: extract service description, amount (default 0 if not specified)
 - For medical certificates: extract reason and leave period (start/end dates)
@@ -185,8 +186,11 @@ Rules:
 
     for (const action of actions) {
       try {
-        // Resolve patient_id if name provided but no ID matched
+        // Resolve patient_id — validate AI-returned ID exists in doctor's patients
         let patientId = action.patient_id || null;
+        if (patientId && !patients.find((p) => p.id === patientId)) {
+          patientId = null; // Invalid ID from AI, force name-based matching
+        }
         if (!patientId && action.patient_name) {
           const match = patients.find((p) =>
             p.name.toLowerCase().includes(action.patient_name.toLowerCase()) ||

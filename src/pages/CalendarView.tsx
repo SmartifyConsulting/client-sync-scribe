@@ -248,7 +248,7 @@ export default function CalendarView() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Calendar</h1>
-          <p className="mt-1 text-muted-foreground">
+          <p className="text-muted-foreground text-[12px]">
             Manage your appointments and schedule
           </p>
         </div>
