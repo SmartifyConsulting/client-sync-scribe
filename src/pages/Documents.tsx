@@ -128,7 +128,7 @@ const renderFormattedContent = (content: string): string => {
   return safeContent;
 };
 
-export default function Documents() {
+export default function Documents({ hideHeader = false }: { hideHeader?: boolean }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const {
