@@ -605,7 +605,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
           </div>
 
           <div className={sectionFrame}>
-            <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide">Next of Kin</h3>
+            <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Next of Kin</h3>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div className="space-y-1"><Label className="text-xs" htmlFor="next_of_kin_name">Name</Label><Input id="next_of_kin_name" className="text-sm" value={formData.next_of_kin_name} onChange={(e) => updateFormData({ next_of_kin_name: e.target.value })} placeholder="Full name" /></div>
               <div className="space-y-1"><Label className="text-xs" htmlFor="next_of_kin_relationship">Relationship</Label><Input id="next_of_kin_relationship" className="text-sm" value={formData.next_of_kin_relationship} onChange={(e) => updateFormData({ next_of_kin_relationship: e.target.value })} placeholder="e.g. Spouse, Parent" /></div>
