@@ -648,12 +648,21 @@ export default function MyPractice() {
                         </div>
                       </div>
                     ) : (
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-sm text-foreground">{service.service_name}</p>
-                          {(service as any).is_first_consultation && <Badge variant="secondary" className="text-xs">1st Consult</Badge>}
+                      <div className="flex-1 flex items-center gap-3">
+                        <div className="h-6 w-6 rounded-full border border-border shrink-0 cursor-pointer relative group" style={{ backgroundColor: service.color || '#3b82f6' }}>
+                          <input type="color" value={service.color || '#3b82f6'} onChange={async (e) => {
+                            const newColor = e.target.value;
+                            await supabase.from('service_prices').update({ color: newColor } as any).eq('id', service.id);
+                            setServicePrices(servicePrices.map(s => s.id === service.id ? { ...s, color: newColor } : s));
+                          }} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
                         </div>
-                        <p className="text-xs text-muted-foreground">{getCurrencySymbol(service.currency)} {Number(service.default_price).toFixed(2)}</p>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-sm text-foreground">{service.service_name}</p>
+                            {(service as any).is_first_consultation && <Badge variant="secondary" className="text-xs">1st Consult</Badge>}
+                          </div>
+                          <p className="text-xs text-muted-foreground">{getCurrencySymbol(service.currency)} {Number(service.default_price).toFixed(2)}</p>
+                        </div>
                       </div>
                     )}
                     <div className="flex items-center gap-0.5">
