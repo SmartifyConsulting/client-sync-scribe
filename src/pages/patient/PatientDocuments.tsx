@@ -255,6 +255,8 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
         mediaUrl: doc.media_url,
         aiAnalysis: (doc as any).ai_analysis,
         aiAnalyzedAt: (doc as any).ai_analyzed_at,
+        emailSentAt: (doc as any).email_sent_at,
+        patientId: (doc as any).patient_id,
       });
     }
 
