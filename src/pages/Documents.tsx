@@ -354,14 +354,16 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className={cn("animate-fade-in", hideHeader ? "space-y-4" : "space-y-8")}>
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Templates</h1>
-          <p className="mt-1 text-muted-foreground">Manage header/footer layouts and content templates separately</p>
+      {!hideHeader && (
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Templates</h1>
+            <p className="mt-1 text-muted-foreground">Manage header/footer layouts and content templates separately</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Tabs for Template Types */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>

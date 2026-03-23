@@ -41,13 +41,10 @@ const doctorNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard" },
   { icon: User, label: "My Holarchive", to: "/profile" },
   { icon: Settings2, label: "My Practice", to: "/practice" },
-  { icon: Gift, label: "My Rewards", to: "/doctor/rewards" },
-  { icon: Users, label: "My Patients", to: "/patients" },
   { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
   { icon: CheckSquare, label: "To-Do List", to: "/todos" },
-  { icon: Receipt, label: "Invoices", to: "/invoices" },
-  { icon: FileText, label: "Templates", to: "/documents" },
+  { icon: Gift, label: "My Rewards", to: "/doctor/rewards" },
 ];
 
 const patientNavItems: NavItem[] = [
