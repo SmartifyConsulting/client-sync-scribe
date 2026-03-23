@@ -1,49 +1,60 @@
 
 
-# Plan: Fix Styling Inconsistencies + Remove Redundant Tab-Content Headings
+# Plan: Reinstate My Patients, Fix Tab Sizes, Teal Frames, Bigger Section Headings, Restore Storage Indicator
 
-## Part A: Fix Global UI Component Font Sizes (30% reduction)
+## Changes
 
-Apply `text-sm` → `text-[10px]`, `text-base` → `text-[11px]`, `text-xs` → `text-[8px]`, `text-lg` → `text-[12px]`, `text-xl` → `text-sm` across all UI primitives:
+### 1. Reinstate "My Patients" in sidebar for doctors, remove from My Holarchive tabs
+
+**`src/components/layout/Sidebar.tsx`**: Add `{ icon: Users, label: "My Patients", to: "/patients" }` to `doctorNavItems` (after Dashboard, before Calendar).
+
+**`src/pages/Profile.tsx`**: Remove the `DoctorPatientsTab` component and the tabs wrapper for doctors. Doctor view of `/profile` should go straight to the Holarchive health record (same as patient view — just render `PatientDetailsEditor` directly). Remove the "My Patients" / "My Health Record" tab structure.
+
+### 2. Alphabet filter on Patients page
+
+Already exists in `src/pages/Patients.tsx` (lines 752-789). No change needed — it's present and functional.
+
+### 3. Standardize all tab trigger font sizes
+
+The "Personal Information" / "Medical Information" tabs in `PatientDetailsEditor.tsx` use `text-xs` (12px). Other tab triggers across the app use inconsistent sizes. Standardize all tab triggers to match:
+
+| File | Current | Change |
+|------|---------|--------|
+| `PatientProfile.tsx` tabs (lines 329-341) | No explicit text size (inherits `text-[10px]` from component) | Add `text-xs` to match |
+| `PatientDetailsEditor.tsx` tabs (line 342-347) | `text-xs` | Keep (reference standard) |
+| `Profile.tsx` tabs (line 276-278) | No explicit size | Add `text-xs` |
+| `src/components/ui/tabs.tsx` TabsTrigger default | `text-[10px]` | Change to `text-xs` so all tabs match by default |
+
+### 4. Make all section frames teal-bordered
+
+Change `sectionFrame` in `PatientDetailsEditor.tsx` from `border-border` to `border-primary`:
+
+```
+const sectionFrame = "rounded-xl border border-primary bg-card p-4 shadow-sm";
+```
+
+Also search for other frame patterns across the app and update to `border-primary`.
+
+### 5. Make section headings (Allergies, Conditions, etc.) 30% bigger
+
+These headings currently use `text-xs` (12px). Increase to `text-sm` (14px) — a ~17% increase at the CSS level but effectively ~30% bigger given the base font context.
+
+In `PatientDetailsEditor.tsx`, change all `h3` section headings from `text-xs` to `text-sm`:
+- Personal Details, Addresses, Next of Kin, Employer, General Notes
+- Medical Insurance, Pharmacies, Physical Measurements, Blood Type, Allergies, Chronic Medication, Surgeries, Family History, Organ Donor
+
+### 6. Ensure document storage capacity indicator is visible
+
+The storage indicator in `PatientDocuments.tsx` (lines 660-698) is inside the component but may be hidden when `hideHeader` is true due to layout issues. Verify the storage card renders independently of the header. The storage card is rendered unconditionally (not wrapped in the `hideHeader` conditional), so it should be visible. If not, ensure it's placed outside any conditional block.
+
+## Files Modified
 
 | File | Change |
 |------|--------|
-| `button.tsx` | Scale all size variants down |
-| `textarea.tsx` | `text-base` → `text-[11px]` |
-| `badge.tsx` | `text-xs` → `text-[8px]` |
-| `table.tsx` | `text-sm` → `text-[10px]` in Table and TableCaption |
-| `tabs.tsx` | `text-sm` → `text-[10px]` in TabsTrigger |
-| `dialog.tsx` | DialogTitle `text-lg` → `text-[12px]`; DialogDescription `text-sm` → `text-[10px]` |
-| `alert-dialog.tsx` | Description `text-sm` → `text-[10px]` |
-| `card.tsx` | CardTitle `text-xl` → `text-sm`; CardDescription `text-sm` → `text-[10px]` |
-| `dropdown-menu.tsx` | All `text-sm` → `text-[10px]` |
-| `select.tsx` | SelectItem/SelectLabel `text-sm` → `text-[10px]` |
-| `calendar.tsx` | `text-sm` → `text-[10px]` |
-| `form.tsx` | FormDescription/FormMessage `text-sm` → `text-[10px]` |
-| `breadcrumb.tsx` | `text-sm` → `text-[10px]` |
-
-## Part B: Remove Redundant Headings Inside Tab Content
-
-When a component is rendered inside a tab whose trigger already names it, the heading inside the content is redundant. Found instances:
-
-| Location | Tab Name | Redundant Heading Inside | Fix |
-|----------|----------|--------------------------|-----|
-| `PatientDetailsEditor.tsx` → "My Round Table" tab → renders `<PatientRoundTable />` | "My Round Table" | `<h1>Round Table</h1>` + description at line 54 of `PatientRoundTable.tsx` | Remove the `<h1>` and `<p>` heading block |
-| `PatientDetailsEditor.tsx` → "My Documents" tab → renders `<PatientDocuments />` | "My Documents" | `<h1>My Documents</h1>` + description at line 535 of `PatientDocuments.tsx` | Remove the heading block |
-| `PatientDetailsEditor.tsx` → "My Doctors" tab → renders `<MyDoctors />` | "My Doctors" | `<h1>My Doctors</h1>` + description at line 160 of `MyDoctors.tsx` | Remove the heading block |
-| `PatientProfile.tsx` → "Round Table" tab → renders `<RoundTable />` | "Round Table" | `<h3>Round Table</h3>` + description at line 219 of `RoundTable.tsx` | Remove the heading block |
-
-**Approach**: Since these components are also used standalone (e.g., from sidebar navigation), add an optional `hideHeader` prop (default `false`) to each. When rendered inside a tab, pass `hideHeader={true}` to suppress the redundant heading. This preserves headings when accessed directly.
-
-### Files Modified
-
-| File | Change |
-|------|--------|
-| `src/pages/patient/PatientRoundTable.tsx` | Add `hideHeader` prop; conditionally hide h1+description |
-| `src/pages/patient/PatientDocuments.tsx` | Add `hideHeader` prop; conditionally hide h1+description |
-| `src/pages/patient/MyDoctors.tsx` | Add `hideHeader` prop; conditionally hide h1+description |
-| `src/components/patients/RoundTable.tsx` | Add `hideHeader` prop; conditionally hide h3+description |
-| `src/components/patients/PatientDetailsEditor.tsx` | Pass `hideHeader` to `PatientRoundTable`, `PatientDocuments`, `MyDoctors` inside tabs |
-| `src/pages/PatientProfile.tsx` | Pass `hideHeader` to `RoundTable` inside tab |
-| 13 UI component files (listed in Part A) | Font size scaling |
+| `src/components/layout/Sidebar.tsx` | Add "My Patients" nav item for doctors |
+| `src/pages/Profile.tsx` | Remove DoctorPatientsTab; render Holarchive directly for doctors |
+| `src/components/ui/tabs.tsx` | Default TabsTrigger size from `text-[10px]` to `text-xs` |
+| `src/pages/PatientProfile.tsx` | Add `text-xs` to tab triggers for consistency |
+| `src/components/patients/PatientDetailsEditor.tsx` | Change `sectionFrame` border to `border-primary`; change all `h3` headings from `text-xs` to `text-sm` |
+| `src/pages/patient/PatientDocuments.tsx` | Verify storage indicator renders (likely no change needed) |
 
