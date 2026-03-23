@@ -416,7 +416,7 @@ export default function Settings() {
               {/* Language Sub-frame */}
               <div className="space-y-3">
                 <h3 className="text-sm font-semibold text-foreground">Language</h3>
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label>Country</Label>
                     <Select value={(profile as any)?.country || "ZA"} onValueChange={async (v) => { await updateProfile({ country: v } as any); toast({ title: "Country updated" }); }}>
@@ -429,13 +429,6 @@ export default function Settings() {
                         <SelectItem value="AE">🇦🇪 UAE</SelectItem><SelectItem value="BW">🇧🇼 Botswana</SelectItem>
                         <SelectItem value="NA">🇳🇦 Namibia</SelectItem>
                       </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Language</Label>
-                    <Select value={(profile as any)?.preferred_language || "en"} onValueChange={async (v) => { await updateProfile({ preferred_language: v } as any); toast({ title: "Language updated" }); }}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>{LANGUAGES.map(l => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1.5">
