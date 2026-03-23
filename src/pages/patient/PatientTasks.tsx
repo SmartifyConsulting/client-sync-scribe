@@ -327,45 +327,35 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
         </div>
       </div>
 
-      {/* Video Recording Dialog */}
+      {/* Photo Capture Dialog */}
       <Dialog open={showRecordDialog} onOpenChange={(open) => { if (!open) handleCloseRecording(); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Video className="h-5 w-5 text-primary" />
-              Record Proof
+              <Camera className="h-5 w-5 text-primary" />
+              Capture Proof Photo
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Film yourself completing the task. Show the medication and take it on camera. Max 30 seconds.
+              Take a photo showing yourself taking the medication. Make sure both you and the medication are clearly visible.
             </p>
             <div className="relative rounded-lg overflow-hidden bg-black aspect-video">
-              {recordedBlob ? (
-                <video src={URL.createObjectURL(recordedBlob)} controls className="w-full h-full object-cover" />
+              {capturedUrl ? (
+                <img src={capturedUrl} alt="Captured proof" className="w-full h-full object-cover" />
               ) : (
                 <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" style={{ transform: "scaleX(-1)" }} />
               )}
-              {isRecording && (
-                <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground px-2 py-1 rounded-full text-xs font-bold animate-pulse">
-                  REC {countdown}s
-                </div>
-              )}
             </div>
+            <canvas ref={canvasRef} className="hidden" />
             <div className="flex gap-2 justify-center">
-              {!recordedBlob ? (
-                !isRecording ? (
-                  <Button onClick={startRecording} disabled={!stream} className="gap-2">
-                    <Video className="h-4 w-4" /> Start Recording
-                  </Button>
-                ) : (
-                  <Button onClick={stopRecording} variant="destructive" className="gap-2">
-                    <Square className="h-4 w-4" /> Stop
-                  </Button>
-                )
+              {!capturedBlob ? (
+                <Button onClick={capturePhoto} disabled={!stream} className="gap-2">
+                  <Camera className="h-4 w-4" /> Take Photo
+                </Button>
               ) : (
                 <>
-                  <Button variant="outline" onClick={() => { setRecordedBlob(null); startCamera(); }}>
+                  <Button variant="outline" onClick={() => { setCapturedBlob(null); setCapturedUrl(null); startCamera(); }}>
                     Retake
                   </Button>
                   <Button onClick={handleSubmitProof} disabled={isUploading} className="gap-2">
