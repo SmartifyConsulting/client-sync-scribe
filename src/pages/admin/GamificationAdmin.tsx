@@ -92,7 +92,7 @@ export default function GamificationAdmin() {
     mutationFn: async () => {
       const { error } = await supabase
         .from("moola_partner_apps")
-        .insert({ name: newAppName, logo_url: newAppLogoUrl || null });
+        .insert({ name: newAppName, logo_url: newAppLogoUrl || null, creator: newAppCreator || null, signup_url: newAppSignupUrl || null } as any);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -100,7 +100,28 @@ export default function GamificationAdmin() {
       setShowAddAppDialog(false);
       setNewAppName("");
       setNewAppLogoUrl("");
+      setNewAppCreator("");
+      setNewAppSignupUrl("");
       toast({ title: "Partner app added" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const updateAppMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<PartnerApp> }) => {
+      const { error } = await supabase
+        .from("moola_partner_apps")
+        .update(updates as any)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-partner-apps"] });
+      setEditingAppId(null);
+      setEditAppValues({});
+      toast({ title: "Partner app updated" });
     },
     onError: (err: Error) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
