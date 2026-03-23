@@ -697,12 +697,23 @@ export default function GamificationAdmin() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Logo URL (optional)</Label>
-                      <Input
-                        placeholder="https://..."
-                        value={newAppLogoUrl}
-                        onChange={(e) => setNewAppLogoUrl(e.target.value)}
-                      />
+                      <Label>Logo</Label>
+                      <div className="flex items-center gap-3">
+                        <Button variant="outline" size="sm" className="gap-2" onClick={() => logoInputRef.current?.click()}>
+                          <Upload className="h-4 w-4" />
+                          {newAppLogoFile ? newAppLogoFile.name : "Upload Logo"}
+                        </Button>
+                        <input
+                          ref={logoInputRef}
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={(e) => setNewAppLogoFile(e.target.files?.[0] || null)}
+                        />
+                        {newAppLogoFile && (
+                          <img src={URL.createObjectURL(newAppLogoFile)} alt="Preview" className="h-8 w-8 rounded-lg object-contain" />
+                        )}
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label>Creator</Label>
