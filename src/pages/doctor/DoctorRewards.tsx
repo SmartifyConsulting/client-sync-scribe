@@ -51,7 +51,7 @@ export default function DoctorRewards() {
     queryKey: ["patient-moolas-profile"],
     queryFn: async () => {
       if (!user?.id) return 0;
-      const { data: patient } = await supabase.from("patients").select("id").eq("patient_user_id", user.id).maybeSingle();
+      const { data: patient } = await supabase.from("patients").select("id").eq("patient_user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
       if (!patient) return 0;
       const { data: rewardsData, error } = await supabase.from("patient_rewards").select("lollipops_count").eq("patient_id", patient.id);
       if (error || !rewardsData) return 0;
