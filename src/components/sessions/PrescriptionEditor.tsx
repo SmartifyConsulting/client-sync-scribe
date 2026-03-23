@@ -72,7 +72,7 @@ export function PrescriptionEditor({
   const doctorName = propDoctorName || profile?.full_name || "Doctor";
   
   const [medications, setMedications] = useState<MedicationItem[]>([
-    { id: crypto.randomUUID(), medication: "", dosage: "", frequency: "", duration: "", instructions: "" }
+    { id: crypto.randomUUID(), medication: "", dosage: "", frequency: "", duration: "", instructions: "", repeats: "0" }
   ]);
   const [conflicts, setConflicts] = useState<MedicationConflict[]>([]);
   const [isCheckingConflicts, setIsCheckingConflicts] = useState(false);
