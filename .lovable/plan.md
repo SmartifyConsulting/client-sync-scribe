@@ -1,39 +1,32 @@
 
 
-# Updated Plan: Doctor Rewards Parity + AI Task Approval + Moola Symbol
+# Plan: Reorganize My Practice & Settings Fields
 
-## Three Changes
+## Changes
 
-### 1. Moola Symbol — Use Uploaded Icon
-The attached image shows the official Moola symbol: a green circle with a stylized "M" inside. This will be copied into the project and used as the Moola icon everywhere, replacing the current CSS-styled "M" circle.
+### 1. Move Language from Settings to My Practice (under Mobile Number)
+- In `src/pages/MyPractice.tsx`, add the `LANGUAGES` constant and a Language select field after the Mobile Number field in the Personal Information frame
+- Add auto-guess logic: when the country code changes, auto-set the language based on a mapping (e.g., `+27` → `af` or `en`, `+49` → `de`, `+33` → `fr`, etc.)
+- The language field remains manually overridable
+- In `src/pages/Settings.tsx`, remove the Language select from the Preferences tab (lines ~434-440)
 
-**Steps:**
-- Copy `user-uploads://image-28.png` → `src/assets/moola-symbol.png`
-- Update `MoolaLogoBadge` in `src/components/gamification/LollipopDisplay.tsx` to render this image instead of the CSS "M" circle
-- Size variants (sm/md/lg) will use the image at appropriate dimensions
-- Update `src/pages/Dashboard.tsx` to use this symbol prominently on the Moola stats card via `imageUrl` prop (already supported by `StatsCard`)
-- Update `src/pages/doctor/DoctorRewards.tsx` to use this symbol in the header/balance display
+### 2. Move Specialty next to First/Last Name (same row)
+- Currently Specialty is in its own full-width row below the 2-column grid (lines 504-510)
+- Move it into the same `grid` row as First Name and Last Name, making it a 3-column grid: First Name | Last Name | Specialty
 
-### 2. Doctor Rewards — Add Patient-Style Rewards View
-Below the existing moola aggregation dashboard in `DoctorRewards.tsx`, add the same rewards sections patients see:
-- Milestones progress, streaks, recent rewards history
-- Reuse hooks and components from `MyRewards.tsx`
-- Doctor's existing breakdown (Doctor/Patient/Combined) stays at top
+### 3. Rename "Practice Details" to "Practice Information"
+- Line 518: Change the heading text from "Practice Details" to "Practice Information"
 
-### 3. AI Task Approval Workflow — No Auto-Complete
-**Edge function (`process-todo-actions/index.ts`):** Change AI-executed tasks from `status: "completed"` to `status: "pending"` so they require manual approval.
+### 4. Move Digital Signature from Settings to My Practice
+- Cut the entire Digital Signature frame (Settings lines 537-583) including its constants (`SIGNATURE_FONTS`, `SIGNATURE_COLORS`), state variables (`sigFormData`, `savedStatus`, debounce logic), and helper functions (`getSignatureFontFamily`, `getSignatureColor`)
+- Paste into `MyPractice.tsx` as a new section frame below Practice Information (after the partners section, before the closing of the practice tab)
+- Add the same auto-save debounce logic for signature fields
+- Remove all signature-related code from Settings.tsx
 
-**UI (`TodoList.tsx` + `CompactTodoList.tsx`):** Add an "Approve" button on AI-generated pending tasks (`is_auto_executed === true`). Clicking it marks the task as completed. AI tasks show a distinct approval icon until confirmed.
-
-## Files to Modify
+## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/assets/moola-symbol.png` | Copy uploaded Moola icon |
-| `src/components/gamification/LollipopDisplay.tsx` | Use Moola symbol image instead of CSS "M" |
-| `src/pages/Dashboard.tsx` | Use Moola symbol as `imageUrl` on stats card |
-| `src/pages/doctor/DoctorRewards.tsx` | Add patient-style rewards view below existing dashboard, use Moola symbol |
-| `supabase/functions/process-todo-actions/index.ts` | Change auto-executed tasks to `status: "pending"` |
-| `src/pages/TodoList.tsx` | Add approve button for AI tasks |
-| `src/components/dashboard/CompactTodoList.tsx` | Add approve button for AI tasks |
+| `src/pages/MyPractice.tsx` | Add Language field with auto-guess, move Specialty to name row, rename heading, add Digital Signature section |
+| `src/pages/Settings.tsx` | Remove Language field, remove Digital Signature section and related constants/state |
 
