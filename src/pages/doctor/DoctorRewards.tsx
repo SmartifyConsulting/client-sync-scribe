@@ -169,7 +169,8 @@ export default function DoctorRewards() {
           <TabsTrigger value="streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Streaks</TabsTrigger>
           <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">History</TabsTrigger>
           <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Transfers</TabsTrigger>
-        </TabsList>
+          <TabsTrigger value="moola-apps" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Moola Apps</TabsTrigger>
+         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           {nextMilestone && (
