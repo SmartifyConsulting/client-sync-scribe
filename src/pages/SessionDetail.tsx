@@ -281,6 +281,7 @@ export default function SessionDetail() {
               >
                 {session.status === "completed" ? "Completed" : "In Progress"}
               </span>
+              <PrivacyBadge />
             </div>
             {session.patient && (
               <Link
