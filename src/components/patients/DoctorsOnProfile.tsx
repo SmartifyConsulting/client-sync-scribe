@@ -55,6 +55,7 @@ export function DoctorsOnProfile({ patientId, patientName }: DoctorsOnProfilePro
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorAccess | null>(null);
   const [messageForm, setMessageForm] = useState({ subject: "", content: "" });
   const [isSending, setIsSending] = useState(false);
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
 
   useEffect(() => {
     fetchCurrentUser();
