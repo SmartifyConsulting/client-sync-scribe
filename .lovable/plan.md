@@ -1,53 +1,56 @@
 
 
-# Multi-Feature Update Plan (Revised)
+# Standardize Sub-Headings & Update Moola Icon
+
+## What It Does
+1. Makes all page sub-headings (the description text below page titles) consistent with the Dashboard style: `text-muted-foreground text-[12px]`
+2. Replaces the Moola icon with the uploaded transparent-background M icon
 
 ## Changes
 
-### 1. Signature Font Dropdown — Show Font Name in Its Font
-**File:** `src/pages/MyPractice.tsx`
-Revert dropdown items to show the **font name** rendered in its own typeface. Show doctor's name in smaller text below. Trigger also shows font name in its typeface.
+### 1. Standardize Sub-Heading Styles Across All Pages
 
-### 2. Remove Language from Settings Preferences
-**File:** `src/pages/Settings.tsx`
-Remove the Language sub-frame (Country selector and Narration Voice) from Preferences tab.
+The Dashboard reference style (line 238): `className="mt-2 text-muted-foreground text-[12px]"`
 
-### 3. Medical Information — Flatten Field Labels
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-Convert `<h4>` sub-headings (Physical Measurements, Blood Type, Allergies, Chronic Medication) into regular `<Label>` elements within the single Medical Information frame.
+Every `<p>` tag that serves as a page-level sub-heading (directly below an `<h1>`) will be updated to use `text-muted-foreground text-[12px]` instead of the current inconsistent mix of `text-sm text-muted-foreground`, `text-muted-foreground` (unsized), etc.
 
-### 4. Persist Calendar View Mode
-**File:** `src/pages/CalendarView.tsx`
-Initialize `calendarView` from `localStorage` and save on each change.
+**Files to update:**
+| File | Current sub-heading style |
+|------|--------------------------|
+| `src/pages/MyPractice.tsx` | `text-sm text-muted-foreground` |
+| `src/pages/Settings.tsx` | `text-sm text-muted-foreground` |
+| `src/pages/Sessions.tsx` | `text-muted-foreground` (no size) |
+| `src/pages/Patients.tsx` | Check & standardize |
+| `src/pages/CalendarView.tsx` | Check & standardize |
+| `src/pages/Profile.tsx` | `text-sm text-muted-foreground` |
+| `src/pages/Notifications.tsx` | Check & standardize |
+| `src/pages/Documents.tsx` | Check & standardize |
+| `src/pages/TodoList.tsx` | Check & standardize |
+| `src/pages/Connections.tsx` | Check & standardize |
+| `src/pages/patient/MyDetails.tsx` | `text-sm text-muted-foreground` |
+| `src/pages/patient/PatientDashboard.tsx` | Check & standardize |
+| `src/pages/patient/PatientCalendar.tsx` | `text-muted-foreground` |
+| `src/pages/patient/PatientDocuments.tsx` | Check & standardize |
+| `src/pages/patient/MyDoctors.tsx` | Check & standardize |
+| `src/pages/patient/MyRewards.tsx` | Check & standardize |
+| `src/pages/patient/PatientRoundTable.tsx` | `text-muted-foreground` |
+| `src/pages/doctor/DoctorRewards.tsx` | Check & standardize |
+| `src/pages/doctor/Invoices.tsx` | Check & standardize |
+| `src/pages/ReferralDoctors.tsx` | Check & standardize |
+| `src/pages/CPDCertificates.tsx` | Check & standardize |
 
-### 5. My Documents — Icons Inline with Heading
-**Files:** `src/pages/patient/PatientDocuments.tsx`, `src/components/patients/PatientDetailsEditor.tsx`
-Move record audio/video/upload icons to the same row as the "My Documents" heading.
+All page-level description `<p>` tags will become: `className="text-muted-foreground text-[12px]"`
 
-### 6. Narrow Mobile Area Code Width
-**Files:** `src/pages/MyPractice.tsx`, `src/pages/Auth.tsx`
-Reduce country code selector from `w-[130px]` to `w-[80px]`.
+Section-level sub-descriptions within cards/frames will also be standardized to the same `text-[12px]` sizing where they currently use `text-sm`.
 
-### 7. Increase Global Font Sizes by 1 Unit
-**Files:** `src/components/ui/button.tsx`, `src/components/ui/input.tsx`, `src/components/ui/label.tsx`
-Bump each `text-[Npx]` class up by 1px.
+### 2. Update Moola Icon with Transparent Background
 
-### 8. Update Moola Icon
-**File:** `src/assets/moola-symbol.png`
-Replace with the uploaded enlarged M icon.
+Copy the uploaded M icon to `src/assets/moola-symbol.png`, replacing the current file. The icon already appears to have a transparent background based on the upload. All existing imports (`Dashboard.tsx`, `LollipopDisplay.tsx`, `DoctorRewards.tsx`) will automatically pick up the new asset.
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/pages/MyPractice.tsx` | Font dropdown labels, narrow area code |
-| `src/components/patients/PatientDetailsEditor.tsx` | Medical field labels, documents header |
-| `src/pages/Settings.tsx` | Remove Language sub-frame |
-| `src/pages/CalendarView.tsx` | Persist view mode in localStorage |
-| `src/pages/patient/PatientDocuments.tsx` | Compact header with icons inline |
-| `src/components/ui/button.tsx` | +1px font size |
-| `src/components/ui/input.tsx` | +1px font size |
-| `src/components/ui/label.tsx` | +1px font size |
-| `src/assets/moola-symbol.png` | Replace with uploaded icon |
-| `src/pages/Auth.tsx` | Narrow area code width |
+| ~20 page files | Standardize sub-heading `<p>` tags to `text-muted-foreground text-[12px]` |
+| `src/assets/moola-symbol.png` | Replace with uploaded transparent M icon |
 
