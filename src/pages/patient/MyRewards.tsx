@@ -167,6 +167,8 @@ export default function MyRewards() {
         .from("patients")
         .select("id")
         .eq("patient_user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
       if (!patient) throw new Error("No patient record found");
 
