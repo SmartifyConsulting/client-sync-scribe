@@ -691,11 +691,18 @@ export default function MyPractice() {
             )}
             <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
               <p className="text-sm font-medium text-foreground">Add New Service</p>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-3">
                 <div className="space-y-1.5"><Label>Service Name *</Label><Input value={newService.service_name} onChange={(e) => setNewService({ ...newService, service_name: e.target.value })} placeholder="e.g., Consultation" /></div>
                 <div className="space-y-1.5">
                   <Label>Price ({getCurrencySymbol(selectedCurrency)}) *</Label>
                   <div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{getCurrencySymbol(selectedCurrency)}</span><Input type="number" step="0.01" min="0" value={newService.default_price} onChange={(e) => setNewService({ ...newService, default_price: e.target.value })} className="pl-8" /></div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Calendar Color</Label>
+                  <div className="flex items-center gap-2">
+                    <input type="color" value={newService.color} onChange={(e) => setNewService({ ...newService, color: e.target.value })} className="h-10 w-12 rounded border border-border cursor-pointer" />
+                    <span className="text-xs text-muted-foreground">Used in calendar</span>
+                  </div>
                 </div>
               </div>
               <Button size="sm" onClick={addServicePrice} disabled={isAddingService} className="gap-1.5"><Plus className="h-3.5 w-3.5" />{isAddingService ? "Adding..." : "Add Service"}</Button>
