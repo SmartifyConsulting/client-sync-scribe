@@ -376,7 +376,256 @@ const completeSession = async (
         }
       }
 
-      // Award moola for qualifying visits
+      // Auto-create prescription document if detected
+      if (summaryData?.prescription && patientId) {
+        try {
+          const rx = summaryData.prescription;
+          const medications = rx.medications || rx.items || [];
+          if (medications.length > 0 || rx.medication) {
+            const [patientRes, profileRes, templateRes] = await Promise.all([
+              supabase.from('patients').select('name').eq('id', patientId).maybeSingle(),
+              supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty').eq('id', user.id).maybeSingle(),
+              supabase.from('templates').select('id, name, content, header_footer_template_id').eq('user_id', user.id),
+            ]);
+
+            const patientRecord = patientRes.data;
+            const docProfile = profileRes.data;
+            const doctorTemplates = templateRes.data || [];
+            const today = new Date().toISOString().split('T')[0];
+
+            const rxTemplate = doctorTemplates.find(t =>
+              t.name.toLowerCase().includes('prescription')
+            );
+
+            let rxContent: string;
+            if (rxTemplate) {
+              const replacements: Record<string, string> = {
+                'ClientName': patientRecord?.name || 'Unknown',
+                'PatientName': patientRecord?.name || 'Unknown',
+                'Patient Name': patientRecord?.name || 'Unknown',
+                'Date': today,
+                'SessionDate': today,
+                'DoctorName': docProfile?.full_name || '',
+                'PracticeNumber': docProfile?.practice_number || '',
+                'RegistrationNumber': docProfile?.doctor_number || '',
+              };
+              rxContent = rxTemplate.content;
+              for (const [key, value] of Object.entries(replacements)) {
+                rxContent = rxContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
+              }
+              // Append medications list
+              const medsList = (medications.length > 0 ? medications : [{ medication: rx.medication, dosage: rx.dosage, frequency: rx.frequency, instructions: rx.instructions }])
+                .map((m: any) => `<p><strong>${m.medication || m.name}</strong> — ${m.dosage || ''} ${m.frequency || ''} ${m.instructions ? `(${m.instructions})` : ''}</p>`)
+                .join('');
+              rxContent += `\n${medsList}`;
+            } else {
+              const medsHtml = (medications.length > 0 ? medications : [{ medication: rx.medication, dosage: rx.dosage, frequency: rx.frequency, instructions: rx.instructions }])
+                .map((m: any) => `<tr><td>${m.medication || m.name || ''}</td><td>${m.dosage || ''}</td><td>${m.frequency || ''}</td><td>${m.instructions || ''}</td></tr>`)
+                .join('');
+              rxContent = `<h2>Prescription</h2>
+<p><strong>Date:</strong> ${today}</p>
+<p><strong>Patient:</strong> ${patientRecord?.name || 'Unknown'}</p>
+<p><strong>Doctor:</strong> ${docProfile?.full_name || ''}</p>
+<p><strong>Practice Number:</strong> ${docProfile?.practice_number || ''}</p>
+<br/>
+<table><thead><tr><th>Medication</th><th>Dosage</th><th>Frequency</th><th>Instructions</th></tr></thead><tbody>${medsHtml}</tbody></table>`;
+            }
+
+            const { data: rxDoc } = await supabase.from('documents').insert({
+              user_id: user.id,
+              patient_id: patientId,
+              name: `Prescription - ${patientRecord?.name || 'Patient'} - ${today}`,
+              content: rxContent,
+              template_name: 'Prescription',
+              patient_name: patientRecord?.name || null,
+              is_draft: true,
+              session_id: sessionId,
+            } as any).select('id').single();
+            console.log('Prescription document auto-created');
+
+            if (rxDoc) {
+              await supabase.from('todos').insert({
+                user_id: user.id,
+                session_id: sessionId,
+                patient_id: patientId,
+                title: `Review & Send: Prescription - ${patientRecord?.name || 'Patient'}`,
+                document_id: rxDoc.id,
+                task_type: 'document_review',
+                priority: 'high',
+                status: 'pending',
+              } as any);
+            }
+            toast({ title: '💊 Prescription Created', description: 'Prescription was auto-generated from the session' });
+          }
+        } catch (rxError) {
+          console.error('Error creating prescription document:', rxError);
+        }
+      }
+
+      // Auto-create medical certificate if detected
+      if (summaryData?.medical_certificate && patientId) {
+        try {
+          const cert = summaryData.medical_certificate;
+          const [patientRes, profileRes, templateRes] = await Promise.all([
+            supabase.from('patients').select('name').eq('id', patientId).maybeSingle(),
+            supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty').eq('id', user.id).maybeSingle(),
+            supabase.from('templates').select('id, name, content').eq('user_id', user.id),
+          ]);
+
+          const patientRecord = patientRes.data;
+          const docProfile = profileRes.data;
+          const doctorTemplates = templateRes.data || [];
+          const today = new Date().toISOString().split('T')[0];
+
+          const certTemplate = doctorTemplates.find(t =>
+            t.name.toLowerCase().includes('medical certificate')
+          );
+
+          let certContent: string;
+          if (certTemplate) {
+            const replacements: Record<string, string> = {
+              'ClientName': patientRecord?.name || 'Unknown',
+              'PatientName': patientRecord?.name || 'Unknown',
+              'Patient Name': patientRecord?.name || 'Unknown',
+              'Date': today,
+              'SessionDate': today,
+              'DoctorName': docProfile?.full_name || '',
+              'PracticeNumber': docProfile?.practice_number || '',
+              'RegistrationNumber': docProfile?.doctor_number || '',
+              'Diagnosis': cert.diagnosis || '',
+              'FromDate': cert.from_date || today,
+              'ToDate': cert.to_date || today,
+              'Reason': cert.reason || '',
+            };
+            certContent = certTemplate.content;
+            for (const [key, value] of Object.entries(replacements)) {
+              certContent = certContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
+            }
+          } else {
+            certContent = `<h2>Medical Certificate</h2>
+<p><strong>Date:</strong> ${today}</p>
+<p><strong>Patient:</strong> ${patientRecord?.name || 'Unknown'}</p>
+<p><strong>Doctor:</strong> ${docProfile?.full_name || ''}</p>
+<p><strong>Practice Number:</strong> ${docProfile?.practice_number || ''}</p>
+<br/>
+<p>This is to certify that ${patientRecord?.name || 'the patient'} was examined on ${today} and is unfit for duty from <strong>${cert.from_date || today}</strong> to <strong>${cert.to_date || today}</strong>.</p>
+<br/>
+<p><strong>Diagnosis:</strong> ${cert.diagnosis || 'As discussed'}</p>
+<p><strong>Reason:</strong> ${cert.reason || ''}</p>`;
+          }
+
+          const { data: certDoc } = await supabase.from('documents').insert({
+            user_id: user.id,
+            patient_id: patientId,
+            name: `Medical Certificate - ${patientRecord?.name || 'Patient'} - ${today}`,
+            content: certContent,
+            template_name: 'Medical Certificate',
+            patient_name: patientRecord?.name || null,
+            is_draft: true,
+            session_id: sessionId,
+          } as any).select('id').single();
+          console.log('Medical certificate document auto-created');
+
+          if (certDoc) {
+            await supabase.from('todos').insert({
+              user_id: user.id,
+              session_id: sessionId,
+              patient_id: patientId,
+              title: `Review & Send: Medical Certificate - ${patientRecord?.name || 'Patient'}`,
+              document_id: certDoc.id,
+              task_type: 'document_review',
+              priority: 'high',
+              status: 'pending',
+            } as any);
+          }
+          toast({ title: '📋 Medical Certificate Created', description: 'Medical certificate was auto-generated from the session' });
+        } catch (certError) {
+          console.error('Error creating medical certificate document:', certError);
+        }
+      }
+
+      // Auto-create referral letter if detected
+      if (summaryData?.referral && patientId) {
+        try {
+          const ref = summaryData.referral;
+          const [patientRes, profileRes, templateRes] = await Promise.all([
+            supabase.from('patients').select('name').eq('id', patientId).maybeSingle(),
+            supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty').eq('id', user.id).maybeSingle(),
+            supabase.from('templates').select('id, name, content').eq('user_id', user.id),
+          ]);
+
+          const patientRecord = patientRes.data;
+          const docProfile = profileRes.data;
+          const doctorTemplates = templateRes.data || [];
+          const today = new Date().toISOString().split('T')[0];
+
+          const refTemplate = doctorTemplates.find(t =>
+            t.name.toLowerCase().includes('referral')
+          );
+
+          let refContent: string;
+          if (refTemplate) {
+            const replacements: Record<string, string> = {
+              'ClientName': patientRecord?.name || 'Unknown',
+              'PatientName': patientRecord?.name || 'Unknown',
+              'Patient Name': patientRecord?.name || 'Unknown',
+              'Date': today,
+              'SessionDate': today,
+              'DoctorName': docProfile?.full_name || '',
+              'PracticeNumber': docProfile?.practice_number || '',
+              'RegistrationNumber': docProfile?.doctor_number || '',
+              'ReferralDoctor': ref.referred_to || '',
+              'ReferralReason': ref.reason || '',
+              'Diagnosis': ref.diagnosis || '',
+            };
+            refContent = refTemplate.content;
+            for (const [key, value] of Object.entries(replacements)) {
+              refContent = refContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
+            }
+          } else {
+            refContent = `<h2>Referral Letter</h2>
+<p><strong>Date:</strong> ${today}</p>
+<p><strong>From:</strong> ${docProfile?.full_name || ''} (${docProfile?.specialty || ''})</p>
+<p><strong>Practice Number:</strong> ${docProfile?.practice_number || ''}</p>
+<br/>
+<p><strong>To:</strong> ${ref.referred_to || 'Specialist'}</p>
+<br/>
+<p>Dear Colleague,</p>
+<p>I am referring <strong>${patientRecord?.name || 'the patient'}</strong> for your expert opinion regarding:</p>
+<p>${ref.reason || ref.diagnosis || 'As discussed during consultation'}</p>
+<br/>
+<p><strong>Clinical Notes:</strong> ${ref.clinical_notes || ''}</p>`;
+          }
+
+          const { data: refDoc } = await supabase.from('documents').insert({
+            user_id: user.id,
+            patient_id: patientId,
+            name: `Referral Letter - ${patientRecord?.name || 'Patient'} - ${today}`,
+            content: refContent,
+            template_name: 'Referral Letter',
+            patient_name: patientRecord?.name || null,
+            is_draft: true,
+            session_id: sessionId,
+          } as any).select('id').single();
+          console.log('Referral letter document auto-created');
+
+          if (refDoc) {
+            await supabase.from('todos').insert({
+              user_id: user.id,
+              session_id: sessionId,
+              patient_id: patientId,
+              title: `Review & Send: Referral Letter - ${patientRecord?.name || 'Patient'}`,
+              document_id: refDoc.id,
+              task_type: 'document_review',
+              priority: 'high',
+              status: 'pending',
+            } as any);
+          }
+          toast({ title: '📨 Referral Letter Created', description: 'Referral letter was auto-generated from the session' });
+        } catch (refError) {
+          console.error('Error creating referral document:', refError);
+        }
+      }
       if (visitCategory && patientId) {
         const { data: configData } = await supabase
           .from('gamification_config')
