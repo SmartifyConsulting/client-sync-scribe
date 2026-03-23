@@ -476,8 +476,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   <ViewField label="Date of Birth" value={patient.dob ? format(new Date(patient.dob), "MMMM d, yyyy") : null} />
                   <ViewField label="Email" value={patient.email} />
                   <ViewField label="Phone" value={patient.phone} />
-                  <ViewField label="Marital Status" value={patient.marital_status} />
-                  <ViewField label="Referred By" value={patient.referred_by} />
+                   <ViewField label="Marital Status" value={patient.marital_status} />
+                   <ViewField label="Language" value="English" />
+                   <ViewField label="Referred By" value={patient.referred_by} />
                 </div>
               </div>
 

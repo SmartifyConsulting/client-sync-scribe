@@ -859,17 +859,31 @@ export default function Sessions() {
             </div>
           </div>
 
-          {/* Notes/Drawing Panel - Main Content */}
-          <div className="min-h-[500px]">
-            <SessionNotepad
-              patientId={patientId || ""}
-              sessionId={currentSessionId}
-              patientName={currentPatient?.name}
-              notes={notes}
-              onNotesChange={setNotes}
-              isRecording={isRecording}
-            />
-          </div>
+           {/* Notes/Drawing Panel - Main Content */}
+           <div className="min-h-[500px] space-y-3">
+             <div className="flex justify-end">
+               <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowDrawingPad(!showDrawingPad)}>
+                 <PenTool className="h-3.5 w-3.5" />
+                 {showDrawingPad ? "Hide Drawing" : "Drawing Pad"}
+               </Button>
+             </div>
+             {showDrawingPad && (
+               <DrawingPad
+                 patientId={patientId || ""}
+                 sessionId={currentSessionId || undefined}
+                 patientName={currentPatient?.name}
+                 onClose={() => setShowDrawingPad(false)}
+               />
+             )}
+             <SessionNotepad
+               patientId={patientId || ""}
+               sessionId={currentSessionId}
+               patientName={currentPatient?.name}
+               notes={notes}
+               onNotesChange={setNotes}
+               isRecording={isRecording}
+             />
+           </div>
         </div>
       )}
 
