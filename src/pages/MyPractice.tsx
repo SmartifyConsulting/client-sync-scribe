@@ -639,9 +639,13 @@ export default function MyPractice() {
                 {servicePrices.map((service) => (
                   <div key={service.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
                     {editingServiceId === service.id ? (
-                      <div className="flex-1 grid gap-2 sm:grid-cols-2 mr-3">
+                      <div className="flex-1 grid gap-2 sm:grid-cols-3 mr-3">
                         <Input value={editingService.service_name} onChange={(e) => setEditingService({ ...editingService, service_name: e.target.value })} />
                         <div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{getCurrencySymbol(selectedCurrency)}</span><Input type="number" step="0.01" min="0" value={editingService.default_price} onChange={(e) => setEditingService({ ...editingService, default_price: e.target.value })} className="pl-8" /></div>
+                        <div className="flex items-center gap-2">
+                          <input type="color" value={editingService.color || "#3b82f6"} onChange={(e) => setEditingService({ ...editingService, color: e.target.value })} className="h-8 w-10 rounded border border-border cursor-pointer" />
+                          <span className="text-xs text-muted-foreground">Color</span>
+                        </div>
                       </div>
                     ) : (
                       <div className="flex-1">
