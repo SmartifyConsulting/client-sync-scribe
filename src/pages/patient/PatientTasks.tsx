@@ -158,7 +158,6 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
   const stopCamera = useCallback(() => {
     stream?.getTracks().forEach((t) => t.stop());
     setStream(null);
-    if (timerRef.current) clearInterval(timerRef.current);
   }, [stream]);
 
   useEffect(() => {
@@ -166,36 +165,28 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
     return () => { stream?.getTracks().forEach((t) => t.stop()); };
   }, [showRecordDialog]);
 
-  const startRecording = () => {
-    if (!stream) return;
-    chunksRef.current = [];
-    const mr = new MediaRecorder(stream, { mimeType: "video/webm" });
-    mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-    mr.onstop = () => setRecordedBlob(new Blob(chunksRef.current, { type: "video/webm" }));
-    mr.start();
-    mediaRecorderRef.current = mr;
-    setIsRecording(true);
-    setCountdown(30);
-    timerRef.current = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) { mr.stop(); setIsRecording(false); if (timerRef.current) clearInterval(timerRef.current); return 0; }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  const stopRecording = () => {
-    mediaRecorderRef.current?.stop();
-    setIsRecording(false);
-    if (timerRef.current) clearInterval(timerRef.current);
+  const capturePhoto = () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0);
+    canvas.toBlob((blob) => {
+      if (blob) {
+        setCapturedBlob(blob);
+        setCapturedUrl(URL.createObjectURL(blob));
+      }
+    }, "image/jpeg", 0.85);
   };
 
   const handleCloseRecording = () => {
     stopCamera();
     setShowRecordDialog(false);
-    setRecordedBlob(null);
-    setIsRecording(false);
-    setCountdown(30);
+    setCapturedBlob(null);
+    setCapturedUrl(null);
   };
 
   const handleSubmitProof = async () => {
