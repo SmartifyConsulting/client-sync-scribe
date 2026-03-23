@@ -39,9 +39,7 @@ interface NavItem {
 const doctorNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard" },
   { icon: User, label: "My Holarchive", to: "/profile" },
-  { icon: Users2, label: "Connections", to: "/connections" },
   { icon: Calendar, label: "Calendar", to: "/calendar" },
-  { icon: Users, label: "Patients", to: "/patients" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
   { icon: CheckSquare, label: "To-Do List", to: "/todos" },
   { icon: Receipt, label: "Invoices", to: "/invoices" },
@@ -107,7 +105,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-1 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 px-4 py-1 space-y-0.5 overflow-y-auto font-size-preserve">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />

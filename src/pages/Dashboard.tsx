@@ -53,8 +53,9 @@ export default function Dashboard() {
         .from("notifications")
         .select("*")
         .eq("user_id", user.id)
+        .eq("is_read", false)
         .order("created_at", { ascending: false })
-        .limit(10);
+        .limit(20);
 
       if (error) return [];
       return data || [];
@@ -62,7 +63,13 @@ export default function Dashboard() {
     refetchInterval: 30000,
   });
 
-  const markAllRead = async () => {
+  const clearNotification = async (notifId: string) => {
+    await supabase.from("notifications").update({ is_read: true }).eq("id", notifId);
+    queryClient.invalidateQueries({ queryKey: ["unread-notifications-dashboard"] });
+    queryClient.invalidateQueries({ queryKey: ["recent-notifications-dashboard"] });
+  };
+
+  const clearAllNotifications = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     await supabase
@@ -261,9 +268,9 @@ export default function Dashboard() {
             <PopoverContent className="w-80 p-0" align="end">
               <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                 <p className="text-sm font-semibold">Notifications</p>
-                {unreadNotifCount > 0 && (
-                  <Button variant="ghost" size="sm" className="text-xs h-7" onClick={markAllRead}>
-                    Mark all read
+                {recentNotifications.length > 0 && (
+                  <Button variant="ghost" size="sm" className="text-xs h-7 text-destructive hover:text-destructive" onClick={clearAllNotifications}>
+                    Clear All
                   </Button>
                 )}
               </div>
@@ -272,10 +279,20 @@ export default function Dashboard() {
                   <p className="text-sm text-muted-foreground text-center py-6">No notifications</p>
                 ) : (
                   recentNotifications.map((n: any) => (
-                    <div key={n.id} className={`px-4 py-3 border-b border-border/50 text-sm ${!n.is_read ? 'bg-primary/5' : ''}`}>
-                      <p className="font-medium text-foreground">{n.title}</p>
-                      {n.description && <p className="text-xs text-muted-foreground mt-0.5">{n.description}</p>}
-                      <p className="text-xs text-muted-foreground mt-1">{new Date(n.created_at).toLocaleDateString()}</p>
+                    <div key={n.id} className="px-4 py-3 border-b border-border/50 text-sm bg-primary/5 flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground">{n.title}</p>
+                        {n.description && <p className="text-xs text-muted-foreground mt-0.5">{n.description}</p>}
+                        <p className="text-xs text-muted-foreground mt-1">{new Date(n.created_at).toLocaleDateString()}</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive shrink-0"
+                        onClick={() => clearNotification(n.id)}
+                      >
+                        Clear
+                      </Button>
                     </div>
                   ))
                 )}
