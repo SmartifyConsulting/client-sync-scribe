@@ -617,6 +617,29 @@ function NotificationList({
     );
   }
 
+  const handleRateDoctor = async (notification: Notification) => {
+    if (!notification.reference_id) return;
+    // reference_id is the session_id, fetch session to get doctor (user_id)
+    try {
+      const { data: session } = await supabase
+        .from('sessions')
+        .select('user_id')
+        .eq('id', notification.reference_id)
+        .single();
+      if (!session) return;
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', session.user_id)
+        .single();
+      setRatedDoctorId(session.user_id);
+      setRatedDoctorName(profile?.full_name || "Your Doctor");
+      setRatingNotification(notification);
+    } catch (err) {
+      console.error("Error fetching session for rating:", err);
+    }
+  };
+
   const getIcon = (type: string) => {
     switch (type) {
       case 'document_received':
@@ -629,6 +652,8 @@ function NotificationList({
         return <MessageCircle className="h-5 w-5 text-pink-500" />;
       case 'task_completed':
         return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+      case 'session_completed':
+        return <Star className="h-5 w-5 text-yellow-500" />;
       default:
         return <Bell className="h-5 w-5 text-primary" />;
     }
