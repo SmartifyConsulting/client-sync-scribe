@@ -157,9 +157,11 @@ const handler = async (req: Request): Promise<Response> => {
     if (finalRecipientId) {
       await supabaseAdmin.from("notifications").insert({
         user_id: finalRecipientId,
-        type: "invitation_received",
-        title: "New Connection Invitation",
-        description: `${senderProfile?.full_name || "A user"} has invited you to connect${senderProfile?.specialty ? ` (${senderProfile.specialty})` : ""}`,
+        type: isReferral ? "app_referral" : "invitation_received",
+        title: isReferral ? "App Invitation" : "New Connection Invitation",
+        description: isReferral
+          ? `${senderProfile?.full_name || "A user"} has invited you to join Holarc`
+          : `${senderProfile?.full_name || "A user"} has invited you to connect${senderProfile?.specialty ? ` (${senderProfile.specialty})` : ""}`,
         reference_id: invitation.id,
         is_read: false,
       });
