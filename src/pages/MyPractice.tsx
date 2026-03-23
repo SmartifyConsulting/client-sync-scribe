@@ -619,7 +619,7 @@ export default function MyPractice() {
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <Building2 className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">Practice Details</h3>
+              <h3 className="text-sm font-semibold text-foreground">Practice Information</h3>
             </div>
             <p className="text-sm text-muted-foreground">This information appears on your document templates and letterheads.</p>
             <div className="grid gap-4 sm:grid-cols-2">
