@@ -1,48 +1,63 @@
 
 
-# Plan: Consolidate Profile into Settings
+# Plan: Font Reduction, Nav Restructure, Notifications Enhancement, Moola Logo Resize
 
-## Summary
-Move ALL content currently in Profile.tsx into the Settings screen. Profile.tsx for patients will remain as the Holarchive view only. For doctors, Profile.tsx will redirect to Settings (or show just the Holarchive if they have a patient record).
+## 1. Reduce All Font Sizes by 30% (except To-Do section and nav items)
 
-## Settings.tsx — New Tab Structure
+**File: `src/index.css`**
+- Change base body font from `15px` to `10.5px` (30% reduction)
+- Add exclusion classes for To-Do section and nav menu items to preserve their current sizes
 
-Replace the current 7 tabs with a comprehensive set that includes all Profile.tsx doctor tabs:
+**File: `src/components/dashboard/CompactTodoList.tsx`**
+- Wrap the component's root in a class that resets font size to the original `15px` base
 
-**Personal** | **Practice** | **Partners** | **Patients** | **Referrals** | **Pricing** | **Certificates** | **Moolas** | **Preferences** | **Calendar** | **Notifications** | **Security** | **Billing** | **Data**
+**File: `src/components/layout/Sidebar.tsx`**
+- Add a class to the nav items section preserving `text-sm` (14px) sizing
 
-- Tabs left-aligned (add `justify-start` to TabsList)
-- Profile picture (avatar upload with camera overlay) added to the Personal tab header
-- Profile auto-save indicator ("Saving..." / "Saved") added to the page header
-- **Personal tab**: First/Last name, email (with admin edit), mobile number, specialty, mailbox section — merged from both Profile.tsx and current Settings.tsx
-- **Practice tab** (doctor only): Practice number, registration number, address, logo upload, digital signature settings (font, color, size, bold/italic), country, language, narration voice with preview
-- **Partners tab** (doctor only): Partner management (add/edit/remove/invite)
-- **Patients tab** (doctor only): Patient import via PatientImport component
-- **Referrals tab** (doctor only): Embeds ReferralDoctors component
-- **Pricing tab** (doctor only): Service prices with currency management
-- **Certificates tab** (doctor only): CPD certificates management with total points badge
-- **Moolas tab** (doctor only): DoctorMoolasTab component
-- **Preferences tab**: Patient auto-email toggles + doctor Patient Management (inactive threshold) — already exists
-- **Calendar/Notifications/Security/Billing/Data**: Keep as-is
+**File: `src/components/layout/BottomNav.tsx`**
+- Preserve current nav font sizes with explicit sizing class
 
-For patients, doctor-only tabs are hidden. Patients see: Personal, Preferences, Calendar, Notifications, Security, Billing, Data.
+## 2. Remove "Patients" from Doctor Nav Bar → List in Doctor's Holarchive
 
-## Profile.tsx — Simplified
+**File: `src/components/layout/Sidebar.tsx`**
+- Remove `{ icon: Users, label: "Patients", to: "/patients" }` from `doctorNavItems`
 
-- For **patients**: Keep as-is (Holarchive view with PatientDetailsEditor + auto-create fallback)
-- For **doctors**: Remove the tabbed layout entirely. Show only the profile picture card + a message/link directing to Settings for account management. Or, if doctors also have a patient record, show their Holarchive. Otherwise show a simple redirect card to Settings.
+**File: `src/components/layout/BottomNav.tsx`**
+- Remove Patients from `doctorNavItems`
+
+**File: `src/pages/Profile.tsx`**
+- For doctors: instead of showing "settings have moved" card, render a doctor Holarchive view that includes a "My Patients" tab embedding the patients list (from `src/pages/Patients.tsx` content)
+
+## 3. Remove "Connections" from Nav Bar → Show in Notifications Popup
+
+**File: `src/components/layout/Sidebar.tsx`**
+- Remove `{ icon: Users2, label: "Connections", to: "/connections" }` from `doctorNavItems`
+
+**File: `src/pages/Dashboard.tsx`**
+- Enhance the notifications popover to include connection requests/invitations alongside regular notifications
+- Add a **"Clear"** button per notification record that deletes/marks-as-dismissed that single notification
+- Add a **"Clear All"** button at the top of the notifications popup header
+- When "Clear" is clicked on a notification, it should no longer appear (mark as read + dismissed, or delete)
+
+## 4. Resize Moola Logo to Match Doctor Rating Star Badge
+
+**File: `src/components/dashboard/StatsCard.tsx`**
+- When `imageUrl` is provided, remove the white circle container (`rounded-full bg-white shadow-sm p-1`)
+- Render the image at the same size as the regular icon badge (same `h-7 w-7` as the Icon, inside the same `rounded-2xl bg-primary/10` container)
+
+**File: `src/components/gamification/LollipopDisplay.tsx`**
+- Update `MoolaLogoBadge` to remove the white circle background, just render the logo directly
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/pages/Settings.tsx` | Add all Profile.tsx doctor tabs (Practice, Partners, Patients, Referrals, Pricing, Certificates, Moolas); left-align tabs; add avatar upload to Personal tab; add signature/language/voice to Practice tab; move helper functions (MailboxSection, DoctorMoolasTab, formatPhoneNumber) |
-| `src/pages/Profile.tsx` | Remove doctor tab layout; simplify to Holarchive-only view for patients; redirect/link to Settings for doctors; remove moved helper components |
-
-## Technical Notes
-
-- All state, constants (SIGNATURE_FONTS, SIGNATURE_COLORS, CURRENCIES, LANGUAGES, SAMPLE_TEXTS, DOCTOR_SPECIALTIES, COUNTRY_CODES), and helper functions/components (MailboxSection, DoctorMoolasTab, formatPhoneNumber, AutoEmailToggle) will be moved from Profile.tsx to Settings.tsx
-- The debounced auto-save pattern from Profile.tsx for form fields will be replicated in Settings.tsx
-- Doctor-only tabs conditionally rendered based on `role === "doctor"`
-- CPD points badge shown in the page header for doctors (same as current Profile.tsx)
+| `src/index.css` | Reduce base font to ~10.5px |
+| `src/components/dashboard/CompactTodoList.tsx` | Preserve original font size |
+| `src/components/layout/Sidebar.tsx` | Remove Patients + Connections; preserve nav font size |
+| `src/components/layout/BottomNav.tsx` | Remove Patients; preserve nav font size |
+| `src/pages/Profile.tsx` | Doctor view: show Holarchive with embedded patients list |
+| `src/pages/Dashboard.tsx` | Enhance notifications popup: per-item Clear button + Clear All; include connections |
+| `src/components/dashboard/StatsCard.tsx` | Remove white circle from image icon, match regular icon size |
+| `src/components/gamification/LollipopDisplay.tsx` | Remove white circle from MoolaLogoBadge |
 
