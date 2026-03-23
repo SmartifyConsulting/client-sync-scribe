@@ -661,6 +661,20 @@ function NotificationList({
 
   return (
     <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden divide-y divide-border">
+      {ratingNotification && (
+        <StarRatingDialog
+          open={!!ratingNotification}
+          onOpenChange={(open) => { if (!open) setRatingNotification(null); }}
+          sessionId={ratingNotification.reference_id || ""}
+          ratedUserId={ratedDoctorId}
+          ratedUserName={ratedDoctorName}
+          raterRole="patient"
+          onRated={() => {
+            onMarkAsRead(ratingNotification.id);
+            setRatingNotification(null);
+          }}
+        />
+      )}
       {notifications.map((notification) => (
         <div
           key={notification.id}
