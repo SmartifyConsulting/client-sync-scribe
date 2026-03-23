@@ -513,7 +513,7 @@ export default function MyPractice() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">My Practice</h1>
-          <p className="text-sm text-muted-foreground">Manage your personal and practice information</p>
+          <p className="text-muted-foreground text-[12px]">Manage your personal and practice information</p>
         </div>
         <div className="text-sm text-muted-foreground flex items-center gap-1.5">
           {savedStatus === 'saving' && <><Loader2 className="h-3.5 w-3.5 animate-spin" /><span>Saving...</span></>}
