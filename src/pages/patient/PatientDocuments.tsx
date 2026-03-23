@@ -225,7 +225,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
     const [docsRes, rxRes, invRes] = await Promise.all([
       supabase
         .from("documents")
-        .select("id, name, content, template_name, created_at, media_type, media_url, ai_analysis, ai_analyzed_at")
+        .select("id, name, content, template_name, created_at, media_type, media_url, ai_analysis, ai_analyzed_at, email_sent_at, patient_id")
         .in("patient_id", ids)
         .order("created_at", { ascending: false }),
       supabase
