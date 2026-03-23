@@ -13,6 +13,7 @@ import {
   Flag,
   Zap,
   Brain,
+  ShieldCheck,
   ChevronDown,
   ChevronRight,
   Send,
