@@ -73,6 +73,8 @@ export default function PatientDashboard() {
         .from("patients")
         .select("id, name, is_chronic, pharmacies, pharmacy_name, pharmacy_email, allergies, dob, status, created_at, notes, occupation, general_practitioner, medical_aid")
         .eq("patient_user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
       return data;
     },

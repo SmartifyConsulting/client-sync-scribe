@@ -243,6 +243,8 @@ export default function Profile() {
           .from("patients")
           .select("*")
           .eq("patient_user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
           .maybeSingle();
         if (error) throw error;
         if (data) {
