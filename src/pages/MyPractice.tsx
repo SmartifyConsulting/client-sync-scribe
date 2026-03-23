@@ -952,6 +952,18 @@ export default function MyPractice() {
           <DoctorInvoices hideHeader />
         </TabsContent>
 
+        {/* === MY ROUND TABLES TAB === */}
+        <TabsContent value="roundtables" className="mt-4">
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
+            <div className="flex items-center gap-2">
+              <Users2 className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">My Round Tables</h3>
+            </div>
+            <p className="text-muted-foreground text-[12px]">All round tables you have contributed to, with alerts for new activity.</p>
+            <DoctorRoundTables />
+          </div>
+        </TabsContent>
+
         {/* === TEMPLATES TAB === */}
         <TabsContent value="templates" className="mt-4">
           <Documents hideHeader />
