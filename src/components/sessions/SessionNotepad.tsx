@@ -16,7 +16,7 @@ export function SessionNotepad({
   isRecording = false,
 }: SessionNotepadProps) {
   return (
-    <div className="rounded-xl border border-border bg-card shadow-sm flex flex-col h-full">
+    <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col h-full">
       <div className="flex items-center justify-between p-3 border-b bg-muted/30">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold text-foreground">Session Notes</h3>

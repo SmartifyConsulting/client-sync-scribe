@@ -422,7 +422,7 @@ export default function MyPractice() {
       </div>
 
       {/* Profile picture card */}
-      <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="relative group">
             <Avatar className="h-16 w-16 border-2 border-[hsl(351,81%,49%)]">
@@ -460,7 +460,7 @@ export default function MyPractice() {
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
         <TabsContent value="practice" className="mt-4 space-y-4">
           {/* Personal Information Frame */}
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <User className="h-4 w-4 text-primary" />
               <h3 className="text-sm font-semibold text-foreground">Personal Information</h3>
@@ -502,7 +502,7 @@ export default function MyPractice() {
           </div>
 
           {/* Practice Details Frame */}
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <Building2 className="h-4 w-4 text-primary" />
               <h3 className="text-sm font-semibold text-foreground">Practice Details</h3>
@@ -600,7 +600,7 @@ export default function MyPractice() {
 
         {/* === REFERRALS TAB === */}
         <TabsContent value="referrals" className="mt-4 space-y-4">
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <Stethoscope className="h-4 w-4 text-primary" />
               <h3 className="text-sm font-semibold text-foreground">Referral Doctors</h3>
@@ -611,7 +611,7 @@ export default function MyPractice() {
 
         {/* === PRICING TAB === */}
         <TabsContent value="pricing" className="mt-4">
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <DollarSign className="h-4 w-4 text-primary" />
               <h3 className="text-sm font-semibold text-foreground">Pricing</h3>
@@ -682,7 +682,7 @@ export default function MyPractice() {
 
         {/* === CERTIFICATES TAB === */}
         <TabsContent value="certificates" className="mt-4">
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <GraduationCap className="h-4 w-4 text-primary" />
               <h3 className="text-sm font-semibold text-foreground">Certificates</h3>

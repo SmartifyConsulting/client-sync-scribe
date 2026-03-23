@@ -330,7 +330,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
   // ==================== VIEW MODE ====================
   if (!isEditing) {
     return (
-      <div className="rounded-xl border border-border bg-card p-4 md:p-6 space-y-4">
+      <div className="rounded-xl border border-primary bg-card p-4 md:p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-foreground">Patient Details</h2>
           <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={() => setIsEditing(true)}>
@@ -569,7 +569,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
   // ==================== EDIT MODE ====================
   return (
-    <div className="rounded-xl border border-border bg-card p-4 md:p-6 space-y-4">
+    <div className="rounded-xl border border-primary bg-card p-4 md:p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h2 className="text-sm font-semibold text-foreground">Edit Patient Details</h2>

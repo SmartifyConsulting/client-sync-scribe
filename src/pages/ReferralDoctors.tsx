@@ -286,7 +286,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
       )}
 
       {showForm && !editingId && (
-        <div className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4">
+        <div className="rounded-xl border border-primary bg-card p-6 shadow-sm space-y-4">
           <h3 className="font-semibold text-foreground">Add Referral Doctor</h3>
 
           {/* Search Step */}
@@ -416,7 +416,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
 
       {/* Edit form (always manual) */}
       {showForm && editingId && (
-        <div className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4">
+        <div className="rounded-xl border border-primary bg-card p-6 shadow-sm space-y-4">
           <h3 className="font-semibold text-foreground">Edit Referral Doctor</h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-2"><Label>First Name *</Label><Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} /></div>
@@ -451,7 +451,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
         <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search doctors..." className="pl-10" />
       </div>
 
-      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+      <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
         {loading ? (
           <div className="p-10 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" /></div>
         ) : filtered.length === 0 ? (

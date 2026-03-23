@@ -188,7 +188,7 @@ export default function PatientProfile() {
           <ArrowLeft className="h-4 w-4" />
           Back to Patients
         </Link>
-        <div className="rounded-xl border border-border bg-card p-8 text-center">
+        <div className="rounded-xl border border-primary bg-card p-8 text-center">
           <p className="text-muted-foreground">Patient not found</p>
         </div>
       </div>

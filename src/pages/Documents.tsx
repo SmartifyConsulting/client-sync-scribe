@@ -430,7 +430,7 @@ export default function Documents() {
               {filteredHFTemplates.map((template) => (
                 <div
                   key={template.id}
-                  className="group rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30"
+                  className="group rounded-xl border border-primary bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary/10">
@@ -536,7 +536,7 @@ export default function Documents() {
               {filteredTemplates.map((template, index) => (
                 <div
                   key={template.id}
-                  className="group rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30 text-left cursor-pointer"
+                  className="group rounded-xl border border-primary bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30 text-left cursor-pointer"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="flex items-start justify-between mb-3">

@@ -143,7 +143,7 @@ export default function CPDCertificates() {
       </div>
 
       {showForm && (
-        <div className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4">
+        <div className="rounded-xl border border-primary bg-card p-6 shadow-sm space-y-4">
           <h3 className="font-semibold text-foreground">{editingId ? "Edit" : "Add"} Certificate</h3>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2"><Label>Certificate Name *</Label><Input value={form.certificate_name} onChange={(e) => setForm({ ...form, certificate_name: e.target.value })} placeholder="e.g., Advanced Cardiac Life Support" /></div>
@@ -180,7 +180,7 @@ export default function CPDCertificates() {
         </div>
       )}
 
-      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+      <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
         {loading ? (
           <div className="p-10 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" /></div>
         ) : certs.length === 0 ? (
