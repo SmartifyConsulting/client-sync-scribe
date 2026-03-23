@@ -53,7 +53,7 @@ IMPORTANT: You must respond with a JSON object in exactly this format:
 The photo is VALID only if ALL three criteria are met: person visible, medication visible, and ingestion action detected.
 Only return the JSON, no other text.`;
 
-    console.log('Sending medication video for AI validation, patient:', patientId);
+    console.log('Sending medication photo for AI validation, patient:', patientId);
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
