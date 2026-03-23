@@ -726,7 +726,15 @@ export default function MyPractice() {
                     {SIGNATURE_FONTS.find(f => f.value === sigFormData.signature_font)?.label || "Select font"}
                   </span>
                 </SelectTrigger>
-                <SelectContent>{SIGNATURE_FONTS.map(f => <SelectItem key={f.value} value={f.value}><span style={{ fontFamily: f.fontFamily, fontSize: '18px' }}>{f.label}</span></SelectItem>)}</SelectContent>
+                <SelectContent className="max-h-[300px]">
+                  {SIGNATURE_FONTS.map(f => (
+                    <SelectItem key={f.value} value={f.value} className="py-3">
+                      <span style={{ fontFamily: f.fontFamily, fontSize: '22px', lineHeight: '1.4' }}>
+                        {f.label}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
