@@ -380,8 +380,8 @@ export default function PatientDashboard() {
         <Link to="/patient/rewards">
           <Card className="h-full border-primary/20 bg-gradient-to-br from-primary/5 via-card to-secondary/5 hover:shadow-lg transition-all cursor-pointer">
             <CardContent className="flex items-center gap-4 p-5">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-sm shrink-0">
-                <img src={moolasLogo} alt="Moolas" className="h-10 w-10 object-cover rounded-full" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                 <img src={moolaSymbol} alt="Moolas" className="h-7 w-7 object-contain" />
               </div>
               <div className="flex-1">
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">My Moolas Balance</p>
