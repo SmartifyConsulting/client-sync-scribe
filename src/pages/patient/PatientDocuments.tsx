@@ -840,7 +840,23 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {doc.source === "documents" && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={cn("h-7 w-7", doc.emailSentAt ? "text-muted-foreground cursor-not-allowed" : "text-green-600 hover:text-green-700")}
+                        onClick={() => handleSendDocument(doc)}
+                        disabled={!!doc.emailSentAt || sendingDocId === doc.id}
+                        title={doc.emailSentAt ? "Already sent" : "Send document"}
+                      >
+                        {sendingDocId === doc.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Send className="h-3.5 w-3.5" />
+                        )}
+                      </Button>
+                    )}
                     {isImageDoc && (
                       <Button
                         variant="outline"
@@ -854,10 +870,10 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                         ) : (
                           <Sparkles className="h-3.5 w-3.5" />
                         )}
-                        {doc.aiAnalysis ? "View Analysis" : "AI Analyse"}
+                        {doc.aiAnalysis ? "View" : "AI"}
                       </Button>
                     )}
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-[10px] text-muted-foreground">
                       {(doc.sizeBytes / 1024).toFixed(1)} KB
                     </span>
                   </div>
