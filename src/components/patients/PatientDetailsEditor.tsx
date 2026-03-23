@@ -775,10 +775,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               <div className={sectionFrame + " space-y-4"}>
                 <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Medical Information</h3>
 
-                {/* Physical Measurements */}
-                <div>
-                  <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Physical Measurements</Label>
-                  <div className="grid gap-3 sm:grid-cols-2">
+                 {/* Physical Measurements */}
+                 <div>
+                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="space-y-1.5"><Label htmlFor="height_cm">Height (cm)</Label><Input id="height_cm" className="text-sm" type="number" step="0.1" value={formData.height_cm} onChange={(e) => updateFormData({ height_cm: e.target.value })} placeholder="e.g., 175" /></div>
                     <div className="space-y-1.5"><Label htmlFor="weight_kg">Weight (kg)</Label><Input id="weight_kg" className="text-sm" type="number" step="0.1" value={formData.weight_kg} onChange={(e) => updateFormData({ weight_kg: e.target.value })} placeholder="e.g., 70" /></div>
                   </div>
