@@ -286,10 +286,6 @@ export default function Settings() {
           <h1 className="text-2xl font-bold text-foreground">Settings</h1>
           <p className="text-sm text-muted-foreground">Manage your preferences, security, and billing</p>
         </div>
-        <div className="text-sm text-muted-foreground flex items-center gap-1.5">
-          {savedStatus === 'saving' && <><Loader2 className="h-3.5 w-3.5 animate-spin" /><span>Saving...</span></>}
-          {savedStatus === 'saved' && <><Check className="h-3.5 w-3.5 text-success" /><span className="text-success">Saved</span></>}
-        </div>
       </div>
 
       {/* Tabs */}
