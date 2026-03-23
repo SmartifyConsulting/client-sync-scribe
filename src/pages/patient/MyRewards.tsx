@@ -98,6 +98,8 @@ export default function MyRewards() {
         .from("patients")
         .select("id, is_chronic")
         .eq("patient_user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
       return data;
     },
