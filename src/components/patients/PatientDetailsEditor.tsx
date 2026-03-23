@@ -596,7 +596,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
           </div>
 
           <div className={sectionFrame}>
-            <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide">Addresses</h3>
+            <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Addresses</h3>
             <div className="space-y-3">
               <div className="space-y-1"><Label className="text-xs" htmlFor="physical_address">Physical Address</Label><Textarea id="physical_address" className="text-sm" value={formData.physical_address} onChange={(e) => updateFormData({ physical_address: e.target.value })} placeholder="Enter physical address" rows={2} /></div>
               <div className="flex items-center space-x-2"><Checkbox id="same_as_physical" checked={formData.same_as_physical} onCheckedChange={(checked) => updateFormData({ same_as_physical: checked as boolean })} /><Label htmlFor="same_as_physical" className="text-xs">Postal address same as physical address</Label></div>
