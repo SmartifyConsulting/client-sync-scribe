@@ -536,6 +536,15 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
               </Suspense>
             </TabsContent>
           )}
+
+          {/* === MY ROUND TABLE TAB (only for self-service) === */}
+          {isSelfService && (
+            <TabsContent value="roundtable" className="mt-4">
+              <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                <PatientRoundTable />
+              </Suspense>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     );
