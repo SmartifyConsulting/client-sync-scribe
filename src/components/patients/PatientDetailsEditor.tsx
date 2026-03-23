@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
+import { useNavigate } from "react-router-dom";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart, User, MapPin, Users, Briefcase, ShieldCheck, Store, Activity, Droplets, Scissors, GitBranch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
