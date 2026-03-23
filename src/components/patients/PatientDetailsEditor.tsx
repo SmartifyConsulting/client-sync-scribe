@@ -529,21 +529,11 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Physical Measurements */}
                   <div>
-                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Physical Measurements</Label>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
-                        <Ruler className="h-4 w-4 text-primary" />
-                        <div><p className="text-xs text-muted-foreground">Height</p><p className="text-sm font-medium text-foreground">{patient.height_cm ? `${patient.height_cm} cm` : "—"}</p></div>
-                      </div>
-                      <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
-                        <Scale className="h-4 w-4 text-primary" />
-                        <div><p className="text-xs text-muted-foreground">Weight</p><p className="text-sm font-medium text-foreground">{patient.weight_kg ? `${patient.weight_kg} kg` : "—"}</p></div>
-                      </div>
-                      {bmi && (
-                        <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
-                          <div><p className="text-xs text-muted-foreground">BMI</p><p className="text-sm font-medium text-foreground">{bmi}</p></div>
-                        </div>
-                      )}
+                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5 mb-2"><Activity className="h-3.5 w-3.5" /> Physical Measurements</Label>
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      <ViewField label="Height (cm)" value={patient.height_cm ? `${patient.height_cm}` : undefined} />
+                      <ViewField label="Weight (kg)" value={patient.weight_kg ? `${patient.weight_kg}` : undefined} />
+                      <ViewField label="BMI" value={bmi || undefined} />
                     </div>
                   </div>
 
