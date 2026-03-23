@@ -372,7 +372,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
             </div>
 
             <div className={sectionFrame}>
-              <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Next of Kin</h3>
+              <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Next of Kin</h3>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <ViewField label="Name" value={patient.next_of_kin_name} />
                 <ViewField label="Relationship" value={patient.next_of_kin_relationship} />
