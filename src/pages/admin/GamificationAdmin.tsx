@@ -725,7 +725,10 @@ export default function GamificationAdmin() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>Logo</TableHead>
                       <TableHead>App Name</TableHead>
+                      <TableHead>Creator</TableHead>
+                      <TableHead>Signup Link</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -733,7 +736,36 @@ export default function GamificationAdmin() {
                   <TableBody>
                     {partnerApps.map((app) => (
                       <TableRow key={app.id}>
-                        <TableCell className="font-medium">{app.name}</TableCell>
+                        <TableCell>
+                          {app.logo_url ? (
+                            <img src={app.logo_url} alt={app.name} className="h-8 w-8 rounded-lg object-contain" />
+                          ) : (
+                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                              <Globe className="h-4 w-4 text-primary" />
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {editingAppId === app.id ? (
+                            <Input value={editAppValues.name || ""} onChange={(e) => setEditAppValues({ ...editAppValues, name: e.target.value })} className="w-32" />
+                          ) : app.name}
+                        </TableCell>
+                        <TableCell>
+                          {editingAppId === app.id ? (
+                            <Input value={editAppValues.creator || ""} onChange={(e) => setEditAppValues({ ...editAppValues, creator: e.target.value })} className="w-28" placeholder="Creator" />
+                          ) : (
+                            <span className="text-sm text-muted-foreground">{app.creator || "-"}</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {editingAppId === app.id ? (
+                            <Input value={editAppValues.signup_url || ""} onChange={(e) => setEditAppValues({ ...editAppValues, signup_url: e.target.value })} className="w-40" placeholder="Signup URL" />
+                          ) : app.signup_url ? (
+                            <a href={app.signup_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline hover:text-primary/80">Sign up</a>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
                         <TableCell>
                           <Switch
                             checked={app.is_active}
@@ -741,14 +773,30 @@ export default function GamificationAdmin() {
                           />
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => deleteAppMutation.mutate(app.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          {editingAppId === app.id ? (
+                            <div className="flex items-center justify-end gap-2">
+                              <Button size="sm" variant="ghost" onClick={() => { setEditingAppId(null); setEditAppValues({}); }}>
+                                <X className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" onClick={() => updateAppMutation.mutate({ id: app.id, updates: editAppValues })}>
+                                <Save className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-end gap-2">
+                              <Button size="sm" variant="ghost" onClick={() => { setEditingAppId(app.id); setEditAppValues({ name: app.name, logo_url: app.logo_url, creator: app.creator, signup_url: app.signup_url }); }}>
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-destructive hover:text-destructive"
+                                onClick={() => deleteAppMutation.mutate(app.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
