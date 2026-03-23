@@ -640,59 +640,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
         {/* === MEDICAL TAB (EDIT) — TWO COLUMNS === */}
         <TabsContent value="medical" className="mt-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Column 1: Insurance & Pharmacies */}
-            <div className="space-y-4">
-              <div className={sectionFrame}>
-                <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide">Medical Insurance</h3>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-1"><Label className="text-xs">Insurance Provider</Label><Input className="text-sm" value={formData.medical_aid} onChange={(e) => updateFormData({ medical_aid: e.target.value })} placeholder="Insurance provider" /></div>
-                  <div className="space-y-1"><Label className="text-xs">Insurance Product</Label><Input className="text-sm" value={formData.medical_insurance_product} onChange={(e) => updateFormData({ medical_insurance_product: e.target.value })} placeholder="Product name" /></div>
-                  <div className="space-y-1"><Label className="text-xs">Insurance Number</Label><Input className="text-sm" value={formData.medical_aid_number} onChange={(e) => updateFormData({ medical_aid_number: e.target.value })} placeholder="Member number" /></div>
-                  <div className="space-y-1"><Label className="text-xs">Primary Member</Label><Input className="text-sm" value={formData.primary_member} onChange={(e) => updateFormData({ primary_member: e.target.value })} placeholder="Primary member name" /></div>
-                  <div className="space-y-1"><Label className="text-xs">Claims Email</Label><Input className="text-sm" type="email" value={formData.claims_email} onChange={(e) => updateFormData({ claims_email: e.target.value })} placeholder="claims@insurance.com" /></div>
-                  <div className="space-y-1"><Label className="text-xs">General Practitioner</Label><Input className="text-sm" value={formData.general_practitioner} onChange={(e) => updateFormData({ general_practitioner: e.target.value })} placeholder="GP name" /></div>
-                </div>
-              </div>
-
-              <div className={sectionFrame}>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">Pharmacies</h3>
-                  {!showAddPharmacy && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddPharmacy(true)}><Plus className="h-3 w-3" />Add</Button>}
-                </div>
-                {showAddPharmacy && (
-                  <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <div className="space-y-1"><Label className="text-xs">Name *</Label><Input className="text-sm" value={newPharmacy.name} onChange={(e) => setNewPharmacy(prev => ({ ...prev, name: e.target.value }))} placeholder="Pharmacy name" /></div>
-                      <div className="space-y-1"><Label className="text-xs">Email</Label><Input className="text-sm" type="email" value={newPharmacy.email} onChange={(e) => setNewPharmacy(prev => ({ ...prev, email: e.target.value }))} placeholder="pharmacy@email.com" /></div>
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddPharmacy(false); setNewPharmacy({ name: "", email: "" }); }}>Cancel</Button>
-                      <Button size="sm" className="text-xs h-7" onClick={handleAddPharmacy}>Add</Button>
-                    </div>
-                  </div>
-                )}
-                {pharmacies.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">No pharmacies recorded</p>
-                ) : (
-                  <div className="space-y-1.5">
-                    {pharmacies.map((pharmacy) => (
-                      <div key={pharmacy.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/50">
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => handleSetPrimaryPharmacy(pharmacy.id)} className="text-xs text-primary hover:underline">
-                            {pharmacy.is_primary ? <Star className="h-3.5 w-3.5 fill-primary text-primary" /> : <Star className="h-3.5 w-3.5 text-muted-foreground" />}
-                          </button>
-                          <div>
-                            <p className="text-sm font-medium text-foreground">{pharmacy.name}</p>
-                            {pharmacy.email && <p className="text-xs text-muted-foreground">{pharmacy.email}</p>}
-                          </div>
-                        </div>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => handleRemovePharmacy(pharmacy.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+            {/* Column 1: Medical Information (single frame) */}
+            <div className={sectionFrame + " space-y-4"}>
+              <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Medical Information</h3>
 
             {/* Column 2: Physical, Blood, Allergies, Chronic, Surgeries, Family History, Organ Donor */}
             <div className="space-y-4">
