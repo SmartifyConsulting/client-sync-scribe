@@ -21,6 +21,7 @@ interface RoundTableProps {
   patientId: string;
   patientName: string;
   onUnreadCountChange?: (count: number) => void;
+  hideHeader?: boolean;
 }
 
 export function RoundTable({ patientId, patientName, onUnreadCountChange }: RoundTableProps) {
