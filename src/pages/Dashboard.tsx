@@ -239,6 +239,9 @@ export default function Dashboard() {
           <p className="mt-2 text-muted-foreground text-[12px]">
             Here's what's happening with your practice today, {formattedDate}
           </p>
+          <div className="mt-2">
+            <ShareAppDialog />
+          </div>
         </div>
       </div>
 

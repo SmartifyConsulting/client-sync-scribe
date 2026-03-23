@@ -886,7 +886,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                 {/* Organ Donor */}
                 <div>
-                  <h4 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><Heart className="h-3.5 w-3.5" /> Organ Donor</h4>
+                  <Label className="mb-3 block">Organ Donor</Label>
                   <div className="flex items-center gap-3 mb-3">
                     <Switch checked={formData.organ_donor} onCheckedChange={(checked) => { updateFormData({ organ_donor: checked }); if (!checked) { setOrganDonorOrgans([]); setHasChanges(true); } }} />
                     <Label>{formData.organ_donor ? "Yes" : "No"}</Label>
