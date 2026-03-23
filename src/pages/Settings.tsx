@@ -880,14 +880,10 @@ export default function Settings() {
         <TabsList className="flex w-full flex-wrap bg-primary justify-start">
           <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Personal</TabsTrigger>
           {isDoctor && <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Practice</TabsTrigger>}
-          {isDoctor && <TabsTrigger value="partners" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Partners</TabsTrigger>}
-          {isDoctor && <TabsTrigger value="patients" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Patients</TabsTrigger>}
           {isDoctor && <TabsTrigger value="referrals" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Referrals</TabsTrigger>}
           {isDoctor && <TabsTrigger value="pricing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Pricing</TabsTrigger>}
           {isDoctor && <TabsTrigger value="certificates" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Certificates{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}</TabsTrigger>}
           {isDoctor && <TabsTrigger value="moolas" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Moolas</TabsTrigger>}
-          <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Preferences</TabsTrigger>
-          <TabsTrigger value="calendar" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Calendar</TabsTrigger>
           <TabsTrigger value="notifications" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Notifications</TabsTrigger>
           <TabsTrigger value="security" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Security</TabsTrigger>
           <TabsTrigger value="billing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Billing</TabsTrigger>
