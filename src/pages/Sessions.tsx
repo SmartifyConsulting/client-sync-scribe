@@ -334,7 +334,7 @@ export default function Sessions() {
     clearTranscript 
   } = useAudioRecording({
     patientName: currentPatient?.name,
-    doctorName: "Dr. Georgia Adams",
+    doctorName: doctorName,
     sessionId: currentSessionId || undefined,
     onTranscriptionComplete: (text) => {
       console.log("=== onTranscriptionComplete ===");
