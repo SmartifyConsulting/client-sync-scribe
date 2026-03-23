@@ -339,11 +339,12 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
         </div>
 
         <Tabs defaultValue="personal">
-          <TabsList className="bg-primary">
+          <TabsList className="bg-primary flex-wrap">
             <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Personal Information</TabsTrigger>
             <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Medical Information</TabsTrigger>
             {isSelfService && <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Documents</TabsTrigger>}
             {isSelfService && <TabsTrigger value="doctors" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Doctors</TabsTrigger>}
+            {isSelfService && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Round Table</TabsTrigger>}
           </TabsList>
 
           {/* === PERSONAL INFORMATION TAB === */}
