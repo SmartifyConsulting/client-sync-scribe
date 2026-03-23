@@ -549,7 +549,8 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Chronic Medication */}
                   <div>
-                    <ViewField label="Chronic Medication" value={patient.is_chronic ? "Yes - Chronic" : "No"} />
+                    <Label>Chronic Medication</Label>
+                    <Input value={patient.is_chronic ? (patient as any).chronic_medications || "Yes - Chronic" : "No"} disabled className="bg-muted/50" />
                   </div>
 
                   {/* Surgeries and Dates */}
