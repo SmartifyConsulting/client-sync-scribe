@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   Calendar, Bell, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff,
   CreditCard, Receipt, Download, Check, ExternalLink, XCircle, RotateCcw, Users,
-  Settings2, Volume2, Bold, Italic, Send,
+  Settings2, Volume2, Send,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
