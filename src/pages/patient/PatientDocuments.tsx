@@ -775,12 +775,9 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                       {doc.name}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                      <Badge
-                        variant="secondary"
-                        className={`text-xs border-0 ${config.color}`}
-                      >
-                        {config.label}
-                      </Badge>
+                      <span className={`inline-flex items-center justify-center h-5 w-5 rounded-full ${config.color}`} title={config.label}>
+                        <IconComponent className="h-3 w-3" />
+                      </span>
                       {doc.aiAnalysis && (
                         <Badge variant="secondary" className="text-xs border-0 bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400 gap-1">
                           <Sparkles className="h-3 w-3" />
