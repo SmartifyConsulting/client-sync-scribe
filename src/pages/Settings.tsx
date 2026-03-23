@@ -390,8 +390,8 @@ export default function Settings() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
                   <div className="flex-1 mr-3">
-                    <p className="text-[10px] font-medium text-foreground">Auto-email invoice to medical aid</p>
-                    <p className="text-[8px] text-muted-foreground mt-0.5">When your doctor marks an invoice as paid, it will be sent to your insurance claims email.</p>
+                    <p className="text-sm font-medium text-foreground">Auto-email invoice to medical aid</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">When your doctor marks an invoice as paid, it will be sent to your insurance claims email.</p>
                   </div>
                   <Switch checked={(profile as any)?.auto_email_invoice_to_insurance || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_invoice_to_insurance: c } as any); toast({ title: "Preference updated" }); }} />
                 </div>
