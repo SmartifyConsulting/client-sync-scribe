@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Loader2, Check, Camera, Upload, Plus, Trash2, Pencil, X, Phone, Copy,
-  Mail, Save, Award, Bold, Italic, UserPlus, ExternalLink,
+  Mail, Save, Award, Bold, Italic, UserPlus, ExternalLink, User, Building2,
+  DollarSign, GraduationCap, Stethoscope,
 } from "lucide-react";
 import ReferralDoctors from "@/pages/ReferralDoctors";
 import { Button } from "@/components/ui/button";
