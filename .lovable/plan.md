@@ -1,37 +1,36 @@
 
 
-# Fix: Lisa Anderson Not Appearing as Dean Allie's Patient
+# Fix: Hardcoded Doctor Name & Missing Auto-Generated Prescription
 
-## Root Cause
+## Root Cause Analysis
 
-Lisa Anderson (`lisa.a@email.com`) is a **demo patient record** owned by the demo user (`00000000-0000-0000-0000-000000000001`). She is not linked to Dean Allie's account. James Anderson *is* in Dean's patient list, but Lisa is not.
+**Issue 1 — "Dr. Georgia Adams" appearing instead of Dean Allie:**
+In `src/pages/Sessions.tsx` line 318, the doctor name passed to the audio transcription is **hardcoded** as `"Dr. Georgia Adams"`. This means every session transcript labels the doctor as Georgia Adams regardless of who is logged in. The AI summarizer then picks up this wrong name from the transcript.
 
-Lisa also has no `patient_user_id` — she's not a registered user, so there's no access request flow that could have auto-created her as Dean's patient.
+**Issue 2 — Prescription not auto-generated as a draft document:**
+The `completeSession` function in `useSessions.ts` only auto-creates **hospital admission** documents (lines 284-370). There is no equivalent logic for prescriptions, medical certificates, invoices, or referrals. When the AI detects a prescription in the transcript, it returns the data in `summaryData.prescription`, but the code only stores it in `_extractedDocuments` metadata — it never creates a draft document or a review task for it.
 
-## Two Possible Fixes
+## Plan
 
-**Option A — Data fix:** Create a patient record for Lisa Anderson under Dean Allie's user ID via a migration insert. This is appropriate if Lisa should simply be one of Dean's test patients.
+### 1. Fix hardcoded doctor name (`src/pages/Sessions.tsx`)
 
-**Option B — No code change needed:** If the expectation was that Lisa would appear via an access request, she would first need to be a registered user who sent a request. Since she's only demo data, this is expected behavior.
+- Fetch the logged-in user's profile (`full_name`) on mount
+- Pass the actual doctor name (e.g., "Dr. Dean Allie") to `useAudioRecording` instead of the hardcoded string
+- Fallback to "Doctor" if no profile name is available
 
-## Recommended Action
+### 2. Auto-generate prescription draft documents (`src/hooks/useSessions.ts`)
 
-Run a migration to insert Lisa Anderson as a patient for Dean Allie:
+After the hospital admission auto-creation block, add similar logic for prescriptions:
 
-```sql
-INSERT INTO patients (user_id, name, email, phone, status)
-VALUES (
-  '54fa34d8-9705-4407-a825-19c5756ca184',
-  'Lisa Anderson',
-  'lisa.a@email.com',
-  '+1 (555) 567-8901',
-  'active'
-);
-```
+- When `summaryData.prescription` is detected and has medications, auto-create a draft prescription document using the doctor's Prescription template (or a default layout)
+- Insert the document with `is_draft: true` and `session_id` linked
+- Create a `document_review` todo task so the doctor can review and approve before sending
+- Apply the same pattern for medical certificates and referrals if detected
 
-## Files Modified
+### Files Modified
 
 | File | Change |
 |------|--------|
-| New migration | Insert Lisa Anderson patient record for Dean Allie |
+| `src/pages/Sessions.tsx` | Fetch doctor profile, pass real `full_name` to `useAudioRecording` |
+| `src/hooks/useSessions.ts` | Add auto-creation of draft prescription (and med cert, referral) documents when AI detects them |
 
