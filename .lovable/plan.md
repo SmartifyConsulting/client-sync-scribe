@@ -1,36 +1,66 @@
 
 
-# Multi-Fix Update Plan
+# Permission Transparency Modal
 
-## 1. Fix Moolas Icon on Doctor's Patient Profile Tab
-**File:** `src/pages/PatientProfile.tsx`
-- Replace `import moolasLogo from "@/assets/moolas-logo.png"` with `import moolaSymbol from "@/assets/moola-symbol.png"`
-- Update the Moolas stats card (line ~312) to use `moolaSymbol` instead of `moolasLogo`
+## Overview
+Create a reusable `PermissionTransparencyModal` component that shows what data is shared vs. private when connecting doctors to patients. Display it in three contexts: patient inviting a doctor, doctor sharing a patient record, and as a privacy badge in session mode.
 
-## 2. Add "Medical Overview" and "My Sessions" Tabs to Patient's Holarchive
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- Add a new `TabsTrigger` for "Medical Overview" after "Personal Information" (visible when `isSelfService` and user is patient)
-- Add a new `TabsTrigger` for "My Sessions" after "Medical Overview" (visible when `isSelfService` and user is patient)
-- Add `TabsContent` for "overview" that renders the `PatientOverview` component (fetching sessions for the patient)
-- Add `TabsContent` for "sessions" that renders the `SessionHistoryTable` component (fetching sessions where patient is linked)
-- Both tabs appear in both view and edit mode tab lists
+## Changes
 
-## 3. Remove Chronic Medication Banner from Patient Dashboard
-**File:** `src/pages/patient/PatientDashboard.tsx`
-- Remove the "Chronic Medication Badge" block (lines ~303-317)
+### 1. Create `src/components/permissions/PermissionTransparencyModal.tsx`
+A reusable component showing two sections:
+- **Shared Items** (green checkmarks): AI Session Summaries, Patient Information, Patient Medical Overview, Documents (Prescriptions, Hospital Admissions, Patient Images, Patient Videos, Test Results, Scans)
+- **Private Items** (red X, greyed out): Full Transcriptions, Raw Audio Recordings, AI Diagnostics, Clinical Drawings/Sketches, Invoices & Billing Data, Doctor Referrals, Medical Certificates
 
-## 4. Add Recent Activity Banner to Top of Patient Dashboard
-**File:** `src/pages/patient/PatientDashboard.tsx`
-- After the welcome header, add a horizontal scrollable banner showing recent notifications from the last 30 days
-- Use the already-fetched `recentNotifications` data (lines 116-130)
-- Display as a compact, horizontally-scrolling strip with activity type icons, short descriptions, and relative timestamps
-- Style as a subtle banner with border-primary styling consistent with the app
+For patient-facing use, includes a "Holistic Health" nudge message encouraging sharing. If a patient unchecks core items (summaries, patient info, medical overview), show an alert warning about limiting holistic care.
 
-## Files Modified Summary
+Can render as a full dialog or inline panel (for embedding in other dialogs).
 
-| File | Changes |
-|------|---------|
-| `src/pages/PatientProfile.tsx` | Use `moola-symbol.png` for Moolas icon |
-| `src/components/patients/PatientDetailsEditor.tsx` | Add Medical Overview and My Sessions tabs for patient self-service |
-| `src/pages/patient/PatientDashboard.tsx` | Remove chronic med banner, add recent activity banner at top |
+### 2. Update `src/components/patient/InviteDoctorDialog.tsx`
+- Replace the current simple checkbox permissions list (lines 321-336) with the `PermissionTransparencyModal` rendered inline
+- Show the shared/private breakdown before submission
+- Add the holistic health alert if patient deselects core shared items
+- Keep the search and credential fields as-is
+
+### 3. Update `src/components/patients/DoctorsOnProfile.tsx`
+- When a doctor views attending doctors and wants to share/refer, add a "Share with Colleague" action that opens the `PermissionTransparencyModal` as a dialog, showing what will be shared before confirming
+
+### 4. Add Privacy Badge to Session Mode
+**File:** `src/pages/SessionDetail.tsx`
+- Add a small `Shield` icon badge/tooltip in the session header area
+- On hover/click, shows a compact version of the permission transparency breakdown
+- Reminds the doctor what is being synced with the care team
+
+### 5. Create `src/components/permissions/PrivacyBadge.tsx`
+A compact tooltip-triggered component showing the shared vs. private list. Uses `HoverCard` or `Tooltip` for desktop, tappable on mobile.
+
+## Component Structure
+
+```text
+PermissionTransparencyModal
+├── Shared Items Section (green ✅)
+│   ├── AI Session Summaries
+│   ├── Patient Information
+│   ├── Patient Medical Overview
+│   └── Documents (Prescriptions, Admissions, Images, Videos, Tests, Scans)
+├── Private Items Section (greyed + red ❌)
+│   ├── Full Transcriptions
+│   ├── Raw Audio Recordings
+│   ├── AI Diagnostics
+│   ├── Clinical Drawings/Sketches
+│   ├── Invoices & Billing Data
+│   ├── Doctor Referrals
+│   └── Medical Certificates
+└── [Patient only] Holistic Health Alert (if core items deselected)
+```
+
+## Files Modified
+
+| File | Change |
+|------|--------|
+| `src/components/permissions/PermissionTransparencyModal.tsx` | New — shared/private breakdown with holistic nudge |
+| `src/components/permissions/PrivacyBadge.tsx` | New — compact tooltip for session mode |
+| `src/components/patient/InviteDoctorDialog.tsx` | Replace permission checkboxes with transparency modal |
+| `src/components/patients/DoctorsOnProfile.tsx` | Add share action with transparency modal |
+| `src/pages/SessionDetail.tsx` | Add privacy badge in session header |
 
