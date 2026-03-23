@@ -1,63 +1,59 @@
 
 
-# Plan: Font Reduction, Nav Restructure, Notifications Enhancement, Moola Logo Resize
+# Plan: Settings Tab Restructure + Font Fix + Font Size Reduction
 
-## 1. Reduce All Font Sizes by 30% (except To-Do section and nav items)
+## Summary
 
-**File: `src/index.css`**
-- Change base body font from `15px` to `10.5px` (30% reduction)
-- Add exclusion classes for To-Do section and nav menu items to preserve their current sizes
+Restructure Settings tabs by removing Patients (already in Holarchive), merging Partners into Practice, merging Calendar and Language into Preferences, and merging Preferences into Personal. Also fix signature font rendering and reduce all font sizes by 30%.
 
-**File: `src/components/dashboard/CompactTodoList.tsx`**
-- Wrap the component's root in a class that resets font size to the original `15px` base
+## Tab Structure: Before → After
 
-**File: `src/components/layout/Sidebar.tsx`**
-- Add a class to the nav items section preserving `text-sm` (14px) sizing
+**Before**: Personal | Practice | Partners | Patients | Referrals | Pricing | Certificates | Moolas | Preferences | Calendar | Notifications | Security | Billing | Data
 
-**File: `src/components/layout/BottomNav.tsx`**
-- Preserve current nav font sizes with explicit sizing class
+**After**: Personal | Practice | Referrals | Pricing | Certificates | Moolas | Notifications | Security | Billing | Data
 
-## 2. Remove "Patients" from Doctor Nav Bar → List in Doctor's Holarchive
+## Changes
 
-**File: `src/components/layout/Sidebar.tsx`**
-- Remove `{ icon: Users, label: "Patients", to: "/patients" }` from `doctorNavItems`
+### 1. `src/pages/Settings.tsx` — Tab restructure
 
-**File: `src/components/layout/BottomNav.tsx`**
-- Remove Patients from `doctorNavItems`
+**Remove tabs**: Partners, Patients, Calendar, Preferences
 
-**File: `src/pages/Profile.tsx`**
-- For doctors: instead of showing "settings have moved" card, render a doctor Holarchive view that includes a "My Patients" tab embedding the patients list (from `src/pages/Patients.tsx` content)
+**Move Partners section** (lines 1080-1142) into the Practice tab (after the signature section, ~line 1024), as a new "Partners" frame/section with a separator.
 
-## 3. Remove "Connections" from Nav Bar → Show in Notifications Popup
+**Move into Personal tab** (after MailboxSection, ~line 941):
+- A new **"Preferences"** section frame containing:
+  - The existing Preferences content (auto-email toggles for patients, Patient Management for doctors — lines 1308-1369)
+  - A new **"Language"** sub-frame containing Country, Language, and Narration Voice selectors (currently in Practice tab, lines 1026-1075) — move from Practice to here
+  - A new **"Calendar Integration"** sub-frame containing Google/Outlook calendar connect/disconnect (lines 1372-1411)
 
-**File: `src/components/layout/Sidebar.tsx`**
-- Remove `{ icon: Users2, label: "Connections", to: "/connections" }` from `doctorNavItems`
+**Remove from Practice tab**: Country/Language/Narration Voice block (lines 1026-1075) — moved to Personal > Preferences > Language
 
-**File: `src/pages/Dashboard.tsx`**
-- Enhance the notifications popover to include connection requests/invitations alongside regular notifications
-- Add a **"Clear"** button per notification record that deletes/marks-as-dismissed that single notification
-- Add a **"Clear All"** button at the top of the notifications popup header
-- When "Clear" is clicked on a notification, it should no longer appear (mark as read + dismissed, or delete)
+**Remove TabsTrigger entries** for: `partners`, `patients`, `calendar`, `preferences`
 
-## 4. Resize Moola Logo to Match Doctor Rating Star Badge
+### 2. `src/pages/Settings.tsx` — Fix signature fonts
 
-**File: `src/components/dashboard/StatsCard.tsx`**
-- When `imageUrl` is provided, remove the white circle container (`rounded-full bg-white shadow-sm p-1`)
-- Render the image at the same size as the regular icon badge (same `h-7 w-7` as the Icon, inside the same `rounded-2xl bg-primary/10` container)
+Change all `SIGNATURE_FONTS` entries from `cursive` fallback to `serif`:
+- `"'Allura', cursive"` → `"'Allura', serif"`
+- Same for all 11 fonts
 
-**File: `src/components/gamification/LollipopDisplay.tsx`**
-- Update `MoolaLogoBadge` to remove the white circle background, just render the logo directly
+Add `document.fonts.ready` state check so signature preview renders only after fonts load.
+
+### 3. `src/index.css` — Reduce font sizes by 30%
+
+- Change base body font from `10.5px` to `7.35px`
+- Keep `.font-size-preserve` at `15px` for nav and To-Do
+
+### 4. `src/pages/Settings.tsx` — Scale down explicit Tailwind classes
+
+- `text-lg` → `text-sm`
+- `text-base` → `text-xs`  
+- `text-sm` → `text-[10px]`
+- Applied to headings and labels throughout Settings
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/index.css` | Reduce base font to ~10.5px |
-| `src/components/dashboard/CompactTodoList.tsx` | Preserve original font size |
-| `src/components/layout/Sidebar.tsx` | Remove Patients + Connections; preserve nav font size |
-| `src/components/layout/BottomNav.tsx` | Remove Patients; preserve nav font size |
-| `src/pages/Profile.tsx` | Doctor view: show Holarchive with embedded patients list |
-| `src/pages/Dashboard.tsx` | Enhance notifications popup: per-item Clear button + Clear All; include connections |
-| `src/components/dashboard/StatsCard.tsx` | Remove white circle from image icon, match regular icon size |
-| `src/components/gamification/LollipopDisplay.tsx` | Remove white circle from MoolaLogoBadge |
+| `src/pages/Settings.tsx` | Remove Patients/Partners/Calendar/Preferences tabs; merge Partners into Practice; merge Calendar + Language + Preferences into Personal; fix signature font fallbacks; scale down text classes |
+| `src/index.css` | Reduce base font to 7.35px |
 
