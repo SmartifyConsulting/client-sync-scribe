@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Loader2, Check, Camera, Upload, Plus, Trash2, Pencil, X, Phone, Copy,
   Mail, Save, Award, Bold, Italic, UserPlus, ExternalLink, User, Building2,
-  DollarSign, GraduationCap, Stethoscope,
+  DollarSign, GraduationCap, Stethoscope, Users2,
 } from "lucide-react";
 import ReferralDoctors from "@/pages/ReferralDoctors";
 import Patients from "@/pages/Patients";
