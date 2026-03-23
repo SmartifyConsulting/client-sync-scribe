@@ -92,21 +92,38 @@ export default function GamificationAdmin() {
 
   const addAppMutation = useMutation({
     mutationFn: async () => {
+      setUploadingLogo(true);
+      let logoUrl: string | null = null;
+      
+      // Upload logo if file selected
+      if (newAppLogoFile) {
+        const ext = newAppLogoFile.name.split(".").pop() || "png";
+        const fileName = `partner-apps/${Date.now()}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from("logos")
+          .upload(fileName, newAppLogoFile, { contentType: newAppLogoFile.type });
+        if (uploadError) throw uploadError;
+        const { data } = supabase.storage.from("logos").getPublicUrl(fileName);
+        logoUrl = data.publicUrl;
+      }
+
       const { error } = await supabase
         .from("moola_partner_apps")
-        .insert({ name: newAppName, logo_url: newAppLogoUrl || null, creator: newAppCreator || null, signup_url: newAppSignupUrl || null } as any);
+        .insert({ name: newAppName, logo_url: logoUrl, creator: newAppCreator || null, signup_url: newAppSignupUrl || null } as any);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-partner-apps"] });
       setShowAddAppDialog(false);
       setNewAppName("");
-      setNewAppLogoUrl("");
+      setNewAppLogoFile(null);
       setNewAppCreator("");
       setNewAppSignupUrl("");
+      setUploadingLogo(false);
       toast({ title: "Partner app added" });
     },
     onError: (err: Error) => {
+      setUploadingLogo(false);
       toast({ title: "Error", description: err.message, variant: "destructive" });
     },
   });
