@@ -644,7 +644,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
             <div className={sectionFrame + " space-y-4"}>
               <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Medical Information</h3>
 
-            {/* Column 2: Physical, Blood, Allergies, Chronic, Surgeries, Family History, Organ Donor */}
+            {/* Column 2: Insurance & Pharmacies */}
             <div className="space-y-4">
               <div className={sectionFrame}>
                 <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide">Physical Measurements</h3>
