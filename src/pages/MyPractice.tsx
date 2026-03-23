@@ -295,6 +295,19 @@ export default function MyPractice() {
       profileLoadedData.current = newFormData;
       setFormData(newFormData);
       requestAnimationFrame(() => { hasInitialized.current = true; isSettingFromProfile.current = false; });
+
+      // Sync signature state
+      const newSigData = {
+        signature_font: (profile as any).signature_font || "allura",
+        signature_color: (profile as any).signature_color || "black",
+        signature_font_size: (profile as any).signature_font_size ?? 24,
+        signature_bold: (profile as any).signature_bold ?? false,
+        signature_italic: (profile as any).signature_italic ?? false,
+      };
+      sigIsSettingFromProfile.current = true;
+      sigProfileLoadedData.current = newSigData;
+      setSigFormData(newSigData);
+      requestAnimationFrame(() => { sigHasInitialized.current = true; sigIsSettingFromProfile.current = false; });
     }
   }, [profile]);
 
