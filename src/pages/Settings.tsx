@@ -378,10 +378,12 @@ export default function Settings() {
 
         {/* === PREFERENCES TAB === */}
         <TabsContent value="preferences" className="mt-4">
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-3">
               <Settings2 className="h-5 w-5 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">Preferences</h2>
+              <h2 className="text-lg font-semibold text-foreground">Preferences</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">Manage your application preferences and integrations</p>
             </div>
 
             {isPatientRole && (
