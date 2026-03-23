@@ -1,37 +1,43 @@
 
 
-# Plan: Add Icons to All Headings & Restructure Medical Columns
+# Plan: Add Consistent Tab Content Headings
 
-## 1. Add Icons to Missing Headings (View Mode)
+## Problem
 
-In the **view mode** medical tab (lines 400-520), these headings are missing icons:
+When you click a tab (e.g. "Personal Information", "Medical Information", "My Round Table"), the content area doesn't show a matching heading. The tabs say one thing but the content inside starts with different section titles or no heading at all because `hideHeader` suppresses them.
 
-| Heading | Icon to Add |
-|---------|-------------|
-| Medical Insurance (line 407) | `ShieldCheck` |
-| Pharmacies (line 419) | `Store` |
-| Physical Measurements (line 443) | `Activity` |
-| Blood Type (line 462) | `Droplets` |
-| Surgeries and Dates (line 483) | `Scissors` |
-| Family History (line 500) | `GitBranch` |
+## Changes
 
-Each `<h3>` will get `flex items-center gap-1.5` with the corresponding icon at `h-3.5 w-3.5`, matching the existing pattern used by Allergies, Chronic Medication, and Organ Donor.
+### 1. PatientDetailsEditor — Add tab-level headings (view mode & edit mode)
 
-## 2. Restructure View Mode Columns (lines 401-520)
+**File**: `src/components/patients/PatientDetailsEditor.tsx`
 
-**Current**: Column 1 = Insurance + Pharmacies, Column 2 = Physical/Blood/Allergies/etc (separate frames)
+Add a heading block at the top of each TabsContent area, before the section frames:
 
-**New layout**:
-- **Column 1**: Single "Medical Information" frame containing Physical Measurements, Blood Type, Allergies, Chronic Medication, Surgeries, Family History, and Organ Donor (all sub-sections inside one bordered card)
-- **Column 2**: Insurance frame + Pharmacies frame (separate cards)
+| Tab | Heading to add |
+|-----|---------------|
+| Personal Information | `<h2>Personal Information</h2>` + description "View and manage personal details" |
+| Medical Information | `<h2>Medical Information</h2>` + description "View and manage medical records" |
+| My Documents | `<h2>My Documents</h2>` + description "View your medical documents" |
+| My Doctors | `<h2>My Doctors</h2>` + description "View your healthcare providers" |
+| My Round Table | `<h2>My Round Table</h2>` + description "Notes shared by your care team" |
 
-## 3. Edit Mode Already Correct
+For Documents, Doctors, and Round Table: remove `hideHeader` prop so the components show their own built-in headings instead of adding duplicate ones. Update `PatientRoundTable` so its heading says **"My Round Table"** (currently says just "Round Table").
 
-The edit mode (lines 640-830) already has the correct structure — Column 1 is a single "Medical Information" frame, Column 2 is Insurance + Pharmacies. No changes needed there.
+### 2. PatientRoundTable — Fix heading text
 
-## File Modified
+**File**: `src/pages/patient/PatientRoundTable.tsx`
+
+Change `"Round Table"` → `"My Round Table"` in the `<h1>` tag.
+
+### 3. Settings tabs — already consistent
+
+Settings tabs (Preferences, Notifications, Security, Billing) already have matching `<h2>` headings inside each tab content. No changes needed there.
+
+## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/components/patients/PatientDetailsEditor.tsx` | Add icons to all view-mode headings; swap columns so Medical Information (single frame) is Column 1, Insurance + Pharmacies is Column 2 |
+| `src/components/patients/PatientDetailsEditor.tsx` | Add heading blocks for Personal Information and Medical Information tabs; remove `hideHeader` from Documents, Doctors, RoundTable |
+| `src/pages/patient/PatientRoundTable.tsx` | Change heading to "My Round Table" |
 
