@@ -981,6 +981,7 @@ export type Database = {
           address: string | null
           allergies: string | null
           blood_type: string | null
+          chronic_medications: string | null
           claims_email: string | null
           created_at: string
           dob: string | null
@@ -1027,6 +1028,7 @@ export type Database = {
           address?: string | null
           allergies?: string | null
           blood_type?: string | null
+          chronic_medications?: string | null
           claims_email?: string | null
           created_at?: string
           dob?: string | null
@@ -1073,6 +1075,7 @@ export type Database = {
           address?: string | null
           allergies?: string | null
           blood_type?: string | null
+          chronic_medications?: string | null
           claims_email?: string | null
           created_at?: string
           dob?: string | null
