@@ -66,6 +66,8 @@ interface PartnerApp {
   name: string;
   logo_url: string | null;
   is_active: boolean;
+  creator: string | null;
+  signup_url: string | null;
 }
 
 interface MoolaTransfer {
@@ -791,11 +793,21 @@ export default function MyRewards() {
                             <Gift className="h-5 w-5 text-primary" />
                           </div>
                         )}
-                        <div>
+                        <div className="flex-1 min-w-0">
                           <p className="font-semibold text-foreground">{app.name}</p>
-                          <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0 text-[10px] mt-1">
-                            Active
-                          </Badge>
+                          {app.creator && (
+                            <p className="text-xs text-muted-foreground">by {app.creator}</p>
+                          )}
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0 text-[10px]">
+                              Active
+                            </Badge>
+                            {app.signup_url && (
+                              <a href={app.signup_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary underline hover:text-primary/80">
+                                Sign up
+                              </a>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>

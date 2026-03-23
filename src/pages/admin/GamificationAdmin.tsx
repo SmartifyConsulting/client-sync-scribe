@@ -35,6 +35,8 @@ interface PartnerApp {
   logo_url: string | null;
   is_active: boolean;
   created_at: string;
+  creator: string | null;
+  signup_url: string | null;
 }
 
 export default function GamificationAdmin() {
@@ -69,6 +71,10 @@ export default function GamificationAdmin() {
   const [showAddAppDialog, setShowAddAppDialog] = useState(false);
   const [newAppName, setNewAppName] = useState("");
   const [newAppLogoUrl, setNewAppLogoUrl] = useState("");
+  const [newAppCreator, setNewAppCreator] = useState("");
+  const [newAppSignupUrl, setNewAppSignupUrl] = useState("");
+  const [editingAppId, setEditingAppId] = useState<string | null>(null);
+  const [editAppValues, setEditAppValues] = useState<Partial<PartnerApp>>({});
 
   const { data: partnerApps = [], isLoading: appsLoading } = useQuery({
     queryKey: ["admin-partner-apps"],
@@ -86,7 +92,7 @@ export default function GamificationAdmin() {
     mutationFn: async () => {
       const { error } = await supabase
         .from("moola_partner_apps")
-        .insert({ name: newAppName, logo_url: newAppLogoUrl || null });
+        .insert({ name: newAppName, logo_url: newAppLogoUrl || null, creator: newAppCreator || null, signup_url: newAppSignupUrl || null } as any);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -94,7 +100,28 @@ export default function GamificationAdmin() {
       setShowAddAppDialog(false);
       setNewAppName("");
       setNewAppLogoUrl("");
+      setNewAppCreator("");
+      setNewAppSignupUrl("");
       toast({ title: "Partner app added" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const updateAppMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<PartnerApp> }) => {
+      const { error } = await supabase
+        .from("moola_partner_apps")
+        .update(updates as any)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-partner-apps"] });
+      setEditingAppId(null);
+      setEditAppValues({});
+      toast({ title: "Partner app updated" });
     },
     onError: (err: Error) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -658,6 +685,22 @@ export default function GamificationAdmin() {
                         onChange={(e) => setNewAppLogoUrl(e.target.value)}
                       />
                     </div>
+                    <div className="space-y-2">
+                      <Label>Creator</Label>
+                      <Input
+                        placeholder="e.g., Health Corp"
+                        value={newAppCreator}
+                        onChange={(e) => setNewAppCreator(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Signup URL</Label>
+                      <Input
+                        placeholder="https://app.example.com/signup"
+                        value={newAppSignupUrl}
+                        onChange={(e) => setNewAppSignupUrl(e.target.value)}
+                      />
+                    </div>
                   </div>
                   <DialogFooter>
                     <Button variant="outline" onClick={() => setShowAddAppDialog(false)}>Cancel</Button>
@@ -682,7 +725,10 @@ export default function GamificationAdmin() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>Logo</TableHead>
                       <TableHead>App Name</TableHead>
+                      <TableHead>Creator</TableHead>
+                      <TableHead>Signup Link</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -690,7 +736,36 @@ export default function GamificationAdmin() {
                   <TableBody>
                     {partnerApps.map((app) => (
                       <TableRow key={app.id}>
-                        <TableCell className="font-medium">{app.name}</TableCell>
+                        <TableCell>
+                          {app.logo_url ? (
+                            <img src={app.logo_url} alt={app.name} className="h-8 w-8 rounded-lg object-contain" />
+                          ) : (
+                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                              <Globe className="h-4 w-4 text-primary" />
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {editingAppId === app.id ? (
+                            <Input value={editAppValues.name || ""} onChange={(e) => setEditAppValues({ ...editAppValues, name: e.target.value })} className="w-32" />
+                          ) : app.name}
+                        </TableCell>
+                        <TableCell>
+                          {editingAppId === app.id ? (
+                            <Input value={editAppValues.creator || ""} onChange={(e) => setEditAppValues({ ...editAppValues, creator: e.target.value })} className="w-28" placeholder="Creator" />
+                          ) : (
+                            <span className="text-sm text-muted-foreground">{app.creator || "-"}</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {editingAppId === app.id ? (
+                            <Input value={editAppValues.signup_url || ""} onChange={(e) => setEditAppValues({ ...editAppValues, signup_url: e.target.value })} className="w-40" placeholder="Signup URL" />
+                          ) : app.signup_url ? (
+                            <a href={app.signup_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline hover:text-primary/80">Sign up</a>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
                         <TableCell>
                           <Switch
                             checked={app.is_active}
@@ -698,14 +773,30 @@ export default function GamificationAdmin() {
                           />
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => deleteAppMutation.mutate(app.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          {editingAppId === app.id ? (
+                            <div className="flex items-center justify-end gap-2">
+                              <Button size="sm" variant="ghost" onClick={() => { setEditingAppId(null); setEditAppValues({}); }}>
+                                <X className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" onClick={() => updateAppMutation.mutate({ id: app.id, updates: editAppValues })}>
+                                <Save className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-end gap-2">
+                              <Button size="sm" variant="ghost" onClick={() => { setEditingAppId(app.id); setEditAppValues({ name: app.name, logo_url: app.logo_url, creator: app.creator, signup_url: app.signup_url }); }}>
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-destructive hover:text-destructive"
+                                onClick={() => deleteAppMutation.mutate(app.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}

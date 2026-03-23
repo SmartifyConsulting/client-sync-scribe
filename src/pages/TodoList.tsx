@@ -227,6 +227,23 @@ export default function TodoList() {
       if (!user) throw new Error('Not authenticated');
       const { data, error } = await supabase.from('todos').insert({ user_id: user.id, title: newTaskText.trim(), priority: newTaskPriority, status: 'pending' }).select().single();
       if (error) throw error;
+
+      // Notify patient if task has a patient_id
+      if (data.patient_id) {
+        try {
+          const { data: patient } = await supabase.from('patients').select('patient_user_id').eq('id', data.patient_id).maybeSingle();
+          if (patient?.patient_user_id) {
+            await supabase.from('notifications').insert({
+              user_id: patient.patient_user_id,
+              title: `📋 New task assigned: ${data.title}`,
+              description: data.description || 'You have been assigned a new task by your healthcare provider.',
+              type: 'task_assigned',
+              reference_id: data.id,
+            });
+          }
+        } catch (notifErr) { console.error('Error sending task notification:', notifErr); }
+      }
+
       setTodos([{ ...data, completed: false, priority: data.priority as "low" | "medium" | "high", is_auto_executed: false, patient_name: null, document_id: null, task_type: 'standard' }, ...todos]);
       setNewTaskText(""); setNewTaskPriority("medium");
       toast({ title: "Task added" });

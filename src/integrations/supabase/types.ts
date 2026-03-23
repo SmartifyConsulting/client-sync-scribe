@@ -738,24 +738,30 @@ export type Database = {
       moola_partner_apps: {
         Row: {
           created_at: string
+          creator: string | null
           id: string
           is_active: boolean
           logo_url: string | null
           name: string
+          signup_url: string | null
         }
         Insert: {
           created_at?: string
+          creator?: string | null
           id?: string
           is_active?: boolean
           logo_url?: string | null
           name: string
+          signup_url?: string | null
         }
         Update: {
           created_at?: string
+          creator?: string | null
           id?: string
           is_active?: boolean
           logo_url?: string | null
           name?: string
+          signup_url?: string | null
         }
         Relationships: []
       }
