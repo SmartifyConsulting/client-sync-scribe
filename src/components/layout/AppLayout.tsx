@@ -4,6 +4,7 @@ import { BottomNav } from "./BottomNav";
 import { MobileHeader } from "./MobileHeader";
 import { PageTransition } from "./PageTransition";
 import { Footer } from "./Footer";
+import { TopBarIcons } from "./TopBarIcons";
 import { AnimatePresence } from "framer-motion";
 
 export function AppLayout() {
@@ -21,7 +22,11 @@ export function AppLayout() {
       
       {/* Main content - responsive margins */}
       <main className="flex-1 md:ml-[210px] pb-24 md:pb-0">
-        <div className="px-4 py-6 md:px-8 md:py-8 max-w-7xl">
+        {/* Persistent top-right icons on desktop */}
+        <div className="hidden md:flex justify-end px-8 pt-4">
+          <TopBarIcons />
+        </div>
+        <div className="px-4 py-6 md:px-8 md:pt-2 md:pb-8 max-w-7xl">
           <AnimatePresence mode="wait">
             <PageTransition key={location.pathname}>
               <Outlet />

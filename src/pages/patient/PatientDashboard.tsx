@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Calendar, FileText, Clock, User, Loader2, Bell, Pill, LogOut, Settings, ListChecks, ArrowRight, Info, Sparkles, Building2, Receipt, Star, Camera, Trophy, Heart } from "lucide-react";
-import moolasLogo from "@/assets/moolas-logo.png";
+import { Calendar, FileText, Clock, User, Loader2, Pill, ListChecks, ArrowRight, Info, Sparkles, Building2, Receipt, Star, Camera, Trophy, Heart } from "lucide-react";
+import moolaSymbol from "@/assets/moola-symbol.png";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -296,67 +296,6 @@ export default function PatientDashboard() {
             <p className="text-muted-foreground text-[12px]">Your health dashboard at a glance</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <button className="relative h-9 w-9 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors">
-                <Bell className="h-4 w-4 text-terracotta-foreground stroke-terracotta-foreground fill-none" />
-                {unreadNotifCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[8px] font-bold text-white">
-                    {unreadNotifCount > 99 ? "99+" : unreadNotifCount}
-                  </span>
-                )}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-72 p-0" align="end">
-              <div className="flex items-center justify-between px-3 py-2 border-b border-border">
-                <p className="text-xs font-semibold">Notifications</p>
-                {unreadNotifCount > 0 && (
-                  <Button variant="ghost" size="sm" className="text-[10px] h-6" onClick={markAllRead}>Mark all read</Button>
-                )}
-              </div>
-              <div className="max-h-56 overflow-y-auto">
-                {recentNotifications.length === 0 ? (
-                  <p className="text-xs text-muted-foreground text-center py-4">No notifications</p>
-                ) : (
-                  recentNotifications.map((n: any) => (
-                    <div key={n.id} className={`px-3 py-2 border-b border-border/50 text-xs ${!n.is_read ? 'bg-primary/5' : ''}`}>
-                      <p className="font-medium text-foreground">{n.title}</p>
-                      {n.description && <p className="text-[10px] text-muted-foreground mt-0.5">{n.description}</p>}
-                    </div>
-                  ))
-                )}
-              </div>
-            </PopoverContent>
-          </Popover>
-          <Popover>
-            <PopoverTrigger asChild>
-              <button className="rounded-xl p-1.5 hover:bg-accent transition-colors">
-                <Avatar className="h-9 w-9 border-2 border-primary">
-                  <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} className="object-cover" />
-                  <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
-                    {profile?.full_name ? profile.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) : "U"}
-                  </AvatarFallback>
-                </Avatar>
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-48 p-1.5" align="end">
-              <div className="px-2 py-1.5 border-b border-border mb-1">
-                <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
-                <p className="text-[10px] text-muted-foreground">Patient</p>
-              </div>
-              <Link to="/profile" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
-                <User className="h-3.5 w-3.5" /> Profile
-              </Link>
-              <Link to="/settings" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
-                <Settings className="h-3.5 w-3.5" /> Settings
-              </Link>
-              <button onClick={async () => { await supabase.auth.signOut(); window.location.href = "/auth"; }} className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-destructive/10 text-destructive transition-colors w-full">
-                <LogOut className="h-3.5 w-3.5" /> Sign Out
-              </button>
-            </PopoverContent>
-          </Popover>
-        </div>
       </div>
 
       {/* Chronic Medication Badge */}
@@ -380,8 +319,8 @@ export default function PatientDashboard() {
         <Link to="/patient/rewards">
           <Card className="h-full border-primary/20 bg-gradient-to-br from-primary/5 via-card to-secondary/5 hover:shadow-lg transition-all cursor-pointer">
             <CardContent className="flex items-center gap-4 p-5">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-sm shrink-0">
-                <img src={moolasLogo} alt="Moolas" className="h-10 w-10 object-cover rounded-full" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                 <img src={moolaSymbol} alt="Moolas" className="h-7 w-7 object-contain" />
               </div>
               <div className="flex-1">
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">My Moolas Balance</p>
@@ -480,9 +419,9 @@ export default function PatientDashboard() {
           <CardContent>
             {doctors.length === 0 ? (
               <div className="text-center py-4">
-                <p className="text-[11px] text-muted-foreground">No doctors connected yet.</p>
-                <Link to="/patient/access" className="text-primary hover:underline text-[10px]">
-                  Invite a doctor
+               <p className="text-[11px] text-muted-foreground">No healthcare providers connected yet.</p>
+                 <Link to="/patient/access" className="text-primary hover:underline text-[10px]">
+                   Invite a healthcare provider
                 </Link>
               </div>
             ) : (

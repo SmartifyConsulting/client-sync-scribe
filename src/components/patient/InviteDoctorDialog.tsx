@@ -231,7 +231,7 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
       <DialogTrigger asChild>
         <Button className="gap-2">
           <UserPlus className="h-4 w-4" />
-          Invite Doctor
+          Invite Healthcare Provider
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">

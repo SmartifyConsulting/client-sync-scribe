@@ -1,0 +1,177 @@
+import { Bell, Mic, User, Settings, LogOut, Award } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { supabase } from "@/integrations/supabase/client";
+import { useProfile } from "@/hooks/useProfile";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+export function TopBarIcons() {
+  const { profile } = useProfile();
+  const { isDoctor } = useUserRole();
+  const queryClient = useQueryClient();
+
+  const { data: unreadNotifCount = 0 } = useQuery({
+    queryKey: ["unread-notifications-topbar"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return 0;
+      const { count } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("is_read", false);
+      return count || 0;
+    },
+    refetchInterval: 30000,
+  });
+
+  const { data: recentNotifications = [] } = useQuery({
+    queryKey: ["recent-notifications-topbar"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      const { data } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("is_read", false)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      return data || [];
+    },
+    refetchInterval: 30000,
+  });
+
+  const { data: totalCpdPoints = 0 } = useQuery({
+    queryKey: ["cpd-points-topbar"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return 0;
+      const { data } = await supabase
+        .from("cpd_certificates")
+        .select("cpd_points")
+        .eq("user_id", user.id);
+      if (!data) return 0;
+      return data.reduce((sum, cert) => sum + (cert.cpd_points || 0), 0);
+    },
+    refetchInterval: 60000,
+  });
+
+  const clearAllNotifications = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false);
+    queryClient.invalidateQueries({ queryKey: ["unread-notifications-topbar"] });
+    queryClient.invalidateQueries({ queryKey: ["recent-notifications-topbar"] });
+  };
+
+  const clearNotification = async (notifId: string) => {
+    await supabase.from("notifications").update({ is_read: true }).eq("id", notifId);
+    queryClient.invalidateQueries({ queryKey: ["unread-notifications-topbar"] });
+    queryClient.invalidateQueries({ queryKey: ["recent-notifications-topbar"] });
+  };
+
+  const getInitials = () => {
+    if (!profile?.full_name) return "U";
+    return profile.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      {/* Mic */}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Link to="/todos?autoRecord=true">
+              <div className="h-9 w-9 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors">
+                <Mic className="h-4 w-4 text-white stroke-white fill-none" />
+              </div>
+            </Link>
+          </TooltipTrigger>
+          <TooltipContent>Record a Task</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      {/* Bell */}
+      <Popover>
+        <PopoverTrigger asChild>
+          <button className="relative h-9 w-9 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors">
+            <Bell className="h-4 w-4 text-white stroke-white fill-none" />
+            {unreadNotifCount > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[8px] font-bold text-white">
+                {unreadNotifCount > 99 ? "99+" : unreadNotifCount}
+              </span>
+            )}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-72 p-0" align="end">
+          <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+            <p className="text-xs font-semibold">Notifications</p>
+            {recentNotifications.length > 0 && (
+              <Button variant="ghost" size="sm" className="text-[10px] h-6 text-destructive hover:text-destructive" onClick={clearAllNotifications}>
+                Clear All
+              </Button>
+            )}
+          </div>
+          <div className="max-h-56 overflow-y-auto">
+            {recentNotifications.length === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-4">No notifications</p>
+            ) : (
+              recentNotifications.map((n: any) => (
+                <div key={n.id} className="px-3 py-2 border-b border-border/50 text-xs bg-primary/5 flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-foreground">{n.title}</p>
+                    {n.description && <p className="text-[10px] text-muted-foreground mt-0.5">{n.description}</p>}
+                  </div>
+                  <Button variant="ghost" size="sm" className="h-5 px-1 text-[9px] text-muted-foreground hover:text-destructive shrink-0" onClick={() => clearNotification(n.id)}>
+                    Clear
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
+        </PopoverContent>
+      </Popover>
+
+      {/* Avatar */}
+      <Popover>
+        <PopoverTrigger asChild>
+          <button className="rounded-xl p-1 hover:bg-accent transition-colors relative">
+            <Avatar className="h-9 w-9 border-2 border-primary">
+              <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} className="object-cover" />
+              <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
+                {getInitials()}
+              </AvatarFallback>
+            </Avatar>
+            {isDoctor && totalCpdPoints > 0 && (
+              <Badge className="absolute -top-1 -right-1 h-4 min-w-4 px-0.5 text-[8px] bg-amber-500 hover:bg-amber-500 text-white border-2 border-background">
+                <Award className="h-2 w-2 mr-0.5" />
+                {totalCpdPoints}
+              </Badge>
+            )}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-48 p-1.5" align="end">
+          <div className="px-2 py-1.5 border-b border-border mb-1">
+            <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
+            <p className="text-[10px] text-muted-foreground capitalize">{isDoctor ? "Doctor" : "Patient"}</p>
+          </div>
+          <Link to="/profile" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
+            <User className="h-3.5 w-3.5" /> Profile
+          </Link>
+          <Link to="/settings" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
+            <Settings className="h-3.5 w-3.5" /> Settings
+          </Link>
+          <button onClick={async () => { await supabase.auth.signOut(); window.location.href = "/auth"; }} className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-destructive/10 text-destructive transition-colors w-full">
+            <LogOut className="h-3.5 w-3.5" /> Sign Out
+          </button>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}

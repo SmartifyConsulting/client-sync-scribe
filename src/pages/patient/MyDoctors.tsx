@@ -77,7 +77,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
         .from("profiles")
         .select("id, full_name, specialty, practice_address, mobile_number, avatar_url, practice_number, doctor_number")
         .eq("role", "doctor")
-        .or(`full_name.ilike.%${query}%,practice_number.eq.${query}`);
+        .or(`full_name.ilike.%${query}%,practice_number.eq.${query},doctor_number.eq.${query}`);
 
       if (error) throw error;
 
@@ -170,29 +170,28 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
        {!hideHeader ? (
           <div>
             <div className="flex items-center gap-2">
-              <Stethoscope className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">My Doctors</h3>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Healthcare providers with access to your profile
-            </p>
-          </div>
-        ) : <div />}
-        <InviteDoctorDialog />
+               <Stethoscope className="h-4 w-4 text-primary" />
+               <h3 className="text-sm font-semibold text-foreground">My Healthcare Providers</h3>
+             </div>
+             <p className="text-xs text-muted-foreground mt-1">
+               Healthcare providers with access to your profile
+             </p>
+           </div>
+         ) : <div />}
       </div>
 
       {/* Doctor Search */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Find a Doctor on Holarc</CardTitle>
-          <CardDescription>Search by full name or practice number</CardDescription>
+          <CardTitle className="text-base">Find a Healthcare Provider on Holarc</CardTitle>
+          <CardDescription>Search by full name, practice number, or registration number</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search by name or practice number..."
+                placeholder="Search by name, practice number, or registration number..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -206,14 +205,14 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
           {hasSearched && (
             <div className="mt-4">
               {searchResults.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No doctors found matching your search.
-                </p>
+                 <p className="text-sm text-muted-foreground text-center py-4">
+                   No healthcare providers found matching your search.
+                 </p>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Doctor</TableHead>
+                      <TableHead>Provider</TableHead>
                       <TableHead>Specialty</TableHead>
                       <TableHead>Phone</TableHead>
                       <TableHead>Practice #</TableHead>
@@ -268,9 +267,9 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Stethoscope className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold text-foreground">No doctors on your profile</h3>
-            <p className="text-muted-foreground text-center mt-2 max-w-md">
-              Search for a doctor above or use the invite button to connect with your healthcare provider.
+            <h3 className="text-lg font-semibold text-foreground">No healthcare providers on your profile</h3>
+             <p className="text-muted-foreground text-center mt-2 max-w-md">
+               Search for a healthcare provider above or use the invite button to connect.
             </p>
           </CardContent>
         </Card>
@@ -280,11 +279,11 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Doctor</TableHead>
-                  <TableHead>Specialty</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Practice #</TableHead>
-                  <TableHead className="w-[50px]">Access</TableHead>
+                   <TableHead>Provider</TableHead>
+                   <TableHead>Specialty</TableHead>
+                   <TableHead>Phone</TableHead>
+                   <TableHead>Practice #</TableHead>
+                   <TableHead className="w-[50px]">Access</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
