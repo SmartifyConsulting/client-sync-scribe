@@ -2,14 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import {
   Calendar, Bell, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff,
   CreditCard, Receipt, Download, Check, ExternalLink, XCircle, RotateCcw, Users,
-  Settings2, Volume2, Bold, Italic, Send,
+  Settings2, Volume2, Send,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Slider } from "@/components/ui/slider";
-import { Toggle } from "@/components/ui/toggle";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -78,27 +76,6 @@ const SAMPLE_TEXTS: Record<string, string> = {
   zu: "Sawubona, leli yizwi lakho le-Holarc. Nansi isibonelo sokuthi izindaba zakho zizozwakala kanjani.",
 };
 
-const SIGNATURE_FONTS = [
-  { value: "allura", label: "Allura", fontFamily: "'Allura', serif" },
-  { value: "great-vibes", label: "Great Vibes", fontFamily: "'Great Vibes', serif" },
-  { value: "herr-von-muellerhoff", label: "Herr Von Muellerhoff", fontFamily: "'Herr Von Muellerhoff', serif" },
-  { value: "homemade-apple", label: "Homemade Apple", fontFamily: "'Homemade Apple', serif" },
-  { value: "kalam", label: "Kalam", fontFamily: "'Kalam', serif" },
-  { value: "mr-dafoe", label: "Mr Dafoe", fontFamily: "'Mr Dafoe', serif" },
-  { value: "petit-formal-script", label: "Petit Formal Script", fontFamily: "'Petit Formal Script', serif" },
-  { value: "pinyon-script", label: "Pinyon Script", fontFamily: "'Pinyon Script', serif" },
-  { value: "reenie-beanie", label: "Reenie Beanie", fontFamily: "'Reenie Beanie', serif" },
-  { value: "rock-salt", label: "Rock Salt", fontFamily: "'Rock Salt', serif" },
-  { value: "sacramento", label: "Sacramento", fontFamily: "'Sacramento', serif" },
-];
-
-const SIGNATURE_COLORS = [
-  { value: "black", label: "Black", color: "#000000" },
-  { value: "teal", label: "Teal", color: "#104861" },
-  { value: "navy", label: "Navy", color: "#1a2744" },
-  { value: "dark-red", label: "Dark Red", color: "#8B0000" },
-  { value: "dark-green", label: "Dark Green", color: "#006400" },
-];
 
 // ── Interfaces ──────────────────────────────────────────────────────
 interface PlanConfig { price: number; name: string; period: string; savings?: number; }
@@ -117,18 +94,6 @@ export default function Settings() {
 
   const isDoctor = role === "doctor";
   const isPatientRole = role === "patient";
-
-  // ── Signature form state (auto-save) ──
-  const [savedStatus, setSavedStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
-  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hasInitialized = useRef(false);
-  const isSettingFromProfile = useRef(false);
-  const profileLoadedData = useRef<any>(null);
-
-  const [sigFormData, setSigFormData] = useState({
-    signature_font: "allura", signature_color: "black",
-    signature_font_size: 24, signature_bold: false, signature_italic: false,
-  });
 
   // ── Calendar / Security / Billing state ──
   const [outlookConnected, setOutlookConnected] = useState(false);
@@ -152,46 +117,6 @@ export default function Settings() {
   const [inactiveThreshold, setInactiveThreshold] = useState<number>(12);
   const [savingThreshold, setSavingThreshold] = useState(false);
 
-  // ── Profile data sync (signature only) ──
-  useEffect(() => {
-    if (profile) {
-      const newSigData = {
-        signature_font: (profile as any).signature_font || "allura",
-        signature_color: (profile as any).signature_color || "black",
-        signature_font_size: (profile as any).signature_font_size ?? 24,
-        signature_bold: (profile as any).signature_bold ?? false,
-        signature_italic: (profile as any).signature_italic ?? false,
-      };
-      isSettingFromProfile.current = true;
-      profileLoadedData.current = newSigData;
-      setSigFormData(newSigData);
-      requestAnimationFrame(() => { hasInitialized.current = true; isSettingFromProfile.current = false; });
-    }
-  }, [profile]);
-
-  const combinedFullName = profile?.full_name || "Your Name";
-
-  // ── Auto-save signature debounce ──
-  useEffect(() => {
-    if (!hasInitialized.current || !user || isSettingFromProfile.current) return;
-    if (profileLoadedData.current && JSON.stringify(sigFormData) === JSON.stringify(profileLoadedData.current)) {
-      profileLoadedData.current = null; return;
-    }
-    profileLoadedData.current = null;
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    debounceTimer.current = setTimeout(async () => {
-      setSavedStatus('saving');
-      const { error } = await updateProfile({
-        signature_font: sigFormData.signature_font, signature_color: sigFormData.signature_color,
-        signature_font_size: sigFormData.signature_font_size, signature_bold: sigFormData.signature_bold,
-        signature_italic: sigFormData.signature_italic,
-      } as any);
-      if (error) { setSavedStatus('idle'); toast({ title: "Error", description: "Failed to save", variant: "destructive" }); }
-      else { setSavedStatus('saved'); setTimeout(() => setSavedStatus('idle'), 2000); }
-    }, 1500);
-    return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
-  }, [sigFormData]);
-
   // ── Fetch data ──
   useEffect(() => {
     if (user) { fetchMfaFactors(); fetchSubscription(); fetchPaymentHistory(); if (isDoctor) fetchInactiveThreshold(); }
@@ -207,8 +132,6 @@ export default function Settings() {
     else if (paymentResult === "cancelled") { toast({ title: "Payment Cancelled", description: "Your payment was cancelled." }); }
   }, [searchParams]);
 
-  const getSignatureFontFamily = (v: string) => SIGNATURE_FONTS.find(f => f.value === v)?.fontFamily || SIGNATURE_FONTS[0].fontFamily;
-  const getSignatureColor = (v: string) => SIGNATURE_COLORS.find(c => c.value === v)?.color || "#000000";
   const planType = role === "patient" ? "patient" : "doctor";
 
   // ── Fetch functions ──
@@ -361,10 +284,6 @@ export default function Settings() {
           <h1 className="text-2xl font-bold text-foreground">Settings</h1>
           <p className="text-sm text-muted-foreground">Manage your preferences, security, and billing</p>
         </div>
-        <div className="text-sm text-muted-foreground flex items-center gap-1.5">
-          {savedStatus === 'saving' && <><Loader2 className="h-3.5 w-3.5 animate-spin" /><span>Saving...</span></>}
-          {savedStatus === 'saved' && <><Check className="h-3.5 w-3.5 text-success" /><span className="text-success">Saved</span></>}
-        </div>
       </div>
 
       {/* Tabs */}
@@ -416,7 +335,7 @@ export default function Settings() {
               {/* Language Sub-frame */}
               <div className="space-y-3">
                 <h3 className="text-sm font-semibold text-foreground">Language</h3>
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label>Country</Label>
                     <Select value={(profile as any)?.country || "ZA"} onValueChange={async (v) => { await updateProfile({ country: v } as any); toast({ title: "Country updated" }); }}>
@@ -429,13 +348,6 @@ export default function Settings() {
                         <SelectItem value="AE">🇦🇪 UAE</SelectItem><SelectItem value="BW">🇧🇼 Botswana</SelectItem>
                         <SelectItem value="NA">🇳🇦 Namibia</SelectItem>
                       </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Language</Label>
-                    <Select value={(profile as any)?.preferred_language || "en"} onValueChange={async (v) => { await updateProfile({ preferred_language: v } as any); toast({ title: "Language updated" }); }}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>{LANGUAGES.map(l => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1.5">
@@ -533,54 +445,6 @@ export default function Settings() {
                 </div>
               </div>
             </div>
-
-            {/* Frame 3 — Digital Signature */}
-            {isDoctor && (
-              <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-2">
-                <Label className="text-sm font-semibold">Digital Signature</Label>
-                <div className="p-3 border border-border rounded-lg bg-background">
-                  <p style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), color: getSignatureColor(sigFormData.signature_color), fontSize: `${sigFormData.signature_font_size}px`, fontWeight: sigFormData.signature_bold ? 'bold' : 'normal', fontStyle: sigFormData.signature_italic ? 'italic' : 'normal' }}>{combinedFullName}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{new Date().toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Font</Label>
-                  <Select value={sigFormData.signature_font} onValueChange={(v) => setSigFormData({ ...sigFormData, signature_font: v })}>
-                    <SelectTrigger>
-                      <span style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), fontSize: '16px' }}>
-                        {SIGNATURE_FONTS.find(f => f.value === sigFormData.signature_font)?.label || "Select font"}
-                      </span>
-                    </SelectTrigger>
-                    <SelectContent>{SIGNATURE_FONTS.map(f => <SelectItem key={f.value} value={f.value}><span style={{ fontFamily: f.fontFamily, fontSize: '18px' }}>{f.label}</span></SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Color</Label>
-                    <Select value={sigFormData.signature_color} onValueChange={(v) => setSigFormData({ ...sigFormData, signature_color: v })}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {SIGNATURE_COLORS.map(c => (
-                          <SelectItem key={c.value} value={c.value}>
-                            <span className="flex items-center gap-2">
-                              <span className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: c.color }} />
-                              {c.label}
-                            </span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Size: {sigFormData.signature_font_size}px</Label>
-                    <Slider min={16} max={48} step={2} value={[sigFormData.signature_font_size]} onValueChange={([v]) => setSigFormData({ ...sigFormData, signature_font_size: v })} />
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Toggle pressed={sigFormData.signature_bold} onPressedChange={(v) => setSigFormData({ ...sigFormData, signature_bold: v })} size="sm" aria-label="Bold" className="h-8 w-8 p-0"><Bold className="h-4 w-4" /></Toggle>
-                  <Toggle pressed={sigFormData.signature_italic} onPressedChange={(v) => setSigFormData({ ...sigFormData, signature_italic: v })} size="sm" aria-label="Italic" className="h-8 w-8 p-0"><Italic className="h-4 w-4" /></Toggle>
-                </div>
-              </div>
-            )}
           </div>
         </TabsContent>
 

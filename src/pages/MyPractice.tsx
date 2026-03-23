@@ -67,6 +67,47 @@ const CURRENCIES = [
   { code: "LSL", symbol: "M", name: "Lesotho Loti" },
 ];
 
+const LANGUAGES = [
+  { code: "af", name: "Afrikaans" }, { code: "ar", name: "Arabic" }, { code: "nl", name: "Dutch" },
+  { code: "en", name: "English" }, { code: "fr", name: "French" }, { code: "de", name: "German" },
+  { code: "el", name: "Greek" }, { code: "he", name: "Hebrew" }, { code: "hi", name: "Hindi" },
+  { code: "id", name: "Indonesian" }, { code: "it", name: "Italian" }, { code: "ja", name: "Japanese" },
+  { code: "ko", name: "Korean" }, { code: "ms", name: "Malay" }, { code: "zh", name: "Mandarin Chinese" },
+  { code: "pl", name: "Polish" }, { code: "pt", name: "Portuguese" }, { code: "ru", name: "Russian" },
+  { code: "st", name: "Sotho" }, { code: "es", name: "Spanish" }, { code: "sw", name: "Swahili" },
+  { code: "th", name: "Thai" }, { code: "tn", name: "Tswana" }, { code: "tr", name: "Turkish" },
+  { code: "uk", name: "Ukrainian" }, { code: "vi", name: "Vietnamese" }, { code: "xh", name: "Xhosa" },
+  { code: "zu", name: "Zulu" },
+];
+
+const COUNTRY_CODE_TO_LANGUAGE: Record<string, string> = {
+  "+27": "en", "+1": "en", "+44": "en", "+267": "en", "+264": "en",
+  "+268": "en", "+266": "st", "+258": "pt", "+263": "en",
+  "+61": "en", "+91": "hi", "+49": "de", "+33": "fr", "+971": "ar",
+};
+
+const SIGNATURE_FONTS = [
+  { value: "allura", label: "Allura", fontFamily: "'Allura', serif" },
+  { value: "great-vibes", label: "Great Vibes", fontFamily: "'Great Vibes', serif" },
+  { value: "herr-von-muellerhoff", label: "Herr Von Muellerhoff", fontFamily: "'Herr Von Muellerhoff', serif" },
+  { value: "homemade-apple", label: "Homemade Apple", fontFamily: "'Homemade Apple', serif" },
+  { value: "kalam", label: "Kalam", fontFamily: "'Kalam', serif" },
+  { value: "mr-dafoe", label: "Mr Dafoe", fontFamily: "'Mr Dafoe', serif" },
+  { value: "petit-formal-script", label: "Petit Formal Script", fontFamily: "'Petit Formal Script', serif" },
+  { value: "pinyon-script", label: "Pinyon Script", fontFamily: "'Pinyon Script', serif" },
+  { value: "reenie-beanie", label: "Reenie Beanie", fontFamily: "'Reenie Beanie', serif" },
+  { value: "rock-salt", label: "Rock Salt", fontFamily: "'Rock Salt', serif" },
+  { value: "sacramento", label: "Sacramento", fontFamily: "'Sacramento', serif" },
+];
+
+const SIGNATURE_COLORS = [
+  { value: "black", label: "Black", color: "#000000" },
+  { value: "teal", label: "Teal", color: "#104861" },
+  { value: "navy", label: "Navy", color: "#1a2744" },
+  { value: "dark-red", label: "Dark Red", color: "#8B0000" },
+  { value: "dark-green", label: "Dark Green", color: "#006400" },
+];
+
 // ── Interfaces ──────────────────────────────────────────────────────
 interface Partner {
   id: string;
@@ -184,6 +225,17 @@ export default function MyPractice() {
     practice_address: "", specialty: "", mobile_number: "", country_code: "+27",
   });
 
+  // ── Signature form state (auto-save) ──
+  const sigDebounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sigHasInitialized = useRef(false);
+  const sigIsSettingFromProfile = useRef(false);
+  const sigProfileLoadedData = useRef<any>(null);
+
+  const [sigFormData, setSigFormData] = useState({
+    signature_font: "allura", signature_color: "black",
+    signature_font_size: 24, signature_bold: false, signature_italic: false,
+  });
+
   // ── Avatar / Logo upload ──
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
@@ -243,10 +295,25 @@ export default function MyPractice() {
       profileLoadedData.current = newFormData;
       setFormData(newFormData);
       requestAnimationFrame(() => { hasInitialized.current = true; isSettingFromProfile.current = false; });
+
+      // Sync signature state
+      const newSigData = {
+        signature_font: (profile as any).signature_font || "allura",
+        signature_color: (profile as any).signature_color || "black",
+        signature_font_size: (profile as any).signature_font_size ?? 24,
+        signature_bold: (profile as any).signature_bold ?? false,
+        signature_italic: (profile as any).signature_italic ?? false,
+      };
+      sigIsSettingFromProfile.current = true;
+      sigProfileLoadedData.current = newSigData;
+      setSigFormData(newSigData);
+      requestAnimationFrame(() => { sigHasInitialized.current = true; sigIsSettingFromProfile.current = false; });
     }
   }, [profile]);
 
   const combinedFullName = `${formData.first_name} ${formData.last_name}`.trim();
+  const getSignatureFontFamily = (v: string) => SIGNATURE_FONTS.find(f => f.value === v)?.fontFamily || SIGNATURE_FONTS[0].fontFamily;
+  const getSignatureColor = (v: string) => SIGNATURE_COLORS.find(c => c.value === v)?.color || "#000000";
 
   // ── Auto-save debounce ──
   useEffect(() => {
@@ -269,6 +336,36 @@ export default function MyPractice() {
     }, 1500);
     return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
   }, [formData]);
+
+  // ── Auto-save signature debounce ──
+  useEffect(() => {
+    if (!sigHasInitialized.current || !user || sigIsSettingFromProfile.current) return;
+    if (sigProfileLoadedData.current && JSON.stringify(sigFormData) === JSON.stringify(sigProfileLoadedData.current)) {
+      sigProfileLoadedData.current = null; return;
+    }
+    sigProfileLoadedData.current = null;
+    if (sigDebounceTimer.current) clearTimeout(sigDebounceTimer.current);
+    sigDebounceTimer.current = setTimeout(async () => {
+      setSavedStatus('saving');
+      const { error } = await updateProfile({
+        signature_font: sigFormData.signature_font, signature_color: sigFormData.signature_color,
+        signature_font_size: sigFormData.signature_font_size, signature_bold: sigFormData.signature_bold,
+        signature_italic: sigFormData.signature_italic,
+      } as any);
+      if (error) { setSavedStatus('idle'); toast({ title: "Error", description: "Failed to save", variant: "destructive" }); }
+      else { setSavedStatus('saved'); setTimeout(() => setSavedStatus('idle'), 2000); }
+    }, 1500);
+    return () => { if (sigDebounceTimer.current) clearTimeout(sigDebounceTimer.current); };
+  }, [sigFormData]);
+
+  // ── Auto-guess language from country code ──
+  const handleCountryCodeChange = (code: string) => {
+    setFormData({ ...formData, country_code: code });
+    const guessedLang = COUNTRY_CODE_TO_LANGUAGE[code];
+    if (guessedLang) {
+      updateProfile({ preferred_language: guessedLang } as any);
+    }
+  };
 
   // ── Fetch doctor data ──
   useEffect(() => {
@@ -477,7 +574,7 @@ export default function MyPractice() {
               <User className="h-4 w-4 text-primary" />
               <h3 className="text-sm font-semibold text-foreground">Personal Information</h3>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-1.5">
                 <Label>First Name</Label>
                 <Input value={formData.first_name} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
@@ -487,26 +584,33 @@ export default function MyPractice() {
                 <Input value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
               </div>
               <div className="space-y-1.5">
+                <Label>Specialty</Label>
+                <Select value={formData.specialty} onValueChange={(v) => setFormData({ ...formData, specialty: v })}>
+                  <SelectTrigger><SelectValue placeholder="Select specialty" /></SelectTrigger>
+                  <SelectContent>{DOCTOR_SPECIALTIES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
                 <Label>Email</Label>
                 <Input type="email" value={user?.email || ""} disabled className="bg-muted" />
               </div>
               <div className="space-y-1.5">
                 <Label>Mobile Number</Label>
                 <div className="flex gap-2">
-                  <Select value={formData.country_code} onValueChange={(v) => setFormData({ ...formData, country_code: v })}>
+                  <Select value={formData.country_code} onValueChange={handleCountryCodeChange}>
                     <SelectTrigger className="w-[130px]"><SelectValue /></SelectTrigger>
                     <SelectContent>{COUNTRY_CODES.map(c => <SelectItem key={c.code} value={c.code}><span className="flex items-center gap-1.5">{c.flag} {c.code}</span></SelectItem>)}</SelectContent>
                   </Select>
                   <Input type="tel" value={formatPhoneNumber(formData.mobile_number)} onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value.replace(/[^0-9]/g, '') })} placeholder="82 123 4567" className="flex-1" />
                 </div>
               </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Specialty</Label>
-              <Select value={formData.specialty} onValueChange={(v) => setFormData({ ...formData, specialty: v })}>
-                <SelectTrigger><SelectValue placeholder="Select specialty" /></SelectTrigger>
-                <SelectContent>{DOCTOR_SPECIALTIES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-              </Select>
+              <div className="space-y-1.5">
+                <Label>Language</Label>
+                <Select value={(profile as any)?.preferred_language || "en"} onValueChange={async (v) => { await updateProfile({ preferred_language: v } as any); toast({ title: "Language updated" }); }}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{LANGUAGES.map(l => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
             </div>
             <MailboxSection userId={user?.id} />
           </div>
@@ -515,7 +619,7 @@ export default function MyPractice() {
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <Building2 className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">Practice Details</h3>
+              <h3 className="text-sm font-semibold text-foreground">Practice Information</h3>
             </div>
             <p className="text-sm text-muted-foreground">This information appears on your document templates and letterheads.</p>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -604,6 +708,52 @@ export default function MyPractice() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Digital Signature Frame */}
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-2">
+            <Label className="text-sm font-semibold">Digital Signature</Label>
+            <div className="p-3 border border-border rounded-lg bg-background">
+              <p style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), color: getSignatureColor(sigFormData.signature_color), fontSize: `${sigFormData.signature_font_size}px`, fontWeight: sigFormData.signature_bold ? 'bold' : 'normal', fontStyle: sigFormData.signature_italic ? 'italic' : 'normal' }}>{combinedFullName}</p>
+              <p className="text-xs text-muted-foreground mt-1">{new Date().toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Font</Label>
+              <Select value={sigFormData.signature_font} onValueChange={(v) => setSigFormData({ ...sigFormData, signature_font: v })}>
+                <SelectTrigger>
+                  <span style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), fontSize: '16px' }}>
+                    {SIGNATURE_FONTS.find(f => f.value === sigFormData.signature_font)?.label || "Select font"}
+                  </span>
+                </SelectTrigger>
+                <SelectContent>{SIGNATURE_FONTS.map(f => <SelectItem key={f.value} value={f.value}><span style={{ fontFamily: f.fontFamily, fontSize: '18px' }}>{f.label}</span></SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Color</Label>
+                <Select value={sigFormData.signature_color} onValueChange={(v) => setSigFormData({ ...sigFormData, signature_color: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {SIGNATURE_COLORS.map(c => (
+                      <SelectItem key={c.value} value={c.value}>
+                        <span className="flex items-center gap-2">
+                          <span className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: c.color }} />
+                          {c.label}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Size: {sigFormData.signature_font_size}px</Label>
+                <Slider min={16} max={48} step={2} value={[sigFormData.signature_font_size]} onValueChange={([v]) => setSigFormData({ ...sigFormData, signature_font_size: v })} />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Toggle pressed={sigFormData.signature_bold} onPressedChange={(v) => setSigFormData({ ...sigFormData, signature_bold: v })} size="sm" aria-label="Bold" className="h-8 w-8 p-0"><Bold className="h-4 w-4" /></Toggle>
+              <Toggle pressed={sigFormData.signature_italic} onPressedChange={(v) => setSigFormData({ ...sigFormData, signature_italic: v })} size="sm" aria-label="Italic" className="h-8 w-8 p-0"><Italic className="h-4 w-4" /></Toggle>
             </div>
           </div>
         </TabsContent>
