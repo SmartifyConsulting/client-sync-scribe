@@ -412,8 +412,8 @@ export default function TodoList() {
                   <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden mt-1">
                     <div className="divide-y divide-border">
                       {items.map((todo) => (
-                        <div key={todo.id} className={cn("flex items-start gap-4 p-4 transition-colors hover:bg-muted/30", todo.completed && "bg-muted/20", todo.is_auto_executed && "bg-success/5")}>
-                          <Checkbox checked={todo.completed} onCheckedChange={() => toggleComplete(todo.id)} className="h-5 w-5 mt-0.5" />
+                         <div key={todo.id} className={cn("flex items-start gap-3 p-3 transition-colors hover:bg-muted/30", todo.completed && "bg-muted/20", todo.is_auto_executed && "bg-success/5")}>
+                           <Checkbox checked={todo.completed} onCheckedChange={() => toggleComplete(todo.id)} className="h-4 w-4 mt-0.5" />
                           {editingId === todo.id ? (
                             <div className="flex-1 flex items-center gap-2">
                               <Input value={editText} onChange={(e) => setEditText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") saveEdit(todo.id); if (e.key === "Escape") cancelEdit(); }} className="flex-1" autoFocus />
