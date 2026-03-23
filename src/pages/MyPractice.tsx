@@ -499,6 +499,7 @@ export default function MyPractice() {
                   <Input type="tel" value={formatPhoneNumber(formData.mobile_number)} onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value.replace(/[^0-9]/g, '') })} placeholder="82 123 4567" className="flex-1" />
                 </div>
               </div>
+            </div>
             <div className="space-y-1.5">
               <Label>Specialty</Label>
               <Select value={formData.specialty} onValueChange={(v) => setFormData({ ...formData, specialty: v })}>
