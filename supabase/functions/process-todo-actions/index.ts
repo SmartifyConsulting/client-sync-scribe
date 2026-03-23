@@ -386,14 +386,13 @@ Rules:
           }
         }
 
-        // Create completed todo for the auto-executed action
+        // Create pending todo for the auto-executed action — requires manual approval
         await supabase.from("todos").insert({
           user_id: user.id,
           title: action.description,
           priority: "medium",
-          status: "completed",
+          status: "pending",
           is_auto_executed: true,
-          completed_at: new Date().toISOString(),
           patient_id: patientId,
         });
 

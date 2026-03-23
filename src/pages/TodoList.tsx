@@ -470,6 +470,12 @@ export default function TodoList() {
                                 </div>
                               </div>
                               <div className="flex gap-1 shrink-0">
+                                {/* Approve AI task */}
+                                {todo.is_auto_executed && !todo.completed && (
+                                  <Button size="sm" variant="outline" className="h-8 gap-1 text-xs border-success text-success hover:bg-success hover:text-white" onClick={() => toggleComplete(todo.id)}>
+                                    <ShieldCheck className="h-4 w-4" />Approve
+                                  </Button>
+                                )}
                                 {/* Document review actions */}
                                 {todo.document_id && (
                                   <>

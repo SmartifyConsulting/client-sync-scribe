@@ -405,6 +405,14 @@ export function CompactTodoList() {
                     >
                       {todo.title}
                     </span>
+                    {todo.is_auto_executed && !todo.completed && (
+                      <button
+                        onClick={() => toggleComplete(todo.id)}
+                        className="flex items-center gap-0.5 text-[10px] font-medium text-success hover:text-success/80 shrink-0 border border-success/30 rounded px-1 py-0.5"
+                      >
+                        <ShieldCheck className="h-3 w-3" />
+                      </button>
+                    )}
                     <div className="hidden group-hover:flex gap-0.5">
                       {todo.document_id && (
                         <>

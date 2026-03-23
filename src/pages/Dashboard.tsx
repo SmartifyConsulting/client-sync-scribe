@@ -374,6 +374,7 @@ export default function Dashboard() {
             change={`Doctor: ${doctorMoolas} · Patient: ${patientMoolas}`}
             trend="up"
             icon={Award}
+            imageUrl={moolaSymbol}
             iconSize="large"
           />
         )}
