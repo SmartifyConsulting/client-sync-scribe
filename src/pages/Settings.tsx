@@ -572,15 +572,132 @@ Holarc
     return plans[cycle]?.name || "Unknown";
   };
 
+  const billingSubTab = useState<"plan" | "history">("plan");
+  const [activeBillingTab, setActiveBillingTab] = billingSubTab;
+
   return (
-    <div className="space-y-8 animate-fade-in max-w-3xl">
+    <div className="space-y-6 animate-fade-in max-w-3xl">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-foreground">Settings</h1>
         <p className="mt-1 text-muted-foreground">Manage your application preferences and account settings</p>
       </div>
 
-      {/* Calendar Integration */}
+      <Tabs defaultValue="personal" className="w-full">
+        <TabsList className="flex w-full flex-wrap bg-primary">
+          <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Personal</TabsTrigger>
+          <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Preferences</TabsTrigger>
+          <TabsTrigger value="calendar" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Calendar</TabsTrigger>
+          <TabsTrigger value="notifications" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Notifications</TabsTrigger>
+          <TabsTrigger value="security" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Security</TabsTrigger>
+          <TabsTrigger value="billing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Billing</TabsTrigger>
+          <TabsTrigger value="data" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Data</TabsTrigger>
+        </TabsList>
+
+        {/* === PERSONAL TAB === */}
+        <TabsContent value="personal" className="space-y-4 mt-4">
+          <div className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4">
+            <div className="flex items-center gap-3 mb-2">
+              <User className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label>First Name</Label>
+                <Input value={personalFirstName} onChange={(e) => setPersonalFirstName(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Last Name</Label>
+                <Input value={personalLastName} onChange={(e) => setPersonalLastName(e.target.value)} />
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label>Email</Label>
+                <Input value={user?.email || ""} disabled className="bg-muted" />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Mobile Number</Label>
+              <div className="flex gap-2">
+                <Select value={personalCountryCode} onValueChange={setPersonalCountryCode}>
+                  <SelectTrigger className="w-[130px]"><SelectValue /></SelectTrigger>
+                  <SelectContent>{COUNTRY_CODES.map(c => <SelectItem key={c.code} value={c.code}><span className="flex items-center gap-1.5">{c.flag} {c.code}</span></SelectItem>)}</SelectContent>
+                </Select>
+                <Input type="tel" value={personalMobile} onChange={(e) => setPersonalMobile(e.target.value.replace(/[^0-9]/g, ''))} placeholder="82 123 4567" className="flex-1" />
+              </div>
+            </div>
+            <Button onClick={savePersonalInfo} disabled={savingPersonal} size="sm">
+              {savingPersonal ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</> : "Save"}
+            </Button>
+          </div>
+        </TabsContent>
+
+        {/* === PREFERENCES TAB === */}
+        <TabsContent value="preferences" className="space-y-4 mt-4">
+          <div className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4">
+            <div className="flex items-center gap-3 mb-2">
+              <Settings2 className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold text-foreground">My Preferences</h2>
+            </div>
+            {isPatient && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                  <div className="flex-1 mr-3">
+                    <p className="text-sm font-medium text-foreground">Auto-email invoice to medical aid</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">When your doctor marks an invoice as paid, it will be sent to your insurance claims email.</p>
+                  </div>
+                  <Switch checked={(profile as any)?.auto_email_invoice_to_insurance || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_invoice_to_insurance: c } as any); toast({ title: "Preference updated" }); }} />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                  <div className="flex-1 mr-3">
+                    <p className="text-sm font-medium text-foreground">Auto-email prescription to pharmacy</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">When your doctor saves a prescription, it will be sent to your primary pharmacy.</p>
+                  </div>
+                  <Switch checked={(profile as any)?.auto_email_prescription_to_pharmacy || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_prescription_to_pharmacy: c } as any); toast({ title: "Preference updated" }); }} />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                  <div className="flex-1 mr-3">
+                    <p className="text-sm font-medium text-foreground">Auto-email certificate to employer</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">When your doctor saves a medical certificate, it will be sent to your employer.</p>
+                  </div>
+                  <Switch checked={(profile as any)?.auto_email_certificate_to_employer || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_certificate_to_employer: c } as any); toast({ title: "Preference updated" }); }} />
+                </div>
+              </div>
+            )}
+            {!isPatient && (
+              <p className="text-sm text-muted-foreground">No preferences available for your role at this time.</p>
+            )}
+
+            {/* Patient Management (Doctors only) */}
+            {role === "doctor" && (
+              <div className="space-y-4 pt-4 border-t border-border">
+                <div className="flex items-center gap-3">
+                  <Users className="h-5 w-5 text-primary" />
+                  <h3 className="text-base font-semibold text-foreground">Patient Management</h3>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-foreground">Patient Inactivity Threshold</p>
+                    <p className="text-sm text-muted-foreground">Automatically mark patients as inactive after this period without a visit</p>
+                  </div>
+                  <Select value={inactiveThreshold.toString()} onValueChange={(value) => saveInactiveThreshold(parseInt(value))} disabled={savingThreshold}>
+                    <SelectTrigger className="w-[180px]"><SelectValue placeholder="Select period" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="3">3 months</SelectItem>
+                      <SelectItem value="6">6 months</SelectItem>
+                      <SelectItem value="9">9 months</SelectItem>
+                      <SelectItem value="12">12 months (default)</SelectItem>
+                      <SelectItem value="18">18 months</SelectItem>
+                      <SelectItem value="24">24 months</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        {/* === CALENDAR TAB === */}
+        <TabsContent value="calendar" className="mt-4">
       <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
           <Calendar className="h-5 w-5 text-primary" />
