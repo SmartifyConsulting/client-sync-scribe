@@ -81,6 +81,7 @@ interface ServicePrice {
   default_price: number;
   currency: string;
   is_first_consultation?: boolean;
+  color?: string | null;
 }
 
 interface CPDCertificate {
@@ -203,11 +204,11 @@ export default function MyPractice() {
 
   // ── Service Prices ──
   const [servicePrices, setServicePrices] = useState<ServicePrice[]>([]);
-  const [newService, setNewService] = useState({ service_name: "", default_price: "", currency: "ZAR" });
+  const [newService, setNewService] = useState({ service_name: "", default_price: "", currency: "ZAR", color: "#3b82f6" });
   const [isAddingService, setIsAddingService] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState("ZAR");
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
-  const [editingService, setEditingService] = useState({ service_name: "", default_price: "" });
+  const [editingService, setEditingService] = useState({ service_name: "", default_price: "", color: "" });
   const [isSavingService, setIsSavingService] = useState(false);
 
   // ── CPD Certificates ──
@@ -317,20 +318,20 @@ export default function MyPractice() {
   const addServicePrice = async () => {
     if (!user || !newService.service_name.trim() || !newService.default_price) { toast({ title: "Missing fields", description: "Service name and price are required", variant: "destructive" }); return; }
     setIsAddingService(true);
-    const { data, error } = await supabase.from('service_prices').insert({ user_id: user.id, service_name: newService.service_name, default_price: parseFloat(newService.default_price), currency: selectedCurrency, is_first_consultation: false } as any).select().single();
+    const { data, error } = await supabase.from('service_prices').insert({ user_id: user.id, service_name: newService.service_name, default_price: parseFloat(newService.default_price), currency: selectedCurrency, is_first_consultation: false, color: newService.color || null } as any).select().single();
     if (error) toast({ title: "Error", description: "Failed to add service", variant: "destructive" });
-    else { setServicePrices([...servicePrices, data]); setNewService({ service_name: "", default_price: "", currency: selectedCurrency }); toast({ title: "Service added" }); }
+    else { setServicePrices([...servicePrices, data]); setNewService({ service_name: "", default_price: "", currency: selectedCurrency, color: "#3b82f6" }); toast({ title: "Service added" }); }
     setIsAddingService(false);
   };
   const removeServicePrice = async (id: string) => { const { error } = await supabase.from('service_prices').delete().eq('id', id); if (!error) { setServicePrices(servicePrices.filter(s => s.id !== id)); toast({ title: "Service removed" }); } };
-  const startEditingService = (service: ServicePrice) => { setEditingServiceId(service.id); setEditingService({ service_name: service.service_name, default_price: String(service.default_price) }); };
-  const cancelEditingService = () => { setEditingServiceId(null); setEditingService({ service_name: "", default_price: "" }); };
+  const startEditingService = (service: ServicePrice) => { setEditingServiceId(service.id); setEditingService({ service_name: service.service_name, default_price: String(service.default_price), color: service.color || "#3b82f6" }); };
+  const cancelEditingService = () => { setEditingServiceId(null); setEditingService({ service_name: "", default_price: "", color: "" }); };
   const saveEditingService = async () => {
     if (!editingServiceId || !editingService.service_name.trim() || !editingService.default_price) { toast({ title: "Missing fields", variant: "destructive" }); return; }
     setIsSavingService(true);
-    const { error } = await supabase.from('service_prices').update({ service_name: editingService.service_name, default_price: parseFloat(editingService.default_price) }).eq('id', editingServiceId);
+    const { error } = await supabase.from('service_prices').update({ service_name: editingService.service_name, default_price: parseFloat(editingService.default_price), color: editingService.color || null } as any).eq('id', editingServiceId);
     if (error) toast({ title: "Error", variant: "destructive" });
-    else { setServicePrices(servicePrices.map(s => s.id === editingServiceId ? { ...s, service_name: editingService.service_name, default_price: parseFloat(editingService.default_price) } : s)); setEditingServiceId(null); toast({ title: "Service updated" }); }
+    else { setServicePrices(servicePrices.map(s => s.id === editingServiceId ? { ...s, service_name: editingService.service_name, default_price: parseFloat(editingService.default_price), color: editingService.color || null } : s)); setEditingServiceId(null); toast({ title: "Service updated" }); }
     setIsSavingService(false);
   };
   const updateAllServicesCurrency = async (newCurrency: string) => {
@@ -638,17 +639,30 @@ export default function MyPractice() {
                 {servicePrices.map((service) => (
                   <div key={service.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
                     {editingServiceId === service.id ? (
-                      <div className="flex-1 grid gap-2 sm:grid-cols-2 mr-3">
+                      <div className="flex-1 grid gap-2 sm:grid-cols-3 mr-3">
                         <Input value={editingService.service_name} onChange={(e) => setEditingService({ ...editingService, service_name: e.target.value })} />
                         <div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{getCurrencySymbol(selectedCurrency)}</span><Input type="number" step="0.01" min="0" value={editingService.default_price} onChange={(e) => setEditingService({ ...editingService, default_price: e.target.value })} className="pl-8" /></div>
+                        <div className="flex items-center gap-2">
+                          <input type="color" value={editingService.color || "#3b82f6"} onChange={(e) => setEditingService({ ...editingService, color: e.target.value })} className="h-8 w-10 rounded border border-border cursor-pointer" />
+                          <span className="text-xs text-muted-foreground">Color</span>
+                        </div>
                       </div>
                     ) : (
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-sm text-foreground">{service.service_name}</p>
-                          {(service as any).is_first_consultation && <Badge variant="secondary" className="text-xs">1st Consult</Badge>}
+                      <div className="flex-1 flex items-center gap-3">
+                        <div className="h-6 w-6 rounded-full border border-border shrink-0 cursor-pointer relative group" style={{ backgroundColor: service.color || '#3b82f6' }}>
+                          <input type="color" value={service.color || '#3b82f6'} onChange={async (e) => {
+                            const newColor = e.target.value;
+                            await supabase.from('service_prices').update({ color: newColor } as any).eq('id', service.id);
+                            setServicePrices(servicePrices.map(s => s.id === service.id ? { ...s, color: newColor } : s));
+                          }} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
                         </div>
-                        <p className="text-xs text-muted-foreground">{getCurrencySymbol(service.currency)} {Number(service.default_price).toFixed(2)}</p>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-sm text-foreground">{service.service_name}</p>
+                            {(service as any).is_first_consultation && <Badge variant="secondary" className="text-xs">1st Consult</Badge>}
+                          </div>
+                          <p className="text-xs text-muted-foreground">{getCurrencySymbol(service.currency)} {Number(service.default_price).toFixed(2)}</p>
+                        </div>
                       </div>
                     )}
                     <div className="flex items-center gap-0.5">
@@ -677,11 +691,18 @@ export default function MyPractice() {
             )}
             <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
               <p className="text-sm font-medium text-foreground">Add New Service</p>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-3">
                 <div className="space-y-1.5"><Label>Service Name *</Label><Input value={newService.service_name} onChange={(e) => setNewService({ ...newService, service_name: e.target.value })} placeholder="e.g., Consultation" /></div>
                 <div className="space-y-1.5">
                   <Label>Price ({getCurrencySymbol(selectedCurrency)}) *</Label>
                   <div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{getCurrencySymbol(selectedCurrency)}</span><Input type="number" step="0.01" min="0" value={newService.default_price} onChange={(e) => setNewService({ ...newService, default_price: e.target.value })} className="pl-8" /></div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Calendar Color</Label>
+                  <div className="flex items-center gap-2">
+                    <input type="color" value={newService.color} onChange={(e) => setNewService({ ...newService, color: e.target.value })} className="h-10 w-12 rounded border border-border cursor-pointer" />
+                    <span className="text-xs text-muted-foreground">Used in calendar</span>
+                  </div>
                 </div>
               </div>
               <Button size="sm" onClick={addServicePrice} disabled={isAddingService} className="gap-1.5"><Plus className="h-3.5 w-3.5" />{isAddingService ? "Adding..." : "Add Service"}</Button>
