@@ -34,6 +34,8 @@ const sectionFrame = "rounded-xl border border-primary bg-card p-4 shadow-sm";
 
 export function PatientDetailsEditor({ patient, onSave, isSelfService = false }: PatientDetailsEditorProps) {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { isDoctor } = useUserRole();
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
