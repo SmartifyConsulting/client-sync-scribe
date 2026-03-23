@@ -82,44 +82,22 @@ export default function CalendarView() {
   });
   const [calendarView, setCalendarView] = useState<CalendarViewMode>("month");
 
-  // Fetch appointment type colors
+  // Fetch service price colors
   useEffect(() => {
-    const fetchTypeColors = async () => {
+    const fetchServiceColors = async () => {
       if (!user) return;
       const { data } = await supabase
-        .from("appointment_type_colors")
-        .select("id, type_name, color")
+        .from("service_prices")
+        .select("service_name, color")
         .eq("user_id", user.id);
-      if (data) setTypeColors(data);
+      if (data) setServiceColors(data as ServicePriceColor[]);
     };
-    fetchTypeColors();
+    fetchServiceColors();
   }, [user]);
 
   const getTypeColor = (type: string): string | null => {
-    const match = typeColors.find(tc => tc.type_name.toLowerCase() === type.toLowerCase());
+    const match = serviceColors.find(sc => sc.service_name.toLowerCase() === type.toLowerCase());
     return match?.color || null;
-  };
-
-  const addTypeColor = async () => {
-    if (!user || !newColorType.trim()) return;
-    const { data, error } = await supabase
-      .from("appointment_type_colors")
-      .upsert({ user_id: user.id, type_name: newColorType.trim(), color: newColorValue }, { onConflict: "user_id,type_name" })
-      .select()
-      .single();
-    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
-    setTypeColors(prev => {
-      const filtered = prev.filter(tc => tc.type_name.toLowerCase() !== newColorType.trim().toLowerCase());
-      return [...filtered, data];
-    });
-    setNewColorType("");
-    setNewColorValue("#3b82f6");
-    toast({ title: "Color saved" });
-  };
-
-  const removeTypeColor = async (id: string) => {
-    await supabase.from("appointment_type_colors").delete().eq("id", id);
-    setTypeColors(prev => prev.filter(tc => tc.id !== id));
   };
   const { firstDay, daysInMonth } = getDaysInMonth(selectedDate);
 
