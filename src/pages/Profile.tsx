@@ -505,76 +505,33 @@ export default function Profile() {
 
       {/* Tabbed content */}
       {isPatient ? (
-        <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-primary">
-            <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Personal</TabsTrigger>
-            <TabsTrigger value="holarchive" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">My Holarchive</TabsTrigger>
-            <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Preferences</TabsTrigger>
-          </TabsList>
-          <TabsContent value="personal">
-            <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-1.5">
-                  <Label htmlFor="first_name">First Name</Label>
-                  <Input id="first_name" value={formData.first_name} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="last_name">Last Name</Label>
-                  <Input id="last_name" value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
-                </div>
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label>Email</Label>
-                  <Input value={user?.email || ""} disabled className="bg-muted" />
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Mobile Number</Label>
-                <div className="flex gap-2">
-                  <Select value={formData.country_code} onValueChange={(v) => setFormData({ ...formData, country_code: v })}>
-                    <SelectTrigger className="w-[130px]"><SelectValue /></SelectTrigger>
-                    <SelectContent>{COUNTRY_CODES.map(c => <SelectItem key={c.code} value={c.code}><span className="flex items-center gap-1.5">{c.flag} {c.code}</span></SelectItem>)}</SelectContent>
-                  </Select>
-                  <Input type="tel" value={formatPhoneNumber(formData.mobile_number)} onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value.replace(/[^0-9]/g, '') })} placeholder="82 123 4567" className="flex-1" />
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-          <TabsContent value="holarchive">
-            {patientLoading ? (
-              <div className="flex h-40 items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              </div>
-            ) : patientRecord ? (
-              <PatientDetailsEditor
-                patient={patientRecord}
-                onSave={async (updates: Partial<Patient>) => {
-                  const { error } = await supabase
-                    .from("patients")
-                    .update(updates as any)
-                    .eq("id", patientRecord.id);
-                  if (error) {
-                    toast({ title: "Error saving", description: error.message, variant: "destructive" });
-                    throw error;
-                  }
-                  setPatientRecord((prev) => prev ? { ...prev, ...updates } : prev);
-                  toast({ title: "Saved", description: "Your details have been updated." });
-                }}
-                isSelfService
-              />
-            ) : (
-              <div className="p-6 text-center text-muted-foreground">
-                <p>No patient record found. Please ask your doctor to create your profile.</p>
-              </div>
-            )}
-          </TabsContent>
-          <TabsContent value="preferences">
-            <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-3">
-              <AutoEmailToggle label="Auto-email invoice to medical aid" description="When your doctor marks an invoice as paid, it will be sent to your insurance claims email." checked={(profile as any)?.auto_email_invoice_to_insurance || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_invoice_to_insurance: c } as any); toast({ title: "Preference updated" }); }} />
-              <AutoEmailToggle label="Auto-email prescription to pharmacy" description="When your doctor saves a prescription, it will be sent to your primary pharmacy." checked={(profile as any)?.auto_email_prescription_to_pharmacy || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_prescription_to_pharmacy: c } as any); toast({ title: "Preference updated" }); }} />
-              <AutoEmailToggle label="Auto-email certificate to employer" description="When your doctor saves a medical certificate, it will be sent to your employer." checked={(profile as any)?.auto_email_certificate_to_employer || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_certificate_to_employer: c } as any); toast({ title: "Preference updated" }); }} />
-            </div>
-          </TabsContent>
-        </Tabs>
+        patientLoading ? (
+          <div className="flex h-40 items-center justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        ) : patientRecord ? (
+          <PatientDetailsEditor
+            patient={patientRecord}
+            onSave={async (updates: Partial<Patient>) => {
+              const { error } = await supabase
+                .from("patients")
+                .update(updates as any)
+                .eq("id", patientRecord.id);
+              if (error) {
+                toast({ title: "Error saving", description: error.message, variant: "destructive" });
+                throw error;
+              }
+              setPatientRecord((prev) => prev ? { ...prev, ...updates } : prev);
+              toast({ title: "Saved", description: "Your details have been updated." });
+            }}
+            isSelfService
+          />
+        ) : (
+          <AutoCreatePatientFallback
+            user={user}
+            onCreated={(record) => setPatientRecord(record)}
+          />
+        )
       ) : (
         <Tabs defaultValue="personal" className="w-full">
           <TabsList className="flex w-full flex-wrap bg-primary">
