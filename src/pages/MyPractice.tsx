@@ -722,14 +722,14 @@ export default function MyPractice() {
               <Select value={sigFormData.signature_font} onValueChange={(v) => setSigFormData({ ...sigFormData, signature_font: v })}>
                 <SelectTrigger>
                   <span style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), fontSize: '16px' }}>
-                    {SIGNATURE_FONTS.find(f => f.value === sigFormData.signature_font)?.label || "Select font"}
+                    {combinedFullName || "Select font"}
                   </span>
                 </SelectTrigger>
                 <SelectContent className="max-h-[300px]">
                   {SIGNATURE_FONTS.map(f => (
                     <SelectItem key={f.value} value={f.value} className="py-3">
                       <span style={{ fontFamily: f.fontFamily, fontSize: '22px', lineHeight: '1.4' }}>
-                        {f.label}
+                        {combinedFullName || f.label}
                       </span>
                     </SelectItem>
                   ))}
