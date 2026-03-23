@@ -155,6 +155,49 @@ interface CPDCertificate {
   certificate_url: string | null;
 }
 
+function AutoCreatePatientFallback({ user, onCreated }: { user: any; onCreated: (record: Patient) => void }) {
+  const [creating, setCreating] = useState(false);
+  const { toast } = useToast();
+
+  const handleCreate = async () => {
+    if (!user) return;
+    setCreating(true);
+    try {
+      const { data: profileData } = await supabase.from("profiles").select("full_name, mobile_number").eq("id", user.id).single();
+      const { data, error } = await supabase.from("patients").insert({
+        user_id: user.id,
+        patient_user_id: user.id,
+        name: profileData?.full_name || "My Record",
+        email: user.email || null,
+        phone: profileData?.mobile_number || null,
+      }).select().single();
+      if (error) throw error;
+      if (data) {
+        onCreated({
+          ...data,
+          surgeries: [],
+          pharmacies: [],
+          family_history: [],
+        } as Patient);
+        toast({ title: "Record created", description: "Your Holarchive has been initialized." });
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-8 text-center space-y-4">
+      <p className="text-muted-foreground">No clinical record found. Create your Holarchive to start managing your health information.</p>
+      <Button onClick={handleCreate} disabled={creating}>
+        {creating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Creating...</> : "Create My Holarchive"}
+      </Button>
+    </div>
+  );
+}
+
 export default function Profile() {
   const { toast } = useToast();
   const { user } = useAuth();
