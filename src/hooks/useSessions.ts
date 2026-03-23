@@ -626,6 +626,81 @@ const completeSession = async (
           console.error('Error creating referral document:', refError);
         }
       }
+
+      // Auto-generate invoice after session completion
+      if (patientId) {
+        try {
+          const [patientRes, profileRes, templateRes] = await Promise.all([
+            supabase.from('patients').select('name').eq('id', patientId).maybeSingle(),
+            supabase.from('profiles').select('full_name, practice_number, doctor_number, practice_address').eq('id', user.id).maybeSingle(),
+            supabase.from('templates').select('id, name, content').eq('user_id', user.id),
+          ]);
+
+          const patientRecord = patientRes.data;
+          const docProfile = profileRes.data;
+          const doctorTemplates = templateRes.data || [];
+          const today = new Date().toISOString().split('T')[0];
+
+          const invoiceTemplate = doctorTemplates.find(t =>
+            t.name.toLowerCase().includes('invoice')
+          );
+
+          let invoiceContent: string;
+          if (invoiceTemplate) {
+            const replacements: Record<string, string> = {
+              'ClientName': patientRecord?.name || 'Unknown',
+              'PatientName': patientRecord?.name || 'Unknown',
+              'Date': today,
+              'SessionDate': today,
+              'DoctorName': docProfile?.full_name || '',
+              'PracticeNumber': docProfile?.practice_number || '',
+              'PracticeAddress': docProfile?.practice_address || '',
+            };
+            invoiceContent = invoiceTemplate.content;
+            for (const [key, value] of Object.entries(replacements)) {
+              invoiceContent = invoiceContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
+            }
+          } else {
+            invoiceContent = `<h2>Invoice</h2>
+<p><strong>Date:</strong> ${today}</p>
+<p><strong>Patient:</strong> ${patientRecord?.name || 'Unknown'}</p>
+<p><strong>Doctor:</strong> ${docProfile?.full_name || ''}</p>
+<p><strong>Practice Number:</strong> ${docProfile?.practice_number || ''}</p>
+<br/>
+<p><strong>Description:</strong> Consultation on ${today}</p>
+<p><strong>Amount:</strong> [To be completed]</p>`;
+          }
+
+          const { data: invoiceDoc } = await supabase.from('documents').insert({
+            user_id: user.id,
+            patient_id: patientId,
+            name: `Invoice - ${patientRecord?.name || 'Patient'} - ${today}`,
+            content: invoiceContent,
+            template_name: 'Invoice',
+            patient_name: patientRecord?.name || null,
+            is_draft: true,
+            session_id: sessionId,
+          } as any).select('id').single();
+          console.log('Invoice document auto-created');
+
+          if (invoiceDoc) {
+            await supabase.from('todos').insert({
+              user_id: user.id,
+              session_id: sessionId,
+              patient_id: patientId,
+              title: `Review & Send: Invoice - ${patientRecord?.name || 'Patient'}`,
+              document_id: invoiceDoc.id,
+              task_type: 'document_review',
+              priority: 'high',
+              status: 'pending',
+            } as any);
+          }
+          toast({ title: '🧾 Invoice Created', description: 'Invoice was auto-generated for review' });
+        } catch (invError) {
+          console.error('Error creating invoice document:', invError);
+        }
+      }
+
       if (visitCategory && patientId) {
         const { data: configData } = await supabase
           .from('gamification_config')

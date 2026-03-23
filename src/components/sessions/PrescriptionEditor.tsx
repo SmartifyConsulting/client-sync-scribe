@@ -45,6 +45,7 @@ interface MedicationItem {
   frequency: string;
   duration: string;
   instructions: string;
+  repeats: string;
 }
 
 interface PrescriptionEditorProps {
@@ -71,7 +72,7 @@ export function PrescriptionEditor({
   const doctorName = propDoctorName || profile?.full_name || "Doctor";
   
   const [medications, setMedications] = useState<MedicationItem[]>([
-    { id: crypto.randomUUID(), medication: "", dosage: "", frequency: "", duration: "", instructions: "" }
+    { id: crypto.randomUUID(), medication: "", dosage: "", frequency: "", duration: "", instructions: "", repeats: "0" }
   ]);
   const [conflicts, setConflicts] = useState<MedicationConflict[]>([]);
   const [isCheckingConflicts, setIsCheckingConflicts] = useState(false);
@@ -86,7 +87,8 @@ export function PrescriptionEditor({
       dosage: "", 
       frequency: "", 
       duration: "", 
-      instructions: "" 
+      instructions: "",
+      repeats: "0"
     }]);
   };
 
@@ -110,6 +112,7 @@ export function PrescriptionEditor({
         if (m.dosage) line += ` - ${m.dosage}`;
         if (m.frequency) line += ` - ${m.frequency}`;
         if (m.duration) line += ` for ${m.duration}`;
+        if (m.repeats && m.repeats !== "0") line += `\n  Repeats: ${m.repeats}`;
         if (m.instructions) line += `\n  Instructions: ${m.instructions}`;
         return line;
       })
@@ -391,6 +394,13 @@ Signature: ___________________
                     value={med.duration}
                     onChange={(e) => updateMedication(med.id, 'duration', e.target.value)}
                     placeholder="Duration (e.g., 7 days)"
+                  />
+                  <Input
+                    value={med.repeats}
+                    onChange={(e) => updateMedication(med.id, 'repeats', e.target.value)}
+                    placeholder="Repeats (e.g., 3)"
+                    type="number"
+                    min="0"
                   />
                 </div>
                 <Input
