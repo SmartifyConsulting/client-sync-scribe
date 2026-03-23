@@ -31,7 +31,7 @@ interface DoctorAccess {
   doctor?: DoctorProfile;
 }
 
-export default function MyDoctors() {
+export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<DoctorProfile[]>([]);
