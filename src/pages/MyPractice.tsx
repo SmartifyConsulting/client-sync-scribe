@@ -81,6 +81,7 @@ interface ServicePrice {
   default_price: number;
   currency: string;
   is_first_consultation?: boolean;
+  color?: string | null;
 }
 
 interface CPDCertificate {
