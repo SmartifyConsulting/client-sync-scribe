@@ -441,7 +441,7 @@ export default function Settings() {
             {/* Language Sub-frame */}
             <Separator />
             <div className="space-y-3">
-              <h3 className="text-[9px] font-semibold text-foreground">Language</h3>
+              <h3 className="text-sm font-semibold text-foreground">Language</h3>
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className="space-y-1.5">
                   <Label>Country</Label>
