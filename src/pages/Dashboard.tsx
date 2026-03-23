@@ -1,5 +1,4 @@
 import { Users, Calendar, TrendingUp, LogOut, Award, Bell, Mic, User, Settings, Star } from "lucide-react";
-import moolasLogo from "@/assets/moolas-logo.png";
 import { CompactTodoList } from "@/components/dashboard/CompactTodoList";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -374,7 +373,7 @@ export default function Dashboard() {
             change={`Doctor: ${doctorMoolas} · Patient: ${patientMoolas}`}
             trend="up"
             icon={Award}
-            imageUrl={moolasLogo}
+            iconSize="large"
           />
         )}
       </div>

@@ -8,6 +8,7 @@ interface StatsCardProps {
   trend?: "up" | "down" | "neutral";
   icon: LucideIcon;
   imageUrl?: string;
+  iconSize?: "default" | "large";
   className?: string;
 }
 
@@ -18,6 +19,7 @@ export function StatsCard({
   trend = "neutral",
   icon: Icon,
   imageUrl,
+  iconSize = "default",
   className,
 }: StatsCardProps) {
   return (
@@ -44,11 +46,14 @@ export function StatsCard({
             </p>
           )}
         </div>
-        <div className="flex h-14 w-14 items-center justify-center transition-all duration-300 group-hover:scale-105 overflow-hidden rounded-2xl bg-primary/10 group-hover:bg-primary/15">
+        <div className={cn(
+          "flex items-center justify-center transition-all duration-300 group-hover:scale-105 overflow-hidden rounded-2xl bg-primary/10 group-hover:bg-primary/15",
+          iconSize === "large" ? "h-16 w-16" : "h-14 w-14"
+        )}>
           {imageUrl ? (
-            <img src={imageUrl} alt={title} className="h-7 w-7 object-contain" />
+            <img src={imageUrl} alt={title} className={iconSize === "large" ? "h-9 w-9 object-contain" : "h-7 w-7 object-contain"} />
           ) : (
-            <Icon className="h-7 w-7 text-primary" />
+            <Icon className={iconSize === "large" ? "h-9 w-9 text-primary" : "h-7 w-7 text-primary"} />
           )}
         </div>
       </div>

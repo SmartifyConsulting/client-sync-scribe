@@ -3,16 +3,17 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { PatientReward } from "@/hooks/usePatientRewards";
 import { format, parseISO } from "date-fns";
-import moolasLogo from "@/assets/moolas-logo.png";
 
 export function MoolaLogoBadge({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
-  const imgClasses = {
-    sm: "h-5 w-5",
-    md: "h-7 w-7",
-    lg: "h-10 w-10",
+  const sizeClasses = {
+    sm: "h-5 w-5 text-[10px]",
+    md: "h-7 w-7 text-sm",
+    lg: "h-12 w-12 text-xl",
   };
   return (
-    <img src={moolasLogo} alt="Moolas" className={`${imgClasses[size]} object-contain`} />
+    <div className={`${sizeClasses[size]} rounded-full bg-secondary flex items-center justify-center font-bold text-white shrink-0`}>
+      M
+    </div>
   );
 }
 
