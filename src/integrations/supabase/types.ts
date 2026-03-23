@@ -1518,6 +1518,7 @@ export type Database = {
       }
       service_prices: {
         Row: {
+          color: string | null
           created_at: string
           currency: string
           default_price: number
@@ -1528,6 +1529,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          color?: string | null
           created_at?: string
           currency?: string
           default_price?: number
@@ -1538,6 +1540,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          color?: string | null
           created_at?: string
           currency?: string
           default_price?: number
