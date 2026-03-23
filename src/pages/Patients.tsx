@@ -653,7 +653,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
 
                 <Button onClick={handleCreatePatient} className="w-full" disabled={creating}>
                   {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Add Patient
+                  Add New Patient
                 </Button>
               </div>
             </ScrollArea>
