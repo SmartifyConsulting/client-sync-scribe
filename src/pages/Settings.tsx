@@ -1175,55 +1175,65 @@ export default function Settings() {
                 </div>
               </div>
 
-              {/* Country, Language, Voice */}
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div className="space-y-1.5">
-                  <Label>Country</Label>
-                  <Select value={(profile as any)?.country || "ZA"} onValueChange={async (v) => { await updateProfile({ country: v } as any); toast({ title: "Country updated" }); }}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ZA">🇿🇦 South Africa</SelectItem><SelectItem value="US">🇺🇸 United States</SelectItem>
-                      <SelectItem value="GB">🇬🇧 United Kingdom</SelectItem><SelectItem value="AU">🇦🇺 Australia</SelectItem>
-                      <SelectItem value="CA">🇨🇦 Canada</SelectItem><SelectItem value="IN">🇮🇳 India</SelectItem>
-                      <SelectItem value="DE">🇩🇪 Germany</SelectItem><SelectItem value="FR">🇫🇷 France</SelectItem>
-                      <SelectItem value="AE">🇦🇪 UAE</SelectItem><SelectItem value="BW">🇧🇼 Botswana</SelectItem>
-                      <SelectItem value="NA">🇳🇦 Namibia</SelectItem>
-                    </SelectContent>
-                  </Select>
+              {/* Partners Section */}
+              <Separator className="my-4" />
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">Add partners of the same practice. Their information will be available on documents.</p>
+                  {!showAddPartnerForm && <Button variant="outline" size="sm" onClick={() => setShowAddPartnerForm(true)} className="gap-1.5 shrink-0"><Plus className="h-3.5 w-3.5" />Add Partner</Button>}
                 </div>
-                <div className="space-y-1.5">
-                  <Label>Language</Label>
-                  <Select value={(profile as any)?.preferred_language || "en"} onValueChange={async (v) => { await updateProfile({ preferred_language: v } as any); toast({ title: "Language updated" }); }}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{LANGUAGES.map(l => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Narration Voice</Label>
-                  <div className="flex gap-2">
-                    <Select value={(profile as any)?.narration_voice || "nova"} onValueChange={async (v) => { await updateProfile({ narration_voice: v } as any); toast({ title: "Voice updated" }); }}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="alloy">Alloy</SelectItem><SelectItem value="echo">Echo</SelectItem>
-                        <SelectItem value="fable">Fable</SelectItem><SelectItem value="nova">Nova</SelectItem>
-                        <SelectItem value="onyx">Onyx</SelectItem><SelectItem value="shimmer">Shimmer</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button variant="outline" size="icon" className="shrink-0" onClick={async () => {
-                      const voice = (profile as any)?.narration_voice || "nova";
-                      toast({ title: "Generating preview..." });
-                      try {
-                        const langCode = profile?.preferred_language || "en";
-                        const sampleText = SAMPLE_TEXTS[langCode] || SAMPLE_TEXTS.en;
-                        const audio = new Audio(); audio.play().catch(() => {});
-                        const { data: { session } } = await supabase.auth.getSession();
-                        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY }, body: JSON.stringify({ text: sampleText, voice }) });
-                        if (!response.ok) throw new Error('Failed');
-                        const blob = await response.blob(); const url = URL.createObjectURL(blob); audio.src = url; await audio.play(); audio.onended = () => URL.revokeObjectURL(url);
-                      } catch (err: any) { toast({ title: "Preview failed", description: err.message, variant: "destructive" }); }
-                    }}><Volume2 className="h-4 w-4" /></Button>
+                {partners.length > 0 && (
+                  <div className="space-y-2">
+                    {partners.map((partner) => (
+                      <div key={partner.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
+                        {editingPartnerId === partner.id ? (
+                          <div className="flex-1 grid gap-2 sm:grid-cols-3 mr-3">
+                            <Input value={editingPartner.full_name} onChange={(e) => setEditingPartner({ ...editingPartner, full_name: e.target.value })} placeholder="Full name" />
+                            <Input value={editingPartner.registration_number} onChange={(e) => setEditingPartner({ ...editingPartner, registration_number: e.target.value })} placeholder="Registration number" />
+                            <Input value={editingPartner.mobile_number} onChange={(e) => setEditingPartner({ ...editingPartner, mobile_number: e.target.value })} placeholder="Mobile (optional)" />
+                          </div>
+                        ) : (
+                          <div>
+                            <p className="font-medium text-sm text-foreground">{partner.full_name}</p>
+                            <p className="text-xs text-muted-foreground">Reg: {partner.registration_number}{partner.mobile_number && ` · ${partner.mobile_number}`}</p>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-0.5">
+                          {editingPartnerId === partner.id ? (
+                            <>
+                              <Button variant="ghost" size="icon" onClick={saveEditingPartner} disabled={isSavingPartner} className="h-7 w-7 text-success">{isSavingPartner ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}</Button>
+                              <Button variant="ghost" size="icon" onClick={cancelEditingPartner} className="h-7 w-7"><X className="h-3.5 w-3.5" /></Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button variant="ghost" size="icon" onClick={() => startEditingPartner(partner)} className="h-7 w-7"><Pencil className="h-3.5 w-3.5" /></Button>
+                              <Button variant="ghost" size="icon" title="Invite" onClick={async () => {
+                                const partnerEmail = (partner as any).email;
+                                if (!partnerEmail) { toast({ title: "No email", variant: "destructive" }); return; }
+                                try { await supabase.functions.invoke('send-user-invitation', { body: { recipientEmail: partnerEmail, senderName: profile?.full_name || 'A colleague', message: 'You have been invited to join Holarc as a practice partner.', isPracticePartner: true, partnerName: partner.full_name } }); toast({ title: "Invitation sent" }); } catch { toast({ title: "Error", variant: "destructive" }); }
+                              }} className="h-7 w-7 text-primary"><UserPlus className="h-3.5 w-3.5" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => removePartner(partner.id)} className="h-7 w-7 text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
+                )}
+                {showAddPartnerForm && (
+                  <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1.5"><Label>Full Name *</Label><Input value={newPartner.full_name} onChange={(e) => setNewPartner({ ...newPartner, full_name: e.target.value })} placeholder="Dr. Jane Doe" /></div>
+                      <div className="space-y-1.5"><Label>Registration Number *</Label><Input value={newPartner.registration_number} onChange={(e) => setNewPartner({ ...newPartner, registration_number: e.target.value })} placeholder="e.g., MP654321" /></div>
+                      <div className="space-y-1.5"><Label>Mobile (Optional)</Label><Input value={newPartner.mobile_number} onChange={(e) => setNewPartner({ ...newPartner, mobile_number: e.target.value })} /></div>
+                      <div className="space-y-1.5"><Label>Email *</Label><Input type="email" value={newPartner.email} onChange={(e) => setNewPartner({ ...newPartner, email: e.target.value })} placeholder="partner@example.com" /></div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={addPartner} disabled={isAddingPartner} className="gap-1.5"><Save className="h-3.5 w-3.5" />{isAddingPartner ? "Saving..." : "Save"}</Button>
+                      <Button size="sm" variant="outline" onClick={() => { setShowAddPartnerForm(false); setNewPartner({ full_name: "", registration_number: "", mobile_number: "", email: "" }); }}>Cancel</Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </TabsContent>
