@@ -722,7 +722,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
               {/* Allergies */}
               <div>
-                <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</h4>
+                <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</Label>
                 <Textarea id="allergies" className="text-sm" value={formData.allergies} onChange={(e) => updateFormData({ allergies: e.target.value })} placeholder="List any allergies (medications, food, etc.)" rows={2} />
               </div>
 
