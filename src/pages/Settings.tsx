@@ -526,54 +526,6 @@ export default function Settings() {
                 </div>
               </div>
             </div>
-
-            {/* Frame 3 — Digital Signature */}
-            {isDoctor && (
-              <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-2">
-                <Label className="text-sm font-semibold">Digital Signature</Label>
-                <div className="p-3 border border-border rounded-lg bg-background">
-                  <p style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), color: getSignatureColor(sigFormData.signature_color), fontSize: `${sigFormData.signature_font_size}px`, fontWeight: sigFormData.signature_bold ? 'bold' : 'normal', fontStyle: sigFormData.signature_italic ? 'italic' : 'normal' }}>{combinedFullName}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{new Date().toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Font</Label>
-                  <Select value={sigFormData.signature_font} onValueChange={(v) => setSigFormData({ ...sigFormData, signature_font: v })}>
-                    <SelectTrigger>
-                      <span style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), fontSize: '16px' }}>
-                        {SIGNATURE_FONTS.find(f => f.value === sigFormData.signature_font)?.label || "Select font"}
-                      </span>
-                    </SelectTrigger>
-                    <SelectContent>{SIGNATURE_FONTS.map(f => <SelectItem key={f.value} value={f.value}><span style={{ fontFamily: f.fontFamily, fontSize: '18px' }}>{f.label}</span></SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Color</Label>
-                    <Select value={sigFormData.signature_color} onValueChange={(v) => setSigFormData({ ...sigFormData, signature_color: v })}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {SIGNATURE_COLORS.map(c => (
-                          <SelectItem key={c.value} value={c.value}>
-                            <span className="flex items-center gap-2">
-                              <span className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: c.color }} />
-                              {c.label}
-                            </span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Size: {sigFormData.signature_font_size}px</Label>
-                    <Slider min={16} max={48} step={2} value={[sigFormData.signature_font_size]} onValueChange={([v]) => setSigFormData({ ...sigFormData, signature_font_size: v })} />
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Toggle pressed={sigFormData.signature_bold} onPressedChange={(v) => setSigFormData({ ...sigFormData, signature_bold: v })} size="sm" aria-label="Bold" className="h-8 w-8 p-0"><Bold className="h-4 w-4" /></Toggle>
-                  <Toggle pressed={sigFormData.signature_italic} onPressedChange={(v) => setSigFormData({ ...sigFormData, signature_italic: v })} size="sm" aria-label="Italic" className="h-8 w-8 p-0"><Italic className="h-4 w-4" /></Toggle>
-                </div>
-              </div>
-            )}
           </div>
         </TabsContent>
 
