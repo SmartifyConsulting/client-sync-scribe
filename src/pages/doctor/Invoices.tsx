@@ -828,7 +828,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
         {!hideHeader && (
           <div>
             <h1 className="text-3xl font-bold text-foreground">Invoices</h1>
-            <p className="mt-1 text-muted-foreground">
+            <p className="mt-1 text-muted-foreground text-[12px]">
               Manage and track all patient invoices
             </p>
           </div>

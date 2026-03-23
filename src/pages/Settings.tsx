@@ -304,7 +304,7 @@ export default function Settings() {
                 <Settings2 className="h-5 w-5 text-primary" />
                 <h2 className="text-lg font-semibold text-foreground">Preferences</h2>
               </div>
-              <p className="text-sm text-muted-foreground">Manage your application preferences and integrations</p>
+              <p className="text-muted-foreground text-[12px]">Manage your application preferences and integrations</p>
 
               {isPatientRole && (
                 <div className="space-y-3">

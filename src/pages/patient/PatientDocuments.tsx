@@ -551,7 +551,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
         {!hideHeader ? (
           <div>
             <h1 className="text-2xl font-bold text-foreground">My Documents</h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-[12px]">
               All your prescriptions, invoices, certificates and uploaded files.
             </p>
           </div>

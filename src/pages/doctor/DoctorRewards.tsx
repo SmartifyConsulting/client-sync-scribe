@@ -114,7 +114,7 @@ export default function DoctorRewards() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">My Rewards</h1>
-          <p className="text-sm text-muted-foreground">Manage your Moolas balance, milestones, and streaks</p>
+          <p className="text-muted-foreground text-[12px]">Manage your Moolas balance, milestones, and streaks</p>
         </div>
         {partnerApps.length > 0 && (
           <Button onClick={() => setShowTransferDialog(true)} className="gap-2"><Send className="h-4 w-4" /> Transfer Moolas</Button>

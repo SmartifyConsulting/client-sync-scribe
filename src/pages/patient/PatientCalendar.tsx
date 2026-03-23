@@ -348,7 +348,7 @@ export default function PatientCalendar() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground">My Calendar</h1>
-          <p className="text-muted-foreground">View and manage your appointments</p>
+          <p className="text-muted-foreground text-[12px]">View and manage your appointments</p>
         </div>
         <div className="flex items-center gap-3">
           <ViewToggle />

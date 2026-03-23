@@ -606,7 +606,7 @@ export default function Sessions() {
 
       <div>
         <h1 className="text-2xl font-bold text-foreground">Session Mode</h1>
-        <p className="mt-1 text-muted-foreground">
+        <p className="mt-1 text-muted-foreground text-[12px]">
           Record, transcribe, and generate AI summaries for patient sessions
         </p>
       </div>
