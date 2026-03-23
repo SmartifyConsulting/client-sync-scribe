@@ -205,9 +205,9 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
           {hasSearched && (
             <div className="mt-4">
               {searchResults.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No doctors found matching your search.
-                </p>
+                 <p className="text-sm text-muted-foreground text-center py-4">
+                   No healthcare providers found matching your search.
+                 </p>
               ) : (
                 <Table>
                   <TableHeader>
