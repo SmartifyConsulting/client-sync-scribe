@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
 const MyDoctors = lazy(() => import("@/pages/patient/MyDoctors"));
+const PatientRoundTable = lazy(() => import("@/pages/patient/PatientRoundTable"));
 
 interface PatientDetailsEditorProps {
   patient: Patient;
