@@ -433,7 +433,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
                 {/* Physical Measurements */}
                 <div>
-                  <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Physical Measurements</h4>
+                  <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Physical Measurements</Label>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
                       <Ruler className="h-4 w-4 text-primary" />
