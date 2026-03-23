@@ -112,6 +112,7 @@ export function PrescriptionEditor({
         if (m.dosage) line += ` - ${m.dosage}`;
         if (m.frequency) line += ` - ${m.frequency}`;
         if (m.duration) line += ` for ${m.duration}`;
+        if (m.repeats && m.repeats !== "0") line += `\n  Repeats: ${m.repeats}`;
         if (m.instructions) line += `\n  Instructions: ${m.instructions}`;
         return line;
       })
