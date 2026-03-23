@@ -536,6 +536,9 @@ function NotificationList({
 }) {
   const { toast } = useToast();
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [ratingNotification, setRatingNotification] = useState<Notification | null>(null);
+  const [ratedDoctorName, setRatedDoctorName] = useState("");
+  const [ratedDoctorId, setRatedDoctorId] = useState("");
 
   const handleInvitationResponse = async (notification: Notification, accept: boolean) => {
     if (!notification.reference_id) return;
