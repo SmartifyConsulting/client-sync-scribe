@@ -1,55 +1,41 @@
 
 
-# Standardize Field Styling + Rename "My Doctors" + Add Patient Profile Banner
+# Updated Plan: Standardize Field Styling + Rename "My Doctors" + Patient Profile Banner
 
-## 1. Add Profile Picture Banner for Patients
+The profile banner with avatar upload was already added in the previous implementation. However, the user reports the profile picture is not visible. This update ensures it renders correctly.
+
+## 1. Ensure Patient Profile Picture Is Visible
 
 **File:** `src/components/patients/PatientDetailsEditor.tsx`
 
-The doctor's My Practice page has a profile picture card (avatar with camera overlay for upload, name, email) above the tabs. The patient's My Holarchive page has no equivalent. Add a matching banner card above the tabs in PatientDetailsEditor when `isSelfService` is true.
+The `ProfileBanner` component exists (line 358-401) and is rendered in both view and edit modes. However, the avatar may not display if:
+- The `avatar_url` in the `profiles` table is null (no photo uploaded yet) — the fallback initials show instead
+- The banner only renders when `isSelfService` is true
 
-- Fetch the patient's `profiles` record (using `patient_user_id`) to get `avatar_url`
-- Render the same pattern as MyPractice lines 524-549: Avatar with camera hover overlay, name, email
-- On click, upload to `avatars` bucket and update `profiles.avatar_url`
-- Wrap in the standard `sectionFrame` with `border-primary`
-
-**File:** `src/pages/patient/MyDetails.tsx`
-
-- Pass `userEmail` (from auth) to PatientDetailsEditor so the banner can display it
+**Fix:** Ensure the avatar is always prominently visible by:
+- Making the avatar larger (h-20 w-20 instead of h-16 w-16) so it's clearly visible
+- Adding a visible camera icon badge (not just on hover) to prompt users to upload a photo when none exists
+- Showing a "Tap to add photo" hint text below the avatar when no photo is set
 
 ## 2. Rename "My Doctors" to "My Healthcare Providers"
 
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-
-- Line 363: `"My Doctors"` → `"My Healthcare Providers"` (view mode tab)
-- Line 613: `"My Doctors"` → `"My Healthcare Providers"` (edit mode tab)
+Already completed in the previous implementation — verified in current code (lines 454, 707).
 
 ## 3. Standardize ViewField to Match MyPractice Field Style
 
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-
-Current ViewField (line 307-312) renders plain text. Update to use `Label` + disabled `Input`:
-
-```tsx
-const ViewField = ({ label, value }) => (
-  <div className="space-y-1.5">
-    <Label>{label}</Label>
-    <Input value={value || "Not provided"} disabled className="bg-muted/50" />
-  </div>
-);
-```
+Already completed — `ViewField` now uses `Label` + disabled `Input`.
 
 ## 4. Standardize Edit Mode Field Wrappers
 
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
+Already completed — spacing changed to `space-y-1.5`, `text-xs` removed from Labels.
 
-- Change all `space-y-1` field wrappers to `space-y-1.5` (~30 instances across edit mode)
-- Remove `className="text-xs"` from `<Label>` elements in edit mode (let default `text-[11px]` apply)
+## Remaining Work
+
+Only item 1 needs implementation. The profile banner exists but the avatar needs to be more prominent and discoverable.
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/components/patients/PatientDetailsEditor.tsx` | Add profile banner, rename tabs, update ViewField, standardize spacing |
-| `src/pages/patient/MyDetails.tsx` | Minor: pass user email prop |
+| `src/components/patients/PatientDetailsEditor.tsx` | Make avatar larger, add visible upload prompt when no photo exists |
 
