@@ -183,8 +183,8 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
       {/* Doctor Search */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Find a Doctor on Holarc</CardTitle>
-          <CardDescription>Search by full name or practice number</CardDescription>
+          <CardTitle className="text-base">Find a Healthcare Provider on Holarc</CardTitle>
+          <CardDescription>Search by full name, practice number, or registration number</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex gap-2">
