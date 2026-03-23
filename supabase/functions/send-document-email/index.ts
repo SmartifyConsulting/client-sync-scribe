@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
@@ -6,15 +7,6 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-interface EmailRequest {
-  to: string;
-  subject: string;
-  documentName: string;
-  documentContent: string;
-  senderName: string;
-  practiceName?: string;
-}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -26,7 +18,38 @@ serve(async (req) => {
       throw new Error("RESEND_API_KEY is not configured");
     }
 
-    const { to, subject, documentName, documentContent, senderName, practiceName }: EmailRequest = await req.json();
+    const body = await req.json();
+    let to = body.to;
+    let subject = body.subject;
+    let documentContent = body.documentContent;
+    let documentName = body.documentName || "Document";
+    let senderName = body.senderName || "Holarc Health";
+    let practiceName = body.practiceName;
+
+    // Handle the { documentId, recipientEmail } pattern
+    if (!to && body.recipientEmail) {
+      to = body.recipientEmail;
+    }
+
+    if (body.documentId && (!subject || !documentContent)) {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      const { data: doc, error: docError } = await supabase
+        .from("documents")
+        .select("name, content, patient_name, template_name")
+        .eq("id", body.documentId)
+        .single();
+
+      if (docError || !doc) {
+        throw new Error(`Document not found: ${docError?.message || "unknown"}`);
+      }
+
+      documentName = doc.name || documentName;
+      documentContent = documentContent || doc.content;
+      subject = subject || `${documentName}${doc.patient_name ? ` - ${doc.patient_name}` : ""}`;
+    }
 
     if (!to || !subject || !documentContent) {
       throw new Error("Missing required fields: to, subject, documentContent");
