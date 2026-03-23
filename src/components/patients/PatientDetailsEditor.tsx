@@ -349,6 +349,10 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
           {/* === PERSONAL INFORMATION TAB === */}
           <TabsContent value="personal" className="space-y-4 mt-4">
+            <div className="mb-1">
+              <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
+              <p className="text-xs text-muted-foreground">View and manage personal details</p>
+            </div>
             <div className={sectionFrame}>
               <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> Personal Details</h3>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
