@@ -1,44 +1,48 @@
 
 
-# Plan: Separate Frames for Preferences Sub-sections & Fix Signature Font Preview
+# Plan: Fix My Practice Tab Headings & Merge Personal into Practice
 
-## Problem
-1. Patient Management, Calendar Integration, and Digital Signature are all inside one bordered frame, separated only by `<Separator />`. User wants three distinct frames.
-2. The signature font dropdown's trigger (selected value) doesn't show the font preview styled — only the dropdown items are styled with `fontFamily`.
+## Problems Found
+1. **No section headings** inside Personal, Practice, Pricing, or Certificates tab panels — they jump straight into form fields or descriptions.
+2. **Referrals tab** renders `ReferralDoctors.tsx` as a standalone page with its own `text-3xl` h1 and `space-y-6` layout, creating a visual mismatch.
+3. **Personal tab still exists separately** instead of being merged into Practice (as previously requested).
+
+## Reference Style
+The target heading style (from Settings.tsx "Patient Management" / "Calendar Integration"):
+```tsx
+<div className="flex items-center gap-2">
+  <Icon className="h-4 w-4 text-primary" />
+  <h3 className="text-sm font-semibold text-foreground">Section Title</h3>
+</div>
+```
 
 ## Changes
 
-### File: `src/pages/Settings.tsx`
+### File: `src/pages/MyPractice.tsx`
 
-**1. Split into 3 separate frames**
+1. **Remove the "Personal" tab** from the TabsList and its TabsContent.
 
-Break the single `<div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">` into three independent bordered frames:
+2. **Move Personal fields to the top of the Practice tab**, inside the existing card, above the current Practice Number / Registration Number fields. Add a sub-heading "Personal Information" using the reference style.
 
-- **Frame 1 — Patient Management**: Contains the `<h3>Patient Management</h3>` heading and the inactivity threshold setting. Only shown for doctors.
-- **Frame 2 — Calendar Integration**: Contains the calendar heading and Google/Outlook connection rows.
-- **Frame 3 — Digital Signature**: Contains the signature preview, font/color/size selectors, and bold/italic toggles. Only shown for doctors.
+3. **Add consistent section headings** at the top of each tab panel's card content:
+   - Practice tab: "Personal Information" heading (for the moved fields), then "Practice Details" heading (before practice number, logo, partners)
+   - Pricing tab: "Pricing" heading
+   - Certificates tab: "Certificates" heading
 
-Language section stays in the main Preferences frame at the top (with the Settings2 icon and h2).
+   All headings use the same pattern: `text-sm font-semibold text-foreground` with an icon (`h-4 w-4 text-primary`).
 
-Remove the `<Separator />` dividers between these sections since they'll be separate cards.
+4. **Default tab** changes from `"personal"` to `"practice"`.
 
-**2. Fix font preview in SelectTrigger**
+### File: `src/pages/ReferralDoctors.tsx`
 
-Currently the `<SelectTrigger><SelectValue /></SelectTrigger>` for fonts doesn't render the selected font styled. Replace it with a custom `SelectValue` that applies `fontFamily` to the displayed value:
+5. **Add `hideHeader` prop** (optional boolean). When true, skip rendering the standalone page header (`<h1 className="text-3xl">Referrals</h1>`), reduce outer spacing from `space-y-6` to `space-y-4`, and wrap content in the standard card shell (`rounded-xl border border-border bg-card p-4 shadow-sm`).
 
-```tsx
-<SelectTrigger>
-  <SelectValue>
-    <span style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), fontSize: '16px' }}>
-      {SIGNATURE_FONTS.find(f => f.value === sigFormData.signature_font)?.label}
-    </span>
-  </SelectValue>
-</SelectTrigger>
-```
+6. In `MyPractice.tsx`, render `<ReferralDoctors hideHeader />` inside the Referrals tab, with a consistent section heading "Referral Doctors" above it matching the same style.
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/pages/Settings.tsx` | Split preferences content into 3 separate bordered frames; fix font preview in select trigger |
+| `src/pages/MyPractice.tsx` | Remove Personal tab, merge fields into Practice, add consistent `text-sm font-semibold` headings to all tabs |
+| `src/pages/ReferralDoctors.tsx` | Add `hideHeader` prop to support embedded use without standalone page header |
 
