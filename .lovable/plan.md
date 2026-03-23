@@ -1,70 +1,31 @@
 
+Root cause: this was only partially fixed. `MyDoctors.tsx` was updated, but `PatientDocuments.tsx` and `PatientRoundTable.tsx` still render standalone-style headers (`text-2xl font-bold`), and `PatientDetailsEditor.tsx` is still embedding both components without using their existing `hideHeader` prop. So those large page headers are still showing inside the tab panels.
 
-# Plan: Restructure My Practice Tabs & Sidebar Navigation
+Plan:
+1. Update `src/components/patients/PatientDetailsEditor.tsx`
+   - In both the view and edit tab sets, change:
+     - `<PatientDocuments />` → `<PatientDocuments hideHeader />`
+     - `<PatientRoundTable />` → `<PatientRoundTable hideHeader />`
+   - Add compact tab-panel headings above each embedded component so they match the rest of the patient tabs:
+     - `My Documents`
+     - `My Round Table`
+   - Use the same pattern already used elsewhere in the patient profile tabs:
+     - heading: `text-lg font-semibold text-foreground`
+     - description: `text-xs text-muted-foreground`
 
-## Summary
-Consolidate navigation by moving My Patients, Invoices, and Templates into My Practice as tabs, reorder existing tabs, compact the Personal Information layout, and reorder sidebar nav items.
+2. Keep standalone patient routes intact
+   - Leave `src/pages/patient/PatientDocuments.tsx` and `src/pages/patient/PatientRoundTable.tsx` able to show their standalone page headers when opened directly via `/patient/documents` or `/patient/round-table`.
+   - This avoids changing standalone page behavior while fixing the embedded tab layout.
 
-## Changes
+3. Tighten spacing for embedded panels
+   - Ensure the parent tab content in `PatientDetailsEditor.tsx` owns the section title/description and the child pages only render content cards when `hideHeader` is true.
+   - This removes the oversized “page inside a tab” look.
 
-### 1. Sidebar Nav (`src/components/layout/Sidebar.tsx`)
+Files to modify:
+- `src/components/patients/PatientDetailsEditor.tsx`
+- `src/pages/patient/PatientDocuments.tsx` (only if tiny spacing adjustments are needed when `hideHeader` is true)
+- `src/pages/patient/PatientRoundTable.tsx` (only if tiny spacing adjustments are needed when `hideHeader` is true)
 
-Update `doctorNavItems` to remove My Patients, Invoices, Templates and reorder My Rewards:
-
-```
-Dashboard → My Holarchive → My Practice → Calendar → Sessions → To-Do List → My Rewards
-```
-
-Remove: `My Patients (/patients)`, `Invoices (/invoices)`, `Templates (/documents)`.
-Move `My Rewards` after `To-Do List`.
-
-### 2. My Practice Tabs (`src/pages/MyPractice.tsx`)
-
-Rename "Practice" tab to "My Practice". Add new tabs and reorder:
-
-```
-My Patients | My Practice | Referrals | Certificates | Pricing | Invoices | Templates
-```
-
-- **My Patients tab**: Import and render the `Patients` component (from `src/pages/Patients.tsx`) embedded inside the tab. The component already has the alphabetical listing, search, filters, and add patient dialog.
-- **Invoices tab**: Import and render the `DoctorInvoices` component (from `src/pages/doctor/Invoices.tsx`) embedded inside the tab, after Pricing.
-- **Templates tab**: Import and render the `Documents` component (from `src/pages/Documents.tsx`) embedded inside the tab.
-- **Certificates**: Move after Referrals (before Pricing).
-- Default tab changes to `"patients"`.
-
-Each embedded component will need a `hideHeader` prop (or similar pattern) to suppress their standalone page headers when rendered inside tabs.
-
-### 3. Compact Personal Information (`src/pages/MyPractice.tsx`)
-
-In the Personal Information frame, put Email and Mobile Number on the same row using a 2-column grid:
-
-```
-Row 1: [First Name] [Last Name]
-Row 2: [Email]       [Country Code + Mobile Number]
-Row 3: [Specialty]
-Row 4: [Document Mailbox]
-```
-
-Currently Email takes `sm:col-span-2` and Mobile is a separate full-width block below. Change to both fitting in the same `sm:grid-cols-2` row.
-
-### 4. Embedded Component Changes
-
-| File | Change |
-|------|--------|
-| `src/pages/Patients.tsx` | Add `hideHeader` prop to suppress the page header and outer spacing when embedded |
-| `src/pages/doctor/Invoices.tsx` | Add `hideHeader` prop to suppress the page header when embedded |
-| `src/pages/Documents.tsx` | Add `hideHeader` prop to suppress the page header when embedded |
-
-### 5. Routes
-Keep existing routes (`/patients`, `/invoices`, `/documents`) functional for direct URL access and bookmarks — they continue to render the standalone pages. The sidebar just no longer links to them.
-
-## Files Modified
-
-| File | Change |
-|------|--------|
-| `src/components/layout/Sidebar.tsx` | Remove 3 nav items, reorder My Rewards |
-| `src/pages/MyPractice.tsx` | Add 3 new tabs, reorder tabs, rename Practice→My Practice, compact Personal Info layout, import embedded components |
-| `src/pages/Patients.tsx` | Add `hideHeader` prop |
-| `src/pages/doctor/Invoices.tsx` | Add `hideHeader` prop |
-| `src/pages/Documents.tsx` | Add `hideHeader` prop |
-
+Expected result:
+- `My Documents` and `My Round Table` will visually align with the other patient-profile tabs.
+- The mismatch will be fixed at the actual source: embedded tab usage, not just the standalone page components.
