@@ -655,7 +655,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
               </div>
 
               <div className={sectionFrame}>
-                <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide">Blood Type</h3>
+                <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><Droplets className="h-3.5 w-3.5" /> Blood Type</h3>
                 <Select value={formData.blood_type} onValueChange={(value) => updateFormData({ blood_type: value })}>
                   <SelectTrigger className="w-[180px] text-sm"><SelectValue placeholder="Select blood type" /></SelectTrigger>
                   <SelectContent>
