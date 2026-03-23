@@ -498,7 +498,7 @@ export default function Settings() {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
-                <h3 className="text-[9px] font-semibold text-foreground">Calendar Integration</h3>
+                <h3 className="text-sm font-semibold text-foreground">Calendar Integration</h3>
               </div>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
