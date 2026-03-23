@@ -1005,6 +1005,32 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             </div>
           </TabsContent>
 
+          {/* === MEDICAL OVERVIEW TAB (EDIT — same as view) === */}
+          {isSelfService && (
+            <TabsContent value="overview" className="mt-4">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold text-foreground">Medical Overview</h2>
+                <p className="text-xs text-muted-foreground">Summary of your medical history and sessions</p>
+              </div>
+              <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                <PatientOverviewLazy patient={patient} sessions={[]} />
+              </Suspense>
+            </TabsContent>
+          )}
+
+          {/* === MY SESSIONS TAB (EDIT — same as view) === */}
+          {isSelfService && (
+            <TabsContent value="sessions" className="mt-4">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold text-foreground">My Sessions</h2>
+                <p className="text-xs text-muted-foreground">History of your consultations</p>
+              </div>
+              <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                <SessionHistoryTableLazy sessions={[]} patientId={patient.id} patientName={patient.name} />
+              </Suspense>
+            </TabsContent>
+          )}
+
           {/* === DOCUMENTS TAB (EDIT — same as view) === */}
           {isSelfService && (
             <TabsContent value="documents" className="mt-4">
