@@ -698,324 +698,184 @@ Holarc
 
         {/* === CALENDAR TAB === */}
         <TabsContent value="calendar" className="mt-4">
-      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <Calendar className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold text-foreground">Calendar Integration</h2>
-        </div>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {googleRealConnected && <CheckCircle className="h-5 w-5 text-success" />}
-              <div>
-                <p className="font-medium text-foreground">Google Calendar</p>
-                <p className="text-sm text-muted-foreground">
-                  {googleRealConnected ? "Connected - Appointments syncing" : "Sync appointments with Google Calendar"}
-                </p>
+          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-6">
+              <Calendar className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold text-foreground">Calendar Integration</h2>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {googleRealConnected && <CheckCircle className="h-5 w-5 text-success" />}
+                  <div>
+                    <p className="font-medium text-foreground">Google Calendar</p>
+                    <p className="text-sm text-muted-foreground">{googleRealConnected ? "Connected - Appointments syncing" : "Sync appointments with Google Calendar"}</p>
+                  </div>
+                </div>
+                {googleRealConnected ? (
+                  <Button variant="outline" onClick={() => handleDisconnect("google")} className="text-destructive hover:text-destructive">Disconnect</Button>
+                ) : (
+                  <Button variant="outline" onClick={() => handleConnect("google")} disabled={googleRealConnecting}>{googleRealConnecting ? "Connecting..." : "Connect"}</Button>
+                )}
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {outlookConnected && <CheckCircle className="h-5 w-5 text-success" />}
+                  <div>
+                    <p className="font-medium text-foreground">Outlook Calendar</p>
+                    <p className="text-sm text-muted-foreground">{outlookConnected ? "Connected - Appointments syncing" : "Sync appointments with Outlook"}</p>
+                  </div>
+                </div>
+                {outlookConnected ? (
+                  <Button variant="outline" onClick={() => handleDisconnect("outlook")} className="text-destructive hover:text-destructive">Disconnect</Button>
+                ) : (
+                  <Button variant="outline" onClick={() => handleConnect("outlook")} disabled={isConnecting === "outlook"}>{isConnecting === "outlook" ? "Connecting..." : "Connect"}</Button>
+                )}
               </div>
             </div>
-            {googleRealConnected ? (
-              <Button
-                variant="outline"
-                onClick={() => handleDisconnect("google")}
-                className="text-destructive hover:text-destructive"
-              >
-                Disconnect
-              </Button>
-            ) : (
-              <Button variant="outline" onClick={() => handleConnect("google")} disabled={googleRealConnecting}>
-                {googleRealConnecting ? "Connecting..." : "Connect"}
-              </Button>
-            )}
           </div>
-          <Separator />
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {outlookConnected && <CheckCircle className="h-5 w-5 text-success" />}
-              <div>
-                <p className="font-medium text-foreground">Outlook Calendar</p>
-                <p className="text-sm text-muted-foreground">
-                  {outlookConnected ? "Connected - Appointments syncing" : "Sync appointments with Outlook"}
-                </p>
+        </TabsContent>
+
+        {/* === NOTIFICATIONS TAB === */}
+        <TabsContent value="notifications" className="mt-4">
+          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-6">
+              <Bell className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold text-foreground">Notifications</h2>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div><p className="font-medium text-foreground">Email Notifications</p><p className="text-sm text-muted-foreground">Receive email reminders for appointments</p></div>
+                <Switch defaultChecked />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div><p className="font-medium text-foreground">Session Reminders</p><p className="text-sm text-muted-foreground">Get notified 15 minutes before sessions</p></div>
+                <Switch defaultChecked />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div><p className="font-medium text-foreground">Follow-up Alerts</p><p className="text-sm text-muted-foreground">Reminders for scheduled follow-ups</p></div>
+                <Switch defaultChecked />
               </div>
             </div>
-            {outlookConnected ? (
-              <Button
-                variant="outline"
-                onClick={() => handleDisconnect("outlook")}
-                className="text-destructive hover:text-destructive"
-              >
-                Disconnect
-              </Button>
-            ) : (
-              <Button variant="outline" onClick={() => handleConnect("outlook")} disabled={isConnecting === "outlook"}>
-                {isConnecting === "outlook" ? "Connecting..." : "Connect"}
-              </Button>
-            )}
           </div>
-        </div>
-      </div>
+        </TabsContent>
 
-      {/* Notifications */}
-      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <Bell className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold text-foreground">Notifications</h2>
-        </div>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-foreground">Email Notifications</p>
-              <p className="text-sm text-muted-foreground">Receive email reminders for appointments</p>
+        {/* === SECURITY TAB === */}
+        <TabsContent value="security" className="mt-4">
+          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-6">
+              <Shield className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold text-foreground">Security</h2>
             </div>
-            <Switch defaultChecked />
-          </div>
-          <Separator />
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-foreground">Session Reminders</p>
-              <p className="text-sm text-muted-foreground">Get notified 15 minutes before sessions</p>
-            </div>
-            <Switch defaultChecked />
-          </div>
-          <Separator />
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-foreground">Follow-up Alerts</p>
-              <p className="text-sm text-muted-foreground">Reminders for scheduled follow-ups</p>
-            </div>
-            <Switch defaultChecked />
-          </div>
-        </div>
-      </div>
-
-      {/* Patient Management (Doctors only) */}
-      {role === "doctor" && (
-        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-          <div className="flex items-center gap-3 mb-6">
-            <Users className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold text-foreground">Patient Management</h2>
-          </div>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-foreground">Patient Inactivity Threshold</p>
-                <p className="text-sm text-muted-foreground">
-                  Automatically mark patients as inactive after this period without a visit
-                </p>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {loadingMfa ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : mfaFactors.length > 0 ? <ShieldCheck className="h-5 w-5 text-success" /> : <ShieldOff className="h-5 w-5 text-muted-foreground" />}
+                  <div>
+                    <p className="font-medium text-foreground">Two-Factor Authentication</p>
+                    <p className="text-sm text-muted-foreground">{loadingMfa ? "Checking status..." : mfaFactors.length > 0 ? "Enabled - Your account is protected" : "Add an extra layer of security"}</p>
+                  </div>
+                </div>
+                {loadingMfa ? null : mfaFactors.length > 0 ? (
+                  <Button variant="outline" onClick={() => disableMfa(mfaFactors[0].id)} disabled={disablingMfa} className="text-destructive hover:text-destructive">{disablingMfa ? "Disabling..." : "Disable"}</Button>
+                ) : (
+                  <Button variant="outline" onClick={() => setShow2FASetup(true)}>Enable</Button>
+                )}
               </div>
-              <Select
-                value={inactiveThreshold.toString()}
-                onValueChange={(value) => saveInactiveThreshold(parseInt(value))}
-                disabled={savingThreshold}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select period" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="3">3 months</SelectItem>
-                  <SelectItem value="6">6 months</SelectItem>
-                  <SelectItem value="9">9 months</SelectItem>
-                  <SelectItem value="12">12 months (default)</SelectItem>
-                  <SelectItem value="18">18 months</SelectItem>
-                  <SelectItem value="24">24 months</SelectItem>
-                </SelectContent>
-              </Select>
+              <Separator />
+              <div><Button variant="outline" onClick={() => (window.location.href = "/forgot-password")}>Change Password</Button></div>
             </div>
           </div>
-        </div>
-      )}
+        </TabsContent>
 
-      {/* Security */}
-      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <Shield className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold text-foreground">Security</h2>
-        </div>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {loadingMfa ? (
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              ) : mfaFactors.length > 0 ? (
-                <ShieldCheck className="h-5 w-5 text-success" />
-              ) : (
-                <ShieldOff className="h-5 w-5 text-muted-foreground" />
-              )}
-              <div>
-                <p className="font-medium text-foreground">Two-Factor Authentication</p>
-                <p className="text-sm text-muted-foreground">
-                  {loadingMfa
-                    ? "Checking status..."
-                    : mfaFactors.length > 0
-                      ? "Enabled - Your account is protected"
-                      : "Add an extra layer of security"}
-                </p>
+        {/* === BILLING TAB (with Payment History sub-tab) === */}
+        <TabsContent value="billing" className="mt-4 space-y-4">
+          <div className="flex gap-2 mb-2">
+            <Button variant={activeBillingTab === "plan" ? "default" : "outline"} size="sm" onClick={() => setActiveBillingTab("plan")}>Subscription</Button>
+            <Button variant={activeBillingTab === "history" ? "default" : "outline"} size="sm" onClick={() => setActiveBillingTab("history")}>Payment History</Button>
+          </div>
+
+          {activeBillingTab === "plan" && (
+            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <CreditCard className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-semibold text-foreground">Billing</h2>
               </div>
-            </div>
-            {loadingMfa ? null : mfaFactors.length > 0 ? (
-              <Button
-                variant="outline"
-                onClick={() => disableMfa(mfaFactors[0].id)}
-                disabled={disablingMfa}
-                className="text-destructive hover:text-destructive"
-              >
-                {disablingMfa ? "Disabling..." : "Disable"}
-              </Button>
-            ) : (
-              <Button variant="outline" onClick={() => setShow2FASetup(true)}>
-                Enable
-              </Button>
-            )}
-          </div>
-          <Separator />
-          <div>
-            <Button variant="outline" onClick={() => (window.location.href = "/forgot-password")}>
-              Change Password
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Billing */}
-      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <CreditCard className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold text-foreground">Billing</h2>
-        </div>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-foreground">Current Plan</p>
-              <p className="text-sm text-muted-foreground">
-                {loadingSubscription ? "Loading..." : getCurrentPlanName()}
-              </p>
-            </div>
-            {subscription?.status === "active" ? (
-              <Badge variant="default" className="bg-green-600">
-                Active
-              </Badge>
-            ) : subscription?.status === "cancelled" ? (
-              <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">
-                Cancelled
-              </Badge>
-            ) : (
-              <Badge variant="secondary">Inactive</Badge>
-            )}
-          </div>
-          <Separator />
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-foreground">Subscription Status</p>
-              <p className="text-sm text-muted-foreground">
-                {loadingSubscription ? "Loading..." : getSubscriptionStatus()}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              {subscription?.status === "active" && (
-                <Button
-                  variant="outline"
-                  onClick={() => setShowCancelDialog(true)}
-                  className="text-destructive hover:text-destructive"
-                >
-                  Cancel
-                </Button>
-              )}
-              {subscription?.status === "cancelled" && (
-                <Button
-                  variant="outline"
-                  onClick={handleReactivateSubscription}
-                  disabled={reactivatingSubscription}
-                  className="text-green-600 hover:text-green-700"
-                >
-                  {reactivatingSubscription ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Reactivating...
-                    </>
-                  ) : (
-                    <>
-                      <RotateCcw className="h-4 w-4 mr-2" />
-                      Reactivate
-                    </>
-                  )}
-                </Button>
-              )}
-              <Button variant="outline" onClick={() => setShowManagePlan(true)}>
-                {subscription?.status === "active"
-                  ? "Change Plan"
-                  : subscription?.status === "cancelled"
-                    ? "Change Plan"
-                    : "Subscribe"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Payment History */}
-      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <Receipt className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold text-foreground">Payment History</h2>
-        </div>
-        {loadingPaymentHistory ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
-        ) : paymentHistory.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">No payment history yet</p>
-        ) : (
-          <div className="rounded-lg border border-border overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead>Date</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Receipt</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paymentHistory.map((payment) => (
-                  <TableRow key={payment.id}>
-                    <TableCell className="font-medium">{format(new Date(payment.created_at), "MMM d, yyyy")}</TableCell>
-                    <TableCell>{payment.description}</TableCell>
-                    <TableCell>${payment.amount.toFixed(2)}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={payment.status === "completed" ? "default" : "destructive"}
-                        className="capitalize"
-                      >
-                        {payment.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" onClick={() => handleDownloadReceipt(payment)}>
-                        <Download className="h-4 w-4 mr-1" />
-                        Download
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div><p className="font-medium text-foreground">Current Plan</p><p className="text-sm text-muted-foreground">{loadingSubscription ? "Loading..." : getCurrentPlanName()}</p></div>
+                  {subscription?.status === "active" ? <Badge variant="default" className="bg-green-600">Active</Badge> : subscription?.status === "cancelled" ? <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">Cancelled</Badge> : <Badge variant="secondary">Inactive</Badge>}
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <div><p className="font-medium text-foreground">Subscription Status</p><p className="text-sm text-muted-foreground">{loadingSubscription ? "Loading..." : getSubscriptionStatus()}</p></div>
+                  <div className="flex gap-2">
+                    {subscription?.status === "active" && <Button variant="outline" onClick={() => setShowCancelDialog(true)} className="text-destructive hover:text-destructive">Cancel</Button>}
+                    {subscription?.status === "cancelled" && (
+                      <Button variant="outline" onClick={handleReactivateSubscription} disabled={reactivatingSubscription} className="text-green-600 hover:text-green-700">
+                        {reactivatingSubscription ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Reactivating...</> : <><RotateCcw className="h-4 w-4 mr-2" />Reactivate</>}
                       </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </div>
+                    )}
+                    <Button variant="outline" onClick={() => setShowManagePlan(true)}>{subscription?.status === "active" ? "Change Plan" : subscription?.status === "cancelled" ? "Change Plan" : "Subscribe"}</Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
-      {/* Data */}
-      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <Database className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold text-foreground">Data Management</h2>
-        </div>
-        <div className="space-y-4">
-          <Button variant="outline">Export All Data</Button>
-          <p className="text-sm text-muted-foreground">Download all your client data, documents, and session records</p>
-        </div>
-      </div>
+          {activeBillingTab === "history" && (
+            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <Receipt className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-semibold text-foreground">Payment History</h2>
+              </div>
+              {loadingPaymentHistory ? (
+                <div className="flex items-center justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+              ) : paymentHistory.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No payment history yet</p>
+              ) : (
+                <div className="rounded-lg border border-border overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/50">
+                        <TableHead>Date</TableHead><TableHead>Description</TableHead><TableHead>Amount</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Receipt</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {paymentHistory.map((payment) => (
+                        <TableRow key={payment.id}>
+                          <TableCell className="font-medium">{format(new Date(payment.created_at), "MMM d, yyyy")}</TableCell>
+                          <TableCell>{payment.description}</TableCell>
+                          <TableCell>${payment.amount.toFixed(2)}</TableCell>
+                          <TableCell><Badge variant={payment.status === "completed" ? "default" : "destructive"} className="capitalize">{payment.status}</Badge></TableCell>
+                          <TableCell className="text-right"><Button variant="ghost" size="sm" onClick={() => handleDownloadReceipt(payment)}><Download className="h-4 w-4 mr-1" />Download</Button></TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* === DATA MANAGEMENT TAB === */}
+        <TabsContent value="data" className="mt-4">
+          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-6">
+              <Database className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold text-foreground">Data Management</h2>
+            </div>
+            <div className="space-y-4">
+              <Button variant="outline">Export All Data</Button>
+              <p className="text-sm text-muted-foreground">Download all your client data, documents, and session records</p>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {/* 2FA Setup Dialog */}
       <TwoFactorSetup open={show2FASetup} onOpenChange={setShow2FASetup} onSuccess={fetchMfaFactors} />
@@ -1025,101 +885,36 @@ Holarc
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Choose Your Plan</DialogTitle>
-            <DialogDescription>
-              Select a billing cycle for your {planType} subscription. Payment is processed securely via PayPal.
-            </DialogDescription>
+            <DialogDescription>Select a billing cycle for your {planType} subscription. Payment is processed securely via PayPal.</DialogDescription>
           </DialogHeader>
-          <RadioGroup
-            value={selectedBillingCycle}
-            onValueChange={(v) => setSelectedBillingCycle(v as "monthly" | "annual")}
-            className="space-y-4 mt-4"
-          >
-            {/* Monthly Plan */}
-            <div
-              className={`relative flex items-start rounded-lg border p-4 cursor-pointer transition-colors ${
-                selectedBillingCycle === "monthly"
-                  ? "border-primary bg-primary/5"
-                  : "border-border hover:border-primary/50"
-              }`}
-              onClick={() => setSelectedBillingCycle("monthly")}
-            >
+          <RadioGroup value={selectedBillingCycle} onValueChange={(v) => setSelectedBillingCycle(v as "monthly" | "annual")} className="space-y-4 mt-4">
+            <div className={`relative flex items-start rounded-lg border p-4 cursor-pointer transition-colors ${selectedBillingCycle === "monthly" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`} onClick={() => setSelectedBillingCycle("monthly")}>
               <RadioGroupItem value="monthly" id="monthly" className="mt-1" />
               <div className="ml-3 flex-1">
-                <Label htmlFor="monthly" className="font-semibold text-foreground cursor-pointer">
-                  Monthly
-                  <span className="ml-2 text-primary">
-                    ${plans.monthly.price}/{plans.monthly.period}
-                  </span>
-                </Label>
+                <Label htmlFor="monthly" className="font-semibold text-foreground cursor-pointer">Monthly <span className="ml-2 text-primary">${plans.monthly.price}/{plans.monthly.period}</span></Label>
                 <ul className="mt-2 text-sm text-muted-foreground space-y-1">
-                  <li className="flex items-center gap-2">
-                    <Check className="h-3 w-3 text-primary" />
-                    Full access to all features
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-3 w-3 text-primary" />
-                    Cancel anytime
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-3 w-3 text-primary" />
-                    Priority support
-                  </li>
+                  <li className="flex items-center gap-2"><Check className="h-3 w-3 text-primary" />Full access to all features</li>
+                  <li className="flex items-center gap-2"><Check className="h-3 w-3 text-primary" />Cancel anytime</li>
+                  <li className="flex items-center gap-2"><Check className="h-3 w-3 text-primary" />Priority support</li>
                 </ul>
               </div>
             </div>
-
-            {/* Annual Plan */}
-            <div
-              className={`relative flex items-start rounded-lg border p-4 cursor-pointer transition-colors ${
-                selectedBillingCycle === "annual"
-                  ? "border-primary bg-primary/5"
-                  : "border-border hover:border-primary/50"
-              }`}
-              onClick={() => setSelectedBillingCycle("annual")}
-            >
+            <div className={`relative flex items-start rounded-lg border p-4 cursor-pointer transition-colors ${selectedBillingCycle === "annual" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`} onClick={() => setSelectedBillingCycle("annual")}>
               <RadioGroupItem value="annual" id="annual" className="mt-1" />
               <div className="ml-3 flex-1">
-                <Label htmlFor="annual" className="font-semibold text-foreground cursor-pointer">
-                  Annual
-                  <span className="ml-2 text-primary">
-                    ${plans.annual.price}/{plans.annual.period}
-                  </span>
-                  <Badge variant="secondary" className="ml-2 bg-green-100 text-green-700">
-                    Save ${plans.annual.savings}
-                  </Badge>
-                </Label>
+                <Label htmlFor="annual" className="font-semibold text-foreground cursor-pointer">Annual <span className="ml-2 text-primary">${plans.annual.price}/{plans.annual.period}</span> <Badge variant="secondary" className="ml-2 bg-green-100 text-green-700">Save ${plans.annual.savings}</Badge></Label>
                 <ul className="mt-2 text-sm text-muted-foreground space-y-1">
-                  <li className="flex items-center gap-2">
-                    <Check className="h-3 w-3 text-primary" />
-                    Full access to all features
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-3 w-3 text-primary" />2 months free
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-3 w-3 text-primary" />
-                    Priority support
-                  </li>
+                  <li className="flex items-center gap-2"><Check className="h-3 w-3 text-primary" />Full access to all features</li>
+                  <li className="flex items-center gap-2"><Check className="h-3 w-3 text-primary" />2 months free</li>
+                  <li className="flex items-center gap-2"><Check className="h-3 w-3 text-primary" />Priority support</li>
                 </ul>
               </div>
             </div>
           </RadioGroup>
           <DialogFooter className="mt-6">
-            <Button variant="outline" onClick={() => setShowManagePlan(false)}>
-              Cancel
-            </Button>
+            <Button variant="outline" onClick={() => setShowManagePlan(false)}>Cancel</Button>
             <Button onClick={handleSubscribe} disabled={processingPayment}>
-              {processingPayment ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Pay with PayPal
-                </>
-              )}
+              {processingPayment ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Processing...</> : <><ExternalLink className="h-4 w-4 mr-2" />Pay with PayPal</>}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1131,35 +926,14 @@ Holarc
           <AlertDialogHeader>
             <AlertDialogTitle>Cancel Subscription?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to cancel your subscription? You will retain access to all features until the end of
-              your current billing period
-              {subscription?.current_period_end && (
-                <span className="font-medium">
-                  {" "}
-                  ({format(new Date(subscription.current_period_end), "MMMM d, yyyy")})
-                </span>
-              )}
-              .
+              Are you sure you want to cancel your subscription? You will retain access until the end of your current billing period
+              {subscription?.current_period_end && <span className="font-medium"> ({format(new Date(subscription.current_period_end), "MMMM d, yyyy")})</span>}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Keep Subscription</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleCancelSubscription}
-              disabled={cancellingSubscription}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {cancellingSubscription ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Cancelling...
-                </>
-              ) : (
-                <>
-                  <XCircle className="h-4 w-4 mr-2" />
-                  Cancel Subscription
-                </>
-              )}
+            <AlertDialogAction onClick={handleCancelSubscription} disabled={cancellingSubscription} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {cancellingSubscription ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Cancelling...</> : <><XCircle className="h-4 w-4 mr-2" />Cancel Subscription</>}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
