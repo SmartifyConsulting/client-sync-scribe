@@ -597,7 +597,7 @@ export default function MyPractice() {
                 <Label>Mobile Number</Label>
                 <div className="flex gap-2">
                   <Select value={formData.country_code} onValueChange={handleCountryCodeChange}>
-                    <SelectTrigger className="w-[130px]"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="w-[80px]"><SelectValue /></SelectTrigger>
                     <SelectContent>{COUNTRY_CODES.map(c => <SelectItem key={c.code} value={c.code}><span className="flex items-center gap-1.5">{c.flag} {c.code}</span></SelectItem>)}</SelectContent>
                   </Select>
                   <Input type="tel" value={formatPhoneNumber(formData.mobile_number)} onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value.replace(/[^0-9]/g, '') })} placeholder="82 123 4567" className="flex-1" />
