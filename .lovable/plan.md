@@ -1,32 +1,44 @@
 
 
-# Plan: Reset Body Font Size & Reduce Muted Description Text
+# Plan: Separate Frames for Preferences Sub-sections & Fix Signature Font Preview
 
-## 1. Reset Body Font Size
+## Problem
+1. Patient Management, Calendar Integration, and Digital Signature are all inside one bordered frame, separated only by `<Separator />`. User wants three distinct frames.
+2. The signature font dropdown's trigger (selected value) doesn't show the font preview styled — only the dropdown items are styled with `fontFamily`.
 
-**File**: `src/index.css` (line 162)
+## Changes
 
-Remove `font-size: 7.35px;` from the `body` rule, restoring the browser default of **16px**. This will affect all `rem`-based sizes across the app (everything will scale up proportionally).
+### File: `src/pages/Settings.tsx`
 
-## 2. Reduce `text-sm text-muted-foreground` Globally
+**1. Split into 3 separate frames**
 
-With 856 occurrences across 59 files, a per-file find-and-replace is impractical. Instead, add a CSS utility rule in `src/index.css` that targets the combination:
+Break the single `<div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">` into three independent bordered frames:
 
-```css
-.text-muted-foreground.text-sm {
-  font-size: 0.625rem; /* ~10px at 16px base, two steps below text-sm (0.875rem) */
-}
+- **Frame 1 — Patient Management**: Contains the `<h3>Patient Management</h3>` heading and the inactivity threshold setting. Only shown for doctors.
+- **Frame 2 — Calendar Integration**: Contains the calendar heading and Google/Outlook connection rows.
+- **Frame 3 — Digital Signature**: Contains the signature preview, font/color/size selectors, and bold/italic toggles. Only shown for doctors.
+
+Language section stays in the main Preferences frame at the top (with the Settings2 icon and h2).
+
+Remove the `<Separator />` dividers between these sections since they'll be separate cards.
+
+**2. Fix font preview in SelectTrigger**
+
+Currently the `<SelectTrigger><SelectValue /></SelectTrigger>` for fonts doesn't render the selected font styled. Replace it with a custom `SelectValue` that applies `fontFamily` to the displayed value:
+
+```tsx
+<SelectTrigger>
+  <SelectValue>
+    <span style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), fontSize: '16px' }}>
+      {SIGNATURE_FONTS.find(f => f.value === sigFormData.signature_font)?.label}
+    </span>
+  </SelectValue>
+</SelectTrigger>
 ```
-
-This single rule downsizes all `text-sm text-muted-foreground` elements by two steps without touching any component files.
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/index.css` | Remove `font-size: 7.35px` from body; add CSS override for `.text-muted-foreground.text-sm` |
-
-## Risk Note
-
-Resetting to 16px base will significantly enlarge all rem-based text and spacing. If the 7.35px was set to achieve a compact clinical UI, this change will alter the entire look. Button sizes, padding, and layout will all scale up.
+| `src/pages/Settings.tsx` | Split preferences content into 3 separate bordered frames; fix font preview in select trigger |
 
