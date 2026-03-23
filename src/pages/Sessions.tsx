@@ -113,6 +113,7 @@ export default function Sessions() {
   const [aiDiagnosis, setAiDiagnosis] = useState<string | null>(null);
   const [isGeneratingDiagnosis, setIsGeneratingDiagnosis] = useState(false);
   const [pastPatientSessions, setPastPatientSessions] = useState<any[]>([]);
+  const [showDrawingPad, setShowDrawingPad] = useState(false);
   const savedAudioUrlRef = useRef<string | null>(null);
   const [showVisitCategoryDialog, setShowVisitCategoryDialog] = useState(false);
   const [pendingTranscript, setPendingTranscript] = useState<string>("");
