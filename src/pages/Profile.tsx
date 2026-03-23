@@ -266,78 +266,35 @@ export default function Profile() {
     <div className="space-y-4 animate-fade-in">
       <div>
         <h1 className="text-2xl font-bold text-foreground">My Holarchive</h1>
-        <p className="text-sm text-muted-foreground">
-          {isDoctor ? "Manage your profile and patients" : "Manage your health information"}
-        </p>
+        <p className="text-sm text-muted-foreground">Manage your health information</p>
       </div>
 
-      {isDoctor ? (
-        <Tabs defaultValue="patients" className="space-y-4">
-          <TabsList className="justify-start">
-            <TabsTrigger value="patients">My Patients</TabsTrigger>
-            <TabsTrigger value="holarchive">My Health Record</TabsTrigger>
-          </TabsList>
-          <TabsContent value="patients">
-            <DoctorPatientsTab />
-          </TabsContent>
-          <TabsContent value="holarchive">
-            {patientLoading ? (
-              <div className="flex h-40 items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              </div>
-            ) : patientRecord ? (
-              <PatientDetailsEditor
-                patient={patientRecord}
-                onSave={async (updates: Partial<Patient>) => {
-                  const { error } = await supabase
-                    .from("patients")
-                    .update(updates as any)
-                    .eq("id", patientRecord.id);
-                  if (error) {
-                    toast({ title: "Error saving", description: error.message, variant: "destructive" });
-                    throw error;
-                  }
-                  setPatientRecord((prev) => prev ? { ...prev, ...updates } : prev);
-                  toast({ title: "Saved", description: "Your details have been updated." });
-                }}
-                isSelfService
-              />
-            ) : (
-              <AutoCreatePatientFallback
-                user={user}
-                onCreated={(record) => setPatientRecord(record)}
-              />
-            )}
-          </TabsContent>
-        </Tabs>
+      {patientLoading ? (
+        <div className="flex h-40 items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
+      ) : patientRecord ? (
+        <PatientDetailsEditor
+          patient={patientRecord}
+          onSave={async (updates: Partial<Patient>) => {
+            const { error } = await supabase
+              .from("patients")
+              .update(updates as any)
+              .eq("id", patientRecord.id);
+            if (error) {
+              toast({ title: "Error saving", description: error.message, variant: "destructive" });
+              throw error;
+            }
+            setPatientRecord((prev) => prev ? { ...prev, ...updates } : prev);
+            toast({ title: "Saved", description: "Your details have been updated." });
+          }}
+          isSelfService
+        />
       ) : (
-        patientLoading ? (
-          <div className="flex h-40 items-center justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          </div>
-        ) : patientRecord ? (
-          <PatientDetailsEditor
-            patient={patientRecord}
-            onSave={async (updates: Partial<Patient>) => {
-              const { error } = await supabase
-                .from("patients")
-                .update(updates as any)
-                .eq("id", patientRecord.id);
-              if (error) {
-                toast({ title: "Error saving", description: error.message, variant: "destructive" });
-                throw error;
-              }
-              setPatientRecord((prev) => prev ? { ...prev, ...updates } : prev);
-              toast({ title: "Saved", description: "Your details have been updated." });
-            }}
-            isSelfService
-          />
-        ) : (
-          <AutoCreatePatientFallback
-            user={user}
-            onCreated={(record) => setPatientRecord(record)}
-          />
-        )
+        <AutoCreatePatientFallback
+          user={user}
+          onCreated={(record) => setPatientRecord(record)}
+        />
       )}
     </div>
   );
