@@ -148,13 +148,13 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 {profile?.full_name?.split(" ").map(n => n[0]).join("").toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
-            <NavLink to="/profile" onClick={onNavigate} className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0">
               {loading ? (
                 <div className="h-3 w-20 rounded bg-muted animate-pulse" />
               ) : (
-                <p className="text-xs font-medium text-primary truncate hover:underline">{profile?.full_name || "My Profile"}</p>
+                <p className="text-xs font-medium text-primary truncate">{profile?.full_name || "My Profile"}</p>
               )}
-            </NavLink>
+            </div>
           </div>
           <div className="px-3 pb-3 space-y-0.5">
             <NavLink
