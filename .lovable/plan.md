@@ -1,66 +1,75 @@
 
 
-# Plan: Create My Practice Page, Restructure Settings, Add Doctor Rewards
+# Plan: Fix Consistency Issues Across App
 
-## Summary of Changes
+## 1. Add Icons to All Section Headings in PatientDetailsEditor
 
-1. **New "My Practice" page** (`/practice`) with tabs: Personal, Practice, Referrals, Pricing, Certificates — content moved from Settings
-2. **New sidebar items** for doctors: "My Practice" (under My Holarchive) and "My Rewards" (under My Practice)
-3. **Settings restructured**: Remove doctor-only tabs; add Preferences as first tab with Digital Signatures; merge Data into Security; replace Billing sub-tabs with two frames
-4. **Move Details content to My Practice**: The "Details" sub-tab (first name, last name, email, mobile, specialty, mailbox) currently under Settings → Personal → Details moves to the **Personal tab** of the new My Practice page
+Currently some headings have icons (General Notes → StickyNote, Allergies → AlertCircle, Chronic Medication → Pill, Organ Donor → Heart) but others don't. Add icons to all:
 
-## Detailed Changes
+| Heading | Icon |
+|---------|------|
+| Personal Details | `User` |
+| Addresses | `MapPin` |
+| Next of Kin | `Users` |
+| Employer | `Briefcase` |
+| Medical Insurance | `ShieldCheck` |
+| Pharmacies | `Store` |
+| Physical Measurements | `Activity` |
+| Blood Type | `Droplets` |
+| Surgeries and Dates | `Scissors` |
+| Family History | `GitBranch` |
 
-### 1. Sidebar (`src/components/layout/Sidebar.tsx`)
+**File**: `src/components/patients/PatientDetailsEditor.tsx` — update all `<h3>` headings to include an icon via `flex items-center gap-1.5` pattern (matching existing ones).
 
-Update `doctorNavItems` order:
-- Dashboard → /dashboard
-- My Holarchive → /profile
-- **My Practice → /practice** (new, icon: Briefcase)
-- **My Rewards → /doctor/rewards** (new, icon: Gift)
-- My Patients → /patients
-- Calendar → /calendar
-- Sessions → /sessions
-- To-Do List → /todos
-- Invoices → /invoices
-- Templates → /documents
+## 2. Fix Settings Preferences Sub-Headings Size
 
-### 2. New Page: My Practice (`src/pages/MyPractice.tsx`)
+Sub-headings in Preferences tab use `text-[9px]` (Patient Management, Language, Calendar Integration). Other tabs use `text-lg` for section headings (Notifications, Security, Data Management, Subscription, Payment History). Standardize Preferences sub-headings to `text-sm font-semibold` to match the section heading pattern, and ensure the Preferences top heading also uses `text-lg` like the other tabs. Also update the Preferences frame border to `border-primary` (teal) to match the rest of the app.
 
-5 tabs: **Personal, Practice, Referrals, Pricing, Certificates**
+**File**: `src/pages/Settings.tsx`
+- Change `h3` sub-headings from `text-[9px]` to `text-sm`
+- Change `h2` heading from `text-sm` to `text-lg` for Preferences
+- Update all frame borders from `border-border` to `border-primary`
 
-- **Personal tab**: Contains the Details content moved from Settings — first name, last name, email, mobile number, specialty, mailbox section. Also includes the profile picture/avatar upload card from Settings header.
-- **Practice tab**: Practice number, registration, address, logo, partners (moved from Settings)
-- **Referrals tab**: `<ReferralDoctors />` (moved from Settings)
-- **Pricing tab**: Currency + service prices (moved from Settings)
-- **Certificates tab**: CPD certificates (moved from Settings)
+## 3. Standardize Description Labels Under Headings
 
-### 3. Settings Page Restructure (`src/pages/Settings.tsx`)
+Settings tab descriptions are inconsistent — some use `text-sm`, others `text-[8px]`. Standardize all to `text-sm text-muted-foreground`.
 
-**Remove**: Personal tab (Details moved to My Practice, Preferences becomes standalone tab), Practice, Referrals, Pricing, Certificates tabs
+**File**: `src/pages/Settings.tsx` — update description `<p>` tags under headings.
 
-**New tab order:**
-1. **Preferences** (first tab) — Content from old Personal → Preferences sub-tab (auto-email toggles, patient management, language/voice, calendar integration). **Add Digital Signature section** (moved from Practice tab)
-2. **Notifications** — Keep as-is
-3. **Security** — Keep 2FA + password. **Add Data Management frame below** (merged from Data tab)
-4. **Billing** — Remove sub-tabs. Two distinct frames: Subscription frame and Payment History frame
+## 4. Add Headings to All Tab Content
 
-### 4. Routes (`src/App.tsx`)
+Ensure tabs like "My Documents", "My Doctors", "My Round Table" always show a heading when rendered inside tabs (currently hidden via `hideHeader`). Change approach: always show heading inside tab content. Remove `hideHeader` usage and instead always render a consistent heading block at the top of each tab content area.
 
-Add:
-- `<Route path="/practice" element={<MyPractice />} />`
-- `<Route path="/doctor/rewards" element={<MyRewards />} />` (reuse patient rewards or create doctor-specific)
+**Files**: 
+- `src/components/patients/PatientDetailsEditor.tsx` — add heading blocks inside each tab content (Personal Information, Medical Information, My Documents, My Doctors, My Round Table)
+- Remove `hideHeader` props from `PatientDocuments`, `MyDoctors`, `PatientRoundTable` calls inside tabs — let them show their headings
 
-### 5. Doctor Rewards Page
+## 5. Reduce Document Type Badge Sizes
 
-Route `/doctor/rewards` to a page showing Moolas content (moved from Settings).
+The filter badges in PatientDocuments use `px-3 py-1.5 text-xs`. Reduce to `px-2 py-0.5 text-[8px]` so they fit on one row.
+
+**File**: `src/pages/patient/PatientDocuments.tsx` — update badge classes in the filter bar (lines 700-727).
+
+## 6. Swap Medical Information Columns
+
+Currently Column 1 = Insurance + Pharmacies, Column 2 = Physical/Blood/Allergies/etc. Swap them:
+- **Column 1**: All medical items (Physical Measurements, Blood Type, Allergies, Chronic Medication, Surgeries, Family History, Organ Donor) inside a single "Medical Information" frame
+- **Column 2**: Insurance + Pharmacies (separate frames)
+
+**File**: `src/components/patients/PatientDetailsEditor.tsx` — restructure the medical tab grid.
+
+## 7. Make Alphabet Letter Badges Match ME Icon Color
+
+The alphabet separators in Patients.tsx use `bg-destructive` (red). The ME badge uses `bg-[#E01837]`. Change alphabet badges to also use `bg-[#E01837]` for consistency.
+
+**File**: `src/pages/Patients.tsx` — line 889, change `bg-destructive` to `bg-[#E01837]`.
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/components/layout/Sidebar.tsx` | Add "My Practice" and "My Rewards" nav items |
-| `src/pages/MyPractice.tsx` | **NEW** — 5-tab page with Details + Practice content from Settings |
-| `src/pages/Settings.tsx` | Remove doctor tabs + Details; restructure to Preferences → Notifications → Security (+Data) → Billing (two frames) |
-| `src/App.tsx` | Add routes for `/practice` and `/doctor/rewards` |
+| `src/components/patients/PatientDetailsEditor.tsx` | Add icons to all headings; swap medical columns into single frame; show headings in all tabs |
+| `src/pages/Settings.tsx` | Fix Preferences sub-heading sizes to `text-sm`; standardize descriptions; use `border-primary` on frames |
+| `src/pages/patient/PatientDocuments.tsx` | Reduce filter badge sizes |
+| `src/pages/Patients.tsx` | Change alphabet badge color to `bg-[#E01837]` |
 
