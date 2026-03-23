@@ -337,6 +337,36 @@ export default function MyPractice() {
     return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
   }, [formData]);
 
+  // ── Auto-save signature debounce ──
+  useEffect(() => {
+    if (!sigHasInitialized.current || !user || sigIsSettingFromProfile.current) return;
+    if (sigProfileLoadedData.current && JSON.stringify(sigFormData) === JSON.stringify(sigProfileLoadedData.current)) {
+      sigProfileLoadedData.current = null; return;
+    }
+    sigProfileLoadedData.current = null;
+    if (sigDebounceTimer.current) clearTimeout(sigDebounceTimer.current);
+    sigDebounceTimer.current = setTimeout(async () => {
+      setSavedStatus('saving');
+      const { error } = await updateProfile({
+        signature_font: sigFormData.signature_font, signature_color: sigFormData.signature_color,
+        signature_font_size: sigFormData.signature_font_size, signature_bold: sigFormData.signature_bold,
+        signature_italic: sigFormData.signature_italic,
+      } as any);
+      if (error) { setSavedStatus('idle'); toast({ title: "Error", description: "Failed to save", variant: "destructive" }); }
+      else { setSavedStatus('saved'); setTimeout(() => setSavedStatus('idle'), 2000); }
+    }, 1500);
+    return () => { if (sigDebounceTimer.current) clearTimeout(sigDebounceTimer.current); };
+  }, [sigFormData]);
+
+  // ── Auto-guess language from country code ──
+  const handleCountryCodeChange = (code: string) => {
+    setFormData({ ...formData, country_code: code });
+    const guessedLang = COUNTRY_CODE_TO_LANGUAGE[code];
+    if (guessedLang) {
+      updateProfile({ preferred_language: guessedLang } as any);
+    }
+  };
+
   // ── Fetch doctor data ──
   useEffect(() => {
     if (user) { fetchPartners(); fetchServicePrices(); fetchCerts(); }
