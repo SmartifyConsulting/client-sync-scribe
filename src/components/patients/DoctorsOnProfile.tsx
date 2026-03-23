@@ -286,6 +286,14 @@ export function DoctorsOnProfile({ patientId, patientName }: DoctorsOnProfilePro
         })}
       </div>
 
+      {/* Permission Transparency Modal */}
+      <PermissionTransparencyModal
+        open={showPermissionModal}
+        onOpenChange={setShowPermissionModal}
+        onConfirm={() => setShowPermissionModal(false)}
+        confirmLabel="I Understand"
+      />
+
       {/* Message Dialog */}
       {showMessageDialog && selectedDoctor && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
