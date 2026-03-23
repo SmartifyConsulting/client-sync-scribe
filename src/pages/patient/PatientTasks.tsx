@@ -127,17 +127,14 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
   const hasMoolasReward = todo.moolas_reward > 0;
   const isMedicationType = todo.task_type === "medication" || todo.title.toLowerCase().includes("medication") || todo.title.toLowerCase().includes("medic");
 
-  // Video recording state
+  // Photo capture state
   const [showRecordDialog, setShowRecordDialog] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
+  const [capturedBlob, setCapturedBlob] = useState<Blob | null>(null);
+  const [capturedUrl, setCapturedUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [countdown, setCountdown] = useState(30);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const priorityColors: Record<string, string> = {
     high: "bg-destructive/10 text-destructive",
