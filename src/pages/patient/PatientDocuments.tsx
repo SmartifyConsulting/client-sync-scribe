@@ -516,6 +516,42 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
     }
   };
 
+  const handleSendDocument = async (doc: UnifiedDocument) => {
+    if (doc.source !== "documents" || doc.emailSentAt) return;
+    setSendingDocId(doc.id);
+    try {
+      const { data: docData } = await supabase
+        .from("documents")
+        .select("*, patients:patient_id(email, pharmacy_email)")
+        .eq("id", doc.id)
+        .maybeSingle();
+      if (!docData) throw new Error("Document not found");
+      const patient = (docData as any).patients;
+      const recipientEmail = doc.type === "prescription"
+        ? patient?.pharmacy_email || patient?.email
+        : patient?.email;
+      if (recipientEmail) {
+        await supabase.functions.invoke("send-document-email", {
+          body: { documentId: doc.id, recipientEmail },
+        });
+      }
+      await supabase
+        .from("documents")
+        .update({ email_sent_at: new Date().toISOString(), is_draft: false } as any)
+        .eq("id", doc.id);
+      setDocuments((prev) =>
+        prev.map((d) =>
+          d.id === doc.id ? { ...d, emailSentAt: new Date().toISOString() } : d
+        )
+      );
+      toast({ title: "Document Sent", description: `${doc.name} has been sent.` });
+    } catch (err: any) {
+      toast({ title: "Send Failed", description: err.message || "Could not send", variant: "destructive" });
+    } finally {
+      setSendingDocId(null);
+    }
+  };
+
   const handleReAnalyse = async () => {
     if (!analysisDialog) return;
     setAnalysisDialog({ ...analysisDialog, aiAnalysis: null, aiAnalyzedAt: null });
