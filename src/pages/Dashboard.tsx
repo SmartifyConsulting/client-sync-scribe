@@ -1,4 +1,4 @@
-import { Users, Calendar, TrendingUp, LogOut, Award, Bell, Mic, User, Settings, Star } from "lucide-react";
+import { Users, Calendar, TrendingUp, Award, Star } from "lucide-react";
 import moolaSymbol from "@/assets/moola-symbol.png";
 import { CompactTodoList } from "@/components/dashboard/CompactTodoList";
 import { Link } from "react-router-dom";
