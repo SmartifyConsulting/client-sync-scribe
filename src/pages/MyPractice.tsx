@@ -411,7 +411,7 @@ export default function MyPractice() {
 
   // ── RENDER ──
   return (
-    <div className="space-y-4 animate-fade-in max-w-3xl">
+    <div className="space-y-4 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
