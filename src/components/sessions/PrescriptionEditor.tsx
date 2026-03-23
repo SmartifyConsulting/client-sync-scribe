@@ -45,6 +45,7 @@ interface MedicationItem {
   frequency: string;
   duration: string;
   instructions: string;
+  repeats: string;
 }
 
 interface PrescriptionEditorProps {
