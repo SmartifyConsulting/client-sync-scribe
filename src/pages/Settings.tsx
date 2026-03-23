@@ -378,48 +378,106 @@ export default function Settings() {
 
         {/* === PREFERENCES TAB === */}
         <TabsContent value="preferences" className="mt-4">
-          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
-            <div className="flex items-center gap-3">
-              <Settings2 className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Preferences</h2>
-            </div>
-            <p className="text-sm text-muted-foreground">Manage your application preferences and integrations</p>
+          <div className="space-y-4">
+            {/* Main Preferences Header + Language */}
+            <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
+              <div className="flex items-center gap-3">
+                <Settings2 className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-semibold text-foreground">Preferences</h2>
+              </div>
+              <p className="text-sm text-muted-foreground">Manage your application preferences and integrations</p>
 
-            {isPatientRole && (
+              {isPatientRole && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                    <div className="flex-1 mr-3">
+                      <p className="text-sm font-medium text-foreground">Auto-email invoice to medical aid</p>
+                      <p className="text-sm text-muted-foreground mt-0.5">When your doctor marks an invoice as paid, it will be sent to your insurance claims email.</p>
+                    </div>
+                    <Switch checked={(profile as any)?.auto_email_invoice_to_insurance || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_invoice_to_insurance: c } as any); toast({ title: "Preference updated" }); }} />
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                    <div className="flex-1 mr-3">
+                      <p className="text-sm font-medium text-foreground">Auto-email prescription to pharmacy</p>
+                      <p className="text-sm text-muted-foreground mt-0.5">When your doctor saves a prescription, it will be sent to your primary pharmacy.</p>
+                    </div>
+                    <Switch checked={(profile as any)?.auto_email_prescription_to_pharmacy || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_prescription_to_pharmacy: c } as any); toast({ title: "Preference updated" }); }} />
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                    <div className="flex-1 mr-3">
+                      <p className="text-sm font-medium text-foreground">Auto-email certificate to employer</p>
+                      <p className="text-sm text-muted-foreground mt-0.5">When your doctor saves a medical certificate, it will be sent to your employer.</p>
+                    </div>
+                    <Switch checked={(profile as any)?.auto_email_certificate_to_employer || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_certificate_to_employer: c } as any); toast({ title: "Preference updated" }); }} />
+                  </div>
+                </div>
+              )}
+
+              {/* Language Sub-frame */}
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
-                  <div className="flex-1 mr-3">
-                    <p className="text-sm font-medium text-foreground">Auto-email invoice to medical aid</p>
-                    <p className="text-sm text-muted-foreground mt-0.5">When your doctor marks an invoice as paid, it will be sent to your insurance claims email.</p>
+                <h3 className="text-sm font-semibold text-foreground">Language</h3>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="space-y-1.5">
+                    <Label>Country</Label>
+                    <Select value={(profile as any)?.country || "ZA"} onValueChange={async (v) => { await updateProfile({ country: v } as any); toast({ title: "Country updated" }); }}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ZA">🇿🇦 South Africa</SelectItem><SelectItem value="US">🇺🇸 United States</SelectItem>
+                        <SelectItem value="GB">🇬🇧 United Kingdom</SelectItem><SelectItem value="AU">🇦🇺 Australia</SelectItem>
+                        <SelectItem value="CA">🇨🇦 Canada</SelectItem><SelectItem value="IN">🇮🇳 India</SelectItem>
+                        <SelectItem value="DE">🇩🇪 Germany</SelectItem><SelectItem value="FR">🇫🇷 France</SelectItem>
+                        <SelectItem value="AE">🇦🇪 UAE</SelectItem><SelectItem value="BW">🇧🇼 Botswana</SelectItem>
+                        <SelectItem value="NA">🇳🇦 Namibia</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <Switch checked={(profile as any)?.auto_email_invoice_to_insurance || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_invoice_to_insurance: c } as any); toast({ title: "Preference updated" }); }} />
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
-                  <div className="flex-1 mr-3">
-                    <p className="text-sm font-medium text-foreground">Auto-email prescription to pharmacy</p>
-                    <p className="text-sm text-muted-foreground mt-0.5">When your doctor saves a prescription, it will be sent to your primary pharmacy.</p>
+                  <div className="space-y-1.5">
+                    <Label>Language</Label>
+                    <Select value={(profile as any)?.preferred_language || "en"} onValueChange={async (v) => { await updateProfile({ preferred_language: v } as any); toast({ title: "Language updated" }); }}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>{LANGUAGES.map(l => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}</SelectContent>
+                    </Select>
                   </div>
-                  <Switch checked={(profile as any)?.auto_email_prescription_to_pharmacy || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_prescription_to_pharmacy: c } as any); toast({ title: "Preference updated" }); }} />
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
-                  <div className="flex-1 mr-3">
-                    <p className="text-sm font-medium text-foreground">Auto-email certificate to employer</p>
-                    <p className="text-sm text-muted-foreground mt-0.5">When your doctor saves a medical certificate, it will be sent to your employer.</p>
+                  <div className="space-y-1.5">
+                    <Label>Narration Voice</Label>
+                    <div className="flex gap-2">
+                      <Select value={(profile as any)?.narration_voice || "nova"} onValueChange={async (v) => { await updateProfile({ narration_voice: v } as any); toast({ title: "Voice updated" }); }}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="alloy">Alloy</SelectItem><SelectItem value="echo">Echo</SelectItem>
+                          <SelectItem value="fable">Fable</SelectItem><SelectItem value="nova">Nova</SelectItem>
+                          <SelectItem value="onyx">Onyx</SelectItem><SelectItem value="shimmer">Shimmer</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button variant="outline" size="icon" className="shrink-0" onClick={async () => {
+                        const voice = (profile as any)?.narration_voice || "nova";
+                        toast({ title: "Generating preview..." });
+                        try {
+                          const langCode = profile?.preferred_language || "en";
+                          const sampleText = SAMPLE_TEXTS[langCode] || SAMPLE_TEXTS.en;
+                          const audio = new Audio(); audio.play().catch(() => {});
+                          const { data: { session } } = await supabase.auth.getSession();
+                          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY }, body: JSON.stringify({ text: sampleText, voice }) });
+                          if (!response.ok) throw new Error('Failed');
+                          const blob = await response.blob(); const url = URL.createObjectURL(blob); audio.src = url; await audio.play(); audio.onended = () => URL.revokeObjectURL(url);
+                        } catch (err: any) { toast({ title: "Preview failed", description: err.message, variant: "destructive" }); }
+                      }}><Volume2 className="h-4 w-4" /></Button>
+                    </div>
                   </div>
-                  <Switch checked={(profile as any)?.auto_email_certificate_to_employer || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_certificate_to_employer: c } as any); toast({ title: "Preference updated" }); }} />
                 </div>
               </div>
-            )}
+            </div>
 
+            {/* Frame 1 — Patient Management */}
             {isDoctor && (
-              <div className="space-y-4">
+              <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
                 <div className="flex items-center gap-3">
                   <Users className="h-4 w-4 text-primary" />
                   <h3 className="text-sm font-semibold text-foreground">Patient Management</h3>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                     <p className="font-medium text-foreground text-sm">Patient Inactivity Threshold</p>
+                    <p className="font-medium text-foreground text-sm">Patient Inactivity Threshold</p>
                     <p className="text-sm text-muted-foreground">Automatically mark patients as inactive after this period without a visit</p>
                   </div>
                   <Select value={inactiveThreshold.toString()} onValueChange={(value) => saveInactiveThreshold(parseInt(value))} disabled={savingThreshold}>
@@ -437,64 +495,8 @@ export default function Settings() {
               </div>
             )}
 
-            {/* Language Sub-frame */}
-            <Separator />
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">Language</h3>
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div className="space-y-1.5">
-                  <Label>Country</Label>
-                  <Select value={(profile as any)?.country || "ZA"} onValueChange={async (v) => { await updateProfile({ country: v } as any); toast({ title: "Country updated" }); }}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ZA">🇿🇦 South Africa</SelectItem><SelectItem value="US">🇺🇸 United States</SelectItem>
-                      <SelectItem value="GB">🇬🇧 United Kingdom</SelectItem><SelectItem value="AU">🇦🇺 Australia</SelectItem>
-                      <SelectItem value="CA">🇨🇦 Canada</SelectItem><SelectItem value="IN">🇮🇳 India</SelectItem>
-                      <SelectItem value="DE">🇩🇪 Germany</SelectItem><SelectItem value="FR">🇫🇷 France</SelectItem>
-                      <SelectItem value="AE">🇦🇪 UAE</SelectItem><SelectItem value="BW">🇧🇼 Botswana</SelectItem>
-                      <SelectItem value="NA">🇳🇦 Namibia</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Language</Label>
-                  <Select value={(profile as any)?.preferred_language || "en"} onValueChange={async (v) => { await updateProfile({ preferred_language: v } as any); toast({ title: "Language updated" }); }}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{LANGUAGES.map(l => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Narration Voice</Label>
-                  <div className="flex gap-2">
-                    <Select value={(profile as any)?.narration_voice || "nova"} onValueChange={async (v) => { await updateProfile({ narration_voice: v } as any); toast({ title: "Voice updated" }); }}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="alloy">Alloy</SelectItem><SelectItem value="echo">Echo</SelectItem>
-                        <SelectItem value="fable">Fable</SelectItem><SelectItem value="nova">Nova</SelectItem>
-                        <SelectItem value="onyx">Onyx</SelectItem><SelectItem value="shimmer">Shimmer</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button variant="outline" size="icon" className="shrink-0" onClick={async () => {
-                      const voice = (profile as any)?.narration_voice || "nova";
-                      toast({ title: "Generating preview..." });
-                      try {
-                        const langCode = profile?.preferred_language || "en";
-                        const sampleText = SAMPLE_TEXTS[langCode] || SAMPLE_TEXTS.en;
-                        const audio = new Audio(); audio.play().catch(() => {});
-                        const { data: { session } } = await supabase.auth.getSession();
-                        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY }, body: JSON.stringify({ text: sampleText, voice }) });
-                        if (!response.ok) throw new Error('Failed');
-                        const blob = await response.blob(); const url = URL.createObjectURL(blob); audio.src = url; await audio.play(); audio.onended = () => URL.revokeObjectURL(url);
-                      } catch (err: any) { toast({ title: "Preview failed", description: err.message, variant: "destructive" }); }
-                    }}><Volume2 className="h-4 w-4" /></Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Calendar Integration Sub-frame */}
-            <Separator />
-            <div className="space-y-3">
+            {/* Frame 2 — Calendar Integration */}
+            <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-3">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
                 <h3 className="text-sm font-semibold text-foreground">Calendar Integration</h3>
@@ -532,51 +534,52 @@ export default function Settings() {
               </div>
             </div>
 
-            {/* Digital Signature Sub-frame */}
+            {/* Frame 3 — Digital Signature */}
             {isDoctor && (
-              <>
-                <Separator />
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold">Digital Signature</Label>
-                  <div className="p-3 border border-border rounded-lg bg-background">
-                    <p style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), color: getSignatureColor(sigFormData.signature_color), fontSize: `${sigFormData.signature_font_size}px`, fontWeight: sigFormData.signature_bold ? 'bold' : 'normal', fontStyle: sigFormData.signature_italic ? 'italic' : 'normal' }}>{combinedFullName}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{new Date().toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                  </div>
+              <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-2">
+                <Label className="text-sm font-semibold">Digital Signature</Label>
+                <div className="p-3 border border-border rounded-lg bg-background">
+                  <p style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), color: getSignatureColor(sigFormData.signature_color), fontSize: `${sigFormData.signature_font_size}px`, fontWeight: sigFormData.signature_bold ? 'bold' : 'normal', fontStyle: sigFormData.signature_italic ? 'italic' : 'normal' }}>{combinedFullName}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{new Date().toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Font</Label>
+                  <Select value={sigFormData.signature_font} onValueChange={(v) => setSigFormData({ ...sigFormData, signature_font: v })}>
+                    <SelectTrigger>
+                      <span style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), fontSize: '16px' }}>
+                        {SIGNATURE_FONTS.find(f => f.value === sigFormData.signature_font)?.label || "Select font"}
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent>{SIGNATURE_FONTS.map(f => <SelectItem key={f.value} value={f.value}><span style={{ fontFamily: f.fontFamily, fontSize: '18px' }}>{f.label}</span></SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label className="text-xs">Font</Label>
-                    <Select value={sigFormData.signature_font} onValueChange={(v) => setSigFormData({ ...sigFormData, signature_font: v })}>
+                    <Label className="text-xs">Color</Label>
+                    <Select value={sigFormData.signature_color} onValueChange={(v) => setSigFormData({ ...sigFormData, signature_color: v })}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>{SIGNATURE_FONTS.map(f => <SelectItem key={f.value} value={f.value}><span style={{ fontFamily: f.fontFamily, fontSize: '18px' }}>{f.label}</span></SelectItem>)}</SelectContent>
+                      <SelectContent>
+                        {SIGNATURE_COLORS.map(c => (
+                          <SelectItem key={c.value} value={c.value}>
+                            <span className="flex items-center gap-2">
+                              <span className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: c.color }} />
+                              {c.label}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
                     </Select>
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-1.5">
-                      <Label className="text-xs">Color</Label>
-                      <Select value={sigFormData.signature_color} onValueChange={(v) => setSigFormData({ ...sigFormData, signature_color: v })}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {SIGNATURE_COLORS.map(c => (
-                            <SelectItem key={c.value} value={c.value}>
-                              <span className="flex items-center gap-2">
-                                <span className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: c.color }} />
-                                {c.label}
-                              </span>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs">Size: {sigFormData.signature_font_size}px</Label>
-                      <Slider min={16} max={48} step={2} value={[sigFormData.signature_font_size]} onValueChange={([v]) => setSigFormData({ ...sigFormData, signature_font_size: v })} />
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Toggle pressed={sigFormData.signature_bold} onPressedChange={(v) => setSigFormData({ ...sigFormData, signature_bold: v })} size="sm" aria-label="Bold" className="h-8 w-8 p-0"><Bold className="h-4 w-4" /></Toggle>
-                    <Toggle pressed={sigFormData.signature_italic} onPressedChange={(v) => setSigFormData({ ...sigFormData, signature_italic: v })} size="sm" aria-label="Italic" className="h-8 w-8 p-0"><Italic className="h-4 w-4" /></Toggle>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Size: {sigFormData.signature_font_size}px</Label>
+                    <Slider min={16} max={48} step={2} value={[sigFormData.signature_font_size]} onValueChange={([v]) => setSigFormData({ ...sigFormData, signature_font_size: v })} />
                   </div>
                 </div>
-              </>
+                <div className="flex gap-2">
+                  <Toggle pressed={sigFormData.signature_bold} onPressedChange={(v) => setSigFormData({ ...sigFormData, signature_bold: v })} size="sm" aria-label="Bold" className="h-8 w-8 p-0"><Bold className="h-4 w-4" /></Toggle>
+                  <Toggle pressed={sigFormData.signature_italic} onPressedChange={(v) => setSigFormData({ ...sigFormData, signature_italic: v })} size="sm" aria-label="Italic" className="h-8 w-8 p-0"><Italic className="h-4 w-4" /></Toggle>
+                </div>
+              </div>
             )}
           </div>
         </TabsContent>
