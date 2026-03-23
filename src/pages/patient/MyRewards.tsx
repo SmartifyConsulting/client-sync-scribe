@@ -383,9 +383,12 @@ export default function MyRewards() {
             History
           </TabsTrigger>
           <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-            Moolas
-          </TabsTrigger>
-        </TabsList>
+             Moolas
+           </TabsTrigger>
+          <TabsTrigger value="moola-apps" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+             Moola Apps
+           </TabsTrigger>
+         </TabsList>
 
         {patientRecord?.is_chronic && patientRecord?.id && (
           <TabsContent value="chronic-meds" className="space-y-6">
