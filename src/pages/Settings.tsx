@@ -520,8 +520,8 @@ export default function Settings() {
                   <div className="flex items-center gap-3">
                     {outlookConnected && <CheckCircle className="h-4 w-4 text-success" />}
                     <div>
-                      <p className="font-medium text-foreground text-[10px]">Outlook Calendar</p>
-                      <p className="text-[8px] text-muted-foreground">{outlookConnected ? "Connected - Appointments syncing" : "Sync appointments with Outlook"}</p>
+                      <p className="font-medium text-foreground text-sm">Outlook Calendar</p>
+                      <p className="text-sm text-muted-foreground">{outlookConnected ? "Connected - Appointments syncing" : "Sync appointments with Outlook"}</p>
                     </div>
                   </div>
                   {outlookConnected ? (
