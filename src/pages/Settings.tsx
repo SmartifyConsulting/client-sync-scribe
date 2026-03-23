@@ -505,8 +505,8 @@ export default function Settings() {
                   <div className="flex items-center gap-3">
                     {googleRealConnected && <CheckCircle className="h-4 w-4 text-success" />}
                     <div>
-                      <p className="font-medium text-foreground text-[10px]">Google Calendar</p>
-                      <p className="text-[8px] text-muted-foreground">{googleRealConnected ? "Connected - Appointments syncing" : "Sync appointments with Google Calendar"}</p>
+                      <p className="font-medium text-foreground text-sm">Google Calendar</p>
+                      <p className="text-sm text-muted-foreground">{googleRealConnected ? "Connected - Appointments syncing" : "Sync appointments with Google Calendar"}</p>
                     </div>
                   </div>
                   {googleRealConnected ? (
