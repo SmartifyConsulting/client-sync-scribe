@@ -71,6 +71,10 @@ export default function GamificationAdmin() {
   const [showAddAppDialog, setShowAddAppDialog] = useState(false);
   const [newAppName, setNewAppName] = useState("");
   const [newAppLogoUrl, setNewAppLogoUrl] = useState("");
+  const [newAppCreator, setNewAppCreator] = useState("");
+  const [newAppSignupUrl, setNewAppSignupUrl] = useState("");
+  const [editingAppId, setEditingAppId] = useState<string | null>(null);
+  const [editAppValues, setEditAppValues] = useState<Partial<PartnerApp>>({});
 
   const { data: partnerApps = [], isLoading: appsLoading } = useQuery({
     queryKey: ["admin-partner-apps"],
