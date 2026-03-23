@@ -97,18 +97,6 @@ export default function Settings() {
   const isDoctor = role === "doctor";
   const isPatientRole = role === "patient";
 
-  // ── Signature form state (auto-save) ──
-  const [savedStatus, setSavedStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
-  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hasInitialized = useRef(false);
-  const isSettingFromProfile = useRef(false);
-  const profileLoadedData = useRef<any>(null);
-
-  const [sigFormData, setSigFormData] = useState({
-    signature_font: "allura", signature_color: "black",
-    signature_font_size: 24, signature_bold: false, signature_italic: false,
-  });
-
   // ── Calendar / Security / Billing state ──
   const [outlookConnected, setOutlookConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState<string | null>(null);
@@ -131,46 +119,6 @@ export default function Settings() {
   const [inactiveThreshold, setInactiveThreshold] = useState<number>(12);
   const [savingThreshold, setSavingThreshold] = useState(false);
 
-  // ── Profile data sync (signature only) ──
-  useEffect(() => {
-    if (profile) {
-      const newSigData = {
-        signature_font: (profile as any).signature_font || "allura",
-        signature_color: (profile as any).signature_color || "black",
-        signature_font_size: (profile as any).signature_font_size ?? 24,
-        signature_bold: (profile as any).signature_bold ?? false,
-        signature_italic: (profile as any).signature_italic ?? false,
-      };
-      isSettingFromProfile.current = true;
-      profileLoadedData.current = newSigData;
-      setSigFormData(newSigData);
-      requestAnimationFrame(() => { hasInitialized.current = true; isSettingFromProfile.current = false; });
-    }
-  }, [profile]);
-
-  const combinedFullName = profile?.full_name || "Your Name";
-
-  // ── Auto-save signature debounce ──
-  useEffect(() => {
-    if (!hasInitialized.current || !user || isSettingFromProfile.current) return;
-    if (profileLoadedData.current && JSON.stringify(sigFormData) === JSON.stringify(profileLoadedData.current)) {
-      profileLoadedData.current = null; return;
-    }
-    profileLoadedData.current = null;
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    debounceTimer.current = setTimeout(async () => {
-      setSavedStatus('saving');
-      const { error } = await updateProfile({
-        signature_font: sigFormData.signature_font, signature_color: sigFormData.signature_color,
-        signature_font_size: sigFormData.signature_font_size, signature_bold: sigFormData.signature_bold,
-        signature_italic: sigFormData.signature_italic,
-      } as any);
-      if (error) { setSavedStatus('idle'); toast({ title: "Error", description: "Failed to save", variant: "destructive" }); }
-      else { setSavedStatus('saved'); setTimeout(() => setSavedStatus('idle'), 2000); }
-    }, 1500);
-    return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
-  }, [sigFormData]);
-
   // ── Fetch data ──
   useEffect(() => {
     if (user) { fetchMfaFactors(); fetchSubscription(); fetchPaymentHistory(); if (isDoctor) fetchInactiveThreshold(); }
@@ -186,8 +134,6 @@ export default function Settings() {
     else if (paymentResult === "cancelled") { toast({ title: "Payment Cancelled", description: "Your payment was cancelled." }); }
   }, [searchParams]);
 
-  const getSignatureFontFamily = (v: string) => SIGNATURE_FONTS.find(f => f.value === v)?.fontFamily || SIGNATURE_FONTS[0].fontFamily;
-  const getSignatureColor = (v: string) => SIGNATURE_COLORS.find(c => c.value === v)?.color || "#000000";
   const planType = role === "patient" ? "patient" : "doctor";
 
   // ── Fetch functions ──
