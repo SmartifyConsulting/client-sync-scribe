@@ -480,9 +480,9 @@ export default function PatientDashboard() {
           <CardContent>
             {doctors.length === 0 ? (
               <div className="text-center py-4">
-                <p className="text-[11px] text-muted-foreground">No doctors connected yet.</p>
-                <Link to="/patient/access" className="text-primary hover:underline text-[10px]">
-                  Invite a doctor
+               <p className="text-[11px] text-muted-foreground">No healthcare providers connected yet.</p>
+                 <Link to="/patient/access" className="text-primary hover:underline text-[10px]">
+                   Invite a healthcare provider
                 </Link>
               </div>
             ) : (

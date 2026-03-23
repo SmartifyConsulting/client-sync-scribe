@@ -345,9 +345,46 @@ export default function DoctorRewards() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="moola-apps" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Gift className="h-5 w-5 text-primary" />Moola Apps</CardTitle>
+              <CardDescription>Apps and services that accept Moolas as currency</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {partnerApps.length === 0 ? (
+                <div className="text-center py-8">
+                  <Gift className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No partner apps available yet. Check back soon!</p>
+                </div>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {partnerApps.map((app: any) => (
+                    <div key={app.id} className="p-4 rounded-xl border border-border hover:border-primary/30 hover:shadow-md transition-all">
+                      <div className="flex items-center gap-3">
+                        {app.logo_url ? (
+                          <img src={app.logo_url} alt={app.name} className="h-10 w-10 rounded-lg object-contain" />
+                        ) : (
+                          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Gift className="h-5 w-5 text-primary" />
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-semibold text-foreground">{app.name}</p>
+                          <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0 text-[10px] mt-1">Active</Badge>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
-      {/* Transfer Dialog */}
+       {/* Transfer Dialog */}
       {showTransferDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-card rounded-xl border border-border p-6 w-full max-w-md shadow-lg space-y-4">

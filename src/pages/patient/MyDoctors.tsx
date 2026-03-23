@@ -279,11 +279,11 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Doctor</TableHead>
-                  <TableHead>Specialty</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Practice #</TableHead>
-                  <TableHead className="w-[50px]">Access</TableHead>
+                   <TableHead>Provider</TableHead>
+                   <TableHead>Specialty</TableHead>
+                   <TableHead>Phone</TableHead>
+                   <TableHead>Practice #</TableHead>
+                   <TableHead className="w-[50px]">Access</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
