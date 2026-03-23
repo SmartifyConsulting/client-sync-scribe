@@ -404,6 +404,10 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
           {/* === MEDICAL INFORMATION TAB — TWO COLUMNS === */}
           <TabsContent value="medical" className="mt-4">
+            <div className="mb-3">
+              <h2 className="text-lg font-semibold text-foreground">Medical Information</h2>
+              <p className="text-xs text-muted-foreground">View and manage medical records</p>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Column 1: Medical Information (single frame) */}
               <div className={sectionFrame + " space-y-5"}>
