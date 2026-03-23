@@ -159,7 +159,7 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-    font-size: 10.5px;
+    font-size: 7.35px;
   }
 
   /* Preserve original font size for nav and to-do sections */
