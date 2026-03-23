@@ -378,32 +378,34 @@ export default function Settings() {
 
         {/* === PREFERENCES TAB === */}
         <TabsContent value="preferences" className="mt-4">
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-3">
               <Settings2 className="h-5 w-5 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">Preferences</h2>
+              <h2 className="text-lg font-semibold text-foreground">Preferences</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">Manage your application preferences and integrations</p>
             </div>
 
             {isPatientRole && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
                   <div className="flex-1 mr-3">
-                    <p className="text-[10px] font-medium text-foreground">Auto-email invoice to medical aid</p>
-                    <p className="text-[8px] text-muted-foreground mt-0.5">When your doctor marks an invoice as paid, it will be sent to your insurance claims email.</p>
+                    <p className="text-sm font-medium text-foreground">Auto-email invoice to medical aid</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">When your doctor marks an invoice as paid, it will be sent to your insurance claims email.</p>
                   </div>
                   <Switch checked={(profile as any)?.auto_email_invoice_to_insurance || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_invoice_to_insurance: c } as any); toast({ title: "Preference updated" }); }} />
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
                   <div className="flex-1 mr-3">
-                    <p className="text-[10px] font-medium text-foreground">Auto-email prescription to pharmacy</p>
-                    <p className="text-[8px] text-muted-foreground mt-0.5">When your doctor saves a prescription, it will be sent to your primary pharmacy.</p>
+                    <p className="text-sm font-medium text-foreground">Auto-email prescription to pharmacy</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">When your doctor saves a prescription, it will be sent to your primary pharmacy.</p>
                   </div>
                   <Switch checked={(profile as any)?.auto_email_prescription_to_pharmacy || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_prescription_to_pharmacy: c } as any); toast({ title: "Preference updated" }); }} />
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
                   <div className="flex-1 mr-3">
-                    <p className="text-[10px] font-medium text-foreground">Auto-email certificate to employer</p>
-                    <p className="text-[8px] text-muted-foreground mt-0.5">When your doctor saves a medical certificate, it will be sent to your employer.</p>
+                    <p className="text-sm font-medium text-foreground">Auto-email certificate to employer</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">When your doctor saves a medical certificate, it will be sent to your employer.</p>
                   </div>
                   <Switch checked={(profile as any)?.auto_email_certificate_to_employer || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_certificate_to_employer: c } as any); toast({ title: "Preference updated" }); }} />
                 </div>
@@ -414,12 +416,12 @@ export default function Settings() {
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <Users className="h-4 w-4 text-primary" />
-                  <h3 className="text-[9px] font-semibold text-foreground">Patient Management</h3>
+                  <h3 className="text-sm font-semibold text-foreground">Patient Management</h3>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-foreground text-[10px]">Patient Inactivity Threshold</p>
-                    <p className="text-[8px] text-muted-foreground">Automatically mark patients as inactive after this period without a visit</p>
+                     <p className="font-medium text-foreground text-sm">Patient Inactivity Threshold</p>
+                    <p className="text-sm text-muted-foreground">Automatically mark patients as inactive after this period without a visit</p>
                   </div>
                   <Select value={inactiveThreshold.toString()} onValueChange={(value) => saveInactiveThreshold(parseInt(value))} disabled={savingThreshold}>
                     <SelectTrigger className="w-[180px]"><SelectValue placeholder="Select period" /></SelectTrigger>
@@ -439,7 +441,7 @@ export default function Settings() {
             {/* Language Sub-frame */}
             <Separator />
             <div className="space-y-3">
-              <h3 className="text-[9px] font-semibold text-foreground">Language</h3>
+              <h3 className="text-sm font-semibold text-foreground">Language</h3>
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className="space-y-1.5">
                   <Label>Country</Label>
@@ -496,15 +498,15 @@ export default function Settings() {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
-                <h3 className="text-[9px] font-semibold text-foreground">Calendar Integration</h3>
+                <h3 className="text-sm font-semibold text-foreground">Calendar Integration</h3>
               </div>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     {googleRealConnected && <CheckCircle className="h-4 w-4 text-success" />}
                     <div>
-                      <p className="font-medium text-foreground text-[10px]">Google Calendar</p>
-                      <p className="text-[8px] text-muted-foreground">{googleRealConnected ? "Connected - Appointments syncing" : "Sync appointments with Google Calendar"}</p>
+                      <p className="font-medium text-foreground text-sm">Google Calendar</p>
+                      <p className="text-sm text-muted-foreground">{googleRealConnected ? "Connected - Appointments syncing" : "Sync appointments with Google Calendar"}</p>
                     </div>
                   </div>
                   {googleRealConnected ? (
@@ -518,8 +520,8 @@ export default function Settings() {
                   <div className="flex items-center gap-3">
                     {outlookConnected && <CheckCircle className="h-4 w-4 text-success" />}
                     <div>
-                      <p className="font-medium text-foreground text-[10px]">Outlook Calendar</p>
-                      <p className="text-[8px] text-muted-foreground">{outlookConnected ? "Connected - Appointments syncing" : "Sync appointments with Outlook"}</p>
+                      <p className="font-medium text-foreground text-sm">Outlook Calendar</p>
+                      <p className="text-sm text-muted-foreground">{outlookConnected ? "Connected - Appointments syncing" : "Sync appointments with Outlook"}</p>
                     </div>
                   </div>
                   {outlookConnected ? (
@@ -582,11 +584,12 @@ export default function Settings() {
 
         {/* === NOTIFICATIONS TAB === */}
         <TabsContent value="notifications" className="mt-4">
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <Bell className="h-5 w-5 text-primary" />
               <h2 className="text-lg font-semibold text-foreground">Notifications</h2>
             </div>
+            <p className="text-sm text-muted-foreground">Configure how you receive alerts and reminders</p>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div><p className="font-medium text-foreground">Email Notifications</p><p className="text-sm text-muted-foreground">Receive email reminders for appointments</p></div>
@@ -608,11 +611,12 @@ export default function Settings() {
 
         {/* === SECURITY TAB (with Data Management) === */}
         <TabsContent value="security" className="mt-4 space-y-4">
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <Shield className="h-5 w-5 text-primary" />
               <h2 className="text-lg font-semibold text-foreground">Security</h2>
             </div>
+            <p className="text-sm text-muted-foreground">Manage your authentication and account protection</p>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -634,7 +638,7 @@ export default function Settings() {
           </div>
 
           {/* Data Management frame */}
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <Database className="h-5 w-5 text-primary" />
               <h2 className="text-lg font-semibold text-foreground">Data Management</h2>
@@ -649,7 +653,7 @@ export default function Settings() {
         {/* === BILLING TAB (two distinct frames) === */}
         <TabsContent value="billing" className="mt-4 space-y-4">
           {/* Subscription Frame */}
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <CreditCard className="h-5 w-5 text-primary" />
               <h2 className="text-lg font-semibold text-foreground">Subscription</h2>
@@ -676,7 +680,7 @@ export default function Settings() {
           </div>
 
           {/* Payment History Frame */}
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <Receipt className="h-5 w-5 text-primary" />
               <h2 className="text-lg font-semibold text-foreground">Payment History</h2>

@@ -886,7 +886,7 @@ export default function Patients() {
                   <React.Fragment key={letter}>
                     <tr id={`patient-group-${letter}`}>
                       <td colSpan={6} className="px-4 py-1">
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-white text-xs font-bold">
+                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(351,81%,49%)] text-white text-xs font-bold">
                           {letter}
                         </span>
                       </td>
