@@ -612,6 +612,10 @@ export default function MyPractice() {
         {/* === PRICING TAB === */}
         <TabsContent value="pricing" className="mt-4">
           <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+            <div className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">Pricing</h3>
+            </div>
             <p className="text-sm text-muted-foreground">Define your service types and default prices for invoicing.</p>
             <div className="space-y-1.5">
               <Label>Currency</Label>
