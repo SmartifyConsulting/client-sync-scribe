@@ -329,9 +329,9 @@ export default function MyPractice() {
   const saveEditingService = async () => {
     if (!editingServiceId || !editingService.service_name.trim() || !editingService.default_price) { toast({ title: "Missing fields", variant: "destructive" }); return; }
     setIsSavingService(true);
-    const { error } = await supabase.from('service_prices').update({ service_name: editingService.service_name, default_price: parseFloat(editingService.default_price) }).eq('id', editingServiceId);
+    const { error } = await supabase.from('service_prices').update({ service_name: editingService.service_name, default_price: parseFloat(editingService.default_price), color: editingService.color || null } as any).eq('id', editingServiceId);
     if (error) toast({ title: "Error", variant: "destructive" });
-    else { setServicePrices(servicePrices.map(s => s.id === editingServiceId ? { ...s, service_name: editingService.service_name, default_price: parseFloat(editingService.default_price) } : s)); setEditingServiceId(null); toast({ title: "Service updated" }); }
+    else { setServicePrices(servicePrices.map(s => s.id === editingServiceId ? { ...s, service_name: editingService.service_name, default_price: parseFloat(editingService.default_price), color: editingService.color || null } : s)); setEditingServiceId(null); toast({ title: "Service updated" }); }
     setIsSavingService(false);
   };
   const updateAllServicesCurrency = async (newCurrency: string) => {
