@@ -77,7 +77,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
         .from("profiles")
         .select("id, full_name, specialty, practice_address, mobile_number, avatar_url, practice_number, doctor_number")
         .eq("role", "doctor")
-        .or(`full_name.ilike.%${query}%,practice_number.eq.${query}`);
+        .or(`full_name.ilike.%${query}%,practice_number.eq.${query},doctor_number.eq.${query}`);
 
       if (error) throw error;
 
