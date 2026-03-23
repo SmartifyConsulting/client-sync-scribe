@@ -760,6 +760,16 @@ export default function MyPractice() {
             )}
           </div>
         </TabsContent>
+
+        {/* === INVOICES TAB === */}
+        <TabsContent value="invoices" className="mt-4">
+          <DoctorInvoices hideHeader />
+        </TabsContent>
+
+        {/* === TEMPLATES TAB === */}
+        <TabsContent value="templates" className="mt-4">
+          <Documents hideHeader />
+        </TabsContent>
       </Tabs>
     </div>
   );
