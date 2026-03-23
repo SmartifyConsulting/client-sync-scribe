@@ -87,7 +87,8 @@ export function PrescriptionEditor({
       dosage: "", 
       frequency: "", 
       duration: "", 
-      instructions: "" 
+      instructions: "",
+      repeats: "0"
     }]);
   };
 
