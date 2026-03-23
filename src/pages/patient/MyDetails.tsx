@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 export default function MyDetails() {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState<string>("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -18,6 +19,8 @@ export default function MyDetails() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+
+      setUserEmail(user.email || "");
 
       const { data, error } = await supabase
         .from("patients")
@@ -79,7 +82,7 @@ export default function MyDetails() {
         <h1 className="text-2xl font-bold text-foreground">My Holarchive</h1>
         <p className="text-muted-foreground text-[12px]">View and update your personal and medical information</p>
       </div>
-      <PatientDetailsEditor patient={patient} onSave={handleSave} isSelfService />
+      <PatientDetailsEditor patient={patient} onSave={handleSave} isSelfService userEmail={userEmail} />
     </div>
   );
 }
