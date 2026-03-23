@@ -39,9 +39,7 @@ interface NavItem {
 const doctorNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard" },
   { icon: User, label: "My Holarchive", to: "/profile" },
-  { icon: Users2, label: "Connections", to: "/connections" },
   { icon: Calendar, label: "Calendar", to: "/calendar" },
-  { icon: Users, label: "Patients", to: "/patients" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
   { icon: CheckSquare, label: "To-Do List", to: "/todos" },
   { icon: Receipt, label: "Invoices", to: "/invoices" },
