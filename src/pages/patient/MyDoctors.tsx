@@ -195,11 +195,10 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                 placeholder="Search by name or practice number..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 className="pl-10"
               />
             </div>
-            <Button onClick={handleSearch} disabled={isSearching || !searchQuery.trim()}>
+            <Button onClick={() => handleSearch(searchQuery)} disabled={isSearching || !searchQuery.trim()}>
               {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
             </Button>
           </div>
