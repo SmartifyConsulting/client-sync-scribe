@@ -1,14 +1,15 @@
 
 
-# Plan: Fix My Practice Tab Headings & Merge Personal into Practice
+# Plan: Fix My Practice Headings, Merge Personal into Practice & Fix MyDoctors Heading
 
 ## Problems Found
-1. **No section headings** inside Personal, Practice, Pricing, or Certificates tab panels — they jump straight into form fields or descriptions.
-2. **Referrals tab** renders `ReferralDoctors.tsx` as a standalone page with its own `text-3xl` h1 and `space-y-6` layout, creating a visual mismatch.
-3. **Personal tab still exists separately** instead of being merged into Practice (as previously requested).
+1. **No section headings** inside Personal, Practice, Pricing, or Certificates tab panels.
+2. **Referrals tab** renders `ReferralDoctors.tsx` as a standalone page with `text-3xl` h1 — visual mismatch.
+3. **Personal tab still exists separately** instead of being merged into Practice.
+4. **MyDoctors heading mismatch**: `MyDoctors.tsx` uses `text-2xl font-bold` for its "My Doctors" heading, while MyPractice section headings use `text-sm font-semibold` with an icon. When MyDoctors is embedded inside the "Doctors" tab (via `PatientDetailsEditor`), this creates an inconsistent heading size.
 
 ## Reference Style
-The target heading style (from Settings.tsx "Patient Management" / "Calendar Integration"):
+All section headings must match this pattern (from Settings.tsx):
 ```tsx
 <div className="flex items-center gap-2">
   <Icon className="h-4 w-4 text-primary" />
@@ -19,30 +20,24 @@ The target heading style (from Settings.tsx "Patient Management" / "Calendar Int
 ## Changes
 
 ### File: `src/pages/MyPractice.tsx`
-
-1. **Remove the "Personal" tab** from the TabsList and its TabsContent.
-
-2. **Move Personal fields to the top of the Practice tab**, inside the existing card, above the current Practice Number / Registration Number fields. Add a sub-heading "Personal Information" using the reference style.
-
-3. **Add consistent section headings** at the top of each tab panel's card content:
-   - Practice tab: "Personal Information" heading (for the moved fields), then "Practice Details" heading (before practice number, logo, partners)
-   - Pricing tab: "Pricing" heading
-   - Certificates tab: "Certificates" heading
-
-   All headings use the same pattern: `text-sm font-semibold text-foreground` with an icon (`h-4 w-4 text-primary`).
-
-4. **Default tab** changes from `"personal"` to `"practice"`.
+1. Remove the "Personal" tab from TabsList and its TabsContent.
+2. Move Personal fields to the top of the Practice tab with a "Personal Information" sub-heading.
+3. Add consistent `text-sm font-semibold` headings with icons to all tab panels: Practice Details, Referral Doctors, Pricing, Certificates.
+4. Default tab changes from `"personal"` to `"practice"`.
 
 ### File: `src/pages/ReferralDoctors.tsx`
+5. Add `hideHeader` prop. When true, skip the standalone `text-3xl` page header and reduce spacing.
+6. In MyPractice, render `<ReferralDoctors hideHeader />` with a matching section heading above it.
 
-5. **Add `hideHeader` prop** (optional boolean). When true, skip rendering the standalone page header (`<h1 className="text-3xl">Referrals</h1>`), reduce outer spacing from `space-y-6` to `space-y-4`, and wrap content in the standard card shell (`rounded-xl border border-border bg-card p-4 shadow-sm`).
-
-6. In `MyPractice.tsx`, render `<ReferralDoctors hideHeader />` inside the Referrals tab, with a consistent section heading "Referral Doctors" above it matching the same style.
+### File: `src/pages/patient/MyDoctors.tsx`
+7. When `hideHeader` is false (standalone page), keep the current heading.
+8. When embedded in tabs (the common case), the heading "My Doctors" currently uses `text-2xl font-bold` — change it to match the standard pattern: `text-sm font-semibold text-foreground` with a `Stethoscope` icon (`h-4 w-4 text-primary`), and update the subtitle to `text-xs text-muted-foreground`. This ensures the "My Doctors" heading matches "Personal Information" and all other section headings.
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/pages/MyPractice.tsx` | Remove Personal tab, merge fields into Practice, add consistent `text-sm font-semibold` headings to all tabs |
-| `src/pages/ReferralDoctors.tsx` | Add `hideHeader` prop to support embedded use without standalone page header |
+| `src/pages/MyPractice.tsx` | Remove Personal tab, merge fields into Practice, add consistent headings |
+| `src/pages/ReferralDoctors.tsx` | Add `hideHeader` prop for embedded use |
+| `src/pages/patient/MyDoctors.tsx` | Standardize heading to `text-sm font-semibold` with icon to match other sections |
 
