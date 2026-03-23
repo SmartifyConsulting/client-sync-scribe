@@ -21,7 +21,9 @@ import {
   Volume2,
   VolumeX,
   MessageCircle,
+  Star,
 } from "lucide-react";
+import { StarRatingDialog } from "@/components/sessions/StarRatingDialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -534,6 +536,9 @@ function NotificationList({
 }) {
   const { toast } = useToast();
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [ratingNotification, setRatingNotification] = useState<Notification | null>(null);
+  const [ratedDoctorName, setRatedDoctorName] = useState("");
+  const [ratedDoctorId, setRatedDoctorId] = useState("");
 
   const handleInvitationResponse = async (notification: Notification, accept: boolean) => {
     if (!notification.reference_id) return;
@@ -612,6 +617,29 @@ function NotificationList({
     );
   }
 
+  const handleRateDoctor = async (notification: Notification) => {
+    if (!notification.reference_id) return;
+    // reference_id is the session_id, fetch session to get doctor (user_id)
+    try {
+      const { data: session } = await supabase
+        .from('sessions')
+        .select('user_id')
+        .eq('id', notification.reference_id)
+        .single();
+      if (!session) return;
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', session.user_id)
+        .single();
+      setRatedDoctorId(session.user_id);
+      setRatedDoctorName(profile?.full_name || "Your Doctor");
+      setRatingNotification(notification);
+    } catch (err) {
+      console.error("Error fetching session for rating:", err);
+    }
+  };
+
   const getIcon = (type: string) => {
     switch (type) {
       case 'document_received':
@@ -624,6 +652,8 @@ function NotificationList({
         return <MessageCircle className="h-5 w-5 text-pink-500" />;
       case 'task_completed':
         return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+      case 'session_completed':
+        return <Star className="h-5 w-5 text-yellow-500" />;
       default:
         return <Bell className="h-5 w-5 text-primary" />;
     }
@@ -631,6 +661,20 @@ function NotificationList({
 
   return (
     <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden divide-y divide-border">
+      {ratingNotification && (
+        <StarRatingDialog
+          open={!!ratingNotification}
+          onOpenChange={(open) => { if (!open) setRatingNotification(null); }}
+          sessionId={ratingNotification.reference_id || ""}
+          ratedUserId={ratedDoctorId}
+          ratedUserName={ratedDoctorName}
+          raterRole="patient"
+          onRated={() => {
+            onMarkAsRead(ratingNotification.id);
+            setRatingNotification(null);
+          }}
+        />
+      )}
       {notifications.map((notification) => (
         <div
           key={notification.id}
@@ -700,6 +744,23 @@ function NotificationList({
                 >
                   <UserX className="h-3.5 w-3.5" />
                   Decline
+                </Button>
+              </div>
+            )}
+
+            {/* Rate visit button for session_completed notifications */}
+            {notification.type === 'session_completed' && !notification.is_read && (
+              <div className="flex items-center gap-2 mt-3">
+                <Button
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRateDoctor(notification);
+                  }}
+                  className="gap-1.5 bg-yellow-500 hover:bg-yellow-600 text-white"
+                >
+                  <Star className="h-3.5 w-3.5" />
+                  Rate Visit
                 </Button>
               </div>
             )}

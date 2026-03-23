@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
 import {
   FileText,
   AlertTriangle,
@@ -71,6 +72,8 @@ interface UnifiedDocument {
   mediaUrl?: string;
   aiAnalysis?: string | null;
   aiAnalyzedAt?: string | null;
+  emailSentAt?: string | null;
+  patientId?: string | null;
 }
 
 const DOC_TYPE_CONFIG: Record<
@@ -197,6 +200,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
   // AI Analysis state
   const [analyzingDocId, setAnalyzingDocId] = useState<string | null>(null);
   const [analysisDialog, setAnalysisDialog] = useState<UnifiedDocument | null>(null);
+  const [sendingDocId, setSendingDocId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) fetchAll();
@@ -223,7 +227,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
     const [docsRes, rxRes, invRes] = await Promise.all([
       supabase
         .from("documents")
-        .select("id, name, content, template_name, created_at, media_type, media_url, ai_analysis, ai_analyzed_at")
+        .select("id, name, content, template_name, created_at, media_type, media_url, ai_analysis, ai_analyzed_at, email_sent_at, patient_id")
         .in("patient_id", ids)
         .order("created_at", { ascending: false }),
       supabase
@@ -253,6 +257,8 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
         mediaUrl: doc.media_url,
         aiAnalysis: (doc as any).ai_analysis,
         aiAnalyzedAt: (doc as any).ai_analyzed_at,
+        emailSentAt: (doc as any).email_sent_at,
+        patientId: (doc as any).patient_id,
       });
     }
 
@@ -508,6 +514,42 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
       });
     } finally {
       setAnalyzingDocId(null);
+    }
+  };
+
+  const handleSendDocument = async (doc: UnifiedDocument) => {
+    if (doc.source !== "documents" || doc.emailSentAt) return;
+    setSendingDocId(doc.id);
+    try {
+      const { data: docData } = await supabase
+        .from("documents")
+        .select("*, patients:patient_id(email, pharmacy_email)")
+        .eq("id", doc.id)
+        .maybeSingle();
+      if (!docData) throw new Error("Document not found");
+      const patient = (docData as any).patients;
+      const recipientEmail = doc.type === "prescription"
+        ? patient?.pharmacy_email || patient?.email
+        : patient?.email;
+      if (recipientEmail) {
+        await supabase.functions.invoke("send-document-email", {
+          body: { documentId: doc.id, recipientEmail },
+        });
+      }
+      await supabase
+        .from("documents")
+        .update({ email_sent_at: new Date().toISOString(), is_draft: false } as any)
+        .eq("id", doc.id);
+      setDocuments((prev) =>
+        prev.map((d) =>
+          d.id === doc.id ? { ...d, emailSentAt: new Date().toISOString() } : d
+        )
+      );
+      toast({ title: "Document Sent", description: `${doc.name} has been sent.` });
+    } catch (err: any) {
+      toast({ title: "Send Failed", description: err.message || "Could not send", variant: "destructive" });
+    } finally {
+      setSendingDocId(null);
     }
   };
 
@@ -768,38 +810,54 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
             const isImageDoc = doc.type === "image" && doc.mediaUrl;
             return (
               <Card key={`${doc.source}-${doc.id}`} className={`hover:shadow-sm transition-shadow border-l-4 ${config.borderColor}`}>
-                <CardContent className="flex items-center gap-4 py-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                <CardContent className="flex items-center gap-3 py-2.5">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                     {isImageDoc ? (
                       <img
                         src={doc.mediaUrl}
                         alt={doc.name}
-                        className="h-10 w-10 rounded-lg object-cover"
+                        className="h-8 w-8 rounded-lg object-cover"
                       />
                     ) : (
-                      <IconComponent className="h-5 w-5 text-primary" />
+                      <IconComponent className="h-4 w-4 text-primary" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground truncate">
+                    <p className="text-sm font-medium text-foreground truncate">
                       {doc.name}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                      <span className={`inline-flex items-center justify-center h-5 w-5 rounded-full ${config.color}`} title={config.label}>
-                        <IconComponent className="h-3 w-3" />
+                      <span className={`inline-flex items-center justify-center h-4 w-4 rounded-full ${config.color}`} title={config.label}>
+                        <IconComponent className="h-2.5 w-2.5" />
                       </span>
                       {doc.aiAnalysis && (
-                        <Badge variant="secondary" className="text-xs border-0 bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400 gap-1">
-                          <Sparkles className="h-3 w-3" />
-                          AI Analysed
+                        <Badge variant="secondary" className="text-[10px] h-4 border-0 bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400 gap-0.5 px-1">
+                          <Sparkles className="h-2.5 w-2.5" />
+                          AI
                         </Badge>
                       )}
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-[10px] text-muted-foreground">
                         {format(new Date(doc.date), "dd MMM yyyy")}
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {doc.source === "documents" && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={cn("h-7 w-7", doc.emailSentAt ? "text-muted-foreground cursor-not-allowed" : "text-green-600 hover:text-green-700")}
+                        onClick={() => handleSendDocument(doc)}
+                        disabled={!!doc.emailSentAt || sendingDocId === doc.id}
+                        title={doc.emailSentAt ? "Already sent" : "Send document"}
+                      >
+                        {sendingDocId === doc.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Send className="h-3.5 w-3.5" />
+                        )}
+                      </Button>
+                    )}
                     {isImageDoc && (
                       <Button
                         variant="outline"
@@ -813,10 +871,10 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                         ) : (
                           <Sparkles className="h-3.5 w-3.5" />
                         )}
-                        {doc.aiAnalysis ? "View Analysis" : "AI Analyse"}
+                        {doc.aiAnalysis ? "View" : "AI"}
                       </Button>
                     )}
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-[10px] text-muted-foreground">
                       {(doc.sizeBytes / 1024).toFixed(1)} KB
                     </span>
                   </div>

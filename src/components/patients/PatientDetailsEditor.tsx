@@ -549,7 +549,8 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Chronic Medication */}
                   <div>
-                    <ViewField label="Chronic Medication" value={patient.is_chronic ? "Yes - Chronic" : "No"} />
+                    <Label>Chronic Medication</Label>
+                    <Input value={patient.is_chronic ? (patient as any).chronic_medications || "Yes - Chronic" : "No"} disabled className="bg-muted/50" />
                   </div>
 
                   {/* Surgeries and Dates */}
@@ -593,7 +594,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   </div>
                 </div>
 
-                {/* Column 2: Insurance & Pharmacies */}
+                {/* Column 2: Insurance, GP & Pharmacies */}
                 <div className="space-y-4">
                   <div className={sectionFrame}>
                     <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> Medical Insurance</h3>
@@ -603,8 +604,12 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                       <ViewField label="Insurance Number" value={patient.medical_aid_number} />
                       <ViewField label="Primary Member" value={patient.primary_member} />
                       <ViewField label="Claims Email" value={patient.claims_email} />
-                      <ViewField label="General Practitioner" value={patient.general_practitioner} />
                     </div>
+                  </div>
+
+                  <div className={sectionFrame}>
+                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> General Practitioner</h3>
+                    <ViewField label="General Practitioner" value={patient.general_practitioner} />
                   </div>
 
                   <div className={sectionFrame}>
@@ -905,7 +910,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 </div>
               </div>
 
-              {/* Column 2: Insurance & Pharmacies */}
+              {/* Column 2: Insurance, GP & Pharmacies */}
               <div className="space-y-4">
                 <div className={sectionFrame}>
                   <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> Medical Insurance</h3>
@@ -915,7 +920,14 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                     <div className="space-y-1.5"><Label>Insurance Number</Label><Input className="text-sm" value={formData.medical_aid_number} onChange={(e) => updateFormData({ medical_aid_number: e.target.value })} placeholder="Member number" /></div>
                     <div className="space-y-1.5"><Label>Primary Member</Label><Input className="text-sm" value={formData.primary_member} onChange={(e) => updateFormData({ primary_member: e.target.value })} placeholder="Primary member name" /></div>
                     <div className="space-y-1.5"><Label>Claims Email</Label><Input className="text-sm" type="email" value={formData.claims_email} onChange={(e) => updateFormData({ claims_email: e.target.value })} placeholder="claims@insurance.com" /></div>
-                    <div className="space-y-1.5"><Label>General Practitioner</Label><Input className="text-sm" value={formData.general_practitioner} onChange={(e) => updateFormData({ general_practitioner: e.target.value })} placeholder="GP name" /></div>
+                  </div>
+                </div>
+
+                <div className={sectionFrame}>
+                  <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> General Practitioner</h3>
+                  <div className="space-y-1.5">
+                    <Label>General Practitioner</Label>
+                    <Input className="text-sm" value={formData.general_practitioner} onChange={(e) => updateFormData({ general_practitioner: e.target.value })} placeholder="Search or type GP name" />
                   </div>
                 </div>
 

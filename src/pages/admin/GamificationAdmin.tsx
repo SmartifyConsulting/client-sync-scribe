@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Loader2, Plus, Pencil, Trash2, Save, X, Gift, Flame, Calendar, Globe } from "lucide-react";
+import { useState, useRef } from "react";
+import { Loader2, Plus, Pencil, Trash2, Save, X, Gift, Flame, Calendar, Globe, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -70,9 +70,11 @@ export default function GamificationAdmin() {
   const queryClient = useQueryClient();
   const [showAddAppDialog, setShowAddAppDialog] = useState(false);
   const [newAppName, setNewAppName] = useState("");
-  const [newAppLogoUrl, setNewAppLogoUrl] = useState("");
+  const [newAppLogoFile, setNewAppLogoFile] = useState<File | null>(null);
   const [newAppCreator, setNewAppCreator] = useState("");
   const [newAppSignupUrl, setNewAppSignupUrl] = useState("");
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const [editingAppId, setEditingAppId] = useState<string | null>(null);
   const [editAppValues, setEditAppValues] = useState<Partial<PartnerApp>>({});
 
@@ -90,21 +92,38 @@ export default function GamificationAdmin() {
 
   const addAppMutation = useMutation({
     mutationFn: async () => {
+      setUploadingLogo(true);
+      let logoUrl: string | null = null;
+      
+      // Upload logo if file selected
+      if (newAppLogoFile) {
+        const ext = newAppLogoFile.name.split(".").pop() || "png";
+        const fileName = `partner-apps/${Date.now()}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from("logos")
+          .upload(fileName, newAppLogoFile, { contentType: newAppLogoFile.type });
+        if (uploadError) throw uploadError;
+        const { data } = supabase.storage.from("logos").getPublicUrl(fileName);
+        logoUrl = data.publicUrl;
+      }
+
       const { error } = await supabase
         .from("moola_partner_apps")
-        .insert({ name: newAppName, logo_url: newAppLogoUrl || null, creator: newAppCreator || null, signup_url: newAppSignupUrl || null } as any);
+        .insert({ name: newAppName, logo_url: logoUrl, creator: newAppCreator || null, signup_url: newAppSignupUrl || null } as any);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-partner-apps"] });
       setShowAddAppDialog(false);
       setNewAppName("");
-      setNewAppLogoUrl("");
+      setNewAppLogoFile(null);
       setNewAppCreator("");
       setNewAppSignupUrl("");
+      setUploadingLogo(false);
       toast({ title: "Partner app added" });
     },
     onError: (err: Error) => {
+      setUploadingLogo(false);
       toast({ title: "Error", description: err.message, variant: "destructive" });
     },
   });
@@ -678,12 +697,23 @@ export default function GamificationAdmin() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Logo URL (optional)</Label>
-                      <Input
-                        placeholder="https://..."
-                        value={newAppLogoUrl}
-                        onChange={(e) => setNewAppLogoUrl(e.target.value)}
-                      />
+                      <Label>Logo</Label>
+                      <div className="flex items-center gap-3">
+                        <Button variant="outline" size="sm" className="gap-2" onClick={() => logoInputRef.current?.click()}>
+                          <Upload className="h-4 w-4" />
+                          {newAppLogoFile ? newAppLogoFile.name : "Upload Logo"}
+                        </Button>
+                        <input
+                          ref={logoInputRef}
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={(e) => setNewAppLogoFile(e.target.files?.[0] || null)}
+                        />
+                        {newAppLogoFile && (
+                          <img src={URL.createObjectURL(newAppLogoFile)} alt="Preview" className="h-8 w-8 rounded-lg object-contain" />
+                        )}
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label>Creator</Label>
