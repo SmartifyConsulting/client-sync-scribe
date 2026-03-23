@@ -159,7 +159,7 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-    font-size: 7.35px;
+    
   }
 
   /* Preserve original font size for nav and to-do sections */
@@ -255,6 +255,11 @@
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Reduce muted description text by 2 sizes */
+  .text-muted-foreground.text-sm {
+    font-size: 0.625rem;
   }
 
   /* Subtle hover lift */
