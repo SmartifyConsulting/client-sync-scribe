@@ -78,27 +78,6 @@ const SAMPLE_TEXTS: Record<string, string> = {
   zu: "Sawubona, leli yizwi lakho le-Holarc. Nansi isibonelo sokuthi izindaba zakho zizozwakala kanjani.",
 };
 
-const SIGNATURE_FONTS = [
-  { value: "allura", label: "Allura", fontFamily: "'Allura', serif" },
-  { value: "great-vibes", label: "Great Vibes", fontFamily: "'Great Vibes', serif" },
-  { value: "herr-von-muellerhoff", label: "Herr Von Muellerhoff", fontFamily: "'Herr Von Muellerhoff', serif" },
-  { value: "homemade-apple", label: "Homemade Apple", fontFamily: "'Homemade Apple', serif" },
-  { value: "kalam", label: "Kalam", fontFamily: "'Kalam', serif" },
-  { value: "mr-dafoe", label: "Mr Dafoe", fontFamily: "'Mr Dafoe', serif" },
-  { value: "petit-formal-script", label: "Petit Formal Script", fontFamily: "'Petit Formal Script', serif" },
-  { value: "pinyon-script", label: "Pinyon Script", fontFamily: "'Pinyon Script', serif" },
-  { value: "reenie-beanie", label: "Reenie Beanie", fontFamily: "'Reenie Beanie', serif" },
-  { value: "rock-salt", label: "Rock Salt", fontFamily: "'Rock Salt', serif" },
-  { value: "sacramento", label: "Sacramento", fontFamily: "'Sacramento', serif" },
-];
-
-const SIGNATURE_COLORS = [
-  { value: "black", label: "Black", color: "#000000" },
-  { value: "teal", label: "Teal", color: "#104861" },
-  { value: "navy", label: "Navy", color: "#1a2744" },
-  { value: "dark-red", label: "Dark Red", color: "#8B0000" },
-  { value: "dark-green", label: "Dark Green", color: "#006400" },
-];
 
 // ── Interfaces ──────────────────────────────────────────────────────
 interface PlanConfig { price: number; name: string; period: string; savings?: number; }
