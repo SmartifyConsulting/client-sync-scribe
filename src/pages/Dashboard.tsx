@@ -63,7 +63,13 @@ export default function Dashboard() {
     refetchInterval: 30000,
   });
 
-  const markAllRead = async () => {
+  const clearNotification = async (notifId: string) => {
+    await supabase.from("notifications").update({ is_read: true }).eq("id", notifId);
+    queryClient.invalidateQueries({ queryKey: ["unread-notifications-dashboard"] });
+    queryClient.invalidateQueries({ queryKey: ["recent-notifications-dashboard"] });
+  };
+
+  const clearAllNotifications = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     await supabase
