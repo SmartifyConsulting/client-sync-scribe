@@ -395,6 +395,13 @@ Signature: ___________________
                     onChange={(e) => updateMedication(med.id, 'duration', e.target.value)}
                     placeholder="Duration (e.g., 7 days)"
                   />
+                  <Input
+                    value={med.repeats}
+                    onChange={(e) => updateMedication(med.id, 'repeats', e.target.value)}
+                    placeholder="Repeats (e.g., 3)"
+                    type="number"
+                    min="0"
+                  />
                 </div>
                 <Input
                   value={med.instructions}
