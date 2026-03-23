@@ -20,6 +20,8 @@ import { supabase } from "@/integrations/supabase/client";
 const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
 const MyDoctors = lazy(() => import("@/pages/patient/MyDoctors"));
 const PatientRoundTable = lazy(() => import("@/pages/patient/PatientRoundTable"));
+const PatientOverviewLazy = lazy(() => import("@/components/patients/PatientOverview").then(m => ({ default: m.PatientOverview })));
+const SessionHistoryTableLazy = lazy(() => import("@/components/patients/SessionHistoryTable").then(m => ({ default: m.SessionHistoryTable })));
 
 interface PatientDetailsEditorProps {
   patient: Patient;
@@ -455,6 +457,8 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             <TabsList className="bg-primary flex-wrap">
               <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Personal Information</TabsTrigger>
               <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Medical Information</TabsTrigger>
+              {isSelfService && <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Medical Overview</TabsTrigger>}
+              {isSelfService && <TabsTrigger value="sessions" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Sessions</TabsTrigger>}
               {isSelfService && <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Documents</TabsTrigger>}
               {isSelfService && <TabsTrigger value="doctors" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Healthcare Providers</TabsTrigger>}
               {isSelfService && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Round Table</TabsTrigger>}
@@ -636,6 +640,32 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               </div>
             </TabsContent>
 
+            {/* === MEDICAL OVERVIEW TAB (only for self-service) === */}
+            {isSelfService && (
+              <TabsContent value="overview" className="mt-4">
+                <div className="mb-4">
+                  <h2 className="text-lg font-semibold text-foreground">Medical Overview</h2>
+                  <p className="text-xs text-muted-foreground">Summary of your medical history and sessions</p>
+                </div>
+                <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                  <PatientOverviewLazy patient={patient} sessions={[]} />
+                </Suspense>
+              </TabsContent>
+            )}
+
+            {/* === MY SESSIONS TAB (only for self-service) === */}
+            {isSelfService && (
+              <TabsContent value="sessions" className="mt-4">
+                <div className="mb-4">
+                  <h2 className="text-lg font-semibold text-foreground">My Sessions</h2>
+                  <p className="text-xs text-muted-foreground">History of your consultations</p>
+                </div>
+                <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                  <SessionHistoryTableLazy sessions={[]} patientId={patient.id} patientName={patient.name} />
+                </Suspense>
+              </TabsContent>
+            )}
+
             {/* === MY DOCUMENTS TAB (only for self-service) === */}
             {isSelfService && (
                <TabsContent value="documents" className="mt-4">
@@ -694,6 +724,8 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
           <TabsList className="bg-primary flex-wrap">
             <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Personal Information</TabsTrigger>
             <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Medical Information</TabsTrigger>
+            {isSelfService && <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Medical Overview</TabsTrigger>}
+            {isSelfService && <TabsTrigger value="sessions" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Sessions</TabsTrigger>}
             {isSelfService && <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Documents</TabsTrigger>}
             {isSelfService && <TabsTrigger value="doctors" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Healthcare Providers</TabsTrigger>}
             {isSelfService && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Round Table</TabsTrigger>}
@@ -972,6 +1004,32 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               </div>
             </div>
           </TabsContent>
+
+          {/* === MEDICAL OVERVIEW TAB (EDIT — same as view) === */}
+          {isSelfService && (
+            <TabsContent value="overview" className="mt-4">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold text-foreground">Medical Overview</h2>
+                <p className="text-xs text-muted-foreground">Summary of your medical history and sessions</p>
+              </div>
+              <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                <PatientOverviewLazy patient={patient} sessions={[]} />
+              </Suspense>
+            </TabsContent>
+          )}
+
+          {/* === MY SESSIONS TAB (EDIT — same as view) === */}
+          {isSelfService && (
+            <TabsContent value="sessions" className="mt-4">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold text-foreground">My Sessions</h2>
+                <p className="text-xs text-muted-foreground">History of your consultations</p>
+              </div>
+              <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                <SessionHistoryTableLazy sessions={[]} patientId={patient.id} patientName={patient.name} />
+              </Suspense>
+            </TabsContent>
+          )}
 
           {/* === DOCUMENTS TAB (EDIT — same as view) === */}
           {isSelfService && (

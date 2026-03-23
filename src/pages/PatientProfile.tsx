@@ -19,7 +19,7 @@ import {
   FilePlus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import moolasLogo from "@/assets/moolas-logo.png";
+import moolaSymbol from "@/assets/moola-symbol.png";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -309,7 +309,7 @@ export default function PatientProfile() {
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-muted-foreground">Moolas</p>
             <div className="h-8 w-8 rounded-full bg-white shadow-sm flex items-center justify-center">
-              <img src={moolasLogo} alt="Moolas" className="h-6 w-6 object-cover rounded-full" />
+              <img src={moolaSymbol} alt="Moolas" className="h-6 w-6 object-contain" />
             </div>
           </div>
           <p className="mt-2 text-2xl font-bold text-emerald-600 dark:text-emerald-400">
