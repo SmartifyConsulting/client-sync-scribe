@@ -1,56 +1,32 @@
 
 
-# Standardize Sub-Headings & Update Moola Icon
+# Fix: Calendar Sub-Heading + Process-Todo-Actions Improvements
 
-## What It Does
-1. Makes all page sub-headings (the description text below page titles) consistent with the Dashboard style: `text-muted-foreground text-[12px]`
-2. Replaces the Moola icon with the uploaded transparent-background M icon
+## 1. Fix Calendar Sub-Heading Font Size
 
-## Changes
+**File:** `src/pages/CalendarView.tsx` (line 251)
 
-### 1. Standardize Sub-Heading Styles Across All Pages
+Current: `<p className="mt-1 text-muted-foreground">`
+Should be: `<p className="text-muted-foreground text-[12px]">`
 
-The Dashboard reference style (line 238): `className="mt-2 text-muted-foreground text-[12px]"`
+The previous batch update missed adding `text-[12px]` to this file's sub-heading, so it defaults to the browser's inherited size instead of the standardized 12px used on every other page.
 
-Every `<p>` tag that serves as a page-level sub-heading (directly below an `<h1>`) will be updated to use `text-muted-foreground text-[12px]` instead of the current inconsistent mix of `text-sm text-muted-foreground`, `text-muted-foreground` (unsized), etc.
+## 2. Improve AI Todo Descriptions to Include Date/Time
 
-**Files to update:**
-| File | Current sub-heading style |
-|------|--------------------------|
-| `src/pages/MyPractice.tsx` | `text-sm text-muted-foreground` |
-| `src/pages/Settings.tsx` | `text-sm text-muted-foreground` |
-| `src/pages/Sessions.tsx` | `text-muted-foreground` (no size) |
-| `src/pages/Patients.tsx` | Check & standardize |
-| `src/pages/CalendarView.tsx` | Check & standardize |
-| `src/pages/Profile.tsx` | `text-sm text-muted-foreground` |
-| `src/pages/Notifications.tsx` | Check & standardize |
-| `src/pages/Documents.tsx` | Check & standardize |
-| `src/pages/TodoList.tsx` | Check & standardize |
-| `src/pages/Connections.tsx` | Check & standardize |
-| `src/pages/patient/MyDetails.tsx` | `text-sm text-muted-foreground` |
-| `src/pages/patient/PatientDashboard.tsx` | Check & standardize |
-| `src/pages/patient/PatientCalendar.tsx` | `text-muted-foreground` |
-| `src/pages/patient/PatientDocuments.tsx` | Check & standardize |
-| `src/pages/patient/MyDoctors.tsx` | Check & standardize |
-| `src/pages/patient/MyRewards.tsx` | Check & standardize |
-| `src/pages/patient/PatientRoundTable.tsx` | `text-muted-foreground` |
-| `src/pages/doctor/DoctorRewards.tsx` | Check & standardize |
-| `src/pages/doctor/Invoices.tsx` | Check & standardize |
-| `src/pages/ReferralDoctors.tsx` | Check & standardize |
-| `src/pages/CPDCertificates.tsx` | Check & standardize |
+**File:** `supabase/functions/process-todo-actions/index.ts`
 
-All page-level description `<p>` tags will become: `className="text-muted-foreground text-[12px]"`
+Update the AI system prompt to explicitly instruct it to always embed date, time, and patient name into the `description` field for scheduling tasks.
 
-Section-level sub-descriptions within cards/frames will also be standardized to the same `text-[12px]` sizing where they currently use `text-sm`.
+## 3. Fix Patient ID Validation in Todo Processing
 
-### 2. Update Moola Icon with Transparent Background
+**File:** `supabase/functions/process-todo-actions/index.ts`
 
-Copy the uploaded M icon to `src/assets/moola-symbol.png`, replacing the current file. The icon already appears to have a transparent background based on the upload. All existing imports (`Dashboard.tsx`, `LollipopDisplay.tsx`, `DoctorRewards.tsx`) will automatically pick up the new asset.
+Validate that any AI-returned `patient_id` actually exists in the doctor's patient list. If not, fall back to name-based fuzzy matching so patients like Lisa Anderson are correctly linked.
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| ~20 page files | Standardize sub-heading `<p>` tags to `text-muted-foreground text-[12px]` |
-| `src/assets/moola-symbol.png` | Replace with uploaded transparent M icon |
+| `src/pages/CalendarView.tsx` | Add `text-[12px]` to sub-heading |
+| `supabase/functions/process-todo-actions/index.ts` | Improve AI prompt for date/time; fix patient_id validation |
 
