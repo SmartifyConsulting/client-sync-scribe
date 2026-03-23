@@ -757,7 +757,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
             const isAnalyzing = analyzingDocId === doc.id;
             const isImageDoc = doc.type === "image" && doc.mediaUrl;
             return (
-              <Card key={`${doc.source}-${doc.id}`} className="hover:shadow-sm transition-shadow">
+              <Card key={`${doc.source}-${doc.id}`} className={`hover:shadow-sm transition-shadow border-l-4 ${config.color.split(' ')[0].replace('text-', 'border-').replace('bg-', 'border-')}`}>
                 <CardContent className="flex items-center gap-4 py-4">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                     {isImageDoc ? (
