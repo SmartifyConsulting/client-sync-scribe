@@ -245,7 +245,7 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
           </DialogDescription>
         </DialogHeader>
         
-        <div className="grid gap-6 py-4">
+        <div className="grid gap-3 py-2">
           {/* Doctor Name Search */}
           <div className="space-y-2 relative">
             <Label htmlFor="doctorSearch">Search by Name</Label>
