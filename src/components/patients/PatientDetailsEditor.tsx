@@ -459,7 +459,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
                 {/* Allergies */}
                 <div>
-                  <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</h4>
+                  <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</Label>
                   <div className="rounded-lg bg-muted/30 p-3 border border-border/50">
                     <p className="text-sm text-foreground">{patient.allergies || "None recorded"}</p>
                   </div>
