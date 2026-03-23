@@ -4,16 +4,16 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import type { PatientReward } from "@/hooks/usePatientRewards";
 import { format, parseISO } from "date-fns";
 
+import moolaSymbol from "@/assets/moola-symbol.png";
+
 export function MoolaLogoBadge({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   const sizeClasses = {
-    sm: "h-5 w-5 text-[10px]",
-    md: "h-7 w-7 text-sm",
-    lg: "h-12 w-12 text-xl",
+    sm: "h-5 w-5",
+    md: "h-7 w-7",
+    lg: "h-12 w-12",
   };
   return (
-    <div className={`${sizeClasses[size]} rounded-full bg-secondary flex items-center justify-center font-bold text-white shrink-0`}>
-      M
-    </div>
+    <img src={moolaSymbol} alt="Moola" className={`${sizeClasses[size]} object-contain shrink-0`} />
   );
 }
 
