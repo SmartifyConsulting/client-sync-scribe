@@ -204,7 +204,7 @@ export default function MyPractice() {
 
   // ── Service Prices ──
   const [servicePrices, setServicePrices] = useState<ServicePrice[]>([]);
-  const [newService, setNewService] = useState({ service_name: "", default_price: "", currency: "ZAR" });
+  const [newService, setNewService] = useState({ service_name: "", default_price: "", currency: "ZAR", color: "#3b82f6" });
   const [isAddingService, setIsAddingService] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState("ZAR");
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
