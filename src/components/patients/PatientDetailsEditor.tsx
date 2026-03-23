@@ -539,8 +539,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Blood Type */}
                   <div>
-                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Droplets className="h-3.5 w-3.5" /> Blood Type</Label>
-                    <p className="text-sm text-foreground">{patient.blood_type || "Not recorded"}</p>
+                    <ViewField label="Blood Type" value={patient.blood_type} />
                   </div>
 
                   {/* Allergies */}
