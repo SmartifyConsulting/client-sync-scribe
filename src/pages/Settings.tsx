@@ -892,206 +892,217 @@ export default function Settings() {
 
         {/* === PERSONAL TAB === */}
         <TabsContent value="personal" className="mt-4">
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label>First Name</Label>
-                <Input value={formData.first_name} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Last Name</Label>
-                <Input value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
-              </div>
-              <div className="space-y-1.5 sm:col-span-2">
-                <Label>Email</Label>
-                {isAdmin && isEditingEmail ? (
-                  <div className="flex gap-2">
-                    <Input type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
-                    <Button size="icon" variant="ghost" onClick={handleSaveEmail} disabled={isSavingEmail}>{isSavingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}</Button>
-                    <Button size="icon" variant="ghost" onClick={() => setIsEditingEmail(false)}><X className="h-4 w-4" /></Button>
+          <Tabs defaultValue="details" className="w-full">
+            <TabsList className="flex w-full bg-muted justify-start mb-4">
+              <TabsTrigger value="details" className="text-xs">Details</TabsTrigger>
+              <TabsTrigger value="preferences" className="text-xs">Preferences</TabsTrigger>
+            </TabsList>
+
+            {/* Details Sub-tab */}
+            <TabsContent value="details">
+              <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label>First Name</Label>
+                    <Input value={formData.first_name} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
                   </div>
-                ) : (
+                  <div className="space-y-1.5">
+                    <Label>Last Name</Label>
+                    <Input value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
+                  </div>
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label>Email</Label>
+                    {isAdmin && isEditingEmail ? (
+                      <div className="flex gap-2">
+                        <Input type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
+                        <Button size="icon" variant="ghost" onClick={handleSaveEmail} disabled={isSavingEmail}>{isSavingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}</Button>
+                        <Button size="icon" variant="ghost" onClick={() => setIsEditingEmail(false)}><X className="h-4 w-4" /></Button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Input type="email" value={user?.email || ""} disabled className="bg-muted" />
+                        {isAdmin && <Button size="icon" variant="ghost" onClick={() => { setEditEmail(user?.email || ""); setIsEditingEmail(true); }}><Pencil className="h-4 w-4" /></Button>}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Mobile Number</Label>
                   <div className="flex gap-2">
-                    <Input type="email" value={user?.email || ""} disabled className="bg-muted" />
-                    {isAdmin && <Button size="icon" variant="ghost" onClick={() => { setEditEmail(user?.email || ""); setIsEditingEmail(true); }}><Pencil className="h-4 w-4" /></Button>}
+                    <Select value={formData.country_code} onValueChange={(v) => setFormData({ ...formData, country_code: v })}>
+                      <SelectTrigger className="w-[130px]"><SelectValue /></SelectTrigger>
+                      <SelectContent>{COUNTRY_CODES.map(c => <SelectItem key={c.code} value={c.code}><span className="flex items-center gap-1.5">{c.flag} {c.code}</span></SelectItem>)}</SelectContent>
+                    </Select>
+                    <Input type="tel" value={formatPhoneNumber(formData.mobile_number)} onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value.replace(/[^0-9]/g, '') })} placeholder="82 123 4567" className="flex-1" />
+                  </div>
+                </div>
+                {isDoctor && formData.specialty && (
+                  <div className="space-y-1.5">
+                    <Label>Specialty</Label>
+                    <p className="text-[10px] text-muted-foreground">{formData.specialty}</p>
                   </div>
                 )}
+                <MailboxSection userId={user?.id} />
               </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Mobile Number</Label>
-              <div className="flex gap-2">
-                <Select value={formData.country_code} onValueChange={(v) => setFormData({ ...formData, country_code: v })}>
-                  <SelectTrigger className="w-[130px]"><SelectValue /></SelectTrigger>
-                  <SelectContent>{COUNTRY_CODES.map(c => <SelectItem key={c.code} value={c.code}><span className="flex items-center gap-1.5">{c.flag} {c.code}</span></SelectItem>)}</SelectContent>
-                </Select>
-                <Input type="tel" value={formatPhoneNumber(formData.mobile_number)} onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value.replace(/[^0-9]/g, '') })} placeholder="82 123 4567" className="flex-1" />
-              </div>
-            </div>
-            {isDoctor && formData.specialty && (
-              <div className="space-y-1.5">
-                <Label>Specialty</Label>
-                <p className="text-sm text-muted-foreground">{formData.specialty}</p>
-              </div>
-            )}
-            <MailboxSection userId={user?.id} />
+            </TabsContent>
 
-            {/* Preferences Section */}
-            <Separator className="my-4" />
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <Settings2 className="h-5 w-5 text-primary" />
-                <h2 className="text-sm font-semibold text-foreground">Preferences</h2>
-              </div>
-
-              {isPatientRole && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
-                    <div className="flex-1 mr-3">
-                      <p className="text-sm font-medium text-foreground">Auto-email invoice to medical aid</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">When your doctor marks an invoice as paid, it will be sent to your insurance claims email.</p>
-                    </div>
-                    <Switch checked={(profile as any)?.auto_email_invoice_to_insurance || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_invoice_to_insurance: c } as any); toast({ title: "Preference updated" }); }} />
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
-                    <div className="flex-1 mr-3">
-                      <p className="text-sm font-medium text-foreground">Auto-email prescription to pharmacy</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">When your doctor saves a prescription, it will be sent to your primary pharmacy.</p>
-                    </div>
-                    <Switch checked={(profile as any)?.auto_email_prescription_to_pharmacy || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_prescription_to_pharmacy: c } as any); toast({ title: "Preference updated" }); }} />
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
-                    <div className="flex-1 mr-3">
-                      <p className="text-sm font-medium text-foreground">Auto-email certificate to employer</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">When your doctor saves a medical certificate, it will be sent to your employer.</p>
-                    </div>
-                    <Switch checked={(profile as any)?.auto_email_certificate_to_employer || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_certificate_to_employer: c } as any); toast({ title: "Preference updated" }); }} />
-                  </div>
+            {/* Preferences Sub-tab */}
+            <TabsContent value="preferences">
+              <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+                <div className="flex items-center gap-3">
+                  <Settings2 className="h-5 w-5 text-primary" />
+                  <h2 className="text-[10px] font-semibold text-foreground">Preferences</h2>
                 </div>
-              )}
 
-              {isDoctor && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <Users className="h-4 w-4 text-primary" />
-                    <h3 className="text-xs font-semibold text-foreground">Patient Management</h3>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-foreground text-sm">Patient Inactivity Threshold</p>
-                      <p className="text-xs text-muted-foreground">Automatically mark patients as inactive after this period without a visit</p>
+                {isPatientRole && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                      <div className="flex-1 mr-3">
+                        <p className="text-[10px] font-medium text-foreground">Auto-email invoice to medical aid</p>
+                        <p className="text-[8px] text-muted-foreground mt-0.5">When your doctor marks an invoice as paid, it will be sent to your insurance claims email.</p>
+                      </div>
+                      <Switch checked={(profile as any)?.auto_email_invoice_to_insurance || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_invoice_to_insurance: c } as any); toast({ title: "Preference updated" }); }} />
                     </div>
-                    <Select value={inactiveThreshold.toString()} onValueChange={(value) => saveInactiveThreshold(parseInt(value))} disabled={savingThreshold}>
-                      <SelectTrigger className="w-[180px]"><SelectValue placeholder="Select period" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="3">3 months</SelectItem>
-                        <SelectItem value="6">6 months</SelectItem>
-                        <SelectItem value="9">9 months</SelectItem>
-                        <SelectItem value="12">12 months (default)</SelectItem>
-                        <SelectItem value="18">18 months</SelectItem>
-                        <SelectItem value="24">24 months</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                      <div className="flex-1 mr-3">
+                        <p className="text-[10px] font-medium text-foreground">Auto-email prescription to pharmacy</p>
+                        <p className="text-[8px] text-muted-foreground mt-0.5">When your doctor saves a prescription, it will be sent to your primary pharmacy.</p>
+                      </div>
+                      <Switch checked={(profile as any)?.auto_email_prescription_to_pharmacy || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_prescription_to_pharmacy: c } as any); toast({ title: "Preference updated" }); }} />
+                    </div>
+                    <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                      <div className="flex-1 mr-3">
+                        <p className="text-[10px] font-medium text-foreground">Auto-email certificate to employer</p>
+                        <p className="text-[8px] text-muted-foreground mt-0.5">When your doctor saves a medical certificate, it will be sent to your employer.</p>
+                      </div>
+                      <Switch checked={(profile as any)?.auto_email_certificate_to_employer || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_certificate_to_employer: c } as any); toast({ title: "Preference updated" }); }} />
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Language Sub-frame */}
-              <Separator />
-              <div className="space-y-3">
-                <h3 className="text-xs font-semibold text-foreground">Language</h3>
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div className="space-y-1.5">
-                    <Label>Country</Label>
-                    <Select value={(profile as any)?.country || "ZA"} onValueChange={async (v) => { await updateProfile({ country: v } as any); toast({ title: "Country updated" }); }}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="ZA">🇿🇦 South Africa</SelectItem><SelectItem value="US">🇺🇸 United States</SelectItem>
-                        <SelectItem value="GB">🇬🇧 United Kingdom</SelectItem><SelectItem value="AU">🇦🇺 Australia</SelectItem>
-                        <SelectItem value="CA">🇨🇦 Canada</SelectItem><SelectItem value="IN">🇮🇳 India</SelectItem>
-                        <SelectItem value="DE">🇩🇪 Germany</SelectItem><SelectItem value="FR">🇫🇷 France</SelectItem>
-                        <SelectItem value="AE">🇦🇪 UAE</SelectItem><SelectItem value="BW">🇧🇼 Botswana</SelectItem>
-                        <SelectItem value="NA">🇳🇦 Namibia</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Language</Label>
-                    <Select value={(profile as any)?.preferred_language || "en"} onValueChange={async (v) => { await updateProfile({ preferred_language: v } as any); toast({ title: "Language updated" }); }}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>{LANGUAGES.map(l => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Narration Voice</Label>
-                    <div className="flex gap-2">
-                      <Select value={(profile as any)?.narration_voice || "nova"} onValueChange={async (v) => { await updateProfile({ narration_voice: v } as any); toast({ title: "Voice updated" }); }}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                {isDoctor && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <Users className="h-4 w-4 text-primary" />
+                      <h3 className="text-[9px] font-semibold text-foreground">Patient Management</h3>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-foreground text-[10px]">Patient Inactivity Threshold</p>
+                        <p className="text-[8px] text-muted-foreground">Automatically mark patients as inactive after this period without a visit</p>
+                      </div>
+                      <Select value={inactiveThreshold.toString()} onValueChange={(value) => saveInactiveThreshold(parseInt(value))} disabled={savingThreshold}>
+                        <SelectTrigger className="w-[180px]"><SelectValue placeholder="Select period" /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="alloy">Alloy</SelectItem><SelectItem value="echo">Echo</SelectItem>
-                          <SelectItem value="fable">Fable</SelectItem><SelectItem value="nova">Nova</SelectItem>
-                          <SelectItem value="onyx">Onyx</SelectItem><SelectItem value="shimmer">Shimmer</SelectItem>
+                          <SelectItem value="3">3 months</SelectItem>
+                          <SelectItem value="6">6 months</SelectItem>
+                          <SelectItem value="9">9 months</SelectItem>
+                          <SelectItem value="12">12 months (default)</SelectItem>
+                          <SelectItem value="18">18 months</SelectItem>
+                          <SelectItem value="24">24 months</SelectItem>
                         </SelectContent>
                       </Select>
-                      <Button variant="outline" size="icon" className="shrink-0" onClick={async () => {
-                        const voice = (profile as any)?.narration_voice || "nova";
-                        toast({ title: "Generating preview..." });
-                        try {
-                          const langCode = profile?.preferred_language || "en";
-                          const sampleText = SAMPLE_TEXTS[langCode] || SAMPLE_TEXTS.en;
-                          const audio = new Audio(); audio.play().catch(() => {});
-                          const { data: { session } } = await supabase.auth.getSession();
-                          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY }, body: JSON.stringify({ text: sampleText, voice }) });
-                          if (!response.ok) throw new Error('Failed');
-                          const blob = await response.blob(); const url = URL.createObjectURL(blob); audio.src = url; await audio.play(); audio.onended = () => URL.revokeObjectURL(url);
-                        } catch (err: any) { toast({ title: "Preview failed", description: err.message, variant: "destructive" }); }
-                      }}><Volume2 className="h-4 w-4" /></Button>
                     </div>
                   </div>
-                </div>
-              </div>
+                )}
 
-              {/* Calendar Integration Sub-frame */}
-              <Separator />
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-primary" />
-                  <h3 className="text-xs font-semibold text-foreground">Calendar Integration</h3>
-                </div>
+                {/* Language Sub-frame */}
+                <Separator />
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {googleRealConnected && <CheckCircle className="h-4 w-4 text-success" />}
-                      <div>
-                        <p className="font-medium text-foreground text-sm">Google Calendar</p>
-                        <p className="text-xs text-muted-foreground">{googleRealConnected ? "Connected - Appointments syncing" : "Sync appointments with Google Calendar"}</p>
+                  <h3 className="text-[9px] font-semibold text-foreground">Language</h3>
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    <div className="space-y-1.5">
+                      <Label>Country</Label>
+                      <Select value={(profile as any)?.country || "ZA"} onValueChange={async (v) => { await updateProfile({ country: v } as any); toast({ title: "Country updated" }); }}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="ZA">🇿🇦 South Africa</SelectItem><SelectItem value="US">🇺🇸 United States</SelectItem>
+                          <SelectItem value="GB">🇬🇧 United Kingdom</SelectItem><SelectItem value="AU">🇦🇺 Australia</SelectItem>
+                          <SelectItem value="CA">🇨🇦 Canada</SelectItem><SelectItem value="IN">🇮🇳 India</SelectItem>
+                          <SelectItem value="DE">🇩🇪 Germany</SelectItem><SelectItem value="FR">🇫🇷 France</SelectItem>
+                          <SelectItem value="AE">🇦🇪 UAE</SelectItem><SelectItem value="BW">🇧🇼 Botswana</SelectItem>
+                          <SelectItem value="NA">🇳🇦 Namibia</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Language</Label>
+                      <Select value={(profile as any)?.preferred_language || "en"} onValueChange={async (v) => { await updateProfile({ preferred_language: v } as any); toast({ title: "Language updated" }); }}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>{LANGUAGES.map(l => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Narration Voice</Label>
+                      <div className="flex gap-2">
+                        <Select value={(profile as any)?.narration_voice || "nova"} onValueChange={async (v) => { await updateProfile({ narration_voice: v } as any); toast({ title: "Voice updated" }); }}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="alloy">Alloy</SelectItem><SelectItem value="echo">Echo</SelectItem>
+                            <SelectItem value="fable">Fable</SelectItem><SelectItem value="nova">Nova</SelectItem>
+                            <SelectItem value="onyx">Onyx</SelectItem><SelectItem value="shimmer">Shimmer</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button variant="outline" size="icon" className="shrink-0" onClick={async () => {
+                          const voice = (profile as any)?.narration_voice || "nova";
+                          toast({ title: "Generating preview..." });
+                          try {
+                            const langCode = profile?.preferred_language || "en";
+                            const sampleText = SAMPLE_TEXTS[langCode] || SAMPLE_TEXTS.en;
+                            const audio = new Audio(); audio.play().catch(() => {});
+                            const { data: { session } } = await supabase.auth.getSession();
+                            const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY }, body: JSON.stringify({ text: sampleText, voice }) });
+                            if (!response.ok) throw new Error('Failed');
+                            const blob = await response.blob(); const url = URL.createObjectURL(blob); audio.src = url; await audio.play(); audio.onended = () => URL.revokeObjectURL(url);
+                          } catch (err: any) { toast({ title: "Preview failed", description: err.message, variant: "destructive" }); }
+                        }}><Volume2 className="h-4 w-4" /></Button>
                       </div>
                     </div>
-                    {googleRealConnected ? (
-                      <Button variant="outline" size="sm" onClick={() => handleDisconnect("google")} className="text-destructive hover:text-destructive">Disconnect</Button>
-                    ) : (
-                      <Button variant="outline" size="sm" onClick={() => handleConnect("google")} disabled={googleRealConnecting}>{googleRealConnecting ? "Connecting..." : "Connect"}</Button>
-                    )}
                   </div>
-                  <Separator />
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {outlookConnected && <CheckCircle className="h-4 w-4 text-success" />}
-                      <div>
-                        <p className="font-medium text-foreground text-sm">Outlook Calendar</p>
-                        <p className="text-xs text-muted-foreground">{outlookConnected ? "Connected - Appointments syncing" : "Sync appointments with Outlook"}</p>
+                </div>
+
+                {/* Calendar Integration Sub-frame */}
+                <Separator />
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-primary" />
+                    <h3 className="text-[9px] font-semibold text-foreground">Calendar Integration</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {googleRealConnected && <CheckCircle className="h-4 w-4 text-success" />}
+                        <div>
+                          <p className="font-medium text-foreground text-[10px]">Google Calendar</p>
+                          <p className="text-[8px] text-muted-foreground">{googleRealConnected ? "Connected - Appointments syncing" : "Sync appointments with Google Calendar"}</p>
+                        </div>
                       </div>
+                      {googleRealConnected ? (
+                        <Button variant="outline" size="sm" onClick={() => handleDisconnect("google")} className="text-destructive hover:text-destructive">Disconnect</Button>
+                      ) : (
+                        <Button variant="outline" size="sm" onClick={() => handleConnect("google")} disabled={googleRealConnecting}>{googleRealConnecting ? "Connecting..." : "Connect"}</Button>
+                      )}
                     </div>
-                    {outlookConnected ? (
-                      <Button variant="outline" size="sm" onClick={() => handleDisconnect("outlook")} className="text-destructive hover:text-destructive">Disconnect</Button>
-                    ) : (
-                      <Button variant="outline" size="sm" onClick={() => handleConnect("outlook")} disabled={isConnecting === "outlook"}>{isConnecting === "outlook" ? "Connecting..." : "Connect"}</Button>
-                    )}
+                    <Separator />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {outlookConnected && <CheckCircle className="h-4 w-4 text-success" />}
+                        <div>
+                          <p className="font-medium text-foreground text-[10px]">Outlook Calendar</p>
+                          <p className="text-[8px] text-muted-foreground">{outlookConnected ? "Connected - Appointments syncing" : "Sync appointments with Outlook"}</p>
+                        </div>
+                      </div>
+                      {outlookConnected ? (
+                        <Button variant="outline" size="sm" onClick={() => handleDisconnect("outlook")} className="text-destructive hover:text-destructive">Disconnect</Button>
+                      ) : (
+                        <Button variant="outline" size="sm" onClick={() => handleConnect("outlook")} disabled={isConnecting === "outlook"}>{isConnecting === "outlook" ? "Connecting..." : "Connect"}</Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         {/* === PRACTICE TAB (Doctor only) === */}
