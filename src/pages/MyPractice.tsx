@@ -599,8 +599,14 @@ export default function MyPractice() {
         </TabsContent>
 
         {/* === REFERRALS TAB === */}
-        <TabsContent value="referrals" className="mt-4">
-          <ReferralDoctors />
+        <TabsContent value="referrals" className="mt-4 space-y-4">
+          <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+            <div className="flex items-center gap-2">
+              <Stethoscope className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">Referral Doctors</h3>
+            </div>
+            <ReferralDoctors hideHeader />
+          </div>
         </TabsContent>
 
         {/* === PRICING TAB === */}
