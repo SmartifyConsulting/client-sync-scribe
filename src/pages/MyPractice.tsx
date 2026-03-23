@@ -208,7 +208,7 @@ export default function MyPractice() {
   const [isAddingService, setIsAddingService] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState("ZAR");
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
-  const [editingService, setEditingService] = useState({ service_name: "", default_price: "" });
+  const [editingService, setEditingService] = useState({ service_name: "", default_price: "", color: "" });
   const [isSavingService, setIsSavingService] = useState(false);
 
   // ── CPD Certificates ──
