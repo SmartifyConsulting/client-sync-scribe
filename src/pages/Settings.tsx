@@ -103,7 +103,8 @@ interface PaymentHistoryItem {
 export default function Settings() {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { role } = useUserRole();
+  const { role, isPatient } = useUserRole();
+  const { profile, updateProfile } = useProfile();
   const [searchParams] = useSearchParams();
   const { isConnected: googleRealConnected, isConnecting: googleRealConnecting, connect: googleConnect, disconnect: googleDisconnect } = useGoogleCalendar();
 
