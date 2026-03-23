@@ -469,7 +469,7 @@ export default function MyPractice() {
         </TabsContent>
 
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
-        <TabsContent value="practice" className="mt-4 space-y-4">
+        <TabsContent value="practice" className="mt-4 space-y-4 max-w-3xl">
           {/* Personal Information Frame */}
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
