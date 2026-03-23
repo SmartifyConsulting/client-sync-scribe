@@ -324,8 +324,8 @@ export default function MyPractice() {
     setIsAddingService(false);
   };
   const removeServicePrice = async (id: string) => { const { error } = await supabase.from('service_prices').delete().eq('id', id); if (!error) { setServicePrices(servicePrices.filter(s => s.id !== id)); toast({ title: "Service removed" }); } };
-  const startEditingService = (service: ServicePrice) => { setEditingServiceId(service.id); setEditingService({ service_name: service.service_name, default_price: String(service.default_price) }); };
-  const cancelEditingService = () => { setEditingServiceId(null); setEditingService({ service_name: "", default_price: "" }); };
+  const startEditingService = (service: ServicePrice) => { setEditingServiceId(service.id); setEditingService({ service_name: service.service_name, default_price: String(service.default_price), color: service.color || "#3b82f6" }); };
+  const cancelEditingService = () => { setEditingServiceId(null); setEditingService({ service_name: "", default_price: "", color: "" }); };
   const saveEditingService = async () => {
     if (!editingServiceId || !editingService.service_name.trim() || !editingService.default_price) { toast({ title: "Missing fields", variant: "destructive" }); return; }
     setIsSavingService(true);
