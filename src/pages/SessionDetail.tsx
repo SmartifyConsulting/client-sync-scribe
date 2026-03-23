@@ -57,6 +57,7 @@ import {
 } from "@/components/ui/dialog";
 import { useSessions } from "@/hooks/useSessions";
 import { StarRatingDialog } from "@/components/sessions/StarRatingDialog";
+import { PrivacyBadge } from "@/components/permissions/PrivacyBadge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -280,6 +281,7 @@ export default function SessionDetail() {
               >
                 {session.status === "completed" ? "Completed" : "In Progress"}
               </span>
+              <PrivacyBadge />
             </div>
             {session.patient && (
               <Link

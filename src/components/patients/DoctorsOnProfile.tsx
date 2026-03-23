@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { PermissionTransparencyModal } from "@/components/permissions/PermissionTransparencyModal";
 
 interface DoctorAccess {
   id: string;
@@ -54,6 +55,7 @@ export function DoctorsOnProfile({ patientId, patientName }: DoctorsOnProfilePro
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorAccess | null>(null);
   const [messageForm, setMessageForm] = useState({ subject: "", content: "" });
   const [isSending, setIsSending] = useState(false);
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
 
   useEffect(() => {
     fetchCurrentUser();
@@ -221,7 +223,13 @@ export function DoctorsOnProfile({ patientId, patientName }: DoctorsOnProfilePro
             Doctors with access to this patient's profile
           </p>
         </div>
-        <Badge variant="secondary">{doctors.length} doctor{doctors.length !== 1 ? 's' : ''}</Badge>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowPermissionModal(true)}>
+            <Shield className="h-3.5 w-3.5" />
+            View Permissions
+          </Button>
+          <Badge variant="secondary">{doctors.length} doctor{doctors.length !== 1 ? 's' : ''}</Badge>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -283,6 +291,14 @@ export function DoctorsOnProfile({ patientId, patientName }: DoctorsOnProfilePro
           );
         })}
       </div>
+
+      {/* Permission Transparency Modal */}
+      <PermissionTransparencyModal
+        open={showPermissionModal}
+        onOpenChange={setShowPermissionModal}
+        onConfirm={() => setShowPermissionModal(false)}
+        confirmLabel="I Understand"
+      />
 
       {/* Message Dialog */}
       {showMessageDialog && selectedDoctor && (
