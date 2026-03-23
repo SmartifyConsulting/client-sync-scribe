@@ -685,6 +685,22 @@ export default function GamificationAdmin() {
                         onChange={(e) => setNewAppLogoUrl(e.target.value)}
                       />
                     </div>
+                    <div className="space-y-2">
+                      <Label>Creator</Label>
+                      <Input
+                        placeholder="e.g., Health Corp"
+                        value={newAppCreator}
+                        onChange={(e) => setNewAppCreator(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Signup URL</Label>
+                      <Input
+                        placeholder="https://app.example.com/signup"
+                        value={newAppSignupUrl}
+                        onChange={(e) => setNewAppSignupUrl(e.target.value)}
+                      />
+                    </div>
                   </div>
                   <DialogFooter>
                     <Button variant="outline" onClick={() => setShowAddAppDialog(false)}>Cancel</Button>
