@@ -186,8 +186,11 @@ Rules:
 
     for (const action of actions) {
       try {
-        // Resolve patient_id if name provided but no ID matched
+        // Resolve patient_id — validate AI-returned ID exists in doctor's patients
         let patientId = action.patient_id || null;
+        if (patientId && !patients.find((p) => p.id === patientId)) {
+          patientId = null; // Invalid ID from AI, force name-based matching
+        }
         if (!patientId && action.patient_name) {
           const match = patients.find((p) =>
             p.name.toLowerCase().includes(action.patient_name.toLowerCase()) ||
