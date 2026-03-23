@@ -313,7 +313,7 @@ export default function TodoList() {
     <div className="space-y-6 animate-fade-in max-w-3xl">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground">To-Do List</h1>
+        <h1 className="text-2xl font-bold text-foreground">To-Do List</h1>
         <p className="mt-1 text-muted-foreground text-[12px]">Manage your tasks with voice or text input — AI can auto-execute actions</p>
       </div>
 
@@ -412,8 +412,8 @@ export default function TodoList() {
                   <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden mt-1">
                     <div className="divide-y divide-border">
                       {items.map((todo) => (
-                        <div key={todo.id} className={cn("flex items-start gap-4 p-4 transition-colors hover:bg-muted/30", todo.completed && "bg-muted/20", todo.is_auto_executed && "bg-success/5")}>
-                          <Checkbox checked={todo.completed} onCheckedChange={() => toggleComplete(todo.id)} className="h-5 w-5 mt-0.5" />
+                         <div key={todo.id} className={cn("flex items-start gap-3 p-3 transition-colors hover:bg-muted/30", todo.completed && "bg-muted/20", todo.is_auto_executed && "bg-success/5")}>
+                           <Checkbox checked={todo.completed} onCheckedChange={() => toggleComplete(todo.id)} className="h-4 w-4 mt-0.5" />
                           {editingId === todo.id ? (
                             <div className="flex-1 flex items-center gap-2">
                               <Input value={editText} onChange={(e) => setEditText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") saveEdit(todo.id); if (e.key === "Escape") cancelEdit(); }} className="flex-1" autoFocus />
@@ -424,7 +424,7 @@ export default function TodoList() {
                             <>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
-                                  <p className={cn("font-medium text-foreground", todo.completed && "line-through text-muted-foreground")}>{todo.title}</p>
+                                  <p className={cn("text-sm font-medium text-foreground", todo.completed && "line-through text-muted-foreground")}>{todo.title}</p>
                                    {(todo.is_auto_executed || todo.task_type === 'document_review') && (
                                      <span className="inline-flex items-center gap-0.5">
                                        <Badge className="bg-success/10 text-success border-success/20 text-[10px] px-1.5 py-0"><Zap className="h-3 w-3 mr-0.5" />AI</Badge>

@@ -378,7 +378,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
             </p>
           </div>
         )}
-        <div className="flex gap-2">
+        <div className="flex gap-2 ml-auto">
           <ShareAppDialog />
           <PatientImportDialog 
             trigger={

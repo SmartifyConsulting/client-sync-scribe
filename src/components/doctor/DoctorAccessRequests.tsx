@@ -43,9 +43,9 @@ interface AccessRequest {
 }
 
 const permissionLabels: Record<AccessPermission, string> = {
+  session_summaries: "Session Summaries",
   patient_info: "Patient Information",
   calendar: "Calendar",
-  session_summaries: "Session Summaries",
   prescription_history: "Documentation",
 };
 

@@ -369,7 +369,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
         <div className="flex items-center gap-4">
           <div className="flex flex-col items-center gap-1 cursor-pointer" onClick={() => avatarInputRef.current?.click()}>
             <div className="relative">
-              <Avatar className="h-20 w-20">
+              <Avatar className="h-20 w-20 border-2 border-primary">
                 {avatarUrl ? (
                   <AvatarImage src={avatarUrl} alt={patient.name} />
                 ) : null}
@@ -408,7 +408,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   // Shared organ donor display
   const OrganDonorView = () => (
     <div>
-      <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Heart className="h-3.5 w-3.5" /> Organ Donor</h3>
+      <Label>Organ Donor</Label>
       {patient.organ_donor ? (
         <div>
           <span className="inline-flex items-center gap-1 rounded-full bg-green-100 dark:bg-green-900/30 px-2.5 py-0.5 text-xs font-semibold text-green-700 dark:text-green-300">Yes</span>
@@ -476,8 +476,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   <ViewField label="Date of Birth" value={patient.dob ? format(new Date(patient.dob), "MMMM d, yyyy") : null} />
                   <ViewField label="Email" value={patient.email} />
                   <ViewField label="Phone" value={patient.phone} />
-                  <ViewField label="Marital Status" value={patient.marital_status} />
-                  <ViewField label="Referred By" value={patient.referred_by} />
+                   <ViewField label="Marital Status" value={patient.marital_status} />
+                   <ViewField label="Language" value="English" />
+                   <ViewField label="Referred By" value={patient.referred_by} />
                 </div>
               </div>
 
@@ -527,10 +528,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 <div className={sectionFrame + " space-y-5"}>
                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Medical Information</h3>
 
-                  {/* Physical Measurements */}
-                  <div>
-                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5 mb-2"><Activity className="h-3.5 w-3.5" /> Physical Measurements</Label>
-                    <div className="grid gap-3 sm:grid-cols-3">
+                   {/* Physical Measurements */}
+                   <div>
+                     <div className="grid gap-3 sm:grid-cols-3">
                       <ViewField label="Height (cm)" value={patient.height_cm ? `${patient.height_cm}` : undefined} />
                       <ViewField label="Weight (kg)" value={patient.weight_kg ? `${patient.weight_kg}` : undefined} />
                       <ViewField label="BMI" value={bmi || undefined} />
@@ -554,7 +554,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Surgeries and Dates */}
                   <div>
-                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Scissors className="h-3.5 w-3.5" /> Surgeries and Dates</Label>
+                     <Label>Surgeries and Dates</Label>
                     {surgeries.length === 0 ? (
                       <p className="text-xs text-muted-foreground">No surgeries recorded</p>
                     ) : (
@@ -572,7 +572,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Family History */}
                   <div>
-                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><GitBranch className="h-3.5 w-3.5" /> Family History</Label>
+                     <Label>Family History</Label>
                     {familyHistory.length === 0 ? (
                       <p className="text-xs text-muted-foreground">No family history recorded</p>
                     ) : (
@@ -776,10 +776,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               <div className={sectionFrame + " space-y-4"}>
                 <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Medical Information</h3>
 
-                {/* Physical Measurements */}
-                <div>
-                  <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Physical Measurements</Label>
-                  <div className="grid gap-3 sm:grid-cols-2">
+                 {/* Physical Measurements */}
+                 <div>
+                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="space-y-1.5"><Label htmlFor="height_cm">Height (cm)</Label><Input id="height_cm" className="text-sm" type="number" step="0.1" value={formData.height_cm} onChange={(e) => updateFormData({ height_cm: e.target.value })} placeholder="e.g., 175" /></div>
                     <div className="space-y-1.5"><Label htmlFor="weight_kg">Weight (kg)</Label><Input id="weight_kg" className="text-sm" type="number" step="0.1" value={formData.weight_kg} onChange={(e) => updateFormData({ weight_kg: e.target.value })} placeholder="e.g., 70" /></div>
                   </div>
@@ -817,7 +816,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 {/* Surgeries */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Scissors className="h-3.5 w-3.5" /> Surgeries and Dates</Label>
+                    <Label>Surgeries and Dates</Label>
                     {!showAddSurgery && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddSurgery(true)}><Plus className="h-3 w-3" />Add</Button>}
                   </div>
                   {showAddSurgery && (
@@ -854,7 +853,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 {/* Family History */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><GitBranch className="h-3.5 w-3.5" /> Family History</Label>
+                    <Label>Family History</Label>
                     {!showAddFamily && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddFamily(true)}><Plus className="h-3 w-3" />Add</Button>}
                   </div>
                   {showAddFamily && (
@@ -888,7 +887,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                 {/* Organ Donor */}
                 <div>
-                  <h4 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><Heart className="h-3.5 w-3.5" /> Organ Donor</h4>
+                  <Label className="mb-3 block">Organ Donor</Label>
                   <div className="flex items-center gap-3 mb-3">
                     <Switch checked={formData.organ_donor} onCheckedChange={(checked) => { updateFormData({ organ_donor: checked }); if (!checked) { setOrganDonorOrgans([]); setHasChanges(true); } }} />
                     <Label>{formData.organ_donor ? "Yes" : "No"}</Label>

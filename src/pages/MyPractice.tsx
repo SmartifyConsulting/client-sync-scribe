@@ -526,7 +526,7 @@ export default function MyPractice() {
       <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="relative group">
-            <Avatar className="h-16 w-16 border-2 border-[hsl(351,81%,49%)]">
+            <Avatar className="h-16 w-16 border-2 border-primary">
               <AvatarImage key={(profile as any)?.avatar_url} src={(profile as any)?.avatar_url} alt={combinedFullName || "Profile"} />
               <AvatarFallback className="text-base bg-primary/10 text-primary">{combinedFullName ? getInitials(combinedFullName) : "U"}</AvatarFallback>
             </Avatar>
@@ -606,11 +606,39 @@ export default function MyPractice() {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label>Language</Label>
-                <Select value={(profile as any)?.preferred_language || "en"} onValueChange={async (v) => { await updateProfile({ preferred_language: v } as any); toast({ title: "Language updated" }); }}>
+                <Label>Primary Language</Label>
+                <Select value={(profile as any)?.preferred_language || "en"} onValueChange={async (v) => { await updateProfile({ preferred_language: v } as any); toast({ title: "Primary language updated" }); }}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>{LANGUAGES.map(l => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}</SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-1.5 col-span-3">
+                <Label>Additional Languages</Label>
+                <div className="flex flex-wrap gap-2">
+                  {LANGUAGES.map(l => {
+                    const primaryLang = (profile as any)?.preferred_language || "en";
+                    if (l.code === primaryLang) return null;
+                    const selectedLangs: string[] = (profile as any)?.preferred_languages || [];
+                    const isSelected = selectedLangs.includes(l.code);
+                    return (
+                      <button
+                        key={l.code}
+                        type="button"
+                        onClick={async () => {
+                          const current: string[] = (profile as any)?.preferred_languages || [];
+                          const updated = isSelected ? current.filter((c: string) => c !== l.code) : [...current, l.code];
+                          await updateProfile({ preferred_languages: updated } as any);
+                        }}
+                        className={cn(
+                          "rounded-full px-3 py-1 text-xs font-medium border transition-colors",
+                          isSelected ? "bg-primary text-primary-foreground border-primary" : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50"
+                        )}
+                      >
+                        {l.name}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
             <MailboxSection userId={user?.id} />

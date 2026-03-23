@@ -237,13 +237,8 @@ export default function PatientProfile() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <RequestConnectionButton 
-              patientUserId={(patient as any).patient_user_id} 
-              patientName={patient.name} 
-            />
             {(patient as any).patient_user_id !== currentUserId && (
               <>
-                <InvitePatientDialog patientId={patient.id} patientName={patient.name} />
                 {(patient as any).patient_user_id && (
                   <EmoticonSender
                     recipientId={(patient as any).patient_user_id}
