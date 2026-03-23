@@ -312,6 +312,8 @@ export default function MyPractice() {
   }, [profile]);
 
   const combinedFullName = `${formData.first_name} ${formData.last_name}`.trim();
+  const getSignatureFontFamily = (v: string) => SIGNATURE_FONTS.find(f => f.value === v)?.fontFamily || SIGNATURE_FONTS[0].fontFamily;
+  const getSignatureColor = (v: string) => SIGNATURE_COLORS.find(c => c.value === v)?.color || "#000000";
 
   // ── Auto-save debounce ──
   useEffect(() => {
