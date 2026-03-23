@@ -420,8 +420,8 @@ export default function Settings() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-foreground text-[10px]">Patient Inactivity Threshold</p>
-                    <p className="text-[8px] text-muted-foreground">Automatically mark patients as inactive after this period without a visit</p>
+                     <p className="font-medium text-foreground text-sm">Patient Inactivity Threshold</p>
+                    <p className="text-sm text-muted-foreground">Automatically mark patients as inactive after this period without a visit</p>
                   </div>
                   <Select value={inactiveThreshold.toString()} onValueChange={(value) => saveInactiveThreshold(parseInt(value))} disabled={savingThreshold}>
                     <SelectTrigger className="w-[180px]"><SelectValue placeholder="Select period" /></SelectTrigger>
