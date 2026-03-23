@@ -156,10 +156,13 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        {!hideHeader ? (
+       {!hideHeader ? (
           <div>
-            <h1 className="text-2xl font-bold text-foreground">My Doctors</h1>
-            <p className="text-muted-foreground mt-1">
+            <div className="flex items-center gap-2">
+              <Stethoscope className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">My Doctors</h3>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
               Healthcare providers with access to your profile
             </p>
           </div>
