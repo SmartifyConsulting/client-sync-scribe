@@ -574,7 +574,7 @@ export default function MyPractice() {
               <User className="h-4 w-4 text-primary" />
               <h3 className="text-sm font-semibold text-foreground">Personal Information</h3>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-1.5">
                 <Label>First Name</Label>
                 <Input value={formData.first_name} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
@@ -584,26 +584,33 @@ export default function MyPractice() {
                 <Input value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
               </div>
               <div className="space-y-1.5">
+                <Label>Specialty</Label>
+                <Select value={formData.specialty} onValueChange={(v) => setFormData({ ...formData, specialty: v })}>
+                  <SelectTrigger><SelectValue placeholder="Select specialty" /></SelectTrigger>
+                  <SelectContent>{DOCTOR_SPECIALTIES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
                 <Label>Email</Label>
                 <Input type="email" value={user?.email || ""} disabled className="bg-muted" />
               </div>
               <div className="space-y-1.5">
                 <Label>Mobile Number</Label>
                 <div className="flex gap-2">
-                  <Select value={formData.country_code} onValueChange={(v) => setFormData({ ...formData, country_code: v })}>
+                  <Select value={formData.country_code} onValueChange={handleCountryCodeChange}>
                     <SelectTrigger className="w-[130px]"><SelectValue /></SelectTrigger>
                     <SelectContent>{COUNTRY_CODES.map(c => <SelectItem key={c.code} value={c.code}><span className="flex items-center gap-1.5">{c.flag} {c.code}</span></SelectItem>)}</SelectContent>
                   </Select>
                   <Input type="tel" value={formatPhoneNumber(formData.mobile_number)} onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value.replace(/[^0-9]/g, '') })} placeholder="82 123 4567" className="flex-1" />
                 </div>
               </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Specialty</Label>
-              <Select value={formData.specialty} onValueChange={(v) => setFormData({ ...formData, specialty: v })}>
-                <SelectTrigger><SelectValue placeholder="Select specialty" /></SelectTrigger>
-                <SelectContent>{DOCTOR_SPECIALTIES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-              </Select>
+              <div className="space-y-1.5">
+                <Label>Language</Label>
+                <Select value={(profile as any)?.preferred_language || "en"} onValueChange={async (v) => { await updateProfile({ preferred_language: v } as any); toast({ title: "Language updated" }); }}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{LANGUAGES.map(l => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
             </div>
             <MailboxSection userId={user?.id} />
           </div>
