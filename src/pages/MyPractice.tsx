@@ -449,18 +449,22 @@ export default function MyPractice() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="personal" className="w-full">
+      <Tabs defaultValue="practice" className="w-full">
         <TabsList className="flex w-full flex-wrap bg-primary justify-start">
-          <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Personal</TabsTrigger>
           <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Practice</TabsTrigger>
           <TabsTrigger value="referrals" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Referrals</TabsTrigger>
           <TabsTrigger value="pricing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Pricing</TabsTrigger>
           <TabsTrigger value="certificates" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Certificates{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}</TabsTrigger>
         </TabsList>
 
-        {/* === PERSONAL TAB === */}
-        <TabsContent value="personal" className="mt-4">
+        {/* === PRACTICE TAB (Personal + Practice merged) === */}
+        <TabsContent value="practice" className="mt-4 space-y-4">
+          {/* Personal Information Frame */}
           <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">Personal Information</h3>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label>First Name</Label>
@@ -496,11 +500,13 @@ export default function MyPractice() {
             </div>
             <MailboxSection userId={user?.id} />
           </div>
-        </TabsContent>
 
-        {/* === PRACTICE TAB === */}
-        <TabsContent value="practice" className="mt-4">
+          {/* Practice Details Frame */}
           <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">Practice Details</h3>
+            </div>
             <p className="text-sm text-muted-foreground">This information appears on your document templates and letterheads.</p>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
