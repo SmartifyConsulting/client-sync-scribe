@@ -8,6 +8,7 @@ interface StatsCardProps {
   trend?: "up" | "down" | "neutral";
   icon: LucideIcon;
   imageUrl?: string;
+  iconSize?: "default" | "large";
   className?: string;
 }
 
