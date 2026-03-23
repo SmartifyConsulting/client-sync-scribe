@@ -80,7 +80,13 @@ export default function CalendarView() {
     type: "session",
     notes: "",
   });
-  const [calendarView, setCalendarView] = useState<CalendarViewMode>("month");
+  const [calendarView, setCalendarViewState] = useState<CalendarViewMode>(
+    () => (localStorage.getItem("calendar-view") as CalendarViewMode) || "month"
+  );
+  const setCalendarView = (v: CalendarViewMode) => {
+    setCalendarViewState(v);
+    localStorage.setItem("calendar-view", v);
+  };
 
   // Fetch service price colors
   useEffect(() => {

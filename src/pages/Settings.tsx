@@ -332,52 +332,6 @@ export default function Settings() {
                 </div>
               )}
 
-              {/* Language Sub-frame */}
-              <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-foreground">Language</h3>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label>Country</Label>
-                    <Select value={(profile as any)?.country || "ZA"} onValueChange={async (v) => { await updateProfile({ country: v } as any); toast({ title: "Country updated" }); }}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="ZA">🇿🇦 South Africa</SelectItem><SelectItem value="US">🇺🇸 United States</SelectItem>
-                        <SelectItem value="GB">🇬🇧 United Kingdom</SelectItem><SelectItem value="AU">🇦🇺 Australia</SelectItem>
-                        <SelectItem value="CA">🇨🇦 Canada</SelectItem><SelectItem value="IN">🇮🇳 India</SelectItem>
-                        <SelectItem value="DE">🇩🇪 Germany</SelectItem><SelectItem value="FR">🇫🇷 France</SelectItem>
-                        <SelectItem value="AE">🇦🇪 UAE</SelectItem><SelectItem value="BW">🇧🇼 Botswana</SelectItem>
-                        <SelectItem value="NA">🇳🇦 Namibia</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Narration Voice</Label>
-                    <div className="flex gap-2">
-                      <Select value={(profile as any)?.narration_voice || "nova"} onValueChange={async (v) => { await updateProfile({ narration_voice: v } as any); toast({ title: "Voice updated" }); }}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="alloy">Alloy</SelectItem><SelectItem value="echo">Echo</SelectItem>
-                          <SelectItem value="fable">Fable</SelectItem><SelectItem value="nova">Nova</SelectItem>
-                          <SelectItem value="onyx">Onyx</SelectItem><SelectItem value="shimmer">Shimmer</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button variant="outline" size="icon" className="shrink-0" onClick={async () => {
-                        const voice = (profile as any)?.narration_voice || "nova";
-                        toast({ title: "Generating preview..." });
-                        try {
-                          const langCode = profile?.preferred_language || "en";
-                          const sampleText = SAMPLE_TEXTS[langCode] || SAMPLE_TEXTS.en;
-                          const audio = new Audio(); audio.play().catch(() => {});
-                          const { data: { session } } = await supabase.auth.getSession();
-                          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY }, body: JSON.stringify({ text: sampleText, voice }) });
-                          if (!response.ok) throw new Error('Failed');
-                          const blob = await response.blob(); const url = URL.createObjectURL(blob); audio.src = url; await audio.play(); audio.onended = () => URL.revokeObjectURL(url);
-                        } catch (err: any) { toast({ title: "Preview failed", description: err.message, variant: "destructive" }); }
-                      }}><Volume2 className="h-4 w-4" /></Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Frame 1 — Patient Management */}

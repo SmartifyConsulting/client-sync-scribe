@@ -489,7 +489,7 @@ export default function Auth() {
   // Country selector component
   const CountrySelector = () => (
     <Select value={countryCode} onValueChange={setCountryCode}>
-      <SelectTrigger className="w-[140px]">
+      <SelectTrigger className="w-[80px]">
         <SelectValue>
           {selectedCountry.flag} {selectedCountry.code}
         </SelectValue>

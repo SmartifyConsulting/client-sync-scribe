@@ -597,7 +597,7 @@ export default function MyPractice() {
                 <Label>Mobile Number</Label>
                 <div className="flex gap-2">
                   <Select value={formData.country_code} onValueChange={handleCountryCodeChange}>
-                    <SelectTrigger className="w-[130px]"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="w-[80px]"><SelectValue /></SelectTrigger>
                     <SelectContent>{COUNTRY_CODES.map(c => <SelectItem key={c.code} value={c.code}><span className="flex items-center gap-1.5">{c.flag} {c.code}</span></SelectItem>)}</SelectContent>
                   </Select>
                   <Input type="tel" value={formatPhoneNumber(formData.mobile_number)} onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value.replace(/[^0-9]/g, '') })} placeholder="82 123 4567" className="flex-1" />
@@ -722,15 +722,22 @@ export default function MyPractice() {
               <Select value={sigFormData.signature_font} onValueChange={(v) => setSigFormData({ ...sigFormData, signature_font: v })}>
                 <SelectTrigger>
                   <span style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), fontSize: '16px' }}>
-                    {combinedFullName || "Select font"}
+                    {SIGNATURE_FONTS.find(f => f.value === sigFormData.signature_font)?.label || "Select font"}
                   </span>
                 </SelectTrigger>
                 <SelectContent className="max-h-[300px]">
                   {SIGNATURE_FONTS.map(f => (
                     <SelectItem key={f.value} value={f.value} className="py-3">
-                      <span style={{ fontFamily: f.fontFamily, fontSize: '22px', lineHeight: '1.4' }}>
-                        {combinedFullName || f.label}
-                      </span>
+                      <div className="flex flex-col">
+                        <span style={{ fontFamily: f.fontFamily, fontSize: '22px', lineHeight: '1.4' }}>
+                          {f.label}
+                        </span>
+                        {combinedFullName && (
+                          <span className="text-xs text-muted-foreground" style={{ fontFamily: f.fontFamily }}>
+                            {combinedFullName}
+                          </span>
+                        )}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>

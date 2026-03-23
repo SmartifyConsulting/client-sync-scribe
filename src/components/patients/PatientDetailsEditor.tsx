@@ -433,7 +433,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
                 {/* Physical Measurements */}
                 <div>
-                  <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Physical Measurements</h4>
+                  <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Physical Measurements</Label>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
                       <Ruler className="h-4 w-4 text-primary" />
@@ -453,13 +453,13 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
                 {/* Blood Type */}
                 <div>
-                  <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Droplets className="h-3.5 w-3.5" /> Blood Type</h4>
+                  <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Droplets className="h-3.5 w-3.5" /> Blood Type</Label>
                   <p className="text-sm text-foreground">{patient.blood_type || "Not recorded"}</p>
                 </div>
 
                 {/* Allergies */}
                 <div>
-                  <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</h4>
+                  <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</Label>
                   <div className="rounded-lg bg-muted/30 p-3 border border-border/50">
                     <p className="text-sm text-foreground">{patient.allergies || "None recorded"}</p>
                   </div>
@@ -467,7 +467,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
                 {/* Chronic Medication */}
                 <div>
-                  <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Chronic Medication</h4>
+                  <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Chronic Medication</Label>
                   {patient.is_chronic ? (
                     <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive"><Pill className="h-3 w-3" />Chronic</span>
                   ) : (
@@ -477,7 +477,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
                 {/* Surgeries and Dates */}
                 <div>
-                  <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Scissors className="h-3.5 w-3.5" /> Surgeries and Dates</h4>
+                  <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Scissors className="h-3.5 w-3.5" /> Surgeries and Dates</Label>
                   {surgeries.length === 0 ? (
                     <p className="text-xs text-muted-foreground">No surgeries recorded</p>
                   ) : (
@@ -495,7 +495,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
                 {/* Family History */}
                 <div>
-                  <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><GitBranch className="h-3.5 w-3.5" /> Family History</h4>
+                  <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><GitBranch className="h-3.5 w-3.5" /> Family History</Label>
                   {familyHistory.length === 0 ? (
                     <p className="text-xs text-muted-foreground">No family history recorded</p>
                   ) : (
@@ -556,13 +556,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
           {/* === MY DOCUMENTS TAB (only for self-service) === */}
           {isSelfService && (
-            <TabsContent value="documents" className="mt-4">
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">My Documents</h2>
-                <p className="text-xs text-muted-foreground">All your prescriptions, invoices, certificates and uploaded files</p>
-              </div>
+             <TabsContent value="documents" className="mt-4">
               <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-                <PatientDocuments hideHeader />
+                <PatientDocuments hideHeader={false} />
               </Suspense>
             </TabsContent>
           )}
@@ -702,7 +698,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
               {/* Physical Measurements */}
               <div>
-                <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Physical Measurements</h4>
+                <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Physical Measurements</Label>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1"><Label className="text-xs" htmlFor="height_cm">Height (cm)</Label><Input id="height_cm" className="text-sm" type="number" step="0.1" value={formData.height_cm} onChange={(e) => updateFormData({ height_cm: e.target.value })} placeholder="e.g., 175" /></div>
                   <div className="space-y-1"><Label className="text-xs" htmlFor="weight_kg">Weight (kg)</Label><Input id="weight_kg" className="text-sm" type="number" step="0.1" value={formData.weight_kg} onChange={(e) => updateFormData({ weight_kg: e.target.value })} placeholder="e.g., 70" /></div>
@@ -711,7 +707,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
               {/* Blood Type */}
               <div>
-                <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Droplets className="h-3.5 w-3.5" /> Blood Type</h4>
+                <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Droplets className="h-3.5 w-3.5" /> Blood Type</Label>
                 <Select value={formData.blood_type} onValueChange={(value) => updateFormData({ blood_type: value })}>
                   <SelectTrigger className="w-[180px] text-sm"><SelectValue placeholder="Select blood type" /></SelectTrigger>
                   <SelectContent>
@@ -722,13 +718,13 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
               {/* Allergies */}
               <div>
-                <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</h4>
+                <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</Label>
                 <Textarea id="allergies" className="text-sm" value={formData.allergies} onChange={(e) => updateFormData({ allergies: e.target.value })} placeholder="List any allergies (medications, food, etc.)" rows={2} />
               </div>
 
               {/* Chronic Medication */}
               <div>
-                <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Chronic Medication</h4>
+                <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Chronic Medication</Label>
                 <div className="flex items-center space-x-2">
                   <Checkbox id="is_chronic" checked={patient.is_chronic || false} onCheckedChange={(checked) => { onSave({ is_chronic: checked as boolean }); }} />
                   <Label htmlFor="is_chronic" className="text-xs">Patient is on chronic medication</Label>
@@ -741,7 +737,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
               {/* Surgeries */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Scissors className="h-3.5 w-3.5" /> Surgeries and Dates</h4>
+                  <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Scissors className="h-3.5 w-3.5" /> Surgeries and Dates</Label>
                   {!showAddSurgery && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddSurgery(true)}><Plus className="h-3 w-3" />Add</Button>}
                 </div>
                 {showAddSurgery && (
@@ -778,7 +774,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
               {/* Family History */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><GitBranch className="h-3.5 w-3.5" /> Family History</h4>
+                  <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><GitBranch className="h-3.5 w-3.5" /> Family History</Label>
                   {!showAddFamily && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddFamily(true)}><Plus className="h-3 w-3" />Add</Button>}
                 </div>
                 {showAddFamily && (
