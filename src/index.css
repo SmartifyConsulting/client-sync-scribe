@@ -257,6 +257,11 @@
     display: none;
   }
 
+  /* Reduce muted description text by 2 sizes */
+  .text-muted-foreground.text-sm {
+    font-size: 0.625rem;
+  }
+
   /* Subtle hover lift */
   .hover-lift {
     @apply transition-all duration-300;
