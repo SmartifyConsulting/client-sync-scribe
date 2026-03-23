@@ -557,6 +557,7 @@ export default function MyPractice() {
           <TabsTrigger value="certificates" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Certificates{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}</TabsTrigger>
           <TabsTrigger value="pricing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Pricing</TabsTrigger>
           <TabsTrigger value="invoices" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Invoices</TabsTrigger>
+          <TabsTrigger value="roundtables" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Round Tables</TabsTrigger>
           <TabsTrigger value="templates" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Templates</TabsTrigger>
         </TabsList>
 
