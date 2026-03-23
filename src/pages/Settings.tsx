@@ -653,7 +653,7 @@ export default function Settings() {
         {/* === BILLING TAB (two distinct frames) === */}
         <TabsContent value="billing" className="mt-4 space-y-4">
           {/* Subscription Frame */}
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <CreditCard className="h-5 w-5 text-primary" />
               <h2 className="text-lg font-semibold text-foreground">Subscription</h2>
