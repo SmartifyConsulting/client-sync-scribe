@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart, User, MapPin, Users, Briefcase, ShieldCheck, Store, Activity, Droplets, Scissors, GitBranch } from "lucide-react";
+import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart, User, MapPin, Users, Briefcase, ShieldCheck, Store, Activity, Droplets, Scissors, GitBranch, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
 import { Patient, Surgery, Pharmacy, FamilyHistoryEntry } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
+import { ShareAppDialog } from "@/components/ShareAppDialog";
 
 const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
 const MyDoctors = lazy(() => import("@/pages/patient/MyDoctors"));
@@ -337,9 +338,21 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
       <div className="rounded-xl border border-primary bg-card p-4 md:p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-foreground">My Details</h2>
-          <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={() => setIsEditing(true)}>
-            <Pencil className="h-3.5 w-3.5" /> Edit
-          </Button>
+          <div className="flex items-center gap-2">
+            {isSelfService && (
+              <ShareAppDialog
+                prefillEmail=""
+                trigger={
+                  <Button variant="outline" size="sm" className="gap-2 text-xs">
+                    <Share2 className="h-3.5 w-3.5" /> Share App
+                  </Button>
+                }
+              />
+            )}
+            <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={() => setIsEditing(true)}>
+              <Pencil className="h-3.5 w-3.5" /> Edit
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="personal">
@@ -557,8 +570,12 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
           {/* === MY DOCTORS TAB (only for self-service) === */}
           {isSelfService && (
             <TabsContent value="doctors" className="mt-4">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold text-foreground">My Doctors</h2>
+                <p className="text-xs text-muted-foreground">Healthcare providers with access to your profile</p>
+              </div>
               <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-                <MyDoctors />
+                <MyDoctors hideHeader />
               </Suspense>
             </TabsContent>
           )}

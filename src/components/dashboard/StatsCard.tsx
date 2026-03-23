@@ -51,7 +51,7 @@ export function StatsCard({
           iconSize === "large" ? "h-16 w-16" : "h-14 w-14"
         )}>
           {imageUrl ? (
-            <img src={imageUrl} alt={title} className={iconSize === "large" ? "h-9 w-9 object-contain" : "h-7 w-7 object-contain"} />
+            <img src={imageUrl} alt={title} className={iconSize === "large" ? "h-11 w-11 object-contain" : "h-7 w-7 object-contain"} />
           ) : (
             <Icon className={iconSize === "large" ? "h-9 w-9 text-primary" : "h-7 w-7 text-primary"} />
           )}

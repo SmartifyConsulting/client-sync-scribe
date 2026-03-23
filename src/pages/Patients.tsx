@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock, X, CalendarIcon, Upload, Pill, Send } from "lucide-react";
+import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock, X, CalendarIcon, Upload, Pill, Send, Share2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -44,6 +44,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
+import { ShareAppDialog } from "@/components/ShareAppDialog";
 
 export default function Patients({ hideHeader = false }: { hideHeader?: boolean }) {
   const { user } = useAuth();
@@ -378,6 +379,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           </div>
         )}
         <div className="flex gap-2">
+          <ShareAppDialog />
           <PatientImportDialog 
             trigger={
               <Button variant="outline" className="gap-2">
@@ -391,7 +393,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
-                Add Patient
+                Add New Patient
               </Button>
             </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh]">
@@ -653,7 +655,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
 
                 <Button onClick={handleCreatePatient} className="w-full" disabled={creating}>
                   {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Add Patient
+                  Add New Patient
                 </Button>
               </div>
             </ScrollArea>
