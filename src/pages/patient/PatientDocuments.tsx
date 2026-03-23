@@ -768,33 +768,33 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
             const isImageDoc = doc.type === "image" && doc.mediaUrl;
             return (
               <Card key={`${doc.source}-${doc.id}`} className={`hover:shadow-sm transition-shadow border-l-4 ${config.borderColor}`}>
-                <CardContent className="flex items-center gap-4 py-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                <CardContent className="flex items-center gap-3 py-2.5">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                     {isImageDoc ? (
                       <img
                         src={doc.mediaUrl}
                         alt={doc.name}
-                        className="h-10 w-10 rounded-lg object-cover"
+                        className="h-8 w-8 rounded-lg object-cover"
                       />
                     ) : (
-                      <IconComponent className="h-5 w-5 text-primary" />
+                      <IconComponent className="h-4 w-4 text-primary" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground truncate">
+                    <p className="text-sm font-medium text-foreground truncate">
                       {doc.name}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                      <span className={`inline-flex items-center justify-center h-5 w-5 rounded-full ${config.color}`} title={config.label}>
-                        <IconComponent className="h-3 w-3" />
+                      <span className={`inline-flex items-center justify-center h-4 w-4 rounded-full ${config.color}`} title={config.label}>
+                        <IconComponent className="h-2.5 w-2.5" />
                       </span>
                       {doc.aiAnalysis && (
-                        <Badge variant="secondary" className="text-xs border-0 bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400 gap-1">
-                          <Sparkles className="h-3 w-3" />
-                          AI Analysed
+                        <Badge variant="secondary" className="text-[10px] h-4 border-0 bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400 gap-0.5 px-1">
+                          <Sparkles className="h-2.5 w-2.5" />
+                          AI
                         </Badge>
                       )}
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-[10px] text-muted-foreground">
                         {format(new Date(doc.date), "dd MMM yyyy")}
                       </span>
                     </div>
