@@ -51,6 +51,7 @@ const patientNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard" },
   { icon: User, label: "My Holarchive", to: "/patient/details" },
   { icon: Calendar, label: "My Calendar", to: "/patient/calendar" },
+  { icon: CheckSquare, label: "To-Do List", to: "/patient/tasks" },
   { icon: Gift, label: "My Rewards", to: "/patient/rewards" },
 ];
 
