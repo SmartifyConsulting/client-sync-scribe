@@ -91,7 +91,6 @@ const SIGNATURE_FONTS = [
   { value: "great-vibes", label: "Great Vibes", fontFamily: "'Great Vibes', serif" },
   { value: "herr-von-muellerhoff", label: "Herr Von Muellerhoff", fontFamily: "'Herr Von Muellerhoff', serif" },
   { value: "homemade-apple", label: "Homemade Apple", fontFamily: "'Homemade Apple', serif" },
-  { value: "kalam", label: "Kalam", fontFamily: "'Kalam', serif" },
   { value: "mr-dafoe", label: "Mr Dafoe", fontFamily: "'Mr Dafoe', serif" },
   { value: "petit-formal-script", label: "Petit Formal Script", fontFamily: "'Petit Formal Script', serif" },
   { value: "pinyon-script", label: "Pinyon Script", fontFamily: "'Pinyon Script', serif" },
@@ -723,14 +722,14 @@ export default function MyPractice() {
               <Select value={sigFormData.signature_font} onValueChange={(v) => setSigFormData({ ...sigFormData, signature_font: v })}>
                 <SelectTrigger>
                   <span style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), fontSize: '16px' }}>
-                    {SIGNATURE_FONTS.find(f => f.value === sigFormData.signature_font)?.label || "Select font"}
+                    {combinedFullName || "Select font"}
                   </span>
                 </SelectTrigger>
                 <SelectContent className="max-h-[300px]">
                   {SIGNATURE_FONTS.map(f => (
                     <SelectItem key={f.value} value={f.value} className="py-3">
                       <span style={{ fontFamily: f.fontFamily, fontSize: '22px', lineHeight: '1.4' }}>
-                        {f.label}
+                        {combinedFullName || f.label}
                       </span>
                     </SelectItem>
                   ))}

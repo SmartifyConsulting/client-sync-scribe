@@ -7,6 +7,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Self-hosted signature fonts */
+@font-face { font-family: 'Allura'; src: url('/fonts/signatures/Allura-Regular.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Great Vibes'; src: url('/fonts/signatures/GreatVibes-Regular.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Herr Von Muellerhoff'; src: url('/fonts/signatures/HerrVonMuellerhoff-Regular.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Homemade Apple'; src: url('/fonts/signatures/HomemadeApple-Regular.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Mr Dafoe'; src: url('/fonts/signatures/MrDafoe-Regular.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Petit Formal Script'; src: url('/fonts/signatures/PetitFormalScript-Regular.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Pinyon Script'; src: url('/fonts/signatures/PinyonScript-Regular.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Reenie Beanie'; src: url('/fonts/signatures/ReenieBeanie-Regular.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Rock Salt'; src: url('/fonts/signatures/RockSalt-Regular.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Sacramento'; src: url('/fonts/signatures/Sacramento-Regular.ttf') format('truetype'); font-display: swap; }
+
 /* Holarc Health - Clean Modern Design */
 
 @layer base {
