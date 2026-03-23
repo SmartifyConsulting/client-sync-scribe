@@ -71,6 +71,8 @@ interface UnifiedDocument {
   mediaUrl?: string;
   aiAnalysis?: string | null;
   aiAnalyzedAt?: string | null;
+  emailSentAt?: string | null;
+  patientId?: string | null;
 }
 
 const DOC_TYPE_CONFIG: Record<
