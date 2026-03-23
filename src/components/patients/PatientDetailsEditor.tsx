@@ -408,7 +408,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   // Shared organ donor display
   const OrganDonorView = () => (
     <div>
-      <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Heart className="h-3.5 w-3.5" /> Organ Donor</h3>
+      <Label>Organ Donor</Label>
       {patient.organ_donor ? (
         <div>
           <span className="inline-flex items-center gap-1 rounded-full bg-green-100 dark:bg-green-900/30 px-2.5 py-0.5 text-xs font-semibold text-green-700 dark:text-green-300">Yes</span>
