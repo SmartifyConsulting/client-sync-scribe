@@ -1,56 +1,51 @@
 
 
-# Plan: Language Field, Nav Rename, Prescription Repeats, and Auto-Document Workflow Fixes
+# Task Notification, Moola Apps Admin Enhancements
+
+## Summary
+Three changes: (1) Send notification to patients when a doctor assigns them a task, (2) enhance the Moola Partner Apps admin with creator and signup link fields, (3) display apps with logo, name, creator, and signup link.
+
+---
 
 ## Changes
 
-### 1. Merge "Primary Language" + "Additional Languages" into single "Language" multi-checkbox field
-**File:** `src/pages/MyPractice.tsx` (lines 608-642)
-- Rename label from "Primary Language" to "Language"
-- Remove the separate "Additional Languages" section
-- Replace both with a single multi-checkbox chip toggle (like current Additional Languages), but using the `preferred_languages` array field to store all selected languages
-- Default auto-select "English" if none selected
-- Remove usage of `preferred_language` (single) field; consolidate into `preferred_languages` array only
+### 1. Notify patients when assigned a task
+**File:** `src/pages/TodoList.tsx` — `addTask` function (line ~215)
+- After inserting a todo with a `patient_id`, look up the patient's `patient_user_id`
+- Insert a notification for the patient: `"📋 You've been assigned a new task: {title}"`
+- Also applies to AI-generated tasks in `useSessions.ts` that have a `patient_id`
 
-### 2. Rename "My Practice" to "My Holarprac" and reorder in sidebar
-**Files:** `src/components/layout/Sidebar.tsx` (line 42), `src/components/layout/BottomNav.tsx` (if applicable)
-- Change label from `"My Practice"` to `"My Holarprac"`
-- Move it below "My Holarchive" in `doctorNavItems` array (swap lines 42-43 order)
+**File:** `src/hooks/useSessions.ts` — wherever todos with `patient_id` are created
+- After inserting a patient-linked todo, insert a notification for `patient_user_id`
 
-### 3. Add "Repeats" field to Prescription medication rows
-**File:** `src/components/sessions/PrescriptionEditor.tsx`
-- Add `repeats: string` to `MedicationItem` interface
-- Add a "Repeats" input field in each medication row (e.g., "0", "1", "3" repeats)
-- Include repeats in `generateContent()` output
-- When AI auto-generates prescriptions (`useSessions.ts`), pass through `repeats` data from `summaryData.prescription` if mentioned in the session
+### 2. Extend `moola_partner_apps` table with `creator` and `signup_url` columns
+**Migration:**
+```sql
+ALTER TABLE public.moola_partner_apps 
+  ADD COLUMN IF NOT EXISTS creator text,
+  ADD COLUMN IF NOT EXISTS signup_url text;
+```
 
-### 4. Medical Certificate: Approve & Save (not Send), auto-generate as Review & Send todo
-**File:** `src/components/sessions/MedicalCertificateEditor.tsx`
-- Change save button label from "Send" to "Save" if it currently says Send
-- Already auto-generated in `useSessions.ts` (lines 466-544) with `is_draft: true` and `document_review` todo — this is correct
-- Verify the editor's save action does NOT auto-send emails; it should only save the document
+### 3. Enhance Moola Apps Admin UI
+**File:** `src/pages/admin/GamificationAdmin.tsx`
+- Add "Creator" and "Signup URL" fields to the Add App dialog
+- Display Logo (as image), App Name, Creator, and Signup Link in the table
+- Add edit capability for existing apps (update name, logo, creator, signup_url)
 
-### 5. Auto-generate invoice after each session as a Review & Send todo
-**File:** `src/hooks/useSessions.ts` (after referral letter block, ~line 628)
-- After session completion, always auto-generate a draft invoice document linked to the session
-- Insert into `documents` table with `is_draft: true`, `template_name: 'Invoice'`
-- Create a `document_review` todo: `"Review & Send: Invoice - {PatientName}"`
-- Use the doctor's Invoice template if available, with placeholder replacements
-- Documents must NEVER be auto-sent — only saved as drafts for manual review
+### 4. Update patient/doctor Moola Apps views
+**Files:** `src/pages/patient/MyRewards.tsx`, `src/pages/doctor/DoctorRewards.tsx`
+- Display partner apps with logo image, app name, creator, and clickable signup link
 
-### 6. Ensure all auto-generated documents are never auto-sent
-**File:** `src/hooks/useSessions.ts`
-- Verify all auto-created documents have `is_draft: true` (already the case)
-- Verify no `email_sent_at` is set on auto-creation (already the case)
-- No code change needed here — current implementation is correct
+---
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/pages/MyPractice.tsx` | Merge language fields into single "Language" multi-checkbox |
-| `src/components/layout/Sidebar.tsx` | Rename "My Practice" → "My Holarprac", move below "My Holarchive" |
-| `src/components/sessions/PrescriptionEditor.tsx` | Add "Repeats" field to medication rows |
-| `src/hooks/useSessions.ts` | Add auto-invoice generation after session; include repeats in prescription auto-gen |
-| `src/components/sessions/MedicalCertificateEditor.tsx` | Verify save button says "Save" not "Send" |
+| Migration | Add `creator`, `signup_url` columns to `moola_partner_apps` |
+| `src/pages/admin/GamificationAdmin.tsx` | Enhanced Partner Apps admin with logo, creator, signup URL fields |
+| `src/pages/TodoList.tsx` | Notify patient when task is assigned |
+| `src/hooks/useSessions.ts` | Notify patient for AI-generated tasks |
+| `src/pages/patient/MyRewards.tsx` | Show app logo, creator, signup link |
+| `src/pages/doctor/DoctorRewards.tsx` | Show app logo, creator, signup link |
 
