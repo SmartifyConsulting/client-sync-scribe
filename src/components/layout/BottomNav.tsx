@@ -33,7 +33,7 @@ export function BottomNav() {
   const navItems = isPatient ? patientNavItems : doctorNavItems;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg safe-area-pb md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg safe-area-pb md:hidden font-size-preserve">
       <div className="flex items-center justify-around px-2 py-2">
         {navItems.map((item) => (
           <NavLink
