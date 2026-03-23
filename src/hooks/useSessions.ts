@@ -25,6 +25,22 @@ export interface Session {
   };
 }
 
+// Helper to notify patient when a task is assigned to them
+const notifyPatientOfTask = async (patientId: string, taskTitle: string, taskId: string) => {
+  try {
+    const { data: patient } = await supabase.from('patients').select('patient_user_id').eq('id', patientId).maybeSingle();
+    if (patient?.patient_user_id) {
+      await supabase.from('notifications').insert({
+        user_id: patient.patient_user_id,
+        title: `📋 New task assigned: ${taskTitle}`,
+        description: 'You have been assigned a new task by your healthcare provider.',
+        type: 'task_assigned',
+        reference_id: taskId,
+      });
+    }
+  } catch (err) { console.error('Error sending task notification:', err); }
+};
+
 // Helper to transform database session to our Session type
 const transformSession = (dbSession: any): Session => ({
   ...dbSession,
