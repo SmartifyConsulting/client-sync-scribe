@@ -733,6 +733,23 @@ function NotificationList({
                 </Button>
               </div>
             )}
+
+            {/* Rate visit button for session_completed notifications */}
+            {notification.type === 'session_completed' && !notification.is_read && (
+              <div className="flex items-center gap-2 mt-3">
+                <Button
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRateDoctor(notification);
+                  }}
+                  className="gap-1.5 bg-yellow-500 hover:bg-yellow-600 text-white"
+                >
+                  <Star className="h-3.5 w-3.5" />
+                  Rate Visit
+                </Button>
+              </div>
+            )}
           </div>
           {!notification.is_read && notification.type !== 'invitation_received' && (
             <div className="h-2 w-2 rounded-full bg-primary shrink-0 mt-2" />
