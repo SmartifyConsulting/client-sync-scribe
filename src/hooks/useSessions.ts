@@ -274,6 +274,12 @@ const completeSession = async (
               status: 'pending',
             }));
             await supabase.from('todos').insert(todosToInsert);
+            // Notify patient about assigned tasks
+            if (patientId) {
+              for (const point of summaryData.action_points) {
+                await notifyPatientOfTask(patientId, point, sessionId);
+              }
+            }
           } else {
             console.log('Auto-execution result:', processResult);
             const autoCount = processResult?.results?.filter((r: any) => r.auto_executed).length || 0;
