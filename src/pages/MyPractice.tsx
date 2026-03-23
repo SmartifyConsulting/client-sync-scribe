@@ -67,6 +67,47 @@ const CURRENCIES = [
   { code: "LSL", symbol: "M", name: "Lesotho Loti" },
 ];
 
+const LANGUAGES = [
+  { code: "af", name: "Afrikaans" }, { code: "ar", name: "Arabic" }, { code: "nl", name: "Dutch" },
+  { code: "en", name: "English" }, { code: "fr", name: "French" }, { code: "de", name: "German" },
+  { code: "el", name: "Greek" }, { code: "he", name: "Hebrew" }, { code: "hi", name: "Hindi" },
+  { code: "id", name: "Indonesian" }, { code: "it", name: "Italian" }, { code: "ja", name: "Japanese" },
+  { code: "ko", name: "Korean" }, { code: "ms", name: "Malay" }, { code: "zh", name: "Mandarin Chinese" },
+  { code: "pl", name: "Polish" }, { code: "pt", name: "Portuguese" }, { code: "ru", name: "Russian" },
+  { code: "st", name: "Sotho" }, { code: "es", name: "Spanish" }, { code: "sw", name: "Swahili" },
+  { code: "th", name: "Thai" }, { code: "tn", name: "Tswana" }, { code: "tr", name: "Turkish" },
+  { code: "uk", name: "Ukrainian" }, { code: "vi", name: "Vietnamese" }, { code: "xh", name: "Xhosa" },
+  { code: "zu", name: "Zulu" },
+];
+
+const COUNTRY_CODE_TO_LANGUAGE: Record<string, string> = {
+  "+27": "en", "+1": "en", "+44": "en", "+267": "en", "+264": "en",
+  "+268": "en", "+266": "st", "+258": "pt", "+263": "en",
+  "+61": "en", "+91": "hi", "+49": "de", "+33": "fr", "+971": "ar",
+};
+
+const SIGNATURE_FONTS = [
+  { value: "allura", label: "Allura", fontFamily: "'Allura', serif" },
+  { value: "great-vibes", label: "Great Vibes", fontFamily: "'Great Vibes', serif" },
+  { value: "herr-von-muellerhoff", label: "Herr Von Muellerhoff", fontFamily: "'Herr Von Muellerhoff', serif" },
+  { value: "homemade-apple", label: "Homemade Apple", fontFamily: "'Homemade Apple', serif" },
+  { value: "kalam", label: "Kalam", fontFamily: "'Kalam', serif" },
+  { value: "mr-dafoe", label: "Mr Dafoe", fontFamily: "'Mr Dafoe', serif" },
+  { value: "petit-formal-script", label: "Petit Formal Script", fontFamily: "'Petit Formal Script', serif" },
+  { value: "pinyon-script", label: "Pinyon Script", fontFamily: "'Pinyon Script', serif" },
+  { value: "reenie-beanie", label: "Reenie Beanie", fontFamily: "'Reenie Beanie', serif" },
+  { value: "rock-salt", label: "Rock Salt", fontFamily: "'Rock Salt', serif" },
+  { value: "sacramento", label: "Sacramento", fontFamily: "'Sacramento', serif" },
+];
+
+const SIGNATURE_COLORS = [
+  { value: "black", label: "Black", color: "#000000" },
+  { value: "teal", label: "Teal", color: "#104861" },
+  { value: "navy", label: "Navy", color: "#1a2744" },
+  { value: "dark-red", label: "Dark Red", color: "#8B0000" },
+  { value: "dark-green", label: "Dark Green", color: "#006400" },
+];
+
 // ── Interfaces ──────────────────────────────────────────────────────
 interface Partner {
   id: string;
