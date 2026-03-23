@@ -28,7 +28,7 @@ const ORGAN_OPTIONS = [
   "Heart", "Lungs", "Kidneys", "Liver", "Pancreas", "Corneas", "Skin", "Bone Marrow", "Intestines",
 ];
 
-const sectionFrame = "rounded-xl border border-border bg-card p-4 shadow-sm";
+const sectionFrame = "rounded-xl border border-primary bg-card p-4 shadow-sm";
 
 export function PatientDetailsEditor({ patient, onSave, isSelfService = false }: PatientDetailsEditorProps) {
   const { toast } = useToast();
