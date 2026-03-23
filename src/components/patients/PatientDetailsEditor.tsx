@@ -661,7 +661,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   <p className="text-xs text-muted-foreground">History of your consultations</p>
                 </div>
                 <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-                  <SessionHistoryTableLazy sessions={[]} patientId={patient.id} />
+                  <SessionHistoryTableLazy sessions={[]} patientId={patient.id} patientName={patient.name} />
                 </Suspense>
               </TabsContent>
             )}
