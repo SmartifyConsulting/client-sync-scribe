@@ -428,9 +428,77 @@ serve(async (req) => {
 
           console.log("Subscription updated:", isTrial ? "trial_active" : "active");
 
+          // Award referral Moolas if this user was referred
+          if (!isTrial) {
+            try {
+              const userEmail = await getUserEmail(supabase, subscription.user_id);
+              if (userEmail) {
+                // Check if this user was referred via user_invitations
+                const { data: invitation } = await supabase
+                  .from("user_invitations")
+                  .select("sender_id, status")
+                  .eq("recipient_email", userEmail)
+                  .in("status", ["accepted", "pending"])
+                  .order("created_at", { ascending: false })
+                  .limit(1)
+                  .maybeSingle();
+
+                if (invitation?.sender_id) {
+                  const referrerId = invitation.sender_id;
+                  const REFERRAL_MOOLAS = 50;
+
+                  // Check referrer's role
+                  const { data: referrerRole } = await supabase
+                    .from("user_roles")
+                    .select("role")
+                    .eq("user_id", referrerId)
+                    .maybeSingle();
+
+                  // Award to referrer
+                  if (referrerRole?.role === "patient") {
+                    // Get referrer's patient record
+                    const { data: referrerPatient } = await supabase
+                      .from("patients")
+                      .select("id")
+                      .eq("patient_user_id", referrerId)
+                      .limit(1)
+                      .maybeSingle();
+                    if (referrerPatient) {
+                      await supabase.from("patient_rewards").insert({
+                        patient_id: referrerPatient.id,
+                        awarded_by: referrerId,
+                        lollipops_count: REFERRAL_MOOLAS,
+                        reward_type: "referral",
+                        visit_category: "app_referral",
+                      });
+                    }
+                  } else {
+                    await supabase.from("doctor_rewards").insert({
+                      doctor_id: referrerId,
+                      moolas_count: REFERRAL_MOOLAS,
+                      reward_type: "referral",
+                      description: `Referral reward: ${userEmail} subscribed`,
+                    });
+                  }
+
+                  // Update invitation status
+                  await supabase
+                    .from("user_invitations")
+                    .update({ status: "accepted" })
+                    .eq("sender_id", referrerId)
+                    .eq("recipient_email", userEmail);
+
+                  console.log("Referral Moolas awarded to:", referrerId);
+                }
+              }
+            } catch (refErr) {
+              console.error("Error awarding referral Moolas:", refErr);
+            }
+          }
+
           // Send activation email
-          const userEmail = await getUserEmail(supabase, subscription.user_id);
-          if (userEmail) {
+          const userEmailForNotif = await getUserEmail(supabase, subscription.user_id);
+          if (userEmailForNotif) {
             const emailSubject = isTrial 
               ? "Welcome to Holarc - Your 7-Day Free Trial Has Started!"
               : "Welcome to Holarc - Subscription Activated!";
@@ -455,7 +523,7 @@ serve(async (req) => {
               <p>Best regards,<br>The Holarc Team</p>
             `;
 
-            await sendSubscriptionEmail(userEmail, emailSubject, emailContent);
+            await sendSubscriptionEmail(userEmailForNotif, emailSubject, emailContent);
           }
         }
 

@@ -2,12 +2,13 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Loader2, Check, Camera, Upload, Plus, Trash2, Pencil, X, Phone, Copy,
   Mail, Save, Award, Bold, Italic, UserPlus, ExternalLink, User, Building2,
-  DollarSign, GraduationCap, Stethoscope,
+  DollarSign, GraduationCap, Stethoscope, Users2,
 } from "lucide-react";
 import ReferralDoctors from "@/pages/ReferralDoctors";
 import Patients from "@/pages/Patients";
 import DoctorInvoices from "@/pages/doctor/Invoices";
 import Documents from "@/pages/Documents";
+import { DoctorRoundTables } from "@/components/doctor/DoctorRoundTables";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -557,6 +558,7 @@ export default function MyPractice() {
           <TabsTrigger value="certificates" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Certificates{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}</TabsTrigger>
           <TabsTrigger value="pricing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Pricing</TabsTrigger>
           <TabsTrigger value="invoices" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Invoices</TabsTrigger>
+          <TabsTrigger value="roundtables" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Round Tables</TabsTrigger>
           <TabsTrigger value="templates" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Templates</TabsTrigger>
         </TabsList>
 
@@ -949,6 +951,18 @@ export default function MyPractice() {
         {/* === INVOICES TAB === */}
         <TabsContent value="invoices" className="mt-4">
           <DoctorInvoices hideHeader />
+        </TabsContent>
+
+        {/* === MY ROUND TABLES TAB === */}
+        <TabsContent value="roundtables" className="mt-4">
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
+            <div className="flex items-center gap-2">
+              <Users2 className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">My Round Tables</h3>
+            </div>
+            <p className="text-muted-foreground text-[12px]">All round tables you have contributed to, with alerts for new activity.</p>
+            <DoctorRoundTables />
+          </div>
         </TabsContent>
 
         {/* === TEMPLATES TAB === */}

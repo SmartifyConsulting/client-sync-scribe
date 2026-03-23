@@ -157,6 +157,27 @@ export function RoundTable({ patientId, patientName, onUnreadCountChange, hideHe
 
       if (error) throw error;
 
+      // Notify other doctors who have contributed to this round table
+      const { data: otherDoctors } = await supabase
+        .from('round_table_notes')
+        .select('doctor_id')
+        .eq('patient_id', patientId)
+        .neq('doctor_id', currentUserId);
+
+      if (otherDoctors) {
+        const uniqueDoctorIds = [...new Set(otherDoctors.map(d => d.doctor_id))];
+        for (const doctorId of uniqueDoctorIds) {
+          await supabase.from('notifications').insert({
+            user_id: doctorId,
+            title: `New Round Table note for ${patientName}`,
+            description: `${currentUserName} added a note to ${patientName}'s Round Table`,
+            type: 'round_table',
+            reference_id: patientId,
+            is_read: false,
+          });
+        }
+      }
+
       toast({
         title: "Note added",
         description: "Your note has been added to the Round Table",
