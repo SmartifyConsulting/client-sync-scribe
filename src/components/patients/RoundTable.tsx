@@ -212,17 +212,19 @@ export function RoundTable({ patientId, patientName, onUnreadCountChange, hideHe
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-          <Users className="h-5 w-5 text-primary" />
+      {!hideHeader && (
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <Users className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground">Round Table</h3>
+            <p className="text-xs text-muted-foreground">
+              Collaborative notes from all doctors on {patientName}'s care team
+            </p>
+          </div>
         </div>
-        <div>
-          <h3 className="font-semibold text-foreground">Round Table</h3>
-          <p className="text-xs text-muted-foreground">
-            Collaborative notes from all doctors on {patientName}'s care team
-          </p>
-        </div>
-      </div>
+      )}
 
       {/* New Note Input */}
       <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">

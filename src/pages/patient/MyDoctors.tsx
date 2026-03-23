@@ -156,12 +156,14 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">My Doctors</h1>
-          <p className="text-muted-foreground mt-1">
-            Healthcare providers with access to your profile
-          </p>
-        </div>
+        {!hideHeader ? (
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">My Doctors</h1>
+            <p className="text-muted-foreground mt-1">
+              Healthcare providers with access to your profile
+            </p>
+          </div>
+        ) : <div />}
         <InviteDoctorDialog />
       </div>
 
