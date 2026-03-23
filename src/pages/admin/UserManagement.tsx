@@ -153,7 +153,7 @@ export default function UserManagement() {
             <Users className="h-7 w-7 text-primary" />
             User Management
           </h1>
-          <p className="mt-1 text-muted-foreground">View and edit registered users and their roles</p>
+          <p className="mt-1 text-muted-foreground text-[12px]">View and edit registered users and their roles</p>
         </div>
         <div className="flex gap-2">
           <Button

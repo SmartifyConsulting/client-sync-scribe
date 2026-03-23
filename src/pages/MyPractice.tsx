@@ -513,7 +513,7 @@ export default function MyPractice() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">My Practice</h1>
-          <p className="text-sm text-muted-foreground">Manage your personal and practice information</p>
+          <p className="text-muted-foreground text-[12px]">Manage your personal and practice information</p>
         </div>
         <div className="text-sm text-muted-foreground flex items-center gap-1.5">
           {savedStatus === 'saving' && <><Loader2 className="h-3.5 w-3.5 animate-spin" /><span>Saving...</span></>}
@@ -882,7 +882,7 @@ export default function MyPractice() {
               <h3 className="text-sm font-semibold text-foreground">Certificates</h3>
             </div>
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Track your continuing professional development certificates and CPD points.</p>
+              <p className="text-muted-foreground text-[12px]">Track your continuing professional development certificates and CPD points.</p>
               <Button size="sm" onClick={() => { setShowCertForm(true); setEditingCertId(null); setCertForm({ certificate_name: "", issuing_body: "", date_earned: "", cpd_points: "" }); setCertificateFile(null); }} className="gap-1.5 shrink-0"><Plus className="h-3.5 w-3.5" />Add Certificate</Button>
             </div>
             {showCertForm && (

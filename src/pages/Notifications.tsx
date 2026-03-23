@@ -351,7 +351,7 @@ export default function Notifications() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Notifications</h1>
-          <p className="mt-1 text-muted-foreground">
+          <p className="mt-1 text-muted-foreground text-[12px]">
             Messages, documents, and alerts
           </p>
         </div>

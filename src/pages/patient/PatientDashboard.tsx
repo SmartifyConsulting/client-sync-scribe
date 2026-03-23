@@ -255,7 +255,7 @@ export default function PatientDashboard() {
             <h1 className="text-2xl font-bold text-foreground">
               {profile?.full_name ? `Welcome back, ${profile.full_name.split(" ")[0]}` : "Welcome back"}
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-[12px]">
               Manage your health information and appointments
             </p>
           </div>
