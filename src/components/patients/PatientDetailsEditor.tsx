@@ -728,7 +728,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
               {/* Chronic Medication */}
               <div>
-                <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Chronic Medication</h4>
+                <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Chronic Medication</Label>
                 <div className="flex items-center space-x-2">
                   <Checkbox id="is_chronic" checked={patient.is_chronic || false} onCheckedChange={(checked) => { onSave({ is_chronic: checked as boolean }); }} />
                   <Label htmlFor="is_chronic" className="text-xs">Patient is on chronic medication</Label>
