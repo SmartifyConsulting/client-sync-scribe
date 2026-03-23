@@ -170,15 +170,14 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
        {!hideHeader ? (
           <div>
             <div className="flex items-center gap-2">
-              <Stethoscope className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">My Doctors</h3>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Healthcare providers with access to your profile
-            </p>
-          </div>
-        ) : <div />}
-        <InviteDoctorDialog />
+               <Stethoscope className="h-4 w-4 text-primary" />
+               <h3 className="text-sm font-semibold text-foreground">My Healthcare Providers</h3>
+             </div>
+             <p className="text-xs text-muted-foreground mt-1">
+               Healthcare providers with access to your profile
+             </p>
+           </div>
+         ) : <div />}
       </div>
 
       {/* Doctor Search */}
