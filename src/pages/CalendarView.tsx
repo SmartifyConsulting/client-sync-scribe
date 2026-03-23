@@ -31,10 +31,9 @@ import { format, startOfMonth, endOfMonth, addMonths, startOfYear, endOfYear, ea
 
 
 
-interface AppointmentTypeColor {
-  id: string;
-  type_name: string;
-  color: string;
+interface ServicePriceColor {
+  service_name: string;
+  color: string | null;
 }
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
