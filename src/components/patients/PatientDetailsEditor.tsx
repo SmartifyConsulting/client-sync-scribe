@@ -574,7 +574,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
         {/* === PERSONAL TAB (EDIT) === */}
         <TabsContent value="personal" className="space-y-4 mt-4">
           <div className={sectionFrame}>
-            <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide">Personal Information</h3>
+            <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> Personal Information</h3>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <div className="space-y-1"><Label className="text-xs" htmlFor="name">Full Name *</Label><Input id="name" className="text-sm" value={formData.name} onChange={(e) => updateFormData({ name: e.target.value })} placeholder="Patient name" /></div>
               <div className="space-y-1"><Label className="text-xs" htmlFor="id_passport_number">ID/Passport Number</Label><Input id="id_passport_number" className="text-sm" value={formData.id_passport_number} onChange={(e) => updateFormData({ id_passport_number: e.target.value })} placeholder="ID or passport number" /></div>
