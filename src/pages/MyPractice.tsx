@@ -683,6 +683,10 @@ export default function MyPractice() {
         {/* === CERTIFICATES TAB === */}
         <TabsContent value="certificates" className="mt-4">
           <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
+            <div className="flex items-center gap-2">
+              <GraduationCap className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">Certificates</h3>
+            </div>
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">Track your continuing professional development certificates and CPD points.</p>
               <Button size="sm" onClick={() => { setShowCertForm(true); setEditingCertId(null); setCertForm({ certificate_name: "", issuing_body: "", date_earned: "", cpd_points: "" }); setCertificateFile(null); }} className="gap-1.5 shrink-0"><Plus className="h-3.5 w-3.5" />Add Certificate</Button>
