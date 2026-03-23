@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Calendar, FileText, Receipt, Clock, User, Loader2, Bell, Pill, LogOut, Settings, ListChecks, ArrowRight, Info } from "lucide-react";
+import { Calendar, FileText, Clock, User, Loader2, Bell, Pill, LogOut, Settings, ListChecks, ArrowRight, Info, Sparkles, Building2, Receipt, Star, Camera, Trophy, Heart } from "lucide-react";
 import moolasLogo from "@/assets/moolas-logo.png";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,28 +13,7 @@ import { format, parseISO, isFuture } from "date-fns";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-interface DashboardStats {
-  upcomingAppointments: number;
-  activePrescriptions: number;
-  recentSessions: number;
-  pendingInvoices: number;
-  pendingAmount: number;
-  nextAppointment?: {
-    title: string;
-    date: string;
-  };
-}
-
-interface DoctorAccess {
-  id: string;
-  granted_at: string;
-  doctor_profile?: {
-    full_name: string | null;
-    practice_number: string | null;
-    specialty: string | null;
-  };
-}
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface AssignedTask {
   id: string;
@@ -43,6 +22,26 @@ interface AssignedTask {
   moolas_reward: number;
   due_date: string | null;
   status: string;
+}
+
+interface DoctorWithVisits {
+  id: string;
+  doctor_id: string;
+  granted_at: string;
+  doctor_profile?: {
+    full_name: string | null;
+    practice_number: string | null;
+    specialty: string | null;
+  };
+  lastSeen?: string | null;
+  nextAppointment?: string | null;
+}
+
+interface Pharmacy {
+  name: string;
+  email?: string;
+  phone?: string;
+  is_primary?: boolean;
 }
 
 const getSpecialtyColor = (specialty: string): string => {
@@ -55,10 +54,6 @@ const getSpecialtyColor = (specialty: string): string => {
   if (s.includes("paed") || s.includes("pedia")) return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300";
   if (s.includes("psych")) return "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300";
   if (s.includes("general") || s.includes("gp") || s.includes("family")) return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300";
-  if (s.includes("obst") || s.includes("gyn")) return "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300";
-  if (s.includes("ophthal") || s.includes("eye")) return "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300";
-  if (s.includes("ent") || s.includes("ear")) return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300";
-  if (s.includes("surg")) return "bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300";
   return "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300";
 };
 
@@ -66,17 +61,17 @@ export default function PatientDashboard() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const queryClient = useQueryClient();
-  const { lollipopCount, rewards, loading: rewardsLoading } = useMyRewards();
+  const { lollipopCount, loading: rewardsLoading } = useMyRewards();
 
-  // Fetch patient record for chronic status
+  // Fetch patient record
   const { data: patientRecord } = useQuery({
-    queryKey: ["my-patient-record"],
+    queryKey: ["my-patient-record-dashboard"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
       const { data } = await supabase
         .from("patients")
-        .select("id, is_chronic")
+        .select("id, name, is_chronic, pharmacies, pharmacy_name, pharmacy_email, allergies, dob, status, created_at, notes, occupation, general_practitioner, medical_aid")
         .eq("patient_user_id", user.id)
         .maybeSingle();
       return data;
@@ -100,6 +95,7 @@ export default function PatientDashboard() {
     enabled: !!patientRecord?.id,
   });
 
+  // Fetch notifications
   const { data: unreadNotifCount = 0 } = useQuery({
     queryKey: ["unread-notifications-patient-dashboard"],
     queryFn: async () => {
@@ -131,6 +127,119 @@ export default function PatientDashboard() {
     refetchInterval: 30000,
   });
 
+  // Fetch prescriptions (medications)
+  const { data: medications = [] } = useQuery({
+    queryKey: ["patient-medications-dashboard", patientRecord?.id],
+    queryFn: async () => {
+      if (!patientRecord?.id) return [];
+      const { data } = await supabase
+        .from("prescriptions")
+        .select("id, medication, dosage, frequency, status, start_date, end_date, instructions")
+        .eq("patient_id", patientRecord.id)
+        .order("created_at", { ascending: false });
+      return data || [];
+    },
+    enabled: !!patientRecord?.id,
+  });
+
+  // Fetch doctors with last seen / next appointment
+  const { data: doctors = [] } = useQuery({
+    queryKey: ["patient-doctors-dashboard"],
+    queryFn: async () => {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!currentUser) return [];
+      
+      const { data: accessData } = await supabase
+        .from("doctor_patient_access")
+        .select("id, doctor_id, granted_at")
+        .eq("patient_user_id", currentUser.id)
+        .eq("is_active", true);
+
+      if (!accessData?.length) return [];
+
+      const results: DoctorWithVisits[] = [];
+      for (const access of accessData) {
+        const { data: doctorProfile } = await supabase
+          .from("profiles")
+          .select("full_name, practice_number, specialty")
+          .eq("id", access.doctor_id)
+          .maybeSingle();
+
+        // Last session with this doctor
+        const { data: lastSession } = await supabase
+          .from("sessions")
+          .select("ended_at")
+          .eq("user_id", access.doctor_id)
+          .eq("status", "completed")
+          .order("ended_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        // Next appointment with this doctor
+        const { data: nextAppt } = await supabase
+          .from("appointments")
+          .select("start_time")
+          .eq("user_id", access.doctor_id)
+          .gte("start_time", new Date().toISOString())
+          .order("start_time", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+
+        results.push({
+          ...access,
+          doctor_profile: doctorProfile || undefined,
+          lastSeen: lastSession?.ended_at || null,
+          nextAppointment: nextAppt?.start_time || null,
+        });
+      }
+      return results;
+    },
+  });
+
+  // Fetch recent claims (invoices submitted to insurance)
+  const { data: recentClaims = [] } = useQuery({
+    queryKey: ["patient-recent-claims", patientRecord?.id],
+    queryFn: async () => {
+      if (!patientRecord?.id) return [];
+      const { data } = await supabase
+        .from("invoices")
+        .select("id, invoice_number, amount, status, created_at, email_sent_at")
+        .eq("patient_id", patientRecord.id)
+        .not("email_sent_at", "is", null)
+        .order("email_sent_at", { ascending: false })
+        .limit(5);
+      return data || [];
+    },
+    enabled: !!patientRecord?.id,
+  });
+
+  // AI Health Summary
+  const { data: aiSummary, isLoading: aiSummaryLoading } = useQuery({
+    queryKey: ["patient-ai-summary", patientRecord?.id],
+    queryFn: async () => {
+      if (!patientRecord) return null;
+      // Fetch sessions for context
+      const { data: sessions } = await supabase
+        .from("sessions")
+        .select("started_at, summary, transcript, status")
+        .order("started_at", { ascending: false })
+        .limit(20);
+
+      const { data, error } = await supabase.functions.invoke("summarize-patient-history", {
+        body: {
+          patient: patientRecord,
+          sessions: sessions || [],
+          language: profile?.preferred_language || "English",
+        },
+      });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!patientRecord?.id,
+    staleTime: 1000 * 60 * 10, // 10 min cache
+    retry: 1,
+  });
+
   const markAllRead = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -138,104 +247,33 @@ export default function PatientDashboard() {
     queryClient.invalidateQueries({ queryKey: ["unread-notifications-patient-dashboard"] });
     queryClient.invalidateQueries({ queryKey: ["recent-notifications-patient-dashboard"] });
   };
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<DashboardStats>({
-    upcomingAppointments: 0,
-    activePrescriptions: 0,
-    recentSessions: 0,
-    pendingInvoices: 0,
-    pendingAmount: 0,
-  });
-  const [doctors, setDoctors] = useState<DoctorAccess[]>([]);
 
-  useEffect(() => {
-    if (user) {
-      fetchDashboardData();
-    }
-  }, [user]);
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR" }).format(amount);
 
-  const fetchDashboardData = async () => {
-    if (!user) return;
-    setLoading(true);
-
-    try {
-      // Fetch appointments
-      const { data: appointments } = await supabase
-        .from("appointments")
-        .select("*")
-        .order("start_time", { ascending: true });
-
-      const upcomingAppointments = (appointments || []).filter(
-        (apt) => isFuture(parseISO(apt.start_time))
-      );
-
-      // Fetch prescriptions
-      const { data: prescriptions } = await supabase
-        .from("prescriptions")
-        .select("*")
-        .eq("status", "active");
-
-      // Fetch invoices
-      const { data: invoices } = await supabase
-        .from("invoices")
-        .select("*")
-        .in("status", ["pending", "overdue"]);
-
-      const pendingAmount = (invoices || []).reduce(
-        (sum, inv) => sum + Number(inv.amount),
-        0
-      );
-
-      // Fetch connected doctors
-      const { data: accessData } = await supabase
-        .from("doctor_patient_access")
-        .select("*")
-        .eq("patient_user_id", user.id)
-        .eq("is_active", true);
-
-      const doctorsWithProfiles: DoctorAccess[] = [];
-      for (const access of accessData || []) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("full_name, practice_number, specialty")
-          .eq("id", access.doctor_id)
-          .maybeSingle();
-
-        doctorsWithProfiles.push({
-          ...access,
-          doctor_profile: profile || undefined,
-        });
+  // Parse pharmacies from patient record
+  const pharmacies: Pharmacy[] = (() => {
+    const list: Pharmacy[] = [];
+    if (patientRecord?.pharmacies && Array.isArray(patientRecord.pharmacies)) {
+      for (const p of patientRecord.pharmacies as any[]) {
+        list.push({ name: p.name || "Unnamed", email: p.email, phone: p.phone, is_primary: p.is_primary || false });
       }
-
-      setDoctors(doctorsWithProfiles);
-      setStats({
-        upcomingAppointments: upcomingAppointments.length,
-        activePrescriptions: (prescriptions || []).length,
-        recentSessions: 0,
-        pendingInvoices: (invoices || []).length,
-        pendingAmount,
-        nextAppointment: upcomingAppointments[0]
-          ? {
-              title: upcomingAppointments[0].title,
-              date: format(parseISO(upcomingAppointments[0].start_time), "MMM d 'at' h:mm a"),
-            }
-          : undefined,
-      });
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error);
-    } finally {
-      setLoading(false);
     }
-  };
+    // Also add legacy single pharmacy if not already in list
+    if (patientRecord?.pharmacy_name && !list.find(p => p.name === patientRecord.pharmacy_name)) {
+      list.unshift({ name: patientRecord.pharmacy_name, email: patientRecord.pharmacy_email || undefined, is_primary: list.length === 0 });
+    }
+    return list;
+  })();
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-ZA", {
-      style: "currency",
-      currency: "ZAR",
-    }).format(amount);
-  };
+  const activeMeds = medications.filter(m => m.status === "active");
+  const pastMeds = medications.filter(m => m.status !== "active");
 
-  if (loading) {
+  // Strip HTML-like tags from AI summary for plain display
+  const cleanSummary = (text: string) =>
+    text?.replace(/<\/?(?:med|symptom|condition)>/g, "") || "";
+
+  if (!patientRecord) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -244,82 +282,77 @@ export default function PatientDashboard() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-5 animate-fade-in">
       {/* Welcome Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-            <User className="h-8 w-8 text-primary" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+            <User className="h-7 w-7 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">
+            <h1 className="text-xl font-bold text-foreground">
               {profile?.full_name ? `Welcome back, ${profile.full_name.split(" ")[0]}` : "Welcome back"}
             </h1>
-            <p className="text-muted-foreground text-[12px]">
-              Manage your health information and appointments
-            </p>
+            <p className="text-muted-foreground text-[12px]">Your health dashboard at a glance</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          {/* Notification Bell */}
+        <div className="flex items-center gap-2">
           <Popover>
             <PopoverTrigger asChild>
-              <button className="relative h-10 w-10 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors">
-                <Bell className="h-5 w-5 text-terracotta-foreground stroke-terracotta-foreground fill-none" />
+              <button className="relative h-9 w-9 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors">
+                <Bell className="h-4 w-4 text-terracotta-foreground stroke-terracotta-foreground fill-none" />
                 {unreadNotifCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-white">
+                  <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[8px] font-bold text-white">
                     {unreadNotifCount > 99 ? "99+" : unreadNotifCount}
                   </span>
                 )}
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 p-0" align="end">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-                <p className="text-sm font-semibold">Notifications</p>
+            <PopoverContent className="w-72 p-0" align="end">
+              <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+                <p className="text-xs font-semibold">Notifications</p>
                 {unreadNotifCount > 0 && (
-                  <Button variant="ghost" size="sm" className="text-xs h-7" onClick={markAllRead}>Mark all read</Button>
+                  <Button variant="ghost" size="sm" className="text-[10px] h-6" onClick={markAllRead}>Mark all read</Button>
                 )}
               </div>
-              <div className="max-h-64 overflow-y-auto">
+              <div className="max-h-56 overflow-y-auto">
                 {recentNotifications.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-6">No notifications</p>
+                  <p className="text-xs text-muted-foreground text-center py-4">No notifications</p>
                 ) : (
                   recentNotifications.map((n: any) => (
-                    <div key={n.id} className={`px-4 py-3 border-b border-border/50 text-sm ${!n.is_read ? 'bg-primary/5' : ''}`}>
+                    <div key={n.id} className={`px-3 py-2 border-b border-border/50 text-xs ${!n.is_read ? 'bg-primary/5' : ''}`}>
                       <p className="font-medium text-foreground">{n.title}</p>
-                      {n.description && <p className="text-xs text-muted-foreground mt-0.5">{n.description}</p>}
-                      <p className="text-xs text-muted-foreground mt-1">{new Date(n.created_at).toLocaleDateString()}</p>
+                      {n.description && <p className="text-[10px] text-muted-foreground mt-0.5">{n.description}</p>}
                     </div>
                   ))
                 )}
               </div>
             </PopoverContent>
           </Popover>
-          {/* Avatar Profile Popover */}
           <Popover>
             <PopoverTrigger asChild>
-              <button className="rounded-xl p-2 hover:bg-accent transition-colors relative">
-                <Avatar className="h-10 w-10 border-2 border-[hsl(351,81%,49%)]">
+              <button className="rounded-xl p-1.5 hover:bg-accent transition-colors">
+                <Avatar className="h-9 w-9 border-2 border-primary">
                   <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} className="object-cover" />
-                  <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                  <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
                     {profile?.full_name ? profile.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) : "U"}
                   </AvatarFallback>
                 </Avatar>
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-56 p-2" align="end">
-              <div className="px-3 py-2 border-b border-border mb-1">
-                <p className="text-sm font-semibold text-foreground">{profile?.full_name || "User"}</p>
-                <p className="text-xs text-muted-foreground">Patient</p>
+            <PopoverContent className="w-48 p-1.5" align="end">
+              <div className="px-2 py-1.5 border-b border-border mb-1">
+                <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
+                <p className="text-[10px] text-muted-foreground">Patient</p>
               </div>
-              <Link to="/profile" className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors">
-                <User className="h-4 w-4" /> View Profile
+              <Link to="/profile" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
+                <User className="h-3.5 w-3.5" /> Profile
               </Link>
-              <Link to="/settings" className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors">
-                <Settings className="h-4 w-4" /> Settings
+              <Link to="/settings" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
+                <Settings className="h-3.5 w-3.5" /> Settings
               </Link>
-              <button onClick={async () => { await supabase.auth.signOut(); window.location.href = "/auth"; }} className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-destructive/10 text-destructive transition-colors w-full">
-                <LogOut className="h-4 w-4" /> Sign Out
+              <button onClick={async () => { await supabase.auth.signOut(); window.location.href = "/auth"; }} className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-destructive/10 text-destructive transition-colors w-full">
+                <LogOut className="h-3.5 w-3.5" /> Sign Out
               </button>
             </PopoverContent>
           </Popover>
@@ -328,70 +361,259 @@ export default function PatientDashboard() {
 
       {/* Chronic Medication Badge */}
       {patientRecord?.is_chronic && (
-        <div className="flex items-center gap-3 p-4 rounded-xl border border-secondary/30 bg-secondary/5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/10">
-            <Pill className="h-5 w-5 text-secondary" />
+        <div className="flex items-center gap-3 p-3 rounded-xl border border-secondary/30 bg-secondary/5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/10">
+            <Pill className="h-4 w-4 text-secondary" />
           </div>
-          <div>
-            <p className="font-semibold text-foreground">Chronic Medication</p>
-            <p className="text-sm text-muted-foreground">You are on chronic medication — remember to log daily intake for rewards</p>
+          <div className="flex-1">
+            <p className="font-semibold text-sm text-foreground">Chronic Medication</p>
+            <p className="text-[10px] text-muted-foreground">Remember to log daily intake for rewards</p>
           </div>
-          <Badge className="ml-auto bg-secondary/10 text-secondary hover:bg-secondary/20 border-0">
-            <Pill className="h-3 w-3 mr-1" />Chronic
+          <Badge className="bg-secondary/10 text-secondary hover:bg-secondary/20 border-0 text-[8px]">
+            <Pill className="h-2.5 w-2.5 mr-1" />Chronic
           </Badge>
         </div>
       )}
 
-      {/* Moolas Hero Card + Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        {/* Moolas Hero */}
-        <Link to="/patient/rewards" className="lg:col-span-2">
+      {/* Row 1: Moolas + AI Health Summary */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Link to="/patient/rewards">
           <Card className="h-full border-primary/20 bg-gradient-to-br from-primary/5 via-card to-secondary/5 hover:shadow-lg transition-all cursor-pointer">
-            <CardContent className="flex items-center gap-5 p-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm">
-                <img src={moolasLogo} alt="Moolas" className="h-12 w-12 object-cover rounded-full" />
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-sm shrink-0">
+                <img src={moolasLogo} alt="Moolas" className="h-10 w-10 object-cover rounded-full" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-muted-foreground">My Moolas Balance</p>
-                <p className="text-4xl font-bold text-foreground">{lollipopCount}</p>
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">My Moolas Balance</p>
+                <p className="text-3xl font-bold text-foreground">{lollipopCount}</p>
               </div>
-              <ArrowRight className="h-5 w-5 text-muted-foreground" />
+              <ArrowRight className="h-4 w-4 text-muted-foreground" />
             </CardContent>
           </Card>
         </Link>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Appointments</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+        <Card className="border-primary/10">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Sparkles className="h-4 w-4 text-primary" />
+              AI Health Summary
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.upcomingAppointments}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.nextAppointment ? `Next: ${stats.nextAppointment.date}` : "None scheduled"}
-            </p>
+            {aiSummaryLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-4/5" />
+                <Skeleton className="h-3 w-3/5" />
+              </div>
+            ) : aiSummary?.summary ? (
+              <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-4">
+                {cleanSummary(aiSummary.summary)}
+              </p>
+            ) : (
+              <p className="text-[11px] text-muted-foreground italic">No health summary available yet. Visit your doctor to build your health profile.</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Row 2: My Medications */}
+      <Card>
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Pill className="h-4 w-4 text-primary" />
+              My Medications
+            </CardTitle>
+            <Link to="/patient/prescriptions">
+              <Button variant="ghost" size="sm" className="text-[10px] h-6 text-primary gap-1">
+                View All <ArrowRight className="h-3 w-3" />
+              </Button>
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {medications.length === 0 ? (
+            <p className="text-[11px] text-muted-foreground text-center py-4">No medications on record.</p>
+          ) : (
+            <div className="space-y-1.5">
+              {activeMeds.map((med) => (
+                <div key={med.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border bg-card">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-foreground">{med.medication}</p>
+                    <p className="text-[10px] text-muted-foreground">{med.dosage} · {med.frequency}</p>
+                  </div>
+                  <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0 text-[8px]">Active</Badge>
+                </div>
+              ))}
+              {pastMeds.map((med) => (
+                <div key={med.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border/50 opacity-50">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-muted-foreground">{med.medication}</p>
+                    <p className="text-[10px] text-muted-foreground">{med.dosage} · {med.frequency}</p>
+                  </div>
+                  <Badge variant="outline" className="text-[8px] text-muted-foreground">{med.status}</Badge>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Row 3: Doctors + Pharmacies */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Healthcare Providers */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <Heart className="h-4 w-4 text-primary" />
+                My Healthcare Providers
+              </CardTitle>
+              <Link to="/patient/access">
+                <Button variant="ghost" size="sm" className="text-[10px] h-6 text-primary gap-1">
+                  Manage <ArrowRight className="h-3 w-3" />
+                </Button>
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {doctors.length === 0 ? (
+              <div className="text-center py-4">
+                <p className="text-[11px] text-muted-foreground">No doctors connected yet.</p>
+                <Link to="/patient/access" className="text-primary hover:underline text-[10px]">
+                  Invite a doctor
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                {doctors.map((doc) => (
+                  <div key={doc.id} className="p-2.5 rounded-lg border border-border hover:bg-muted/30 transition-colors">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs font-medium text-foreground truncate">{doc.doctor_profile?.full_name || "Unknown"}</p>
+                      {doc.doctor_profile?.specialty && (
+                        <Badge className={`text-[8px] font-medium border-0 ${getSpecialtyColor(doc.doctor_profile.specialty)}`}>
+                          {doc.doctor_profile.specialty}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex gap-3 text-[10px] text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-2.5 w-2.5" />
+                        Last: {doc.lastSeen ? format(parseISO(doc.lastSeen), "MMM d") : "Never"}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-2.5 w-2.5" />
+                        Next: {doc.nextAppointment ? format(parseISO(doc.nextAppointment), "MMM d") : "None"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
+        {/* Pharmacies */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Prescriptions</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Building2 className="h-4 w-4 text-primary" />
+              My Pharmacies
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.activePrescriptions}</div>
-            <p className="text-xs text-muted-foreground">Active medications</p>
+            {pharmacies.length === 0 ? (
+              <p className="text-[11px] text-muted-foreground text-center py-4">No pharmacies on record. Update your profile to add one.</p>
+            ) : (
+              <div className="space-y-1.5">
+                {pharmacies.map((pharm, i) => (
+                  <div key={i} className="flex items-center justify-between p-2.5 rounded-lg border border-border">
+                    <div>
+                      <p className="text-xs font-medium text-foreground">{pharm.name}</p>
+                      {pharm.email && <p className="text-[10px] text-muted-foreground">{pharm.email}</p>}
+                    </div>
+                    {pharm.is_primary && (
+                      <Badge className="bg-primary/10 text-primary border-0 text-[8px]">
+                        <Star className="h-2.5 w-2.5 mr-0.5 fill-current" /> Primary
+                      </Badge>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Row 4: Claims + Earn Moolas */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Recent Claims */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <Receipt className="h-4 w-4 text-primary" />
+                Recent Claims
+              </CardTitle>
+              <Link to="/patient/invoices">
+                <Button variant="ghost" size="sm" className="text-[10px] h-6 text-primary gap-1">
+                  All Invoices <ArrowRight className="h-3 w-3" />
+                </Button>
+              </Link>
+            </div>
+            <CardDescription className="text-[10px]">Invoices submitted to your medical aid</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {recentClaims.length === 0 ? (
+              <p className="text-[11px] text-muted-foreground text-center py-4">No claims submitted recently.</p>
+            ) : (
+              <div className="space-y-1.5">
+                {recentClaims.map((claim: any) => (
+                  <div key={claim.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border">
+                    <div>
+                      <p className="text-xs font-medium text-foreground">#{claim.invoice_number}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        Submitted {claim.email_sent_at ? format(parseISO(claim.email_sent_at), "MMM d, yyyy") : "—"}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-semibold text-foreground">{formatCurrency(Number(claim.amount))}</p>
+                      <Badge variant="outline" className="text-[8px] capitalize">{claim.status}</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Invoices</CardTitle>
-            <Receipt className="h-4 w-4 text-muted-foreground" />
+        {/* Earn More Moolas */}
+        <Card className="border-primary/10 bg-gradient-to-br from-primary/3 to-card">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Trophy className="h-4 w-4 text-primary" />
+              Earn More Moolas
+            </CardTitle>
+            <CardDescription className="text-[10px]">Tips to boost your rewards</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.pendingAmount)}</div>
-            <p className="text-xs text-muted-foreground">{stats.pendingInvoices} pending</p>
+            <div className="space-y-2">
+              {[
+                { icon: Pill, text: "Log daily medication intake", link: "/patient/prescriptions" },
+                { icon: ListChecks, text: "Complete tasks from your doctor", link: "/patient/tasks" },
+                { icon: Camera, text: "Upload health photos regularly", link: "/patient/health-album" },
+                { icon: Calendar, text: "Keep visit streaks going", link: "/patient/calendar" },
+              ].map((tip, i) => (
+                <Link key={i} to={tip.link} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-primary/5 transition-colors group">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                    <tip.icon className="h-3.5 w-3.5 text-primary" />
+                  </div>
+                  <p className="text-[11px] text-foreground group-hover:text-primary transition-colors">{tip.text}</p>
+                  <ArrowRight className="h-3 w-3 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Link>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -399,34 +621,34 @@ export default function PatientDashboard() {
       {/* Assigned Tasks */}
       {assignedTasks.length > 0 && (
         <Card className="border-primary/20">
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ListChecks className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Assigned Tasks</CardTitle>
-              </div>
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <ListChecks className="h-4 w-4 text-primary" />
+                Assigned Tasks
+              </CardTitle>
               <Link to="/patient/rewards">
-                <Button variant="ghost" size="sm" className="text-primary gap-1">
-                  View All <ArrowRight className="h-3.5 w-3.5" />
+                <Button variant="ghost" size="sm" className="text-[10px] h-6 text-primary gap-1">
+                  View All <ArrowRight className="h-3 w-3" />
                 </Button>
               </Link>
             </div>
-            <CardDescription>Tasks from your doctors — complete them to earn Moolas</CardDescription>
+            <CardDescription className="text-[10px]">Complete tasks to earn Moolas</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {assignedTasks.map((task) => (
-                <div key={task.id} className="flex items-center justify-between p-3 rounded-xl border border-border hover:bg-muted/50 transition-colors">
+                <div key={task.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{task.title}</p>
+                    <p className="text-xs font-medium truncate">{task.title}</p>
                     {task.due_date && (
-                      <p className="text-xs text-muted-foreground mt-0.5">
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
                         Due: {format(parseISO(task.due_date), "MMM d, yyyy")}
                       </p>
                     )}
                   </div>
                   {task.moolas_reward > 0 && (
-                    <Badge className="ml-2 bg-primary/10 text-primary border-0 font-bold">
+                    <Badge className="ml-2 bg-primary/10 text-primary border-0 text-[8px] font-bold">
                       +{task.moolas_reward} Ⓜ️
                     </Badge>
                   )}
@@ -438,125 +660,34 @@ export default function PatientDashboard() {
       )}
 
       {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         <Link to="/patient/calendar">
           <Card className="cursor-pointer border-primary/10 hover:border-primary/30 hover:shadow-md transition-all h-full">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
-                  <Calendar className="h-5 w-5 text-primary" />
+            <CardHeader className="p-4">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
+                  <Calendar className="h-4 w-4 text-primary" />
                 </div>
                 My Calendar
               </CardTitle>
-              <CardDescription>View and manage your appointments</CardDescription>
+              <CardDescription className="text-[10px]">View and manage appointments</CardDescription>
             </CardHeader>
           </Card>
         </Link>
-
         <Link to="/patient/documentation">
           <Card className="cursor-pointer border-primary/10 hover:border-primary/30 hover:shadow-md transition-all h-full">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
-                  <FileText className="h-5 w-5 text-primary" />
+            <CardHeader className="p-4">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
+                  <FileText className="h-4 w-4 text-primary" />
                 </div>
                 Documentation
               </CardTitle>
-              <CardDescription>View your documents and records</CardDescription>
-            </CardHeader>
-          </Card>
-        </Link>
-
-        <Link to="/patient/invoices">
-          <Card className="cursor-pointer border-primary/10 hover:border-primary/30 hover:shadow-md transition-all h-full">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
-                  <Receipt className="h-5 w-5 text-primary" />
-                </div>
-                Invoices
-              </CardTitle>
-              <CardDescription>View and pay your invoices</CardDescription>
+              <CardDescription className="text-[10px]">View your documents and records</CardDescription>
             </CardHeader>
           </Card>
         </Link>
       </div>
-
-      {/* Connected Doctors */}
-      <Card>
-        <CardHeader>
-          <CardTitle>My Healthcare Providers</CardTitle>
-          <CardDescription>Doctors who have access to your health information</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {doctors.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">No doctors connected yet.</p>
-              <Link to="/patient/access" className="text-primary hover:underline text-sm">
-                Invite a doctor to get started
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-1">
-              {/* Table Header */}
-              <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                <span>Doctor</span>
-                <span>Specialty</span>
-                <span>Practice #</span>
-                <span></span>
-              </div>
-              {doctors.map((doctor) => (
-                <div
-                  key={doctor.id}
-                  className="grid grid-cols-[1fr_auto_auto_auto] gap-4 items-center px-3 py-3 rounded-lg border border-border hover:bg-muted/30 transition-colors"
-                >
-                  <p className="font-medium text-sm text-foreground truncate">
-                    {doctor.doctor_profile?.full_name || "Unknown Doctor"}
-                  </p>
-                  <div>
-                    {doctor.doctor_profile?.specialty ? (
-                      <Badge className={`text-xs font-medium border-0 ${getSpecialtyColor(doctor.doctor_profile.specialty)}`}>
-                        {doctor.doctor_profile.specialty}
-                      </Badge>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    )}
-                  </div>
-                  <span className="text-sm text-muted-foreground">
-                    {doctor.doctor_profile?.practice_number || "N/A"}
-                  </span>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted transition-colors">
-                        <Info className="h-4 w-4 text-muted-foreground" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-56 p-3" align="end">
-                      <p className="text-xs font-medium text-foreground mb-2">Access Details</p>
-                      <div className="space-y-1.5 text-xs text-muted-foreground">
-                        <div className="flex justify-between">
-                          <span>Connected since</span>
-                          <span className="font-medium text-foreground">{format(parseISO(doctor.granted_at), "MMM d, yyyy")}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Status</span>
-                          <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0 text-[10px]">Active</Badge>
-                        </div>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              ))}
-              <Link
-                to="/patient/access"
-                className="block text-center text-sm text-muted-foreground hover:text-primary py-2"
-              >
-                Manage access or invite another doctor
-              </Link>
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }
