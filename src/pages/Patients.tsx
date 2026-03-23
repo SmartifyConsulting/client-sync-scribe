@@ -45,7 +45,7 @@ import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
 
-export default function Patients() {
+export default function Patients({ hideHeader = false }: { hideHeader?: boolean }) {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { toast } = useToast();
@@ -366,15 +366,17 @@ export default function Patients() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className={cn("animate-fade-in", hideHeader ? "space-y-4" : "space-y-6")}>
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Patients</h1>
-          <p className="mt-1 text-muted-foreground">
-            Manage your patient profiles and history
-          </p>
-        </div>
+        {!hideHeader && (
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Patients</h1>
+            <p className="mt-1 text-muted-foreground">
+              Manage your patient profiles and history
+            </p>
+          </div>
+        )}
         <div className="flex gap-2">
           <PatientImportDialog 
             trigger={

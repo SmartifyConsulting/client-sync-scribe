@@ -5,6 +5,9 @@ import {
   DollarSign, GraduationCap, Stethoscope,
 } from "lucide-react";
 import ReferralDoctors from "@/pages/ReferralDoctors";
+import Patients from "@/pages/Patients";
+import DoctorInvoices from "@/pages/doctor/Invoices";
+import Documents from "@/pages/Documents";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -408,7 +411,7 @@ export default function MyPractice() {
 
   // ── RENDER ──
   return (
-    <div className="space-y-4 animate-fade-in max-w-3xl">
+    <div className="space-y-4 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -449,16 +452,24 @@ export default function MyPractice() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="practice" className="w-full">
+      <Tabs defaultValue="patients" className="w-full">
         <TabsList className="flex w-full flex-wrap bg-primary justify-start">
-          <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Practice</TabsTrigger>
+          <TabsTrigger value="patients" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Patients</TabsTrigger>
+          <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Practice</TabsTrigger>
           <TabsTrigger value="referrals" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Referrals</TabsTrigger>
-          <TabsTrigger value="pricing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Pricing</TabsTrigger>
           <TabsTrigger value="certificates" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Certificates{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}</TabsTrigger>
+          <TabsTrigger value="pricing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Pricing</TabsTrigger>
+          <TabsTrigger value="invoices" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Invoices</TabsTrigger>
+          <TabsTrigger value="templates" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Templates</TabsTrigger>
         </TabsList>
 
+        {/* === MY PATIENTS TAB === */}
+        <TabsContent value="patients" className="mt-4">
+          <Patients hideHeader />
+        </TabsContent>
+
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
-        <TabsContent value="practice" className="mt-4 space-y-4">
+        <TabsContent value="practice" className="mt-4 space-y-4 max-w-3xl">
           {/* Personal Information Frame */}
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
@@ -474,21 +485,19 @@ export default function MyPractice() {
                 <Label>Last Name</Label>
                 <Input value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
               </div>
-              <div className="space-y-1.5 sm:col-span-2">
+              <div className="space-y-1.5">
                 <Label>Email</Label>
-                <div className="flex gap-2">
-                  <Input type="email" value={user?.email || ""} disabled className="bg-muted" />
-                </div>
+                <Input type="email" value={user?.email || ""} disabled className="bg-muted" />
               </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Mobile Number</Label>
-              <div className="flex gap-2">
-                <Select value={formData.country_code} onValueChange={(v) => setFormData({ ...formData, country_code: v })}>
-                  <SelectTrigger className="w-[130px]"><SelectValue /></SelectTrigger>
-                  <SelectContent>{COUNTRY_CODES.map(c => <SelectItem key={c.code} value={c.code}><span className="flex items-center gap-1.5">{c.flag} {c.code}</span></SelectItem>)}</SelectContent>
-                </Select>
-                <Input type="tel" value={formatPhoneNumber(formData.mobile_number)} onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value.replace(/[^0-9]/g, '') })} placeholder="82 123 4567" className="flex-1" />
+              <div className="space-y-1.5">
+                <Label>Mobile Number</Label>
+                <div className="flex gap-2">
+                  <Select value={formData.country_code} onValueChange={(v) => setFormData({ ...formData, country_code: v })}>
+                    <SelectTrigger className="w-[130px]"><SelectValue /></SelectTrigger>
+                    <SelectContent>{COUNTRY_CODES.map(c => <SelectItem key={c.code} value={c.code}><span className="flex items-center gap-1.5">{c.flag} {c.code}</span></SelectItem>)}</SelectContent>
+                  </Select>
+                  <Input type="tel" value={formatPhoneNumber(formData.mobile_number)} onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value.replace(/[^0-9]/g, '') })} placeholder="82 123 4567" className="flex-1" />
+                </div>
               </div>
             </div>
             <div className="space-y-1.5">
@@ -750,6 +759,16 @@ export default function MyPractice() {
               </Table>
             )}
           </div>
+        </TabsContent>
+
+        {/* === INVOICES TAB === */}
+        <TabsContent value="invoices" className="mt-4">
+          <DoctorInvoices hideHeader />
+        </TabsContent>
+
+        {/* === TEMPLATES TAB === */}
+        <TabsContent value="templates" className="mt-4">
+          <Documents hideHeader />
         </TabsContent>
       </Tabs>
     </div>

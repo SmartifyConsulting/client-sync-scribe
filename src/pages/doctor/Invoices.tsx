@@ -166,7 +166,7 @@ function getStatusBadge(status: "issued" | "paid" | "overdue" | "archived") {
   }
 }
 
-export default function DoctorInvoices() {
+export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: boolean }) {
   const { toast } = useToast();
   const { profile } = useProfile();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -822,15 +822,17 @@ export default function DoctorInvoices() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className={cn("animate-fade-in", hideHeader ? "space-y-4" : "space-y-6")}>
       {/* Header with Create and Report Buttons */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Invoices</h1>
-          <p className="mt-1 text-muted-foreground">
-            Manage and track all patient invoices
-          </p>
-        </div>
+        {!hideHeader && (
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Invoices</h1>
+            <p className="mt-1 text-muted-foreground">
+              Manage and track all patient invoices
+            </p>
+          </div>
+        )}
         <div className="flex gap-2">
           {/* Create Invoice Dialog */}
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
