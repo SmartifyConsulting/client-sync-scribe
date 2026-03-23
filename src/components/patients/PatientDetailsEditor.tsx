@@ -495,7 +495,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
                 {/* Family History */}
                 <div>
-                  <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><GitBranch className="h-3.5 w-3.5" /> Family History</h4>
+                  <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><GitBranch className="h-3.5 w-3.5" /> Family History</Label>
                   {familyHistory.length === 0 ? (
                     <p className="text-xs text-muted-foreground">No family history recorded</p>
                   ) : (
