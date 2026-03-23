@@ -19,6 +19,7 @@ export function StatsCard({
   trend = "neutral",
   icon: Icon,
   imageUrl,
+  iconSize = "default",
   className,
 }: StatsCardProps) {
   return (
