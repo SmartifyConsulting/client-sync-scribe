@@ -53,8 +53,9 @@ export default function Dashboard() {
         .from("notifications")
         .select("*")
         .eq("user_id", user.id)
+        .eq("is_read", false)
         .order("created_at", { ascending: false })
-        .limit(10);
+        .limit(20);
 
       if (error) return [];
       return data || [];
