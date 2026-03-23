@@ -667,6 +667,7 @@ export default function PatientProfile() {
               patientId={patient.id} 
               patientName={patient.name}
               onUnreadCountChange={setUnreadRoundTableCount}
+              hideHeader
             />
           </div>
         </TabsContent>

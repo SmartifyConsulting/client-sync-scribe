@@ -13,7 +13,7 @@ interface RoundTableNote {
   created_at: string;
 }
 
-export default function PatientRoundTable() {
+export default function PatientRoundTable({ hideHeader = false }: { hideHeader?: boolean }) {
   const { user } = useAuth();
   const [notes, setNotes] = useState<RoundTableNote[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,12 +50,14 @@ export default function PatientRoundTable() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Round Table</h1>
-        <p className="text-muted-foreground">
-          Notes shared by your healthcare providers about your care.
-        </p>
-      </div>
+      {!hideHeader && (
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Round Table</h1>
+          <p className="text-muted-foreground">
+            Notes shared by your healthcare providers about your care.
+          </p>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex items-center justify-center py-16">

@@ -154,7 +154,7 @@ function deriveDocType(
   return "file";
 }
 
-export default function PatientDocuments() {
+export default function PatientDocuments({ hideHeader = false }: { hideHeader?: boolean }) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [documents, setDocuments] = useState<UnifiedDocument[]>([]);
@@ -531,12 +531,14 @@ export default function PatientDocuments() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">My Documents</h1>
-          <p className="text-muted-foreground">
-            All your prescriptions, invoices, certificates and uploaded files.
-          </p>
-        </div>
+        {!hideHeader ? (
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">My Documents</h1>
+            <p className="text-muted-foreground">
+              All your prescriptions, invoices, certificates and uploaded files.
+            </p>
+          </div>
+        ) : <div />}
 
         <div className="flex items-center gap-2">
           <Button

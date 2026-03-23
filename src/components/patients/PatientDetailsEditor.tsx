@@ -845,7 +845,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
         {isSelfService && (
           <TabsContent value="documents" className="mt-4">
             <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-              <PatientDocuments />
+              <PatientDocuments hideHeader />
             </Suspense>
           </TabsContent>
         )}
@@ -854,7 +854,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
         {isSelfService && (
           <TabsContent value="doctors" className="mt-4">
             <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-              <MyDoctors />
+              <MyDoctors hideHeader />
             </Suspense>
           </TabsContent>
         )}
@@ -863,7 +863,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
         {isSelfService && (
           <TabsContent value="roundtable" className="mt-4">
             <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-              <PatientRoundTable />
+              <PatientRoundTable hideHeader />
             </Suspense>
           </TabsContent>
         )}
