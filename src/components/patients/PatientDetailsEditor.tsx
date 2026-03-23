@@ -369,7 +369,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
         <div className="flex items-center gap-4">
           <div className="flex flex-col items-center gap-1 cursor-pointer" onClick={() => avatarInputRef.current?.click()}>
             <div className="relative">
-              <Avatar className="h-20 w-20">
+              <Avatar className="h-20 w-20 border-2 border-primary">
                 {avatarUrl ? (
                   <AvatarImage src={avatarUrl} alt={patient.name} />
                 ) : null}
