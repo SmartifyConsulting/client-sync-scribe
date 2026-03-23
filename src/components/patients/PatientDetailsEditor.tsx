@@ -852,7 +852,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 {/* Family History */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><GitBranch className="h-3.5 w-3.5" /> Family History</Label>
+                    <Label>Family History</Label>
                     {!showAddFamily && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddFamily(true)}><Plus className="h-3 w-3" />Add</Button>}
                   </div>
                   {showAddFamily && (
