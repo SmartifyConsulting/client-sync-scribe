@@ -594,7 +594,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   </div>
                 </div>
 
-                {/* Column 2: Insurance & Pharmacies */}
+                {/* Column 2: Insurance, GP & Pharmacies */}
                 <div className="space-y-4">
                   <div className={sectionFrame}>
                     <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> Medical Insurance</h3>
@@ -604,8 +604,12 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                       <ViewField label="Insurance Number" value={patient.medical_aid_number} />
                       <ViewField label="Primary Member" value={patient.primary_member} />
                       <ViewField label="Claims Email" value={patient.claims_email} />
-                      <ViewField label="General Practitioner" value={patient.general_practitioner} />
                     </div>
+                  </div>
+
+                  <div className={sectionFrame}>
+                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> General Practitioner</h3>
+                    <ViewField label="General Practitioner" value={patient.general_practitioner} />
                   </div>
 
                   <div className={sectionFrame}>
