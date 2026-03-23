@@ -45,7 +45,7 @@ import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
 
-export default function Patients() {
+export default function Patients({ hideHeader = false }: { hideHeader?: boolean }) {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { toast } = useToast();
