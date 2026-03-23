@@ -67,8 +67,8 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
     },
   });
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
+  const handleSearch = useCallback(async (query: string) => {
+    if (!query.trim() || query.trim().length < 2) return;
     setIsSearching(true);
     setHasSearched(true);
 
@@ -77,7 +77,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
         .from("profiles")
         .select("id, full_name, specialty, practice_address, mobile_number, avatar_url, practice_number, doctor_number")
         .eq("role", "doctor")
-        .or(`full_name.ilike.%${searchQuery}%,practice_number.eq.${searchQuery}`);
+        .or(`full_name.ilike.%${query}%,practice_number.eq.${query}`);
 
       if (error) throw error;
 
@@ -88,7 +88,18 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
     } finally {
       setIsSearching(false);
     }
-  };
+  }, [doctors]);
+
+  // Debounced auto-search
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) {
+      setSearchResults([]);
+      setHasSearched(false);
+      return;
+    }
+    const timeout = setTimeout(() => handleSearch(searchQuery), 300);
+    return () => clearTimeout(timeout);
+  }, [searchQuery, handleSearch]);
 
   const getSpecialtyColor = (specialty: string): string => {
     const s = specialty.toLowerCase();

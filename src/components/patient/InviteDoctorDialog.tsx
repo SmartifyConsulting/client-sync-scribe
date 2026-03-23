@@ -319,16 +319,16 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
           </div>
 
           {/* Permissions */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <Label>Access Permissions</Label>
-            <p className="text-sm text-muted-foreground">Select what information this doctor can access:</p>
-            <div className="space-y-3">
+            <p className="text-[10px] text-muted-foreground">Select what information this doctor can access:</p>
+            <div className="space-y-2">
               {permissionOptions.map((permission) => (
-                <div key={permission.id} className="flex items-start space-x-3 rounded-lg border border-border p-3 hover:bg-muted/50 transition-colors">
+                <div key={permission.id} className="flex items-start space-x-3 rounded-lg border border-border p-2 hover:bg-muted/50 transition-colors">
                   <Checkbox id={permission.id} checked={selectedPermissions.includes(permission.id)} onCheckedChange={() => handlePermissionToggle(permission.id)} />
                   <div className="flex-1">
-                    <Label htmlFor={permission.id} className="text-sm font-medium cursor-pointer">{permission.label}</Label>
-                    <p className="text-xs text-muted-foreground mt-0.5">{permission.description}</p>
+                    <Label htmlFor={permission.id} className="text-[10px] font-medium cursor-pointer">{permission.label}</Label>
+                    <p className="text-[8px] text-muted-foreground mt-0.5">{permission.description}</p>
                   </div>
                 </div>
               ))}
