@@ -199,6 +199,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
   // AI Analysis state
   const [analyzingDocId, setAnalyzingDocId] = useState<string | null>(null);
   const [analysisDialog, setAnalysisDialog] = useState<UnifiedDocument | null>(null);
+  const [sendingDocId, setSendingDocId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) fetchAll();
