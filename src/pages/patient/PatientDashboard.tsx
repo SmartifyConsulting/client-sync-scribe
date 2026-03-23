@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Calendar, FileText, Clock, User, Loader2, Bell, Pill, LogOut, Settings, ListChecks, ArrowRight, Info, Sparkles, Building2, Receipt, Star, Camera, Trophy, Heart } from "lucide-react";
-import moolasLogo from "@/assets/moolas-logo.png";
+import moolaSymbol from "@/assets/moola-symbol.png";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
