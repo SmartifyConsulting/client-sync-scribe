@@ -25,6 +25,7 @@ const patientNavItems = [
   { icon: LayoutDashboard, label: "Home", to: "/dashboard" },
   { icon: Stethoscope, label: "My Holarchive", to: "/patient/details" },
   { icon: Calendar, label: "Calendar", to: "/patient/calendar" },
+  { icon: CheckSquare, label: "To-Do", to: "/patient/tasks" },
   { icon: Settings, label: "Settings", to: "/settings" },
 ];
 

@@ -8,6 +8,7 @@ import ReferralDoctors from "@/pages/ReferralDoctors";
 import Patients from "@/pages/Patients";
 import DoctorInvoices from "@/pages/doctor/Invoices";
 import Documents from "@/pages/Documents";
+import { DoctorRoundTables } from "@/components/doctor/DoctorRoundTables";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

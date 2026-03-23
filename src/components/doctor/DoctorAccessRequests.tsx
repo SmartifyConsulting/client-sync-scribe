@@ -155,15 +155,30 @@ export function DoctorAccessRequests() {
           .from("profiles")
           .select("full_name, mobile_number")
           .eq("id", patientUserId)
-          .single();
+          .maybeSingle();
 
-        await supabase.from("patients").insert({
+        // Fetch email from auth user via user_invitations or profile email
+        let patientEmail: string | null = null;
+        const { data: invitations } = await supabase
+          .from("user_invitations")
+          .select("recipient_email")
+          .eq("recipient_id", patientUserId)
+          .limit(1);
+        if (invitations?.length) patientEmail = invitations[0].recipient_email;
+
+        const { error: insertError } = await supabase.from("patients").insert({
           user_id: user.id,
           patient_user_id: patientUserId,
           name: patientProfile?.full_name || acceptingRequest.patient_profile?.full_name || "Unknown Patient",
           phone: patientProfile?.mobile_number || null,
+          email: patientEmail,
           status: "active",
         });
+
+        if (insertError) {
+          console.error("Error creating patient record:", insertError);
+          throw insertError;
+        }
       }
 
       toast({

@@ -549,12 +549,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Chronic Medication */}
                   <div>
-                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Chronic Medication</Label>
-                    {patient.is_chronic ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive"><Pill className="h-3 w-3" />Chronic</span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">Not on chronic medication</span>
-                    )}
+                    <ViewField label="Chronic Medication" value={patient.is_chronic ? "Yes - Chronic" : "No"} />
                   </div>
 
                   {/* Surgeries and Dates */}

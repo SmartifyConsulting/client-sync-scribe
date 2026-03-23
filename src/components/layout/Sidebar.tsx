@@ -142,7 +142,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         {/* Bottom Section - Account */}
         <div className="border-t border-sidebar-border mt-auto bg-sidebar-accent/30">
           <div className="flex items-center gap-3 px-4 pt-3 pb-2">
-            <Avatar className="h-8 w-8 border-2 border-[hsl(351,81%,49%)]">
+            <Avatar className="h-8 w-8 border-2 border-primary">
               <AvatarImage key={profile?.avatar_url} src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} />
               <AvatarFallback className="bg-primary/20 text-primary text-xs">
                 {profile?.full_name?.split(" ").map(n => n[0]).join("").toUpperCase() || "U"}
