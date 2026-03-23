@@ -166,7 +166,7 @@ function getStatusBadge(status: "issued" | "paid" | "overdue" | "archived") {
   }
 }
 
-export default function DoctorInvoices() {
+export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: boolean }) {
   const { toast } = useToast();
   const { profile } = useProfile();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
