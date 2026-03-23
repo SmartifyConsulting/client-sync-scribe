@@ -126,17 +126,17 @@ const CURRENCIES = [
 ];
 
 const SIGNATURE_FONTS = [
-  { value: "allura", label: "Allura", fontFamily: "'Allura', cursive" },
-  { value: "great-vibes", label: "Great Vibes", fontFamily: "'Great Vibes', cursive" },
-  { value: "herr-von-muellerhoff", label: "Herr Von Muellerhoff", fontFamily: "'Herr Von Muellerhoff', cursive" },
-  { value: "homemade-apple", label: "Homemade Apple", fontFamily: "'Homemade Apple', cursive" },
-  { value: "kalam", label: "Kalam", fontFamily: "'Kalam', cursive" },
-  { value: "mr-dafoe", label: "Mr Dafoe", fontFamily: "'Mr Dafoe', cursive" },
-  { value: "petit-formal-script", label: "Petit Formal Script", fontFamily: "'Petit Formal Script', cursive" },
-  { value: "pinyon-script", label: "Pinyon Script", fontFamily: "'Pinyon Script', cursive" },
-  { value: "reenie-beanie", label: "Reenie Beanie", fontFamily: "'Reenie Beanie', cursive" },
-  { value: "rock-salt", label: "Rock Salt", fontFamily: "'Rock Salt', cursive" },
-  { value: "sacramento", label: "Sacramento", fontFamily: "'Sacramento', cursive" },
+  { value: "allura", label: "Allura", fontFamily: "'Allura', serif" },
+  { value: "great-vibes", label: "Great Vibes", fontFamily: "'Great Vibes', serif" },
+  { value: "herr-von-muellerhoff", label: "Herr Von Muellerhoff", fontFamily: "'Herr Von Muellerhoff', serif" },
+  { value: "homemade-apple", label: "Homemade Apple", fontFamily: "'Homemade Apple', serif" },
+  { value: "kalam", label: "Kalam", fontFamily: "'Kalam', serif" },
+  { value: "mr-dafoe", label: "Mr Dafoe", fontFamily: "'Mr Dafoe', serif" },
+  { value: "petit-formal-script", label: "Petit Formal Script", fontFamily: "'Petit Formal Script', serif" },
+  { value: "pinyon-script", label: "Pinyon Script", fontFamily: "'Pinyon Script', serif" },
+  { value: "reenie-beanie", label: "Reenie Beanie", fontFamily: "'Reenie Beanie', serif" },
+  { value: "rock-salt", label: "Rock Salt", fontFamily: "'Rock Salt', serif" },
+  { value: "sacramento", label: "Sacramento", fontFamily: "'Sacramento', serif" },
 ];
 
 const SIGNATURE_COLORS = [
@@ -880,14 +880,10 @@ export default function Settings() {
         <TabsList className="flex w-full flex-wrap bg-primary justify-start">
           <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Personal</TabsTrigger>
           {isDoctor && <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Practice</TabsTrigger>}
-          {isDoctor && <TabsTrigger value="partners" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Partners</TabsTrigger>}
-          {isDoctor && <TabsTrigger value="patients" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Patients</TabsTrigger>}
           {isDoctor && <TabsTrigger value="referrals" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Referrals</TabsTrigger>}
           {isDoctor && <TabsTrigger value="pricing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Pricing</TabsTrigger>}
           {isDoctor && <TabsTrigger value="certificates" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Certificates{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}</TabsTrigger>}
           {isDoctor && <TabsTrigger value="moolas" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Moolas</TabsTrigger>}
-          <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Preferences</TabsTrigger>
-          <TabsTrigger value="calendar" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Calendar</TabsTrigger>
           <TabsTrigger value="notifications" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Notifications</TabsTrigger>
           <TabsTrigger value="security" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Security</TabsTrigger>
           <TabsTrigger value="billing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Billing</TabsTrigger>
@@ -939,6 +935,162 @@ export default function Settings() {
               </div>
             )}
             <MailboxSection userId={user?.id} />
+
+            {/* Preferences Section */}
+            <Separator className="my-4" />
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Settings2 className="h-5 w-5 text-primary" />
+                <h2 className="text-sm font-semibold text-foreground">Preferences</h2>
+              </div>
+
+              {isPatientRole && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                    <div className="flex-1 mr-3">
+                      <p className="text-sm font-medium text-foreground">Auto-email invoice to medical aid</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">When your doctor marks an invoice as paid, it will be sent to your insurance claims email.</p>
+                    </div>
+                    <Switch checked={(profile as any)?.auto_email_invoice_to_insurance || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_invoice_to_insurance: c } as any); toast({ title: "Preference updated" }); }} />
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                    <div className="flex-1 mr-3">
+                      <p className="text-sm font-medium text-foreground">Auto-email prescription to pharmacy</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">When your doctor saves a prescription, it will be sent to your primary pharmacy.</p>
+                    </div>
+                    <Switch checked={(profile as any)?.auto_email_prescription_to_pharmacy || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_prescription_to_pharmacy: c } as any); toast({ title: "Preference updated" }); }} />
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                    <div className="flex-1 mr-3">
+                      <p className="text-sm font-medium text-foreground">Auto-email certificate to employer</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">When your doctor saves a medical certificate, it will be sent to your employer.</p>
+                    </div>
+                    <Switch checked={(profile as any)?.auto_email_certificate_to_employer || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_certificate_to_employer: c } as any); toast({ title: "Preference updated" }); }} />
+                  </div>
+                </div>
+              )}
+
+              {isDoctor && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Users className="h-4 w-4 text-primary" />
+                    <h3 className="text-xs font-semibold text-foreground">Patient Management</h3>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-foreground text-sm">Patient Inactivity Threshold</p>
+                      <p className="text-xs text-muted-foreground">Automatically mark patients as inactive after this period without a visit</p>
+                    </div>
+                    <Select value={inactiveThreshold.toString()} onValueChange={(value) => saveInactiveThreshold(parseInt(value))} disabled={savingThreshold}>
+                      <SelectTrigger className="w-[180px]"><SelectValue placeholder="Select period" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="3">3 months</SelectItem>
+                        <SelectItem value="6">6 months</SelectItem>
+                        <SelectItem value="9">9 months</SelectItem>
+                        <SelectItem value="12">12 months (default)</SelectItem>
+                        <SelectItem value="18">18 months</SelectItem>
+                        <SelectItem value="24">24 months</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+
+              {/* Language Sub-frame */}
+              <Separator />
+              <div className="space-y-3">
+                <h3 className="text-xs font-semibold text-foreground">Language</h3>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="space-y-1.5">
+                    <Label>Country</Label>
+                    <Select value={(profile as any)?.country || "ZA"} onValueChange={async (v) => { await updateProfile({ country: v } as any); toast({ title: "Country updated" }); }}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ZA">🇿🇦 South Africa</SelectItem><SelectItem value="US">🇺🇸 United States</SelectItem>
+                        <SelectItem value="GB">🇬🇧 United Kingdom</SelectItem><SelectItem value="AU">🇦🇺 Australia</SelectItem>
+                        <SelectItem value="CA">🇨🇦 Canada</SelectItem><SelectItem value="IN">🇮🇳 India</SelectItem>
+                        <SelectItem value="DE">🇩🇪 Germany</SelectItem><SelectItem value="FR">🇫🇷 France</SelectItem>
+                        <SelectItem value="AE">🇦🇪 UAE</SelectItem><SelectItem value="BW">🇧🇼 Botswana</SelectItem>
+                        <SelectItem value="NA">🇳🇦 Namibia</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Language</Label>
+                    <Select value={(profile as any)?.preferred_language || "en"} onValueChange={async (v) => { await updateProfile({ preferred_language: v } as any); toast({ title: "Language updated" }); }}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>{LANGUAGES.map(l => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Narration Voice</Label>
+                    <div className="flex gap-2">
+                      <Select value={(profile as any)?.narration_voice || "nova"} onValueChange={async (v) => { await updateProfile({ narration_voice: v } as any); toast({ title: "Voice updated" }); }}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="alloy">Alloy</SelectItem><SelectItem value="echo">Echo</SelectItem>
+                          <SelectItem value="fable">Fable</SelectItem><SelectItem value="nova">Nova</SelectItem>
+                          <SelectItem value="onyx">Onyx</SelectItem><SelectItem value="shimmer">Shimmer</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button variant="outline" size="icon" className="shrink-0" onClick={async () => {
+                        const voice = (profile as any)?.narration_voice || "nova";
+                        toast({ title: "Generating preview..." });
+                        try {
+                          const langCode = profile?.preferred_language || "en";
+                          const sampleText = SAMPLE_TEXTS[langCode] || SAMPLE_TEXTS.en;
+                          const audio = new Audio(); audio.play().catch(() => {});
+                          const { data: { session } } = await supabase.auth.getSession();
+                          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY }, body: JSON.stringify({ text: sampleText, voice }) });
+                          if (!response.ok) throw new Error('Failed');
+                          const blob = await response.blob(); const url = URL.createObjectURL(blob); audio.src = url; await audio.play(); audio.onended = () => URL.revokeObjectURL(url);
+                        } catch (err: any) { toast({ title: "Preview failed", description: err.message, variant: "destructive" }); }
+                      }}><Volume2 className="h-4 w-4" /></Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Calendar Integration Sub-frame */}
+              <Separator />
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-primary" />
+                  <h3 className="text-xs font-semibold text-foreground">Calendar Integration</h3>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {googleRealConnected && <CheckCircle className="h-4 w-4 text-success" />}
+                      <div>
+                        <p className="font-medium text-foreground text-sm">Google Calendar</p>
+                        <p className="text-xs text-muted-foreground">{googleRealConnected ? "Connected - Appointments syncing" : "Sync appointments with Google Calendar"}</p>
+                      </div>
+                    </div>
+                    {googleRealConnected ? (
+                      <Button variant="outline" size="sm" onClick={() => handleDisconnect("google")} className="text-destructive hover:text-destructive">Disconnect</Button>
+                    ) : (
+                      <Button variant="outline" size="sm" onClick={() => handleConnect("google")} disabled={googleRealConnecting}>{googleRealConnecting ? "Connecting..." : "Connect"}</Button>
+                    )}
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {outlookConnected && <CheckCircle className="h-4 w-4 text-success" />}
+                      <div>
+                        <p className="font-medium text-foreground text-sm">Outlook Calendar</p>
+                        <p className="text-xs text-muted-foreground">{outlookConnected ? "Connected - Appointments syncing" : "Sync appointments with Outlook"}</p>
+                      </div>
+                    </div>
+                    {outlookConnected ? (
+                      <Button variant="outline" size="sm" onClick={() => handleDisconnect("outlook")} className="text-destructive hover:text-destructive">Disconnect</Button>
+                    ) : (
+                      <Button variant="outline" size="sm" onClick={() => handleConnect("outlook")} disabled={isConnecting === "outlook"}>{isConnecting === "outlook" ? "Connecting..." : "Connect"}</Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </TabsContent>
 
@@ -1023,133 +1175,70 @@ export default function Settings() {
                 </div>
               </div>
 
-              {/* Country, Language, Voice */}
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div className="space-y-1.5">
-                  <Label>Country</Label>
-                  <Select value={(profile as any)?.country || "ZA"} onValueChange={async (v) => { await updateProfile({ country: v } as any); toast({ title: "Country updated" }); }}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ZA">🇿🇦 South Africa</SelectItem><SelectItem value="US">🇺🇸 United States</SelectItem>
-                      <SelectItem value="GB">🇬🇧 United Kingdom</SelectItem><SelectItem value="AU">🇦🇺 Australia</SelectItem>
-                      <SelectItem value="CA">🇨🇦 Canada</SelectItem><SelectItem value="IN">🇮🇳 India</SelectItem>
-                      <SelectItem value="DE">🇩🇪 Germany</SelectItem><SelectItem value="FR">🇫🇷 France</SelectItem>
-                      <SelectItem value="AE">🇦🇪 UAE</SelectItem><SelectItem value="BW">🇧🇼 Botswana</SelectItem>
-                      <SelectItem value="NA">🇳🇦 Namibia</SelectItem>
-                    </SelectContent>
-                  </Select>
+              {/* Partners Section */}
+              <Separator className="my-4" />
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">Add partners of the same practice. Their information will be available on documents.</p>
+                  {!showAddPartnerForm && <Button variant="outline" size="sm" onClick={() => setShowAddPartnerForm(true)} className="gap-1.5 shrink-0"><Plus className="h-3.5 w-3.5" />Add Partner</Button>}
                 </div>
-                <div className="space-y-1.5">
-                  <Label>Language</Label>
-                  <Select value={(profile as any)?.preferred_language || "en"} onValueChange={async (v) => { await updateProfile({ preferred_language: v } as any); toast({ title: "Language updated" }); }}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{LANGUAGES.map(l => <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Narration Voice</Label>
-                  <div className="flex gap-2">
-                    <Select value={(profile as any)?.narration_voice || "nova"} onValueChange={async (v) => { await updateProfile({ narration_voice: v } as any); toast({ title: "Voice updated" }); }}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="alloy">Alloy</SelectItem><SelectItem value="echo">Echo</SelectItem>
-                        <SelectItem value="fable">Fable</SelectItem><SelectItem value="nova">Nova</SelectItem>
-                        <SelectItem value="onyx">Onyx</SelectItem><SelectItem value="shimmer">Shimmer</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button variant="outline" size="icon" className="shrink-0" onClick={async () => {
-                      const voice = (profile as any)?.narration_voice || "nova";
-                      toast({ title: "Generating preview..." });
-                      try {
-                        const langCode = profile?.preferred_language || "en";
-                        const sampleText = SAMPLE_TEXTS[langCode] || SAMPLE_TEXTS.en;
-                        const audio = new Audio(); audio.play().catch(() => {});
-                        const { data: { session } } = await supabase.auth.getSession();
-                        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY }, body: JSON.stringify({ text: sampleText, voice }) });
-                        if (!response.ok) throw new Error('Failed');
-                        const blob = await response.blob(); const url = URL.createObjectURL(blob); audio.src = url; await audio.play(); audio.onended = () => URL.revokeObjectURL(url);
-                      } catch (err: any) { toast({ title: "Preview failed", description: err.message, variant: "destructive" }); }
-                    }}><Volume2 className="h-4 w-4" /></Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-        )}
-
-        {/* === PARTNERS TAB (Doctor only) === */}
-        {isDoctor && (
-          <TabsContent value="partners" className="mt-4">
-            <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">Add partners of the same practice. Their information will be available on documents.</p>
-                {!showAddPartnerForm && <Button variant="outline" size="sm" onClick={() => setShowAddPartnerForm(true)} className="gap-1.5 shrink-0"><Plus className="h-3.5 w-3.5" />Add Partner</Button>}
-              </div>
-              {partners.length > 0 && (
-                <div className="space-y-2">
-                  {partners.map((partner) => (
-                    <div key={partner.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
-                      {editingPartnerId === partner.id ? (
-                        <div className="flex-1 grid gap-2 sm:grid-cols-3 mr-3">
-                          <Input value={editingPartner.full_name} onChange={(e) => setEditingPartner({ ...editingPartner, full_name: e.target.value })} placeholder="Full name" />
-                          <Input value={editingPartner.registration_number} onChange={(e) => setEditingPartner({ ...editingPartner, registration_number: e.target.value })} placeholder="Registration number" />
-                          <Input value={editingPartner.mobile_number} onChange={(e) => setEditingPartner({ ...editingPartner, mobile_number: e.target.value })} placeholder="Mobile (optional)" />
-                        </div>
-                      ) : (
-                        <div>
-                          <p className="font-medium text-sm text-foreground">{partner.full_name}</p>
-                          <p className="text-xs text-muted-foreground">Reg: {partner.registration_number}{partner.mobile_number && ` · ${partner.mobile_number}`}</p>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-0.5">
+                {partners.length > 0 && (
+                  <div className="space-y-2">
+                    {partners.map((partner) => (
+                      <div key={partner.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
                         {editingPartnerId === partner.id ? (
-                          <>
-                            <Button variant="ghost" size="icon" onClick={saveEditingPartner} disabled={isSavingPartner} className="h-7 w-7 text-success">{isSavingPartner ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}</Button>
-                            <Button variant="ghost" size="icon" onClick={cancelEditingPartner} className="h-7 w-7"><X className="h-3.5 w-3.5" /></Button>
-                          </>
+                          <div className="flex-1 grid gap-2 sm:grid-cols-3 mr-3">
+                            <Input value={editingPartner.full_name} onChange={(e) => setEditingPartner({ ...editingPartner, full_name: e.target.value })} placeholder="Full name" />
+                            <Input value={editingPartner.registration_number} onChange={(e) => setEditingPartner({ ...editingPartner, registration_number: e.target.value })} placeholder="Registration number" />
+                            <Input value={editingPartner.mobile_number} onChange={(e) => setEditingPartner({ ...editingPartner, mobile_number: e.target.value })} placeholder="Mobile (optional)" />
+                          </div>
                         ) : (
-                          <>
-                            <Button variant="ghost" size="icon" onClick={() => startEditingPartner(partner)} className="h-7 w-7"><Pencil className="h-3.5 w-3.5" /></Button>
-                            <Button variant="ghost" size="icon" title="Invite" onClick={async () => {
-                              const partnerEmail = (partner as any).email;
-                              if (!partnerEmail) { toast({ title: "No email", variant: "destructive" }); return; }
-                              try { await supabase.functions.invoke('send-user-invitation', { body: { recipientEmail: partnerEmail, senderName: profile?.full_name || 'A colleague', message: 'You have been invited to join Holarc as a practice partner.', isPracticePartner: true, partnerName: partner.full_name } }); toast({ title: "Invitation sent" }); } catch { toast({ title: "Error", variant: "destructive" }); }
-                            }} className="h-7 w-7 text-primary"><UserPlus className="h-3.5 w-3.5" /></Button>
-                            <Button variant="ghost" size="icon" onClick={() => removePartner(partner.id)} className="h-7 w-7 text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
-                          </>
+                          <div>
+                            <p className="font-medium text-sm text-foreground">{partner.full_name}</p>
+                            <p className="text-xs text-muted-foreground">Reg: {partner.registration_number}{partner.mobile_number && ` · ${partner.mobile_number}`}</p>
+                          </div>
                         )}
+                        <div className="flex items-center gap-0.5">
+                          {editingPartnerId === partner.id ? (
+                            <>
+                              <Button variant="ghost" size="icon" onClick={saveEditingPartner} disabled={isSavingPartner} className="h-7 w-7 text-success">{isSavingPartner ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}</Button>
+                              <Button variant="ghost" size="icon" onClick={cancelEditingPartner} className="h-7 w-7"><X className="h-3.5 w-3.5" /></Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button variant="ghost" size="icon" onClick={() => startEditingPartner(partner)} className="h-7 w-7"><Pencil className="h-3.5 w-3.5" /></Button>
+                              <Button variant="ghost" size="icon" title="Invite" onClick={async () => {
+                                const partnerEmail = (partner as any).email;
+                                if (!partnerEmail) { toast({ title: "No email", variant: "destructive" }); return; }
+                                try { await supabase.functions.invoke('send-user-invitation', { body: { recipientEmail: partnerEmail, senderName: profile?.full_name || 'A colleague', message: 'You have been invited to join Holarc as a practice partner.', isPracticePartner: true, partnerName: partner.full_name } }); toast({ title: "Invitation sent" }); } catch { toast({ title: "Error", variant: "destructive" }); }
+                              }} className="h-7 w-7 text-primary"><UserPlus className="h-3.5 w-3.5" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => removePartner(partner.id)} className="h-7 w-7 text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
+                            </>
+                          )}
+                        </div>
                       </div>
+                    ))}
+                  </div>
+                )}
+                {showAddPartnerForm && (
+                  <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1.5"><Label>Full Name *</Label><Input value={newPartner.full_name} onChange={(e) => setNewPartner({ ...newPartner, full_name: e.target.value })} placeholder="Dr. Jane Doe" /></div>
+                      <div className="space-y-1.5"><Label>Registration Number *</Label><Input value={newPartner.registration_number} onChange={(e) => setNewPartner({ ...newPartner, registration_number: e.target.value })} placeholder="e.g., MP654321" /></div>
+                      <div className="space-y-1.5"><Label>Mobile (Optional)</Label><Input value={newPartner.mobile_number} onChange={(e) => setNewPartner({ ...newPartner, mobile_number: e.target.value })} /></div>
+                      <div className="space-y-1.5"><Label>Email *</Label><Input type="email" value={newPartner.email} onChange={(e) => setNewPartner({ ...newPartner, email: e.target.value })} placeholder="partner@example.com" /></div>
                     </div>
-                  ))}
-                </div>
-              )}
-              {showAddPartnerForm && (
-                <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-1.5"><Label>Full Name *</Label><Input value={newPartner.full_name} onChange={(e) => setNewPartner({ ...newPartner, full_name: e.target.value })} placeholder="Dr. Jane Doe" /></div>
-                    <div className="space-y-1.5"><Label>Registration Number *</Label><Input value={newPartner.registration_number} onChange={(e) => setNewPartner({ ...newPartner, registration_number: e.target.value })} placeholder="e.g., MP654321" /></div>
-                    <div className="space-y-1.5"><Label>Mobile (Optional)</Label><Input value={newPartner.mobile_number} onChange={(e) => setNewPartner({ ...newPartner, mobile_number: e.target.value })} /></div>
-                    <div className="space-y-1.5"><Label>Email *</Label><Input type="email" value={newPartner.email} onChange={(e) => setNewPartner({ ...newPartner, email: e.target.value })} placeholder="partner@example.com" /></div>
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={addPartner} disabled={isAddingPartner} className="gap-1.5"><Save className="h-3.5 w-3.5" />{isAddingPartner ? "Saving..." : "Save"}</Button>
+                      <Button size="sm" variant="outline" onClick={() => { setShowAddPartnerForm(false); setNewPartner({ full_name: "", registration_number: "", mobile_number: "", email: "" }); }}>Cancel</Button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={addPartner} disabled={isAddingPartner} className="gap-1.5"><Save className="h-3.5 w-3.5" />{isAddingPartner ? "Saving..." : "Save"}</Button>
-                    <Button size="sm" variant="outline" onClick={() => { setShowAddPartnerForm(false); setNewPartner({ full_name: "", registration_number: "", mobile_number: "", email: "" }); }}>Cancel</Button>
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </TabsContent>
         )}
 
-        {/* === PATIENTS TAB (Doctor only) === */}
-        {isDoctor && (
-          <TabsContent value="patients" className="mt-4">
-            <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-4">
-              <p className="text-sm text-muted-foreground">Import patients from a spreadsheet file. Drag and drop or browse to upload.</p>
-              <PatientImport />
-            </div>
-          </TabsContent>
-        )}
 
         {/* === REFERRALS TAB (Doctor only) === */}
         {isDoctor && (
@@ -1304,111 +1393,6 @@ export default function Settings() {
           </TabsContent>
         )}
 
-        {/* === PREFERENCES TAB === */}
-        <TabsContent value="preferences" className="space-y-4 mt-4">
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4">
-            <div className="flex items-center gap-3 mb-2">
-              <Settings2 className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">My Preferences</h2>
-            </div>
-            {isPatientRole && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
-                  <div className="flex-1 mr-3">
-                    <p className="text-sm font-medium text-foreground">Auto-email invoice to medical aid</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">When your doctor marks an invoice as paid, it will be sent to your insurance claims email.</p>
-                  </div>
-                  <Switch checked={(profile as any)?.auto_email_invoice_to_insurance || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_invoice_to_insurance: c } as any); toast({ title: "Preference updated" }); }} />
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
-                  <div className="flex-1 mr-3">
-                    <p className="text-sm font-medium text-foreground">Auto-email prescription to pharmacy</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">When your doctor saves a prescription, it will be sent to your primary pharmacy.</p>
-                  </div>
-                  <Switch checked={(profile as any)?.auto_email_prescription_to_pharmacy || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_prescription_to_pharmacy: c } as any); toast({ title: "Preference updated" }); }} />
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
-                  <div className="flex-1 mr-3">
-                    <p className="text-sm font-medium text-foreground">Auto-email certificate to employer</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">When your doctor saves a medical certificate, it will be sent to your employer.</p>
-                  </div>
-                  <Switch checked={(profile as any)?.auto_email_certificate_to_employer || false} onCheckedChange={async (c) => { await updateProfile({ auto_email_certificate_to_employer: c } as any); toast({ title: "Preference updated" }); }} />
-                </div>
-              </div>
-            )}
-            {!isPatientRole && !isDoctor && (
-              <p className="text-sm text-muted-foreground">No preferences available for your role at this time.</p>
-            )}
-
-            {/* Patient Management (Doctors only) */}
-            {isDoctor && (
-              <div className="space-y-4 pt-4 border-t border-border">
-                <div className="flex items-center gap-3">
-                  <Users className="h-5 w-5 text-primary" />
-                  <h3 className="text-base font-semibold text-foreground">Patient Management</h3>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-foreground">Patient Inactivity Threshold</p>
-                    <p className="text-sm text-muted-foreground">Automatically mark patients as inactive after this period without a visit</p>
-                  </div>
-                  <Select value={inactiveThreshold.toString()} onValueChange={(value) => saveInactiveThreshold(parseInt(value))} disabled={savingThreshold}>
-                    <SelectTrigger className="w-[180px]"><SelectValue placeholder="Select period" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="3">3 months</SelectItem>
-                      <SelectItem value="6">6 months</SelectItem>
-                      <SelectItem value="9">9 months</SelectItem>
-                      <SelectItem value="12">12 months (default)</SelectItem>
-                      <SelectItem value="18">18 months</SelectItem>
-                      <SelectItem value="24">24 months</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            )}
-          </div>
-        </TabsContent>
-
-        {/* === CALENDAR TAB === */}
-        <TabsContent value="calendar" className="mt-4">
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-            <div className="flex items-center gap-3 mb-6">
-              <Calendar className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Calendar Integration</h2>
-            </div>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {googleRealConnected && <CheckCircle className="h-5 w-5 text-success" />}
-                  <div>
-                    <p className="font-medium text-foreground">Google Calendar</p>
-                    <p className="text-sm text-muted-foreground">{googleRealConnected ? "Connected - Appointments syncing" : "Sync appointments with Google Calendar"}</p>
-                  </div>
-                </div>
-                {googleRealConnected ? (
-                  <Button variant="outline" onClick={() => handleDisconnect("google")} className="text-destructive hover:text-destructive">Disconnect</Button>
-                ) : (
-                  <Button variant="outline" onClick={() => handleConnect("google")} disabled={googleRealConnecting}>{googleRealConnecting ? "Connecting..." : "Connect"}</Button>
-                )}
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {outlookConnected && <CheckCircle className="h-5 w-5 text-success" />}
-                  <div>
-                    <p className="font-medium text-foreground">Outlook Calendar</p>
-                    <p className="text-sm text-muted-foreground">{outlookConnected ? "Connected - Appointments syncing" : "Sync appointments with Outlook"}</p>
-                  </div>
-                </div>
-                {outlookConnected ? (
-                  <Button variant="outline" onClick={() => handleDisconnect("outlook")} className="text-destructive hover:text-destructive">Disconnect</Button>
-                ) : (
-                  <Button variant="outline" onClick={() => handleConnect("outlook")} disabled={isConnecting === "outlook"}>{isConnecting === "outlook" ? "Connecting..." : "Connect"}</Button>
-                )}
-              </div>
-            </div>
-          </div>
-        </TabsContent>
 
         {/* === NOTIFICATIONS TAB === */}
         <TabsContent value="notifications" className="mt-4">
