@@ -53,7 +53,7 @@ export default function PatientRoundTable({ hideHeader = false }: { hideHeader?:
       {!hideHeader && (
         <div>
           <h1 className="text-2xl font-bold text-foreground">My Round Table</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-[12px]">
             Notes shared by your healthcare providers about your care.
           </p>
         </div>
