@@ -70,9 +70,11 @@ export default function GamificationAdmin() {
   const queryClient = useQueryClient();
   const [showAddAppDialog, setShowAddAppDialog] = useState(false);
   const [newAppName, setNewAppName] = useState("");
-  const [newAppLogoUrl, setNewAppLogoUrl] = useState("");
+  const [newAppLogoFile, setNewAppLogoFile] = useState<File | null>(null);
   const [newAppCreator, setNewAppCreator] = useState("");
   const [newAppSignupUrl, setNewAppSignupUrl] = useState("");
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const [editingAppId, setEditingAppId] = useState<string | null>(null);
   const [editAppValues, setEditAppValues] = useState<Partial<PartnerApp>>({});
 
