@@ -1,43 +1,48 @@
 
 
-# Fix: Dynamic Doctor Search + Compact Invite Doctor Dialog + Calendar Sub-Heading
+# Redesign Patient Dashboard
 
-## 1. Make Doctor Search Dynamic (My Doctors Page)
+## Overview
+Redesign the patient dashboard to be more informative and appealing. Remove Invoices, Prescriptions, and Appointments stat cards. Add AI-powered patient summary, medications view, doctors with last/next visit dates, pharmacies, recent claims, and reward tips.
 
-**File:** `src/pages/patient/MyDoctors.tsx`
+## Layout (top to bottom)
 
-Add a `useEffect` with 300ms debounce on `searchQuery` — auto-triggers search when 2+ characters typed. Clears results when input is emptied.
+1. **Welcome Header** — keep as-is (name, notifications, avatar)
+2. **Chronic Medication Badge** — keep as-is
+3. **Row 1: Moolas Hero + AI Health Summary** (2-column)
+   - Left: Moolas balance card (keep)
+   - Right: AI-generated health summary card using existing `summarize-patient-history` edge function, showing a brief paragraph about the patient's health status
+4. **Row 2: My Medications** (full-width card)
+   - Show active medications in normal text, past/inactive medications greyed out
+   - Fetch from `prescriptions` table — active vs expired/discontinued
+5. **Row 3: Two-column grid**
+   - **Left: My Healthcare Providers** — enhanced doctor table with "Last Seen" (from `sessions`) and "Next Appointment" (from `appointments`) columns
+   - **Right: My Pharmacies** — list from patient record's `pharmacies` JSON field, highlight primary pharmacy with a badge
+6. **Row 4: Two-column grid**
+   - **Left: Recent Claims** — fetch recent invoices with `status = 'submitted'` or similar, show amount and date submitted so user can track reimbursements
+   - **Right: Earn More Moolas** — tips card with actionable reward-earning strategies (log medication, complete tasks, health photos, visit streaks)
+7. **Assigned Tasks** — keep as-is
+8. **Quick Actions** — keep Calendar and Documentation links, remove Invoices link
 
-## 2. Fix Calendar Sub-Heading Font Size
+## Sections Removed
+- Appointments stat card
+- Prescriptions stat card
+- Invoices stat card
+- Invoices quick action link
 
-**File:** `src/pages/CalendarView.tsx` (line 251)
-
-Change `<p className="mt-1 text-muted-foreground">` to `<p className="text-muted-foreground text-[12px]">`.
-
-## 3. Compact Invite Doctor Dialog & Reduce Permission Font Sizes
-
-**File:** `src/components/patient/InviteDoctorDialog.tsx`
-
-- Reduce dialog gap/padding: change `gap-6 py-4` → `gap-3 py-2` on the main content wrapper (line 248)
-- Reduce permission item padding: `p-3` → `p-2` (line 327)
-- Reduce permission label: `text-sm font-medium` → `text-[10px] font-medium` (line 330) — ~30% smaller than current `text-sm` (~14px → ~10px)
-- Reduce permission description: keep `text-xs` → `text-[8px]` (line 331) — ~30% smaller
-- Reduce permission section description (line 324): `text-sm` → `text-[10px]`
-- Reduce spacing between permission items: `space-y-3` → `space-y-2` (line 325)
-
-## 4. Improve AI Todo Descriptions & Patient Matching
-
-**File:** `supabase/functions/process-todo-actions/index.ts`
-
-- Update AI system prompt to require date/time/patient name in description field
-- Validate AI-returned `patient_id` exists in doctor's patient list; fall back to name-based fuzzy matching if invalid
+## Data Sources
+- AI Summary: call `summarize-patient-history` edge function (already exists), cache in React Query
+- Medications: `prescriptions` table filtered by patient_id
+- Doctors + last/next visit: existing `doctor_patient_access` + `sessions` (last completed) + `appointments` (next upcoming)
+- Pharmacies: `patients.pharmacies` JSON field from patient record
+- Claims: `invoices` table where email_sent_at is not null (indicates submitted to insurance)
+- Reward tips: static content with links
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/pages/patient/MyDoctors.tsx` | Add debounced auto-search |
-| `src/pages/CalendarView.tsx` | Add `text-[12px]` to sub-heading |
-| `src/components/patient/InviteDoctorDialog.tsx` | Compact layout, reduce permission font sizes by ~30% |
-| `supabase/functions/process-todo-actions/index.ts` | Improve AI prompt; fix patient_id validation |
+| `src/pages/patient/PatientDashboard.tsx` | Complete redesign — remove stat cards, add new sections |
+
+No database changes needed — all data sources already exist.
 
