@@ -866,8 +866,12 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
         {/* === DOCUMENTS TAB (EDIT — same as view) === */}
         {isSelfService && (
           <TabsContent value="documents" className="mt-4">
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-foreground">My Documents</h2>
+              <p className="text-xs text-muted-foreground">All your prescriptions, invoices, certificates and uploaded files</p>
+            </div>
             <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-              <PatientDocuments />
+              <PatientDocuments hideHeader />
             </Suspense>
           </TabsContent>
         )}
