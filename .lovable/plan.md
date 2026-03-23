@@ -1,36 +1,70 @@
 
 
-# Plan: Standardize All Frames to Teal Borders
+# Plan: Restructure My Practice Tabs & Sidebar Navigation
 
-## Problem
-Settings.tsx consistently uses `border-primary` (teal) on all card frames, but many other pages still use `border-border` (gray). This creates visual inconsistency across the app.
+## Summary
+Consolidate navigation by moving My Patients, Invoices, and Templates into My Practice as tabs, reorder existing tabs, compact the Personal Information layout, and reorder sidebar nav items.
 
-## Pages that need `border-border` → `border-primary`
+## Changes
 
-| File | Approximate occurrences |
-|------|------------------------|
-| `src/pages/MyPractice.tsx` | ~6 frames (profile card, personal info, practice details, referrals, pricing, certificates) |
-| `src/pages/SessionDetail.tsx` | ~4 frames (not found, quick actions, audio recording, empty state) |
-| `src/pages/Profile.tsx` | ~1 frame (no record found) |
-| `src/pages/Documents.tsx` | Template cards + document list |
-| `src/pages/CPDCertificates.tsx` | ~2 frames (form + table) |
-| `src/pages/doctor/Invoices.tsx` | Edit/view invoice modals |
-| `src/pages/patient/PatientCalendar.tsx` | Appointment cards, month cards |
-| `src/components/dashboard/UpcomingAppointments.tsx` | Loading/content frame |
-| `src/components/dashboard/RecentActivity.tsx` | Loading/content frame |
-| `src/components/dashboard/TodaysBriefing.tsx` | Loading/content frame |
-| `src/components/patients/PatientOverview.tsx` | Loading/empty frames |
-| `src/components/sessions/*.tsx` | Document preview, letter editors |
+### 1. Sidebar Nav (`src/components/layout/Sidebar.tsx`)
 
-## Change
-Global find-and-replace of `border border-border bg-card` → `border border-primary bg-card` across all page and component files listed above.
+Update `doctorNavItems` to remove My Patients, Invoices, Templates and reorder My Rewards:
 
-Exceptions (keep `border-border`):
-- Inner dividers / sub-borders within frames (e.g., `border-b border-border`)
-- Input field borders
-- Modal overlay containers where teal would be visually heavy
-- Hover-only teal borders (e.g., `hover:border-primary/30` stays as-is)
+```
+Dashboard → My Holarchive → My Practice → Calendar → Sessions → To-Do List → My Rewards
+```
+
+Remove: `My Patients (/patients)`, `Invoices (/invoices)`, `Templates (/documents)`.
+Move `My Rewards` after `To-Do List`.
+
+### 2. My Practice Tabs (`src/pages/MyPractice.tsx`)
+
+Rename "Practice" tab to "My Practice". Add new tabs and reorder:
+
+```
+My Patients | My Practice | Referrals | Certificates | Pricing | Invoices | Templates
+```
+
+- **My Patients tab**: Import and render the `Patients` component (from `src/pages/Patients.tsx`) embedded inside the tab. The component already has the alphabetical listing, search, filters, and add patient dialog.
+- **Invoices tab**: Import and render the `DoctorInvoices` component (from `src/pages/doctor/Invoices.tsx`) embedded inside the tab, after Pricing.
+- **Templates tab**: Import and render the `Documents` component (from `src/pages/Documents.tsx`) embedded inside the tab.
+- **Certificates**: Move after Referrals (before Pricing).
+- Default tab changes to `"patients"`.
+
+Each embedded component will need a `hideHeader` prop (or similar pattern) to suppress their standalone page headers when rendered inside tabs.
+
+### 3. Compact Personal Information (`src/pages/MyPractice.tsx`)
+
+In the Personal Information frame, put Email and Mobile Number on the same row using a 2-column grid:
+
+```
+Row 1: [First Name] [Last Name]
+Row 2: [Email]       [Country Code + Mobile Number]
+Row 3: [Specialty]
+Row 4: [Document Mailbox]
+```
+
+Currently Email takes `sm:col-span-2` and Mobile is a separate full-width block below. Change to both fitting in the same `sm:grid-cols-2` row.
+
+### 4. Embedded Component Changes
+
+| File | Change |
+|------|--------|
+| `src/pages/Patients.tsx` | Add `hideHeader` prop to suppress the page header and outer spacing when embedded |
+| `src/pages/doctor/Invoices.tsx` | Add `hideHeader` prop to suppress the page header when embedded |
+| `src/pages/Documents.tsx` | Add `hideHeader` prop to suppress the page header when embedded |
+
+### 5. Routes
+Keep existing routes (`/patients`, `/invoices`, `/documents`) functional for direct URL access and bookmarks — they continue to render the standalone pages. The sidebar just no longer links to them.
 
 ## Files Modified
-All files listed in the table above (~12-15 files), changing outer frame borders from gray to teal.
+
+| File | Change |
+|------|--------|
+| `src/components/layout/Sidebar.tsx` | Remove 3 nav items, reorder My Rewards |
+| `src/pages/MyPractice.tsx` | Add 3 new tabs, reorder tabs, rename Practice→My Practice, compact Personal Info layout, import embedded components |
+| `src/pages/Patients.tsx` | Add `hideHeader` prop |
+| `src/pages/doctor/Invoices.tsx` | Add `hideHeader` prop |
+| `src/pages/Documents.tsx` | Add `hideHeader` prop |
 
