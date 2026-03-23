@@ -126,17 +126,17 @@ const CURRENCIES = [
 ];
 
 const SIGNATURE_FONTS = [
-  { value: "allura", label: "Allura", fontFamily: "'Allura', cursive" },
-  { value: "great-vibes", label: "Great Vibes", fontFamily: "'Great Vibes', cursive" },
-  { value: "herr-von-muellerhoff", label: "Herr Von Muellerhoff", fontFamily: "'Herr Von Muellerhoff', cursive" },
-  { value: "homemade-apple", label: "Homemade Apple", fontFamily: "'Homemade Apple', cursive" },
-  { value: "kalam", label: "Kalam", fontFamily: "'Kalam', cursive" },
-  { value: "mr-dafoe", label: "Mr Dafoe", fontFamily: "'Mr Dafoe', cursive" },
-  { value: "petit-formal-script", label: "Petit Formal Script", fontFamily: "'Petit Formal Script', cursive" },
-  { value: "pinyon-script", label: "Pinyon Script", fontFamily: "'Pinyon Script', cursive" },
-  { value: "reenie-beanie", label: "Reenie Beanie", fontFamily: "'Reenie Beanie', cursive" },
-  { value: "rock-salt", label: "Rock Salt", fontFamily: "'Rock Salt', cursive" },
-  { value: "sacramento", label: "Sacramento", fontFamily: "'Sacramento', cursive" },
+  { value: "allura", label: "Allura", fontFamily: "'Allura', serif" },
+  { value: "great-vibes", label: "Great Vibes", fontFamily: "'Great Vibes', serif" },
+  { value: "herr-von-muellerhoff", label: "Herr Von Muellerhoff", fontFamily: "'Herr Von Muellerhoff', serif" },
+  { value: "homemade-apple", label: "Homemade Apple", fontFamily: "'Homemade Apple', serif" },
+  { value: "kalam", label: "Kalam", fontFamily: "'Kalam', serif" },
+  { value: "mr-dafoe", label: "Mr Dafoe", fontFamily: "'Mr Dafoe', serif" },
+  { value: "petit-formal-script", label: "Petit Formal Script", fontFamily: "'Petit Formal Script', serif" },
+  { value: "pinyon-script", label: "Pinyon Script", fontFamily: "'Pinyon Script', serif" },
+  { value: "reenie-beanie", label: "Reenie Beanie", fontFamily: "'Reenie Beanie', serif" },
+  { value: "rock-salt", label: "Rock Salt", fontFamily: "'Rock Salt', serif" },
+  { value: "sacramento", label: "Sacramento", fontFamily: "'Sacramento', serif" },
 ];
 
 const SIGNATURE_COLORS = [
