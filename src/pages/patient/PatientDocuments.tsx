@@ -154,7 +154,7 @@ function deriveDocType(
   return "file";
 }
 
-export default function PatientDocuments() {
+export default function PatientDocuments({ hideHeader = false }: { hideHeader?: boolean }) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [documents, setDocuments] = useState<UnifiedDocument[]>([]);
