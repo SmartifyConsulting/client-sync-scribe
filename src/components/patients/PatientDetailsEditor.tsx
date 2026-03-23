@@ -349,6 +349,10 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
           {/* === PERSONAL INFORMATION TAB === */}
           <TabsContent value="personal" className="space-y-4 mt-4">
+            <div className="mb-1">
+              <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
+              <p className="text-xs text-muted-foreground">View and manage personal details</p>
+            </div>
             <div className={sectionFrame}>
               <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> Personal Details</h3>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -400,6 +404,10 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
           {/* === MEDICAL INFORMATION TAB — TWO COLUMNS === */}
           <TabsContent value="medical" className="mt-4">
+            <div className="mb-3">
+              <h2 className="text-lg font-semibold text-foreground">Medical Information</h2>
+              <p className="text-xs text-muted-foreground">View and manage medical records</p>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Column 1: Medical Information (single frame) */}
               <div className={sectionFrame + " space-y-5"}>
@@ -532,7 +540,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
           {isSelfService && (
             <TabsContent value="documents" className="mt-4">
               <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-                <PatientDocuments />
+                <PatientDocuments hideHeader />
               </Suspense>
             </TabsContent>
           )}
@@ -541,7 +549,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
           {isSelfService && (
             <TabsContent value="doctors" className="mt-4">
               <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-                <MyDoctors />
+                <MyDoctors hideHeader />
               </Suspense>
             </TabsContent>
           )}
@@ -550,7 +558,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
           {isSelfService && (
             <TabsContent value="roundtable" className="mt-4">
               <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-                <PatientRoundTable />
+                <PatientRoundTable hideHeader />
               </Suspense>
             </TabsContent>
           )}
@@ -582,6 +590,10 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
         {/* === PERSONAL TAB (EDIT) === */}
         <TabsContent value="personal" className="space-y-4 mt-4">
+          <div className="mb-1">
+            <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
+            <p className="text-xs text-muted-foreground">View and manage personal details</p>
+          </div>
           <div className={sectionFrame}>
             <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> Personal Information</h3>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -648,6 +660,10 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
         {/* === MEDICAL TAB (EDIT) — TWO COLUMNS === */}
         <TabsContent value="medical" className="mt-4">
+          <div className="mb-3">
+            <h2 className="text-lg font-semibold text-foreground">Medical Information</h2>
+            <p className="text-xs text-muted-foreground">View and manage medical records</p>
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Column 1: Medical Information (single frame) */}
             <div className={sectionFrame + " space-y-4"}>
