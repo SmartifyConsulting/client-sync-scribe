@@ -313,7 +313,7 @@ export default function TodoList() {
     <div className="space-y-6 animate-fade-in max-w-3xl">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground">To-Do List</h1>
+        <h1 className="text-2xl font-bold text-foreground">To-Do List</h1>
         <p className="mt-1 text-muted-foreground text-[12px]">Manage your tasks with voice or text input — AI can auto-execute actions</p>
       </div>
 
