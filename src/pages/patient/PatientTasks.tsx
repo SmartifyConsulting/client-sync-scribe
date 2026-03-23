@@ -190,22 +190,17 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
   };
 
   const handleSubmitProof = async () => {
-    if (!recordedBlob || !todo.patient_id) return;
-
-    if (recordedBlob.size > 5 * 1024 * 1024) {
-      toast({ title: "File too large", description: "Recording must be under 5MB.", variant: "destructive" });
-      return;
-    }
+    if (!capturedBlob || !todo.patient_id) return;
 
     setIsUploading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const filePath = `task-proof/${user.id}/${Date.now()}.webm`;
+      const filePath = `task-proof/${user.id}/${Date.now()}.jpg`;
       const { error: uploadError } = await supabase.storage
         .from("patient-media")
-        .upload(filePath, recordedBlob, { contentType: "video/webm" });
+        .upload(filePath, capturedBlob, { contentType: "image/jpeg" });
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage.from("patient-media").getPublicUrl(filePath);
