@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
 const MyDoctors = lazy(() => import("@/pages/patient/MyDoctors"));
+const PatientRoundTable = lazy(() => import("@/pages/patient/PatientRoundTable"));
 
 interface PatientDetailsEditorProps {
   patient: Patient;
@@ -338,11 +339,12 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
         </div>
 
         <Tabs defaultValue="personal">
-          <TabsList className="bg-primary">
+          <TabsList className="bg-primary flex-wrap">
             <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Personal Information</TabsTrigger>
             <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Medical Information</TabsTrigger>
             {isSelfService && <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Documents</TabsTrigger>}
             {isSelfService && <TabsTrigger value="doctors" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Doctors</TabsTrigger>}
+            {isSelfService && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Round Table</TabsTrigger>}
           </TabsList>
 
           {/* === PERSONAL INFORMATION TAB === */}
@@ -534,6 +536,15 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
               </Suspense>
             </TabsContent>
           )}
+
+          {/* === MY ROUND TABLE TAB (only for self-service) === */}
+          {isSelfService && (
+            <TabsContent value="roundtable" className="mt-4">
+              <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                <PatientRoundTable />
+              </Suspense>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     );
@@ -552,11 +563,12 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
       </div>
 
       <Tabs defaultValue="personal">
-        <TabsList className="bg-primary">
+        <TabsList className="bg-primary flex-wrap">
           <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Personal Information</TabsTrigger>
           <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Medical Information</TabsTrigger>
           {isSelfService && <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Documents</TabsTrigger>}
           {isSelfService && <TabsTrigger value="doctors" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Doctors</TabsTrigger>}
+          {isSelfService && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Round Table</TabsTrigger>}
         </TabsList>
 
         {/* === PERSONAL TAB (EDIT) === */}
@@ -843,6 +855,15 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
           <TabsContent value="doctors" className="mt-4">
             <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
               <MyDoctors />
+            </Suspense>
+          </TabsContent>
+        )}
+
+        {/* === MY ROUND TABLE TAB (EDIT — same as view) === */}
+        {isSelfService && (
+          <TabsContent value="roundtable" className="mt-4">
+            <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+              <PatientRoundTable />
             </Suspense>
           </TabsContent>
         )}

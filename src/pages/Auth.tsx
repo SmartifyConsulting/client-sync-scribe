@@ -387,6 +387,34 @@ export default function Auth() {
             }
           }
         }
+
+        if (!inviteToken) {
+          // Non-invited patient: auto-create a blank patient record
+          const fullPhone = `${countryCode} ${phone}`;
+          await supabase.from("patients").insert({
+            user_id: userId,
+            patient_user_id: userId,
+            name: fullName,
+            email,
+            phone: fullPhone,
+            dob: dob || null,
+            physical_address: physicalAddress || null,
+            postal_address: sameAsPhysical ? physicalAddress : (postalAddress || null),
+            same_as_physical: sameAsPhysical,
+            employer: employer || null,
+            occupation: occupation || null,
+            medical_aid: medicalInsurance || null,
+            medical_aid_number: medicalInsuranceNumber || null,
+            medical_insurance_product: medicalInsuranceProduct || null,
+            primary_member: primaryMember || null,
+            next_of_kin_name: nextOfKinName || null,
+            next_of_kin_phone: nextOfKinPhone || null,
+            next_of_kin_email: nextOfKinEmail || null,
+            general_practitioner: generalPractitioner || null,
+            allergies: allergies || null,
+            referred_by: referredBy || null,
+          });
+        }
       }
 
       // Create trial subscription
