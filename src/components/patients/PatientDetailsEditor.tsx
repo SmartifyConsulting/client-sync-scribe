@@ -364,7 +364,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
             </div>
 
             <div className={sectionFrame}>
-              <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Addresses</h3>
+              <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Addresses</h3>
               <div className="grid gap-3 sm:grid-cols-2">
                 <ViewField label="Physical Address" value={patient.physical_address || patient.address} />
                 <ViewField label="Postal Address" value={patient.same_as_physical ? "Same as physical address" : patient.postal_address} />
