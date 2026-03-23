@@ -401,46 +401,13 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
           {/* === MEDICAL INFORMATION TAB — TWO COLUMNS === */}
           <TabsContent value="medical" className="mt-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {/* Column 1: Medical Insurance & Pharmacies */}
-              <div className="space-y-4">
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Medical Insurance</h3>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <ViewField label="Insurance Provider" value={patient.medical_aid} />
-                    <ViewField label="Insurance Product" value={patient.medical_insurance_product} />
-                    <ViewField label="Insurance Number" value={patient.medical_aid_number} />
-                    <ViewField label="Primary Member" value={patient.primary_member} />
-                    <ViewField label="Claims Email" value={patient.claims_email} />
-                    <ViewField label="General Practitioner" value={patient.general_practitioner} />
-                  </div>
-                </div>
+              {/* Column 1: Medical Information (single frame) */}
+              <div className={sectionFrame + " space-y-5"}>
+                <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Medical Information</h3>
 
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Pharmacies</h3>
-                  {pharmacies.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No pharmacies recorded</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {pharmacies.map((pharmacy) => (
-                        <div key={pharmacy.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/50">
-                          <div>
-                            <p className="text-sm font-medium text-foreground flex items-center gap-2">
-                              {pharmacy.name}
-                              {pharmacy.is_primary && <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">Primary</span>}
-                            </p>
-                            {pharmacy.email && <p className="text-xs text-muted-foreground">{pharmacy.email}</p>}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Column 2: Physical, Blood, Allergies, Surgeries, Family History, Organ Donor */}
-              <div className="space-y-4">
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Physical Measurements</h3>
+                {/* Physical Measurements */}
+                <div>
+                  <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Physical Measurements</h4>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
                       <Ruler className="h-4 w-4 text-primary" />
@@ -458,20 +425,23 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
                   </div>
                 </div>
 
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Blood Type</h3>
+                {/* Blood Type */}
+                <div>
+                  <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Droplets className="h-3.5 w-3.5" /> Blood Type</h4>
                   <p className="text-sm text-foreground">{patient.blood_type || "Not recorded"}</p>
                 </div>
 
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</h3>
+                {/* Allergies */}
+                <div>
+                  <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</h4>
                   <div className="rounded-lg bg-muted/30 p-3 border border-border/50">
                     <p className="text-sm text-foreground">{patient.allergies || "None recorded"}</p>
                   </div>
                 </div>
 
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Chronic Medication</h3>
+                {/* Chronic Medication */}
+                <div>
+                  <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Chronic Medication</h4>
                   {patient.is_chronic ? (
                     <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive"><Pill className="h-3 w-3" />Chronic</span>
                   ) : (
@@ -479,8 +449,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
                   )}
                 </div>
 
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Surgeries and Dates</h3>
+                {/* Surgeries and Dates */}
+                <div>
+                  <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Scissors className="h-3.5 w-3.5" /> Surgeries and Dates</h4>
                   {surgeries.length === 0 ? (
                     <p className="text-xs text-muted-foreground">No surgeries recorded</p>
                   ) : (
@@ -496,8 +467,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
                   )}
                 </div>
 
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide">Family History</h3>
+                {/* Family History */}
+                <div>
+                  <h4 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><GitBranch className="h-3.5 w-3.5" /> Family History</h4>
                   {familyHistory.length === 0 ? (
                     <p className="text-xs text-muted-foreground">No family history recorded</p>
                   ) : (
@@ -512,8 +484,45 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
                   )}
                 </div>
 
-                <div className={sectionFrame}>
+                {/* Organ Donor */}
+                <div>
                   <OrganDonorView />
+                </div>
+              </div>
+
+              {/* Column 2: Insurance & Pharmacies */}
+              <div className="space-y-4">
+                <div className={sectionFrame}>
+                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> Medical Insurance</h3>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <ViewField label="Insurance Provider" value={patient.medical_aid} />
+                    <ViewField label="Insurance Product" value={patient.medical_insurance_product} />
+                    <ViewField label="Insurance Number" value={patient.medical_aid_number} />
+                    <ViewField label="Primary Member" value={patient.primary_member} />
+                    <ViewField label="Claims Email" value={patient.claims_email} />
+                    <ViewField label="General Practitioner" value={patient.general_practitioner} />
+                  </div>
+                </div>
+
+                <div className={sectionFrame}>
+                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Store className="h-3.5 w-3.5" /> Pharmacies</h3>
+                  {pharmacies.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No pharmacies recorded</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {pharmacies.map((pharmacy) => (
+                        <div key={pharmacy.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/50">
+                          <div>
+                            <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                              {pharmacy.name}
+                              {pharmacy.is_primary && <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">Primary</span>}
+                            </p>
+                            {pharmacy.email && <p className="text-xs text-muted-foreground">{pharmacy.email}</p>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
