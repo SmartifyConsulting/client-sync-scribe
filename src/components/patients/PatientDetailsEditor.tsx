@@ -724,7 +724,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false }:
 
               <div className={sectionFrame}>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">Family History</h3>
+                  <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><GitBranch className="h-3.5 w-3.5" /> Family History</h3>
                   {!showAddFamily && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddFamily(true)}><Plus className="h-3 w-3" />Add</Button>}
                 </div>
                 {showAddFamily && (

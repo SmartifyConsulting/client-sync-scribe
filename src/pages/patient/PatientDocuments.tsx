@@ -707,7 +707,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
             <button
               key={opt.value}
               onClick={() => setFilter(opt.value)}
-              className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+              className={`inline-flex items-center rounded-full px-2 py-0.5 text-[8px] font-medium transition-colors ${
                 isActive
                   ? "bg-primary text-primary-foreground"
                   : config

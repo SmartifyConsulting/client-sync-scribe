@@ -680,7 +680,7 @@ export default function Settings() {
           </div>
 
           {/* Payment History Frame */}
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <Receipt className="h-5 w-5 text-primary" />
               <h2 className="text-lg font-semibold text-foreground">Payment History</h2>
