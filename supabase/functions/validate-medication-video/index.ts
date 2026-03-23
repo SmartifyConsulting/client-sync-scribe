@@ -13,6 +13,7 @@ serve(async (req) => {
 
   try {
     const { videoUrl, filePath, prescriptionId, patientId } = await req.json();
+    const imageUrl = videoUrl; // Now receives image URL despite param name
 
     if (!videoUrl || !filePath || !prescriptionId || !patientId) {
       return new Response(
