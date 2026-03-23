@@ -1328,6 +1328,7 @@ export type Database = {
           practice_address: string | null
           practice_number: string | null
           preferred_language: string | null
+          preferred_languages: string[] | null
           role: Database["public"]["Enums"]["user_role"] | null
           round_table_enabled: boolean | null
           signature_bold: boolean | null
@@ -1359,6 +1360,7 @@ export type Database = {
           practice_address?: string | null
           practice_number?: string | null
           preferred_language?: string | null
+          preferred_languages?: string[] | null
           role?: Database["public"]["Enums"]["user_role"] | null
           round_table_enabled?: boolean | null
           signature_bold?: boolean | null
@@ -1390,6 +1392,7 @@ export type Database = {
           practice_address?: string | null
           practice_number?: string | null
           preferred_language?: string | null
+          preferred_languages?: string[] | null
           role?: Database["public"]["Enums"]["user_role"] | null
           round_table_enabled?: boolean | null
           signature_bold?: boolean | null
