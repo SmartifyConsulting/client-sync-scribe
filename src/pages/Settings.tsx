@@ -416,7 +416,7 @@ export default function Settings() {
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <Users className="h-4 w-4 text-primary" />
-                  <h3 className="text-[9px] font-semibold text-foreground">Patient Management</h3>
+                  <h3 className="text-sm font-semibold text-foreground">Patient Management</h3>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
