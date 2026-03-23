@@ -68,7 +68,7 @@ Only return the JSON, no other text.`;
             role: 'user',
             content: [
               { type: 'text', text: validationPrompt },
-              { type: 'image_url', image_url: { url: videoUrl } }
+              { type: 'image_url', image_url: { url: imageUrl } }
             ]
           }
         ],
