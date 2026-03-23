@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
 import { Patient, Surgery, Pharmacy, FamilyHistoryEntry } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
+import { ShareAppDialog } from "@/components/ShareAppDialog";
 
 const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
 const MyDoctors = lazy(() => import("@/pages/patient/MyDoctors"));
