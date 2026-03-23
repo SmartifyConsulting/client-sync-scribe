@@ -225,6 +225,17 @@ export default function MyPractice() {
     practice_address: "", specialty: "", mobile_number: "", country_code: "+27",
   });
 
+  // ── Signature form state (auto-save) ──
+  const sigDebounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sigHasInitialized = useRef(false);
+  const sigIsSettingFromProfile = useRef(false);
+  const sigProfileLoadedData = useRef<any>(null);
+
+  const [sigFormData, setSigFormData] = useState({
+    signature_font: "allura", signature_color: "black",
+    signature_font_size: 24, signature_bold: false, signature_italic: false,
+  });
+
   // ── Avatar / Logo upload ──
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
