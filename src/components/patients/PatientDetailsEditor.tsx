@@ -367,20 +367,25 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
     return (
       <div className={sectionFrame + " mb-4"}>
         <div className="flex items-center gap-4">
-          <div className="relative group cursor-pointer" onClick={() => avatarInputRef.current?.click()}>
-            <Avatar className="h-16 w-16">
-              {avatarUrl ? (
-                <AvatarImage src={avatarUrl} alt={patient.name} />
-              ) : null}
-              <AvatarFallback className="bg-primary/10 text-primary text-lg font-semibold">{initials}</AvatarFallback>
-            </Avatar>
-            <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-              {uploadingAvatar ? (
-                <Loader2 className="h-5 w-5 animate-spin text-white" />
-              ) : (
-                <Camera className="h-5 w-5 text-white" />
-              )}
+          <div className="flex flex-col items-center gap-1 cursor-pointer" onClick={() => avatarInputRef.current?.click()}>
+            <div className="relative">
+              <Avatar className="h-20 w-20">
+                {avatarUrl ? (
+                  <AvatarImage src={avatarUrl} alt={patient.name} />
+                ) : null}
+                <AvatarFallback className="bg-primary/10 text-primary text-xl font-semibold">{initials}</AvatarFallback>
+              </Avatar>
+              <div className={`absolute inset-0 flex items-center justify-center rounded-full transition-opacity ${avatarUrl ? "bg-black/40 opacity-0 group-hover:opacity-100" : "bg-black/30"}`}>
+                {uploadingAvatar ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-white" />
+                ) : (
+                  <Camera className="h-5 w-5 text-white" />
+                )}
+              </div>
             </div>
+            {!avatarUrl && (
+              <span className="text-[10px] text-muted-foreground">Tap to add photo</span>
+            )}
             <input
               ref={avatarInputRef}
               type="file"
