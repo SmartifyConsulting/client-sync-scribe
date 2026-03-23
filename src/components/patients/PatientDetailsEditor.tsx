@@ -544,10 +544,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Allergies */}
                   <div>
-                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</Label>
-                    <div className="rounded-lg bg-muted/30 p-3 border border-border/50">
-                      <p className="text-sm text-foreground">{patient.allergies || "None recorded"}</p>
-                    </div>
+                    <ViewField label="Allergies" value={patient.allergies || "None recorded"} />
                   </div>
 
                   {/* Chronic Medication */}
