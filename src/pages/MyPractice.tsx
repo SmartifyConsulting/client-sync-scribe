@@ -485,23 +485,20 @@ export default function MyPractice() {
                 <Label>Last Name</Label>
                 <Input value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
               </div>
-              <div className="space-y-1.5 sm:col-span-2">
+              <div className="space-y-1.5">
                 <Label>Email</Label>
+                <Input type="email" value={user?.email || ""} disabled className="bg-muted" />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Mobile Number</Label>
                 <div className="flex gap-2">
-                  <Input type="email" value={user?.email || ""} disabled className="bg-muted" />
+                  <Select value={formData.country_code} onValueChange={(v) => setFormData({ ...formData, country_code: v })}>
+                    <SelectTrigger className="w-[130px]"><SelectValue /></SelectTrigger>
+                    <SelectContent>{COUNTRY_CODES.map(c => <SelectItem key={c.code} value={c.code}><span className="flex items-center gap-1.5">{c.flag} {c.code}</span></SelectItem>)}</SelectContent>
+                  </Select>
+                  <Input type="tel" value={formatPhoneNumber(formData.mobile_number)} onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value.replace(/[^0-9]/g, '') })} placeholder="82 123 4567" className="flex-1" />
                 </div>
               </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Mobile Number</Label>
-              <div className="flex gap-2">
-                <Select value={formData.country_code} onValueChange={(v) => setFormData({ ...formData, country_code: v })}>
-                  <SelectTrigger className="w-[130px]"><SelectValue /></SelectTrigger>
-                  <SelectContent>{COUNTRY_CODES.map(c => <SelectItem key={c.code} value={c.code}><span className="flex items-center gap-1.5">{c.flag} {c.code}</span></SelectItem>)}</SelectContent>
-                </Select>
-                <Input type="tel" value={formatPhoneNumber(formData.mobile_number)} onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value.replace(/[^0-9]/g, '') })} placeholder="82 123 4567" className="flex-1" />
-              </div>
-            </div>
             <div className="space-y-1.5">
               <Label>Specialty</Label>
               <Select value={formData.specialty} onValueChange={(v) => setFormData({ ...formData, specialty: v })}>
