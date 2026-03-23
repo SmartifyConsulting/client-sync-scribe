@@ -527,10 +527,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 <div className={sectionFrame + " space-y-5"}>
                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Medical Information</h3>
 
-                  {/* Physical Measurements */}
-                  <div>
-                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5 mb-2"><Activity className="h-3.5 w-3.5" /> Physical Measurements</Label>
-                    <div className="grid gap-3 sm:grid-cols-3">
+                   {/* Physical Measurements */}
+                   <div>
+                     <div className="grid gap-3 sm:grid-cols-3">
                       <ViewField label="Height (cm)" value={patient.height_cm ? `${patient.height_cm}` : undefined} />
                       <ViewField label="Weight (kg)" value={patient.weight_kg ? `${patient.weight_kg}` : undefined} />
                       <ViewField label="BMI" value={bmi || undefined} />
