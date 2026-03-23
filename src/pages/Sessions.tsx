@@ -854,7 +854,7 @@ export default function Sessions() {
       )}
 
       {sessionState === "processing" && (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card p-12 text-center">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-primary bg-card p-12 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
             <Sparkles className="h-8 w-8 text-primary animate-pulse" />
           </div>
@@ -910,7 +910,7 @@ export default function Sessions() {
 
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Transcription */}
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
               <div className="flex items-center gap-3 mb-4">
                 <Mic className="h-5 w-5 text-primary" />
                 <h3 className="font-semibold text-foreground">Transcription</h3>
@@ -934,7 +934,7 @@ export default function Sessions() {
             </div>
 
             {/* Summary */}
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
               <div className="flex items-center gap-3 mb-4">
                 <Sparkles className="h-5 w-5 text-primary" />
                 <h3 className="font-semibold text-foreground">AI Summary</h3>
@@ -945,7 +945,7 @@ export default function Sessions() {
             </div>
 
             {/* Action Points */}
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
               <div className="flex items-center gap-3 mb-4">
                 <AlertCircle className="h-5 w-5 text-warning" />
                 <h3 className="font-semibold text-foreground">Action Points</h3>
@@ -980,7 +980,7 @@ export default function Sessions() {
           {/* Post-Session Actions: Prescription & Invoice */}
           <div className="grid gap-4 md:grid-cols-2">
             {/* Prescription Card */}
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
@@ -1014,7 +1014,7 @@ export default function Sessions() {
             </div>
 
             {/* Invoice Card */}
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
@@ -1121,7 +1121,7 @@ export default function Sessions() {
       )}
 
       {/* All Sessions List */}
-      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+      <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <Calendar className="h-5 w-5 text-primary" />

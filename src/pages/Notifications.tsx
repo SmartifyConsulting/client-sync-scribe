@@ -630,7 +630,7 @@ function NotificationList({
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border">
+    <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden divide-y divide-border">
       {notifications.map((notification) => (
         <div
           key={notification.id}
@@ -733,7 +733,7 @@ function MessageList({
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border">
+    <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden divide-y divide-border">
       {messages.map((message) => (
         <div
           key={message.id}

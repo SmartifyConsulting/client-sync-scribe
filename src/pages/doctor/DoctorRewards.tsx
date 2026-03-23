@@ -93,7 +93,7 @@ export default function DoctorRewards() {
         <p className="text-sm text-muted-foreground">Manage your Moolas balance and transfers</p>
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-6">
+      <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-6">
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-lg border border-border p-4 bg-emerald-50 dark:bg-emerald-950/20">
             <p className="text-xs text-muted-foreground">Doctor Moolas</p>

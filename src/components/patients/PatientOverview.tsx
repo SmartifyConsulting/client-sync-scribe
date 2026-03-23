@@ -454,7 +454,7 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-border bg-card p-8 text-center">
+      <div className="rounded-xl border border-primary bg-card p-8 text-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-muted-foreground">Generating AI summary of patient history...</p>
@@ -465,7 +465,7 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
 
   if (!summaryData) {
     return (
-      <div className="rounded-xl border border-border bg-card p-8 text-center">
+      <div className="rounded-xl border border-primary bg-card p-8 text-center">
         <p className="text-muted-foreground mb-4">No summary available yet.</p>
         <Button onClick={generateSummary} className="gap-2">
           <Sparkles className="h-4 w-4" />

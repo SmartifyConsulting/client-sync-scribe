@@ -397,7 +397,7 @@ export default function Connections() {
               {filteredConnections.map((connection) => (
                 <div
                   key={connection.id}
-                  className="rounded-xl border border-border bg-card p-4 shadow-sm hover:shadow-md transition-shadow"
+                  className="rounded-xl border border-primary bg-card p-4 shadow-sm hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-start gap-4">
                     <Avatar className="h-12 w-12">
@@ -449,7 +449,7 @@ export default function Connections() {
               <p className="text-sm">All your invitations have been responded to</p>
             </div>
           ) : (
-            <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border">
+            <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden divide-y divide-border">
               {filteredPending.map((invitation) => (
                 <div
                   key={invitation.id}

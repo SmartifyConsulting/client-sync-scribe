@@ -59,7 +59,7 @@ export default function ForgotPassword() {
             <p className="text-muted-foreground mt-2">Reset your password</p>
           </div>
 
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
             {emailSent ? (
               <div className="text-center py-4">
                 <div className="flex justify-center mb-4">

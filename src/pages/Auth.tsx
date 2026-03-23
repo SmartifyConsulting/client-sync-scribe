@@ -851,7 +851,7 @@ export default function Auth() {
               </button>
               <p className="text-muted-foreground mt-2">Sign In</p>
             </div>
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
@@ -911,7 +911,7 @@ export default function Auth() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm max-h-[60vh] overflow-y-auto">
+          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm max-h-[60vh] overflow-y-auto">
             {userRole === "doctor" ? renderDoctorStep() : renderPatientStep()}
           </div>
 

@@ -63,7 +63,7 @@ function AutoCreatePatientFallback({ user, onCreated }: { user: any; onCreated: 
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card p-8 text-center space-y-4">
+    <div className="rounded-xl border border-primary bg-card p-8 text-center space-y-4">
       <p className="text-muted-foreground">No clinical record found. Create your Holarchive to start managing your health information.</p>
       <Button onClick={handleCreate} disabled={creating}>
         {creating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Creating...</> : "Create My Holarchive"}

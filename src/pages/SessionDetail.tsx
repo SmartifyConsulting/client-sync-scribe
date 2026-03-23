@@ -228,7 +228,7 @@ export default function SessionDetail() {
           <ArrowLeft className="h-4 w-4" />
           Back
         </button>
-        <div className="rounded-xl border border-border bg-card p-8 text-center">
+        <div className="rounded-xl border border-primary bg-card p-8 text-center">
           <p className="text-muted-foreground">Session not found</p>
         </div>
       </div>
@@ -337,7 +337,7 @@ export default function SessionDetail() {
 
       {/* Quick Actions */}
       {session.status === "completed" && session.patient && (
-        <div className="rounded-xl border border-border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-6">
           <h2 className="font-semibold text-foreground mb-4">Quick Actions</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2">
             <Button
@@ -433,7 +433,7 @@ export default function SessionDetail() {
       )}
 
       {/* Audio Recording */}
-      <div className="rounded-xl border border-border bg-card p-6">
+      <div className="rounded-xl border border-primary bg-card p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10">
@@ -595,7 +595,7 @@ export default function SessionDetail() {
 
       {/* Empty State */}
       {!session.summary && !session.transcript && (!session.action_points || session.action_points.length === 0) && (
-        <div className="rounded-xl border border-border bg-card p-8 text-center">
+        <div className="rounded-xl border border-primary bg-card p-8 text-center">
           <p className="text-muted-foreground">No content recorded for this session yet.</p>
         </div>
       )}

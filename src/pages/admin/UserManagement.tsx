@@ -180,7 +180,7 @@ export default function UserManagement() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-border bg-card">
+      <div className="rounded-lg border border-primary bg-card">
         <Table>
           <TableHeader>
             <TableRow>

@@ -94,7 +94,7 @@ export function RecentActivity() {
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-border bg-card shadow-sm p-8">
+      <div className="rounded-xl border border-primary bg-card shadow-sm p-8">
         <div className="animate-pulse space-y-4">
           <div className="h-6 bg-muted rounded w-1/2" />
           <div className="h-4 bg-muted rounded w-1/3" />

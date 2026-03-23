@@ -1424,7 +1424,7 @@ export default function DoctorInvoices() {
       {/* Edit Invoice Modal */}
       {editingInvoice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-lg animate-fade-in">
+          <div className="w-full max-w-lg rounded-xl border border-primary bg-card p-6 shadow-lg animate-fade-in">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -1515,7 +1515,7 @@ export default function DoctorInvoices() {
       {/* View Invoice Modal - Template Format */}
       {viewingInvoice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-border bg-card shadow-lg animate-fade-in">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-primary bg-card shadow-lg animate-fade-in">
             {/* Invoice Template Header */}
             <div className="bg-primary text-primary-foreground p-6">
               <div className="flex items-center justify-between">
