@@ -387,7 +387,8 @@ export default function Auth() {
             }
           }
         }
-        } else {
+
+        if (!inviteToken) {
           // Non-invited patient: auto-create a blank patient record
           const fullPhone = `${countryCode} ${phone}`;
           await supabase.from("patients").insert({
@@ -414,6 +415,7 @@ export default function Auth() {
             referred_by: referredBy || null,
           });
         }
+      }
 
       // Create trial subscription
       const trialEndsAt = new Date();
