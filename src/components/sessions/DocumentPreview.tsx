@@ -41,18 +41,44 @@ const normalizeHeadingMarkup = (content: string): string => {
 const renderFormattedContent = (content: string): string => {
   const withHeadings = normalizeHeadingMarkup(content);
 
-  const safeContent = withHeadings
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/&lt;b&gt;/g, "<b>")
-    .replace(/&lt;\/b&gt;/g, "</b>")
-    .replace(/&lt;i&gt;/g, "<i>")
-    .replace(/&lt;\/i&gt;/g, "</i>")
-    .replace(/&lt;u&gt;/g, "<u>")
-    .replace(/&lt;\/u&gt;/g, "</u>")
-    .replace(/\n/g, "<br/>");
+  // Extract safe HTML tags into placeholders before escaping
+  const safeTags: string[] = [];
+  const safeTagPattern = /<\/?(h[1-4]|p|div|br|hr|blockquote|b|i|u|strong|em|span|sub|sup|table|thead|tbody|tr|td|th|ul|ol|li)(\s[^>]*)?\/?>/gi;
+  const imgPattern = /<img\s[^>]*\/?>/gi;
 
-  return safeContent;
+  let processed = withHeadings;
+
+  // Preserve img tags (with attributes)
+  processed = processed.replace(imgPattern, (match) => {
+    const idx = safeTags.length;
+    safeTags.push(match);
+    return `__SAFE_TAG_${idx}__`;
+  });
+
+  // Preserve other safe tags
+  processed = processed.replace(safeTagPattern, (match) => {
+    const idx = safeTags.length;
+    safeTags.push(match);
+    return `__SAFE_TAG_${idx}__`;
+  });
+
+  // Escape remaining content
+  processed = processed
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  // Restore safe tags
+  for (let i = 0; i < safeTags.length; i++) {
+    processed = processed.replace(`__SAFE_TAG_${i}__`, safeTags[i]);
+  }
+
+  // Convert newlines to <br/> only if content doesn't already use block-level HTML
+  const hasBlockTags = /<(h[1-4]|p|div|table|ul|ol|br|hr)/i.test(processed);
+  if (!hasBlockTags) {
+    processed = processed.replace(/\n/g, "<br/>");
+  }
+
+  return processed;
 };
 interface DocumentPreviewProps {
   title: string;
