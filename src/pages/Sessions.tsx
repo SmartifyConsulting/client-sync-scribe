@@ -1437,6 +1437,7 @@ export default function Sessions() {
           patientId={patientId}
           sessionId={currentSessionId || undefined}
           onClose={() => setShowMedicalCertificateEditor(false)}
+          onSave={() => setShowMedicalCertificateEditor(false)}
         />
       )}
 
