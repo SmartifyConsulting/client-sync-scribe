@@ -303,8 +303,8 @@ export default function Settings() {
             {/* Main Preferences Header + Language */}
             <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
               <div className="flex items-center gap-3">
-                <Settings2 className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold text-foreground">Preferences</h2>
+                <Settings2 className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-semibold text-foreground">Preferences</h2>
               </div>
               <p className="text-muted-foreground text-[12px]">Manage your application preferences and integrations</p>
 
