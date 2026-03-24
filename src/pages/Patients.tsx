@@ -560,7 +560,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-foreground">Medical Insurance Number</label>
+                      <Label>Medical Insurance Number</Label>
                       <Input
                         placeholder="Member number"
                         value={newPatient.medical_insurance_number}
