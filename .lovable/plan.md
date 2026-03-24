@@ -1,107 +1,34 @@
 
 
-# Standardise App UI: Remove Inconsistencies
+# Fix: Transcription Failing Due to Large Base64 Payload Timeout
 
-## Problem
-The app has grown organically, leading to inconsistent typography, spacing, and component styling across screens. Key inconsistencies found:
+## Root Cause
 
-**Page Headings:** Mix of `text-3xl`, `text-2xl`, `text-lg` for main `<h1>` headings
-**Sub-headings:** Mix of `text-muted-foreground` (no size), `text-[12px]`, `text-sm` for page descriptions
-**Section headings:** Mix of `text-lg font-semibold`, `text-sm font-semibold`, `text-xl font-semibold` inside cards/frames
-**Form labels:** Mix of `text-sm font-medium`, `text-[11px]` (Label component), and raw `<label>` vs `<Label>`
-**Frame padding:** Mix of `p-4`, `p-6`, `p-3` on similar card/frame containers
-**Icon sizes in section headers:** Mix of `h-5 w-5` and `h-4 w-4`
-**Stat card values:** Mix of `text-3xl`, `text-2xl`, `text-xl` for numbers
+The audio is sent as base64 inside a JSON body to the edge function. For a session with Shannon, the base64 string was 2.5MB. The `supabase.functions.invoke` call timed out after ~3 minutes (`TypeError: Failed to fetch`). The edge function booted but never logged any processing, confirming the request body never arrived or was rejected.
 
-## Design System Standards (Based on Existing Memories)
+## Solution: Use Storage URL Instead of Base64
 
-Per the project's established conventions:
-- **Page heading (h1):** `text-2xl font-bold text-foreground` (not text-3xl — too large for clinical density)
-- **Page sub-heading:** `text-muted-foreground text-[12px]`
-- **Section heading (h2/h3 in frames):** `text-sm font-semibold text-foreground` with `h-4 w-4 text-primary` icon
-- **Section description:** `text-sm text-muted-foreground` → standardise to `text-[12px] text-muted-foreground`
-- **Form labels:** Use `<Label>` component (`text-[11px]`) everywhere, not raw `<label class="text-sm">`
-- **Input text:** `text-[12px]` (already in Input component)
-- **Frame containers:** `rounded-xl border border-primary bg-card p-4 shadow-sm`
-- **Card stat values:** `text-2xl font-bold` (not text-3xl)
-- **Empty state text:** `text-sm` for title, `text-[12px]` for description
+The audio is **already uploaded to storage** before transcription (line 105). Instead of converting the blob to base64 and sending it inline, pass the storage URL to the edge function. The edge function then downloads the file from storage directly (server-to-server, fast) and sends it to Whisper.
 
-## Changes by File
+### File: `src/hooks/useAudioRecording.ts`
 
-### Pages with `text-3xl` h1 → change to `text-2xl`
-| File | Line(s) | Current | Target |
-|------|---------|---------|--------|
-| `Dashboard.tsx` | 238 | `text-3xl font-bold` | `text-2xl font-bold` |
-| `Patients.tsx` | 375 | `text-3xl font-bold` | `text-2xl font-bold` |
-| `Notifications.tsx` | 355 | `text-3xl font-bold` | `text-2xl font-bold` |
-| `Documents.tsx` | 363 | `text-3xl font-bold` | `text-2xl font-bold` |
-| `Connections.tsx` | 346 | `text-3xl font-bold` | `text-2xl font-bold` |
-| `doctor/Invoices.tsx` | 830 | `text-3xl font-bold` | `text-2xl font-bold` |
-| `admin/GamificationAdmin.tsx` | 269 | `text-3xl font-bold` | `text-2xl font-bold` |
-| `admin/PricingAdmin.tsx` | 145 | `text-3xl font-bold` | `text-2xl font-bold` |
-| `ReferralDoctors.tsx` | heading | `text-3xl font-bold` | `text-2xl font-bold` |
+**In `mediaRecorder.onstop`:** Reorder so storage upload happens first, then pass `storageUrl` to `transcribeAudio` instead of the blob.
 
-### Pages with unsized sub-heading descriptions → add `text-[12px]`
-| File | Current | Target |
-|------|---------|--------|
-| `Patients.tsx` (376) | `text-muted-foreground` (no size) | `text-muted-foreground text-[12px]` |
-| `Documents.tsx` (364) | `text-muted-foreground` (no size) | `text-muted-foreground text-[12px]` |
-| `admin/GamificationAdmin.tsx` (270) | `text-muted-foreground` (no size) | `text-muted-foreground text-[12px]` |
-| `admin/PricingAdmin.tsx` (146) | `text-muted-foreground` (no size) | `text-muted-foreground text-[12px]` |
+**In `transcribeAudio`:** Change signature to accept either a blob or a URL. When a storage URL is available, send `{ audioUrl, patientName, doctorName, language }` instead of `{ audio: base64, ... }`. Fall back to base64 for short recordings without a sessionId.
 
-### Section headings inside frames → standardise to `text-sm font-semibold`
-| File | Current | Target |
-|------|---------|--------|
-| `Settings.tsx` (~307, 412, 468, 495) | `text-lg font-semibold` | `text-sm font-semibold` |
-| `Sessions.tsx` (~1286) | `text-xl font-semibold` | `text-sm font-semibold` |
-| `Settings.tsx` section icons (~306, 411, 467, 494) | `h-5 w-5` | `h-4 w-4` |
+### File: `supabase/functions/transcribe-audio/index.ts`
 
-### Frame padding → standardise to `p-4`
-| File | Current | Target |
-|------|---------|--------|
-| `Settings.tsx` (~409, 465, 492) | `p-6` | `p-4` |
+**Accept `audioUrl` as an alternative to `audio`:**
+- If `audioUrl` is provided, fetch the file from storage using `fetch(audioUrl)` to get the binary data
+- If `audio` (base64) is provided, use the existing `processBase64Chunks` logic
+- Either way, create the FormData blob and send to Whisper as before
 
-### Form labels in dialogs → use `<Label>` instead of raw `<label>`
-| File | Current |
-|------|---------|
-| `CalendarView.tsx` (~311, 319, 328) | `<label className="text-sm font-medium">` → `<Label>` |
-| `Patients.tsx` (~411, 465, 474, 488, 508, 524, 532, 547, 555, 563, 571, 579, 595) | `<label className="text-sm font-medium">` → `<Label>` |
-
-### Stat card values → standardise to `text-2xl`
-| File | Current | Target |
-|------|---------|--------|
-| `admin/GamificationAdmin.tsx` (~282, 290, 300, 310) | `text-3xl font-bold` | `text-2xl font-bold` |
-| `patient/PatientDashboard.tsx` (~340) | `text-3xl font-bold` | `text-2xl font-bold` |
-| `doctor/DoctorRewards.tsx` (~131, 156) | `text-3xl font-bold` | `text-2xl font-bold` |
-
-### Empty state text → standardise
-| File | Current | Target |
-|------|---------|--------|
-| `Notifications.tsx` (~614, 790) | `text-lg font-medium` | `text-sm font-medium` |
-
-### Settings section descriptions → standardise to `text-[12px]`
-| File | Current | Target |
-|------|---------|--------|
-| `Settings.tsx` (~414, 470) | `text-sm text-muted-foreground` | `text-[12px] text-muted-foreground` |
+This eliminates the 2.5MB+ JSON payload, replacing it with a tiny JSON body (~200 bytes) containing the URL. The edge function downloads the audio server-side with no timeout risk.
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/pages/Dashboard.tsx` | h1 text-3xl → text-2xl |
-| `src/pages/Patients.tsx` | h1 text-3xl → text-2xl, sub-heading size, labels → `<Label>` |
-| `src/pages/Notifications.tsx` | h1 text-3xl → text-2xl, empty state text size |
-| `src/pages/Documents.tsx` | h1 text-3xl → text-2xl, sub-heading size |
-| `src/pages/Connections.tsx` | h1 text-3xl → text-2xl |
-| `src/pages/Settings.tsx` | Section heading sizes, icon sizes, padding, description sizes |
-| `src/pages/Sessions.tsx` | "All Sessions" heading text-xl → text-sm |
-| `src/pages/CalendarView.tsx` | Form labels → `<Label>` |
-| `src/pages/ReferralDoctors.tsx` | h1 text-3xl → text-2xl |
-| `src/pages/doctor/Invoices.tsx` | h1 text-3xl → text-2xl |
-| `src/pages/admin/GamificationAdmin.tsx` | h1 + stat values text-3xl → text-2xl, sub-heading size |
-| `src/pages/admin/PricingAdmin.tsx` | h1 text-3xl → text-2xl, sub-heading size |
-| `src/pages/patient/PatientDashboard.tsx` | Stat value text-3xl → text-2xl |
-| `src/pages/doctor/DoctorRewards.tsx` | Stat values text-3xl → text-2xl |
-
-No branding changes. No new components. Pure consistency pass.
+| `src/hooks/useAudioRecording.ts` | Pass storage URL to transcribeAudio instead of base64 blob |
+| `supabase/functions/transcribe-audio/index.ts` | Accept `audioUrl` param, fetch audio from storage server-side |
 
