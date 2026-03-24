@@ -664,6 +664,13 @@ const completeSession = async (
             } as any);
           }
           toast({ title: '📨 Referral Letter Created', description: 'Referral letter was auto-generated from the session' });
+          // Remove duplicate action_point todos for referrals
+          await supabase.from('todos')
+            .delete()
+            .eq('session_id', sessionId!)
+            .eq('user_id', user.id)
+            .neq('task_type', 'document_review')
+            .ilike('title', '%referral%');
         } catch (refError) {
           console.error('Error creating referral document:', refError);
         }
