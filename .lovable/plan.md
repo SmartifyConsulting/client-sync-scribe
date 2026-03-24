@@ -1,76 +1,57 @@
 
 
-# Fixes: Sample Voice, Language Split, Nav Highlighting, Round Tables Tab, Nav Size
+# Fixes: Healthcare Providers Tab, Voice Narration, Round Tables Route, Page Heading
 
-## 1. Fix Sample Voice Not Playing
-**File:** `src/pages/MyPractice.tsx` (lines 829-854)
+## 1. Move "My Healthcare Providers" Tab — Doctor's Holarchive
+**File:** `src/components/patients/PatientDetailsEditor.tsx`
 
-**Root cause:** `supabase.functions.invoke` parses the response as JSON, but `narrate-briefing` returns raw MP3 bytes. The returned `data` is corrupted.
+Currently, for doctors viewing their own Holarchive (`isSelfService && isDoctor`), the tab order is: Personal → Medical → Overview → Sessions → Documents → Healthcare Providers → Round Table → Practice.
 
-**Fix:** Replace `supabase.functions.invoke` with a direct `fetch()` call using `.blob()`, matching the pattern used elsewhere for audio streaming:
-```typescript
-const response = await fetch(
-  `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`,
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-    },
-    body: JSON.stringify({ text: sampleText, voice }),
-  }
-);
-const blob = await response.blob();
-const url = URL.createObjectURL(blob);
-const audio = new Audio(url);
-audio.play();
-audio.onended = () => URL.revokeObjectURL(url);
-```
+The request is to move "My Healthcare Providers" to appear right after "Medical Overview". New order:
+- Personal Information
+- Medical Information  
+- Medical Overview
+- **My Healthcare Providers** (moved up)
+- My Sessions
+- My Documents
+- My Round Table
+- My Practice
 
-## 2. Add "Primary Language" Field + Rename "Language" to "Additional Languages"
-**File:** `src/pages/MyPractice.tsx` (lines 602-633)
+Update both view-mode (line 446-456) and edit-mode (line 713-722) tab lists to reorder the triggers.
 
-- Add a new **Primary Language** dropdown above the existing language chips
-- Default the primary language based on the phone number country code (using existing `COUNTRY_CODE_TO_LANGUAGE` mapping)
-- Store as `preferred_language` on the profile
-- Rename the existing "Language" label to **"Additional Languages"**
-- The existing multi-select chips become additional languages only
-- Update `handleCountryCodeChange` to auto-set the primary language dropdown value
-- The voice narration sample will use the primary language
-
-## 3. Fix Nav Highlighting — "My Round Tables" Highlights With "My Holarprac"
-**File:** `src/components/layout/Sidebar.tsx` (lines 119-140)
-
-**Root cause:** `NavLink` uses pathname matching. Both "My Holarprac" (`/practice`) and "My Round Tables" (`/practice?tab=roundtables`) share the same pathname `/practice`, so React Router marks both as active.
-
-**Fix:** Use `end` prop on the Holarprac NavLink and add custom `isActive` logic for the Round Tables link that checks for the `tab=roundtables` query parameter:
-```tsx
-// For each NavLink, use a custom className function that checks search params
-const location = useLocation();
-// In className callback, check if item.to includes '?' and match accordingly
-```
-
-## 4. Remove "My Round Tables" Tab From MyPractice
+## 2. Fix Narration Voice Not Changing + Sample Text
 **File:** `src/pages/MyPractice.tsx`
-- Remove the `TabsTrigger` for "roundtables" (line 560)
-- Remove the `TabsContent` for "roundtables" (lines 1037-1047)
-- Keep the sidebar nav link to `/practice?tab=roundtables` — but since the tab is removed, change the sidebar link to a dedicated route or keep it opening the DoctorRoundTables page directly
 
-Actually, since Round Tables is already in the sidebar as a nav item, we should just route it to a standalone page. Update the sidebar `to` from `/practice?tab=roundtables` to a route that renders `DoctorRoundTables` directly. But simplest: keep the existing `/practice?tab=roundtables` URL but auto-select that tab. Since we're removing the tab, we need to handle this differently — use URL param to auto-render round tables content inline, OR just remove the tab UI trigger but keep the content rendering when `?tab=roundtables` is in the URL.
+**Root cause:** The `Select` `onValueChange` handler (line 818-823) updates the database but does NOT update the local `profile` state. Since the Select is controlled by `profile?.narration_voice`, it snaps back to the old value.
 
-**Approach:** Remove the tab trigger from the tab bar. Add logic to read `searchParams` and if `tab=roundtables`, render the round tables content instead of the tabs. This way the sidebar link still works.
+**Fix:** After the DB update, call `useProfile`'s refresh or update local state. Since `useProfile` doesn't expose a setter, add an optimistic local state for the voice:
+- Add `const [localVoice, setLocalVoice] = useState(profile?.narration_voice || "nova")` 
+- Sync it when profile loads
+- In `onValueChange`: set `localVoice` immediately, then update DB
+- Use `localVoice` for the Select value and the sample voice playback
 
-## 5. Reduce Nav Item Size
-**File:** `src/components/layout/Sidebar.tsx` (line 125)
-- Reduce `py-2.5` to `py-1.5` and `text-sm` to `text-xs` on nav items
-- Reduce icon size from `h-5 w-5` to `h-4 w-4`
-- This ensures "My Round Tables" fits on one line
+**Sample text:** Change from the generic English text (line 846) to:
+`"Welcome to Holarch Health - your 360 degree healthcare holarchy"`
+
+**Primary language narration:** The `narrate-briefing` edge function uses OpenAI TTS which doesn't have a language parameter — it auto-detects from text. The sample text is English so it will speak English. No edge function change needed.
+
+## 3. My Round Tables Shows Practice Screen
+**File:** `src/components/layout/Sidebar.tsx`
+
+The sidebar link is `{ to: "/practice?tab=roundtables" }`. The MyPractice page removed the tab trigger but should still render Round Tables content when `?tab=roundtables` is present.
+
+**Check:** Look at how MyPractice handles the `tab=roundtables` query param. The Tabs component uses `defaultValue="practice"` and there's no logic to read query params and set the active tab. The Round Tables tab trigger was removed, so there's no way to activate it.
+
+**Fix:** In `src/pages/MyPractice.tsx`, read `searchParams.get("tab")` and if it equals `"roundtables"`, render the `DoctorRoundTables` component directly instead of the Tabs UI. This way the sidebar link works.
+
+## 4. Rename Heading to "My Holarprac"
+**File:** `src/pages/MyPractice.tsx` (line 516)
+- Change `"My Practice"` to `"My Holarprac"`
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/pages/MyPractice.tsx` | Fix sample voice fetch, add Primary Language dropdown, rename Language to Additional Languages, remove Round Tables tab trigger, handle ?tab=roundtables via URL params |
-| `src/components/layout/Sidebar.tsx` | Fix nav highlighting for query-param links, reduce nav item sizing |
+| `src/components/patients/PatientDetailsEditor.tsx` | Reorder tabs: Healthcare Providers after Medical Overview |
+| `src/pages/MyPractice.tsx` | Fix voice state, update sample text, handle roundtables query param, rename heading |
 
