@@ -743,6 +743,15 @@ export default function PatientProfile() {
           }}
         />
       )}
+
+      {/* Image Comparison Dialog */}
+      {patient && (
+        <ImageComparisonDialog
+          open={showCompareDialog}
+          onOpenChange={setShowCompareDialog}
+          patientId={patient.id}
+        />
+      )}
     </div>
   );
 }

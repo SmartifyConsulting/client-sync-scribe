@@ -1429,6 +1429,46 @@ export default function Sessions() {
           onSave={setInvoice}
         />
       )}
+
+      {/* Medical Certificate Editor Modal */}
+      {showMedicalCertificateEditor && currentPatient && patientId && (
+        <MedicalCertificateEditor
+          patientName={currentPatient.name}
+          patientId={patientId}
+          sessionId={currentSessionId || undefined}
+          onClose={() => setShowMedicalCertificateEditor(false)}
+        />
+      )}
+
+      {/* Referral Letter Editor Modal */}
+      {showReferralLetterEditor && currentPatient && patientId && (
+        <ReferralLetterEditor
+          patientName={currentPatient.name}
+          patientId={patientId}
+          sessionId={currentSessionId || undefined}
+          onClose={() => setShowReferralLetterEditor(false)}
+        />
+      )}
+
+      {/* General Letter Editor Modal */}
+      {showGeneralLetterEditor && currentPatient && patientId && (
+        <GeneralLetterEditor
+          patientName={currentPatient.name}
+          patientId={patientId}
+          sessionId={currentSessionId || undefined}
+          onClose={() => setShowGeneralLetterEditor(false)}
+        />
+      )}
+
+      {/* Hospital Admission Editor Modal */}
+      {showHospitalAdmissionEditor && currentPatient && patientId && (
+        <HospitalAdmissionEditor
+          patientName={currentPatient.name}
+          patientId={patientId}
+          sessionId={currentSessionId || undefined}
+          onClose={() => setShowHospitalAdmissionEditor(false)}
+        />
+      )}
     </div>
   );
 }

@@ -317,18 +317,6 @@ export default function SessionDetail() {
         </div>
       </div>
 
-      {/* Star Rating Dialog */}
-      {session.patient && id && (
-        <StarRatingDialog
-          open={showStarRating}
-          onOpenChange={setShowStarRating}
-          sessionId={id}
-          ratedUserId={(session.patient as any).patient_user_id || session.patient_id}
-          ratedUserName={session.patient.name}
-          raterRole="doctor"
-          onRated={() => setHasRated(true)}
-        />
-      )}
 
       {/* Quick Actions */}
       {session.status === "completed" && session.patient && (
