@@ -266,8 +266,8 @@ export default function GamificationAdmin() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Reward Admin</h1>
-        <p className="mt-1 text-muted-foreground">
+        <h1 className="text-2xl font-bold text-foreground">Reward Admin</h1>
+        <p className="mt-1 text-muted-foreground text-[12px]">
           Configure Moola rewards and streak bonuses
         </p>
       </div>
