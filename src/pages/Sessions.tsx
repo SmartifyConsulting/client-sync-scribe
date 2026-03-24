@@ -230,6 +230,8 @@ export default function Sessions() {
       
       if (data?.recommendation) {
         setAiDiagnosis(data.recommendation);
+        setTranslatedDiagnosis(null);
+        setShowTranslated(false);
       } else if (data?.error) {
         throw new Error(data.error);
       }
