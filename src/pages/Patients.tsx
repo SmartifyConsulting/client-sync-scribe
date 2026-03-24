@@ -544,7 +544,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   <h3 className="text-sm font-semibold text-foreground border-b pb-2">Medical Insurance Information</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-foreground">Medical Insurance</label>
+                      <Label>Medical Insurance</Label>
                       <Input
                         placeholder="Insurance provider"
                         value={newPatient.medical_insurance}
