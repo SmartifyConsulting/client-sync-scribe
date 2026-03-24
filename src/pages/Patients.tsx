@@ -529,7 +529,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-foreground">Occupation</label>
+                      <Label>Occupation</Label>
                       <Input
                         placeholder="Occupation"
                         value={newPatient.occupation}
