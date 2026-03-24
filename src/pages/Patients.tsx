@@ -485,7 +485,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                 <div className="space-y-4">
                   <h3 className="text-sm font-semibold text-foreground border-b pb-2">Address Information</h3>
                   <div>
-                    <label className="text-sm font-medium text-foreground">Physical Address</label>
+                    <Label>Physical Address</Label>
                     <Textarea
                       placeholder="Enter physical address"
                       value={newPatient.physical_address}
