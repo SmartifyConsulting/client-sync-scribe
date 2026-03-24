@@ -1,69 +1,76 @@
 
 
-# Document Preview, Task Icons, Sample Voice, and Share App Placement
+# Fixes: Sample Voice, Language Split, Nav Highlighting, Round Tables Tab, Nav Size
 
-## 1. Full Document Preview with Real Headers/Footers from To-Do List
+## 1. Fix Sample Voice Not Playing
+**File:** `src/pages/MyPractice.tsx` (lines 829-854)
 
-**Problem:** When a doctor clicks the FileText icon on a document_review task, it navigates to `/documents?view=ID`. The preview should show the actual document with real header/footer template applied, not raw template placeholders.
+**Root cause:** `supabase.functions.invoke` parses the response as JSON, but `narrate-briefing` returns raw MP3 bytes. The returned `data` is corrupted.
 
-**Solution:**
-- In `src/pages/TodoList.tsx`, add a preview dialog that opens the `DocumentPreview` component inline
-- Fetch the document content from `session_documents` table by `document_id`
-- Use `useTemplateWithHeaderFooter` to get the header/footer and apply it to the document content before rendering
-- Pass the doctor's logo URL and font family to `DocumentPreview`
+**Fix:** Replace `supabase.functions.invoke` with a direct `fetch()` call using `.blob()`, matching the pattern used elsewhere for audio streaming:
+```typescript
+const response = await fetch(
+  `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+    },
+    body: JSON.stringify({ text: sampleText, voice }),
+  }
+);
+const blob = await response.blob();
+const url = URL.createObjectURL(blob);
+const audio = new Audio(url);
+audio.play();
+audio.onended = () => URL.revokeObjectURL(url);
+```
 
-**Task Action Icons (5 icons per document_review task):**
-Replace the current 2-icon setup (FileText + Send) with 5 distinct icons:
-1. **Eye** — Preview: opens full `DocumentPreview` modal with real headers/footers
-2. **Edit3** — Edit document content: navigates to `/documents?view={document_id}` (existing behavior)
-3. **Send** — Approve and send (existing green arrow behavior)
-4. **Edit3 (pencil)** — Edit the task itself (existing edit task behavior, already present)
-5. **Trash2** — Delete task (already present)
+## 2. Add "Primary Language" Field + Rename "Language" to "Additional Languages"
+**File:** `src/pages/MyPractice.tsx` (lines 602-633)
 
-**File:** `src/pages/TodoList.tsx`
-- Import `DocumentPreview`, `Eye` from lucide, `useTemplateWithHeaderFooter`
-- Add state for `previewDoc: { content, title, logoUrl, fontFamily } | null`
-- Add `handlePreviewDoc(todo)` — fetches document from `session_documents`, applies header/footer, opens preview
-- Update the document_id action buttons section (lines 524-537) to show all 5 icons
+- Add a new **Primary Language** dropdown above the existing language chips
+- Default the primary language based on the phone number country code (using existing `COUNTRY_CODE_TO_LANGUAGE` mapping)
+- Store as `preferred_language` on the profile
+- Rename the existing "Language" label to **"Additional Languages"**
+- The existing multi-select chips become additional languages only
+- Update `handleCountryCodeChange` to auto-set the primary language dropdown value
+- The voice narration sample will use the primary language
 
----
+## 3. Fix Nav Highlighting — "My Round Tables" Highlights With "My Holarprac"
+**File:** `src/components/layout/Sidebar.tsx` (lines 119-140)
 
-## 2. Restore Sample Voice Button
+**Root cause:** `NavLink` uses pathname matching. Both "My Holarprac" (`/practice`) and "My Round Tables" (`/practice?tab=roundtables`) share the same pathname `/practice`, so React Router marks both as active.
 
-**Problem:** The "Sample Voice" button was in the Voice Narration Settings under My Practice but appears to have been removed or never added. The SAMPLE_TEXTS and narrate-briefing edge function exist but the button to play a sample is missing.
+**Fix:** Use `end` prop on the Holarprac NavLink and add custom `isActive` logic for the Round Tables link that checks for the `tab=roundtables` query parameter:
+```tsx
+// For each NavLink, use a custom className function that checks search params
+const location = useLocation();
+// In className callback, check if item.to includes '?' and match accordingly
+```
 
-**Solution:**
-- In `src/pages/MyPractice.tsx` (lines 795-825, Voice Narration Settings frame), add a "Sample Voice" button after the voice selector dropdown
-- On click, call the `narrate-briefing` edge function with the sample text from `SAMPLE_TEXTS` (defined in Settings.tsx) for the user's preferred language
-- Play the returned audio
-
+## 4. Remove "My Round Tables" Tab From MyPractice
 **File:** `src/pages/MyPractice.tsx`
-- Add sample text constants (or import from a shared location)
-- Add state for `playingSample`, `sampleAudioRef`
-- Add a `Volume2` icon button labeled "Sample Voice" that invokes `narrate-briefing` with the sample text and selected voice, then plays the audio
+- Remove the `TabsTrigger` for "roundtables" (line 560)
+- Remove the `TabsContent` for "roundtables" (lines 1037-1047)
+- Keep the sidebar nav link to `/practice?tab=roundtables` — but since the tab is removed, change the sidebar link to a dedicated route or keep it opening the DoctorRoundTables page directly
 
----
+Actually, since Round Tables is already in the sidebar as a nav item, we should just route it to a standalone page. Update the sidebar `to` from `/practice?tab=roundtables` to a route that renders `DoctorRoundTables` directly. But simplest: keep the existing `/practice?tab=roundtables` URL but auto-select that tab. Since we're removing the tab, we need to handle this differently — use URL param to auto-render round tables content inline, OR just remove the tab UI trigger but keep the content rendering when `?tab=roundtables` is in the URL.
 
-## 3. Share App Button — Only on Settings and Dashboard
+**Approach:** Remove the tab trigger from the tab bar. Add logic to read `searchParams` and if `tab=roundtables`, render the round tables content instead of the tabs. This way the sidebar link still works.
 
-**Problem:** ShareAppDialog appears on Dashboard, Patients, and PatientDetailsEditor. It should only be on Settings and Dashboard top-right.
-
-**Changes:**
-- **`src/pages/Dashboard.tsx`** (line 242-244): Move ShareAppDialog to the top-right of the header (next to the date line), not below it
-- **`src/pages/Settings.tsx`** (line 282-287): Add ShareAppDialog button to the header `flex` row on the right side
-- **`src/pages/Patients.tsx`** (line 382): Remove `<ShareAppDialog />`
-- **`src/components/patients/PatientDetailsEditor.tsx`** (lines 440-448): Remove the ShareAppDialog block
-
----
+## 5. Reduce Nav Item Size
+**File:** `src/components/layout/Sidebar.tsx` (line 125)
+- Reduce `py-2.5` to `py-1.5` and `text-sm` to `text-xs` on nav items
+- Reduce icon size from `h-5 w-5` to `h-4 w-4`
+- This ensures "My Round Tables" fits on one line
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/pages/TodoList.tsx` | Add full document preview with headers/footers; 5 action icons per document task |
-| `src/pages/MyPractice.tsx` | Add "Sample Voice" button to Voice Narration Settings |
-| `src/pages/Settings.tsx` | Add ShareAppDialog to header top-right |
-| `src/pages/Dashboard.tsx` | Reposition ShareAppDialog to top-right of header |
-| `src/pages/Patients.tsx` | Remove ShareAppDialog |
-| `src/components/patients/PatientDetailsEditor.tsx` | Remove ShareAppDialog |
+| `src/pages/MyPractice.tsx` | Fix sample voice fetch, add Primary Language dropdown, rename Language to Additional Languages, remove Round Tables tab trigger, handle ?tab=roundtables via URL params |
+| `src/components/layout/Sidebar.tsx` | Fix nav highlighting for query-param links, reduce nav item sizing |
 
