@@ -203,6 +203,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
   const [analyzingDocId, setAnalyzingDocId] = useState<string | null>(null);
   const [analysisDialog, setAnalysisDialog] = useState<UnifiedDocument | null>(null);
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
+  const [showCompareDialog, setShowCompareDialog] = useState(false);
 
   useEffect(() => {
     if (user) fetchAll();
