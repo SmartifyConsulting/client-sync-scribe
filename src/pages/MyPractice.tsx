@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Loader2, Check, Camera, Upload, Plus, Trash2, Pencil, X, Phone, Copy,
   Mail, Save, Award, Bold, Italic, UserPlus, ExternalLink, User, Building2,
@@ -212,6 +213,7 @@ export default function MyPractice() {
   const { toast } = useToast();
   const { user } = useAuth();
   const { profile, loading, fetchProfile, updateProfile, uploadLogo } = useProfile();
+  const [searchParams] = useSearchParams();
 
   // ── Form state (auto-save) ──
   const [savedStatus, setSavedStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
@@ -263,6 +265,9 @@ export default function MyPractice() {
   const [editingService, setEditingService] = useState({ service_name: "", default_price: "", color: "" });
   const [isSavingService, setIsSavingService] = useState(false);
 
+  // ── Voice narration local state ──
+  const [localVoice, setLocalVoice] = useState(profile?.narration_voice || "nova");
+
   // ── CPD Certificates ──
   const [certs, setCerts] = useState<CPDCertificate[]>([]);
   const [certsLoading, setCertsLoading] = useState(true);
@@ -308,6 +313,9 @@ export default function MyPractice() {
       sigProfileLoadedData.current = newSigData;
       setSigFormData(newSigData);
       requestAnimationFrame(() => { sigHasInitialized.current = true; sigIsSettingFromProfile.current = false; });
+
+      // Sync voice state
+      setLocalVoice((profile as any).narration_voice || "nova");
     }
   }, [profile]);
 
@@ -507,13 +515,27 @@ export default function MyPractice() {
     else { toast({ title: "Email updated", description: "A confirmation email has been sent" }); setIsEditingEmail(false); }
   };
 
+  const activeTab = searchParams.get("tab");
+
+  if (activeTab === "roundtables") {
+    return (
+      <div className="space-y-4 animate-fade-in">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">My Round Tables</h1>
+          <p className="text-muted-foreground text-[12px]">View round table discussions you've contributed to</p>
+        </div>
+        <DoctorRoundTables />
+      </div>
+    );
+  }
+
   // ── RENDER ──
   return (
     <div className="space-y-4 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">My Practice</h1>
+          <h1 className="text-2xl font-bold text-foreground">My Holarprac</h1>
           <p className="text-muted-foreground text-[12px]">Manage your personal and practice information</p>
         </div>
         <div className="text-sm text-muted-foreground flex items-center gap-1.5">
@@ -814,8 +836,9 @@ export default function MyPractice() {
             <div className="space-y-1.5">
               <Label className="text-xs">Narration Voice</Label>
               <Select
-                value={profile?.narration_voice || "nova"}
+                value={localVoice}
                 onValueChange={async (v) => {
+                  setLocalVoice(v);
                   const { data: { user } } = await supabase.auth.getUser();
                   if (!user) return;
                   await supabase.from("profiles").update({ narration_voice: v } as any).eq("id", user.id);
@@ -843,8 +866,8 @@ export default function MyPractice() {
               className="gap-2 text-xs mt-2"
               onClick={async () => {
                 try {
-                  const sampleText = "Good morning, Doctor. You have 5 appointments scheduled for today, including 2 follow-ups and 1 new patient consultation.";
-                  const voice = profile?.narration_voice || "nova";
+                  const sampleText = "Welcome to Holarch Health - your 360 degree healthcare holarchy";
+                  const voice = localVoice;
                   const session = await supabase.auth.getSession();
                   const token = session.data.session?.access_token;
                   if (!token) throw new Error("Not authenticated");
