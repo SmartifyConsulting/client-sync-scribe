@@ -22,6 +22,7 @@ export interface Profile {
   auto_email_prescription_to_pharmacy: boolean | null;
   auto_email_certificate_to_employer: boolean | null;
   narration_voice: string | null;
+  chronic_med_notification_frequency: string | null;
   created_at: string;
   updated_at: string;
 }

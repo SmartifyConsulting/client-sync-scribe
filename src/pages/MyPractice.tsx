@@ -550,9 +550,8 @@ export default function MyPractice() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="patients" className="w-full">
+      <Tabs defaultValue="practice" className="w-full">
         <TabsList className="flex w-full flex-wrap bg-primary justify-start">
-          <TabsTrigger value="patients" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Patients</TabsTrigger>
           <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Practice</TabsTrigger>
           <TabsTrigger value="referrals" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Referrals</TabsTrigger>
           <TabsTrigger value="certificates" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Certificates{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}</TabsTrigger>
@@ -561,11 +560,6 @@ export default function MyPractice() {
           <TabsTrigger value="roundtables" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Round Tables</TabsTrigger>
           <TabsTrigger value="templates" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Templates</TabsTrigger>
         </TabsList>
-
-        {/* === MY PATIENTS TAB === */}
-        <TabsContent value="patients" className="mt-4">
-          <Patients hideHeader />
-        </TabsContent>
 
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
         <TabsContent value="practice" className="mt-4 space-y-4 max-w-3xl">

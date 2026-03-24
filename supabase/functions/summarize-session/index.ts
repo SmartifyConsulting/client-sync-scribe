@@ -103,6 +103,7 @@ Your task is to analyze the session transcript or notes and provide:
    - **Prescription**: If medications are prescribed or discussed for the patient, extract medication details.
    - **Invoice / Billing**: If billing, fees, or invoice amounts are discussed, extract the details.
    - **Referral Letter**: If a referral to another specialist or doctor is discussed, extract the details.
+   - **Patient Tasks / Exercises**: If exercises, homework, lifestyle changes, or daily tasks are assigned to the patient, extract each task with title, description, frequency, and suggested moolas reward (1-5).
 
 IMPORTANT GUIDELINES:
 - Actually read and analyze the transcript content thoroughly
@@ -214,6 +215,26 @@ Respond using the provided tool/function schema.`,
                     },
                     required: ["diagnosis"],
                   },
+                  patient_tasks: {
+                    type: "object",
+                    description: "Patient task assignments (exercises, homework, lifestyle changes) if discussed. Null/omit if not discussed.",
+                    properties: {
+                      tasks: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            title: { type: "string", description: "Short task title" },
+                            description: { type: "string", description: "Detailed task description" },
+                            frequency: { type: "string", description: "How often (e.g., daily, twice daily, weekly)" },
+                            moolas_reward: { type: "number", description: "Suggested moolas reward 1-5" },
+                          },
+                          required: ["title", "description"],
+                        },
+                      },
+                    },
+                    required: ["tasks"],
+                  },
                 },
                 required: ["summary", "action_points"],
                 additionalProperties: false,
@@ -256,6 +277,7 @@ Respond using the provided tool/function schema.`,
       console.log("Invoice detected:", !!result.invoice);
       console.log("Referral detected:", !!result.referral);
       console.log("Hospital admission detected:", !!result.hospital_admission);
+      console.log("Patient tasks detected:", !!result.patient_tasks);
       return new Response(JSON.stringify(result), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

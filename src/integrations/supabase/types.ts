@@ -1323,6 +1323,7 @@ export type Database = {
           auto_email_invoice_to_insurance: boolean | null
           auto_email_prescription_to_pharmacy: boolean | null
           avatar_url: string | null
+          chronic_med_notification_frequency: string | null
           country: string | null
           created_at: string
           doctor_number: string | null
@@ -1355,6 +1356,7 @@ export type Database = {
           auto_email_invoice_to_insurance?: boolean | null
           auto_email_prescription_to_pharmacy?: boolean | null
           avatar_url?: string | null
+          chronic_med_notification_frequency?: string | null
           country?: string | null
           created_at?: string
           doctor_number?: string | null
@@ -1387,6 +1389,7 @@ export type Database = {
           auto_email_invoice_to_insurance?: boolean | null
           auto_email_prescription_to_pharmacy?: boolean | null
           avatar_url?: string | null
+          chronic_med_notification_frequency?: string | null
           country?: string | null
           created_at?: string
           doctor_number?: string | null

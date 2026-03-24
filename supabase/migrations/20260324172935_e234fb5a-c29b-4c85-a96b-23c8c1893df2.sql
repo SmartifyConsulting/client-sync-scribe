@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS chronic_med_notification_frequency text DEFAULT 'daily';
