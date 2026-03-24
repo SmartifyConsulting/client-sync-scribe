@@ -33,7 +33,11 @@ import {
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
 import { VisitCategoryDialog } from "@/components/sessions/VisitCategoryDialog";
-import { StarRatingDialog } from "@/components/sessions/StarRatingDialog";
+import { MedicalCertificateEditor } from "@/components/sessions/MedicalCertificateEditor";
+import { ReferralLetterEditor } from "@/components/sessions/ReferralLetterEditor";
+import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
+import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SessionNotepad } from "@/components/sessions/SessionNotepad";
 import { DrawingPad } from "@/components/drawings/DrawingPad";
 import {
@@ -130,7 +134,11 @@ export default function Sessions() {
   const pendingCompletionRef = useRef(false);
   const latestTranscriptRef = useRef<string>("");
   const currentSessionIdRef = useRef<string | null>(null);
-  const [showStarRating, setShowStarRating] = useState(false);
+  const [showMedicalCertificateEditor, setShowMedicalCertificateEditor] = useState(false);
+  const [showReferralLetterEditor, setShowReferralLetterEditor] = useState(false);
+  const [showGeneralLetterEditor, setShowGeneralLetterEditor] = useState(false);
+  const [showHospitalAdmissionEditor, setShowHospitalAdmissionEditor] = useState(false);
+  const [selectedDocType, setSelectedDocType] = useState<string>("");
   const notesRef = useRef<string>("");
   const sessionStartTimeRef = useRef<Date | null>(null);
 
@@ -332,8 +340,6 @@ export default function Sessions() {
     setShowVisitCategoryDialog(false);
     await handleSessionComplete(pendingTranscript, categories);
     setPendingTranscript("");
-    // Show star rating after session completes
-    setTimeout(() => setShowStarRating(true), 500);
   };
 
   const { 
@@ -361,7 +367,7 @@ export default function Sessions() {
       
       // Auto-detect end of session phrases
       const lastChunk = text.slice(-150).toLowerCase();
-      const endPhrases = ['end of session', 'end session', 'that brings us to the end', "we'll end here", 'that concludes', 'end of the session', 'conclude the session'];
+      const endPhrases = ['end of session', 'end session', 'that brings us to the end', "we'll end here", 'that concludes', 'end of the session', 'conclude the session', 'end the session', 'session ended'];
       const detectedEnd = endPhrases.some(phrase => lastChunk.includes(phrase));
       
       if (detectedEnd && !pendingCompletionRef.current) {
@@ -369,7 +375,7 @@ export default function Sessions() {
         toast({ title: "🎤 Session ending detected", description: "Ending session automatically from voice cue." });
         pendingCompletionRef.current = true;
         setPendingTranscript(text);
-        if (isRecording) stopRecording();
+        setTimeout(() => { if (isRecording) stopRecording(); }, 100);
         // Show visit category dialog after a brief delay to allow recording to finalize
         setTimeout(() => {
           setShowVisitCategoryDialog(true);
@@ -592,17 +598,6 @@ export default function Sessions() {
         transcript={pendingTranscript}
       />
 
-      {/* Star Rating Dialog - shown after session completion */}
-      {currentSessionId && currentPatient && (
-        <StarRatingDialog
-          open={showStarRating}
-          onOpenChange={setShowStarRating}
-          sessionId={currentSessionId}
-          ratedUserId={currentPatient.patient_user_id || currentPatient.id}
-          ratedUserName={currentPatient.name}
-          raterRole="doctor"
-        />
-      )}
 
       {/* AI-Extracted Document Review Dialogs */}
       {extractedMedCert && (
@@ -891,7 +886,22 @@ export default function Sessions() {
                 </div>
                 <div className="max-h-[120px] overflow-y-auto bg-muted/30 rounded p-2">
                   {transcript ? (
-                    <p className="text-xs text-foreground whitespace-pre-wrap leading-relaxed">{transcript}</p>
+                    <div className="space-y-0.5">
+                      {transcript.split('\n').map((line, index) => {
+                        const colonIndex = line.indexOf(':');
+                        if (colonIndex > 0 && colonIndex < 50) {
+                          const speaker = line.substring(0, colonIndex);
+                          const text = line.substring(colonIndex + 1);
+                          const isDoctor = speaker.toLowerCase().includes('dr') || speaker.toLowerCase().includes('doctor');
+                          return (
+                            <p key={index} className={`text-xs leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
+                              <span className="font-bold">{speaker}</span>:{text}
+                            </p>
+                          );
+                        }
+                        return line.trim() ? <p key={index} className="text-xs text-foreground leading-relaxed">{line}</p> : null;
+                      })}
+                    </div>
                   ) : (
                     <p className="text-xs text-muted-foreground italic">Transcribing...</p>
                   )}
@@ -1062,79 +1072,52 @@ export default function Sessions() {
             </div>
           </div>
 
-          {/* Post-Session Actions: Prescription & Invoice */}
-          <div className="grid gap-4 md:grid-cols-2">
-            {/* Prescription Card */}
-            <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                    <Pill className="h-5 w-5 text-accent-foreground" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">Prescription</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {prescription ? "Prescription recorded" : "Create a prescription for this session"}
-                    </p>
-                  </div>
-                </div>
-                <Button 
-                  variant={prescription ? "secondary" : "default"}
-                  className="gap-2" 
-                  onClick={() => setShowPrescriptionEditor(true)}
-                >
-                  <Pill className="h-4 w-4" />
-                  {prescription ? "View/Edit" : "Create"}
-                </Button>
-              </div>
-              
-              {prescription && (
-                <div className="mt-4 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <p className="text-sm font-medium text-green-600">Prescription Saved</p>
-                  </div>
-                </div>
-              )}
+          {/* Post-Session Actions: Create Documents */}
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
+            <h3 className="text-sm font-semibold text-foreground mb-3">Create Document</h3>
+            <div className="flex items-center gap-3">
+              <Select value={selectedDocType} onValueChange={setSelectedDocType}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Select document type..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="prescription">Prescription</SelectItem>
+                  <SelectItem value="invoice">Invoice</SelectItem>
+                  <SelectItem value="medical_certificate">Medical Certificate</SelectItem>
+                  <SelectItem value="referral_letter">Referral Letter</SelectItem>
+                  <SelectItem value="general_letter">General Letter</SelectItem>
+                  <SelectItem value="hospital_admission">Hospital Admission</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                disabled={!selectedDocType || !patientId}
+                onClick={() => {
+                  if (selectedDocType === 'prescription') setShowPrescriptionEditor(true);
+                  else if (selectedDocType === 'invoice') setShowInvoiceEditor(true);
+                  else if (selectedDocType === 'medical_certificate') setShowMedicalCertificateEditor(true);
+                  else if (selectedDocType === 'referral_letter') setShowReferralLetterEditor(true);
+                  else if (selectedDocType === 'general_letter') setShowGeneralLetterEditor(true);
+                  else if (selectedDocType === 'hospital_admission') setShowHospitalAdmissionEditor(true);
+                }}
+              >
+                <FileText className="h-4 w-4 mr-1" />
+                Create
+              </Button>
             </div>
-
-            {/* Invoice Card */}
-            <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                    <Receipt className="h-5 w-5 text-accent-foreground" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">Invoice</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {invoice ? `Invoice ${invoice.invoice_number}` : "Generate an invoice for this session"}
-                    </p>
-                  </div>
-                </div>
-                <Button 
-                  variant={invoice ? "secondary" : "default"}
-                  className="gap-2" 
-                  onClick={() => setShowInvoiceEditor(true)}
-                  disabled={!patientId}
-                >
-                  <Receipt className="h-4 w-4" />
-                  {invoice ? "View" : "Generate"}
-                </Button>
+            {(prescription || invoice) && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {prescription && (
+                  <Badge variant="secondary" className="gap-1">
+                    <CheckCircle className="h-3 w-3 text-success" /> Prescription Saved
+                  </Badge>
+                )}
+                {invoice && (
+                  <Badge variant="secondary" className="gap-1">
+                    <CheckCircle className="h-3 w-3 text-success" /> Invoice R {invoice.amount.toFixed(2)}
+                  </Badge>
+                )}
               </div>
-              
-              {invoice && (
-                <div className="mt-4 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                      <p className="text-sm font-medium text-green-600">Invoice Created</p>
-                    </div>
-                    <p className="text-sm font-semibold text-foreground">R {invoice.amount.toFixed(2)}</p>
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
           {/* AI Clinician Decision Support */}
@@ -1444,6 +1427,50 @@ export default function Sessions() {
           sessionId={currentSessionId || undefined}
           onClose={() => setShowInvoiceEditor(false)}
           onSave={setInvoice}
+        />
+      )}
+
+      {/* Medical Certificate Editor Modal */}
+      {showMedicalCertificateEditor && currentPatient && patientId && (
+        <MedicalCertificateEditor
+          patientName={currentPatient.name}
+          patientId={patientId}
+          sessionId={currentSessionId || undefined}
+          onClose={() => setShowMedicalCertificateEditor(false)}
+          onSave={() => setShowMedicalCertificateEditor(false)}
+        />
+      )}
+
+      {/* Referral Letter Editor Modal */}
+      {showReferralLetterEditor && currentPatient && patientId && (
+        <ReferralLetterEditor
+          patientName={currentPatient.name}
+          patientId={patientId}
+          sessionId={currentSessionId || undefined}
+          onClose={() => setShowReferralLetterEditor(false)}
+          onSave={() => setShowReferralLetterEditor(false)}
+        />
+      )}
+
+      {/* General Letter Editor Modal */}
+      {showGeneralLetterEditor && currentPatient && patientId && (
+        <GeneralLetterEditor
+          patientName={currentPatient.name}
+          patientId={patientId}
+          sessionId={currentSessionId || undefined}
+          onClose={() => setShowGeneralLetterEditor(false)}
+          onSave={() => setShowGeneralLetterEditor(false)}
+        />
+      )}
+
+      {/* Hospital Admission Editor Modal */}
+      {showHospitalAdmissionEditor && currentPatient && patientId && (
+        <HospitalAdmissionEditor
+          patientName={currentPatient.name}
+          patientId={patientId}
+          sessionId={currentSessionId || undefined}
+          onClose={() => setShowHospitalAdmissionEditor(false)}
+          onSave={() => setShowHospitalAdmissionEditor(false)}
         />
       )}
     </div>

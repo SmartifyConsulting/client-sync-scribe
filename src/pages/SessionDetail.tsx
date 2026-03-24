@@ -22,7 +22,6 @@ import {
   Languages,
   Download,
   AlertTriangle,
-  Star,
   Edit3,
   Send,
 } from "lucide-react";
@@ -56,7 +55,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useSessions } from "@/hooks/useSessions";
-import { StarRatingDialog } from "@/components/sessions/StarRatingDialog";
+
 import { PrivacyBadge } from "@/components/permissions/PrivacyBadge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -90,8 +89,6 @@ export default function SessionDetail() {
   const [translatedSummary, setTranslatedSummary] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
-  const [showStarRating, setShowStarRating] = useState(false);
-  const [hasRated, setHasRated] = useState(false);
   const [sessionDocs, setSessionDocs] = useState<any[]>([]);
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
 
@@ -151,22 +148,6 @@ export default function SessionDetail() {
     }
   };
 
-  // Check if user has already rated this session
-  useEffect(() => {
-    if (!id) return;
-    const checkRating = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase
-        .from('visit_ratings' as any)
-        .select('id')
-        .eq('session_id', id)
-        .eq('rater_id', user.id)
-        .maybeSingle();
-      setHasRated(!!data);
-    };
-    checkRating();
-  }, [id]);
 
   const handleTranslate = async (langCode: string) => {
     if (!session?.summary || !langCode) return;
@@ -295,12 +276,6 @@ export default function SessionDetail() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {session.status === "completed" && !hasRated && session.patient && (
-            <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowStarRating(true)}>
-              <Star className="h-4 w-4" />
-              Rate Visit
-            </Button>
-          )}
           <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="destructive" size="sm" className="gap-2">
@@ -324,18 +299,6 @@ export default function SessionDetail() {
         </div>
       </div>
 
-      {/* Star Rating Dialog */}
-      {session.patient && id && (
-        <StarRatingDialog
-          open={showStarRating}
-          onOpenChange={setShowStarRating}
-          sessionId={id}
-          ratedUserId={(session.patient as any).patient_user_id || session.patient_id}
-          ratedUserName={session.patient.name}
-          raterRole="doctor"
-          onRated={() => setHasRated(true)}
-        />
-      )}
 
       {/* Quick Actions */}
       {session.status === "completed" && session.patient && (

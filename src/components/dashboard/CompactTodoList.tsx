@@ -12,6 +12,7 @@ import {
   Sparkles,
   Send,
   FileText,
+  Eye,
   ShieldCheck,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -47,7 +48,7 @@ const actionTypeLabels: Record<string, string> = {
   write_referral_letter: "✉️ Created referral letter",
   write_general_letter: "📝 Created general letter",
   manual_task: "📌 Manual task created",
-  document_review: "📄 Send document",
+  document_review: "📄 Review document",
 };
 
 export function CompactTodoList() {
@@ -416,7 +417,10 @@ export function CompactTodoList() {
                     <div className="hidden group-hover:flex gap-0.5">
                       {todo.document_id && (
                         <>
-                          <button onClick={() => navigate(`/documents?view=${todo.document_id}`)} className="text-primary hover:text-primary/80">
+                          <button onClick={() => navigate(`/documents?view=${todo.document_id}`)} className="text-muted-foreground hover:text-foreground" title="Preview">
+                            <Eye className="h-3 w-3" />
+                          </button>
+                          <button onClick={() => navigate(`/documents?view=${todo.document_id}`)} className="text-primary hover:text-primary/80" title="Edit">
                             <FileText className="h-3 w-3" />
                           </button>
                           <button

@@ -76,7 +76,7 @@ const actionTypeLabels: Record<string, string> = {
   write_referral_letter: "✉️ Created referral letter",
   write_general_letter: "📝 Created general letter",
   manual_task: "📌 Manual task created",
-  document_review: "📄 Send document",
+  document_review: "📄 Review document",
 };
 
 function getDateLabel(dateStr: string): string {

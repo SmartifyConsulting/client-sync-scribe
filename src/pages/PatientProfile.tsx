@@ -17,7 +17,9 @@ import {
   Mic,
   Video,
   FilePlus,
+  GitCompareArrows,
 } from "lucide-react";
+import { ImageComparisonDialog } from "@/components/documents/ImageComparisonDialog";
 import { cn } from "@/lib/utils";
 import moolaSymbol from "@/assets/moola-symbol.png";
 import { Button } from "@/components/ui/button";
@@ -66,6 +68,7 @@ export default function PatientProfile() {
   const { user } = useAuth();
   const [mailboxAlias, setMailboxAlias] = useState<string | null>(null);
   const [mailboxId, setMailboxId] = useState<string | null>(null);
+  const [showCompareDialog, setShowCompareDialog] = useState(false);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -569,6 +572,15 @@ export default function PatientProfile() {
             >
               <FilePlus className="h-5 w-5" />
             </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-12 w-12 rounded-xl"
+              title="Compare Images"
+              onClick={() => setShowCompareDialog(true)}
+            >
+              <GitCompareArrows className="h-5 w-5" />
+            </Button>
           </div>
           <div className="rounded-2xl bg-card shadow-card overflow-hidden">
             {(() => {
@@ -729,6 +741,15 @@ export default function PatientProfile() {
               description: "The document has been saved to this patient's profile.",
             });
           }}
+        />
+      )}
+
+      {/* Image Comparison Dialog */}
+      {patient && (
+        <ImageComparisonDialog
+          open={showCompareDialog}
+          onOpenChange={setShowCompareDialog}
+          patientId={patient.id}
         />
       )}
     </div>
