@@ -1470,6 +1470,7 @@ export default function Sessions() {
           patientId={patientId}
           sessionId={currentSessionId || undefined}
           onClose={() => setShowHospitalAdmissionEditor(false)}
+          onSave={() => setShowHospitalAdmissionEditor(false)}
         />
       )}
     </div>
