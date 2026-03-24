@@ -261,6 +261,8 @@ Total: ${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`;
         title="Invoice"
         subtitle={`Patient: ${patientName}`}
         content={generateContent()}
+        logoUrl={profile?.logo_url || headerFooter?.header?.center?.imageUrl || undefined}
+        fontFamily={headerFooter?.font_family || undefined}
         onClose={() => setShowPreview(false)}
       />
     );
