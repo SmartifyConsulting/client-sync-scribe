@@ -797,6 +797,38 @@ export default function MyPractice() {
               <Toggle pressed={sigFormData.signature_italic} onPressedChange={(v) => setSigFormData({ ...sigFormData, signature_italic: v })} size="sm" aria-label="Italic" className="h-8 w-8 p-0"><Italic className="h-4 w-4" /></Toggle>
             </div>
           </div>
+
+          {/* Voice Narration Settings Frame */}
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-2">
+            <Label className="text-sm font-semibold">Voice Narration Settings</Label>
+            <p className="text-xs text-muted-foreground">Choose the voice used for your daily briefing narration.</p>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Narration Voice</Label>
+              <Select
+                value={profile?.narration_voice || "nova"}
+                onValueChange={async (v) => {
+                  const { data: { user } } = await supabase.auth.getUser();
+                  if (!user) return;
+                  await supabase.from("profiles").update({ narration_voice: v } as any).eq("id", user.id);
+                  toast({ title: "Voice updated", description: `Narration voice set to ${v}.` });
+                }}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {[
+                    { value: "alloy", label: "Alloy – Neutral & balanced" },
+                    { value: "echo", label: "Echo – Warm & clear" },
+                    { value: "fable", label: "Fable – Expressive & British" },
+                    { value: "onyx", label: "Onyx – Deep & authoritative" },
+                    { value: "nova", label: "Nova – Friendly & natural" },
+                    { value: "shimmer", label: "Shimmer – Soft & gentle" },
+                  ].map((voice) => (
+                    <SelectItem key={voice.value} value={voice.value}>{voice.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </TabsContent>
 
         {/* === REFERRALS TAB === */}
