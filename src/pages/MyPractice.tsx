@@ -311,6 +311,9 @@ export default function MyPractice() {
       sigProfileLoadedData.current = newSigData;
       setSigFormData(newSigData);
       requestAnimationFrame(() => { sigHasInitialized.current = true; sigIsSettingFromProfile.current = false; });
+
+      // Sync voice state
+      setLocalVoice((profile as any).narration_voice || "nova");
     }
   }, [profile]);
 
