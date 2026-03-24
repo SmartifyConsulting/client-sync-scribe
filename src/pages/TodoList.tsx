@@ -621,6 +621,17 @@ export default function TodoList() {
       {todos.length > 0 && (
         <p className="text-sm text-muted-foreground text-center">{completedCount} of {todos.length} tasks completed</p>
       )}
+
+      {/* Document Preview Modal */}
+      {previewDoc && (
+        <DocumentPreview
+          title={previewDoc.title}
+          content={previewDoc.content}
+          logoUrl={previewDoc.logoUrl}
+          fontFamily={previewDoc.fontFamily}
+          onClose={() => setPreviewDoc(null)}
+        />
+      )}
     </div>
   );
 }

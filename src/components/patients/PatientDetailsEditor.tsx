@@ -437,16 +437,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground">My Details</h2>
             <div className="flex items-center gap-2">
-              {isSelfService && (
-                <ShareAppDialog
-                  prefillEmail=""
-                  trigger={
-                    <Button variant="outline" size="sm" className="gap-2 text-xs">
-                      <Share2 className="h-3.5 w-3.5" /> Share App
-                    </Button>
-                  }
-                />
-              )}
               <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={() => setIsEditing(true)}>
                 <Pencil className="h-3.5 w-3.5" /> Edit
               </Button>

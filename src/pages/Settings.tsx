@@ -284,6 +284,7 @@ export default function Settings() {
           <h1 className="text-2xl font-bold text-foreground">Settings</h1>
           <p className="text-muted-foreground text-[12px]">Manage your preferences, security, and billing</p>
         </div>
+        <ShareAppDialog />
       </div>
 
       {/* Tabs */}
