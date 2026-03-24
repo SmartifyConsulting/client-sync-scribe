@@ -266,7 +266,7 @@ export default function MyPractice() {
   const [isSavingService, setIsSavingService] = useState(false);
 
   // ── Voice narration local state ──
-  const [localVoice, setLocalVoice] = useState(profile?.narration_voice || "nova");
+  const [localVoice, setLocalVoice] = useState(profile?.narration_voice || "shimmer");
 
   // ── CPD Certificates ──
   const [certs, setCerts] = useState<CPDCertificate[]>([]);
@@ -315,7 +315,7 @@ export default function MyPractice() {
       requestAnimationFrame(() => { sigHasInitialized.current = true; sigIsSettingFromProfile.current = false; });
 
       // Sync voice state
-      setLocalVoice((profile as any).narration_voice || "nova");
+      setLocalVoice((profile as any).narration_voice || "shimmer");
     }
   }, [profile]);
 
@@ -584,7 +584,7 @@ export default function MyPractice() {
         </TabsList>
 
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
-        <TabsContent value="practice" className="mt-4 space-y-4 max-w-3xl">
+        <TabsContent value="practice" className="mt-4 space-y-4">
           {/* Personal Information Frame */}
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
@@ -639,7 +639,7 @@ export default function MyPractice() {
               </div>
               <div className="space-y-1.5 col-span-2">
                 <Label>Additional Languages</Label>
-                <div className="flex flex-wrap gap-1.5 justify-center max-h-[5.5rem] overflow-y-auto">
+                <div className="flex flex-wrap gap-1.5 justify-center">
                   {LANGUAGES.filter(l => l.code !== ((profile as any)?.preferred_language || "en")).map(l => {
                     const selectedLangs: string[] = (profile as any)?.preferred_languages || [];
                     const isSelected = selectedLangs.includes(l.code);

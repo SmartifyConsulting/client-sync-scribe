@@ -40,6 +40,12 @@ serve(async (req) => {
         await supabase.from("sessions").update({ audio_url: null }).eq("id", session.id);
       }
       console.log(`Deleted audio for ${expiredSessions.length} expired sessions`);
+
+      // Also clear transcripts and notes for expired sessions (keep summary and action_points)
+      for (const session of expiredSessions) {
+        await supabase.from("sessions").update({ transcript: null, notes: null }).eq("id", session.id);
+      }
+      console.log(`Cleared transcripts/notes for ${expiredSessions.length} expired sessions`);
     }
 
     // 2. Send reminder notifications for sessions expiring soon (6+ days old)

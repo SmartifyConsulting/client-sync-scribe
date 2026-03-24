@@ -782,9 +782,41 @@ export default function Sessions() {
       )}
 
       {sessionState === "active" && (
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4">
+           {/* Notes/Drawing Panel - Tabbed Interface */}
+           <div className="min-h-[500px] order-2 lg:order-1">
+              <Tabs defaultValue="notes" className="h-full">
+                <TabsList className="mb-2">
+                  <TabsTrigger value="notes" className="gap-1.5 text-xs">
+                    <FileText className="h-3.5 w-3.5" />
+                    Session Notes
+                  </TabsTrigger>
+                  <TabsTrigger value="drawing" className="gap-1.5 text-xs">
+                    <PenTool className="h-3.5 w-3.5" />
+                    Drawing Pad
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="notes" className="mt-0">
+                  <SessionNotepad
+                    patientId={patientId || ""}
+                    sessionId={currentSessionId}
+                    patientName={currentPatient?.name}
+                    notes={notes}
+                    onNotesChange={setNotes}
+                    isRecording={isRecording}
+                  />
+                </TabsContent>
+                <TabsContent value="drawing" className="mt-0">
+                  <DrawingPad
+                    patientId={patientId || ""}
+                    sessionId={currentSessionId || undefined}
+                  />
+                </TabsContent>
+              </Tabs>
+            </div>
+
           {/* Compact Recording Panel - Sidebar */}
-          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col">
+          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-2 lg:order-2">
             {/* Patient Info */}
             <div className="flex items-center gap-3 p-4 border-b">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
@@ -829,6 +861,9 @@ export default function Sessions() {
                   : isRecording 
                     ? "Recording... Tap to stop" 
                     : "Tap to record"}
+              </p>
+              <p className="text-[10px] text-muted-foreground/70 text-center mt-1">
+                💡 Say "End Session" to automatically stop recording
               </p>
               
               {/* Compact Waveform */}
@@ -891,39 +926,6 @@ export default function Sessions() {
             </div>
           </div>
 
-           {/* Notes/Drawing Panel - Tabbed Interface */}
-           <div className="min-h-[500px]">
-              <Tabs defaultValue="notes" className="h-full">
-                <TabsList className="mb-2">
-                  <TabsTrigger value="notes" className="gap-1.5 text-xs">
-                    <FileText className="h-3.5 w-3.5" />
-                    Session Notes
-                  </TabsTrigger>
-                  <TabsTrigger value="drawing" className="gap-1.5 text-xs">
-                    <PenTool className="h-3.5 w-3.5" />
-                    Drawing Pad
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="notes" className="mt-0">
-                  <SessionNotepad
-                    patientId={patientId || ""}
-                    sessionId={currentSessionId}
-                    patientName={currentPatient?.name}
-                    notes={notes}
-                    onNotesChange={setNotes}
-                    isRecording={isRecording}
-                  />
-                </TabsContent>
-                <TabsContent value="drawing" className="mt-0">
-                  <DrawingPad
-                    patientId={patientId || ""}
-                    sessionId={currentSessionId || undefined}
-                    patientName={currentPatient?.name}
-                    onClose={() => {}}
-                  />
-                </TabsContent>
-              </Tabs>
-            </div>
         </div>
       )}
 
@@ -1321,7 +1323,7 @@ export default function Sessions() {
         <Alert className="mb-4 border-amber-500/30 bg-amber-500/5">
           <AlertCircle className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-xs text-amber-700">
-            Voice recordings are deleted after 7 days. Select and download recordings you wish to keep. Transcriptions remain permanently.
+            Voice recordings and transcriptions are deleted after 7 days. Download them to keep. AI summaries remain permanently.
           </AlertDescription>
         </Alert>
         
