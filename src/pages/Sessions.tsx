@@ -1072,79 +1072,52 @@ export default function Sessions() {
             </div>
           </div>
 
-          {/* Post-Session Actions: Prescription & Invoice */}
-          <div className="grid gap-4 md:grid-cols-2">
-            {/* Prescription Card */}
-            <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                    <Pill className="h-5 w-5 text-accent-foreground" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">Prescription</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {prescription ? "Prescription recorded" : "Create a prescription for this session"}
-                    </p>
-                  </div>
-                </div>
-                <Button 
-                  variant={prescription ? "secondary" : "default"}
-                  className="gap-2" 
-                  onClick={() => setShowPrescriptionEditor(true)}
-                >
-                  <Pill className="h-4 w-4" />
-                  {prescription ? "View/Edit" : "Create"}
-                </Button>
-              </div>
-              
-              {prescription && (
-                <div className="mt-4 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <p className="text-sm font-medium text-green-600">Prescription Saved</p>
-                  </div>
-                </div>
-              )}
+          {/* Post-Session Actions: Create Documents */}
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
+            <h3 className="text-sm font-semibold text-foreground mb-3">Create Document</h3>
+            <div className="flex items-center gap-3">
+              <Select value={selectedDocType} onValueChange={setSelectedDocType}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Select document type..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="prescription">Prescription</SelectItem>
+                  <SelectItem value="invoice">Invoice</SelectItem>
+                  <SelectItem value="medical_certificate">Medical Certificate</SelectItem>
+                  <SelectItem value="referral_letter">Referral Letter</SelectItem>
+                  <SelectItem value="general_letter">General Letter</SelectItem>
+                  <SelectItem value="hospital_admission">Hospital Admission</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                disabled={!selectedDocType || !patientId}
+                onClick={() => {
+                  if (selectedDocType === 'prescription') setShowPrescriptionEditor(true);
+                  else if (selectedDocType === 'invoice') setShowInvoiceEditor(true);
+                  else if (selectedDocType === 'medical_certificate') setShowMedicalCertificateEditor(true);
+                  else if (selectedDocType === 'referral_letter') setShowReferralLetterEditor(true);
+                  else if (selectedDocType === 'general_letter') setShowGeneralLetterEditor(true);
+                  else if (selectedDocType === 'hospital_admission') setShowHospitalAdmissionEditor(true);
+                }}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Create
+              </Button>
             </div>
-
-            {/* Invoice Card */}
-            <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                    <Receipt className="h-5 w-5 text-accent-foreground" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">Invoice</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {invoice ? `Invoice ${invoice.invoice_number}` : "Generate an invoice for this session"}
-                    </p>
-                  </div>
-                </div>
-                <Button 
-                  variant={invoice ? "secondary" : "default"}
-                  className="gap-2" 
-                  onClick={() => setShowInvoiceEditor(true)}
-                  disabled={!patientId}
-                >
-                  <Receipt className="h-4 w-4" />
-                  {invoice ? "View" : "Generate"}
-                </Button>
+            {(prescription || invoice) && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {prescription && (
+                  <Badge variant="secondary" className="gap-1">
+                    <CheckCircle className="h-3 w-3 text-success" /> Prescription Saved
+                  </Badge>
+                )}
+                {invoice && (
+                  <Badge variant="secondary" className="gap-1">
+                    <CheckCircle className="h-3 w-3 text-success" /> Invoice R {invoice.amount.toFixed(2)}
+                  </Badge>
+                )}
               </div>
-              
-              {invoice && (
-                <div className="mt-4 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                      <p className="text-sm font-medium text-green-600">Invoice Created</p>
-                    </div>
-                    <p className="text-sm font-semibold text-foreground">R {invoice.amount.toFixed(2)}</p>
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
           {/* AI Clinician Decision Support */}
