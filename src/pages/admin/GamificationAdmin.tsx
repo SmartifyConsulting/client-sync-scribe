@@ -297,7 +297,7 @@ export default function GamificationAdmin() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Streak Programs</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-orange-600">
+            <div className="text-2xl font-bold text-orange-600">
               {streakConfigs.length}
             </div>
           </CardContent>
