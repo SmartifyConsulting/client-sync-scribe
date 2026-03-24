@@ -1,57 +1,43 @@
 
 
-# Fixes: Healthcare Providers Tab, Voice Narration, Round Tables Route, Page Heading
+# Fix: Sample Voice Should Speak in Primary Language
 
-## 1. Move "My Healthcare Providers" Tab — Doctor's Holarchive
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
+## Root Cause
+OpenAI TTS determines the spoken language from the **text content**, not a language parameter. The sample text is hardcoded in English, so it always speaks English regardless of the user's primary language setting.
 
-Currently, for doctors viewing their own Holarchive (`isSelfService && isDoctor`), the tab order is: Personal → Medical → Overview → Sessions → Documents → Healthcare Providers → Round Table → Practice.
+## Solution
+Add a map of sample texts translated into each supported primary language. When the user clicks "Sample Voice", use the text matching their selected primary language.
 
-The request is to move "My Healthcare Providers" to appear right after "Medical Overview". New order:
-- Personal Information
-- Medical Information  
-- Medical Overview
-- **My Healthcare Providers** (moved up)
-- My Sessions
-- My Documents
-- My Round Table
-- My Practice
+### File: `src/pages/MyPractice.tsx`
 
-Update both view-mode (line 446-456) and edit-mode (line 713-722) tab lists to reorder the triggers.
+Add a `SAMPLE_TEXTS` constant mapping language codes to translated versions of "Welcome to Holarch Health - your 360 degree healthcare holarchy":
 
-## 2. Fix Narration Voice Not Changing + Sample Text
-**File:** `src/pages/MyPractice.tsx`
+```typescript
+const SAMPLE_TEXTS: Record<string, string> = {
+  en: "Welcome to Holarch Health - your 360 degree healthcare holarchy",
+  af: "Welkom by Holarch Health - jou 360 grade gesondheidsholarchie",
+  zu: "Siyakwamukela ku-Holarch Health - i-holarchy yakho yezempilo yamadigri angu-360",
+  xh: "Wamkelekile kwi-Holarch Health - i-holarchy yakho yezempilo yeedegri ezingama-360",
+  st: "Rea u amohela ho Holarch Health - holarchy ea hau ea bophelo bo botle ea digri tse 360",
+  tn: "O amogelesegile mo Holarch Health - holarchy ya gago ya boitekanelo ya digri di le 360",
+  fr: "Bienvenue chez Holarch Health - votre holarchie de santé à 360 degrés",
+  pt: "Bem-vindo ao Holarch Health - sua holarquia de saúde de 360 graus",
+  es: "Bienvenido a Holarch Health - su holarquía de salud de 360 grados",
+  de: "Willkommen bei Holarch Health - Ihre 360-Grad-Gesundheitsholarchie",
+  // ... remaining languages
+};
+```
 
-**Root cause:** The `Select` `onValueChange` handler (line 818-823) updates the database but does NOT update the local `profile` state. Since the Select is controlled by `profile?.narration_voice`, it snaps back to the old value.
+Then change the sample text lookup from the hardcoded string to:
+```typescript
+const sampleText = SAMPLE_TEXTS[primaryLanguage] || SAMPLE_TEXTS.en;
+```
 
-**Fix:** After the DB update, call `useProfile`'s refresh or update local state. Since `useProfile` doesn't expose a setter, add an optimistic local state for the voice:
-- Add `const [localVoice, setLocalVoice] = useState(profile?.narration_voice || "nova")` 
-- Sync it when profile loads
-- In `onValueChange`: set `localVoice` immediately, then update DB
-- Use `localVoice` for the Select value and the sample voice playback
+Where `primaryLanguage` is the current value of the Primary Language dropdown (already stored as `profile?.preferred_language`).
 
-**Sample text:** Change from the generic English text (line 846) to:
-`"Welcome to Holarch Health - your 360 degree healthcare holarchy"`
-
-**Primary language narration:** The `narrate-briefing` edge function uses OpenAI TTS which doesn't have a language parameter — it auto-detects from text. The sample text is English so it will speak English. No edge function change needed.
-
-## 3. My Round Tables Shows Practice Screen
-**File:** `src/components/layout/Sidebar.tsx`
-
-The sidebar link is `{ to: "/practice?tab=roundtables" }`. The MyPractice page removed the tab trigger but should still render Round Tables content when `?tab=roundtables` is present.
-
-**Check:** Look at how MyPractice handles the `tab=roundtables` query param. The Tabs component uses `defaultValue="practice"` and there's no logic to read query params and set the active tab. The Round Tables tab trigger was removed, so there's no way to activate it.
-
-**Fix:** In `src/pages/MyPractice.tsx`, read `searchParams.get("tab")` and if it equals `"roundtables"`, render the `DoctorRoundTables` component directly instead of the Tabs UI. This way the sidebar link works.
-
-## 4. Rename Heading to "My Holarprac"
-**File:** `src/pages/MyPractice.tsx` (line 516)
-- Change `"My Practice"` to `"My Holarprac"`
-
-## Files Modified
+### Files Modified
 
 | File | Change |
 |------|--------|
-| `src/components/patients/PatientDetailsEditor.tsx` | Reorder tabs: Healthcare Providers after Medical Overview |
-| `src/pages/MyPractice.tsx` | Fix voice state, update sample text, handle roundtables query param, rename heading |
+| `src/pages/MyPractice.tsx` | Add translated sample texts map, use primary language to select text |
 
