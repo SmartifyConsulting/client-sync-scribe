@@ -34,7 +34,7 @@ export function SessionCard({ session, index }: SessionCardProps) {
   return (
     <div
       onClick={handleCardClick}
-      className="rounded-xl border border-primary bg-card p-5 transition-all hover:shadow-md hover:border-primary/30 animate-fade-in group cursor-pointer"
+      className="rounded-xl border border-primary bg-card p-3 transition-all hover:shadow-md hover:border-primary/30 animate-fade-in group cursor-pointer"
       style={{ animationDelay: `${index * 100}ms` }}
     >
       <div className="flex items-start justify-between">
