@@ -281,7 +281,7 @@ export default function TodoList() {
     if (!todo.document_id) return;
     setSendingDocId(todo.document_id);
     try {
-      const { data: doc } = await supabase.from('documents').select('*, patients:patient_id(email, pharmacy_email)').eq('id', todo.document_id).maybeSingle();
+      const { data: doc } = await supabase.from('documents').select('*, patients:patient_id(email, pharmacy_email, patient_user_id, name)').eq('id', todo.document_id).maybeSingle();
       if (!doc) throw new Error('Document not found');
       const patient = (doc as any).patients;
       const recipientEmail = doc.template_name?.toLowerCase().includes('prescription')
@@ -291,6 +291,36 @@ export default function TodoList() {
       }
       await supabase.from('documents').update({ email_sent_at: new Date().toISOString(), is_draft: false } as any).eq('id', todo.document_id);
       await supabase.from('todos').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', todo.id);
+
+      // If this is a Patient Task Assignment, create actual patient todos
+      if (doc.template_name === 'Patient Task Assignment' && patient?.patient_user_id && todo.patient_id) {
+        try {
+          // Parse tasks from document content
+          const titleMatches = doc.content.match(/<strong>\d+\.\s*(.+?)<\/strong>/g) || [];
+          for (const match of titleMatches) {
+            const title = match.replace(/<\/?strong>/g, '').replace(/^\d+\.\s*/, '').trim();
+            const { data: newTodo } = await supabase.from('todos').insert({
+              user_id: patient.patient_user_id,
+              patient_id: todo.patient_id,
+              title,
+              task_type: 'patient_assignment',
+              priority: 'medium',
+              status: 'pending',
+              moolas_reward: 1,
+            }).select('id').single();
+            if (newTodo) {
+              await supabase.from('notifications').insert({
+                user_id: patient.patient_user_id,
+                title: `📋 New task assigned: ${title}`,
+                description: 'You have been assigned a new task by your healthcare provider.',
+                type: 'task_assigned',
+                reference_id: newTodo.id,
+              });
+            }
+          }
+        } catch (ptErr) { console.error('Error creating patient tasks:', ptErr); }
+      }
+
       setTodos(todos.map(t => t.id === todo.id ? { ...t, completed: true } : t));
       toast({ title: "Document sent" });
     } catch { toast({ title: "Send failed", variant: "destructive" }); } finally { setSendingDocId(null); }
