@@ -159,7 +159,7 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
       .map(item => `${item.description} - ${getCurrencySymbol(currency)}${parseFloat(item.amount || '0').toFixed(2)}`)
       .join('\n');
 
-    return `INVOICE
+    const invoiceBody = `INVOICE
 
 Invoice Number: ${generateInvoiceNumber()}
 Date: ${new Date().toLocaleDateString()}
@@ -173,6 +173,21 @@ ${itemLines}
 ─────────────────────────────────────
 
 Total: ${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`;
+
+    // If we have a saved template with header/footer, use it as wrapper
+    if (savedTemplate) {
+      return savedTemplate
+        .replace(/\[DATE\]/g, new Date().toLocaleDateString())
+        .replace(/\[InvoiceDate\]/g, new Date().toLocaleDateString())
+        .replace(/\[PATIENT_NAME\]/g, patientName)
+        .replace(/\[PatientName\]/g, patientName)
+        .replace(/\[INVOICE_CONTENT\]/g, invoiceBody)
+        .replace(/\[InvoiceNumber\]/g, generateInvoiceNumber())
+        .replace(/\[DueDate\]/g, new Date(dueDate).toLocaleDateString())
+        .replace(/\[TotalAmount\]/g, `${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`);
+    }
+
+    return invoiceBody;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
