@@ -406,12 +406,12 @@ export default function Settings() {
 
         {/* === NOTIFICATIONS TAB === */}
         <TabsContent value="notifications" className="mt-4">
-          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-            <div className="flex items-center gap-3 mb-6">
-              <Bell className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Notifications</h2>
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <Bell className="h-4 w-4 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">Notifications</h2>
             </div>
-             <p className="text-sm text-muted-foreground">Configure how you receive alerts and reminders</p>
+             <p className="text-[12px] text-muted-foreground">Configure how you receive alerts and reminders</p>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div><p className="font-medium text-foreground">Email Notifications</p><p className="text-sm text-muted-foreground">Receive email reminders for appointments</p></div>
