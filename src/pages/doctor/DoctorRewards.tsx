@@ -128,7 +128,7 @@ export default function DoctorRewards() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-yellow-900 dark:text-yellow-200">Combined</p>
-                <p className="text-3xl font-bold text-yellow-900 dark:text-yellow-100">{totalMoolas}</p>
+                <p className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">{totalMoolas}</p>
               </div>
               <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center">
                 <img src={moolaSymbol} alt="Moolas" className="h-9 w-9 object-contain" />
@@ -153,7 +153,7 @@ export default function DoctorRewards() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-sky-100">Transferred</p>
-                <p className="text-3xl font-bold text-white">{totalTransferred}</p>
+                <p className="text-2xl font-bold text-white">{totalTransferred}</p>
               </div>
               <ArrowRightLeft className="h-10 w-10 text-white/90" />
             </div>

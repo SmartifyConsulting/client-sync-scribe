@@ -352,7 +352,7 @@ export default function Notifications() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Notifications</h1>
+          <h1 className="text-2xl font-bold text-foreground">Notifications</h1>
           <p className="mt-1 text-muted-foreground text-[12px]">
             Messages, documents, and alerts
           </p>
@@ -611,7 +611,7 @@ function NotificationList({
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
         <Bell className="h-12 w-12 mb-4" />
-        <p className="text-lg font-medium">No notifications</p>
+        <p className="text-sm font-medium">No notifications</p>
         <p className="text-sm">You're all caught up!</p>
       </div>
     );
@@ -787,7 +787,7 @@ function MessageList({
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
         <Mail className="h-12 w-12 mb-4" />
-        <p className="text-lg font-medium">No messages</p>
+        <p className="text-sm font-medium">No messages</p>
         <p className="text-sm">Your {showSender ? "inbox" : "sent messages"} is empty</p>
       </div>
     );

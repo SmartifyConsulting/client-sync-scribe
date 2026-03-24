@@ -1279,11 +1279,11 @@ export default function Sessions() {
       )}
 
       {/* All Sessions List */}
-      <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
+      <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <Calendar className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold text-foreground">All Sessions</h2>
+            <Calendar className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-semibold text-foreground">All Sessions</h2>
           </div>
           <div className="flex items-center gap-2">
             {selectedRecordings.size > 0 && (

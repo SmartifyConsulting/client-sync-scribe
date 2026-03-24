@@ -303,8 +303,8 @@ export default function Settings() {
             {/* Main Preferences Header + Language */}
             <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
               <div className="flex items-center gap-3">
-                <Settings2 className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold text-foreground">Preferences</h2>
+                <Settings2 className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-semibold text-foreground">Preferences</h2>
               </div>
               <p className="text-muted-foreground text-[12px]">Manage your application preferences and integrations</p>
 
@@ -406,12 +406,12 @@ export default function Settings() {
 
         {/* === NOTIFICATIONS TAB === */}
         <TabsContent value="notifications" className="mt-4">
-          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-            <div className="flex items-center gap-3 mb-6">
-              <Bell className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Notifications</h2>
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <Bell className="h-4 w-4 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">Notifications</h2>
             </div>
-             <p className="text-sm text-muted-foreground">Configure how you receive alerts and reminders</p>
+             <p className="text-[12px] text-muted-foreground">Configure how you receive alerts and reminders</p>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div><p className="font-medium text-foreground">Email Notifications</p><p className="text-sm text-muted-foreground">Receive email reminders for appointments</p></div>
@@ -462,12 +462,12 @@ export default function Settings() {
 
         {/* === SECURITY TAB (with Data Management) === */}
         <TabsContent value="security" className="mt-4 space-y-4">
-          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-            <div className="flex items-center gap-3 mb-6">
-              <Shield className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Security</h2>
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <Shield className="h-4 w-4 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">Security</h2>
             </div>
-            <p className="text-sm text-muted-foreground">Manage your authentication and account protection</p>
+            <p className="text-[12px] text-muted-foreground">Manage your authentication and account protection</p>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -489,10 +489,10 @@ export default function Settings() {
           </div>
 
           {/* Data Management frame */}
-          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-            <div className="flex items-center gap-3 mb-6">
-              <Database className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Data Management</h2>
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <Database className="h-4 w-4 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">Data Management</h2>
             </div>
             <div className="space-y-4">
               <Button variant="outline">Export All Data</Button>

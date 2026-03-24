@@ -266,8 +266,8 @@ export default function GamificationAdmin() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Reward Admin</h1>
-        <p className="mt-1 text-muted-foreground">
+        <h1 className="text-2xl font-bold text-foreground">Reward Admin</h1>
+        <p className="mt-1 text-muted-foreground text-[12px]">
           Configure Moola rewards and streak bonuses
         </p>
       </div>
@@ -279,7 +279,7 @@ export default function GamificationAdmin() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Visit Categories</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{configs.length}</div>
+            <div className="text-2xl font-bold">{configs.length}</div>
           </CardContent>
         </Card>
         <Card>
@@ -287,7 +287,7 @@ export default function GamificationAdmin() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Active Categories</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-green-600">
               {configs.filter(c => c.is_active).length}
             </div>
           </CardContent>
@@ -297,7 +297,7 @@ export default function GamificationAdmin() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Streak Programs</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-orange-600">
+            <div className="text-2xl font-bold text-orange-600">
               {streakConfigs.length}
             </div>
           </CardContent>
@@ -307,7 +307,7 @@ export default function GamificationAdmin() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Max Moolas/Visit</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-emerald-600">
+            <div className="text-2xl font-bold text-emerald-600">
               {Math.max(...configs.map(c => c.lollipops_awarded), 0)} Ⓜ
             </div>
           </CardContent>

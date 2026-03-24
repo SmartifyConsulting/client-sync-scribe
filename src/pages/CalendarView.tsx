@@ -308,7 +308,7 @@ export default function CalendarView() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-foreground">Date *</label>
+                  <Label>Date *</Label>
                   <Input
                     type="date"
                     value={newAppointment.date}
@@ -316,7 +316,7 @@ export default function CalendarView() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-foreground">Time *</label>
+                  <Label>Time *</Label>
                   <Input
                     type="time"
                     value={newAppointment.time}
@@ -325,7 +325,7 @@ export default function CalendarView() {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-foreground">Type</label>
+                <Label>Type</Label>
                 <Select
                   value={newAppointment.type}
                   onValueChange={(value) => setNewAppointment({ ...newAppointment, type: value })}

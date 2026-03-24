@@ -372,8 +372,8 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {!hideHeader && (
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Patients</h1>
-            <p className="mt-1 text-muted-foreground">
+            <h1 className="text-2xl font-bold text-foreground">Patients</h1>
+            <p className="mt-1 text-muted-foreground text-[12px]">
               Manage your patient profiles and history
             </p>
           </div>
@@ -408,7 +408,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   <h3 className="text-sm font-semibold text-foreground border-b pb-2">Basic Information</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="col-span-2 relative">
-                      <label className="text-sm font-medium text-foreground">Name *</label>
+                      <Label>Name *</Label>
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
@@ -462,7 +462,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       )}
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-foreground">Email</label>
+                      <Label>Email</Label>
                       <Input
                         type="email"
                         placeholder="patient@email.com"
@@ -471,7 +471,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-foreground">Phone</label>
+                      <Label>Phone</Label>
                       <Input
                         placeholder="+1 (555) 123-4567"
                         value={newPatient.phone}
@@ -485,7 +485,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                 <div className="space-y-4">
                   <h3 className="text-sm font-semibold text-foreground border-b pb-2">Address Information</h3>
                   <div>
-                    <label className="text-sm font-medium text-foreground">Physical Address</label>
+                    <Label>Physical Address</Label>
                     <Textarea
                       placeholder="Enter physical address"
                       value={newPatient.physical_address}
@@ -505,7 +505,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   </div>
                   {!newPatient.same_as_physical && (
                     <div>
-                      <label className="text-sm font-medium text-foreground">Postal Address</label>
+                      <Label>Postal Address</Label>
                       <Textarea
                         placeholder="Enter postal address"
                         value={newPatient.postal_address}
@@ -521,7 +521,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   <h3 className="text-sm font-semibold text-foreground border-b pb-2">Employment Information</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-foreground">Employer</label>
+                      <Label>Employer</Label>
                       <Input
                         placeholder="Employer name"
                         value={newPatient.employer}
@@ -529,7 +529,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-foreground">Occupation</label>
+                      <Label>Occupation</Label>
                       <Input
                         placeholder="Occupation"
                         value={newPatient.occupation}
@@ -544,7 +544,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   <h3 className="text-sm font-semibold text-foreground border-b pb-2">Medical Insurance Information</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-foreground">Medical Insurance</label>
+                      <Label>Medical Insurance</Label>
                       <Input
                         placeholder="Insurance provider"
                         value={newPatient.medical_insurance}
@@ -552,7 +552,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-foreground">Medical Insurance Product</label>
+                      <Label>Medical Insurance Product</Label>
                       <Input
                         placeholder="e.g., Executive Plan"
                         value={newPatient.medical_insurance_product}
@@ -560,7 +560,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-foreground">Medical Insurance Number</label>
+                      <Label>Medical Insurance Number</Label>
                       <Input
                         placeholder="Member number"
                         value={newPatient.medical_insurance_number}
@@ -568,7 +568,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-foreground">Primary Member</label>
+                      <Label>Primary Member</Label>
                       <Input
                         placeholder="Primary member name"
                         value={newPatient.primary_member}
@@ -576,7 +576,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-foreground">Claims Email</label>
+                      <Label>Claims Email</Label>
                       <Input
                         type="email"
                         placeholder="claims@insurance.com"
@@ -592,7 +592,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   <h3 className="text-sm font-semibold text-foreground border-b pb-2">Medical Information</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-foreground">General Practitioner</label>
+                      <Label>General Practitioner</Label>
                       <Input
                         placeholder="GP name"
                         value={newPatient.general_practitioner}
