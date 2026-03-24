@@ -67,7 +67,7 @@ Your response should be structured as follows:
 5. RED FLAGS: Any concerning symptoms that require immediate attention
 6. FOLLOW-UP RECOMMENDATIONS: Suggested follow-up timeline and monitoring
 
-Be concise, evidence-based, and clinically relevant. Use medical terminology appropriate for a healthcare professional audience.`;
+Be concise, evidence-based, and clinically relevant. Use medical terminology appropriate for a healthcare professional audience.${language && language !== 'English' ? `\n\nIMPORTANT: Respond entirely in ${language}.` : ''}`;
 
     console.log('Generating AI clinician diagnostic recommendation...');
 

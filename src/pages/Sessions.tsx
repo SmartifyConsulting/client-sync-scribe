@@ -1322,7 +1322,7 @@ export default function Sessions() {
             {sessions.filter(s => s.status !== 'in_progress').map((session) => (
               <div
                 key={session.id}
-                className="flex items-center justify-between p-4 rounded-lg border border-border bg-background hover:bg-accent/50 transition-colors"
+                className="flex items-center justify-between p-2 rounded-lg border border-border bg-background hover:bg-accent/50 transition-colors"
               >
                 {(() => {
                   const daysSinceCreation = Math.floor((Date.now() - new Date(session.created_at).getTime()) / (1000 * 60 * 60 * 24));
