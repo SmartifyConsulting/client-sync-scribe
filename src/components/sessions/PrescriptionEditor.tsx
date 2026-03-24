@@ -120,7 +120,7 @@ export function PrescriptionEditor({
       })
       .join('\n\n');
 
-    return `PRESCRIPTION
+    const prescriptionBody = `PRESCRIPTION
 
 Date: ${new Date().toLocaleDateString()}
 Patient: ${patientName}
@@ -139,6 +139,20 @@ Follow-up: As directed by physician.
 
 Signature: ___________________
            ${doctorName}`;
+
+    // If we have a saved template with header/footer, use it as wrapper
+    if (savedTemplate) {
+      return savedTemplate
+        .replace(/\[DATE\]/g, new Date().toLocaleDateString())
+        .replace(/\[PrescriptionDate\]/g, new Date().toLocaleDateString())
+        .replace(/\[PATIENT_NAME\]/g, patientName)
+        .replace(/\[PatientName\]/g, patientName)
+        .replace(/\[DOCTOR_NAME\]/g, doctorName)
+        .replace(/\[DoctorName\]/g, doctorName)
+        .replace(/\[PRESCRIPTION_CONTENT\]/g, prescriptionBody);
+    }
+
+    return prescriptionBody;
   };
 
   // Check for medication conflicts
