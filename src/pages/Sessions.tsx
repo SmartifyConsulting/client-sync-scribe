@@ -359,6 +359,19 @@ export default function Sessions() {
       latestTranscriptRef.current = text;
       setNotes(prev => prev ? `${prev}\n\n${text}` : text);
       
+      // Auto-detect end of session phrases
+      const lastChunk = text.slice(-150).toLowerCase();
+      const endPhrases = ['end of session', 'end session', 'that brings us to the end', "we'll end here", 'that concludes', 'end of the session', 'conclude the session'];
+      const detectedEnd = endPhrases.some(phrase => lastChunk.includes(phrase));
+      
+      if (detectedEnd && !pendingCompletionRef.current && sessionState === 'active') {
+        console.log("Auto-detected end of session from voice");
+        toast({ title: "🎤 Session ending detected", description: "Ending session automatically from voice cue." });
+        pendingCompletionRef.current = true;
+        stopRecording();
+        return;
+      }
+      
       // If pending completion, show visit category dialog
       if (pendingCompletionRef.current) {
         console.log("Pending completion - showing visit category dialog");
