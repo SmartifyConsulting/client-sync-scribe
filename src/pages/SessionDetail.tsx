@@ -149,9 +149,6 @@ export default function SessionDetail() {
     }
   };
 
-  // Check if user has already rated this session
-  useEffect(() => {
-    if (!id) return;
 
   const handleTranslate = async (langCode: string) => {
     if (!session?.summary || !langCode) return;
