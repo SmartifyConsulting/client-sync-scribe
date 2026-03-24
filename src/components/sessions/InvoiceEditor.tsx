@@ -41,6 +41,7 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
   const { toast } = useToast();
   const { profile } = useProfile();
   const { formattedContent: savedTemplate, headerFooter } = useTemplateWithHeaderFooter("Invoice");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [patientDetails, setPatientDetails] = useState<PatientDetails | null>(null);
   const [servicePrices, setServicePrices] = useState<ServicePrice[]>([]);
   const [selectedService, setSelectedService] = useState<string>("");
