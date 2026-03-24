@@ -1448,6 +1448,7 @@ export default function Sessions() {
           patientId={patientId}
           sessionId={currentSessionId || undefined}
           onClose={() => setShowReferralLetterEditor(false)}
+          onSave={() => setShowReferralLetterEditor(false)}
         />
       )}
 
