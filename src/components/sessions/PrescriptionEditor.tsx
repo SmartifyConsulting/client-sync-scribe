@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
+import { useTemplateWithHeaderFooter } from "@/hooks/useTemplateWithHeaderFooter";
 
 interface MedicationConflict {
   type: "drug-drug" | "drug-allergy";
