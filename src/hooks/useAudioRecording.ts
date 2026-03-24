@@ -147,6 +147,12 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
     setIsTranscribing(true);
     
     try {
+      // Refresh the session token before transcription to avoid 401 on long recordings
+      const { error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError) {
+        console.warn('Token refresh failed, proceeding with existing token:', refreshError.message);
+      }
+
       // Convert blob to base64
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve, reject) => {
