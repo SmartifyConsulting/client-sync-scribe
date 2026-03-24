@@ -39,7 +39,8 @@ interface InvoiceEditorProps {
 
 export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSave }: InvoiceEditorProps) {
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { profile } = useProfile();
+  const { formattedContent: savedTemplate, headerFooter } = useTemplateWithHeaderFooter("Invoice");
   const [patientDetails, setPatientDetails] = useState<PatientDetails | null>(null);
   const [servicePrices, setServicePrices] = useState<ServicePrice[]>([]);
   const [selectedService, setSelectedService] = useState<string>("");

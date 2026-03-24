@@ -70,6 +70,7 @@ export function PrescriptionEditor({
 }: PrescriptionEditorProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
+  const { formattedContent: savedTemplate, headerFooter } = useTemplateWithHeaderFooter("Prescription");
   const doctorName = propDoctorName || profile?.full_name || "Doctor";
   
   const [medications, setMedications] = useState<MedicationItem[]>([
