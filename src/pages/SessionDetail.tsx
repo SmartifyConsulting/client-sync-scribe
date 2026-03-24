@@ -464,8 +464,8 @@ export default function SessionDetail() {
             <Alert className="mt-4 border-amber-500/30 bg-amber-500/5">
               <AlertTriangle className="h-4 w-4 text-amber-600" />
               <AlertDescription className="text-xs text-amber-700">
-                Voice recordings are automatically deleted after 7 days. Download recordings you wish to keep.
-                Transcriptions will remain available permanently.
+                Voice recordings and transcriptions are automatically deleted after 7 days. Download them to keep.
+                AI summaries remain permanently.
               </AlertDescription>
             </Alert>
           </>
