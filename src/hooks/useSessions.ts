@@ -391,7 +391,7 @@ const completeSession = async (
               user_id: user.id,
               session_id: sessionId,
               patient_id: patientId,
-              title: `Review & Send: Hospital Admission - ${patientRecord?.name || 'Patient'}`,
+              title: `Review Hospital Admission - ${patientRecord?.name || 'Patient'}`,
               document_id: admissionDoc.id,
               task_type: 'document_review',
               priority: 'high',
