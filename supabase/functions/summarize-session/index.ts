@@ -215,6 +215,26 @@ Respond using the provided tool/function schema.`,
                     },
                     required: ["diagnosis"],
                   },
+                  patient_tasks: {
+                    type: "object",
+                    description: "Patient task assignments (exercises, homework, lifestyle changes) if discussed. Null/omit if not discussed.",
+                    properties: {
+                      tasks: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            title: { type: "string", description: "Short task title" },
+                            description: { type: "string", description: "Detailed task description" },
+                            frequency: { type: "string", description: "How often (e.g., daily, twice daily, weekly)" },
+                            moolas_reward: { type: "number", description: "Suggested moolas reward 1-5" },
+                          },
+                          required: ["title", "description"],
+                        },
+                      },
+                    },
+                    required: ["tasks"],
+                  },
                 },
                 required: ["summary", "action_points"],
                 additionalProperties: false,
