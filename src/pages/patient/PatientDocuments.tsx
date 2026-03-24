@@ -633,6 +633,15 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
           >
             <Upload className="h-4 w-4" />
           </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 rounded-full"
+            onClick={() => setShowCompareDialog(true)}
+            title="Compare Images"
+          >
+            <GitCompare className="h-4 w-4" />
+          </Button>
           <input
             ref={fileInputRef}
             type="file"
