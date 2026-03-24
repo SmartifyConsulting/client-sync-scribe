@@ -590,6 +590,50 @@ export type Database = {
           },
         ]
       }
+      image_comparisons: {
+        Row: {
+          ai_analysis: string | null
+          analyzed_at: string | null
+          comparison_type: string | null
+          created_at: string | null
+          doctor_id: string
+          id: string
+          image_labels: string[] | null
+          image_urls: string[]
+          patient_id: string | null
+        }
+        Insert: {
+          ai_analysis?: string | null
+          analyzed_at?: string | null
+          comparison_type?: string | null
+          created_at?: string | null
+          doctor_id: string
+          id?: string
+          image_labels?: string[] | null
+          image_urls: string[]
+          patient_id?: string | null
+        }
+        Update: {
+          ai_analysis?: string | null
+          analyzed_at?: string | null
+          comparison_type?: string | null
+          created_at?: string | null
+          doctor_id?: string
+          id?: string
+          image_labels?: string[] | null
+          image_urls?: string[]
+          patient_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "image_comparisons_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           amount: number

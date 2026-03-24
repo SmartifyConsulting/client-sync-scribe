@@ -22,6 +22,7 @@ import {
   Sparkles,
   X,
   RotateCw,
+  GitCompare,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -46,6 +47,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ImageComparisonDialog } from "@/components/documents/ImageComparisonDialog";
 
 const STORAGE_LIMIT_MB = 100;
 
@@ -201,6 +203,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
   const [analyzingDocId, setAnalyzingDocId] = useState<string | null>(null);
   const [analysisDialog, setAnalysisDialog] = useState<UnifiedDocument | null>(null);
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
+  const [showCompareDialog, setShowCompareDialog] = useState(false);
 
   useEffect(() => {
     if (user) fetchAll();
@@ -630,6 +633,15 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
           >
             <Upload className="h-4 w-4" />
           </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 rounded-full"
+            onClick={() => setShowCompareDialog(true)}
+            title="Compare Images"
+          >
+            <GitCompare className="h-4 w-4" />
+          </Button>
           <input
             ref={fileInputRef}
             type="file"
@@ -964,6 +976,12 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
           )}
         </DialogContent>
       </Dialog>
+
+      <ImageComparisonDialog
+        open={showCompareDialog}
+        onOpenChange={setShowCompareDialog}
+        patientId={patientIds[0]}
+      />
     </div>
   );
 }

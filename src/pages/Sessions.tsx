@@ -44,6 +44,7 @@ import {
 } from "@/components/sessions/TranscriptionReviewDialogs";
 import type { MedCertData, PrescriptionData, InvoiceData, ReferralData } from "@/components/sessions/TranscriptionReviewDialogs";
 import { Toggle } from "@/components/ui/toggle";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -123,7 +124,6 @@ export default function Sessions() {
   const narrationAudioRef = useRef<HTMLAudioElement | null>(null);
   const [doctorLanguage, setDoctorLanguage] = useState<string>("English");
   const [pastPatientSessions, setPastPatientSessions] = useState<any[]>([]);
-  const [showDrawingPad, setShowDrawingPad] = useState(false);
   const savedAudioUrlRef = useRef<string | null>(null);
   const [showVisitCategoryDialog, setShowVisitCategoryDialog] = useState(false);
   const [pendingTranscript, setPendingTranscript] = useState<string>("");
@@ -368,7 +368,13 @@ export default function Sessions() {
         console.log("Auto-detected end of session from voice");
         toast({ title: "🎤 Session ending detected", description: "Ending session automatically from voice cue." });
         pendingCompletionRef.current = true;
-        stopRecording();
+        setPendingTranscript(text);
+        if (isRecording) stopRecording();
+        // Show visit category dialog after a brief delay to allow recording to finalize
+        setTimeout(() => {
+          setShowVisitCategoryDialog(true);
+          pendingCompletionRef.current = false;
+        }, 2000);
         return;
       }
       
@@ -885,31 +891,39 @@ export default function Sessions() {
             </div>
           </div>
 
-           {/* Notes/Drawing Panel - Main Content */}
-           <div className="min-h-[500px] space-y-3">
-             <div className="flex justify-end">
-               <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowDrawingPad(!showDrawingPad)}>
-                 <PenTool className="h-3.5 w-3.5" />
-                 {showDrawingPad ? "Hide Drawing" : "Drawing Pad"}
-               </Button>
-             </div>
-             {showDrawingPad && (
-               <DrawingPad
-                 patientId={patientId || ""}
-                 sessionId={currentSessionId || undefined}
-                 patientName={currentPatient?.name}
-                 onClose={() => setShowDrawingPad(false)}
-               />
-             )}
-             <SessionNotepad
-               patientId={patientId || ""}
-               sessionId={currentSessionId}
-               patientName={currentPatient?.name}
-               notes={notes}
-               onNotesChange={setNotes}
-               isRecording={isRecording}
-             />
-           </div>
+           {/* Notes/Drawing Panel - Tabbed Interface */}
+           <div className="min-h-[500px]">
+              <Tabs defaultValue="notes" className="h-full">
+                <TabsList className="mb-2">
+                  <TabsTrigger value="notes" className="gap-1.5 text-xs">
+                    <FileText className="h-3.5 w-3.5" />
+                    Session Notes
+                  </TabsTrigger>
+                  <TabsTrigger value="drawing" className="gap-1.5 text-xs">
+                    <PenTool className="h-3.5 w-3.5" />
+                    Drawing Pad
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="notes" className="mt-0">
+                  <SessionNotepad
+                    patientId={patientId || ""}
+                    sessionId={currentSessionId}
+                    patientName={currentPatient?.name}
+                    notes={notes}
+                    onNotesChange={setNotes}
+                    isRecording={isRecording}
+                  />
+                </TabsContent>
+                <TabsContent value="drawing" className="mt-0">
+                  <DrawingPad
+                    patientId={patientId || ""}
+                    sessionId={currentSessionId || undefined}
+                    patientName={currentPatient?.name}
+                    onClose={() => {}}
+                  />
+                </TabsContent>
+              </Tabs>
+            </div>
         </div>
       )}
 

@@ -72,3 +72,6 @@ verify_jwt = false
 
 [functions.analyze-medical-image]
 verify_jwt = false
+
+[functions.compare-medical-images]
+verify_jwt = false
