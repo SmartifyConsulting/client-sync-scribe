@@ -639,7 +639,7 @@ export default function MyPractice() {
               </div>
               <div className="space-y-1.5 col-span-2">
                 <Label>Additional Languages</Label>
-                <div className="flex flex-wrap gap-1.5 justify-center max-h-[5.5rem] overflow-y-auto">
+                <div className="flex flex-wrap gap-1.5 justify-center">
                   {LANGUAGES.filter(l => l.code !== ((profile as any)?.preferred_language || "en")).map(l => {
                     const selectedLangs: string[] = (profile as any)?.preferred_languages || [];
                     const isSelected = selectedLangs.includes(l.code);

@@ -33,7 +33,7 @@ export function SessionNotepad({
             placeholder="Type your notes here during the session. Voice transcriptions will be appended automatically..."
             value={notes}
             onChange={(e) => onNotesChange(e.target.value)}
-            className="min-h-full h-full resize-none border-0 focus-visible:ring-0 p-0"
+            className="min-h-full h-full resize-none border-0 focus-visible:ring-0 p-2"
           />
         </div>
       </div>

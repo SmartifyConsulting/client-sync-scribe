@@ -782,7 +782,39 @@ export default function Sessions() {
       )}
 
       {sessionState === "active" && (
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4">
+           {/* Notes/Drawing Panel - Tabbed Interface */}
+           <div className="min-h-[500px] order-2 lg:order-1">
+              <Tabs defaultValue="notes" className="h-full">
+                <TabsList className="mb-2">
+                  <TabsTrigger value="notes" className="gap-1.5 text-xs">
+                    <FileText className="h-3.5 w-3.5" />
+                    Session Notes
+                  </TabsTrigger>
+                  <TabsTrigger value="drawing" className="gap-1.5 text-xs">
+                    <PenTool className="h-3.5 w-3.5" />
+                    Drawing Pad
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="notes" className="mt-0">
+                  <SessionNotepad
+                    patientId={patientId || ""}
+                    sessionId={currentSessionId}
+                    patientName={currentPatient?.name}
+                    notes={notes}
+                    onNotesChange={setNotes}
+                    isRecording={isRecording}
+                  />
+                </TabsContent>
+                <TabsContent value="drawing" className="mt-0">
+                  <DrawingPad
+                    patientId={patientId || ""}
+                    sessionId={currentSessionId || undefined}
+                  />
+                </TabsContent>
+              </Tabs>
+            </div>
+
           {/* Compact Recording Panel - Sidebar */}
           <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col">
             {/* Patient Info */}

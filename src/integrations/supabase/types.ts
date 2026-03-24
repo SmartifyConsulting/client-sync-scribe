@@ -1998,8 +1998,11 @@ export type Database = {
       }
       visit_ratings: {
         Row: {
+          communication_rating: number | null
           created_at: string | null
+          expertise_rating: number | null
           id: string
+          professionalism_rating: number | null
           rated_user_id: string
           rater_id: string
           rater_role: string
@@ -2007,8 +2010,11 @@ export type Database = {
           session_id: string
         }
         Insert: {
+          communication_rating?: number | null
           created_at?: string | null
+          expertise_rating?: number | null
           id?: string
+          professionalism_rating?: number | null
           rated_user_id: string
           rater_id: string
           rater_role: string
@@ -2016,8 +2022,11 @@ export type Database = {
           session_id: string
         }
         Update: {
+          communication_rating?: number | null
           created_at?: string | null
+          expertise_rating?: number | null
           id?: string
+          professionalism_rating?: number | null
           rated_user_id?: string
           rater_id?: string
           rater_role?: string

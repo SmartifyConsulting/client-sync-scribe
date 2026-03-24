@@ -327,7 +327,7 @@ export function TodaysBriefing() {
         .select('narration_voice')
         .eq('id', (await supabase.auth.getUser()).data.user?.id || '')
         .single();
-      const selectedVoice = (profileData as any)?.narration_voice || 'nova';
+      const selectedVoice = (profileData as any)?.narration_voice || 'shimmer';
 
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`,
