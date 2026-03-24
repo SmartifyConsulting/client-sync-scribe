@@ -90,8 +90,7 @@ export default function SessionDetail() {
   const [translatedSummary, setTranslatedSummary] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
-  const [showStarRating, setShowStarRating] = useState(false);
-  const [hasRated, setHasRated] = useState(false);
+  const [translatedSummary, setTranslatedSummary] = useState<string | null>(null);
   const [sessionDocs, setSessionDocs] = useState<any[]>([]);
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
 
