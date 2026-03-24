@@ -862,6 +862,9 @@ export default function Sessions() {
                     ? "Recording... Tap to stop" 
                     : "Tap to record"}
               </p>
+              <p className="text-[10px] text-muted-foreground/70 text-center mt-1">
+                💡 Say "End Session" to automatically stop recording
+              </p>
               
               {/* Compact Waveform */}
               {(isRecording || isTranscribing) && (
