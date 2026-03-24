@@ -581,11 +581,14 @@ export default function TodoList() {
                                 {/* Document review actions */}
                                 {todo.document_id && (
                                   <>
-                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => navigate(`/documents?view=${todo.document_id}`)}>
+                                    <Button size="icon" variant="ghost" className="h-8 w-8" title="Preview" onClick={() => handlePreviewDoc(todo)} disabled={loadingPreview === todo.document_id}>
+                                      {loadingPreview === todo.document_id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4 text-primary" />}
+                                    </Button>
+                                    <Button size="icon" variant="ghost" className="h-8 w-8" title="Edit document" onClick={() => navigate(`/documents?view=${todo.document_id}`)}>
                                       <FileText className="h-4 w-4 text-primary" />
                                     </Button>
                                     <Button
-                                      size="icon" variant="ghost"
+                                      size="icon" variant="ghost" title="Approve & Send"
                                       className={cn("h-8 w-8", todo.completed ? "text-muted-foreground" : "text-green-600 hover:text-green-700")}
                                       disabled={todo.completed || sendingDocId === todo.document_id}
                                       onClick={() => handleSendDoc(todo)}
