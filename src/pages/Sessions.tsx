@@ -340,8 +340,6 @@ export default function Sessions() {
     setShowVisitCategoryDialog(false);
     await handleSessionComplete(pendingTranscript, categories);
     setPendingTranscript("");
-    // Show star rating after session completes
-    setTimeout(() => setShowStarRating(true), 500);
   };
 
   const { 
