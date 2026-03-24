@@ -656,7 +656,7 @@ const completeSession = async (
               user_id: user.id,
               session_id: sessionId,
               patient_id: patientId,
-              title: `Review & Send: Referral Letter - ${patientRecord?.name || 'Patient'}`,
+              title: `Review Referral Letter - ${patientRecord?.name || 'Patient'}`,
               document_id: refDoc.id,
               task_type: 'document_review',
               priority: 'high',
