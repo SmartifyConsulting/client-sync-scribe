@@ -791,7 +791,7 @@ ${tasksHtml}`;
               user_id: user.id,
               session_id: sessionId,
               patient_id: patientId,
-              title: `Review & Send: Patient Tasks - ${patientName}`,
+              title: `Review Patient Tasks - ${patientName}`,
               document_id: taskDoc.id,
               task_type: 'document_review',
               priority: 'high',

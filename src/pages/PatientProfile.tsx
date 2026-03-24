@@ -17,7 +17,9 @@ import {
   Mic,
   Video,
   FilePlus,
+  GitCompareArrows,
 } from "lucide-react";
+import { ImageComparisonDialog } from "@/components/documents/ImageComparisonDialog";
 import { cn } from "@/lib/utils";
 import moolaSymbol from "@/assets/moola-symbol.png";
 import { Button } from "@/components/ui/button";

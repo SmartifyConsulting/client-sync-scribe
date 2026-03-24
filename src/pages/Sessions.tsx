@@ -33,7 +33,11 @@ import {
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
 import { VisitCategoryDialog } from "@/components/sessions/VisitCategoryDialog";
-import { StarRatingDialog } from "@/components/sessions/StarRatingDialog";
+import { MedicalCertificateEditor } from "@/components/sessions/MedicalCertificateEditor";
+import { ReferralLetterEditor } from "@/components/sessions/ReferralLetterEditor";
+import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
+import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SessionNotepad } from "@/components/sessions/SessionNotepad";
 import { DrawingPad } from "@/components/drawings/DrawingPad";
 import {
