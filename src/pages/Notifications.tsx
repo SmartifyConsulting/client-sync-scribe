@@ -611,7 +611,7 @@ function NotificationList({
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
         <Bell className="h-12 w-12 mb-4" />
-        <p className="text-lg font-medium">No notifications</p>
+        <p className="text-sm font-medium">No notifications</p>
         <p className="text-sm">You're all caught up!</p>
       </div>
     );
