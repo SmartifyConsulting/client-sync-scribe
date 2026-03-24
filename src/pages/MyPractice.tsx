@@ -359,11 +359,11 @@ export default function MyPractice() {
   }, [sigFormData]);
 
   // ── Auto-guess language from country code ──
-  const handleCountryCodeChange = (code: string) => {
+  const handleCountryCodeChange = async (code: string) => {
     setFormData({ ...formData, country_code: code });
     const guessedLang = COUNTRY_CODE_TO_LANGUAGE[code];
-    if (guessedLang) {
-      updateProfile({ preferred_language: guessedLang } as any);
+    if (guessedLang && !(profile as any)?.preferred_language) {
+      await updateProfile({ preferred_language: guessedLang } as any);
     }
   };
 
