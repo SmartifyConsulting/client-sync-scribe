@@ -134,7 +134,11 @@ export default function Sessions() {
   const pendingCompletionRef = useRef(false);
   const latestTranscriptRef = useRef<string>("");
   const currentSessionIdRef = useRef<string | null>(null);
-  const [showStarRating, setShowStarRating] = useState(false);
+  const [showMedicalCertificateEditor, setShowMedicalCertificateEditor] = useState(false);
+  const [showReferralLetterEditor, setShowReferralLetterEditor] = useState(false);
+  const [showGeneralLetterEditor, setShowGeneralLetterEditor] = useState(false);
+  const [showHospitalAdmissionEditor, setShowHospitalAdmissionEditor] = useState(false);
+  const [selectedDocType, setSelectedDocType] = useState<string>("");
   const notesRef = useRef<string>("");
   const sessionStartTimeRef = useRef<Date | null>(null);
 
