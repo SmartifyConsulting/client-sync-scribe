@@ -369,7 +369,7 @@ export default function Sessions() {
       
       // Auto-detect end of session phrases
       const lastChunk = text.slice(-150).toLowerCase();
-      const endPhrases = ['end of session', 'end session', 'that brings us to the end', "we'll end here", 'that concludes', 'end of the session', 'conclude the session'];
+      const endPhrases = ['end of session', 'end session', 'that brings us to the end', "we'll end here", 'that concludes', 'end of the session', 'conclude the session', 'end the session', 'session ended'];
       const detectedEnd = endPhrases.some(phrase => lastChunk.includes(phrase));
       
       if (detectedEnd && !pendingCompletionRef.current) {
