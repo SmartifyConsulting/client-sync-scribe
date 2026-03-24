@@ -568,7 +568,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-foreground">Primary Member</label>
+                      <Label>Primary Member</Label>
                       <Input
                         placeholder="Primary member name"
                         value={newPatient.primary_member}
