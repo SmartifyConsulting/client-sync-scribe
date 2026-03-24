@@ -1323,7 +1323,7 @@ export default function Sessions() {
         <Alert className="mb-4 border-amber-500/30 bg-amber-500/5">
           <AlertCircle className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-xs text-amber-700">
-            Voice recordings are deleted after 7 days. Select and download recordings you wish to keep. Transcriptions remain permanently.
+            Voice recordings and transcriptions are deleted after 7 days. Download them to keep. AI summaries remain permanently.
           </AlertDescription>
         </Alert>
         
