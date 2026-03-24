@@ -22,7 +22,6 @@ import {
   Languages,
   Download,
   AlertTriangle,
-  AlertTriangle,
   Edit3,
   Send,
 } from "lucide-react";
