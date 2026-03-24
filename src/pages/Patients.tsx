@@ -372,8 +372,8 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {!hideHeader && (
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Patients</h1>
-            <p className="mt-1 text-muted-foreground">
+            <h1 className="text-2xl font-bold text-foreground">Patients</h1>
+            <p className="mt-1 text-muted-foreground text-[12px]">
               Manage your patient profiles and history
             </p>
           </div>
