@@ -142,8 +142,8 @@ export default function PricingAdmin() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Pricing Administration</h1>
-          <p className="mt-1 text-muted-foreground">
+          <h1 className="text-2xl font-bold text-foreground">Pricing Administration</h1>
+          <p className="mt-1 text-muted-foreground text-[12px]">
             Manage subscription pricing for doctors and patients
           </p>
         </div>

@@ -337,7 +337,7 @@ export default function PatientDashboard() {
               </div>
               <div className="flex-1">
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">My Moolas Balance</p>
-                <p className="text-3xl font-bold text-foreground">{lollipopCount}</p>
+                <p className="text-2xl font-bold text-foreground">{lollipopCount}</p>
               </div>
               <ArrowRight className="h-4 w-4 text-muted-foreground" />
             </CardContent>

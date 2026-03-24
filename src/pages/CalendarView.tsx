@@ -325,7 +325,7 @@ export default function CalendarView() {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-foreground">Type</label>
+                <Label>Type</Label>
                 <Select
                   value={newAppointment.type}
                   onValueChange={(value) => setNewAppointment({ ...newAppointment, type: value })}

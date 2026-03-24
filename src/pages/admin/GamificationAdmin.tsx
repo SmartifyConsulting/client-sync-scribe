@@ -307,7 +307,7 @@ export default function GamificationAdmin() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Max Moolas/Visit</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-emerald-600">
+            <div className="text-2xl font-bold text-emerald-600">
               {Math.max(...configs.map(c => c.lollipops_awarded), 0)} Ⓜ
             </div>
           </CardContent>

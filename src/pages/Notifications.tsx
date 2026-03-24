@@ -787,7 +787,7 @@ function MessageList({
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
         <Mail className="h-12 w-12 mb-4" />
-        <p className="text-lg font-medium">No messages</p>
+        <p className="text-sm font-medium">No messages</p>
         <p className="text-sm">Your {showSender ? "inbox" : "sent messages"} is empty</p>
       </div>
     );

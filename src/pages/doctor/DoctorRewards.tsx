@@ -153,7 +153,7 @@ export default function DoctorRewards() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-sky-100">Transferred</p>
-                <p className="text-3xl font-bold text-white">{totalTransferred}</p>
+                <p className="text-2xl font-bold text-white">{totalTransferred}</p>
               </div>
               <ArrowRightLeft className="h-10 w-10 text-white/90" />
             </div>
