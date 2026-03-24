@@ -279,7 +279,7 @@ export default function GamificationAdmin() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Visit Categories</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{configs.length}</div>
+            <div className="text-2xl font-bold">{configs.length}</div>
           </CardContent>
         </Card>
         <Card>
