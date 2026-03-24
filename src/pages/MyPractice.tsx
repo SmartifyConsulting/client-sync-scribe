@@ -213,6 +213,7 @@ export default function MyPractice() {
   const { toast } = useToast();
   const { user } = useAuth();
   const { profile, loading, fetchProfile, updateProfile, uploadLogo } = useProfile();
+  const [searchParams] = useSearchParams();
 
   // ── Form state (auto-save) ──
   const [savedStatus, setSavedStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
