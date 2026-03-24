@@ -505,7 +505,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   </div>
                   {!newPatient.same_as_physical && (
                     <div>
-                      <label className="text-sm font-medium text-foreground">Postal Address</label>
+                      <Label>Postal Address</Label>
                       <Textarea
                         placeholder="Enter postal address"
                         value={newPatient.postal_address}
