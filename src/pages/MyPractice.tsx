@@ -883,6 +883,22 @@ export default function MyPractice() {
                     ss: "Siyakwemukela ku-Holarch Health - i-holarchy yakho yetempilo yemadigri langu-360",
                     ts: "Xa amukeriwa eka Holarch Health - holarchy ya rihanyu ra wena ra 360 degrees",
                     ve: "Vho ṱanganedzwa kha Holarch Health - holarchy ya mutakalo waṋu ya 360 degrees",
+                    nl: "Welkom bij Holarch Health - uw 360 graden gezondheidsholararchie",
+                    el: "Καλώς ήρθατε στο Holarch Health - η 360 μοιρών ολαρχία υγείας σας",
+                    he: "ברוכים הבאים ל-Holarch Health - ההולרכיה הבריאותית שלכם ב-360 מעלות",
+                    hi: "Holarch Health में आपका स्वागत है - आपकी 360 डिग्री स्वास्थ्य होलार्की",
+                    id: "Selamat datang di Holarch Health - holarki kesehatan 360 derajat Anda",
+                    it: "Benvenuti in Holarch Health - la vostra olarchia sanitaria a 360 gradi",
+                    ja: "Holarch Healthへようこそ - あなたの360度ヘルスケアホラーキー",
+                    ko: "Holarch Health에 오신 것을 환영합니다 - 당신의 360도 헬스케어 홀라키",
+                    ms: "Selamat datang ke Holarch Health - holarki penjagaan kesihatan 360 darjah anda",
+                    zh: "欢迎来到Holarch Health - 您的360度健康全息体系",
+                    pl: "Witamy w Holarch Health - Twoja 360-stopniowa holarchija zdrowia",
+                    ru: "Добро пожаловать в Holarch Health - ваша 360-градусная холархия здоровья",
+                    th: "ยินดีต้อนรับสู่ Holarch Health - โฮลาร์คีสุขภาพ 360 องศาของคุณ",
+                    tr: "Holarch Health'e hoş geldiniz - 360 derecelik sağlık holarşiniz",
+                    uk: "Ласкаво просимо до Holarch Health - ваша 360-градусна холархія здоров'я",
+                    vi: "Chào mừng bạn đến với Holarch Health - hệ thống chăm sóc sức khỏe toàn diện 360 độ",
                   };
                   const primaryLang = (profile as any)?.preferred_language || "en";
                   const sampleText = SAMPLE_TEXTS[primaryLang] || SAMPLE_TEXTS.en;
