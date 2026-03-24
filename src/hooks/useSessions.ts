@@ -574,6 +574,13 @@ const completeSession = async (
             } as any);
           }
           toast({ title: '📋 Medical Certificate Created', description: 'Medical certificate was auto-generated from the session' });
+          // Remove duplicate action_point todos for medical certificates
+          await supabase.from('todos')
+            .delete()
+            .eq('session_id', sessionId!)
+            .eq('user_id', user.id)
+            .neq('task_type', 'document_review')
+            .ilike('title', '%certificate%');
         } catch (certError) {
           console.error('Error creating medical certificate document:', certError);
         }
