@@ -287,7 +287,7 @@ export default function GamificationAdmin() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Active Categories</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-green-600">
               {configs.filter(c => c.is_active).length}
             </div>
           </CardContent>
