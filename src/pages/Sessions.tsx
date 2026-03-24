@@ -221,7 +221,8 @@ export default function Sessions() {
           allergies: currentPatient.allergies,
           currentMedications: currentMedications,
           pastSessions: pastPatientSessions,
-          conditions: currentPatient.notes // Using notes field for conditions
+          conditions: currentPatient.notes,
+          language: doctorLanguage
         }
       });
       
