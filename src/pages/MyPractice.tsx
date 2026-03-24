@@ -599,26 +599,41 @@ export default function MyPractice() {
                   <Input type="tel" value={formatPhoneNumber(formData.mobile_number)} onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value.replace(/[^0-9]/g, '') })} placeholder="82 123 4567" className="flex-1" />
                 </div>
               </div>
-              <div className="space-y-1.5 col-span-3">
-                <Label>Language</Label>
+              <div className="space-y-1.5">
+                <Label>Primary Language</Label>
+                <Select
+                  value={(profile as any)?.preferred_language || "en"}
+                  onValueChange={async (v) => {
+                    await updateProfile({ preferred_language: v } as any);
+                  }}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {LANGUAGES.map(l => (
+                      <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5 col-span-2">
+                <Label>Additional Languages</Label>
                 <div className="flex flex-wrap gap-2">
-                  {LANGUAGES.map(l => {
-                    const selectedLangs: string[] = (profile as any)?.preferred_languages || ((profile as any)?.preferred_language ? [(profile as any).preferred_language] : ["en"]);
+                  {LANGUAGES.filter(l => l.code !== ((profile as any)?.preferred_language || "en")).map(l => {
+                    const selectedLangs: string[] = (profile as any)?.preferred_languages || [];
                     const isSelected = selectedLangs.includes(l.code);
                     return (
                       <button
                         key={l.code}
                         type="button"
                         onClick={async () => {
-                          const current: string[] = (profile as any)?.preferred_languages || ((profile as any)?.preferred_language ? [(profile as any).preferred_language] : ["en"]);
+                          const current: string[] = (profile as any)?.preferred_languages || [];
                           let updated: string[];
                           if (isSelected) {
                             updated = current.filter((c: string) => c !== l.code);
-                            if (updated.length === 0) updated = ["en"];
                           } else {
                             updated = [...current, l.code];
                           }
-                          await updateProfile({ preferred_languages: updated, preferred_language: updated[0] } as any);
+                          await updateProfile({ preferred_languages: updated } as any);
                         }}
                         className={cn(
                           "rounded-full px-3 py-1 text-xs font-medium border transition-colors",
