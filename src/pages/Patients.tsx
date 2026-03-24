@@ -576,7 +576,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-foreground">Claims Email</label>
+                      <Label>Claims Email</Label>
                       <Input
                         type="email"
                         placeholder="claims@insurance.com"
