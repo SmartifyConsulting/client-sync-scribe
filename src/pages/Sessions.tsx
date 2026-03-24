@@ -368,7 +368,13 @@ export default function Sessions() {
         console.log("Auto-detected end of session from voice");
         toast({ title: "🎤 Session ending detected", description: "Ending session automatically from voice cue." });
         pendingCompletionRef.current = true;
-        stopRecording();
+        setPendingTranscript(text);
+        if (isRecording) stopRecording();
+        // Show visit category dialog after a brief delay to allow recording to finalize
+        setTimeout(() => {
+          setShowVisitCategoryDialog(true);
+          pendingCompletionRef.current = false;
+        }, 2000);
         return;
       }
       
