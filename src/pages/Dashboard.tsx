@@ -139,17 +139,27 @@ export default function Dashboard() {
   });
 
   // Query for doctor average rating
-  const { data: avgRating = 0 } = useQuery({
-    queryKey: ["doctor-avg-rating"],
+  const { data: ratingData = { avg: 0, communication: 0, expertise: 0, professionalism: 0, count: 0 } } = useQuery({
+    queryKey: ["doctor-rating-breakdown"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return 0;
+      if (!user) return { avg: 0, communication: 0, expertise: 0, professionalism: 0, count: 0 };
       const { data, error } = await supabase
         .from("visit_ratings")
-        .select("rating")
+        .select("rating, communication_rating, expertise_rating, professionalism_rating")
         .eq("rated_user_id", user.id);
-      if (error || !data || data.length === 0) return 0;
-      return data.reduce((sum, r) => sum + r.rating, 0) / data.length;
+      if (error || !data || data.length === 0) return { avg: 0, communication: 0, expertise: 0, professionalism: 0, count: 0 };
+      const count = data.length;
+      const avg = data.reduce((s, r) => s + r.rating, 0) / count;
+      const withCriteria = data.filter(r => r.communication_rating != null);
+      const cc = withCriteria.length;
+      return {
+        avg,
+        communication: cc ? withCriteria.reduce((s, r) => s + (r.communication_rating || 0), 0) / cc : 0,
+        expertise: cc ? withCriteria.reduce((s, r) => s + (r.expertise_rating || 0), 0) / cc : 0,
+        professionalism: cc ? withCriteria.reduce((s, r) => s + (r.professionalism_rating || 0), 0) / cc : 0,
+        count,
+      };
     },
     refetchInterval: 60000,
   });
