@@ -462,7 +462,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       )}
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-foreground">Email</label>
+                      <Label>Email</Label>
                       <Input
                         type="email"
                         placeholder="patient@email.com"
