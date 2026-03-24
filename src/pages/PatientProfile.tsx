@@ -68,6 +68,7 @@ export default function PatientProfile() {
   const { user } = useAuth();
   const [mailboxAlias, setMailboxAlias] = useState<string | null>(null);
   const [mailboxId, setMailboxId] = useState<string | null>(null);
+  const [showCompareDialog, setShowCompareDialog] = useState(false);
 
   useEffect(() => {
     if (!user?.id) return;
