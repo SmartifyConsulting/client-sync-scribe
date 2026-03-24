@@ -359,11 +359,11 @@ export default function MyPractice() {
   }, [sigFormData]);
 
   // ── Auto-guess language from country code ──
-  const handleCountryCodeChange = (code: string) => {
+  const handleCountryCodeChange = async (code: string) => {
     setFormData({ ...formData, country_code: code });
     const guessedLang = COUNTRY_CODE_TO_LANGUAGE[code];
-    if (guessedLang) {
-      updateProfile({ preferred_language: guessedLang } as any);
+    if (guessedLang && !(profile as any)?.preferred_language) {
+      await updateProfile({ preferred_language: guessedLang } as any);
     }
   };
 
@@ -557,7 +557,7 @@ export default function MyPractice() {
           <TabsTrigger value="certificates" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Certificates{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}</TabsTrigger>
           <TabsTrigger value="pricing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Pricing</TabsTrigger>
           <TabsTrigger value="invoices" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Invoices</TabsTrigger>
-          <TabsTrigger value="roundtables" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Round Tables</TabsTrigger>
+          
           <TabsTrigger value="templates" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Templates</TabsTrigger>
         </TabsList>
 
@@ -599,26 +599,41 @@ export default function MyPractice() {
                   <Input type="tel" value={formatPhoneNumber(formData.mobile_number)} onChange={(e) => setFormData({ ...formData, mobile_number: e.target.value.replace(/[^0-9]/g, '') })} placeholder="82 123 4567" className="flex-1" />
                 </div>
               </div>
-              <div className="space-y-1.5 col-span-3">
-                <Label>Language</Label>
+              <div className="space-y-1.5">
+                <Label>Primary Language</Label>
+                <Select
+                  value={(profile as any)?.preferred_language || "en"}
+                  onValueChange={async (v) => {
+                    await updateProfile({ preferred_language: v } as any);
+                  }}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {LANGUAGES.map(l => (
+                      <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5 col-span-2">
+                <Label>Additional Languages</Label>
                 <div className="flex flex-wrap gap-2">
-                  {LANGUAGES.map(l => {
-                    const selectedLangs: string[] = (profile as any)?.preferred_languages || ((profile as any)?.preferred_language ? [(profile as any).preferred_language] : ["en"]);
+                  {LANGUAGES.filter(l => l.code !== ((profile as any)?.preferred_language || "en")).map(l => {
+                    const selectedLangs: string[] = (profile as any)?.preferred_languages || [];
                     const isSelected = selectedLangs.includes(l.code);
                     return (
                       <button
                         key={l.code}
                         type="button"
                         onClick={async () => {
-                          const current: string[] = (profile as any)?.preferred_languages || ((profile as any)?.preferred_language ? [(profile as any).preferred_language] : ["en"]);
+                          const current: string[] = (profile as any)?.preferred_languages || [];
                           let updated: string[];
                           if (isSelected) {
                             updated = current.filter((c: string) => c !== l.code);
-                            if (updated.length === 0) updated = ["en"];
                           } else {
                             updated = [...current, l.code];
                           }
-                          await updateProfile({ preferred_languages: updated, preferred_language: updated[0] } as any);
+                          await updateProfile({ preferred_languages: updated } as any);
                         }}
                         className={cn(
                           "rounded-full px-3 py-1 text-xs font-medium border transition-colors",
@@ -830,19 +845,27 @@ export default function MyPractice() {
                 try {
                   const sampleText = "Good morning, Doctor. You have 5 appointments scheduled for today, including 2 follow-ups and 1 new patient consultation.";
                   const voice = profile?.narration_voice || "nova";
-                  const { data, error } = await supabase.functions.invoke("narrate-briefing", {
-                    body: { text: sampleText, voice },
-                  });
-                  if (error) throw error;
-                  if (data?.audioUrl) {
-                    const audio = new Audio(data.audioUrl);
-                    audio.play();
-                  } else if (data instanceof Blob || (data && typeof data === 'object' && data.size)) {
-                    const url = URL.createObjectURL(data as Blob);
-                    const audio = new Audio(url);
-                    audio.play();
-                    audio.onended = () => URL.revokeObjectURL(url);
-                  }
+                  const session = await supabase.auth.getSession();
+                  const token = session.data.session?.access_token;
+                  if (!token) throw new Error("Not authenticated");
+                  const response = await fetch(
+                    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`,
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                      },
+                      body: JSON.stringify({ text: sampleText, voice }),
+                    }
+                  );
+                  if (!response.ok) throw new Error("Failed to generate audio");
+                  const blob = await response.blob();
+                  const url = URL.createObjectURL(blob);
+                  const audio = new Audio(url);
+                  audio.play();
+                  audio.onended = () => URL.revokeObjectURL(url);
                   toast({ title: "Playing sample voice" });
                 } catch {
                   toast({ title: "Failed to play sample", variant: "destructive" });
@@ -1034,17 +1057,6 @@ export default function MyPractice() {
           <DoctorInvoices hideHeader />
         </TabsContent>
 
-        {/* === MY ROUND TABLES TAB === */}
-        <TabsContent value="roundtables" className="mt-4">
-          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
-            <div className="flex items-center gap-2">
-              <Users2 className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">My Round Tables</h3>
-            </div>
-            <p className="text-muted-foreground text-[12px]">All round tables you have contributed to, with alerts for new activity.</p>
-            <DoctorRoundTables />
-          </div>
-        </TabsContent>
 
         {/* === TEMPLATES TAB === */}
         <TabsContent value="templates" className="mt-4">

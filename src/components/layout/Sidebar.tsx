@@ -72,6 +72,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const { role, loading: roleLoading, isPatient, isAdmin } = useUserRole();
   const loading = roleLoading;
   const { profile } = useProfile();
+  const location = useLocation();
   const navItems = isAdmin ? adminNavItems : isPatient ? patientNavItems : doctorNavItems;
 
   const { data: unreadCount = 0 } = useQuery({
@@ -115,29 +116,39 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                onClick={onNavigate}
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
-                    isActive
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                  )
-                }
-              >
-                <item.icon className="h-5 w-5" />
-                <span className="flex-1">{item.label}</span>
-                {item.label === "Notifications" && unreadCount > 0 && (
-                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-semibold text-destructive-foreground">
-                    {unreadCount > 99 ? "99+" : unreadCount}
-                  </span>
-                )}
-              </NavLink>
-            ))
+            navItems.map((item) => {
+              const hasQuery = item.to.includes('?');
+              const itemPath = hasQuery ? item.to.split('?')[0] : item.to;
+              const itemSearch = hasQuery ? item.to.split('?')[1] : '';
+
+              const isItemActive = hasQuery
+                ? location.pathname === itemPath && location.search === `?${itemSearch}`
+                : location.pathname === itemPath && (!location.search || !navItems.some(n => n.to.includes(`${itemPath}?`) && location.search === `?${n.to.split('?')[1]}`));
+
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  onClick={onNavigate}
+                  className={() =>
+                    cn(
+                      "flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium transition-all duration-200",
+                      isItemActive
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                    )
+                  }
+                >
+                  <item.icon className="h-4 w-4" />
+                  <span className="flex-1">{item.label}</span>
+                  {item.label === "Notifications" && unreadCount > 0 && (
+                    <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
+                </NavLink>
+              );
+            })
           )}
         </nav>
 
@@ -164,14 +175,14 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               onClick={onNavigate}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
+                  "flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium transition-all duration-200",
                   isActive
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-primary hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                 )
               }
             >
-              <Settings className="h-5 w-5" />
+              <Settings className="h-4 w-4" />
               Settings
             </NavLink>
             <button
@@ -180,9 +191,9 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 await supabase.auth.signOut();
                 window.location.href = "/auth";
               }}
-              className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
             >
-              <LogOut className="h-5 w-5" />
+              <LogOut className="h-4 w-4" />
               Sign Out
             </button>
           </div>
