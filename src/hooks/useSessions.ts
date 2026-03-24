@@ -811,6 +811,7 @@ ${tasksHtml}`;
         }
       }
 
+      if (visitCategory && patientId) {
         const { data: configData } = await supabase
           .from('gamification_config')
           .select('lollipops_awarded')
