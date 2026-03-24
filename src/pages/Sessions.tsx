@@ -1165,11 +1165,86 @@ export default function Sessions() {
             </div>
 
             {aiDiagnosis && (
-              <div className="mt-4 p-4 rounded-lg bg-muted/50 border border-border max-h-[400px] overflow-y-auto">
-                <pre className="text-sm text-foreground whitespace-pre-wrap font-sans leading-relaxed">
-                  {aiDiagnosis}
-                </pre>
-              </div>
+              <>
+                <div className="flex items-center gap-2 mb-2">
+                  {doctorLanguage !== 'English' && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1 text-xs"
+                      disabled={isTranslatingDiagnosis}
+                      onClick={async () => {
+                        if (translatedDiagnosis) {
+                          setShowTranslated(!showTranslated);
+                          return;
+                        }
+                        setIsTranslatingDiagnosis(true);
+                        try {
+                          const { data, error } = await supabase.functions.invoke('summarize-session', {
+                            body: { content: aiDiagnosis, action: 'translate', targetLanguage: 'English' }
+                          });
+                          if (!error && data?.summary) {
+                            setTranslatedDiagnosis(data.summary);
+                            setShowTranslated(true);
+                          }
+                        } catch (e) { console.error('Translation error:', e); }
+                        setIsTranslatingDiagnosis(false);
+                      }}
+                    >
+                      {isTranslatingDiagnosis ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
+                      {showTranslated ? 'Show Original' : 'Translate to English'}
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1 text-xs"
+                    onClick={async () => {
+                      if (isNarrating) {
+                        narrationAudioRef.current?.pause();
+                        narrationAudioRef.current = null;
+                        setIsNarrating(false);
+                        return;
+                      }
+                      setIsNarrating(true);
+                      try {
+                        const textToNarrate = showTranslated && translatedDiagnosis ? translatedDiagnosis : aiDiagnosis;
+                        const response = await fetch(
+                          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`,
+                          {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+                            },
+                            body: JSON.stringify({ text: textToNarrate }),
+                          }
+                        );
+                        if (!response.ok) throw new Error('Narration failed');
+                        const blob = await response.blob();
+                        const url = URL.createObjectURL(blob);
+                        const audio = new Audio(url);
+                        audio.onended = () => { setIsNarrating(false); narrationAudioRef.current = null; };
+                        audio.play();
+                        narrationAudioRef.current = audio;
+                      } catch (e) {
+                        console.error('Narration error:', e);
+                        setIsNarrating(false);
+                        toast({ title: "Narration failed", variant: "destructive" });
+                      }
+                    }}
+                  >
+                    {isNarrating ? <VolumeX className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
+                    {isNarrating ? 'Stop' : 'Narrate'}
+                  </Button>
+                </div>
+                <div className="p-4 rounded-lg bg-muted/50 border border-border max-h-[400px] overflow-y-auto">
+                  <pre className="text-sm text-foreground whitespace-pre-wrap font-sans leading-relaxed">
+                    {showTranslated && translatedDiagnosis ? translatedDiagnosis : aiDiagnosis}
+                  </pre>
+                </div>
+              </>
             )}
           </div>
 
