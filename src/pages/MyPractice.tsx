@@ -266,7 +266,7 @@ export default function MyPractice() {
   const [isSavingService, setIsSavingService] = useState(false);
 
   // ── Voice narration local state ──
-  const [localVoice, setLocalVoice] = useState(profile?.narration_voice || "nova");
+  const [localVoice, setLocalVoice] = useState(profile?.narration_voice || "shimmer");
 
   // ── CPD Certificates ──
   const [certs, setCerts] = useState<CPDCertificate[]>([]);
