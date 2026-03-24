@@ -377,7 +377,7 @@ export default function Sessions() {
         toast({ title: "🎤 Session ending detected", description: "Ending session automatically from voice cue." });
         pendingCompletionRef.current = true;
         setPendingTranscript(text);
-        if (isRecording) stopRecording();
+        setTimeout(() => { if (isRecording) stopRecording(); }, 100);
         // Show visit category dialog after a brief delay to allow recording to finalize
         setTimeout(() => {
           setShowVisitCategoryDialog(true);
