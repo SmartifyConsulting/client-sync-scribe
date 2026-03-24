@@ -175,14 +175,14 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               onClick={onNavigate}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
+                  "flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium transition-all duration-200",
                   isActive
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-primary hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                 )
               }
             >
-              <Settings className="h-5 w-5" />
+              <Settings className="h-4 w-4" />
               Settings
             </NavLink>
             <button
@@ -191,9 +191,9 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 await supabase.auth.signOut();
                 window.location.href = "/auth";
               }}
-              className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
             >
-              <LogOut className="h-5 w-5" />
+              <LogOut className="h-4 w-4" />
               Sign Out
             </button>
           </div>
