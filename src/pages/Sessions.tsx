@@ -81,22 +81,25 @@ export default function Sessions() {
   // Use URL param if provided, otherwise use selected patient
   const patientId = urlPatientId || selectedPatientId;
 
-  // Fetch logged-in doctor's name for transcription
+  // Fetch logged-in doctor's name and language preference
   useEffect(() => {
-    const fetchDoctorName = async () => {
+    const fetchDoctorProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('full_name')
+          .select('full_name, preferred_languages')
           .eq('id', user.id)
           .maybeSingle();
         if (profile?.full_name) {
           setDoctorName(profile.full_name);
         }
+        if (profile?.preferred_languages && profile.preferred_languages.length > 0) {
+          setDoctorLanguage(profile.preferred_languages[0]);
+        }
       }
     };
-    fetchDoctorName();
+    fetchDoctorProfile();
   }, []);
   
   const [sessionState, setSessionState] = useState<SessionState>("idle");
