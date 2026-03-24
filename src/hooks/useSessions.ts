@@ -476,7 +476,7 @@ const completeSession = async (
                 user_id: user.id,
                 session_id: sessionId,
                 patient_id: patientId,
-                title: `Review & Send: Prescription - ${patientRecord?.name || 'Patient'}`,
+                title: `Review Prescription - ${patientRecord?.name || 'Patient'}`,
                 document_id: rxDoc.id,
                 task_type: 'document_review',
                 priority: 'high',
