@@ -98,11 +98,12 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
         const url = URL.createObjectURL(audioBlob);
         setAudioUrl(url);
         
-        // Upload to storage if sessionId is provided
+        // Upload to storage first if sessionId is provided, then use storage URL for transcription
         const currentSessionId = optionsRef.current.sessionId;
+        let storageUrl: string | null = null;
         if (currentSessionId) {
           setIsSavingAudio(true);
-          const storageUrl = await uploadAudioToStorage(audioBlob, currentSessionId);
+          storageUrl = await uploadAudioToStorage(audioBlob, currentSessionId);
           if (storageUrl) {
             setSavedAudioUrl(storageUrl);
             optionsRef.current.onAudioSaved?.(storageUrl);
@@ -110,7 +111,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
           setIsSavingAudio(false);
         }
         
-        await transcribeAudio(audioBlob);
+        // Use storage URL if available (avoids large base64 payload), otherwise fall back to blob
+        await transcribeAudio(audioBlob, storageUrl);
         
         // Stop all tracks
         if (streamRef.current) {
