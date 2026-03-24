@@ -476,12 +476,6 @@ export default function TodoList() {
                                     <Calendar className="h-3 w-3" />
                                     {format(new Date(todo.created_at), "MMM d, h:mm a")}
                                   </span>
-                                  {/* Patient name */}
-                                  {todo.patient_name && (
-                                    <span className="flex items-center gap-1 text-xs text-primary">
-                                      <User className="h-3 w-3" />{todo.patient_name}
-                                    </span>
-                                  )}
                                   {todo.due_date && (
                                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                       <Calendar className="h-3 w-3" />{new Date(todo.due_date).toLocaleDateString()}

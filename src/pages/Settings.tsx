@@ -409,7 +409,7 @@ export default function Settings() {
               <Bell className="h-5 w-5 text-primary" />
               <h2 className="text-lg font-semibold text-foreground">Notifications</h2>
             </div>
-            <p className="text-sm text-muted-foreground">Configure how you receive alerts and reminders</p>
+             <p className="text-sm text-muted-foreground">Configure how you receive alerts and reminders</p>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div><p className="font-medium text-foreground">Email Notifications</p><p className="text-sm text-muted-foreground">Receive email reminders for appointments</p></div>
@@ -425,6 +425,35 @@ export default function Settings() {
                 <div><p className="font-medium text-foreground">Follow-up Alerts</p><p className="text-sm text-muted-foreground">Reminders for scheduled follow-ups</p></div>
                 <Switch defaultChecked />
               </div>
+              {isDoctor && (
+                <>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-foreground">Chronic Medication Adherence Updates</p>
+                      <p className="text-sm text-muted-foreground">How often to receive notifications about chronic patients taking or missing their medications</p>
+                    </div>
+                    <Select
+                      defaultValue={profile?.chronic_med_notification_frequency as string || "daily"}
+                      onValueChange={async (value) => {
+                        await updateProfile({ chronic_med_notification_frequency: value } as any);
+                        toast({ title: "Setting saved", description: `Chronic med updates set to: ${value}` });
+                      }}
+                    >
+                      <SelectTrigger className="w-[160px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="every_dose">Every dose</SelectItem>
+                        <SelectItem value="daily">Daily summary</SelectItem>
+                        <SelectItem value="weekly">Weekly summary</SelectItem>
+                        <SelectItem value="monthly">Monthly summary</SelectItem>
+                        <SelectItem value="never">Never</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </TabsContent>
