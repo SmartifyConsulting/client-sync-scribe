@@ -282,8 +282,10 @@ export default function Dashboard() {
         {isDoctor && (
           <StatsCard
             title="Doctor Rating"
-            value={avgRating > 0 ? `${avgRating.toFixed(1)} ★` : "—"}
-            change={avgRating > 0 ? "Average from patients" : "No ratings yet"}
+            value={ratingData.avg > 0 ? `${ratingData.avg.toFixed(1)} ★` : "—"}
+            change={ratingData.count > 0 
+              ? `Comm: ${ratingData.communication.toFixed(1)} · Exp: ${ratingData.expertise.toFixed(1)} · Prof: ${ratingData.professionalism.toFixed(1)}`
+              : "No ratings yet"}
             trend="neutral"
             icon={Star}
           />
