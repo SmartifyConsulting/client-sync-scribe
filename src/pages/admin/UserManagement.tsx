@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Loader2, ShieldAlert, Users, Pencil, Save, X, KeyRound } from "lucide-react";
+import { Loader2, ShieldAlert, Users, Pencil, Save, X } from "lucide-react";
 import { InviteUserDialog } from "@/components/InviteUserDialog";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
