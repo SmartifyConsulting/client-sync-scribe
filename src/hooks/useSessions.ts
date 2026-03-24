@@ -566,7 +566,7 @@ const completeSession = async (
               user_id: user.id,
               session_id: sessionId,
               patient_id: patientId,
-              title: `Review & Send: Medical Certificate - ${patientRecord?.name || 'Patient'}`,
+              title: `Review Medical Certificate - ${patientRecord?.name || 'Patient'}`,
               document_id: certDoc.id,
               task_type: 'document_review',
               priority: 'high',
