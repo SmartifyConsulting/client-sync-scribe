@@ -1354,13 +1354,13 @@ export default function Sessions() {
                     </div>
                   );
                 })()}
-                <div className="flex items-center gap-4 flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/sessions/${session.id}`)}>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 shrink-0">
-                    <User className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/sessions/${session.id}`)}>
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                    <User className="h-4 w-4 text-primary" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-medium text-foreground truncate">{session.title || 'Untitled Session'}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm font-medium text-foreground truncate">{session.title || 'Untitled Session'}</p>
+                    <p className="text-xs text-muted-foreground">
                       {session.patient?.name || 'Unknown Patient'} • {format(new Date(session.started_at), 'MMM d, yyyy h:mm a')}
                     </p>
                   </div>
