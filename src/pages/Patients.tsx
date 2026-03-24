@@ -408,7 +408,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   <h3 className="text-sm font-semibold text-foreground border-b pb-2">Basic Information</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="col-span-2 relative">
-                      <label className="text-sm font-medium text-foreground">Name *</label>
+                      <Label>Name *</Label>
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
