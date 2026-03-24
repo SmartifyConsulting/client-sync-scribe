@@ -866,7 +866,26 @@ export default function MyPractice() {
               className="gap-2 text-xs mt-2"
               onClick={async () => {
                 try {
-                  const sampleText = "Welcome to Holarch Health - your 360 degree healthcare holarchy";
+                  const SAMPLE_TEXTS: Record<string, string> = {
+                    en: "Welcome to Holarch Health - your 360 degree healthcare holarchy",
+                    af: "Welkom by Holarch Health - jou 360 grade gesondheidsholarchie",
+                    zu: "Siyakwamukela ku-Holarch Health - i-holarchy yakho yezempilo yamadigri angu-360",
+                    xh: "Wamkelekile kwi-Holarch Health - i-holarchy yakho yezempilo yeedegri ezingama-360",
+                    st: "Rea u amohela ho Holarch Health - holarchy ea hau ea bophelo bo botle ea digri tse 360",
+                    tn: "O amogelesegile mo Holarch Health - holarchy ya gago ya boitekanelo ya digri di le 360",
+                    fr: "Bienvenue chez Holarch Health - votre holarchie de santé à 360 degrés",
+                    pt: "Bem-vindo ao Holarch Health - sua holarquia de saúde de 360 graus",
+                    es: "Bienvenido a Holarch Health - su holarquía de salud de 360 grados",
+                    de: "Willkommen bei Holarch Health - Ihre 360-Grad-Gesundheitsholarchie",
+                    ar: "مرحبًا بك في Holarch Health - التسلسل الصحي الشامل بزاوية 360 درجة",
+                    sw: "Karibu Holarch Health - holarchy yako ya afya ya digrii 360",
+                    nr: "Siyakwamukela ku-Holarch Health - i-holarchy yakho yezempilo yamadigri angu-360",
+                    ss: "Siyakwemukela ku-Holarch Health - i-holarchy yakho yetempilo yemadigri langu-360",
+                    ts: "Xa amukeriwa eka Holarch Health - holarchy ya rihanyu ra wena ra 360 degrees",
+                    ve: "Vho ṱanganedzwa kha Holarch Health - holarchy ya mutakalo waṋu ya 360 degrees",
+                  };
+                  const primaryLang = (profile as any)?.preferred_language || "en";
+                  const sampleText = SAMPLE_TEXTS[primaryLang] || SAMPLE_TEXTS.en;
                   const voice = localVoice;
                   const session = await supabase.auth.getSession();
                   const token = session.data.session?.access_token;
