@@ -72,6 +72,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const { role, loading: roleLoading, isPatient, isAdmin } = useUserRole();
   const loading = roleLoading;
   const { profile } = useProfile();
+  const location = useLocation();
   const navItems = isAdmin ? adminNavItems : isPatient ? patientNavItems : doctorNavItems;
 
   const { data: unreadCount = 0 } = useQuery({
