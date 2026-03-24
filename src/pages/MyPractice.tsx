@@ -515,7 +515,6 @@ export default function MyPractice() {
     else { toast({ title: "Email updated", description: "A confirmation email has been sent" }); setIsEditingEmail(false); }
   };
 
-  const [searchParams] = useSearchParams();
   const activeTab = searchParams.get("tab");
 
   if (activeTab === "roundtables") {
