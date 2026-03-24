@@ -814,8 +814,9 @@ export default function MyPractice() {
             <div className="space-y-1.5">
               <Label className="text-xs">Narration Voice</Label>
               <Select
-                value={profile?.narration_voice || "nova"}
+                value={localVoice}
                 onValueChange={async (v) => {
+                  setLocalVoice(v);
                   const { data: { user } } = await supabase.auth.getUser();
                   if (!user) return;
                   await supabase.from("profiles").update({ narration_voice: v } as any).eq("id", user.id);
