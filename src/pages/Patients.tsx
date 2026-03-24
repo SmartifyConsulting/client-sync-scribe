@@ -471,7 +471,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-foreground">Phone</label>
+                      <Label>Phone</Label>
                       <Input
                         placeholder="+1 (555) 123-4567"
                         value={newPatient.phone}
