@@ -483,6 +483,13 @@ const completeSession = async (
                 status: 'pending',
               } as any);
             }
+            // Remove duplicate action_point todos for prescriptions
+            await supabase.from('todos')
+              .delete()
+              .eq('session_id', sessionId!)
+              .eq('user_id', user.id)
+              .neq('task_type', 'document_review')
+              .ilike('title', '%prescription%');
             toast({ title: '💊 Prescription Created', description: 'Prescription was auto-generated from the session' });
           }
         } catch (rxError) {
