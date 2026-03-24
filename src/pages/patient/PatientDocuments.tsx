@@ -22,6 +22,7 @@ import {
   Sparkles,
   X,
   RotateCw,
+  GitCompare,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
