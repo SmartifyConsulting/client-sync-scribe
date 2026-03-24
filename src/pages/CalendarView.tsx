@@ -308,7 +308,7 @@ export default function CalendarView() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-foreground">Date *</label>
+                  <Label>Date *</Label>
                   <Input
                     type="date"
                     value={newAppointment.date}
