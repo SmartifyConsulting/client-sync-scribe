@@ -573,11 +573,11 @@ export default function SessionDetail() {
                 const text = line.substring(colonIndex + 1);
                 const isDoctor = speaker.toLowerCase().includes('dr') || speaker.toLowerCase().includes('doctor');
                 
-                return (
-                  <p key={index} className={`leading-relaxed ${isDoctor ? 'text-primary-dark' : 'text-foreground'}`}>
-                    <span className="font-bold">{speaker}</span>:{text}
-                  </p>
-                );
+                  return (
+                   <p key={index} className={`leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
+                     <span className="font-bold">{speaker}</span>:{text}
+                   </p>
+                 );
               }
               return line.trim() ? (
                 <p key={index} className="text-foreground leading-relaxed">{line}</p>

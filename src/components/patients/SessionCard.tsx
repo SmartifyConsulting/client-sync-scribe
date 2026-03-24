@@ -34,13 +34,13 @@ export function SessionCard({ session, index }: SessionCardProps) {
   return (
     <div
       onClick={handleCardClick}
-      className="rounded-xl border border-primary bg-card p-5 transition-all hover:shadow-md hover:border-primary/30 animate-fade-in group cursor-pointer"
+      className="rounded-xl border border-primary bg-card p-3 transition-all hover:shadow-md hover:border-primary/30 animate-fade-in group cursor-pointer"
       style={{ animationDelay: `${index * 100}ms` }}
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-            <Clock className="h-5 w-5 text-accent-foreground" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent">
+            <Clock className="h-4 w-4 text-accent-foreground" />
           </div>
           <div>
             <p className="font-medium text-foreground group-hover:text-primary transition-colors">

@@ -81,22 +81,25 @@ export default function Sessions() {
   // Use URL param if provided, otherwise use selected patient
   const patientId = urlPatientId || selectedPatientId;
 
-  // Fetch logged-in doctor's name for transcription
+  // Fetch logged-in doctor's name and language preference
   useEffect(() => {
-    const fetchDoctorName = async () => {
+    const fetchDoctorProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('full_name')
+          .select('full_name, preferred_languages')
           .eq('id', user.id)
           .maybeSingle();
         if (profile?.full_name) {
           setDoctorName(profile.full_name);
         }
+        if (profile?.preferred_languages && profile.preferred_languages.length > 0) {
+          setDoctorLanguage(profile.preferred_languages[0]);
+        }
       }
     };
-    fetchDoctorName();
+    fetchDoctorProfile();
   }, []);
   
   const [sessionState, setSessionState] = useState<SessionState>("idle");
@@ -113,6 +116,12 @@ export default function Sessions() {
   const [patientSelectorOpen, setPatientSelectorOpen] = useState(false);
   const [aiDiagnosis, setAiDiagnosis] = useState<string | null>(null);
   const [isGeneratingDiagnosis, setIsGeneratingDiagnosis] = useState(false);
+  const [translatedDiagnosis, setTranslatedDiagnosis] = useState<string | null>(null);
+  const [isTranslatingDiagnosis, setIsTranslatingDiagnosis] = useState(false);
+  const [showTranslated, setShowTranslated] = useState(false);
+  const [isNarrating, setIsNarrating] = useState(false);
+  const narrationAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [doctorLanguage, setDoctorLanguage] = useState<string>("English");
   const [pastPatientSessions, setPastPatientSessions] = useState<any[]>([]);
   const [showDrawingPad, setShowDrawingPad] = useState(false);
   const savedAudioUrlRef = useRef<string | null>(null);
@@ -212,7 +221,8 @@ export default function Sessions() {
           allergies: currentPatient.allergies,
           currentMedications: currentMedications,
           pastSessions: pastPatientSessions,
-          conditions: currentPatient.notes // Using notes field for conditions
+          conditions: currentPatient.notes,
+          language: doctorLanguage
         }
       });
       
@@ -220,6 +230,8 @@ export default function Sessions() {
       
       if (data?.recommendation) {
         setAiDiagnosis(data.recommendation);
+        setTranslatedDiagnosis(null);
+        setShowTranslated(false);
       } else if (data?.error) {
         throw new Error(data.error);
       }
@@ -346,6 +358,19 @@ export default function Sessions() {
       // Store transcript
       latestTranscriptRef.current = text;
       setNotes(prev => prev ? `${prev}\n\n${text}` : text);
+      
+      // Auto-detect end of session phrases
+      const lastChunk = text.slice(-150).toLowerCase();
+      const endPhrases = ['end of session', 'end session', 'that brings us to the end', "we'll end here", 'that concludes', 'end of the session', 'conclude the session'];
+      const detectedEnd = endPhrases.some(phrase => lastChunk.includes(phrase));
+      
+      if (detectedEnd && !pendingCompletionRef.current) {
+        console.log("Auto-detected end of session from voice");
+        toast({ title: "🎤 Session ending detected", description: "Ending session automatically from voice cue." });
+        pendingCompletionRef.current = true;
+        stopRecording();
+        return;
+      }
       
       // If pending completion, show visit category dialog
       if (pendingCompletionRef.current) {
@@ -943,25 +968,36 @@ export default function Sessions() {
             </div>
           )}
 
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="grid gap-3 lg:grid-cols-3">
             {/* Transcription */}
-            <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <Mic className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold text-foreground">Transcription</h3>
+            <div className="rounded-xl border border-primary bg-card p-3 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <Mic className="h-4 w-4 text-primary" />
+                <h3 className="font-semibold text-sm text-foreground">Transcription</h3>
               </div>
-              <div className="max-h-[250px] overflow-y-auto">
+              <div className="max-h-[150px] overflow-y-auto space-y-1">
                 {transcript ? (
-                  <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">{transcript}</p>
+                  transcript.split('\n').map((line, index) => {
+                    const colonIndex = line.indexOf(':');
+                    if (colonIndex > 0 && colonIndex < 50) {
+                      const speaker = line.substring(0, colonIndex);
+                      const text = line.substring(colonIndex + 1);
+                      const isDoctor = speaker.toLowerCase().includes('dr') || speaker.toLowerCase().includes('doctor');
+                      return (
+                        <p key={index} className={`text-sm leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
+                          <span className="font-bold">{speaker}</span>:{text}
+                        </p>
+                      );
+                    }
+                    return line.trim() ? <p key={index} className="text-sm text-foreground leading-relaxed">{line}</p> : null;
+                  })
                 ) : (
-                  <p className="text-muted-foreground italic">No transcription recorded.</p>
+                  <p className="text-sm text-muted-foreground italic">No transcription recorded.</p>
                 )}
               </div>
-              {/* Audio Playback in completed state */}
               {audioUrl && (
-                <div className="mt-4 pt-4 border-t border-border">
-                  <p className="text-xs text-muted-foreground mb-2">Listen to recording:</p>
-                  <audio controls className="w-full h-10" src={audioUrl}>
+                <div className="mt-2 pt-2 border-t border-border">
+                  <audio controls className="w-full h-8" src={audioUrl}>
                     Your browser does not support audio playback.
                   </audio>
                 </div>
@@ -969,40 +1005,38 @@ export default function Sessions() {
             </div>
 
             {/* Summary */}
-            <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <Sparkles className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold text-foreground">AI Summary</h3>
+            <div className="rounded-xl border border-primary bg-card p-3 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <h3 className="font-semibold text-sm text-foreground">AI Summary</h3>
               </div>
-              <div className="max-h-[250px] overflow-y-auto">
-                <p className="text-muted-foreground leading-relaxed">{summary}</p>
+              <div className="max-h-[150px] overflow-y-auto">
+                <p className="text-sm text-muted-foreground leading-relaxed">{summary}</p>
               </div>
             </div>
 
             {/* Action Points */}
-            <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <AlertCircle className="h-5 w-5 text-warning" />
-                <h3 className="font-semibold text-foreground">Action Points</h3>
+            <div className="rounded-xl border border-primary bg-card p-3 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertCircle className="h-4 w-4 text-warning" />
+                <h3 className="font-semibold text-sm text-foreground">Action Points</h3>
               </div>
-              <div className="max-h-[200px] overflow-y-auto">
+              <div className="max-h-[150px] overflow-y-auto">
                 {actionPoints.length > 0 ? (
-                  <ul className="space-y-3">
+                  <ul className="space-y-1.5">
                     {actionPoints.map((point, index) => (
-                      <li key={index} className="flex items-start gap-3">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-                          {index + 1}
-                        </span>
+                      <li key={index} className="flex items-start gap-2 text-sm">
+                        <CheckCircle className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
                         <span className="text-foreground">{point}</span>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-muted-foreground">No action points generated.</p>
+                  <p className="text-sm text-muted-foreground">No action points generated.</p>
                 )}
               </div>
               {actionPoints.length > 0 && (
-                <div className="mt-4 pt-3 border-t border-border">
+                <div className="mt-2 pt-2 border-t border-border">
                   <p className="text-xs text-green-600 flex items-center gap-1">
                     <CheckCircle className="h-3 w-3" />
                     Added to To-Do List
@@ -1131,11 +1165,86 @@ export default function Sessions() {
             </div>
 
             {aiDiagnosis && (
-              <div className="mt-4 p-4 rounded-lg bg-muted/50 border border-border max-h-[400px] overflow-y-auto">
-                <pre className="text-sm text-foreground whitespace-pre-wrap font-sans leading-relaxed">
-                  {aiDiagnosis}
-                </pre>
-              </div>
+              <>
+                <div className="flex items-center gap-2 mb-2">
+                  {doctorLanguage !== 'English' && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1 text-xs"
+                      disabled={isTranslatingDiagnosis}
+                      onClick={async () => {
+                        if (translatedDiagnosis) {
+                          setShowTranslated(!showTranslated);
+                          return;
+                        }
+                        setIsTranslatingDiagnosis(true);
+                        try {
+                          const { data, error } = await supabase.functions.invoke('summarize-session', {
+                            body: { content: aiDiagnosis, action: 'translate', targetLanguage: 'English' }
+                          });
+                          if (!error && data?.summary) {
+                            setTranslatedDiagnosis(data.summary);
+                            setShowTranslated(true);
+                          }
+                        } catch (e) { console.error('Translation error:', e); }
+                        setIsTranslatingDiagnosis(false);
+                      }}
+                    >
+                      {isTranslatingDiagnosis ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
+                      {showTranslated ? 'Show Original' : 'Translate to English'}
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1 text-xs"
+                    onClick={async () => {
+                      if (isNarrating) {
+                        narrationAudioRef.current?.pause();
+                        narrationAudioRef.current = null;
+                        setIsNarrating(false);
+                        return;
+                      }
+                      setIsNarrating(true);
+                      try {
+                        const textToNarrate = showTranslated && translatedDiagnosis ? translatedDiagnosis : aiDiagnosis;
+                        const response = await fetch(
+                          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`,
+                          {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+                            },
+                            body: JSON.stringify({ text: textToNarrate }),
+                          }
+                        );
+                        if (!response.ok) throw new Error('Narration failed');
+                        const blob = await response.blob();
+                        const url = URL.createObjectURL(blob);
+                        const audio = new Audio(url);
+                        audio.onended = () => { setIsNarrating(false); narrationAudioRef.current = null; };
+                        audio.play();
+                        narrationAudioRef.current = audio;
+                      } catch (e) {
+                        console.error('Narration error:', e);
+                        setIsNarrating(false);
+                        toast({ title: "Narration failed", variant: "destructive" });
+                      }
+                    }}
+                  >
+                    {isNarrating ? <VolumeX className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
+                    {isNarrating ? 'Stop' : 'Narrate'}
+                  </Button>
+                </div>
+                <div className="p-4 rounded-lg bg-muted/50 border border-border max-h-[400px] overflow-y-auto">
+                  <pre className="text-sm text-foreground whitespace-pre-wrap font-sans leading-relaxed">
+                    {showTranslated && translatedDiagnosis ? translatedDiagnosis : aiDiagnosis}
+                  </pre>
+                </div>
+              </>
             )}
           </div>
 
@@ -1209,11 +1318,11 @@ export default function Sessions() {
         ) : sessions.filter(s => s.status !== 'in_progress').length === 0 ? (
           <p className="text-muted-foreground text-center py-8">No sessions recorded yet.</p>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-1.5">
             {sessions.filter(s => s.status !== 'in_progress').map((session) => (
               <div
                 key={session.id}
-                className="flex items-center justify-between p-4 rounded-lg border border-border bg-background hover:bg-accent/50 transition-colors"
+                className="flex items-center justify-between p-2 rounded-lg border border-border bg-background hover:bg-accent/50 transition-colors"
               >
                 {(() => {
                   const daysSinceCreation = Math.floor((Date.now() - new Date(session.created_at).getTime()) / (1000 * 60 * 60 * 24));
@@ -1245,13 +1354,13 @@ export default function Sessions() {
                     </div>
                   );
                 })()}
-                <div className="flex items-center gap-4 flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/sessions/${session.id}`)}>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 shrink-0">
-                    <User className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/sessions/${session.id}`)}>
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                    <User className="h-4 w-4 text-primary" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-medium text-foreground truncate">{session.title || 'Untitled Session'}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm font-medium text-foreground truncate">{session.title || 'Untitled Session'}</p>
+                    <p className="text-xs text-muted-foreground">
                       {session.patient?.name || 'Unknown Patient'} • {format(new Date(session.started_at), 'MMM d, yyyy h:mm a')}
                     </p>
                   </div>
