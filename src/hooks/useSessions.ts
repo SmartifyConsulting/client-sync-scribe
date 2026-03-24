@@ -745,6 +745,13 @@ const completeSession = async (
             } as any);
           }
           toast({ title: '🧾 Invoice Created', description: 'Invoice was auto-generated for review' });
+          // Remove duplicate action_point todos for invoices
+          await supabase.from('todos')
+            .delete()
+            .eq('session_id', sessionId!)
+            .eq('user_id', user.id)
+            .neq('task_type', 'document_review')
+            .ilike('title', '%invoice%');
         } catch (invError) {
           console.error('Error creating invoice document:', invError);
         }
