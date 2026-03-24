@@ -177,17 +177,15 @@ const renderFormattedContentForPrint = (content: string): string => {
     const nextLine = lines[i + 1];
     const lineAfterNext = lines[i + 2];
 
-    // Check for: Heading followed directly by underline
     if (nextLine && (/^=+$/.test(nextLine.trim()) || /^-+$/.test(nextLine.trim()))) {
       out.push(`<u><b>${line}</b></u>`);
-      i++; // skip the underline line
+      i++;
       continue;
     }
 
-    // Check for: Heading followed by blank line then underline
     if (nextLine?.trim() === '' && lineAfterNext && (/^=+$/.test(lineAfterNext.trim()) || /^-+$/.test(lineAfterNext.trim()))) {
       out.push(`<u><b>${line}</b></u>`);
-      i += 2; // skip blank line and underline line
+      i += 2;
       continue;
     }
 
@@ -196,17 +194,39 @@ const renderFormattedContentForPrint = (content: string): string => {
 
   const withHeadings = out.join("\n");
 
-  // Escape HTML for safety, but preserve our formatting tags
-  return withHeadings
+  // Extract safe HTML tags into placeholders before escaping
+  const safeTags: string[] = [];
+  const safeTagPattern = /<\/?(h[1-4]|p|div|br|hr|blockquote|b|i|u|strong|em|span|sub|sup|table|thead|tbody|tr|td|th|ul|ol|li)(\s[^>]*)?\/?>/gi;
+  const imgPattern = /<img\s[^>]*\/?>/gi;
+
+  let processed = withHeadings;
+
+  processed = processed.replace(imgPattern, (match) => {
+    const idx = safeTags.length;
+    safeTags.push(match);
+    return `__SAFE_TAG_${idx}__`;
+  });
+
+  processed = processed.replace(safeTagPattern, (match) => {
+    const idx = safeTags.length;
+    safeTags.push(match);
+    return `__SAFE_TAG_${idx}__`;
+  });
+
+  processed = processed
     .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/&lt;b&gt;/g, "<b>")
-    .replace(/&lt;\/b&gt;/g, "</b>")
-    .replace(/&lt;i&gt;/g, "<i>")
-    .replace(/&lt;\/i&gt;/g, "</i>")
-    .replace(/&lt;u&gt;/g, "<u>")
-    .replace(/&lt;\/u&gt;/g, "</u>")
-    .replace(/\n/g, "<br/>");
+    .replace(/>/g, "&gt;");
+
+  for (let i = 0; i < safeTags.length; i++) {
+    processed = processed.replace(`__SAFE_TAG_${i}__`, safeTags[i]);
+  }
+
+  const hasBlockTags = /<(h[1-4]|p|div|table|ul|ol|br|hr)/i.test(processed);
+  if (!hasBlockTags) {
+    processed = processed.replace(/\n/g, "<br/>");
+  }
+
+  return processed;
 };
 
 const loadImage = (url: string): Promise<HTMLImageElement> => {
