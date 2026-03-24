@@ -417,7 +417,10 @@ export function CompactTodoList() {
                     <div className="hidden group-hover:flex gap-0.5">
                       {todo.document_id && (
                         <>
-                          <button onClick={() => navigate(`/documents?view=${todo.document_id}`)} className="text-primary hover:text-primary/80">
+                          <button onClick={() => navigate(`/documents?view=${todo.document_id}`)} className="text-muted-foreground hover:text-foreground" title="Preview">
+                            <Eye className="h-3 w-3" />
+                          </button>
+                          <button onClick={() => navigate(`/documents?view=${todo.document_id}`)} className="text-primary hover:text-primary/80" title="Edit">
                             <FileText className="h-3 w-3" />
                           </button>
                           <button
