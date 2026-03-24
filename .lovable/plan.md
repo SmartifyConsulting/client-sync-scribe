@@ -1,34 +1,83 @@
 
 
-# Fix: Transcription Failing Due to Large Base64 Payload Timeout
+# Multi-Feature Update: Voice Default, Layout Fixes, Transcription Retention, Doctor-Only Multi-Criteria Ratings
 
-## Root Cause
+## 1. Default Narration Voice to "Shimmer"
+**Files:** `src/pages/MyPractice.tsx` (lines 269, 318), `src/components/dashboard/TodaysBriefing.tsx` (line 330)
+- Change all `"nova"` fallbacks to `"shimmer"`
 
-The audio is sent as base64 inside a JSON body to the edge function. For a session with Shannon, the base64 string was 2.5MB. The `supabase.functions.invoke` call timed out after ~3 minutes (`TypeError: Failed to fetch`). The edge function booted but never logged any processing, confirming the request body never arrived or was rejected.
+## 2. Widen Practice Frames
+**File:** `src/pages/MyPractice.tsx` (line 587)
+- Remove `max-w-3xl` from `<TabsContent value="practice">` so frames match tab bar width
 
-## Solution: Use Storage URL Instead of Base64
+## 3. Remove Vertical Scroll on Additional Languages
+**File:** `src/pages/MyPractice.tsx` (line 642)
+- Remove `max-h-[5.5rem] overflow-y-auto`, keep `flex flex-wrap gap-1.5 justify-center`
 
-The audio is **already uploaded to storage** before transcription (line 105). Instead of converting the blob to base64 and sending it inline, pass the storage URL to the edge function. The edge function then downloads the file from storage directly (server-to-server, fast) and sends it to Whisper.
+## 4. "End Session" Tip for Practitioners
+**File:** `src/pages/Sessions.tsx` (after line 831)
+- Add tip below recording status: "Say 'End Session' to automatically stop recording"
+- Detection already works via `endPhrases` array
 
-### File: `src/hooks/useAudioRecording.ts`
+## 5. Move Session Notes/Drawing Pad to Left
+**File:** `src/pages/Sessions.tsx` (line 785)
+- Change grid to `lg:grid-cols-[1fr_300px]`, swap children so Notes are left, Recording Panel right
 
-**In `mediaRecorder.onstop`:** Reorder so storage upload happens first, then pass `storageUrl` to `transcribeAudio` instead of the blob.
+## 6. Fix "T" Cut Off in Session Notes
+**File:** `src/components/sessions/SessionNotepad.tsx` (line 36)
+- Change textarea from `p-0` to `p-2`
 
-**In `transcribeAudio`:** Change signature to accept either a blob or a URL. When a storage URL is available, send `{ audioUrl, patientName, doctorName, language }` instead of `{ audio: base64, ... }`. Fall back to base64 for short recordings without a sessionId.
+## 7. Transcription Auto-Delete After 7 Days + Download
+**File:** `supabase/functions/remind-audio-retention/index.ts`
+- Also null out `transcript` and `notes` for sessions older than 7 days (keep `summary`, `action_points`)
 
-### File: `supabase/functions/transcribe-audio/index.ts`
+**File:** `src/pages/Sessions.tsx`
+- Update retention alert text to mention transcriptions
+- Add download button per session for transcript (`.txt` file)
 
-**Accept `audioUrl` as an alternative to `audio`:**
-- If `audioUrl` is provided, fetch the file from storage using `fetch(audioUrl)` to get the binary data
-- If `audio` (base64) is provided, use the existing `processBase64Chunks` logic
-- Either way, create the FormData blob and send to Whisper as before
+**File:** `src/pages/SessionDetail.tsx`
+- Add download buttons for transcript and recording
 
-This eliminates the 2.5MB+ JSON payload, replacing it with a tiny JSON body (~200 bytes) containing the URL. The edge function downloads the audio server-side with no timeout risk.
+## 8. Multi-Criteria Doctor Rating (Patients Are NOT Rated)
+
+### Database Migration
+```sql
+ALTER TABLE public.visit_ratings
+  ADD COLUMN IF NOT EXISTS communication_rating smallint,
+  ADD COLUMN IF NOT EXISTS expertise_rating smallint,
+  ADD COLUMN IF NOT EXISTS professionalism_rating smallint;
+```
+
+### File: `src/components/sessions/StarRatingDialog.tsx`
+- Only show multi-criteria when `raterRole === "patient"` (patient rating a doctor):
+  - Communication (1-5 stars)
+  - Expertise (1-5 stars)
+  - Professionalism (1-5 stars)
+- Overall `rating` = average of 3 criteria
+- Store individual values in the new columns
+- When `raterRole === "doctor"` (doctor rating visit): keep the existing single overall star rating (no criteria breakdown for patients). Moolas still awarded to patient based on single rating.
+
+### File: `src/pages/Dashboard.tsx` (doctor dashboard)
+- Extend rating query to fetch `communication_rating`, `expertise_rating`, `professionalism_rating`
+- Display breakdown (Communication, Expertise, Professionalism averages) under the overall rating stat card
+
+### Patient Dashboard — No Rating Card
+- Patients are not rated, so no rating display is added to `PatientDashboard.tsx`
+- Shannon's existing ratings (from doctor → patient) remain as simple single-star visit ratings with moola rewards but no criteria breakdown
+
+---
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/hooks/useAudioRecording.ts` | Pass storage URL to transcribeAudio instead of base64 blob |
-| `supabase/functions/transcribe-audio/index.ts` | Accept `audioUrl` param, fetch audio from storage server-side |
+| `src/pages/MyPractice.tsx` | Default voice shimmer, remove max-w-3xl, remove scroll on languages |
+| `src/components/dashboard/TodaysBriefing.tsx` | Default voice shimmer |
+| `src/pages/Sessions.tsx` | Swap grid columns, add end-session tip, update retention text, add transcript download |
+| `src/components/sessions/SessionNotepad.tsx` | Fix textarea padding |
+| `src/components/sessions/StarRatingDialog.tsx` | Multi-criteria for doctor ratings only; single star for patient ratings |
+| `src/pages/Dashboard.tsx` | Doctor rating breakdown display |
+| `src/pages/SessionDetail.tsx` | Add transcript/recording download buttons |
+| `supabase/functions/remind-audio-retention/index.ts` | Add transcript auto-delete |
+| Migration | Add `communication_rating`, `expertise_rating`, `professionalism_rating` columns |
 
