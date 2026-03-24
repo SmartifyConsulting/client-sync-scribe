@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
+import { useTemplateWithHeaderFooter } from "@/hooks/useTemplateWithHeaderFooter";
 
 interface MedicationConflict {
   type: "drug-drug" | "drug-allergy";
@@ -69,6 +70,7 @@ export function PrescriptionEditor({
 }: PrescriptionEditorProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
+  const { formattedContent: savedTemplate, headerFooter } = useTemplateWithHeaderFooter("Prescription");
   const doctorName = propDoctorName || profile?.full_name || "Doctor";
   
   const [medications, setMedications] = useState<MedicationItem[]>([
@@ -118,7 +120,7 @@ export function PrescriptionEditor({
       })
       .join('\n\n');
 
-    return `PRESCRIPTION
+    const prescriptionBody = `PRESCRIPTION
 
 Date: ${new Date().toLocaleDateString()}
 Patient: ${patientName}
@@ -137,6 +139,20 @@ Follow-up: As directed by physician.
 
 Signature: ___________________
            ${doctorName}`;
+
+    // If we have a saved template with header/footer, use it as wrapper
+    if (savedTemplate) {
+      return savedTemplate
+        .replace(/\[DATE\]/g, new Date().toLocaleDateString())
+        .replace(/\[PrescriptionDate\]/g, new Date().toLocaleDateString())
+        .replace(/\[PATIENT_NAME\]/g, patientName)
+        .replace(/\[PatientName\]/g, patientName)
+        .replace(/\[DOCTOR_NAME\]/g, doctorName)
+        .replace(/\[DoctorName\]/g, doctorName)
+        .replace(/\[PRESCRIPTION_CONTENT\]/g, prescriptionBody);
+    }
+
+    return prescriptionBody;
   };
 
   // Check for medication conflicts
@@ -322,6 +338,8 @@ Signature: ___________________
         title="Prescription"
         subtitle={`Patient: ${patientName}`}
         content={generateContent()}
+        logoUrl={profile?.logo_url || headerFooter?.header?.center?.imageUrl || undefined}
+        fontFamily={headerFooter?.font_family || undefined}
         onClose={() => setShowPreview(false)}
       />
     );
