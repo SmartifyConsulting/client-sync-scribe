@@ -886,7 +886,22 @@ export default function Sessions() {
                 </div>
                 <div className="max-h-[120px] overflow-y-auto bg-muted/30 rounded p-2">
                   {transcript ? (
-                    <p className="text-xs text-foreground whitespace-pre-wrap leading-relaxed">{transcript}</p>
+                    <div className="space-y-0.5">
+                      {transcript.split('\n').map((line, index) => {
+                        const colonIndex = line.indexOf(':');
+                        if (colonIndex > 0 && colonIndex < 50) {
+                          const speaker = line.substring(0, colonIndex);
+                          const text = line.substring(colonIndex + 1);
+                          const isDoctor = speaker.toLowerCase().includes('dr') || speaker.toLowerCase().includes('doctor');
+                          return (
+                            <p key={index} className={`text-xs leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
+                              <span className="font-bold">{speaker}</span>:{text}
+                            </p>
+                          );
+                        }
+                        return line.trim() ? <p key={index} className="text-xs text-foreground leading-relaxed">{line}</p> : null;
+                      })}
+                    </div>
                   ) : (
                     <p className="text-xs text-muted-foreground italic">Transcribing...</p>
                   )}
