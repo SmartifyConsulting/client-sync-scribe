@@ -316,7 +316,7 @@ export default function CalendarView() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-foreground">Time *</label>
+                  <Label>Time *</Label>
                   <Input
                     type="time"
                     value={newAppointment.time}
