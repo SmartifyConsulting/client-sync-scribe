@@ -1100,7 +1100,7 @@ export default function Sessions() {
                   else if (selectedDocType === 'hospital_admission') setShowHospitalAdmissionEditor(true);
                 }}
               >
-                <Plus className="h-4 w-4 mr-1" />
+                <FileText className="h-4 w-4 mr-1" />
                 Create
               </Button>
             </div>
