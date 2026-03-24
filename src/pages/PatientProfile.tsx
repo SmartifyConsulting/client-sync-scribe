@@ -572,6 +572,15 @@ export default function PatientProfile() {
             >
               <FilePlus className="h-5 w-5" />
             </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-12 w-12 rounded-xl"
+              title="Compare Images"
+              onClick={() => setShowCompareDialog(true)}
+            >
+              <GitCompareArrows className="h-5 w-5" />
+            </Button>
           </div>
           <div className="rounded-2xl bg-card shadow-card overflow-hidden">
             {(() => {
