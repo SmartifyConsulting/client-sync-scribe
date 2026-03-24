@@ -1318,7 +1318,7 @@ export default function Sessions() {
         ) : sessions.filter(s => s.status !== 'in_progress').length === 0 ? (
           <p className="text-muted-foreground text-center py-8">No sessions recorded yet.</p>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-1.5">
             {sessions.filter(s => s.status !== 'in_progress').map((session) => (
               <div
                 key={session.id}
