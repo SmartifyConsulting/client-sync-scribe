@@ -103,6 +103,7 @@ Your task is to analyze the session transcript or notes and provide:
    - **Prescription**: If medications are prescribed or discussed for the patient, extract medication details.
    - **Invoice / Billing**: If billing, fees, or invoice amounts are discussed, extract the details.
    - **Referral Letter**: If a referral to another specialist or doctor is discussed, extract the details.
+   - **Patient Tasks / Exercises**: If exercises, homework, lifestyle changes, or daily tasks are assigned to the patient, extract each task with title, description, frequency, and suggested moolas reward (1-5).
 
 IMPORTANT GUIDELINES:
 - Actually read and analyze the transcript content thoroughly
