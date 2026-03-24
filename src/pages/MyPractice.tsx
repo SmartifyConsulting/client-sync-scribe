@@ -844,8 +844,8 @@ export default function MyPractice() {
               className="gap-2 text-xs mt-2"
               onClick={async () => {
                 try {
-                  const sampleText = "Good morning, Doctor. You have 5 appointments scheduled for today, including 2 follow-ups and 1 new patient consultation.";
-                  const voice = profile?.narration_voice || "nova";
+                  const sampleText = "Welcome to Holarch Health - your 360 degree healthcare holarchy";
+                  const voice = localVoice;
                   const session = await supabase.auth.getSession();
                   const token = session.data.session?.access_token;
                   if (!token) throw new Error("Not authenticated");
