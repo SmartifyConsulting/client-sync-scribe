@@ -12,6 +12,7 @@ import {
   Sparkles,
   Send,
   FileText,
+  Eye,
   ShieldCheck,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
