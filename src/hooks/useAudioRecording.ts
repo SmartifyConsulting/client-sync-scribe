@@ -145,7 +145,7 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
     }
   }, [isRecording]);
 
-  const transcribeAudio = async (audioBlob: Blob) => {
+  const transcribeAudio = async (audioBlob: Blob, storageUrl?: string | null) => {
     setIsTranscribing(true);
     
     try {
@@ -155,27 +155,40 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
         console.warn('Token refresh failed, proceeding with existing token:', refreshError.message);
       }
 
-      // Convert blob to base64
-      const reader = new FileReader();
-      const base64Promise = new Promise<string>((resolve, reject) => {
-        reader.onloadend = () => {
-          const base64 = (reader.result as string).split(',')[1];
-          resolve(base64);
+      let body: Record<string, unknown>;
+
+      if (storageUrl) {
+        // Send storage URL instead of large base64 payload
+        console.log('Sending audio storage URL for transcription');
+        body = {
+          audioUrl: storageUrl,
+          patientName: optionsRef.current.patientName,
+          doctorName: optionsRef.current.doctorName,
+          language: optionsRef.current.language,
         };
-        reader.onerror = reject;
-      });
-      reader.readAsDataURL(audioBlob);
-      const base64Audio = await base64Promise;
-
-      console.log('Sending audio for transcription, size:', base64Audio.length);
-
-      const { data, error } = await supabase.functions.invoke('transcribe-audio', {
-        body: { 
+      } else {
+        // Fallback: convert blob to base64 for short recordings without storage
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve, reject) => {
+          reader.onloadend = () => {
+            const base64 = (reader.result as string).split(',')[1];
+            resolve(base64);
+          };
+          reader.onerror = reject;
+        });
+        reader.readAsDataURL(audioBlob);
+        const base64Audio = await base64Promise;
+        console.log('Sending audio as base64 for transcription, size:', base64Audio.length);
+        body = {
           audio: base64Audio,
           patientName: optionsRef.current.patientName,
           doctorName: optionsRef.current.doctorName,
           language: optionsRef.current.language,
-        },
+        };
+      }
+
+      const { data, error } = await supabase.functions.invoke('transcribe-audio', {
+        body,
       });
 
       if (error) {

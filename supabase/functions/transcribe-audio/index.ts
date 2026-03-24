@@ -125,11 +125,11 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const { audio, patientName, doctorName, language } = await req.json();
+    const { audio, audioUrl, patientName, doctorName, language } = await req.json();
     
-    if (!audio) {
-      console.error('No audio data provided');
-      throw new Error('No audio data provided');
+    if (!audio && !audioUrl) {
+      console.error('No audio data or URL provided');
+      throw new Error('No audio data or URL provided');
     }
 
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
@@ -142,17 +142,28 @@ serve(async (req) => {
     const patient = patientName || 'Patient';
     const doctor = doctorName || 'Doctor';
 
-    console.log('Processing audio data, length:', audio.length);
-
-    // Process audio in chunks
-    const binaryAudio = processBase64Chunks(audio);
-    console.log('Binary audio size:', binaryAudio.length);
-    
-    // Prepare form data
+    // Prepare form data - get audio from URL or base64
     const formData = new FormData();
-    const arrayBuffer = binaryAudio.buffer.slice(binaryAudio.byteOffset, binaryAudio.byteOffset + binaryAudio.byteLength) as ArrayBuffer;
-    const blob = new Blob([arrayBuffer], { type: 'audio/webm' });
-    formData.append('file', blob, 'audio.webm');
+    
+    if (audioUrl) {
+      // Download audio from storage URL (server-to-server, fast)
+      console.log('Fetching audio from storage URL:', audioUrl);
+      const audioResponse = await fetch(audioUrl);
+      if (!audioResponse.ok) {
+        throw new Error(`Failed to fetch audio from storage: ${audioResponse.status}`);
+      }
+      const audioBlob = await audioResponse.blob();
+      console.log('Downloaded audio blob size:', audioBlob.size);
+      formData.append('file', audioBlob, 'audio.webm');
+    } else {
+      // Process base64 audio (fallback for short recordings)
+      console.log('Processing base64 audio data, length:', audio.length);
+      const binaryAudio = processBase64Chunks(audio);
+      console.log('Binary audio size:', binaryAudio.length);
+      const arrayBuffer = binaryAudio.buffer.slice(binaryAudio.byteOffset, binaryAudio.byteOffset + binaryAudio.byteLength) as ArrayBuffer;
+      const blob = new Blob([arrayBuffer], { type: 'audio/webm' });
+      formData.append('file', blob, 'audio.webm');
+    }
     formData.append('model', 'whisper-1');
     formData.append('response_format', 'verbose_json');
     formData.append('timestamp_granularities[]', 'segment');
