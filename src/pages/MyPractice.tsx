@@ -514,6 +514,21 @@ export default function MyPractice() {
     else { toast({ title: "Email updated", description: "A confirmation email has been sent" }); setIsEditingEmail(false); }
   };
 
+  const [searchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab");
+
+  if (activeTab === "roundtables") {
+    return (
+      <div className="space-y-4 animate-fade-in">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">My Round Tables</h1>
+          <p className="text-muted-foreground text-[12px]">View round table discussions you've contributed to</p>
+        </div>
+        <DoctorRoundTables />
+      </div>
+    );
+  }
+
   // ── RENDER ──
   return (
     <div className="space-y-4 animate-fade-in">
