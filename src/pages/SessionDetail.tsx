@@ -556,14 +556,27 @@ export default function SessionDetail() {
       {/* Transcription */}
       {session.transcript && (
         <div className="rounded-xl border border-primary bg-card p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
-              <Mic className="h-5 w-5 text-blue-600" />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
+                <Mic className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-foreground">Full Transcription</h2>
+                <p className="text-xs text-muted-foreground">Voice recording transcript</p>
+              </div>
             </div>
-            <div>
-              <h2 className="font-semibold text-foreground">Full Transcription</h2>
-              <p className="text-xs text-muted-foreground">Voice recording transcript</p>
-            </div>
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => {
+              const blob = new Blob([session.transcript || ''], { type: 'text/plain' });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = `transcript-${format(new Date(session.started_at), 'yyyy-MM-dd')}.txt`;
+              link.click();
+              URL.revokeObjectURL(url);
+            }}>
+              <Download className="h-3.5 w-3.5" /> Download
+            </Button>
           </div>
           <div className="bg-muted/30 rounded-lg p-4 max-h-[400px] overflow-y-auto space-y-2">
             {session.transcript.split('\n').map((line, index) => {
