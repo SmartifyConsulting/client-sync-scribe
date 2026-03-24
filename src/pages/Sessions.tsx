@@ -968,25 +968,36 @@ export default function Sessions() {
             </div>
           )}
 
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="grid gap-3 lg:grid-cols-3">
             {/* Transcription */}
-            <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <Mic className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold text-foreground">Transcription</h3>
+            <div className="rounded-xl border border-primary bg-card p-3 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <Mic className="h-4 w-4 text-primary" />
+                <h3 className="font-semibold text-sm text-foreground">Transcription</h3>
               </div>
-              <div className="max-h-[250px] overflow-y-auto">
+              <div className="max-h-[150px] overflow-y-auto space-y-1">
                 {transcript ? (
-                  <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">{transcript}</p>
+                  transcript.split('\n').map((line, index) => {
+                    const colonIndex = line.indexOf(':');
+                    if (colonIndex > 0 && colonIndex < 50) {
+                      const speaker = line.substring(0, colonIndex);
+                      const text = line.substring(colonIndex + 1);
+                      const isDoctor = speaker.toLowerCase().includes('dr') || speaker.toLowerCase().includes('doctor');
+                      return (
+                        <p key={index} className={`text-sm leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
+                          <span className="font-bold">{speaker}</span>:{text}
+                        </p>
+                      );
+                    }
+                    return line.trim() ? <p key={index} className="text-sm text-foreground leading-relaxed">{line}</p> : null;
+                  })
                 ) : (
-                  <p className="text-muted-foreground italic">No transcription recorded.</p>
+                  <p className="text-sm text-muted-foreground italic">No transcription recorded.</p>
                 )}
               </div>
-              {/* Audio Playback in completed state */}
               {audioUrl && (
-                <div className="mt-4 pt-4 border-t border-border">
-                  <p className="text-xs text-muted-foreground mb-2">Listen to recording:</p>
-                  <audio controls className="w-full h-10" src={audioUrl}>
+                <div className="mt-2 pt-2 border-t border-border">
+                  <audio controls className="w-full h-8" src={audioUrl}>
                     Your browser does not support audio playback.
                   </audio>
                 </div>
@@ -994,40 +1005,38 @@ export default function Sessions() {
             </div>
 
             {/* Summary */}
-            <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <Sparkles className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold text-foreground">AI Summary</h3>
+            <div className="rounded-xl border border-primary bg-card p-3 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <h3 className="font-semibold text-sm text-foreground">AI Summary</h3>
               </div>
-              <div className="max-h-[250px] overflow-y-auto">
-                <p className="text-muted-foreground leading-relaxed">{summary}</p>
+              <div className="max-h-[150px] overflow-y-auto">
+                <p className="text-sm text-muted-foreground leading-relaxed">{summary}</p>
               </div>
             </div>
 
             {/* Action Points */}
-            <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <AlertCircle className="h-5 w-5 text-warning" />
-                <h3 className="font-semibold text-foreground">Action Points</h3>
+            <div className="rounded-xl border border-primary bg-card p-3 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertCircle className="h-4 w-4 text-warning" />
+                <h3 className="font-semibold text-sm text-foreground">Action Points</h3>
               </div>
-              <div className="max-h-[200px] overflow-y-auto">
+              <div className="max-h-[150px] overflow-y-auto">
                 {actionPoints.length > 0 ? (
-                  <ul className="space-y-3">
+                  <ul className="space-y-1.5">
                     {actionPoints.map((point, index) => (
-                      <li key={index} className="flex items-start gap-3">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-                          {index + 1}
-                        </span>
+                      <li key={index} className="flex items-start gap-2 text-sm">
+                        <CheckCircle className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
                         <span className="text-foreground">{point}</span>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-muted-foreground">No action points generated.</p>
+                  <p className="text-sm text-muted-foreground">No action points generated.</p>
                 )}
               </div>
               {actionPoints.length > 0 && (
-                <div className="mt-4 pt-3 border-t border-border">
+                <div className="mt-2 pt-2 border-t border-border">
                   <p className="text-xs text-green-600 flex items-center gap-1">
                     <CheckCircle className="h-3 w-3" />
                     Added to To-Do List
