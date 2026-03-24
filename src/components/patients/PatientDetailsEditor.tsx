@@ -14,7 +14,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { Patient, Surgery, Pharmacy, FamilyHistoryEntry } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
-import { ShareAppDialog } from "@/components/ShareAppDialog";
+
 import { supabase } from "@/integrations/supabase/client";
 
 const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));

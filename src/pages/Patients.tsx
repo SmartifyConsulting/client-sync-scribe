@@ -44,7 +44,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
-import { ShareAppDialog } from "@/components/ShareAppDialog";
+
 
 export default function Patients({ hideHeader = false }: { hideHeader?: boolean }) {
   const { user } = useAuth();
