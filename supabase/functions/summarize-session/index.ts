@@ -277,6 +277,7 @@ Respond using the provided tool/function schema.`,
       console.log("Invoice detected:", !!result.invoice);
       console.log("Referral detected:", !!result.referral);
       console.log("Hospital admission detected:", !!result.hospital_admission);
+      console.log("Patient tasks detected:", !!result.patient_tasks);
       return new Response(JSON.stringify(result), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
