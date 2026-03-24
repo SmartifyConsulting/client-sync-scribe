@@ -22,6 +22,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { TwoFactorSetup } from "@/components/auth/TwoFactorSetup";
 import { format } from "date-fns";
 import { useSearchParams } from "react-router-dom";
+import { ShareAppDialog } from "@/components/ShareAppDialog";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter,
