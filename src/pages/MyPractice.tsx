@@ -845,19 +845,27 @@ export default function MyPractice() {
                 try {
                   const sampleText = "Good morning, Doctor. You have 5 appointments scheduled for today, including 2 follow-ups and 1 new patient consultation.";
                   const voice = profile?.narration_voice || "nova";
-                  const { data, error } = await supabase.functions.invoke("narrate-briefing", {
-                    body: { text: sampleText, voice },
-                  });
-                  if (error) throw error;
-                  if (data?.audioUrl) {
-                    const audio = new Audio(data.audioUrl);
-                    audio.play();
-                  } else if (data instanceof Blob || (data && typeof data === 'object' && data.size)) {
-                    const url = URL.createObjectURL(data as Blob);
-                    const audio = new Audio(url);
-                    audio.play();
-                    audio.onended = () => URL.revokeObjectURL(url);
-                  }
+                  const session = await supabase.auth.getSession();
+                  const token = session.data.session?.access_token;
+                  if (!token) throw new Error("Not authenticated");
+                  const response = await fetch(
+                    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`,
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                      },
+                      body: JSON.stringify({ text: sampleText, voice }),
+                    }
+                  );
+                  if (!response.ok) throw new Error("Failed to generate audio");
+                  const blob = await response.blob();
+                  const url = URL.createObjectURL(blob);
+                  const audio = new Audio(url);
+                  audio.play();
+                  audio.onended = () => URL.revokeObjectURL(url);
                   toast({ title: "Playing sample voice" });
                 } catch {
                   toast({ title: "Failed to play sample", variant: "destructive" });
