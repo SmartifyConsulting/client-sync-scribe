@@ -757,7 +757,60 @@ const completeSession = async (
         }
       }
 
-      if (visitCategory && patientId) {
+      // Auto-create patient task assignment document if detected
+      if (summaryData?.patient_tasks?.tasks?.length > 0 && patientId) {
+        try {
+          const tasks = summaryData.patient_tasks.tasks;
+          const { data: patientRes } = await supabase.from('patients').select('name').eq('id', patientId).maybeSingle();
+          const patientName = patientRes?.name || 'Patient';
+          const today = new Date().toISOString().split('T')[0];
+
+          const tasksHtml = tasks.map((t: any, i: number) => 
+            `<p><strong>${i + 1}. ${t.title}</strong></p><p>${t.description || ''}</p><p><em>Frequency: ${t.frequency || 'As needed'}</em> | <em>Moolas: ${t.moolas_reward || 1}</em></p><br/>`
+          ).join('');
+          const taskDocContent = `<h2>Patient Task Assignment</h2>
+<p><strong>Date:</strong> ${today}</p>
+<p><strong>Patient:</strong> ${patientName}</p>
+<br/>
+<h3>Assigned Tasks</h3>
+${tasksHtml}`;
+
+          const { data: taskDoc } = await supabase.from('documents').insert({
+            user_id: user.id,
+            patient_id: patientId,
+            name: `Patient Tasks - ${patientName} - ${today}`,
+            content: taskDocContent,
+            template_name: 'Patient Task Assignment',
+            patient_name: patientName,
+            is_draft: true,
+            session_id: sessionId,
+          } as any).select('id').single();
+
+          if (taskDoc) {
+            await supabase.from('todos').insert({
+              user_id: user.id,
+              session_id: sessionId,
+              patient_id: patientId,
+              title: `Review & Send: Patient Tasks - ${patientName}`,
+              document_id: taskDoc.id,
+              task_type: 'document_review',
+              priority: 'high',
+              status: 'pending',
+            } as any);
+          }
+          toast({ title: '📋 Patient Tasks Created', description: 'Patient task assignments were auto-generated for review' });
+          // Remove duplicate action_point todos for exercises/tasks
+          await supabase.from('todos')
+            .delete()
+            .eq('session_id', sessionId!)
+            .eq('user_id', user.id)
+            .neq('task_type', 'document_review')
+            .ilike('title', '%exercise%');
+        } catch (taskError) {
+          console.error('Error creating patient task assignment:', taskError);
+        }
+      }
+
         const { data: configData } = await supabase
           .from('gamification_config')
           .select('lollipops_awarded')
