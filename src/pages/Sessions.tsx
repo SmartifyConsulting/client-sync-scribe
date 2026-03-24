@@ -364,7 +364,7 @@ export default function Sessions() {
       const endPhrases = ['end of session', 'end session', 'that brings us to the end', "we'll end here", 'that concludes', 'end of the session', 'conclude the session'];
       const detectedEnd = endPhrases.some(phrase => lastChunk.includes(phrase));
       
-      if (detectedEnd && !pendingCompletionRef.current && sessionState === 'active') {
+      if (detectedEnd && !pendingCompletionRef.current) {
         console.log("Auto-detected end of session from voice");
         toast({ title: "🎤 Session ending detected", description: "Ending session automatically from voice cue." });
         pendingCompletionRef.current = true;
