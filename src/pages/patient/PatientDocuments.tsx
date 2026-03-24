@@ -47,6 +47,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ImageComparisonDialog } from "@/components/documents/ImageComparisonDialog";
 
 const STORAGE_LIMIT_MB = 100;
 
