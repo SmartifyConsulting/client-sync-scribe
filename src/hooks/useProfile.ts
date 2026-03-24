@@ -21,6 +21,7 @@ export interface Profile {
   auto_email_invoice_to_insurance: boolean | null;
   auto_email_prescription_to_pharmacy: boolean | null;
   auto_email_certificate_to_employer: boolean | null;
+  narration_voice: string | null;
   created_at: string;
   updated_at: string;
 }
