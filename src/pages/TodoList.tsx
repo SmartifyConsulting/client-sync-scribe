@@ -19,6 +19,7 @@ import {
   Send,
   User,
   FileText,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { format, isToday, isYesterday } from "date-fns";
+import { DocumentPreview } from "@/components/sessions/DocumentPreview";
+import { useTemplateWithHeaderFooter } from "@/hooks/useTemplateWithHeaderFooter";
+import { useProfile } from "@/hooks/useProfile";
 
 interface TodoItem {
   id: string;
@@ -89,6 +93,7 @@ function getDateKey(dateStr: string): string {
 export default function TodoList() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { profile } = useProfile();
   const [searchParams, setSearchParams] = useSearchParams();
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,6 +108,59 @@ export default function TodoList() {
   const [filter, setFilter] = useState<"all" | "active" | "completed">("active");
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set());
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<{ content: string; title: string; logoUrl?: string; fontFamily?: string } | null>(null);
+  const [loadingPreview, setLoadingPreview] = useState<string | null>(null);
+
+  const { headerFooter } = useTemplateWithHeaderFooter("General");
+
+  const handlePreviewDoc = async (todo: TodoItem) => {
+    if (!todo.document_id) return;
+    setLoadingPreview(todo.document_id);
+    try {
+      const { data: doc } = await supabase.from('documents').select('*').eq('id', todo.document_id).maybeSingle();
+      if (!doc) throw new Error('Document not found');
+
+      let content = doc.content || '';
+
+      // Apply header/footer from template
+      if (headerFooter) {
+        const formatSection = (s: any) => s?.text || '';
+        const formatLine = (l: any, c: any, r: any) => [formatSection(l), formatSection(c), formatSection(r)].filter(Boolean).join('    ');
+
+        const headerLine = formatLine(headerFooter.header?.left, headerFooter.header?.center, headerFooter.header?.right);
+        const footerLine = formatLine(headerFooter.footer?.left, headerFooter.footer?.center, headerFooter.footer?.right);
+
+        let fullContent = '';
+        if (headerLine) fullContent += headerLine + '\n\n' + '─'.repeat(50) + '\n\n';
+        fullContent += content;
+        if (footerLine) fullContent += '\n\n' + '─'.repeat(50) + '\n\n' + footerLine;
+        content = fullContent;
+      }
+
+      // Replace profile placeholders
+      if (profile) {
+        content = content
+          .replace(/\[PracticeNumber\]/g, profile.practice_number || '[PracticeNumber]')
+          .replace(/\[DoctorNumber\]/g, profile.doctor_number || '[DoctorNumber]')
+          .replace(/\[DoctorName\]/g, profile.full_name || '[DoctorName]')
+          .replace(/\[PracticeAddress\]/g, profile.practice_address || '[PracticeAddress]');
+        if ((profile as any)?.signature_url) {
+          content = content.replace(/\[DoctorSignature\]/g, `<img src="${(profile as any).signature_url}" alt="Signature" style="max-height: 60px;" />`);
+        }
+      }
+
+      setPreviewDoc({
+        content,
+        title: doc.template_name || doc.name || 'Document',
+        logoUrl: profile?.logo_url || undefined,
+        fontFamily: headerFooter?.font_family || undefined,
+      });
+    } catch (err) {
+      toast({ title: 'Preview failed', variant: 'destructive' });
+    } finally {
+      setLoadingPreview(null);
+    }
+  };
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -523,11 +581,14 @@ export default function TodoList() {
                                 {/* Document review actions */}
                                 {todo.document_id && (
                                   <>
-                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => navigate(`/documents?view=${todo.document_id}`)}>
+                                    <Button size="icon" variant="ghost" className="h-8 w-8" title="Preview" onClick={() => handlePreviewDoc(todo)} disabled={loadingPreview === todo.document_id}>
+                                      {loadingPreview === todo.document_id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4 text-primary" />}
+                                    </Button>
+                                    <Button size="icon" variant="ghost" className="h-8 w-8" title="Edit document" onClick={() => navigate(`/documents?view=${todo.document_id}`)}>
                                       <FileText className="h-4 w-4 text-primary" />
                                     </Button>
                                     <Button
-                                      size="icon" variant="ghost"
+                                      size="icon" variant="ghost" title="Approve & Send"
                                       className={cn("h-8 w-8", todo.completed ? "text-muted-foreground" : "text-green-600 hover:text-green-700")}
                                       disabled={todo.completed || sendingDocId === todo.document_id}
                                       onClick={() => handleSendDoc(todo)}
@@ -559,6 +620,17 @@ export default function TodoList() {
       {/* Summary */}
       {todos.length > 0 && (
         <p className="text-sm text-muted-foreground text-center">{completedCount} of {todos.length} tasks completed</p>
+      )}
+
+      {/* Document Preview Modal */}
+      {previewDoc && (
+        <DocumentPreview
+          title={previewDoc.title}
+          content={previewDoc.content}
+          logoUrl={previewDoc.logoUrl}
+          fontFamily={previewDoc.fontFamily}
+          onClose={() => setPreviewDoc(null)}
+        />
       )}
     </div>
   );

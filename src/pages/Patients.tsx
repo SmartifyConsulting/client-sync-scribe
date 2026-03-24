@@ -44,7 +44,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
-import { ShareAppDialog } from "@/components/ShareAppDialog";
+
 
 export default function Patients({ hideHeader = false }: { hideHeader?: boolean }) {
   const { user } = useAuth();
@@ -379,7 +379,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           </div>
         )}
         <div className="flex gap-2 ml-auto">
-          <ShareAppDialog />
+          
           <PatientImportDialog 
             trigger={
               <Button variant="outline" className="gap-2">

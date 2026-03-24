@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Loader2, Check, Camera, Upload, Plus, Trash2, Pencil, X, Phone, Copy,
   Mail, Save, Award, Bold, Italic, UserPlus, ExternalLink, User, Building2,
-  DollarSign, GraduationCap, Stethoscope, Users2,
+  DollarSign, GraduationCap, Stethoscope, Users2, Volume2,
 } from "lucide-react";
 import ReferralDoctors from "@/pages/ReferralDoctors";
 import Patients from "@/pages/Patients";
@@ -822,6 +822,36 @@ export default function MyPractice() {
                 </SelectContent>
               </Select>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 text-xs mt-2"
+              onClick={async () => {
+                try {
+                  const sampleText = "Good morning, Doctor. You have 5 appointments scheduled for today, including 2 follow-ups and 1 new patient consultation.";
+                  const voice = profile?.narration_voice || "nova";
+                  const { data, error } = await supabase.functions.invoke("narrate-briefing", {
+                    body: { text: sampleText, voice },
+                  });
+                  if (error) throw error;
+                  if (data?.audioUrl) {
+                    const audio = new Audio(data.audioUrl);
+                    audio.play();
+                  } else if (data instanceof Blob || (data && typeof data === 'object' && data.size)) {
+                    const url = URL.createObjectURL(data as Blob);
+                    const audio = new Audio(url);
+                    audio.play();
+                    audio.onended = () => URL.revokeObjectURL(url);
+                  }
+                  toast({ title: "Playing sample voice" });
+                } catch {
+                  toast({ title: "Failed to play sample", variant: "destructive" });
+                }
+              }}
+            >
+              <Volume2 className="h-3.5 w-3.5" />
+              Sample Voice
+            </Button>
           </div>
         </TabsContent>
 

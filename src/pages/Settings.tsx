@@ -22,6 +22,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { TwoFactorSetup } from "@/components/auth/TwoFactorSetup";
 import { format } from "date-fns";
 import { useSearchParams } from "react-router-dom";
+import { ShareAppDialog } from "@/components/ShareAppDialog";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter,
@@ -284,6 +285,7 @@ export default function Settings() {
           <h1 className="text-2xl font-bold text-foreground">Settings</h1>
           <p className="text-muted-foreground text-[12px]">Manage your preferences, security, and billing</p>
         </div>
+        <ShareAppDialog />
       </div>
 
       {/* Tabs */}
