@@ -891,31 +891,39 @@ export default function Sessions() {
             </div>
           </div>
 
-           {/* Notes/Drawing Panel - Main Content */}
-           <div className="min-h-[500px] space-y-3">
-             <div className="flex justify-end">
-               <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowDrawingPad(!showDrawingPad)}>
-                 <PenTool className="h-3.5 w-3.5" />
-                 {showDrawingPad ? "Hide Drawing" : "Drawing Pad"}
-               </Button>
-             </div>
-             {showDrawingPad && (
-               <DrawingPad
-                 patientId={patientId || ""}
-                 sessionId={currentSessionId || undefined}
-                 patientName={currentPatient?.name}
-                 onClose={() => setShowDrawingPad(false)}
-               />
-             )}
-             <SessionNotepad
-               patientId={patientId || ""}
-               sessionId={currentSessionId}
-               patientName={currentPatient?.name}
-               notes={notes}
-               onNotesChange={setNotes}
-               isRecording={isRecording}
-             />
-           </div>
+           {/* Notes/Drawing Panel - Tabbed Interface */}
+           <div className="min-h-[500px]">
+              <Tabs defaultValue="notes" className="h-full">
+                <TabsList className="mb-2">
+                  <TabsTrigger value="notes" className="gap-1.5 text-xs">
+                    <FileText className="h-3.5 w-3.5" />
+                    Session Notes
+                  </TabsTrigger>
+                  <TabsTrigger value="drawing" className="gap-1.5 text-xs">
+                    <PenTool className="h-3.5 w-3.5" />
+                    Drawing Pad
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="notes" className="mt-0">
+                  <SessionNotepad
+                    patientId={patientId || ""}
+                    sessionId={currentSessionId}
+                    patientName={currentPatient?.name}
+                    notes={notes}
+                    onNotesChange={setNotes}
+                    isRecording={isRecording}
+                  />
+                </TabsContent>
+                <TabsContent value="drawing" className="mt-0">
+                  <DrawingPad
+                    patientId={patientId || ""}
+                    sessionId={currentSessionId || undefined}
+                    patientName={currentPatient?.name}
+                    onClose={() => {}}
+                  />
+                </TabsContent>
+              </Tabs>
+            </div>
         </div>
       )}
 

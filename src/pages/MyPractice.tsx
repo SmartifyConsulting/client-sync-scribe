@@ -639,7 +639,7 @@ export default function MyPractice() {
               </div>
               <div className="space-y-1.5 col-span-2">
                 <Label>Additional Languages</Label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5 justify-center max-h-[5.5rem] overflow-y-auto">
                   {LANGUAGES.filter(l => l.code !== ((profile as any)?.preferred_language || "en")).map(l => {
                     const selectedLangs: string[] = (profile as any)?.preferred_languages || [];
                     const isSelected = selectedLangs.includes(l.code);
@@ -658,7 +658,7 @@ export default function MyPractice() {
                           await updateProfile({ preferred_languages: updated } as any);
                         }}
                         className={cn(
-                          "rounded-full px-3 py-1 text-xs font-medium border transition-colors",
+                          "rounded-full px-2 py-0.5 text-[11px] font-medium border transition-colors",
                           isSelected ? "bg-primary text-primary-foreground border-primary" : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50"
                         )}
                       >
