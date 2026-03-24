@@ -976,6 +976,12 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
           )}
         </DialogContent>
       </Dialog>
+
+      <ImageComparisonDialog
+        open={showCompareDialog}
+        onOpenChange={setShowCompareDialog}
+        patientId={patientIds[0]}
+      />
     </div>
   );
 }
