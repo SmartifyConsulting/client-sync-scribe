@@ -93,6 +93,7 @@ function getDateKey(dateStr: string): string {
 export default function TodoList() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { profile } = useProfile();
   const [searchParams, setSearchParams] = useSearchParams();
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,6 +108,59 @@ export default function TodoList() {
   const [filter, setFilter] = useState<"all" | "active" | "completed">("active");
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set());
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<{ content: string; title: string; logoUrl?: string; fontFamily?: string } | null>(null);
+  const [loadingPreview, setLoadingPreview] = useState<string | null>(null);
+
+  const { headerFooter } = useTemplateWithHeaderFooter("General");
+
+  const handlePreviewDoc = async (todo: TodoItem) => {
+    if (!todo.document_id) return;
+    setLoadingPreview(todo.document_id);
+    try {
+      const { data: doc } = await supabase.from('documents').select('*').eq('id', todo.document_id).maybeSingle();
+      if (!doc) throw new Error('Document not found');
+
+      let content = doc.content || '';
+
+      // Apply header/footer from template
+      if (headerFooter) {
+        const formatSection = (s: any) => s?.text || '';
+        const formatLine = (l: any, c: any, r: any) => [formatSection(l), formatSection(c), formatSection(r)].filter(Boolean).join('    ');
+
+        const headerLine = formatLine(headerFooter.header?.left, headerFooter.header?.center, headerFooter.header?.right);
+        const footerLine = formatLine(headerFooter.footer?.left, headerFooter.footer?.center, headerFooter.footer?.right);
+
+        let fullContent = '';
+        if (headerLine) fullContent += headerLine + '\n\n' + '─'.repeat(50) + '\n\n';
+        fullContent += content;
+        if (footerLine) fullContent += '\n\n' + '─'.repeat(50) + '\n\n' + footerLine;
+        content = fullContent;
+      }
+
+      // Replace profile placeholders
+      if (profile) {
+        content = content
+          .replace(/\[PracticeNumber\]/g, profile.practice_number || '[PracticeNumber]')
+          .replace(/\[DoctorNumber\]/g, profile.doctor_number || '[DoctorNumber]')
+          .replace(/\[DoctorName\]/g, profile.full_name || '[DoctorName]')
+          .replace(/\[PracticeAddress\]/g, profile.practice_address || '[PracticeAddress]');
+        if ((profile as any)?.signature_url) {
+          content = content.replace(/\[DoctorSignature\]/g, `<img src="${(profile as any).signature_url}" alt="Signature" style="max-height: 60px;" />`);
+        }
+      }
+
+      setPreviewDoc({
+        content,
+        title: doc.template_name || doc.name || 'Document',
+        logoUrl: profile?.logo_url || undefined,
+        fontFamily: headerFooter?.font_family || undefined,
+      });
+    } catch (err) {
+      toast({ title: 'Preview failed', variant: 'destructive' });
+    } finally {
+      setLoadingPreview(null);
+    }
+  };
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
