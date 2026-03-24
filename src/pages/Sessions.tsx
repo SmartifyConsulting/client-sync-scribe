@@ -1459,6 +1459,7 @@ export default function Sessions() {
           patientId={patientId}
           sessionId={currentSessionId || undefined}
           onClose={() => setShowGeneralLetterEditor(false)}
+          onSave={() => setShowGeneralLetterEditor(false)}
         />
       )}
 
