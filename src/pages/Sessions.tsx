@@ -124,7 +124,6 @@ export default function Sessions() {
   const narrationAudioRef = useRef<HTMLAudioElement | null>(null);
   const [doctorLanguage, setDoctorLanguage] = useState<string>("English");
   const [pastPatientSessions, setPastPatientSessions] = useState<any[]>([]);
-  const [showDrawingPad, setShowDrawingPad] = useState(false);
   const savedAudioUrlRef = useRef<string | null>(null);
   const [showVisitCategoryDialog, setShowVisitCategoryDialog] = useState(false);
   const [pendingTranscript, setPendingTranscript] = useState<string>("");
