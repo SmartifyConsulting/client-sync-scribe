@@ -315,7 +315,7 @@ export default function MyPractice() {
       requestAnimationFrame(() => { sigHasInitialized.current = true; sigIsSettingFromProfile.current = false; });
 
       // Sync voice state
-      setLocalVoice((profile as any).narration_voice || "nova");
+      setLocalVoice((profile as any).narration_voice || "shimmer");
     }
   }, [profile]);
 
