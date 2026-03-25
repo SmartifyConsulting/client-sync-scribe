@@ -356,6 +356,19 @@ export default function Sessions() {
     patientName: currentPatient?.name,
     doctorName: doctorName,
     sessionId: currentSessionId || undefined,
+    onEndSessionDetected: () => {
+      console.log("End session detected via Web Speech API");
+      if (!pendingCompletionRef.current) {
+        toast({ title: "🎤 Session ending detected", description: "Ending session automatically from voice cue." });
+        pendingCompletionRef.current = true;
+        setPendingTranscript(latestTranscriptRef.current);
+        setTimeout(() => { if (isRecording) stopRecording(); }, 100);
+        setTimeout(() => {
+          setShowVisitCategoryDialog(true);
+          pendingCompletionRef.current = false;
+        }, 2000);
+      }
+    },
     onTranscriptionComplete: (text) => {
       console.log("=== onTranscriptionComplete ===");
       console.log("text length:", text?.length);
@@ -365,26 +378,7 @@ export default function Sessions() {
       latestTranscriptRef.current = text;
       setNotes(prev => prev ? `${prev}\n\n${text}` : text);
       
-      // Auto-detect end of session phrases
-      const lastChunk = text.slice(-150).toLowerCase();
-      const endPhrases = ['end of session', 'end session', 'that brings us to the end', "we'll end here", 'that concludes', 'end of the session', 'conclude the session', 'end the session', 'session ended'];
-      const detectedEnd = endPhrases.some(phrase => lastChunk.includes(phrase));
-      
-      if (detectedEnd && !pendingCompletionRef.current) {
-        console.log("Auto-detected end of session from voice");
-        toast({ title: "🎤 Session ending detected", description: "Ending session automatically from voice cue." });
-        pendingCompletionRef.current = true;
-        setPendingTranscript(text);
-        setTimeout(() => { if (isRecording) stopRecording(); }, 100);
-        // Show visit category dialog after a brief delay to allow recording to finalize
-        setTimeout(() => {
-          setShowVisitCategoryDialog(true);
-          pendingCompletionRef.current = false;
-        }, 2000);
-        return;
-      }
-      
-      // If pending completion, show visit category dialog
+      // If pending completion (from voice detection), show visit category dialog
       if (pendingCompletionRef.current) {
         console.log("Pending completion - showing visit category dialog");
         setPendingTranscript(text);
