@@ -126,6 +126,48 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
 
       mediaRecorder.start(1000);
       setIsRecording(true);
+      endSessionDetectedRef.current = false;
+      
+      // Start Web Speech API for real-time "End Session" detection
+      try {
+        const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognitionAPI) {
+          const recognition = new SpeechRecognitionAPI();
+          recognition.continuous = true;
+          recognition.interimResults = true;
+          recognition.lang = 'en-US';
+          
+          const endPhrases = ['end session', 'end of session', 'end the session', 'conclude the session', 'session ended'];
+          
+          recognition.onresult = (event: SpeechRecognitionEvent) => {
+            if (endSessionDetectedRef.current) return;
+            const last = event.results[event.results.length - 1];
+            const text = last[0].transcript.toLowerCase().trim();
+            if (endPhrases.some(phrase => text.includes(phrase))) {
+              endSessionDetectedRef.current = true;
+              console.log('End session detected via Web Speech API:', text);
+              optionsRef.current.onEndSessionDetected?.();
+              recognition.stop();
+            }
+          };
+          
+          recognition.onerror = (e) => {
+            console.warn('SpeechRecognition error:', e);
+          };
+          
+          recognition.onend = () => {
+            // Restart if still recording and not ended
+            if (!endSessionDetectedRef.current && mediaRecorderRef.current?.state === 'recording') {
+              try { recognition.start(); } catch {} 
+            }
+          };
+          
+          recognition.start();
+          speechRecognitionRef.current = recognition;
+        }
+      } catch (err) {
+        console.warn('Web Speech API not available:', err);
+      }
       
       toast({
         title: "Recording Started",
