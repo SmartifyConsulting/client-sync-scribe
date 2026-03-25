@@ -340,6 +340,7 @@ Signature: ___________________
         content={generateContent()}
         logoUrl={profile?.logo_url || headerFooter?.header?.center?.imageUrl || undefined}
         fontFamily={headerFooter?.font_family || undefined}
+        headerFooter={headerFooter}
         onClose={() => setShowPreview(false)}
       />
     );

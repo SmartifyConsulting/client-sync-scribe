@@ -154,6 +154,8 @@ export function ReferralLetterEditor({
         subtitle={`Patient: ${patientName}`}
         content={generateContent()}
         logoUrl={profile?.logo_url || undefined}
+        fontFamily={headerFooter?.font_family || undefined}
+        headerFooter={headerFooter}
         onClose={() => setShowPreview(false)}
       />
     );
