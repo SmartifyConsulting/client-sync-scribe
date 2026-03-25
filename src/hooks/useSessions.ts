@@ -448,7 +448,7 @@ const completeSession = async (
               rxContent += `\n${medsList}`;
             } else {
               const medsHtml = (medications.length > 0 ? medications : [{ medication: rx.medication, dosage: rx.dosage, frequency: rx.frequency, instructions: rx.instructions }])
-                .map((m: any) => `<tr><td>${m.medication || m.name || ''}</td><td>${m.dosage || ''}</td><td>${m.frequency || ''}</td><td>${m.instructions || ''}</td></tr>`)
+                .map((m: any) => `<tr><td>${m.medication || m.name || ''}</td><td>${m.dosage || ''}</td><td>${m.frequency || ''}</td><td>${m.instructions || ''}</td><td>${m.repeats || ''}</td></tr>`)
                 .join('');
               rxContent = `<h2>Prescription</h2>
 <p><strong>Date:</strong> ${today}</p>
@@ -456,7 +456,7 @@ const completeSession = async (
 <p><strong>Doctor:</strong> ${docProfile?.full_name || ''}</p>
 <p><strong>Practice Number:</strong> ${docProfile?.practice_number || ''}</p>
 <br/>
-<table><thead><tr><th>Medication</th><th>Dosage</th><th>Frequency</th><th>Instructions</th></tr></thead><tbody>${medsHtml}</tbody></table>`;
+<table><thead><tr><th>Medication</th><th>Dosage</th><th>Frequency</th><th>Instructions</th><th>Repeats</th></tr></thead><tbody>${medsHtml}</tbody></table>`;
             }
 
             const { data: rxDoc } = await supabase.from('documents').insert({

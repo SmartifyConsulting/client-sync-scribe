@@ -141,7 +141,7 @@ export default function Documentation() {
         <CardHeader>
           <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
             <div>
-              <CardTitle>All Documents</CardTitle>
+              <CardTitle>Patient Documents</CardTitle>
               <CardDescription>Your complete documentation history</CardDescription>
             </div>
             <div className="flex gap-2">

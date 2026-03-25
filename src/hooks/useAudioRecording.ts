@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 interface UseAudioRecordingOptions {
   onTranscriptionComplete?: (text: string) => void;
   onAudioSaved?: (audioUrl: string) => void;
+  onEndSessionDetected?: () => void;
   patientName?: string;
   doctorName?: string;
   sessionId?: string;
@@ -23,6 +24,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
+  const speechRecognitionRef = useRef<SpeechRecognition | null>(null);
+  const endSessionDetectedRef = useRef(false);
   
   // Use refs to always have latest options
   const optionsRef = useRef(options);
@@ -123,6 +126,48 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
 
       mediaRecorder.start(1000);
       setIsRecording(true);
+      endSessionDetectedRef.current = false;
+      
+      // Start Web Speech API for real-time "End Session" detection
+      try {
+        const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognitionAPI) {
+          const recognition = new SpeechRecognitionAPI();
+          recognition.continuous = true;
+          recognition.interimResults = true;
+          recognition.lang = 'en-US';
+          
+          const endPhrases = ['end session', 'end of session', 'end the session', 'conclude the session', 'session ended'];
+          
+          recognition.onresult = (event: SpeechRecognitionEvent) => {
+            if (endSessionDetectedRef.current) return;
+            const last = event.results[event.results.length - 1];
+            const text = last[0].transcript.toLowerCase().trim();
+            if (endPhrases.some(phrase => text.includes(phrase))) {
+              endSessionDetectedRef.current = true;
+              console.log('End session detected via Web Speech API:', text);
+              optionsRef.current.onEndSessionDetected?.();
+              recognition.stop();
+            }
+          };
+          
+          recognition.onerror = (e) => {
+            console.warn('SpeechRecognition error:', e);
+          };
+          
+          recognition.onend = () => {
+            // Restart if still recording and not ended
+            if (!endSessionDetectedRef.current && mediaRecorderRef.current?.state === 'recording') {
+              try { recognition.start(); } catch {} 
+            }
+          };
+          
+          recognition.start();
+          speechRecognitionRef.current = recognition;
+        }
+      } catch (err) {
+        console.warn('Web Speech API not available:', err);
+      }
       
       toast({
         title: "Recording Started",
@@ -142,6 +187,11 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      // Stop speech recognition
+      if (speechRecognitionRef.current) {
+        try { speechRecognitionRef.current.stop(); } catch {}
+        speechRecognitionRef.current = null;
+      }
     }
   }, [isRecording]);
 

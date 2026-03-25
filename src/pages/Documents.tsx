@@ -610,7 +610,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
       {/* All Documents Section */}
       <div>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">All Documents</h2>
+          <h2 className="text-lg font-semibold text-foreground">Patient Documents</h2>
           <div className="relative max-w-xs">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input

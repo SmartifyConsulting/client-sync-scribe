@@ -58,9 +58,18 @@ export function MedicalCertificateEditor({
   const practiceAddress = profile?.practice_address || "";
   const doctorNumber = profile?.doctor_number || "";
   
-  const [leavePeriod, setLeavePeriod] = useState("");
+  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
   const [medicalReason, setMedicalReason] = useState("");
   const [examinationDate, setExaminationDate] = useState(new Date().toISOString().split('T')[0]);
+
+  const computeLeavePeriod = () => {
+    if (!startDate || !endDate) return "";
+    const s = new Date(startDate);
+    const e = new Date(endDate);
+    const days = Math.max(1, Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+    return `${days} day${days > 1 ? 's' : ''} (${s.toLocaleDateString('en-ZA', { month: 'short', day: 'numeric' })} - ${e.toLocaleDateString('en-ZA', { month: 'short', day: 'numeric', year: 'numeric' })})`;
+  };
   const [isSaving, setIsSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
@@ -80,16 +89,16 @@ export function MedicalCertificateEditor({
       .replace(/\[DOCTOR_NUMBER\]/g, doctorNumber)
       .replace(/\[DoctorNumber\]/g, doctorNumber)
       .replace("[CERTIFICATE_CONTENT]", medicalReason)
-      .replace("[LEAVE_PERIOD]", leavePeriod)
+      .replace("[LEAVE_PERIOD]", computeLeavePeriod())
       .replace(/\[ConsultationDate\]/g, new Date(examinationDate).toLocaleDateString())
       .replace(/\[ConsultationTime\]/g, new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   };
 
   const handleSave = async () => {
-    if (!leavePeriod.trim() || !medicalReason.trim()) {
+    if (!startDate || !endDate || !medicalReason.trim()) {
       toast({
         title: "Missing Information",
-        description: "Please fill in the medical reason and period of leave",
+        description: "Please fill in the medical reason, start date and end date",
         variant: "destructive",
       });
       return;
@@ -214,15 +223,29 @@ export function MedicalCertificateEditor({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="leave-period">Period of Leave *</Label>
-            <Input
-              id="leave-period"
-              value={leavePeriod}
-              onChange={(e) => setLeavePeriod(e.target.value)}
-              placeholder="e.g., 3 days (Dec 11 - Dec 13, 2025)"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="start-date">Leave Start Date *</Label>
+              <Input
+                id="start-date"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="end-date">Leave End Date *</Label>
+              <Input
+                id="end-date"
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </div>
           </div>
+          {startDate && endDate && (
+            <p className="text-[12px] text-muted-foreground">Period: {computeLeavePeriod()}</p>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="medical-reason">Medical Reason *</Label>
