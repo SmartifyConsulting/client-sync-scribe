@@ -556,7 +556,7 @@ export default function SessionDetail() {
                 const speaker = line.substring(0, colonIndex);
                 const text = line.substring(colonIndex + 1);
                 const speakerLower = speaker.toLowerCase().trim();
-                const isDoctor = speakerLower.includes('dr') || speakerLower.includes('doctor') || (session.user_id && speakerLower.length > 2);
+                const isDoctor = speakerLower.includes('dr') || speakerLower.includes('doctor') || (doctorName && speakerLower.includes(doctorName.toLowerCase()));
                 
                   return (
                    <p key={index} className={`leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
