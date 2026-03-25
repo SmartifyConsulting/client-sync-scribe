@@ -24,6 +24,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
+  const speechRecognitionRef = useRef<SpeechRecognition | null>(null);
+  const endSessionDetectedRef = useRef(false);
   
   // Use refs to always have latest options
   const optionsRef = useRef(options);
