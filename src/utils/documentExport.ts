@@ -151,8 +151,9 @@ export const printDocument = (content: string, title: string, logoUrl?: string, 
       </style>
     </head>
     <body>
-      ${logoUrl ? `<img src="${logoUrl}" class="logo" alt="Logo" />` : ''}
+      ${headerFooter?.header ? renderHeaderFooterHtml(headerFooter.header) + '<hr style="border:none;border-top:1px solid #ccc;margin:12px 0;" />' : logoUrl ? `<img src="${logoUrl}" class="logo" alt="Logo" />` : ''}
       <div class="document-content">${formattedContent}</div>
+      ${headerFooter?.footer ? '<hr style="border:none;border-top:1px solid #ccc;margin:12px 0;" />' + renderHeaderFooterHtml(headerFooter.footer) : ''}
       <script>
         window.onload = function() {
           setTimeout(function() {
