@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 interface UseAudioRecordingOptions {
   onTranscriptionComplete?: (text: string) => void;
   onAudioSaved?: (audioUrl: string) => void;
+  onEndSessionDetected?: () => void;
   patientName?: string;
   doctorName?: string;
   sessionId?: string;
