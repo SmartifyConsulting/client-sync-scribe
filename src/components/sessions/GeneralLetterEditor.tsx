@@ -45,7 +45,7 @@ export function GeneralLetterEditor({
 }: GeneralLetterEditorProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
-  const { formattedContent: savedTemplate, isLoading: templateLoading } = useTemplateWithHeaderFooter("General");
+  const { formattedContent: savedTemplate, headerFooter, isLoading: templateLoading } = useTemplateWithHeaderFooter("General");
   
   const doctorName = profile?.full_name || "Doctor";
   const practiceNumber = profile?.practice_number || "";

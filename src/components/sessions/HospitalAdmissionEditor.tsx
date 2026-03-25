@@ -227,7 +227,7 @@ export function HospitalAdmissionEditor({
 }: HospitalAdmissionEditorProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
-  const { formattedContent: savedTemplate, isLoading: templateLoading } =
+  const { formattedContent: savedTemplate, headerFooter, isLoading: templateLoading } =
     useTemplateWithHeaderFooter("Hospital Admission Form");
 
   const doctorName = profile?.full_name || "Doctor";

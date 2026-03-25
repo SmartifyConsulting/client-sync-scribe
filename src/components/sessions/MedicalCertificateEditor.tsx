@@ -51,7 +51,7 @@ export function MedicalCertificateEditor({
 }: MedicalCertificateEditorProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
-  const { formattedContent: savedTemplate, isLoading: templateLoading } = useTemplateWithHeaderFooter("Medical Certificate");
+  const { formattedContent: savedTemplate, headerFooter, isLoading: templateLoading } = useTemplateWithHeaderFooter("Medical Certificate");
   
   const doctorName = profile?.full_name || "Doctor";
   const practiceNumber = profile?.practice_number || "";
