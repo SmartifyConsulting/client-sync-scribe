@@ -573,7 +573,7 @@ export default function TodoList() {
                                       <FileText className="h-4 w-4 text-primary" />
                                     </Button>
                                     <Button
-                                      size="icon" variant="ghost" title="Approve & Send"
+                                      size="icon" variant="ghost" title="Approve & Save"
                                       className={cn("h-8 w-8", todo.completed ? "text-muted-foreground" : "text-green-600 hover:text-green-700")}
                                       disabled={todo.completed || sendingDocId === todo.document_id}
                                       onClick={() => handleSendDoc(todo)}

@@ -693,15 +693,23 @@ export default function CalendarView() {
                     <label className="text-sm font-medium text-foreground">Type</label>
                     <Select
                       value={editedEvent.type}
-                      onValueChange={(value: "session" | "internal" | "followup") => setEditedEvent({ ...editedEvent, type: value })}
+                      onValueChange={(value: string) => setEditedEvent({ ...editedEvent, type: value as any })}
                     >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="session">Session</SelectItem>
-                        <SelectItem value="followup">Follow-up</SelectItem>
-                        <SelectItem value="internal">Internal Meeting</SelectItem>
+                        {serviceColors.length > 0 ? (
+                          serviceColors.map((sc) => (
+                            <SelectItem key={sc.service_name} value={sc.service_name}>{sc.service_name}</SelectItem>
+                          ))
+                        ) : (
+                          <>
+                            <SelectItem value="session">Session</SelectItem>
+                            <SelectItem value="followup">Follow-up</SelectItem>
+                            <SelectItem value="internal">Internal Meeting</SelectItem>
+                          </>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>

@@ -987,7 +987,7 @@ export default function MyPractice() {
                         <div>
                           <div className="flex items-center gap-2">
                             <p className="font-medium text-sm text-foreground">{service.service_name}</p>
-                            {(service as any).is_first_consultation && <Badge variant="secondary" className="text-xs">1st Consult</Badge>}
+                            
                           </div>
                           <p className="text-xs text-muted-foreground">{getCurrencySymbol(service.currency)} {Number(service.default_price).toFixed(2)}</p>
                         </div>

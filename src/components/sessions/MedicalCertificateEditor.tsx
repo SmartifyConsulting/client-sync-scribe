@@ -223,15 +223,29 @@ export function MedicalCertificateEditor({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="leave-period">Period of Leave *</Label>
-            <Input
-              id="leave-period"
-              value={leavePeriod}
-              onChange={(e) => setLeavePeriod(e.target.value)}
-              placeholder="e.g., 3 days (Dec 11 - Dec 13, 2025)"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="start-date">Leave Start Date *</Label>
+              <Input
+                id="start-date"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="end-date">Leave End Date *</Label>
+              <Input
+                id="end-date"
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </div>
           </div>
+          {startDate && endDate && (
+            <p className="text-[12px] text-muted-foreground">Period: {computeLeavePeriod()}</p>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="medical-reason">Medical Reason *</Label>

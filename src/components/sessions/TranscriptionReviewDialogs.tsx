@@ -98,7 +98,7 @@ export function MedCertReviewDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>Skip</Button>
           <Button onClick={() => onApprove(formData)} disabled={loading}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-            Approve & Send
+            Approve & Save
           </Button>
         </DialogFooter>
       </DialogContent>
