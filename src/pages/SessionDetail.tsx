@@ -91,6 +91,14 @@ export default function SessionDetail() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [sessionDocs, setSessionDocs] = useState<any[]>([]);
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
+  const [doctorName, setDoctorName] = useState<string>("");
+
+  // Fetch doctor name
+  useEffect(() => {
+    if (!session?.user_id) return;
+    supabase.from('profiles').select('full_name').eq('id', session.user_id).maybeSingle()
+      .then(({ data }) => { if (data?.full_name) setDoctorName(data.full_name); });
+  }, [session?.user_id]);
 
   // Fetch session documents
   useEffect(() => {
