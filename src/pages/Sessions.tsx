@@ -374,9 +374,18 @@ export default function Sessions() {
       console.log("text length:", text?.length);
       console.log("pendingCompletionRef:", pendingCompletionRef.current);
       
-      // Store transcript
+      // Store transcript — set directly, don't append (hook already returns full text)
       latestTranscriptRef.current = text;
-      setNotes(prev => prev ? `${prev}\n\n${text}` : text);
+      setNotes(text);
+      
+      // Whisper fallback: check transcript for end session phrases
+      const endPhrases = ['end session', 'end of session', 'end the session', 'conclude the session', 'session ended'];
+      if (!pendingCompletionRef.current && isRecording && endPhrases.some(phrase => text.toLowerCase().includes(phrase))) {
+        console.log('End session detected via Whisper transcript fallback');
+        pendingCompletionRef.current = true;
+        stopRecording();
+        toast({ title: "Session Ending", description: "End session detected in transcript" });
+      }
       
       // If pending completion (from voice detection), show visit category dialog
       if (pendingCompletionRef.current) {
