@@ -1012,7 +1012,8 @@ export default function Sessions() {
                     if (colonIndex > 0 && colonIndex < 50) {
                       const speaker = line.substring(0, colonIndex);
                       const text = line.substring(colonIndex + 1);
-                      const isDoctor = speaker.toLowerCase().includes('dr') || speaker.toLowerCase().includes('doctor');
+                      const speakerLower = speaker.toLowerCase().trim();
+                      const isDoctor = speakerLower.includes('dr') || speakerLower.includes('doctor') || (doctorName && speakerLower.includes(doctorName.toLowerCase()));
                       return (
                         <p key={index} className={`text-sm leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
                           <span className="font-bold">{speaker}</span>:{text}
