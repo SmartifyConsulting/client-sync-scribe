@@ -53,38 +53,12 @@ export function useTemplateWithHeaderFooter(templateName: string): CombinedTempl
       headerFooter = headerFooterTemplates.find(hf => hf.is_default) || null;
     }
 
-    // Build the formatted content with header and footer
+    // Build the formatted content — body only (header/footer rendered separately by DocumentPreview)
     let formattedContent = "";
-
-    if (headerFooter) {
-      // Add header
-      const headerLine = formatHeaderFooterLine(
-        headerFooter.header.left,
-        headerFooter.header.center,
-        headerFooter.header.right
-      );
-      if (headerLine) {
-        formattedContent += headerLine + "\n\n";
-        formattedContent += "─".repeat(50) + "\n\n";
-      }
-    }
 
     // Add main content (or use template content if available)
     if (template) {
       formattedContent += template.content;
-    }
-
-    if (headerFooter) {
-      // Add footer
-      const footerLine = formatHeaderFooterLine(
-        headerFooter.footer.left,
-        headerFooter.footer.center,
-        headerFooter.footer.right
-      );
-      if (footerLine) {
-        formattedContent += "\n\n" + "─".repeat(50) + "\n\n";
-        formattedContent += footerLine;
-      }
     }
 
     // Replace profile placeholders

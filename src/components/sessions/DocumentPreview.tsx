@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { printDocument } from "@/utils/documentExport";
+import { HeaderFooterTemplate } from "@/hooks/useHeaderFooterTemplates";
 
 const normalizeHeadingMarkup = (content: string): string => {
   const normalized = content.replace(/\r\n/g, "\n");
@@ -18,17 +19,15 @@ const normalizeHeadingMarkup = (content: string): string => {
     const nextLine = lines[i + 1];
     const lineAfterNext = lines[i + 2];
 
-    // Check for: Heading followed directly by underline
     if (nextLine && (/^=+$/.test(nextLine.trim()) || /^-+$/.test(nextLine.trim()))) {
       out.push(`<u><b>${line}</b></u>`);
-      i++; // skip the underline line
+      i++;
       continue;
     }
 
-    // Check for: Heading followed by blank line then underline
     if (nextLine?.trim() === '' && lineAfterNext && (/^=+$/.test(lineAfterNext.trim()) || /^-+$/.test(lineAfterNext.trim()))) {
       out.push(`<u><b>${line}</b></u>`);
-      i += 2; // skip blank line and underline line
+      i += 2;
       continue;
     }
 
@@ -41,38 +40,32 @@ const normalizeHeadingMarkup = (content: string): string => {
 const renderFormattedContent = (content: string): string => {
   const withHeadings = normalizeHeadingMarkup(content);
 
-  // Extract safe HTML tags into placeholders before escaping
   const safeTags: string[] = [];
   const safeTagPattern = /<\/?(h[1-4]|p|div|br|hr|blockquote|b|i|u|strong|em|span|sub|sup|table|thead|tbody|tr|td|th|ul|ol|li)(\s[^>]*)?\/?>/gi;
   const imgPattern = /<img\s[^>]*\/?>/gi;
 
   let processed = withHeadings;
 
-  // Preserve img tags (with attributes)
   processed = processed.replace(imgPattern, (match) => {
     const idx = safeTags.length;
     safeTags.push(match);
     return `__SAFE_TAG_${idx}__`;
   });
 
-  // Preserve other safe tags
   processed = processed.replace(safeTagPattern, (match) => {
     const idx = safeTags.length;
     safeTags.push(match);
     return `__SAFE_TAG_${idx}__`;
   });
 
-  // Escape remaining content
   processed = processed
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 
-  // Restore safe tags
   for (let i = 0; i < safeTags.length; i++) {
     processed = processed.replace(`__SAFE_TAG_${i}__`, safeTags[i]);
   }
 
-  // Convert newlines to <br/> only if content doesn't already use block-level HTML
   const hasBlockTags = /<(h[1-4]|p|div|table|ul|ol|br|hr)/i.test(processed);
   if (!hasBlockTags) {
     processed = processed.replace(/\n/g, "<br/>");
@@ -80,12 +73,38 @@ const renderFormattedContent = (content: string): string => {
 
   return processed;
 };
+
+function renderHeaderFooterSection(section: { left: { text: string; alignment: string; imageUrl?: string }; center: { text: string; alignment: string; imageUrl?: string }; right: { text: string; alignment: string; imageUrl?: string } }, fontFamily?: string) {
+  const hasContent = section.left?.text || section.center?.text || section.right?.text || section.left?.imageUrl || section.center?.imageUrl || section.right?.imageUrl;
+  if (!hasContent) return null;
+
+  const renderCell = (cell: { text: string; alignment: string; imageUrl?: string }, align: string) => (
+    <div style={{ textAlign: align as any }}>
+      {cell.imageUrl && <img src={cell.imageUrl} alt="" style={{ maxHeight: '50px', objectFit: 'contain', marginBottom: '4px' }} />}
+      {cell.text && (
+        <div style={{ whiteSpace: 'pre-wrap', fontSize: '9pt', lineHeight: '1.4', fontFamily: fontFamily || 'system-ui' }}>
+          {cell.text}
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%' }}>
+      {renderCell(section.left, 'left')}
+      {renderCell(section.center, 'center')}
+      {renderCell(section.right, 'right')}
+    </div>
+  );
+}
+
 interface DocumentPreviewProps {
   title: string;
   subtitle?: string;
   content: string;
   logoUrl?: string;
   fontFamily?: string;
+  headerFooter?: HeaderFooterTemplate | null;
   onClose: () => void;
 }
 
@@ -95,6 +114,7 @@ export function DocumentPreview({
   content,
   logoUrl,
   fontFamily,
+  headerFooter,
   onClose,
 }: DocumentPreviewProps) {
   const { toast } = useToast();
@@ -104,7 +124,7 @@ export function DocumentPreview({
   const [isSending, setIsSending] = useState(false);
 
   const handlePrint = () => {
-    printDocument(content, title, logoUrl, fontFamily);
+    printDocument(content, title, logoUrl, fontFamily, headerFooter || undefined);
   };
 
   const handleSendEmail = async () => {
@@ -179,14 +199,18 @@ export function DocumentPreview({
               fontFamily: fontFamily || "system-ui, -apple-system, sans-serif",
             }}
           >
-            {/* Logo */}
-            {logoUrl && (
+            {/* Structured Header */}
+            {headerFooter?.header && renderHeaderFooterSection(headerFooter.header, fontFamily || headerFooter.font_family || undefined) && (
+              <div style={{ marginBottom: '16px' }}>
+                {renderHeaderFooterSection(headerFooter.header, fontFamily || headerFooter.font_family || undefined)}
+                <hr style={{ border: 'none', borderTop: '1px solid #ccc', margin: '12px 0' }} />
+              </div>
+            )}
+
+            {/* Logo (fallback if no header template) */}
+            {!headerFooter?.header && logoUrl && (
               <div className="mb-6">
-                <img 
-                  src={logoUrl} 
-                  alt="Logo" 
-                  className="max-h-16 object-contain"
-                />
+                <img src={logoUrl} alt="Logo" className="max-h-16 object-contain" />
               </div>
             )}
             
@@ -199,6 +223,14 @@ export function DocumentPreview({
               }}
               dangerouslySetInnerHTML={{ __html: renderFormattedContent(content) }}
             />
+
+            {/* Structured Footer */}
+            {headerFooter?.footer && renderHeaderFooterSection(headerFooter.footer, fontFamily || headerFooter.font_family || undefined) && (
+              <div style={{ marginTop: '24px' }}>
+                <hr style={{ border: 'none', borderTop: '1px solid #ccc', margin: '12px 0' }} />
+                {renderHeaderFooterSection(headerFooter.footer, fontFamily || headerFooter.font_family || undefined)}
+              </div>
+            )}
           </div>
         </div>
 

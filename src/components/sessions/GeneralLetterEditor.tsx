@@ -45,7 +45,7 @@ export function GeneralLetterEditor({
 }: GeneralLetterEditorProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
-  const { formattedContent: savedTemplate, isLoading: templateLoading } = useTemplateWithHeaderFooter("General");
+  const { formattedContent: savedTemplate, headerFooter, isLoading: templateLoading } = useTemplateWithHeaderFooter("General");
   
   const doctorName = profile?.full_name || "Doctor";
   const practiceNumber = profile?.practice_number || "";
@@ -133,6 +133,8 @@ export function GeneralLetterEditor({
         subtitle={`Patient: ${patientName}`}
         content={generateContent()}
         logoUrl={profile?.logo_url || undefined}
+        fontFamily={headerFooter?.font_family || undefined}
+        headerFooter={headerFooter}
         onClose={() => setShowPreview(false)}
       />
     );

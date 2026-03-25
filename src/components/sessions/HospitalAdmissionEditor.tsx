@@ -227,7 +227,7 @@ export function HospitalAdmissionEditor({
 }: HospitalAdmissionEditorProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
-  const { formattedContent: savedTemplate, isLoading: templateLoading } =
+  const { formattedContent: savedTemplate, headerFooter, isLoading: templateLoading } =
     useTemplateWithHeaderFooter("Hospital Admission Form");
 
   const doctorName = profile?.full_name || "Doctor";
@@ -441,6 +441,8 @@ export function HospitalAdmissionEditor({
         subtitle={`Patient: ${patientName}`}
         content={generateContent()}
         logoUrl={profile?.logo_url || undefined}
+        fontFamily={headerFooter?.font_family || undefined}
+        headerFooter={headerFooter}
         onClose={() => setShowPreview(false)}
       />
     );

@@ -57,7 +57,7 @@ export function ReferralLetterEditor({
 }: ReferralLetterEditorProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
-  const { formattedContent: savedTemplate, isLoading: templateLoading } = useTemplateWithHeaderFooter("Referral Letter");
+  const { formattedContent: savedTemplate, headerFooter, isLoading: templateLoading } = useTemplateWithHeaderFooter("Referral Letter");
   
   const doctorName = profile?.full_name || "Doctor";
   const practiceNumber = profile?.practice_number || "";
@@ -154,6 +154,8 @@ export function ReferralLetterEditor({
         subtitle={`Patient: ${patientName}`}
         content={generateContent()}
         logoUrl={profile?.logo_url || undefined}
+        fontFamily={headerFooter?.font_family || undefined}
+        headerFooter={headerFooter}
         onClose={() => setShowPreview(false)}
       />
     );
