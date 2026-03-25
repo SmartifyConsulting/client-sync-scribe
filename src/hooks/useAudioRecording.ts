@@ -251,13 +251,10 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
 
       const transcribedText = data?.text || '';
       
-      // Append to existing transcript and call callback with latest ref
-      setTranscript(prev => {
-        const newTranscript = prev ? `${prev}\n\n${transcribedText}` : transcribedText;
-        console.log('Calling onTranscriptionComplete with text length:', newTranscript.length);
-        optionsRef.current.onTranscriptionComplete?.(newTranscript);
-        return newTranscript;
-      });
+      // Set transcript directly (no append — each transcription is the full result)
+      setTranscript(transcribedText);
+      console.log('Calling onTranscriptionComplete with text length:', transcribedText.length);
+      optionsRef.current.onTranscriptionComplete?.(transcribedText);
 
       toast({
         title: "Transcription Complete",

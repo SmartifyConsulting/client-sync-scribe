@@ -91,6 +91,14 @@ export default function SessionDetail() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [sessionDocs, setSessionDocs] = useState<any[]>([]);
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
+  const [doctorName, setDoctorName] = useState<string>("");
+
+  // Fetch doctor name
+  useEffect(() => {
+    if (!session?.user_id) return;
+    supabase.from('profiles').select('full_name').eq('id', session.user_id).maybeSingle()
+      .then(({ data }) => { if (data?.full_name) setDoctorName(data.full_name); });
+  }, [session?.user_id]);
 
   // Fetch session documents
   useEffect(() => {
@@ -547,7 +555,8 @@ export default function SessionDetail() {
               if (colonIndex > 0 && colonIndex < 50) {
                 const speaker = line.substring(0, colonIndex);
                 const text = line.substring(colonIndex + 1);
-                const isDoctor = speaker.toLowerCase().includes('dr') || speaker.toLowerCase().includes('doctor');
+                const speakerLower = speaker.toLowerCase().trim();
+                const isDoctor = speakerLower.includes('dr') || speakerLower.includes('doctor') || (doctorName && speakerLower.includes(doctorName.toLowerCase()));
                 
                   return (
                    <p key={index} className={`leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
