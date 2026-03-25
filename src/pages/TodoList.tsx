@@ -122,21 +122,6 @@ export default function TodoList() {
 
       let content = doc.content || '';
 
-      // Apply header/footer from template
-      if (headerFooter) {
-        const formatSection = (s: any) => s?.text || '';
-        const formatLine = (l: any, c: any, r: any) => [formatSection(l), formatSection(c), formatSection(r)].filter(Boolean).join('    ');
-
-        const headerLine = formatLine(headerFooter.header?.left, headerFooter.header?.center, headerFooter.header?.right);
-        const footerLine = formatLine(headerFooter.footer?.left, headerFooter.footer?.center, headerFooter.footer?.right);
-
-        let fullContent = '';
-        if (headerLine) fullContent += headerLine + '\n\n' + '─'.repeat(50) + '\n\n';
-        fullContent += content;
-        if (footerLine) fullContent += '\n\n' + '─'.repeat(50) + '\n\n' + footerLine;
-        content = fullContent;
-      }
-
       // Replace profile placeholders
       if (profile) {
         content = content
