@@ -231,7 +231,6 @@ export function DocumentPreview({
                 {renderHeaderFooterSection(headerFooter.footer, fontFamily || headerFooter.font_family || undefined)}
               </div>
             )}
-            />
           </div>
         </div>
 
