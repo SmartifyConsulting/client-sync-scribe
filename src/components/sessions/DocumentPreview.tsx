@@ -124,7 +124,7 @@ export function DocumentPreview({
   const [isSending, setIsSending] = useState(false);
 
   const handlePrint = () => {
-    printDocument(content, title, logoUrl, fontFamily);
+    printDocument(content, title, logoUrl, fontFamily, headerFooter || undefined);
   };
 
   const handleSendEmail = async () => {
