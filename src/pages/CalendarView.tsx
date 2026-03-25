@@ -44,7 +44,7 @@ interface CalendarEvent {
   title: string;
   time: string;
   day: number;
-  type: "session" | "internal" | "followup";
+  type: string;
   patientId?: string;
   notes?: string;
   location?: string;
