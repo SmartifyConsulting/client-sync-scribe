@@ -89,7 +89,7 @@ export function MedicalCertificateEditor({
       .replace(/\[DOCTOR_NUMBER\]/g, doctorNumber)
       .replace(/\[DoctorNumber\]/g, doctorNumber)
       .replace("[CERTIFICATE_CONTENT]", medicalReason)
-      .replace("[LEAVE_PERIOD]", leavePeriod)
+      .replace("[LEAVE_PERIOD]", computeLeavePeriod())
       .replace(/\[ConsultationDate\]/g, new Date(examinationDate).toLocaleDateString())
       .replace(/\[ConsultationTime\]/g, new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   };
