@@ -187,6 +187,11 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      // Stop speech recognition
+      if (speechRecognitionRef.current) {
+        try { speechRecognitionRef.current.stop(); } catch {}
+        speechRecognitionRef.current = null;
+      }
     }
   }, [isRecording]);
 
