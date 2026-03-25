@@ -58,9 +58,18 @@ export function MedicalCertificateEditor({
   const practiceAddress = profile?.practice_address || "";
   const doctorNumber = profile?.doctor_number || "";
   
-  const [leavePeriod, setLeavePeriod] = useState("");
+  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
   const [medicalReason, setMedicalReason] = useState("");
   const [examinationDate, setExaminationDate] = useState(new Date().toISOString().split('T')[0]);
+
+  const computeLeavePeriod = () => {
+    if (!startDate || !endDate) return "";
+    const s = new Date(startDate);
+    const e = new Date(endDate);
+    const days = Math.max(1, Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+    return `${days} day${days > 1 ? 's' : ''} (${s.toLocaleDateString('en-ZA', { month: 'short', day: 'numeric' })} - ${e.toLocaleDateString('en-ZA', { month: 'short', day: 'numeric', year: 'numeric' })})`;
+  };
   const [isSaving, setIsSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
