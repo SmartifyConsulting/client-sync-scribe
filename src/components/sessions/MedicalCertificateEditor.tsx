@@ -95,7 +95,7 @@ export function MedicalCertificateEditor({
   };
 
   const handleSave = async () => {
-    if (!leavePeriod.trim() || !medicalReason.trim()) {
+    if (!startDate || !endDate || !medicalReason.trim()) {
       toast({
         title: "Missing Information",
         description: "Please fill in the medical reason and period of leave",
