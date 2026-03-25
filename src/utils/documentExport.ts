@@ -168,6 +168,16 @@ export const printDocument = (content: string, title: string, logoUrl?: string, 
   printWindow.document.close();
 };
 
+const renderHeaderFooterHtml = (section: { left: { text: string; imageUrl?: string }; center: { text: string; imageUrl?: string }; right: { text: string; imageUrl?: string } }): string => {
+  const renderCell = (cell: { text: string; imageUrl?: string }, align: string) => {
+    let html = '';
+    if (cell.imageUrl) html += `<img src="${cell.imageUrl}" style="max-height:50px;object-fit:contain;margin-bottom:4px;" />`;
+    if (cell.text) html += `<div style="white-space:pre-wrap;font-size:9pt;line-height:1.4;">${cell.text}</div>`;
+    return `<td style="text-align:${align};vertical-align:top;width:33%;padding:4px;">${html}</td>`;
+  };
+  return `<table style="width:100%;border-collapse:collapse;"><tr>${renderCell(section.left, 'left')}${renderCell(section.center, 'center')}${renderCell(section.right, 'right')}</tr></table>`;
+};
+
 const renderFormattedContentForPrint = (content: string): string => {
   const normalized = content.replace(/\r\n/g, "\n");
   const lines = normalized.split("\n");
