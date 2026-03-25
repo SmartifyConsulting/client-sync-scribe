@@ -1,83 +1,97 @@
 
 
-# Fix: Document Preview Should Render Header/Footer as 3-Column Layout
+# Seven Fixes: Med Cert Dates, Button Labels, Rx Repeats, Template Rename, Calendar Services, Pricing Badge, End Session Voice
 
-## Problem
-The header/footer template system stores left, center, and right columns — matching the uploaded image (doctor details left, practice name center, contact right). However, the `useTemplateWithHeaderFooter` hook and all preview code joins these 3 sections into a single plain-text line with spaces (`parts.join("    ")`), destroying the columnar layout. The `DocumentPreview` component has no concept of structured header/footer sections — it just receives a flat string.
+## 1. Medical Certificate: Auto-Detect Start/End Dates
 
-The user sees raw text instead of the professional 3-column letterhead shown in their uploaded image.
+The AI already extracts `start_date` and `end_date` from transcripts (line 152-153 of `summarize-session/index.ts`). The auto-created certificate uses `cert.from_date` and `cert.to_date` (line 546 of `useSessions.ts`). But the `MedicalCertificateEditor` only has a single `examinationDate` and a free-text `leavePeriod` — no structured start/end date fields.
 
-## Solution
-Pass structured header/footer data to `DocumentPreview` and render it as a proper 3-column HTML grid, matching the layout in the `HeaderFooterTemplateForm` preview (which already uses `grid grid-cols-3`).
+**File:** `src/components/sessions/MedicalCertificateEditor.tsx`
+- Replace `leavePeriod` (text input) with `startDate` and `endDate` (date inputs)
+- Auto-calculate display: "3 days (Dec 11 - Dec 13, 2025)"
+- When opening from a session context, pre-populate dates from the AI-extracted `from_date`/`to_date`
 
-### 1. Update `DocumentPreview` Props & Rendering
+**File:** `src/hooks/useSessions.ts` (line 546)
+- Already passes `cert.from_date` / `cert.to_date` into the auto-generated content — ensure the editor receives these when opened from a todo
 
-**File:** `src/components/sessions/DocumentPreview.tsx`
-- Add optional `headerFooter` prop (the `HeaderFooterTemplate` object)
-- Before the main content `dangerouslySetInnerHTML`, render header as a 3-column grid:
-  - Left column: left-aligned text (doctor names, MP numbers)
-  - Center column: center-aligned text (practice name, address)
-  - Right column: right-aligned text (contact details)
-  - Horizontal rule below
-- After main content, render footer the same way (with rule above)
-- Support `imageUrl` in each section (for logos)
+## 2. Medical Certificate Button: "Approve & Send" → "Approve & Save"
 
-### 2. Update `useTemplateWithHeaderFooter` Return
+**File:** `src/components/sessions/TranscriptionReviewDialogs.tsx` (line 101)
+- Change `Approve & Send` to `Approve & Save`
 
-**File:** `src/hooks/useTemplateWithHeaderFooter.ts`
-- Stop embedding header/footer text into `formattedContent` — the formatted string should contain only the document body content (template content with placeholders replaced)
-- The `headerFooter` object is already returned; consumers will use it directly
+**File:** `src/pages/TodoList.tsx` (line 576)
+- Change tooltip `Approve & Send` to `Approve & Save`
 
-### 3. Update All Consumers to Pass `headerFooter` to `DocumentPreview`
+## 3. Prescription Repeats: AI Auto-Population
 
-**Files:** All places that render `DocumentPreview` and currently prepend/append header/footer text:
-- `src/pages/TodoList.tsx` (line 126-137): Remove the text-join logic, pass `headerFooter` prop instead
-- `src/components/dashboard/CompactTodoList.tsx`: Same fix
-- `src/components/sessions/InvoiceEditor.tsx`: Pass `headerFooter` to `DocumentPreview`
-- `src/components/sessions/PrescriptionEditor.tsx`: Pass `headerFooter`
-- `src/components/sessions/ReferralLetterEditor.tsx`: Pass `headerFooter`
-- `src/components/sessions/MedicalCertificateEditor.tsx`: Pass `headerFooter`
-- `src/components/sessions/GeneralLetterEditor.tsx`: Pass `headerFooter`
-- `src/components/sessions/HospitalAdmissionEditor.tsx`: Pass `headerFooter`
+The `MedicationItem` interface already has `repeats: string` (line 49 of `PrescriptionEditor.tsx`), and the UI for repeats exists. The AI schema in `summarize-session/index.ts` does NOT include a `repeats` field in the medication items.
 
-### 4. Update Print Export
+**File:** `supabase/functions/summarize-session/index.ts` (line 166-173)
+- Add `repeats` property to medication item schema: `{ type: "string", description: "Number of repeats or repeat instructions if mentioned" }`
 
-**File:** `src/utils/documentExport.ts`
-- Update `printDocument` to accept `headerFooter` object
-- Render header/footer as 3-column HTML table in the print layout (matching the preview)
+**File:** `src/hooks/useSessions.ts` (line 446-451)
+- Include `repeats` in auto-generated prescription table: add a Repeats column to the HTML table
 
-## Layout Structure (matching uploaded image)
+## 4. Rename "All Documents" → "Patient Documents" Under Templates Tab
 
-```text
-┌──────────────────┬──────────────────┬──────────────────┐
-│ Dr. D. Allie:    │ BORDER ORTHO...  │ CONTACT DETAILS: │
-│ MP 0409820       │ ADDRESS: Room... │ Practice Contact │
-│ [Cell: ...]      │ Royal Buffalo... │ Number:          │
-│ Dr. K. Daniel... │ Amalinda Avenue  │ 0434220461       │
-│                  │ East London 5201 │                  │
-├──────────────────┴──────────────────┴──────────────────┤
-│                                                        │
-│              Document content appears here             │
-│                                                        │
-├────────────────────────────────────────────────────────┤
-│              REGISTRATION NO.:                         │
-│              2022/414807/21                             │
-└────────────────────────────────────────────────────────┘
-```
+**File:** `src/pages/Documents.tsx` (line 613)
+- Change `All Documents` to `Patient Documents`
+
+**File:** `src/pages/patient/PrescriptionHistory.tsx` (line 144)
+- Change `All Documents` to `Patient Documents`
+
+## 5. Calendar "Schedule New Appointment" — Replace Type with Services
+
+Currently the Type dropdown has 3 hardcoded options: Session, Follow-up, Internal Meeting. Replace with the doctor's service_prices list.
+
+**File:** `src/pages/CalendarView.tsx` (lines 91-101, 327-341, 685-698)
+- Fetch `service_prices` with `id, service_name, color` (already fetching for colors)
+- Replace the hardcoded `<SelectItem>` options with dynamically loaded services from `service_prices`
+- Store the service name as the `type` field, or add a `service_id` to the appointment
+- Also update the edit dialog (lines 685-698) to use the same service list
+
+## 6. Remove First Consult Badge from Pricing
+
+**File:** `src/pages/MyPractice.tsx` (line 990)
+- Remove the `{(service as any).is_first_consultation && <Badge>}` rendering
+- Keep the toggle button (line 1004-1010) for setting first consult — just remove the visible badge from the list
+
+## 7. Fix "End Session" Voice Detection
+
+**Root cause:** The recording uses `mediaRecorder.start(1000)` which collects chunks every second, but transcription only happens in `onstop` — AFTER the recording ends. So the `endPhrases` check in `onTranscriptionComplete` only runs once the user has already stopped recording manually.
+
+**Solution:** Add the Web Speech API (`SpeechRecognition`) as a lightweight parallel listener during recording. It runs in the browser, requires no API calls, and can detect "end session" in near real-time.
+
+**File:** `src/hooks/useAudioRecording.ts`
+- In `startRecording`, if `window.SpeechRecognition || window.webkitSpeechRecognition` is available, start a `SpeechRecognition` instance alongside the MediaRecorder
+- Set `continuous = true`, `interimResults = true`
+- In `onresult`, check if the recognized text contains end phrases
+- If detected, call a new `onEndSessionDetected` callback
+- Stop the SpeechRecognition when recording stops
+
+**File:** `src/pages/Sessions.tsx`
+- Add `onEndSessionDetected` callback to `useAudioRecording` options
+- In the callback: toast, set pending, stop recording, show visit category dialog after delay
+
+**File:** `src/vite-env.d.ts`
+- Add `SpeechRecognition` and `webkitSpeechRecognition` type declarations
+
+---
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/components/sessions/DocumentPreview.tsx` | Add `headerFooter` prop, render 3-column header/footer grid |
-| `src/hooks/useTemplateWithHeaderFooter.ts` | Remove header/footer from `formattedContent` string |
-| `src/utils/documentExport.ts` | Add 3-column header/footer to print layout |
-| `src/pages/TodoList.tsx` | Pass `headerFooter` to DocumentPreview instead of text-joining |
-| `src/components/dashboard/CompactTodoList.tsx` | Same |
-| `src/components/sessions/InvoiceEditor.tsx` | Pass `headerFooter` prop |
-| `src/components/sessions/PrescriptionEditor.tsx` | Pass `headerFooter` prop |
-| `src/components/sessions/ReferralLetterEditor.tsx` | Pass `headerFooter` prop |
-| `src/components/sessions/MedicalCertificateEditor.tsx` | Pass `headerFooter` prop |
-| `src/components/sessions/GeneralLetterEditor.tsx` | Pass `headerFooter` prop |
-| `src/components/sessions/HospitalAdmissionEditor.tsx` | Pass `headerFooter` prop |
+| `src/components/sessions/MedicalCertificateEditor.tsx` | Replace text leavePeriod with startDate/endDate date pickers |
+| `src/components/sessions/TranscriptionReviewDialogs.tsx` | "Approve & Send" → "Approve & Save" |
+| `src/pages/TodoList.tsx` | Tooltip "Approve & Send" → "Approve & Save" |
+| `supabase/functions/summarize-session/index.ts` | Add `repeats` to prescription medication schema |
+| `src/hooks/useSessions.ts` | Include repeats in auto-generated prescription HTML |
+| `src/pages/Documents.tsx` | "All Documents" → "Patient Documents" |
+| `src/pages/patient/PrescriptionHistory.tsx` | "All Documents" → "Patient Documents" |
+| `src/pages/CalendarView.tsx` | Replace hardcoded Type options with service_prices list |
+| `src/pages/MyPractice.tsx` | Remove first consult badge from pricing list |
+| `src/hooks/useAudioRecording.ts` | Add Web Speech API for live "End Session" detection |
+| `src/pages/Sessions.tsx` | Add `onEndSessionDetected` callback |
+| `src/vite-env.d.ts` | Add SpeechRecognition type declarations |
 
