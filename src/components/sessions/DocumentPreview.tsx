@@ -199,14 +199,18 @@ export function DocumentPreview({
               fontFamily: fontFamily || "system-ui, -apple-system, sans-serif",
             }}
           >
-            {/* Logo */}
-            {logoUrl && (
+            {/* Structured Header */}
+            {headerFooter?.header && renderHeaderFooterSection(headerFooter.header, fontFamily || headerFooter.font_family || undefined) && (
+              <div style={{ marginBottom: '16px' }}>
+                {renderHeaderFooterSection(headerFooter.header, fontFamily || headerFooter.font_family || undefined)}
+                <hr style={{ border: 'none', borderTop: '1px solid #ccc', margin: '12px 0' }} />
+              </div>
+            )}
+
+            {/* Logo (fallback if no header template) */}
+            {!headerFooter?.header && logoUrl && (
               <div className="mb-6">
-                <img 
-                  src={logoUrl} 
-                  alt="Logo" 
-                  className="max-h-16 object-contain"
-                />
+                <img src={logoUrl} alt="Logo" className="max-h-16 object-contain" />
               </div>
             )}
             
@@ -218,6 +222,15 @@ export function DocumentPreview({
                 fontSize: "12pt",
               }}
               dangerouslySetInnerHTML={{ __html: renderFormattedContent(content) }}
+            />
+
+            {/* Structured Footer */}
+            {headerFooter?.footer && renderHeaderFooterSection(headerFooter.footer, fontFamily || headerFooter.font_family || undefined) && (
+              <div style={{ marginTop: '24px' }}>
+                <hr style={{ border: 'none', borderTop: '1px solid #ccc', margin: '12px 0' }} />
+                {renderHeaderFooterSection(headerFooter.footer, fontFamily || headerFooter.font_family || undefined)}
+              </div>
+            )}
             />
           </div>
         </div>

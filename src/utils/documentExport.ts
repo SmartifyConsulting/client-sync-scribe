@@ -99,7 +99,7 @@ export const exportToPDF = async (options: ExportOptions): Promise<void> => {
   pdf.save(fileName);
 };
 
-export const printDocument = (content: string, title: string, logoUrl?: string, fontFamily?: string): void => {
+export const printDocument = (content: string, title: string, logoUrl?: string, fontFamily?: string, headerFooter?: any): void => {
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
     alert('Please allow popups for printing');
