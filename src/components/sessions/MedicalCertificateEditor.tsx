@@ -98,7 +98,7 @@ export function MedicalCertificateEditor({
     if (!startDate || !endDate || !medicalReason.trim()) {
       toast({
         title: "Missing Information",
-        description: "Please fill in the medical reason and period of leave",
+        description: "Please fill in the medical reason, start date and end date",
         variant: "destructive",
       });
       return;
