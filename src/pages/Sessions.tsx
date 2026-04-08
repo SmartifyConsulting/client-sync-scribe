@@ -1288,8 +1288,10 @@ export default function Sessions() {
                   const selectedSessions = sessions.filter(s => selectedRecordings.has(s.id) && s.audio_url);
                   for (const s of selectedSessions) {
                     try {
+                      const signedUrl = await getSignedAudioUrl(s.audio_url!);
+                      if (!signedUrl) continue;
                       const link = document.createElement('a');
-                      link.href = s.audio_url!;
+                      link.href = signedUrl;
                       link.download = `session-${format(new Date(s.started_at), 'yyyy-MM-dd')}.webm`;
                       link.click();
                       // Clear audio_url after download
