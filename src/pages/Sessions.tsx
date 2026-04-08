@@ -1375,7 +1375,7 @@ export default function Sessions() {
                 <div className="flex items-center gap-3 shrink-0">
                   {session.audio_url && (
                     <button
-                      onClick={(e) => {
+                      onClick={async (e) => {
                         e.stopPropagation();
                         if (playingSessionId === session.id) {
                           audioRef.current?.pause();
@@ -1383,7 +1383,9 @@ export default function Sessions() {
                           setPlayingSessionId(null);
                         } else {
                           audioRef.current?.pause();
-                          const audio = new Audio(session.audio_url!);
+                          const signedUrl = await getSignedAudioUrl(session.audio_url!);
+                          if (!signedUrl) return;
+                          const audio = new Audio(signedUrl);
                           audio.onended = () => setPlayingSessionId(null);
                           audio.play();
                           audioRef.current = audio;
