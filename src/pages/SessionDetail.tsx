@@ -59,6 +59,7 @@ import { useSessions } from "@/hooks/useSessions";
 import { PrivacyBadge } from "@/components/permissions/PrivacyBadge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { getSignedAudioUrl } from "@/utils/audioUrl";
 
 const LANGUAGES = [
   { code: "en", label: "English" }, { code: "af", label: "Afrikaans" }, { code: "zu", label: "Zulu" },
@@ -92,6 +93,7 @@ export default function SessionDetail() {
   const [sessionDocs, setSessionDocs] = useState<any[]>([]);
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
   const [doctorName, setDoctorName] = useState<string>("");
+  const [signedAudioUrl, setSignedAudioUrl] = useState<string | null>(null);
 
   // Fetch doctor name
   useEffect(() => {
