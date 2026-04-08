@@ -102,6 +102,12 @@ export default function SessionDetail() {
       .then(({ data }) => { if (data?.full_name) setDoctorName(data.full_name); });
   }, [session?.user_id]);
 
+  // Resolve signed audio URL
+  useEffect(() => {
+    if (!session?.audio_url) { setSignedAudioUrl(null); return; }
+    getSignedAudioUrl(session.audio_url).then(url => setSignedAudioUrl(url));
+  }, [session?.audio_url]);
+
   // Fetch session documents
   useEffect(() => {
     if (!id) return;
