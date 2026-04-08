@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { getSignedAudioUrl } from "@/utils/audioUrl";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import {
@@ -1287,8 +1288,10 @@ export default function Sessions() {
                   const selectedSessions = sessions.filter(s => selectedRecordings.has(s.id) && s.audio_url);
                   for (const s of selectedSessions) {
                     try {
+                      const signedUrl = await getSignedAudioUrl(s.audio_url!);
+                      if (!signedUrl) continue;
                       const link = document.createElement('a');
-                      link.href = s.audio_url!;
+                      link.href = signedUrl;
                       link.download = `session-${format(new Date(s.started_at), 'yyyy-MM-dd')}.webm`;
                       link.click();
                       // Clear audio_url after download
@@ -1372,7 +1375,7 @@ export default function Sessions() {
                 <div className="flex items-center gap-3 shrink-0">
                   {session.audio_url && (
                     <button
-                      onClick={(e) => {
+                      onClick={async (e) => {
                         e.stopPropagation();
                         if (playingSessionId === session.id) {
                           audioRef.current?.pause();
@@ -1380,7 +1383,9 @@ export default function Sessions() {
                           setPlayingSessionId(null);
                         } else {
                           audioRef.current?.pause();
-                          const audio = new Audio(session.audio_url!);
+                          const signedUrl = await getSignedAudioUrl(session.audio_url!);
+                          if (!signedUrl) return;
+                          const audio = new Audio(signedUrl);
                           audio.onended = () => setPlayingSessionId(null);
                           audio.play();
                           audioRef.current = audio;

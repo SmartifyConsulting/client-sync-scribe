@@ -55,13 +55,9 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
         return null;
       }
 
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('session-audio')
-        .getPublicUrl(fileName);
-
-      console.log('Audio uploaded successfully:', urlData.publicUrl);
-      return urlData.publicUrl;
+      // Store the file path (not public URL) - bucket is private, use signed URLs to access
+      console.log('Audio uploaded successfully:', fileName);
+      return fileName;
     } catch (error) {
       console.error('Error in uploadAudioToStorage:', error);
       return null;

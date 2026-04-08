@@ -59,6 +59,7 @@ import { useSessions } from "@/hooks/useSessions";
 import { PrivacyBadge } from "@/components/permissions/PrivacyBadge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { getSignedAudioUrl } from "@/utils/audioUrl";
 
 const LANGUAGES = [
   { code: "en", label: "English" }, { code: "af", label: "Afrikaans" }, { code: "zu", label: "Zulu" },
@@ -92,6 +93,7 @@ export default function SessionDetail() {
   const [sessionDocs, setSessionDocs] = useState<any[]>([]);
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
   const [doctorName, setDoctorName] = useState<string>("");
+  const [signedAudioUrl, setSignedAudioUrl] = useState<string | null>(null);
 
   // Fetch doctor name
   useEffect(() => {
@@ -99,6 +101,12 @@ export default function SessionDetail() {
     supabase.from('profiles').select('full_name').eq('id', session.user_id).maybeSingle()
       .then(({ data }) => { if (data?.full_name) setDoctorName(data.full_name); });
   }, [session?.user_id]);
+
+  // Resolve signed audio URL
+  useEffect(() => {
+    if (!session?.audio_url) { setSignedAudioUrl(null); return; }
+    getSignedAudioUrl(session.audio_url).then(url => setSignedAudioUrl(url));
+  }, [session?.audio_url]);
 
   // Fetch session documents
   useEffect(() => {
@@ -182,10 +190,12 @@ export default function SessionDetail() {
     }
   };
 
-  const handleDownloadAudio = () => {
+  const handleDownloadAudio = async () => {
     if (!session?.audio_url) return;
+    const url = signedAudioUrl || await getSignedAudioUrl(session.audio_url);
+    if (!url) return;
     const link = document.createElement('a');
-    link.href = session.audio_url;
+    link.href = url;
     link.download = `session-recording-${format(new Date(session.started_at), 'yyyy-MM-dd')}.webm`;
     link.click();
   };
@@ -428,7 +438,7 @@ export default function SessionDetail() {
             <audio 
               controls 
               className="w-full"
-              src={session.audio_url}
+              src={signedAudioUrl || ''}
             >
               Your browser does not support the audio element.
             </audio>
