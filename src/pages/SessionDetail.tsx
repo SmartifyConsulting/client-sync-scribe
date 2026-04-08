@@ -438,7 +438,7 @@ export default function SessionDetail() {
             <audio 
               controls 
               className="w-full"
-              src={session.audio_url}
+              src={signedAudioUrl || ''}
             >
               Your browser does not support the audio element.
             </audio>
