@@ -190,10 +190,12 @@ export default function SessionDetail() {
     }
   };
 
-  const handleDownloadAudio = () => {
+  const handleDownloadAudio = async () => {
     if (!session?.audio_url) return;
+    const url = signedAudioUrl || await getSignedAudioUrl(session.audio_url);
+    if (!url) return;
     const link = document.createElement('a');
-    link.href = session.audio_url;
+    link.href = url;
     link.download = `session-recording-${format(new Date(session.started_at), 'yyyy-MM-dd')}.webm`;
     link.click();
   };
