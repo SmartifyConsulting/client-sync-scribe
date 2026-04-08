@@ -26,14 +26,13 @@ export function useUserRole() {
 
         if (error) {
           console.error('Error fetching user role:', error);
-          // Default to doctor for existing users without role
-          setRole('doctor');
+          setRole(null);
         } else {
           setRole(data?.role as UserRole);
         }
       } catch (error) {
         console.error('Error fetching user role:', error);
-        setRole('doctor');
+        setRole(null);
       } finally {
         setLoading(false);
       }
