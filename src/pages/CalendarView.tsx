@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar, MapPin, Video, Play, Trash2, Link, Unlink, Loader2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar as CalendarIcon, MapPin, Video, Play, Trash2, Link, Unlink, Loader2, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AppointmentRequestsPanel } from "@/components/appointments/AppointmentRequestsPanel";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import { usePatients } from "@/hooks/usePatients";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
@@ -28,6 +34,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Label } from "@/components/ui/label";
 import { format, startOfMonth, endOfMonth, addMonths, startOfYear, endOfYear, eachMonthOfInterval, parseISO, isSameDay, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isToday as isTodayFn } from "date-fns";
+
+// Generate 15-min time slots from 7:00 AM to 6:00 PM
+const TIME_SLOTS: string[] = [];
+for (let h = 7; h <= 18; h++) {
+  for (let m = 0; m < 60; m += 15) {
+    if (h === 18 && m > 0) break;
+    const hour12 = h > 12 ? h - 12 : h === 0 ? 12 : h;
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const label = `${hour12}:${m.toString().padStart(2, '0')} ${ampm}`;
+    const value = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+    TIME_SLOTS.push(value);
+  }
+}
+function formatTimeSlot(value: string): string {
+  const [hStr, mStr] = value.split(':');
+  const h = parseInt(hStr);
+  const hour12 = h > 12 ? h - 12 : h === 0 ? 12 : h;
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  return `${hour12}:${mStr} ${ampm}`;
+}
 
 
 
@@ -298,30 +324,61 @@ export default function CalendarView() {
                     <SelectValue placeholder="Select a patient" />
                   </SelectTrigger>
                   <SelectContent>
-                    {patients.map((patient) => (
-                      <SelectItem key={patient.id} value={patient.id}>
-                        {patient.name}
-                      </SelectItem>
-                    ))}
+                    {[...patients]
+                      .sort((a, b) => {
+                        const surnameA = a.name.split(' ').slice(-1)[0] || '';
+                        const surnameB = b.name.split(' ').slice(-1)[0] || '';
+                        return surnameA.localeCompare(surnameB);
+                      })
+                      .map((patient) => {
+                        const parts = patient.name.split(' ');
+                        const surname = parts.length > 1 ? parts.slice(-1)[0] : parts[0];
+                        const firstName = parts.length > 1 ? parts.slice(0, -1).join(' ') : '';
+                        const displayName = firstName ? `${surname}, ${firstName}` : surname;
+                        return (
+                          <SelectItem key={patient.id} value={patient.id}>
+                            {displayName}
+                          </SelectItem>
+                        );
+                      })}
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Date *</Label>
-                  <Input
-                    type="date"
-                    value={newAppointment.date}
-                    onChange={(e) => setNewAppointment({ ...newAppointment, date: e.target.value })}
-                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !newAppointment.date && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {newAppointment.date ? format(new Date(newAppointment.date + 'T00:00:00'), "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={newAppointment.date ? new Date(newAppointment.date + 'T00:00:00') : undefined}
+                        onSelect={(date) => {
+                          if (date) setNewAppointment({ ...newAppointment, date: format(date, 'yyyy-MM-dd') });
+                        }}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div>
                   <Label>Time *</Label>
-                  <Input
-                    type="time"
-                    value={newAppointment.time}
-                    onChange={(e) => setNewAppointment({ ...newAppointment, time: e.target.value })}
-                  />
+                  <Select value={newAppointment.time} onValueChange={(value) => setNewAppointment({ ...newAppointment, time: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select time" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[200px]">
+                      {TIME_SLOTS.map((slot) => (
+                        <SelectItem key={slot} value={slot}>{formatTimeSlot(slot)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
                <div>
