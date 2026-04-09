@@ -169,7 +169,7 @@ export default function DoctorRewards() {
           <TabsTrigger value="streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Streaks</TabsTrigger>
           <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">History</TabsTrigger>
           <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Transfers</TabsTrigger>
-          <TabsTrigger value="moola-apps" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Moola Apps</TabsTrigger>
+          <TabsTrigger value="moola-apps" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Vula Apps</TabsTrigger>
          </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -349,7 +349,7 @@ export default function DoctorRewards() {
         <TabsContent value="moola-apps" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Gift className="h-5 w-5 text-primary" />Moola Apps</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Gift className="h-5 w-5 text-primary" />Vula Apps</CardTitle>
               <CardDescription>Apps and services that accept Vulas as currency</CardDescription>
             </CardHeader>
             <CardContent>
