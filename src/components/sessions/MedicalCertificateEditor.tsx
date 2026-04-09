@@ -63,6 +63,37 @@ export function MedicalCertificateEditor({
   const [medicalReason, setMedicalReason] = useState("");
   const [examinationDate, setExaminationDate] = useState(new Date().toISOString().split('T')[0]);
 
+  // Auto-detect dates from session AI summary
+  useEffect(() => {
+    if (!sessionId) return;
+    const fetchSessionDates = async () => {
+      const { data } = await supabase
+        .from('sessions')
+        .select('summary')
+        .eq('id', sessionId)
+        .maybeSingle();
+      if (data?.summary) {
+        try {
+          // Try to parse dates from structured summary
+          const fromMatch = data.summary.match(/from[_\s]?date[:\s]*(\d{4}-\d{2}-\d{2})/i);
+          const toMatch = data.summary.match(/to[_\s]?date[:\s]*(\d{4}-\d{2}-\d{2})/i);
+          if (fromMatch?.[1]) setStartDate(fromMatch[1]);
+          if (toMatch?.[1]) setEndDate(toMatch[1]);
+          
+          // Also try "leave from X to Y" pattern
+          const leaveMatch = data.summary.match(/leave.*?(\d{4}-\d{2}-\d{2}).*?(?:to|until).*?(\d{4}-\d{2}-\d{2})/i);
+          if (leaveMatch?.[1] && leaveMatch?.[2]) {
+            setStartDate(leaveMatch[1]);
+            setEndDate(leaveMatch[2]);
+          }
+        } catch (e) {
+          console.warn('Could not parse dates from session summary:', e);
+        }
+      }
+    };
+    fetchSessionDates();
+  }, [sessionId]);
+
   const computeLeavePeriod = () => {
     if (!startDate || !endDate) return "";
     const s = new Date(startDate);

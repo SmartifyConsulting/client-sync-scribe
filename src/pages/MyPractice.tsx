@@ -639,7 +639,7 @@ export default function MyPractice() {
               </div>
               <div className="space-y-1.5 col-span-2">
                 <Label>Additional Languages</Label>
-                <div className="flex flex-wrap gap-1.5 justify-center">
+                <div className="flex flex-wrap gap-1.5 justify-start">
                   {LANGUAGES.filter(l => l.code !== ((profile as any)?.preferred_language || "en")).map(l => {
                     const selectedLangs: string[] = (profile as any)?.preferred_languages || [];
                     const isSelected = selectedLangs.includes(l.code);
@@ -1001,13 +1001,6 @@ export default function MyPractice() {
                         </>
                       ) : (
                         <>
-                          <Button variant="ghost" size="icon" title={(service as any).is_first_consultation ? "Remove first consult" : "Set as first consult"} onClick={async () => {
-                            if (!(service as any).is_first_consultation) { const f = servicePrices.find((s: any) => s.is_first_consultation); if (f) await supabase.from('service_prices').update({ is_first_consultation: false } as any).eq('id', f.id); }
-                            const nv = !(service as any).is_first_consultation;
-                            await supabase.from('service_prices').update({ is_first_consultation: nv } as any).eq('id', service.id);
-                            setServicePrices(servicePrices.map(s => ({ ...s, is_first_consultation: s.id === service.id ? nv : (nv ? false : (s as any).is_first_consultation) })));
-                            toast({ title: nv ? "First consultation fee set" : "Removed" });
-                          }} className={cn("h-7 w-7", (service as any).is_first_consultation ? "text-primary" : "text-muted-foreground")}><Award className="h-3.5 w-3.5" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => startEditingService(service)} className="h-7 w-7"><Pencil className="h-3.5 w-3.5" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => removeServicePrice(service.id)} className="h-7 w-7 text-destructive"><Trash2 className="h-3.5 w-3.5" /></Button>
                         </>

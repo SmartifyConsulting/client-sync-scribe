@@ -298,11 +298,23 @@ export default function CalendarView() {
                     <SelectValue placeholder="Select a patient" />
                   </SelectTrigger>
                   <SelectContent>
-                    {patients.map((patient) => (
-                      <SelectItem key={patient.id} value={patient.id}>
-                        {patient.name}
-                      </SelectItem>
-                    ))}
+                    {[...patients]
+                      .sort((a, b) => {
+                        const surnameA = a.name.split(' ').slice(-1)[0] || '';
+                        const surnameB = b.name.split(' ').slice(-1)[0] || '';
+                        return surnameA.localeCompare(surnameB);
+                      })
+                      .map((patient) => {
+                        const parts = patient.name.split(' ');
+                        const surname = parts.length > 1 ? parts.slice(-1)[0] : parts[0];
+                        const firstName = parts.length > 1 ? parts.slice(0, -1).join(' ') : '';
+                        const displayName = firstName ? `${surname}, ${firstName}` : surname;
+                        return (
+                          <SelectItem key={patient.id} value={patient.id}>
+                            {displayName}
+                          </SelectItem>
+                        );
+                      })}
                   </SelectContent>
                 </Select>
               </div>
