@@ -347,19 +347,38 @@ export default function CalendarView() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Date *</Label>
-                  <Input
-                    type="date"
-                    value={newAppointment.date}
-                    onChange={(e) => setNewAppointment({ ...newAppointment, date: e.target.value })}
-                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !newAppointment.date && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {newAppointment.date ? format(new Date(newAppointment.date + 'T00:00:00'), "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={newAppointment.date ? new Date(newAppointment.date + 'T00:00:00') : undefined}
+                        onSelect={(date) => {
+                          if (date) setNewAppointment({ ...newAppointment, date: format(date, 'yyyy-MM-dd') });
+                        }}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div>
                   <Label>Time *</Label>
-                  <Input
-                    type="time"
-                    value={newAppointment.time}
-                    onChange={(e) => setNewAppointment({ ...newAppointment, time: e.target.value })}
-                  />
+                  <Select value={newAppointment.time} onValueChange={(value) => setNewAppointment({ ...newAppointment, time: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select time" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[200px]">
+                      {TIME_SLOTS.map((slot) => (
+                        <SelectItem key={slot} value={slot}>{formatTimeSlot(slot)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
                <div>
