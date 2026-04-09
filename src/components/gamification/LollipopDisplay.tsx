@@ -4,16 +4,16 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import type { PatientReward } from "@/hooks/usePatientRewards";
 import { format, parseISO } from "date-fns";
 
-import moolaSymbol from "@/assets/moola-symbol.png";
+import vulaSymbol from "@/assets/vula-symbol.png";
 
-export function MoolaLogoBadge({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
+export function VulaLogoBadge({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   const sizeClasses = {
     sm: "h-5 w-5",
     md: "h-7 w-7",
     lg: "h-12 w-12",
   };
   return (
-    <img src={moolaSymbol} alt="Moola" className={`${sizeClasses[size]} object-contain shrink-0`} />
+    <img src={vulaSymbol} alt="Vula" className={`${sizeClasses[size]} object-contain shrink-0`} />
   );
 }
 
@@ -36,12 +36,12 @@ export function LollipopDisplay({
         <Tooltip>
           <TooltipTrigger asChild>
             <Badge variant="secondary" className="gap-1.5 px-3 py-1.5 bg-secondary text-white hover:bg-secondary/90 border-secondary/20">
-              <MoolaLogoBadge size="sm" />
+              <VulaLogoBadge size="sm" />
               <span className="font-bold">{count}</span>
             </Badge>
           </TooltipTrigger>
           <TooltipContent>
-            <p>{count} Moola{count !== 1 ? 's' : ''} earned for healthy visits!</p>
+            <p>{count} Vula{count !== 1 ? 's' : ''} earned for healthy visits!</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -51,9 +51,9 @@ export function LollipopDisplay({
   if (variant === "compact") {
     return (
       <div className="flex items-center gap-2 text-sm">
-        <MoolaLogoBadge size="sm" />
+        <VulaLogoBadge size="sm" />
         <span className="font-semibold text-foreground">{count}</span>
-        <span className="text-muted-foreground">Moola{count !== 1 ? 's' : ''}</span>
+        <span className="text-muted-foreground">Vula{count !== 1 ? 's' : ''}</span>
       </div>
     );
   }
@@ -62,8 +62,8 @@ export function LollipopDisplay({
     <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 dark:from-secondary/20 dark:to-secondary/10 border-secondary/30">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <MoolaLogoBadge size="md" />
-          Moola Rewards
+          <VulaLogoBadge size="md" />
+          Vula Rewards
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -72,7 +72,7 @@ export function LollipopDisplay({
             {count}
           </div>
           <div className="text-sm text-muted-foreground">
-            Moola{count !== 1 ? 's' : ''} earned<br />
+            Vula{count !== 1 ? 's' : ''} earned<br />
             for healthy visits
           </div>
         </div>

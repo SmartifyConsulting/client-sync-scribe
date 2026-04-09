@@ -257,7 +257,7 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
       const validation = validationData?.validation;
 
       if (validation?.isValid) {
-        toast({ title: "✅ Medication verified!", description: `AI confirmed ingestion. +5 Moolas earned!` });
+        toast({ title: "✅ Medication verified!", description: `AI confirmed ingestion. +5 Vulas earned!` });
         handleCloseRecording();
         queryClient.invalidateQueries({ queryKey: ["medication-adherence", patientId] });
         queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
@@ -320,7 +320,7 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
             Daily Medication Tracker
           </CardTitle>
           <CardDescription>
-            Film yourself taking each medication daily to earn Moolas and build streaks
+            Film yourself taking each medication daily to earn Vulas and build streaks
           </CardDescription>
         </CardHeader>
       </Card>

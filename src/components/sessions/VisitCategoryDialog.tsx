@@ -108,7 +108,7 @@ export function VisitCategoryDialog({
     });
   };
 
-  const totalMoolas = gamificationCategories
+  const totalVulas = gamificationCategories
     .filter(c => selectedCategories.has(c.visit_category))
     .reduce((sum, c) => sum + c.lollipops_awarded, 0);
 
@@ -144,10 +144,10 @@ export function VisitCategoryDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <span className="text-2xl">Ⓜ️</span>
-            Award Moola?
+            Award Vula?
           </DialogTitle>
           <DialogDescription>
-            Select all visit types that apply to award {patientName || "the patient"} moola. Multiple selections allowed.
+            Select all visit types that apply to award {patientName || "the patient"} vula. Multiple selections allowed.
           </DialogDescription>
         </DialogHeader>
         
@@ -192,13 +192,13 @@ export function VisitCategoryDialog({
 
         {selectedCategories.size > 0 && (
           <div className="text-sm font-medium text-primary text-center">
-            Total: {totalMoolas} Ⓜ️ for {selectedCategories.size} categor{selectedCategories.size === 1 ? 'y' : 'ies'}
+            Total: {totalVulas} Ⓜ️ for {selectedCategories.size} categor{selectedCategories.size === 1 ? 'y' : 'ies'}
           </div>
         )}
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
           <Button variant="ghost" onClick={handleSkip} className="sm:mr-auto">
-            Skip (No moola)
+            Skip (No vula)
           </Button>
           <Button
             ref={confirmRef}
@@ -206,7 +206,7 @@ export function VisitCategoryDialog({
             disabled={selectedCategories.size === 0 && !customCategory.trim()}
             className="bg-pink-500 hover:bg-pink-600 text-white"
           >
-            Ⓜ️ Award Moola
+            Ⓜ️ Award Vula
           </Button>
         </DialogFooter>
       </DialogContent>

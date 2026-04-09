@@ -11,7 +11,7 @@ import {
   MoreVertical,
   Eye,
   Download,
-  Printer,
+  
   Loader2,
   Send,
   ArrowUpRight,
@@ -29,7 +29,7 @@ import { useTemplates, Template } from "@/hooks/useTemplates";
 import { useHeaderFooterTemplates, HeaderFooterTemplate } from "@/hooks/useHeaderFooterTemplates";
 import { useDocuments, Document } from "@/hooks/useDocuments";
 import { useProfile } from "@/hooks/useProfile";
-import { exportToPDF, printDocument } from "@/utils/documentExport";
+import { exportToPDF } from "@/utils/documentExport";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -683,20 +683,11 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                         className="h-8 w-8"
                         onClick={() => {
                           exportToPDF({ title: doc.name, content: doc.content });
-                          toast({ title: "PDF Exported", description: `"${doc.name}" downloaded` });
+                          toast({ title: "PDF Downloaded", description: `"${doc.name}" downloaded` });
                         }}
-                        title="Export PDF"
+                        title="Download PDF"
                       >
                         <Download className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => printDocument(doc.content, doc.name)}
-                        title="Print"
-                      >
-                        <Printer className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
@@ -1061,22 +1052,14 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => printDocument(previewDocument.content, previewDocument.name)}
-                  className="gap-2"
-                >
-                  <Printer className="h-4 w-4" />
-                  Print
-                </Button>
-                <Button
-                  variant="outline"
                   onClick={() => {
                     exportToPDF({ title: previewDocument.name, content: previewDocument.content });
-                    toast({ title: "PDF Exported", description: `"${previewDocument.name}" downloaded` });
+                    toast({ title: "PDF Downloaded", description: `"${previewDocument.name}" downloaded` });
                   }}
                   className="gap-2"
                 >
                   <Download className="h-4 w-4" />
-                  Export PDF
+                  Download PDF
                 </Button>
               </div>
             </div>

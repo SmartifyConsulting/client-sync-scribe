@@ -119,7 +119,7 @@ function ChronicAdherenceSection({ patientId, patientName }: { patientId: string
         streak_count: maxStreak,
       });
 
-      // Award 250 Moolas to patient
+      // Award 250 Vulas to patient
       await supabase.from("patient_rewards").insert({
         patient_id: patientId,
         awarded_by: user.id,
@@ -138,7 +138,7 @@ function ChronicAdherenceSection({ patientId, patientName }: { patientId: string
         await supabase.from("notifications").insert({
           user_id: patientData.patient_user_id,
           title: "🎉 Your Doctor Congratulated You!",
-          description: `Your doctor congratulated you on your ${maxStreak}-day medication streak! You earned 250 Moolas!`,
+          description: `Your doctor congratulated you on your ${maxStreak}-day medication streak! You earned 250 Vulas!`,
           type: "congratulation",
           reference_id: patientId,
         });
@@ -146,7 +146,7 @@ function ChronicAdherenceSection({ patientId, patientName }: { patientId: string
 
       toast({
         title: "🎉 Congratulations Sent!",
-        description: `${patientName} received 250 Moolas for their ${maxStreak}-day streak. You also earned 250 Moolas!`,
+        description: `${patientName} received 250 Vulas for their ${maxStreak}-day streak. You also earned 250 Vulas!`,
       });
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });

@@ -1,5 +1,5 @@
 import { Users, Calendar, TrendingUp, Award, Star } from "lucide-react";
-import moolaSymbol from "@/assets/moola-symbol.png";
+import vulaSymbol from "@/assets/vula-symbol.png";
 import { CompactTodoList } from "@/components/dashboard/CompactTodoList";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -165,8 +165,8 @@ export default function Dashboard() {
   });
 
   // Query for doctor moolas (from doctor_rewards)
-  const { data: doctorMoolas = 0 } = useQuery({
-    queryKey: ["doctor-moolas-dashboard"],
+  const { data: doctorVulas = 0 } = useQuery({
+    queryKey: ["doctor-vulas-dashboard"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return 0;
@@ -181,8 +181,8 @@ export default function Dashboard() {
   });
 
   // Query for patient moolas (from patient_rewards where patient is linked to this user)
-  const { data: patientMoolas = 0 } = useQuery({
-    queryKey: ["patient-moolas-dashboard"],
+  const { data: patientVulas = 0 } = useQuery({
+    queryKey: ["patient-vulas-dashboard"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return 0;
@@ -292,12 +292,12 @@ export default function Dashboard() {
         )}
         {isDoctor && (
           <StatsCard
-            title="Total Moolas"
-            value={doctorMoolas + patientMoolas}
-            change={`Doctor: ${doctorMoolas} · Patient: ${patientMoolas}`}
+            title="Total Vulas"
+            value={doctorVulas + patientVulas}
+            change={`Doctor: ${doctorVulas} · Patient: ${patientVulas}`}
             trend="up"
             icon={Award}
-            imageUrl={moolaSymbol}
+            imageUrl={vulaSymbol}
             iconSize="large"
           />
         )}

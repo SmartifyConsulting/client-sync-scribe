@@ -75,7 +75,7 @@ export function ShareAppDialog({ prefillEmail = "", prefillName = "", trigger }:
         <DialogHeader>
           <DialogTitle>Share Holarc</DialogTitle>
           <DialogDescription>
-            Invite someone to join Holarc. You'll earn Moolas when they accept! This does not add them as your patient.
+            Invite someone to join Holarc. You'll earn Vulas when they accept! This does not add them as your patient.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 pt-2">
