@@ -85,7 +85,7 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
       toast({
         title: `${emoticon} Sent!`,
         description: isAiFlagged
-          ? "Emoticon sent (no Moolas — view profile first or daily limit reached)"
+          ? "Emoticon sent (no Vulas — view profile first or daily limit reached)"
           : `Emoticon sent to ${recipientName} (+1 Ⓜ️)`,
       });
 

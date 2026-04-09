@@ -34,7 +34,7 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <span className="text-3xl font-bold text-emerald-600">Ⓜ</span>
-            Moola Summary
+            Vula Summary
           </CardTitle>
           <CardDescription>
             Total rewards earned for healthy visits
@@ -45,7 +45,7 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
             <div className="rounded-lg bg-white/50 dark:bg-black/20 p-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <Award className="h-4 w-4" />
-                Total Moolas
+                Total Vulas
               </div>
               <div className="text-4xl font-bold text-emerald-600 dark:text-emerald-400">
                 {totalCount}
@@ -84,16 +84,16 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
             Reward History
           </CardTitle>
           <CardDescription>
-            Detailed log of all Moolas earned
+            Detailed log of all Vulas earned
           </CardDescription>
         </CardHeader>
         <CardContent>
           {rewards.length === 0 ? (
             <div className="text-center py-12">
               <span className="text-5xl mb-4 block font-bold text-emerald-600">Ⓜ</span>
-              <p className="text-muted-foreground">No Moolas earned yet</p>
+              <p className="text-muted-foreground">No Vulas earned yet</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Attend healthy visits to start collecting Moolas!
+                Attend healthy visits to start collecting Vulas!
               </p>
             </div>
           ) : (

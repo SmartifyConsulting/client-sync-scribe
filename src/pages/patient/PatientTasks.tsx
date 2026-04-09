@@ -334,7 +334,7 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
           });
         }
 
-        toast({ title: "✅ Task verified!", description: `AI confirmed your proof. +${todo.moolas_reward} Moolas earned!` });
+        toast({ title: "✅ Task verified!", description: `AI confirmed your proof. +${todo.moolas_reward} Vulas earned!` });
         handleCloseRecording();
         queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
         onComplete();

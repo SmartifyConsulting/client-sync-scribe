@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Calendar, FileText, Clock, User, Loader2, Pill, ListChecks, ArrowRight, Info, Sparkles, Building2, Receipt, Star, Camera, Trophy, Heart } from "lucide-react";
-import moolaSymbol from "@/assets/moola-symbol.png";
+import vulaSymbol from "@/assets/vula-symbol.png";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -327,16 +327,16 @@ export default function PatientDashboard() {
         </div>
       )}
 
-      {/* Row 1: Moolas + AI Health Summary */}
+      {/* Row 1: Vulas + AI Health Summary */}
       <div className="grid gap-4 md:grid-cols-2">
         <Link to="/patient/rewards">
           <Card className="h-full border-primary/20 bg-gradient-to-br from-primary/5 via-card to-secondary/5 hover:shadow-lg transition-all cursor-pointer">
             <CardContent className="flex items-center gap-4 p-5">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 shrink-0">
-                 <img src={moolaSymbol} alt="Moolas" className="h-7 w-7 object-contain" />
+                 <img src={vulaSymbol} alt="Vulas" className="h-7 w-7 object-contain" />
               </div>
               <div className="flex-1">
-                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">My Moolas Balance</p>
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">My Vulas Balance</p>
                 <p className="text-2xl font-bold text-foreground">{lollipopCount}</p>
               </div>
               <ArrowRight className="h-4 w-4 text-muted-foreground" />
@@ -498,7 +498,7 @@ export default function PatientDashboard() {
         </Card>
       </div>
 
-      {/* Row 4: Claims + Earn Moolas */}
+      {/* Row 4: Claims + Earn Vulas */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* Recent Claims */}
         <Card>
@@ -540,12 +540,12 @@ export default function PatientDashboard() {
           </CardContent>
         </Card>
 
-        {/* Earn More Moolas */}
+        {/* Earn More Vulas */}
         <Card className="border-primary/10 bg-gradient-to-br from-primary/3 to-card">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm">
               <Trophy className="h-4 w-4 text-primary" />
-              Earn More Moolas
+              Earn More Vulas
             </CardTitle>
             <CardDescription className="text-[10px]">Tips to boost your rewards</CardDescription>
           </CardHeader>
@@ -585,7 +585,7 @@ export default function PatientDashboard() {
                 </Button>
               </Link>
             </div>
-            <CardDescription className="text-[10px]">Complete tasks to earn Moolas</CardDescription>
+            <CardDescription className="text-[10px]">Complete tasks to earn Vulas</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-1.5">

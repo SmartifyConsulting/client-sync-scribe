@@ -37,7 +37,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ActivityProofCapture } from "@/components/rewards/ActivityProofCapture";
 import { MedicationAdherenceTab } from "@/components/rewards/MedicationAdherenceTab";
 import { useToast } from "@/hooks/use-toast";
-import moolaSymbol from "@/assets/moola-symbol.png";
+import vulaSymbol from "@/assets/vula-symbol.png";
 
 const MILESTONES = [
   { count: 5, label: "First Steps", icon: "🌟", color: "text-yellow-500" },
@@ -159,7 +159,7 @@ export default function MyRewards() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      if (amount > lollipopCount) throw new Error("Insufficient Moolas");
+      if (amount > lollipopCount) throw new Error("Insufficient Vulas");
       if (amount <= 0) throw new Error("Amount must be positive");
 
       // Get patient id for the deduction record
@@ -185,13 +185,13 @@ export default function MyRewards() {
           patient_id: patient.id,
           awarded_by: user.id,
           lollipops_count: -amount,
-          visit_category: "Moola Transfer",
+          visit_category: "Vula Transfer",
           reward_type: "transfer",
         });
       if (deductError) throw deductError;
     },
     onSuccess: () => {
-      toast({ title: "Transfer successful", description: "Your Moolas have been transferred." });
+      toast({ title: "Transfer successful", description: "Your Vulas have been transferred." });
       queryClient.invalidateQueries({ queryKey: ["moola-transfers"] });
       queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
       setShowTransferDialog(false);
@@ -252,7 +252,7 @@ export default function MyRewards() {
         {partnerApps.length > 0 && (
           <Button onClick={() => setShowTransferDialog(true)} className="gap-2">
             <Send className="h-4 w-4" />
-            Transfer Moolas
+            Transfer Vulas
           </Button>
         )}
       </div>
@@ -261,9 +261,9 @@ export default function MyRewards() {
       <Dialog open={showTransferDialog} onOpenChange={setShowTransferDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Transfer Moolas</DialogTitle>
+            <DialogTitle>Transfer Vulas</DialogTitle>
             <DialogDescription>
-              Send your Moolas to a linked partner app. Available balance: {lollipopCount} Ⓜ
+              Send your Vulas to a linked partner app. Available balance: {lollipopCount} Ⓜ
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -312,11 +312,11 @@ export default function MyRewards() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-yellow-900 dark:text-yellow-200">Total Moolas</p>
+                <p className="text-sm font-medium text-yellow-900 dark:text-yellow-200">Total Vulas</p>
                 <p className="text-4xl font-bold text-yellow-900 dark:text-yellow-100">{lollipopCount}</p>
               </div>
               <div className="h-14 w-14 rounded-full bg-white shadow-sm flex items-center justify-center">
-                <img src={moolaSymbol} alt="Moolas" className="h-10 w-10 object-contain" />
+                <img src={vulaSymbol} alt="Vulas" className="h-10 w-10 object-contain" />
               </div>
             </div>
           </CardContent>
@@ -392,7 +392,7 @@ export default function MyRewards() {
              Moolas
            </TabsTrigger>
           <TabsTrigger value="moola-apps" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-             Moola Apps
+             Vula Apps
            </TabsTrigger>
          </TabsList>
 
@@ -411,7 +411,7 @@ export default function MyRewards() {
                   Progress to Next Milestone
                 </CardTitle>
                 <CardDescription>
-                  {lollipopCount} / {nextMilestone.count} Moolas to "{nextMilestone.label}"
+                  {lollipopCount} / {nextMilestone.count} Vulas to "{nextMilestone.label}"
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -473,7 +473,7 @@ export default function MyRewards() {
                     Assigned Tasks
                   </CardTitle>
                   <CardDescription>
-                    Tasks assigned by your healthcare provider. Complete activities to earn Moolas!
+                    Tasks assigned by your healthcare provider. Complete activities to earn Vulas!
                   </CardDescription>
                 </div>
                 <ActivityProofCapture tasks={pendingActivityTasks} onProofSubmitted={refetchTasks} />
@@ -541,7 +541,7 @@ export default function MyRewards() {
                 Milestone Achievements
               </CardTitle>
               <CardDescription>
-                Collect Moolas to unlock milestone badges
+                Collect Vulas to unlock milestone badges
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -591,7 +591,7 @@ export default function MyRewards() {
                 Health Streaks
               </CardTitle>
               <CardDescription>
-                Maintain regular health checkups to earn bonus Moolas
+                Maintain regular health checkups to earn bonus Vulas
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -666,7 +666,7 @@ export default function MyRewards() {
                 Transfer History
               </CardTitle>
               <CardDescription>
-                Record of all Moola transfers to partner apps
+                Record of all Vula transfers to partner apps
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -720,7 +720,7 @@ export default function MyRewards() {
                 Full Reward History
               </CardTitle>
               <CardDescription>
-                Complete log of all Moolas earned
+                Complete log of all Vulas earned
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -773,10 +773,10 @@ export default function MyRewards() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Gift className="h-5 w-5 text-primary" />
-                Moola Apps
+                Vula Apps
               </CardTitle>
               <CardDescription>
-                Apps and services that accept Moolas as currency
+                Apps and services that accept Vulas as currency
               </CardDescription>
             </CardHeader>
             <CardContent>

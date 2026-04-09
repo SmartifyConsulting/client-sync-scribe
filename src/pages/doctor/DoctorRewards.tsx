@@ -15,7 +15,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { useMyRewards, useMyStreaks } from "@/hooks/usePatientRewards";
-import moolaSymbol from "@/assets/moola-symbol.png";
+import vulaSymbol from "@/assets/vula-symbol.png";
 
 const MILESTONES = [
   { count: 5, label: "First Steps", icon: "🌟", color: "text-yellow-500" },
@@ -92,10 +92,10 @@ export default function DoctorRewards() {
     if (transferError) { toast({ title: "Transfer failed", variant: "destructive" }); return; }
     const { error: deductError } = await supabase.from("patient_rewards").insert({
       patient_id: patient.id, awarded_by: user.id, lollipops_count: -amount,
-      visit_category: "Moola Transfer", reward_type: "transfer",
+      visit_category: "Vula Transfer", reward_type: "transfer",
     });
     if (deductError) { toast({ title: "Deduction failed", variant: "destructive" }); return; }
-    toast({ title: "Transfer successful", description: `${amount} Moolas transferred.` });
+    toast({ title: "Transfer successful", description: `${amount} Vulas transferred.` });
     queryClient.invalidateQueries({ queryKey: ["moola-transfers-doctor"] });
     queryClient.invalidateQueries({ queryKey: ["patient-moolas-profile"] });
     queryClient.invalidateQueries({ queryKey: ["doctor-moolas-profile"] });
@@ -114,10 +114,10 @@ export default function DoctorRewards() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">My Rewards</h1>
-          <p className="text-muted-foreground text-[12px]">Manage your Moolas balance, milestones, and streaks</p>
+          <p className="text-muted-foreground text-[12px]">Manage your Vulas balance, milestones, and streaks</p>
         </div>
         {partnerApps.length > 0 && (
-          <Button onClick={() => setShowTransferDialog(true)} className="gap-2"><Send className="h-4 w-4" /> Transfer Moolas</Button>
+          <Button onClick={() => setShowTransferDialog(true)} className="gap-2"><Send className="h-4 w-4" /> Transfer Vulas</Button>
         )}
       </div>
 
@@ -131,20 +131,20 @@ export default function DoctorRewards() {
                 <p className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">{totalMoolas}</p>
               </div>
               <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center">
-                <img src={moolaSymbol} alt="Moolas" className="h-9 w-9 object-contain" />
+                <img src={vulaSymbol} alt="Vulas" className="h-9 w-9 object-contain" />
               </div>
             </div>
           </CardContent>
         </Card>
         <Card className="border-border">
           <CardContent className="pt-6">
-            <p className="text-xs text-muted-foreground">Doctor Moolas</p>
+            <p className="text-xs text-muted-foreground">Doctor Vulas</p>
             <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{doctorMoolas} <span className="text-base">Ⓜ</span></p>
           </CardContent>
         </Card>
         <Card className="border-border">
           <CardContent className="pt-6">
-            <p className="text-xs text-muted-foreground">Patient Moolas</p>
+            <p className="text-xs text-muted-foreground">Patient Vulas</p>
             <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{patientMoolas} <span className="text-base">Ⓜ</span></p>
           </CardContent>
         </Card>
@@ -177,7 +177,7 @@ export default function DoctorRewards() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Target className="h-5 w-5 text-primary" />Progress to Next Milestone</CardTitle>
-                <CardDescription>{totalMoolas} / {nextMilestone.count} Moolas to "{nextMilestone.label}"</CardDescription>
+                <CardDescription>{totalMoolas} / {nextMilestone.count} Vulas to "{nextMilestone.label}"</CardDescription>
               </CardHeader>
               <CardContent>
                 <Progress value={progressToNext} className="h-4" />
@@ -222,7 +222,7 @@ export default function DoctorRewards() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><Trophy className="h-5 w-5 text-yellow-500" />Milestone Achievements</CardTitle>
-              <CardDescription>Collect Moolas to unlock milestone badges</CardDescription>
+              <CardDescription>Collect Vulas to unlock milestone badges</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -250,7 +250,7 @@ export default function DoctorRewards() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><Flame className="h-5 w-5 text-orange-500" />Health Streaks</CardTitle>
-              <CardDescription>Maintain regular health checkups to earn bonus Moolas</CardDescription>
+              <CardDescription>Maintain regular health checkups to earn bonus Vulas</CardDescription>
             </CardHeader>
             <CardContent>
               {streaks.length === 0 ? (
@@ -296,7 +296,7 @@ export default function DoctorRewards() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><CalendarIcon className="h-5 w-5 text-primary" />Full Reward History</CardTitle>
-              <CardDescription>Complete log of all Moolas earned</CardDescription>
+              <CardDescription>Complete log of all Vulas earned</CardDescription>
             </CardHeader>
             <CardContent>
               {rewards.length === 0 ? (
@@ -323,7 +323,7 @@ export default function DoctorRewards() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><ArrowRightLeft className="h-5 w-5 text-blue-500" />Transfer History</CardTitle>
-              <CardDescription>Record of all Moola transfers to partner apps</CardDescription>
+              <CardDescription>Record of all Vula transfers to partner apps</CardDescription>
             </CardHeader>
             <CardContent>
               {transfers.length === 0 ? (
@@ -350,7 +350,7 @@ export default function DoctorRewards() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><Gift className="h-5 w-5 text-primary" />Moola Apps</CardTitle>
-              <CardDescription>Apps and services that accept Moolas as currency</CardDescription>
+              <CardDescription>Apps and services that accept Vulas as currency</CardDescription>
             </CardHeader>
             <CardContent>
               {partnerApps.length === 0 ? (
@@ -398,7 +398,7 @@ export default function DoctorRewards() {
       {showTransferDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-card rounded-xl border border-border p-6 w-full max-w-md shadow-lg space-y-4">
-            <h3 className="text-lg font-semibold">Transfer Moolas</h3>
+            <h3 className="text-lg font-semibold">Transfer Vulas</h3>
             <p className="text-sm text-muted-foreground">Available balance: {totalMoolas} Ⓜ</p>
             <div className="space-y-2">
               <Label>Partner App</Label>

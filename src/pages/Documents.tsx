@@ -683,9 +683,9 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                         className="h-8 w-8"
                         onClick={() => {
                           exportToPDF({ title: doc.name, content: doc.content });
-                          toast({ title: "PDF Exported", description: `"${doc.name}" downloaded` });
+                          toast({ title: "PDF Downloaded", description: `"${doc.name}" downloaded` });
                         }}
-                        title="Export PDF"
+                        title="Download PDF"
                       >
                         <Download className="h-4 w-4" />
                       </Button>

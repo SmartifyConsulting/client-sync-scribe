@@ -268,7 +268,7 @@ export default function GamificationAdmin() {
       <div>
         <h1 className="text-2xl font-bold text-foreground">Reward Admin</h1>
         <p className="mt-1 text-muted-foreground text-[12px]">
-          Configure Moola rewards and streak bonuses
+          Configure Vula rewards and streak bonuses
         </p>
       </div>
 
@@ -304,7 +304,7 @@ export default function GamificationAdmin() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Max Moolas/Visit</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Max Vulas/Visit</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-emerald-600">
@@ -340,7 +340,7 @@ export default function GamificationAdmin() {
                   Reward Categories
                 </CardTitle>
                 <CardDescription>
-                  Configure how many Moolas patients earn for each type of visit
+                  Configure how many Vulas patients earn for each type of visit
                 </CardDescription>
               </div>
               <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
@@ -354,7 +354,7 @@ export default function GamificationAdmin() {
                   <DialogHeader>
                     <DialogTitle>Add New Reward Category</DialogTitle>
                     <DialogDescription>
-                      Create a new visit type that awards Moolas to patients
+                      Create a new visit type that awards Vulas to patients
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
@@ -367,7 +367,7 @@ export default function GamificationAdmin() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Moolas Awarded</Label>
+                      <Label>Vulas Awarded</Label>
                       <Input
                         type="number"
                         min={1}
@@ -537,7 +537,7 @@ export default function GamificationAdmin() {
                       <p className="text-xs text-muted-foreground">How often must this visit be completed to maintain streak</p>
                     </div>
                     <div className="space-y-2">
-                      <Label>Bonus Moolas per Streak</Label>
+                      <Label>Bonus Vulas per Streak</Label>
                       <Input
                         type="number"
                         min={1}
@@ -670,7 +670,7 @@ export default function GamificationAdmin() {
                   Partner Apps
                 </CardTitle>
                 <CardDescription>
-                  Manage external apps that accept Moola transfers from patients
+                  Manage external apps that accept Vula transfers from patients
                 </CardDescription>
               </div>
               <Dialog open={showAddAppDialog} onOpenChange={setShowAddAppDialog}>
@@ -684,7 +684,7 @@ export default function GamificationAdmin() {
                   <DialogHeader>
                     <DialogTitle>Add Partner App</DialogTitle>
                     <DialogDescription>
-                      Add an external app that can receive Moola transfers
+                      Add an external app that can receive Vula transfers
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
@@ -749,7 +749,7 @@ export default function GamificationAdmin() {
               ) : partnerApps.length === 0 ? (
                 <div className="text-center py-8">
                   <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No partner apps yet. Add one to enable Moola transfers.</p>
+                  <p className="text-muted-foreground">No partner apps yet. Add one to enable Vula transfers.</p>
                 </div>
               ) : (
                 <Table>

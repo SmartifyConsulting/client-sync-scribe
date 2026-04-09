@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { ImageComparisonDialog } from "@/components/documents/ImageComparisonDialog";
 import { cn } from "@/lib/utils";
-import moolaSymbol from "@/assets/moola-symbol.png";
+import vulaSymbol from "@/assets/vula-symbol.png";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -43,7 +43,7 @@ import { DoctorsOnProfile } from "@/components/patients/DoctorsOnProfile";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { RequestConnectionButton } from "@/components/patients/RequestConnectionButton";
 import { RoundTable } from "@/components/patients/RoundTable";
-import { LollipopDisplay } from "@/components/gamification/LollipopDisplay"; // Moola display
+import { LollipopDisplay } from "@/components/gamification/LollipopDisplay"; // Vula display
 import { useTemplates } from "@/hooks/useTemplates";
 import { useDocuments } from "@/hooks/useDocuments";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
@@ -307,12 +307,12 @@ export default function PatientProfile() {
             {format(new Date(patient.created_at), "MMM yyyy")}
           </p>
         </div>
-        {/* Moola Rewards */}
+        {/* Vula Rewards */}
         <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-4 shadow-sm border border-emerald-200 dark:border-emerald-800/30">
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-muted-foreground">Moolas</p>
             <div className="h-8 w-8 rounded-full bg-white shadow-sm flex items-center justify-center">
-              <img src={moolaSymbol} alt="Moolas" className="h-6 w-6 object-contain" />
+              <img src={vulaSymbol} alt="Vulas" className="h-6 w-6 object-contain" />
             </div>
           </div>
           <p className="mt-2 text-2xl font-bold text-emerald-600 dark:text-emerald-400">

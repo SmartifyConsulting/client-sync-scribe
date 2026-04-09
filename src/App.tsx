@@ -47,6 +47,7 @@ import PricingAdmin from "./pages/admin/PricingAdmin";
 import GamificationAdmin from "./pages/admin/GamificationAdmin";
 import UserManagement from "./pages/admin/UserManagement";
 import ReferralDoctors from "./pages/ReferralDoctors";
+import ExpiringRecordings from "./pages/ExpiringRecordings";
 
 const queryClient = new QueryClient();
 
@@ -122,6 +123,7 @@ const App = () => (
             <Route path="/doctor/rewards" element={<DoctorRewards />} />
             <Route path="/referral-doctors" element={<ReferralDoctors />} />
             <Route path="/cpd-certificates" element={<Navigate to="/profile" replace />} />
+            <Route path="/expiring-recordings" element={<ExpiringRecordings />} />
             {/* Notifications removed from route - now a dashboard badge */}
             <Route path="/connections" element={<Connections />} />
             

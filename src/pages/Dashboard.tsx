@@ -1,5 +1,5 @@
 import { Users, Calendar, TrendingUp, Award, Star } from "lucide-react";
-import moolaSymbol from "@/assets/moola-symbol.png";
+import vulaSymbol from "@/assets/vula-symbol.png";
 import { CompactTodoList } from "@/components/dashboard/CompactTodoList";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -292,12 +292,12 @@ export default function Dashboard() {
         )}
         {isDoctor && (
           <StatsCard
-            title="Total Moolas"
+            title="Total Vulas"
             value={doctorMoolas + patientMoolas}
             change={`Doctor: ${doctorMoolas} · Patient: ${patientMoolas}`}
             trend="up"
             icon={Award}
-            imageUrl={moolaSymbol}
+            imageUrl={vulaSymbol}
             iconSize="large"
           />
         )}
