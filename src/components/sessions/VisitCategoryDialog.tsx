@@ -147,7 +147,7 @@ export function VisitCategoryDialog({
             Award Vula?
           </DialogTitle>
           <DialogDescription>
-            Select all visit types that apply to award {patientName || "the patient"} moola. Multiple selections allowed.
+            Select all visit types that apply to award {patientName || "the patient"} vula. Multiple selections allowed.
           </DialogDescription>
         </DialogHeader>
         
