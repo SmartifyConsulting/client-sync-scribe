@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar, MapPin, Video, Play, Trash2, Link, Unlink, Loader2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar as CalendarIcon, MapPin, Video, Play, Trash2, Link, Unlink, Loader2, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AppointmentRequestsPanel } from "@/components/appointments/AppointmentRequestsPanel";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import { usePatients } from "@/hooks/usePatients";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
@@ -28,6 +34,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Label } from "@/components/ui/label";
 import { format, startOfMonth, endOfMonth, addMonths, startOfYear, endOfYear, eachMonthOfInterval, parseISO, isSameDay, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isToday as isTodayFn } from "date-fns";
+
+// Generate 15-min time slots from 7:00 AM to 6:00 PM
+const TIME_SLOTS: string[] = [];
+for (let h = 7; h <= 18; h++) {
+  for (let m = 0; m < 60; m += 15) {
+    if (h === 18 && m > 0) break;
+    const hour12 = h > 12 ? h - 12 : h === 0 ? 12 : h;
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const label = `${hour12}:${m.toString().padStart(2, '0')} ${ampm}`;
+    const value = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+    TIME_SLOTS.push(value);
+  }
+}
+function formatTimeSlot(value: string): string {
+  const [hStr, mStr] = value.split(':');
+  const h = parseInt(hStr);
+  const hour12 = h > 12 ? h - 12 : h === 0 ? 12 : h;
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  return `${hour12}:${mStr} ${ampm}`;
+}
 
 
 
