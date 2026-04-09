@@ -49,7 +49,7 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
 
       const tooManyEmoticons = (recentEmoticons?.length || 0) >= 5;
       const isAiFlagged = !profileViewed || tooManyEmoticons;
-      const moolasAwarded = isAiFlagged ? 0 : 1;
+      const vulasAwarded = isAiFlagged ? 0 : 1;
 
       // Insert emoticon message
       await supabase.from('emoticon_messages' as any).insert({
@@ -57,7 +57,7 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
         recipient_id: recipientId,
         patient_id: patientId,
         emoticon,
-        moolas_awarded: moolasAwarded,
+        moolas_awarded: vulasAwarded,
         is_ai_flagged: isAiFlagged,
         profile_viewed: profileViewed,
       });
@@ -77,7 +77,7 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
           doctor_id: user.id,
           reward_type: 'emoticon_checkin',
           description: `Sent ${emoticon} to ${recipientName}`,
-          moolas_count: moolasAwarded,
+          moolas_count: vulasAwarded,
           reference_id: patientId,
         });
       }

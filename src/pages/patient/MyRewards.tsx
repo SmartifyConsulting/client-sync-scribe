@@ -70,7 +70,7 @@ interface PartnerApp {
   signup_url: string | null;
 }
 
-interface MoolaTransfer {
+interface VulaTransfer {
   id: string;
   amount: number;
   created_at: string;
@@ -150,7 +150,7 @@ export default function MyRewards() {
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data || []) as MoolaTransfer[];
+      return (data || []) as VulaTransfer[];
     },
   });
 

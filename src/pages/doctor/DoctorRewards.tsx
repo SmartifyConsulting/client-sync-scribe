@@ -37,8 +37,8 @@ export default function DoctorRewards() {
   const { rewards, lollipopCount: patientLollipopCount, loading: rewardsLoading } = useMyRewards();
   const { streaks, loading: streaksLoading } = useMyStreaks();
 
-  const { data: doctorMoolas = 0 } = useQuery({
-    queryKey: ["doctor-moolas-profile"],
+  const { data: doctorVulas = 0 } = useQuery({
+    queryKey: ["doctor-vulas-profile"],
     queryFn: async () => {
       if (!user?.id) return 0;
       const { data, error } = await supabase.from("doctor_rewards").select("moolas_count").eq("doctor_id", user.id);
@@ -47,8 +47,8 @@ export default function DoctorRewards() {
     },
   });
 
-  const { data: patientMoolas = 0 } = useQuery({
-    queryKey: ["patient-moolas-profile"],
+  const { data: patientVulas = 0 } = useQuery({
+    queryKey: ["patient-vulas-profile"],
     queryFn: async () => {
       if (!user?.id) return 0;
       const { data: patient } = await supabase.from("patients").select("id").eq("patient_user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
@@ -59,7 +59,7 @@ export default function DoctorRewards() {
     },
   });
 
-  const totalMoolas = doctorMoolas + patientMoolas;
+  const totalVulas = doctorVulas + patientVulas;
 
   const { data: partnerApps = [] } = useQuery({
     queryKey: ["moola-partner-apps-doctor"],
@@ -85,7 +85,7 @@ export default function DoctorRewards() {
   const handleTransfer = async () => {
     if (!user?.id) return;
     const amount = parseInt(transferAmount) || 0;
-    if (amount <= 0 || amount > totalMoolas) { toast({ title: "Invalid amount", variant: "destructive" }); return; }
+    if (amount <= 0 || amount > totalVulas) { toast({ title: "Invalid amount", variant: "destructive" }); return; }
     const { data: patient } = await supabase.from("patients").select("id").eq("patient_user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
     if (!patient) { toast({ title: "No patient record found", variant: "destructive" }); return; }
     const { error: transferError } = await supabase.from("moola_transfers").insert({ user_id: user.id, partner_app_id: transferAppId, amount });
@@ -97,16 +97,16 @@ export default function DoctorRewards() {
     if (deductError) { toast({ title: "Deduction failed", variant: "destructive" }); return; }
     toast({ title: "Transfer successful", description: `${amount} Vulas transferred.` });
     queryClient.invalidateQueries({ queryKey: ["moola-transfers-doctor"] });
-    queryClient.invalidateQueries({ queryKey: ["patient-moolas-profile"] });
-    queryClient.invalidateQueries({ queryKey: ["doctor-moolas-profile"] });
+    queryClient.invalidateQueries({ queryKey: ["patient-vulas-profile"] });
+    queryClient.invalidateQueries({ queryKey: ["doctor-vulas-profile"] });
     setShowTransferDialog(false);
     setTransferAppId("");
     setTransferAmount("");
   };
 
-  const currentMilestone = MILESTONES.filter(m => totalMoolas >= m.count).pop();
-  const nextMilestone = MILESTONES.find(m => totalMoolas < m.count);
-  const progressToNext = nextMilestone ? Math.round((totalMoolas / nextMilestone.count) * 100) : 100;
+  const currentMilestone = MILESTONES.filter(m => totalVulas >= m.count).pop();
+  const nextMilestone = MILESTONES.find(m => totalVulas < m.count);
+  const progressToNext = nextMilestone ? Math.round((totalVulas / nextMilestone.count) * 100) : 100;
   const activeStreaks = streaks.filter(s => s.current_streak > 0);
 
   return (
@@ -128,7 +128,7 @@ export default function DoctorRewards() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-yellow-900 dark:text-yellow-200">Combined</p>
-                <p className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">{totalMoolas}</p>
+                <p className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">{totalVulas}</p>
               </div>
               <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center">
                 <img src={vulaSymbol} alt="Vulas" className="h-9 w-9 object-contain" />
@@ -139,13 +139,13 @@ export default function DoctorRewards() {
         <Card className="border-border">
           <CardContent className="pt-6">
             <p className="text-xs text-muted-foreground">Doctor Vulas</p>
-            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{doctorMoolas} <span className="text-base">Ⓜ</span></p>
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{doctorVulas} <span className="text-base">Ⓜ</span></p>
           </CardContent>
         </Card>
         <Card className="border-border">
           <CardContent className="pt-6">
             <p className="text-xs text-muted-foreground">Patient Vulas</p>
-            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{patientMoolas} <span className="text-base">Ⓜ</span></p>
+            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{patientVulas} <span className="text-base">Ⓜ</span></p>
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-sky-400 to-cyan-500 dark:from-sky-700/40 dark:to-cyan-800/30 border-sky-400 dark:border-sky-600/40">
@@ -177,12 +177,12 @@ export default function DoctorRewards() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Target className="h-5 w-5 text-primary" />Progress to Next Milestone</CardTitle>
-                <CardDescription>{totalMoolas} / {nextMilestone.count} Vulas to "{nextMilestone.label}"</CardDescription>
+                <CardDescription>{totalVulas} / {nextMilestone.count} Vulas to "{nextMilestone.label}"</CardDescription>
               </CardHeader>
               <CardContent>
                 <Progress value={progressToNext} className="h-4" />
                 <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                  <span>{nextMilestone.count - totalMoolas} more to go!</span>
+                  <span>{nextMilestone.count - totalVulas} more to go!</span>
                   <span className="text-2xl">{nextMilestone.icon}</span>
                 </div>
               </CardContent>
@@ -227,7 +227,7 @@ export default function DoctorRewards() {
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {MILESTONES.map((milestone) => {
-                  const unlocked = totalMoolas >= milestone.count;
+                  const unlocked = totalVulas >= milestone.count;
                   return (
                     <div key={milestone.count} className={`p-4 rounded-xl border-2 transition-all ${unlocked ? "border-yellow-400 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/30 dark:to-orange-950/30" : "border-muted bg-muted/20 opacity-60"}`}>
                       <div className="flex items-center gap-3">
@@ -399,7 +399,7 @@ export default function DoctorRewards() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-card rounded-xl border border-border p-6 w-full max-w-md shadow-lg space-y-4">
             <h3 className="text-lg font-semibold">Transfer Vulas</h3>
-            <p className="text-sm text-muted-foreground">Available balance: {totalMoolas} Ⓜ</p>
+            <p className="text-sm text-muted-foreground">Available balance: {totalVulas} Ⓜ</p>
             <div className="space-y-2">
               <Label>Partner App</Label>
               <Select value={transferAppId} onValueChange={setTransferAppId}>
@@ -409,11 +409,11 @@ export default function DoctorRewards() {
             </div>
             <div className="space-y-2">
               <Label>Amount</Label>
-              <Input type="number" min={1} max={totalMoolas} placeholder="Enter amount" value={transferAmount} onChange={(e) => setTransferAmount(e.target.value)} />
+              <Input type="number" min={1} max={totalVulas} placeholder="Enter amount" value={transferAmount} onChange={(e) => setTransferAmount(e.target.value)} />
             </div>
             <div className="flex gap-2 justify-end">
               <Button variant="outline" onClick={() => setShowTransferDialog(false)}>Cancel</Button>
-              <Button onClick={handleTransfer} disabled={!transferAppId || !transferAmount || parseInt(transferAmount) <= 0 || parseInt(transferAmount) > totalMoolas}>
+              <Button onClick={handleTransfer} disabled={!transferAppId || !transferAmount || parseInt(transferAmount) <= 0 || parseInt(transferAmount) > totalVulas}>
                 <Send className="h-4 w-4 mr-2" /> Transfer
               </Button>
             </div>
