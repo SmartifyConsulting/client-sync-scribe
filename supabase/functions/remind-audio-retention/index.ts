@@ -51,7 +51,7 @@ serve(async (req) => {
     // 2. Send reminder notifications for sessions expiring soon (6+ days old)
     const { data: expiringSessions } = await supabase
       .from("sessions")
-      .select("id, user_id, patient_id")
+      .select("id, user_id, patient_id, created_at")
       .not("audio_url", "is", null)
       .lt("created_at", sixDaysAgo)
       .gte("created_at", sevenDaysAgo);
@@ -60,12 +60,16 @@ serve(async (req) => {
       const doctorIds = [...new Set(expiringSessions.map(s => s.user_id))];
       
       for (const doctorId of doctorIds) {
-        const count = expiringSessions.filter(s => s.user_id === doctorId).length;
+        const doctorSessions = expiringSessions.filter(s => s.user_id === doctorId);
+        const count = doctorSessions.length;
+        const sessionDates = doctorSessions
+          .map(s => new Date(s.created_at).toLocaleDateString('en-ZA', { month: 'short', day: 'numeric' }))
+          .join(', ');
         await supabase.from("notifications").insert({
           user_id: doctorId,
           type: "audio_retention",
           title: "Session recordings expiring soon",
-          description: `You have ${count} session recording(s) that will be deleted tomorrow. Download them from Sessions to keep.`,
+          description: `You have ${count} session recording(s) from ${sessionDates} that will be deleted tomorrow. Download them from Sessions to keep.`,
         });
       }
 
@@ -79,11 +83,15 @@ serve(async (req) => {
           .maybeSingle();
         
         if (patient?.patient_user_id) {
+          const patientSessions = expiringSessions.filter(s => s.patient_id === patientId);
+          const sessionDates = patientSessions
+            .map(s => new Date(s.created_at).toLocaleDateString('en-ZA', { month: 'short', day: 'numeric' }))
+            .join(', ');
           await supabase.from("notifications").insert({
             user_id: patient.patient_user_id,
             type: "audio_retention",
             title: "Session recordings expiring soon",
-            description: "Some of your session recordings will be deleted tomorrow. Contact your doctor if you need copies.",
+            description: `Your session recording(s) from ${sessionDates} will be deleted tomorrow. Contact your doctor if you need copies.`,
           });
         }
       }
