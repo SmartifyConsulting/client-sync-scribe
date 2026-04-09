@@ -46,7 +46,7 @@ const doctorNavItems: NavItem[] = [
   { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
   { icon: CheckSquare, label: "To-Do List", to: "/todos" },
-  { icon: Gift, label: "My Rewards", to: "/doctor/rewards" },
+  { icon: Gift, label: "My Vulas", to: "/doctor/rewards" },
 ];
 
 const patientNavItems: NavItem[] = [
@@ -54,7 +54,7 @@ const patientNavItems: NavItem[] = [
   { icon: User, label: "My Holarchive", to: "/patient/details" },
   { icon: Calendar, label: "My Calendar", to: "/patient/calendar" },
   { icon: CheckSquare, label: "To-Do List", to: "/patient/tasks" },
-  { icon: Gift, label: "My Rewards", to: "/patient/rewards" },
+  { icon: Gift, label: "My Vulas", to: "/patient/rewards" },
 ];
 
 const adminNavItems: NavItem[] = [
