@@ -129,7 +129,7 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isCompleted = todo.status === "completed";
-  const hasMoolasReward = todo.moolas_reward > 0;
+  const hasVulasReward = todo.moolas_reward > 0;
   const isMedicationType = todo.task_type === "medication" || todo.title.toLowerCase().includes("medication") || todo.title.toLowerCase().includes("medic");
 
   // Recording state
@@ -397,7 +397,7 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
 
             {!isCompleted && (
               <div className="flex items-center gap-2 mt-3">
-                {hasMoolasReward && (
+                {hasVulasReward && (
                   <Button size="sm" onClick={() => setShowRecordDialog(true)} className="gap-1.5 text-xs h-8">
                     <Video className="h-3.5 w-3.5" />
                     Record Proof

@@ -246,7 +246,7 @@ export default function MyRewards() {
         <div>
           <h1 className="text-3xl font-bold text-foreground">My Rewards</h1>
           <p className="mt-1 text-muted-foreground text-[12px]">
-            Track your Moolas, milestones, and health streaks
+            Track your Vulas, milestones, and health streaks
           </p>
         </div>
         {partnerApps.length > 0 && (
@@ -389,9 +389,9 @@ export default function MyRewards() {
             History
           </TabsTrigger>
           <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-             Moolas
+             Vulas
            </TabsTrigger>
-          <TabsTrigger value="moola-apps" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+          <TabsTrigger value="vula-apps" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
              Vula Apps
            </TabsTrigger>
          </TabsList>
@@ -566,7 +566,7 @@ export default function MyRewards() {
                             {milestone.label}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {milestone.count} Moolas
+                            {milestone.count} Vulas
                           </p>
                         </div>
                       </div>
@@ -735,7 +735,7 @@ export default function MyRewards() {
                     <TableRow>
                       <TableHead>Date</TableHead>
                       <TableHead>Visit Type</TableHead>
-                      <TableHead className="text-right">Moolas</TableHead>
+                      <TableHead className="text-right">Vulas</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -768,7 +768,7 @@ export default function MyRewards() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="moola-apps" className="space-y-6">
+        <TabsContent value="vula-apps" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

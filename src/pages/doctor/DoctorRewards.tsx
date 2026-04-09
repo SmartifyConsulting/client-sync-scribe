@@ -169,7 +169,7 @@ export default function DoctorRewards() {
           <TabsTrigger value="streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Streaks</TabsTrigger>
           <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">History</TabsTrigger>
           <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Transfers</TabsTrigger>
-          <TabsTrigger value="moola-apps" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Vula Apps</TabsTrigger>
+          <TabsTrigger value="vula-apps" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Vula Apps</TabsTrigger>
          </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -234,7 +234,7 @@ export default function DoctorRewards() {
                         <span className={`text-4xl ${!unlocked && "grayscale"}`}>{milestone.icon}</span>
                         <div>
                           <p className={`font-bold ${milestone.color}`}>{milestone.label}</p>
-                          <p className="text-sm text-muted-foreground">{milestone.count} Moolas</p>
+                          <p className="text-sm text-muted-foreground">{milestone.count} Vulas</p>
                         </div>
                       </div>
                       {unlocked && <Badge className="mt-3 bg-yellow-500 text-white"><Star className="h-3 w-3 mr-1" /> Unlocked!</Badge>}
@@ -303,7 +303,7 @@ export default function DoctorRewards() {
                 <div className="text-center py-8"><span className="text-5xl mb-4 block font-bold text-emerald-600">Ⓜ</span><p className="text-muted-foreground">No rewards yet</p></div>
               ) : (
                 <Table>
-                  <TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Visit Type</TableHead><TableHead className="text-right">Moolas</TableHead></TableRow></TableHeader>
+                  <TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Visit Type</TableHead><TableHead className="text-right">Vulas</TableHead></TableRow></TableHeader>
                   <TableBody>
                     {rewards.map((reward) => (
                       <TableRow key={reward.id}>
@@ -346,7 +346,7 @@ export default function DoctorRewards() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="moola-apps" className="space-y-6">
+        <TabsContent value="vula-apps" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><Gift className="h-5 w-5 text-primary" />Vula Apps</CardTitle>
