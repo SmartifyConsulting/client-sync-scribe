@@ -841,23 +841,23 @@ ${tasksHtml}`;
           .single();
 
         if (rewardError) {
-          console.error('Error awarding moola:', rewardError);
+          console.error('Error awarding vula:', rewardError);
         } else {
-          console.log('Moola awarded for:', visitCategory, 'count:', lollipopsToAward);
+          console.log('Vula awarded for:', visitCategory, 'count:', lollipopsToAward);
           
           if (patientData?.patient_user_id) {
             await supabase.from('notifications').insert({
               user_id: patientData.patient_user_id,
-              title: `Ⓜ️ You earned ${lollipopsToAward} Moola${lollipopsToAward > 1 ? 's' : ''}!`,
-              description: `Great job! You received ${lollipopsToAward} Moola${lollipopsToAward > 1 ? 's' : ''} for your ${visitCategory}.`,
+              title: `Ⓜ️ You earned ${lollipopsToAward} Vula${lollipopsToAward > 1 ? 's' : ''}!`,
+              description: `Great job! You received ${lollipopsToAward} Vula${lollipopsToAward > 1 ? 's' : ''} for your ${visitCategory}.`,
               type: 'reward',
               reference_id: rewardData.id,
             });
           }
 
           toast({ 
-            title: `Ⓜ️ ${lollipopsToAward} Moola${lollipopsToAward > 1 ? 's' : ''} Awarded!`, 
-            description: `Patient earned ${lollipopsToAward} Moola${lollipopsToAward > 1 ? 's' : ''} for their ${visitCategory}` 
+            title: `Ⓜ️ ${lollipopsToAward} Vula${lollipopsToAward > 1 ? 's' : ''} Awarded!`, 
+            description: `Patient earned ${lollipopsToAward} Vula${lollipopsToAward > 1 ? 's' : ''} for their ${visitCategory}` 
           });
         }
       }

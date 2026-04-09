@@ -41,7 +41,7 @@ export function LollipopDisplay({
             </Badge>
           </TooltipTrigger>
           <TooltipContent>
-            <p>{count} Moola{count !== 1 ? 's' : ''} earned for healthy visits!</p>
+            <p>{count} Vula{count !== 1 ? 's' : ''} earned for healthy visits!</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -53,7 +53,7 @@ export function LollipopDisplay({
       <div className="flex items-center gap-2 text-sm">
         <VulaLogoBadge size="sm" />
         <span className="font-semibold text-foreground">{count}</span>
-        <span className="text-muted-foreground">Moola{count !== 1 ? 's' : ''}</span>
+        <span className="text-muted-foreground">Vula{count !== 1 ? 's' : ''}</span>
       </div>
     );
   }
@@ -72,7 +72,7 @@ export function LollipopDisplay({
             {count}
           </div>
           <div className="text-sm text-muted-foreground">
-            Moola{count !== 1 ? 's' : ''} earned<br />
+            Vula{count !== 1 ? 's' : ''} earned<br />
             for healthy visits
           </div>
         </div>

@@ -102,7 +102,7 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
                 <TableRow>
                   <TableHead>Date</TableHead>
                   <TableHead>Visit Type</TableHead>
-                  <TableHead>Moolas</TableHead>
+                  <TableHead>Vulas</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

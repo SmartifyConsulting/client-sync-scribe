@@ -226,16 +226,16 @@ export function usePatientRewards(patientId?: string) {
       if (patientUserId) {
         await supabase.from('notifications').insert({
           user_id: patientUserId,
-          title: `Ⓜ You earned ${lollipopsToAward} Moola${lollipopsToAward > 1 ? 's' : ''}!`,
-          description: `Great job! You received ${lollipopsToAward} Moola${lollipopsToAward > 1 ? 's' : ''} for your ${visitCategory}.`,
+          title: `Ⓜ You earned ${lollipopsToAward} Vula${lollipopsToAward > 1 ? 's' : ''}!`,
+          description: `Great job! You received ${lollipopsToAward} Vula${lollipopsToAward > 1 ? 's' : ''} for your ${visitCategory}.`,
           type: 'reward',
           reference_id: data.id,
         });
       }
 
       toast({
-        title: `Ⓜ ${lollipopsToAward} Moola${lollipopsToAward > 1 ? 's' : ''} Awarded!`,
-        description: `Patient earned ${lollipopsToAward} Moola${lollipopsToAward > 1 ? 's' : ''} for their ${visitCategory}`,
+        title: `Ⓜ ${lollipopsToAward} Vula${lollipopsToAward > 1 ? 's' : ''} Awarded!`,
+        description: `Patient earned ${lollipopsToAward} Vula${lollipopsToAward > 1 ? 's' : ''} for their ${visitCategory}`,
       });
 
       return true;
@@ -287,8 +287,8 @@ export function usePatientRewards(patientId?: string) {
       // Create welcome notification
       await supabase.from('notifications').insert({
         user_id: patientUserId,
-        title: 'Ⓜ Welcome! You earned your first Moola!',
-        description: `Congratulations on signing up! You received ${lollipopsToAward} Moola${lollipopsToAward > 1 ? 's' : ''} as a welcome bonus.`,
+        title: 'Ⓜ Welcome! You earned your first Vula!',
+        description: `Congratulations on signing up! You received ${lollipopsToAward} Vula${lollipopsToAward > 1 ? 's' : ''} as a welcome bonus.`,
         type: 'reward',
         reference_id: data.id,
       });

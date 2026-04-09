@@ -396,7 +396,7 @@ export default function GamificationAdmin() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Visit Category</TableHead>
-                     <TableHead>Moolas</TableHead>
+                     <TableHead>Vulas</TableHead>
                     <TableHead>Description</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -570,7 +570,7 @@ export default function GamificationAdmin() {
                     <TableHead>Streak Name</TableHead>
                     <TableHead>Visit Category</TableHead>
                     <TableHead>Interval</TableHead>
-                     <TableHead>Moolas</TableHead>
+                     <TableHead>Vulas</TableHead>
                      <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
