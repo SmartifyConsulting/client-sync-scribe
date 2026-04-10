@@ -175,6 +175,7 @@ const SECTION_TABS: Record<string, string[]> = {
 
 export function PatientDetailsEditor({ patient, onSave, isSelfService = false, userEmail, lollipopCount = 0, rewardsLoading = false, section }: PatientDetailsEditorProps) {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { isDoctor } = useUserRole();
   const [isEditing, setIsEditing] = useState(false);
