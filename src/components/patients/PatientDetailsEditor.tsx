@@ -1221,7 +1221,7 @@ export function PatientDetailsEditor({
           )}
           {show("doctors") && (
             <TabsTrigger value="doctors" className={triggerClass}>
-              My H/Care Panel
+              My Care Panel
             </TabsTrigger>
           )}
           {show("sessions") && (
@@ -1280,7 +1280,7 @@ export function PatientDetailsEditor({
           </button>
           {isSelfService && (
             <TabsTrigger value="doctors" className={triggerClass}>
-              My H/Care Panel;
+              My Care Panel;
             </TabsTrigger>
           )}
           {isSelfService && (
@@ -1900,7 +1900,7 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="doctors" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">My H/Care Panel</h2>
+                  <h2 className="text-lg font-semibold text-foreground">My Care Panel</h2>
                   <p className="text-xs text-muted-foreground">Healthcare providers with access to your profile</p>
                 </div>
                 <Suspense
@@ -1934,7 +1934,6 @@ export function PatientDetailsEditor({
                 </Suspense>
               </TabsContent>
             )}
-
           </Tabs>
         </div>
       </div>
@@ -3569,7 +3568,6 @@ export function PatientDetailsEditor({
               </Suspense>
             </TabsContent>
           )}
-
         </Tabs>
       </div>
     </div>
