@@ -946,7 +946,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     <ViewField label="Employer" value={patient.employer} />
                     <ViewField label="Occupation" value={patient.occupation} />
-                    <ViewField label="Reporting To Email (Optional)" value={patient.reporting_to_email} />
+                    <ViewField label="Line Manager Email Address (Optional)" value={patient.reporting_to_email} />
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -1142,6 +1142,41 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                         <ViewField label="Primary Member" value={patient.primary_member} />
                         <ViewField label="Claims Email (auto-submission)" value={patient.claims_email} />
                       </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+
+                  {/* Next of Kin - moved from Personal to Medical */}
+                  <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                    <SectionHeader icon={Users} label="Next of Kin" />
+                    <CollapsibleContent className="p-3">
+                      {nokMembers.length > 0 ? (
+                        <div className="space-y-2">
+                          {nokMembers.map(nok => (
+                            <div key={nok.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                              <div>
+                                <p className="text-xs font-medium text-foreground">{nok.name} {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}</p>
+                                {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
+                                {nok.email && <p className="text-[10px] text-muted-foreground">{nok.email}</p>}
+                              </div>
+                              <div className="flex gap-1">
+                                <Button variant="ghost" size="icon" className="h-6 w-6" title="Notify" onClick={() => toast({ title: "Notification sent", description: `${nok.name} has been notified` })}>
+                                  <Bell className="h-3 w-3 text-primary" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('nok', nok)}>
+                                  <Share2 className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")} />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                          <ViewField label="Name" value={patient.next_of_kin_name} />
+                          <ViewField label="Relationship" value={patient.next_of_kin_relationship} />
+                          <ViewField label="Phone" value={patient.next_of_kin_phone} />
+                          <ViewField label="Email" value={patient.next_of_kin_email} />
+                        </div>
+                      )}
                     </CollapsibleContent>
                   </Collapsible>
 
