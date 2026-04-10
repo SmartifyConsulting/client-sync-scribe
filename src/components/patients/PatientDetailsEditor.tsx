@@ -72,7 +72,7 @@ const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
 const MyDoctors = lazy(() => import("@/pages/patient/MyDoctors"));
 const PatientRoundTable = lazy(() => import("@/pages/patient/PatientRoundTable"));
 const PatientCalendarLazy = lazy(() => import("@/pages/patient/PatientCalendar"));
-const NokIcedTab = lazy(() => import("@/components/patients/NokIcedTab"));
+
 const SettingsContentLazy = lazy(() =>
   import("@/components/settings/SettingsContent").then((m) => ({ default: m.SettingsContent })),
 );
@@ -1935,25 +1935,6 @@ export function PatientDetailsEditor({
               </TabsContent>
             )}
 
-            {isSelfService && (
-              <TabsContent value="nok-iced" className="mt-4">
-                <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">NOK & ICE</h2>
-                  <p className="text-xs text-muted-foreground">
-                    People who have listed you as their Next of Kin or In Case of Emergency contact
-                  </p>
-                </div>
-                <Suspense
-                  fallback={
-                    <div className="flex items-center justify-center py-12">
-                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                    </div>
-                  }
-                >
-                  <NokIcedTab />
-                </Suspense>
-              </TabsContent>
-            )}
           </Tabs>
         </div>
       </div>
@@ -3589,25 +3570,6 @@ export function PatientDetailsEditor({
             </TabsContent>
           )}
 
-          {isSelfService && (
-            <TabsContent value="nok-iced" className="mt-4">
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">NOK & ICE</h2>
-                <p className="text-xs text-muted-foreground">
-                  People who have listed you as their Next of Kin or In Case of Emergency contact
-                </p>
-              </div>
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                }
-              >
-                <NokIcedTab />
-              </Suspense>
-            </TabsContent>
-          )}
         </Tabs>
       </div>
     </div>
