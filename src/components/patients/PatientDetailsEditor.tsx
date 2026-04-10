@@ -961,10 +961,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
             {/* === MEDICAL INFORMATION TAB — TWO COLUMNS === */}
             <TabsContent value="medical" className="mt-4">
-              <div className="mb-3">
-                <h2 className="text-lg font-semibold text-foreground">Medical Information</h2>
-                <p className="text-xs text-muted-foreground">View and manage medical records</p>
-              </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="space-y-3">
                   {/* General Information */}
@@ -1226,10 +1222,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             {/* === TASKS TAB === */}
             {isSelfService && (
               <TabsContent value="tasks" className="mt-4">
-                <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">My Tasks</h2>
-                  <p className="text-xs text-muted-foreground">Manage your health tasks and to-dos</p>
-                </div>
                 <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
                   <PatientTasksLazy />
                 </Suspense>
@@ -1238,10 +1230,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
             {isSelfService && (
               <TabsContent value="sessions" className="mt-4">
-                <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">My Sessions</h2>
-                  <p className="text-xs text-muted-foreground">History of your consultations</p>
-                </div>
                 <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
                   <SessionHistoryTableLazy sessions={[]} patientId={patient.id} patientName={patient.name} />
                 </Suspense>
@@ -1259,17 +1247,13 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             {isSelfService && (
               <TabsContent value="documents" className="mt-4">
                 <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-                  <PatientDocuments hideHeader={false} />
+                  <PatientDocuments hideHeader />
                 </Suspense>
               </TabsContent>
             )}
 
             {isSelfService && (
               <TabsContent value="doctors" className="mt-4">
-                <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">My H/Care Providers</h2>
-                  <p className="text-xs text-muted-foreground">Healthcare providers with access to your profile</p>
-                </div>
                 <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
                   <MyDoctors hideHeader />
                 </Suspense>
@@ -1278,10 +1262,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
             {isSelfService && (
               <TabsContent value="roundtable" className="mt-4">
-                <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">My Round Table</h2>
-                  <p className="text-xs text-muted-foreground">Notes shared by your healthcare providers about your care</p>
-                </div>
                 <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
                   <PatientRoundTable hideHeader />
                 </Suspense>
