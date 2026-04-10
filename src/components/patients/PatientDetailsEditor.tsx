@@ -946,128 +946,148 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 <p className="text-xs text-muted-foreground">View and manage medical records</p>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div className={sectionFrame + " space-y-5"}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Medical Information</h3>
-
-                  <div>
-                    <div className="grid gap-3 sm:grid-cols-4">
-                      <ViewField label="Height (cm)" value={patient.height_cm ? `${patient.height_cm}` : undefined} />
-                      <ViewField label="Weight (kg)" value={patient.weight_kg ? `${patient.weight_kg}` : undefined} />
-                      <ViewField label="BMI" value={bmi || undefined} />
-                      <ViewField label="Blood Type" value={patient.blood_type} />
-                    </div>
-                  </div>
-
-                  {/* Allergies */}
-                  <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
-                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
-                      <AlertCircle className="h-3.5 w-3.5" /> Allergies
-                    </h3>
-                    <p className="text-xs text-foreground">{patient.allergies || "None recorded"}</p>
-                  </div>
-
-                  {/* Medication */}
-                  <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
-                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
-                      <Pill className="h-3.5 w-3.5" /> Medication
-                    </h3>
-                    {currentMedications.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No medications recorded</p>
-                    ) : (
-                      <div className="space-y-1">
-                        {currentMedications.map(m => (
-                          <div key={m.id} className="flex items-center gap-2 p-1.5 rounded-lg bg-muted/30 border border-border/50">
-                            <Pill className="h-3 w-3 text-muted-foreground shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-medium text-foreground">{m.name}{m.dosage ? ` — ${m.dosage}` : ""}</p>
-                              {(m.start_date || m.end_date) && (
-                                <p className="text-[10px] text-muted-foreground">
-                                  {m.start_date ? format(new Date(m.start_date), "MMM yyyy") : "?"} — {m.end_date ? format(new Date(m.end_date), "MMM yyyy") : "Present"}
-                                </p>
-                              )}
-                            </div>
-                            <Badge className={`text-[8px] border-0 ${m.status === 'past' ? 'bg-muted text-muted-foreground' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'}`}>
-                              {m.status === 'past' ? 'Past' : 'Current'}
-                            </Badge>
-                            {m.is_chronic && <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[9px] font-bold text-destructive shrink-0">Chronic</span>}
-                          </div>
-                        ))}
+                <div className="space-y-3">
+                  {/* General Information */}
+                  <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
+                    <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
+                      <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> General Information</h3>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-3 pb-3">
+                      <div className="grid gap-3 sm:grid-cols-4">
+                        <ViewField label="Height (cm)" value={patient.height_cm ? `${patient.height_cm}` : undefined} />
+                        <ViewField label="Weight (kg)" value={patient.weight_kg ? `${patient.weight_kg}` : undefined} />
+                        <ViewField label="BMI" value={bmi || undefined} />
+                        <ViewField label="Blood Type" value={patient.blood_type} />
                       </div>
-                    )}
-                    {isChronic && (
-                      <div className="mt-2">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive"><Pill className="h-2.5 w-2.5" />Chronic Patient</span>
-                      </div>
-                    )}
-                  </div>
+                    </CollapsibleContent>
+                  </Collapsible>
 
-                  {/* Conditions & Diagnoses */}
-                  <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
-                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
-                      <HeartPulse className="h-3.5 w-3.5" /> Conditions & Diagnoses
-                    </h3>
-                    {conditionsDiagnoses.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No conditions recorded</p>
-                    ) : (
-                      <div className="space-y-1">
-                        {conditionsDiagnoses.map(c => (
-                          <div key={c.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
-                            <div className="flex items-center gap-2">
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-medium text-foreground">{c.name}</p>
-                                <p className="text-[10px] text-muted-foreground">
-                                  {c.diagnosed_date ? format(new Date(c.diagnosed_date), "MMM d, yyyy") : "Date unknown"}
-                                  {c.diagnosed_by ? ` · Dr. ${c.diagnosed_by}` : ""}
-                                </p>
+                  {/* Allergies, Medication & Conditions */}
+                  <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
+                    <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
+                      <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Allergies, Medication & Conditions</h3>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-3 pb-3 space-y-3">
+                      {/* Allergies */}
+                      <div className="rounded-lg border border-border/50 p-2.5 space-y-1">
+                        <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5">
+                          <AlertCircle className="h-3.5 w-3.5" /> Allergies
+                        </h4>
+                        <p className="text-xs text-foreground">{patient.allergies || "None recorded"}</p>
+                      </div>
+
+                      {/* Medication */}
+                      <div className="rounded-lg border border-border/50 p-2.5 space-y-1">
+                        <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5">
+                          <Pill className="h-3.5 w-3.5" /> Medication
+                        </h4>
+                        {currentMedications.length === 0 ? (
+                          <p className="text-xs text-muted-foreground">No medications recorded</p>
+                        ) : (
+                          <div className="space-y-1">
+                            {currentMedications.map(m => (
+                              <div key={m.id} className="flex items-center gap-2 p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                                <Pill className="h-3 w-3 text-muted-foreground shrink-0" />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-medium text-foreground">{m.name}{m.dosage ? ` — ${m.dosage}` : ""}</p>
+                                  {(m.start_date || m.end_date) && (
+                                    <p className="text-[10px] text-muted-foreground">
+                                      {m.start_date ? format(new Date(m.start_date), "MMM yyyy") : "?"} — {m.end_date ? format(new Date(m.end_date), "MMM yyyy") : "Present"}
+                                    </p>
+                                  )}
+                                </div>
+                                <Badge className={`text-[8px] border-0 ${m.status === 'past' ? 'bg-muted text-muted-foreground' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'}`}>
+                                  {m.status === 'past' ? 'Past' : 'Current'}
+                                </Badge>
+                                {m.is_chronic && <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[9px] font-bold text-destructive shrink-0">Chronic</span>}
                               </div>
-                              <Badge className={`text-[8px] border-0 ${c.status === 'resolved' ? 'bg-muted text-muted-foreground' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'}`}>
-                                {c.status === 'resolved' ? 'Resolved' : 'Active'}
-                              </Badge>
-                            </div>
+                            ))}
                           </div>
-                        ))}
+                        )}
+                        {isChronic && (
+                          <div className="mt-2">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive"><Pill className="h-2.5 w-2.5" />Chronic Patient</span>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
 
-                  {/* Surgeries */}
-                  <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
-                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
-                     <Scissors className="h-3.5 w-3.5" /> Surgeries and Dates
-                   </h3>
-                    {surgeries.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No surgeries recorded</p>
-                    ) : (
-                      <div className="space-y-1">
-                        {surgeries.map((surgery) => (
-                          <div key={surgery.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
-                            <p className="text-xs font-medium text-foreground">{surgery.name}</p>
-                            <p className="text-[10px] text-muted-foreground">{formatSurgeryDate(surgery.date, surgery.date_precision)}</p>
-                            {surgery.notes && <p className="text-[10px] text-muted-foreground mt-0.5">{surgery.notes}</p>}
+                      {/* Conditions & Diagnoses */}
+                      <div className="rounded-lg border border-border/50 p-2.5 space-y-1">
+                        <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5">
+                          <HeartPulse className="h-3.5 w-3.5" /> Conditions & Diagnoses
+                        </h4>
+                        {conditionsDiagnoses.length === 0 ? (
+                          <p className="text-xs text-muted-foreground">No conditions recorded</p>
+                        ) : (
+                          <div className="space-y-1">
+                            {conditionsDiagnoses.map(c => (
+                              <div key={c.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
+                                <div className="flex items-center gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-medium text-foreground">{c.name}</p>
+                                    <p className="text-[10px] text-muted-foreground">
+                                      {c.diagnosed_date ? format(new Date(c.diagnosed_date), "MMM d, yyyy") : "Date unknown"}
+                                      {c.diagnosed_by ? ` · Dr. ${c.diagnosed_by}` : ""}
+                                    </p>
+                                  </div>
+                                  <Badge className={`text-[8px] border-0 ${c.status === 'resolved' ? 'bg-muted text-muted-foreground' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'}`}>
+                                    {c.status === 'resolved' ? 'Resolved' : 'Active'}
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        )}
                       </div>
-                    )}
-                  </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+
+                  {/* Surgeries & Dates */}
+                  <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
+                    <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
+                      <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Scissors className="h-3.5 w-3.5" /> Surgeries & Dates</h3>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-3 pb-3">
+                      {surgeries.length === 0 ? (
+                        <p className="text-xs text-muted-foreground">No surgeries recorded</p>
+                      ) : (
+                        <div className="space-y-1">
+                          {surgeries.map((surgery) => (
+                            <div key={surgery.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
+                              <p className="text-xs font-medium text-foreground">{surgery.name}</p>
+                              <p className="text-[10px] text-muted-foreground">{formatSurgeryDate(surgery.date, surgery.date_precision)}</p>
+                              {surgery.notes && <p className="text-[10px] text-muted-foreground mt-0.5">{surgery.notes}</p>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CollapsibleContent>
+                  </Collapsible>
 
                   {/* Family History */}
-                  <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
-                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
-                     <GitBranch className="h-3.5 w-3.5" /> Family History
-                   </h3>
-                    {familyHistory.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No family history recorded</p>
-                    ) : (
-                      <div className="space-y-1">
-                        {familyHistory.map((entry) => (
-                          <div key={entry.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
-                            <p className="text-xs font-medium text-foreground">{entry.relation}</p>
-                            <p className="text-[10px] text-muted-foreground">{entry.condition}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
+                    <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
+                      <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><GitBranch className="h-3.5 w-3.5" /> Family History</h3>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-3 pb-3">
+                      {familyHistory.length === 0 ? (
+                        <p className="text-xs text-muted-foreground">No family history recorded</p>
+                      ) : (
+                        <div className="space-y-1">
+                          {familyHistory.map((entry) => (
+                            <div key={entry.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
+                              <p className="text-xs font-medium text-foreground">{entry.relation}</p>
+                              <p className="text-[10px] text-muted-foreground">{entry.condition}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CollapsibleContent>
+                  </Collapsible>
 
                   <div><OrganDonorView /></div>
                 </div>
