@@ -380,7 +380,7 @@ export default function DoctorRewards() {
                           {app.creator && (
                             <p className="text-xs text-muted-foreground">by {app.creator}</p>
                           )}
-                          <div className="flex items-center gap-2 mt-1">
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
                             <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0 text-[10px]">Active</Badge>
                             {app.signup_url && (
                               <a href={app.signup_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary underline hover:text-primary/80">
@@ -388,6 +388,20 @@ export default function DoctorRewards() {
                               </a>
                             )}
                           </div>
+                          {(app.google_play_url || app.app_store_url) && (
+                            <div className="flex items-center gap-2 mt-2 flex-wrap">
+                              {app.google_play_url && (
+                                <a href={app.google_play_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md bg-muted hover:bg-muted/80 text-foreground transition-colors">
+                                  ▶ Google Play
+                                </a>
+                              )}
+                              {app.app_store_url && (
+                                <a href={app.app_store_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md bg-muted hover:bg-muted/80 text-foreground transition-colors">
+                                   App Store
+                                </a>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

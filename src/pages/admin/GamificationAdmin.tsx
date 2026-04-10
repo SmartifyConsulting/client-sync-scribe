@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Loader2, Plus, Pencil, Trash2, Save, X, Gift, Flame, Calendar, Globe, Upload } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Save, X, Gift, Flame, Calendar, Globe, Upload, Pill } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,6 +28,7 @@ import { useGamificationAdmin, useStreakAdmin, GamificationConfig, StreakConfig 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import vulaSymbol from "@/assets/vula-symbol.png";
 
 interface PartnerApp {
   id: string;
@@ -37,6 +38,18 @@ interface PartnerApp {
   created_at: string;
   creator: string | null;
   signup_url: string | null;
+  google_play_url: string | null;
+  app_store_url: string | null;
+}
+
+interface AdherenceConfig {
+  id: string;
+  medication_category: string;
+  lollipops_awarded: number;
+  description: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export default function GamificationAdmin() {
@@ -73,10 +86,23 @@ export default function GamificationAdmin() {
   const [newAppLogoFile, setNewAppLogoFile] = useState<File | null>(null);
   const [newAppCreator, setNewAppCreator] = useState("");
   const [newAppSignupUrl, setNewAppSignupUrl] = useState("");
+  const [newAppGooglePlayUrl, setNewAppGooglePlayUrl] = useState("");
+  const [newAppStoreUrl, setNewAppStoreUrl] = useState("");
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const [editingAppId, setEditingAppId] = useState<string | null>(null);
   const [editAppValues, setEditAppValues] = useState<Partial<PartnerApp>>({});
+
+  // Adherence Rewards state
+  const [showAddAdherenceDialog, setShowAddAdherenceDialog] = useState(false);
+  const [newAdherenceConfig, setNewAdherenceConfig] = useState({
+    medication_category: "",
+    lollipops_awarded: 1,
+    description: "",
+    is_active: true,
+  });
+  const [editingAdherenceId, setEditingAdherenceId] = useState<string | null>(null);
+  const [editAdherenceValues, setEditAdherenceValues] = useState<Partial<AdherenceConfig>>({});
 
   const { data: partnerApps = [], isLoading: appsLoading } = useQuery({
     queryKey: ["admin-partner-apps"],
@@ -90,15 +116,28 @@ export default function GamificationAdmin() {
     },
   });
 
+  const { data: adherenceConfigs = [], isLoading: adherenceLoading } = useQuery({
+    queryKey: ["admin-adherence-configs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("moola_adherence_configs")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data || []) as AdherenceConfig[];
+    },
+  });
+
   const addAppMutation = useMutation({
     mutationFn: async () => {
       setUploadingLogo(true);
       let logoUrl: string | null = null;
       
-      // Upload logo if file selected
       if (newAppLogoFile) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("Not authenticated");
         const ext = newAppLogoFile.name.split(".").pop() || "png";
-        const fileName = `partner-apps/${Date.now()}.${ext}`;
+        const fileName = `${user.id}/partner-apps/${Date.now()}.${ext}`;
         const { error: uploadError } = await supabase.storage
           .from("logos")
           .upload(fileName, newAppLogoFile, { contentType: newAppLogoFile.type });
@@ -109,7 +148,14 @@ export default function GamificationAdmin() {
 
       const { error } = await supabase
         .from("moola_partner_apps")
-        .insert({ name: newAppName, logo_url: logoUrl, creator: newAppCreator || null, signup_url: newAppSignupUrl || null } as any);
+        .insert({
+          name: newAppName,
+          logo_url: logoUrl,
+          creator: newAppCreator || null,
+          signup_url: newAppSignupUrl || null,
+          google_play_url: newAppGooglePlayUrl || null,
+          app_store_url: newAppStoreUrl || null,
+        } as any);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -119,6 +165,8 @@ export default function GamificationAdmin() {
       setNewAppLogoFile(null);
       setNewAppCreator("");
       setNewAppSignupUrl("");
+      setNewAppGooglePlayUrl("");
+      setNewAppStoreUrl("");
       setUploadingLogo(false);
       toast({ title: "Partner app added" });
     },
@@ -174,6 +222,79 @@ export default function GamificationAdmin() {
     },
     onError: (err: Error) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
+  // Adherence config mutations
+  const addAdherenceMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("moola_adherence_configs")
+        .insert({
+          medication_category: newAdherenceConfig.medication_category,
+          lollipops_awarded: newAdherenceConfig.lollipops_awarded,
+          description: newAdherenceConfig.description || null,
+          is_active: newAdherenceConfig.is_active,
+        } as any);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-adherence-configs"] });
+      setShowAddAdherenceDialog(false);
+      setNewAdherenceConfig({ medication_category: "", lollipops_awarded: 1, description: "", is_active: true });
+      toast({ title: "Adherence reward added" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const updateAdherenceMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<AdherenceConfig> }) => {
+      const { error } = await supabase
+        .from("moola_adherence_configs")
+        .update(updates as any)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-adherence-configs"] });
+      setEditingAdherenceId(null);
+      setEditAdherenceValues({});
+      toast({ title: "Adherence reward updated" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const deleteAdherenceMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("moola_adherence_configs")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-adherence-configs"] });
+      toast({ title: "Adherence reward removed" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const toggleAdherenceMutation = useMutation({
+    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
+      const { error } = await supabase
+        .from("moola_adherence_configs")
+        .update({ is_active } as any)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-adherence-configs"] });
     },
   });
 
@@ -307,8 +428,8 @@ export default function GamificationAdmin() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Max Vulas/Visit</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-emerald-600">
-              {Math.max(...configs.map(c => c.lollipops_awarded), 0)} Ⓜ
+            <div className="text-2xl font-bold text-emerald-600 flex items-center gap-1">
+              {Math.max(...configs.map(c => c.lollipops_awarded), 0)} <img src={vulaSymbol} alt="Vula" className="h-5 w-5 inline object-contain" />
             </div>
           </CardContent>
         </Card>
@@ -319,6 +440,10 @@ export default function GamificationAdmin() {
           <TabsTrigger value="rewards" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
             <Gift className="h-4 w-4 mr-2" />
             Visit Rewards
+          </TabsTrigger>
+          <TabsTrigger value="adherence" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+            <Pill className="h-4 w-4 mr-2" />
+            Adherence Rewards
           </TabsTrigger>
           <TabsTrigger value="streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
             <Flame className="h-4 w-4 mr-2" />
@@ -419,7 +544,7 @@ export default function GamificationAdmin() {
                           />
                         ) : (
                           <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold">
-                            {config.lollipops_awarded} Ⓜ
+                            {config.lollipops_awarded} <img src={vulaSymbol} alt="Vula" className="h-4 w-4 inline object-contain" />
                           </span>
                         )}
                       </TableCell>
@@ -478,6 +603,156 @@ export default function GamificationAdmin() {
                   ))}
                 </TableBody>
               </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Adherence Rewards Tab */}
+        <TabsContent value="adherence" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Pill className="h-5 w-5 text-blue-500" />
+                  Adherence Reward Categories
+                </CardTitle>
+                <CardDescription>
+                  Configure Vula rewards for verified medication adherence
+                </CardDescription>
+              </div>
+              <Dialog open={showAddAdherenceDialog} onOpenChange={setShowAddAdherenceDialog}>
+                <DialogTrigger asChild>
+                  <Button className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add Category
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add Adherence Reward</DialogTitle>
+                    <DialogDescription>
+                      Create a new medication category that awards Vulas for verified doses
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label>Medication Category</Label>
+                      <Input
+                        placeholder="e.g., Blood Pressure, Diabetes, Chronic"
+                        value={newAdherenceConfig.medication_category}
+                        onChange={(e) => setNewAdherenceConfig({ ...newAdherenceConfig, medication_category: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Vulas per Verified Dose</Label>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={newAdherenceConfig.lollipops_awarded}
+                        onChange={(e) => setNewAdherenceConfig({ ...newAdherenceConfig, lollipops_awarded: parseInt(e.target.value) || 1 })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Description</Label>
+                      <Textarea
+                        placeholder="Brief description..."
+                        value={newAdherenceConfig.description}
+                        onChange={(e) => setNewAdherenceConfig({ ...newAdherenceConfig, description: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setShowAddAdherenceDialog(false)}>Cancel</Button>
+                    <Button onClick={() => addAdherenceMutation.mutate()} disabled={!newAdherenceConfig.medication_category.trim() || addAdherenceMutation.isPending}>
+                      Add Category
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </CardHeader>
+            <CardContent>
+              {adherenceLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                </div>
+              ) : adherenceConfigs.length === 0 ? (
+                <div className="text-center py-8">
+                  <Pill className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No adherence reward categories yet. Add one to reward patients for taking their medication.</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Medication Category</TableHead>
+                      <TableHead>Vulas/Dose</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {adherenceConfigs.map((config) => (
+                      <TableRow key={config.id}>
+                        <TableCell className="font-medium">
+                          {editingAdherenceId === config.id ? (
+                            <Input value={editAdherenceValues.medication_category || ""} onChange={(e) => setEditAdherenceValues({ ...editAdherenceValues, medication_category: e.target.value })} className="w-40" />
+                          ) : config.medication_category}
+                        </TableCell>
+                        <TableCell>
+                          {editingAdherenceId === config.id ? (
+                            <Input type="number" min={1} className="w-20" value={editAdherenceValues.lollipops_awarded} onChange={(e) => setEditAdherenceValues({ ...editAdherenceValues, lollipops_awarded: parseInt(e.target.value) || 1 })} />
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold">
+                              {config.lollipops_awarded} <img src={vulaSymbol} alt="Vula" className="h-4 w-4 inline object-contain" />
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="max-w-xs">
+                          {editingAdherenceId === config.id ? (
+                            <Input value={editAdherenceValues.description || ""} onChange={(e) => setEditAdherenceValues({ ...editAdherenceValues, description: e.target.value })} placeholder="Description..." />
+                          ) : (
+                            <span className="text-muted-foreground text-sm">{config.description || "-"}</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Switch
+                            checked={editingAdherenceId === config.id ? editAdherenceValues.is_active : config.is_active}
+                            onCheckedChange={(checked) => {
+                              if (editingAdherenceId === config.id) {
+                                setEditAdherenceValues({ ...editAdherenceValues, is_active: checked });
+                              } else {
+                                toggleAdherenceMutation.mutate({ id: config.id, is_active: !config.is_active });
+                              }
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {editingAdherenceId === config.id ? (
+                            <div className="flex items-center justify-end gap-2">
+                              <Button size="sm" variant="ghost" onClick={() => { setEditingAdherenceId(null); setEditAdherenceValues({}); }}>
+                                <X className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" onClick={() => updateAdherenceMutation.mutate({ id: config.id, updates: editAdherenceValues })}>
+                                <Save className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-end gap-2">
+                              <Button size="sm" variant="ghost" onClick={() => { setEditingAdherenceId(config.id); setEditAdherenceValues({ medication_category: config.medication_category, lollipops_awarded: config.lollipops_awarded, description: config.description, is_active: config.is_active }); }}>
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => deleteAdherenceMutation.mutate(config.id)}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -611,7 +886,7 @@ export default function GamificationAdmin() {
                           />
                         ) : (
                           <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold">
-                            {config.lollipops_awarded} Ⓜ
+                            {config.lollipops_awarded} <img src={vulaSymbol} alt="Vula" className="h-4 w-4 inline object-contain" />
                           </span>
                         )}
                       </TableCell>
@@ -731,6 +1006,22 @@ export default function GamificationAdmin() {
                         onChange={(e) => setNewAppSignupUrl(e.target.value)}
                       />
                     </div>
+                    <div className="space-y-2">
+                      <Label>Google Play Store URL</Label>
+                      <Input
+                        placeholder="https://play.google.com/store/apps/details?id=..."
+                        value={newAppGooglePlayUrl}
+                        onChange={(e) => setNewAppGooglePlayUrl(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>App Store URL (iOS)</Label>
+                      <Input
+                        placeholder="https://apps.apple.com/app/..."
+                        value={newAppStoreUrl}
+                        onChange={(e) => setNewAppStoreUrl(e.target.value)}
+                      />
+                    </div>
                   </div>
                   <DialogFooter>
                     <Button variant="outline" onClick={() => setShowAddAppDialog(false)}>Cancel</Button>
@@ -759,6 +1050,7 @@ export default function GamificationAdmin() {
                       <TableHead>App Name</TableHead>
                       <TableHead>Creator</TableHead>
                       <TableHead>Signup Link</TableHead>
+                      <TableHead>Install Links</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -797,6 +1089,20 @@ export default function GamificationAdmin() {
                           )}
                         </TableCell>
                         <TableCell>
+                          {editingAppId === app.id ? (
+                            <div className="space-y-1">
+                              <Input value={editAppValues.google_play_url || ""} onChange={(e) => setEditAppValues({ ...editAppValues, google_play_url: e.target.value })} className="w-40" placeholder="Google Play URL" />
+                              <Input value={editAppValues.app_store_url || ""} onChange={(e) => setEditAppValues({ ...editAppValues, app_store_url: e.target.value })} className="w-40" placeholder="App Store URL" />
+                            </div>
+                          ) : (
+                            <div className="flex flex-col gap-1">
+                              {app.google_play_url && <a href={app.google_play_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary underline">Play Store</a>}
+                              {app.app_store_url && <a href={app.app_store_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary underline">App Store</a>}
+                              {!app.google_play_url && !app.app_store_url && <span className="text-sm text-muted-foreground">-</span>}
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell>
                           <Switch
                             checked={app.is_active}
                             onCheckedChange={(checked) => toggleAppMutation.mutate({ id: app.id, is_active: checked })}
@@ -814,7 +1120,7 @@ export default function GamificationAdmin() {
                             </div>
                           ) : (
                             <div className="flex items-center justify-end gap-2">
-                              <Button size="sm" variant="ghost" onClick={() => { setEditingAppId(app.id); setEditAppValues({ name: app.name, logo_url: app.logo_url, creator: app.creator, signup_url: app.signup_url }); }}>
+                              <Button size="sm" variant="ghost" onClick={() => { setEditingAppId(app.id); setEditAppValues({ name: app.name, logo_url: app.logo_url, creator: app.creator, signup_url: app.signup_url, google_play_url: app.google_play_url, app_store_url: app.app_store_url }); }}>
                                 <Pencil className="h-4 w-4" />
                               </Button>
                               <Button
