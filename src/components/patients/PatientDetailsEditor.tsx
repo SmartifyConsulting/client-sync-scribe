@@ -1351,7 +1351,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   ) : (
                     <div className="space-y-1">
                       {surgeries.map((surgery) => (
-                        <div key={surgery.id} className="flex items-start justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                        <div key={surgery.id} className="flex items-start justify-between p-1.5 rounded-lg bg-primary/5 border border-primary/20">
                           <div>
                             <p className="text-xs font-medium text-foreground">{surgery.name}</p>
                             <p className="text-[10px] text-muted-foreground">{formatSurgeryDate(surgery.date, surgery.date_precision)}</p>
