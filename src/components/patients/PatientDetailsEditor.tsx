@@ -625,6 +625,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
     setIceContacts(patient.ice_contacts || []);
     setNokMembers(patient.next_of_kin_members || []);
     setCurrentMedications(patient.current_medications || []);
+    setConditionsDiagnoses(patient.conditions_diagnoses || []);
     setIsEditing(false);
   };
 
@@ -1318,7 +1319,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                         <Label className="text-xs">This is a chronic medication</Label>
                       </div>
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddMed(false); setEditingMedId(null); setNewMed({ name: "", dosage: "", is_chronic: false }); }}>Cancel</Button>
+                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddMed(false); setEditingMedId(null); setNewMed({ name: "", dosage: "", is_chronic: false, status: "current", start_date: "", end_date: "" }); }}>Cancel</Button>
                         <Button size="sm" className="text-xs h-7" onClick={handleAddMed}>{editingMedId ? "Save" : "Add"}</Button>
                       </div>
                     </div>
