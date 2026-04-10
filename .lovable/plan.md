@@ -1,59 +1,87 @@
 
 
-# Navigation Grouping, Section Header Styling & Mobile Compactness
+# Navigation, ICE Removal, Tab Reordering & Header Cleanup
 
 ## Summary
-Group tabs into "My Profile" and "My Admin" parent tabs on web/tablet. Rename "Health" to "Profile" on mobile. Update section header colors. Make calendar and documents mobile-compact.
+Move upcoming appointments to top of calendar, remove ICE from DB and all layouts, delete NOK & ICE tab, move NOK under Medical Insurance, remove Share from section headers (keep on records), rename email label, reorder Round Table to last, and remove duplicate headers in tab content.
 
 ## Changes
 
-### 1. Section Header Background — `#F5F4F1` with black text
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- In `SectionHeader` component (line ~74): change `bg-primary` to `bg-[#F5F4F1]`, change `text-white` to `text-foreground` (black), change chevron from `text-white` to `text-foreground`
-
-### 2. Web/Tablet: Group tabs into "My Profile" and "My Admin"
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- In `renderTabsList()`, on non-mobile (desktop/iPad), replace flat tabs with grouped parent tabs:
-  - **My Profile** parent tab → sub-tabs: Personal Information, Medical Information, NOK & ICE
-  - **My Admin** parent tab → sub-tabs: My Calendar, My Tasks, My Documents
-  - Other tabs (Dashboard, My H/Care Providers, My Sessions, My Round Table) remain as flat top-level tabs
-- Implementation: Use a two-tier approach — top-level tabs include "My Profile" and "My Admin" as values. When selected, show a secondary sub-tab row below. The `activeTab` state will track the actual content tab (personal, medical, etc.), while a separate state tracks which parent group is active
-- On mobile, keep the existing section-filtered flat tab behavior unchanged
-
-### 3. Mobile: Rename "Health" to "Profile"
-**File:** `src/components/layout/BottomNav.tsx`
-- Change `{ icon: HeartPulse, label: "Health", section: "health" }` to `{ icon: HeartPulse, label: "Profile", section: "health" }`
-- The `section` key stays `"health"` so the SECTION_TABS mapping still works
-
-### 4. Mobile Calendar — compact layout
+### 1. Calendar: Move Upcoming Appointments to top
 **File:** `src/pages/patient/PatientCalendar.tsx`
-- Header area (lines 348-367): Stack the title, view toggle, and "Book Appointment" button vertically on mobile. Use `flex-col` on small screens:
-  - Title row: remove back arrow (not needed inside tab), shrink heading to `text-lg`
-  - View toggle + Book button: wrap into a row with `w-full` buttons on mobile, use smaller `size="sm"` 
-- Month grid (line 263): reduce `gap-1` to `gap-0`, reduce cell padding
-- `AppointmentCard`: reduce padding from `p-4` to `p-2` on mobile, shrink icon from `h-10 w-10` to `h-8 w-8`
-- Upcoming sidebar card: hide on mobile (`hidden lg:block`) since it duplicates the day view
-- Week view buttons (line 212-214): use icon-only on mobile or abbreviate to `<` and `>`
+- Move the "Upcoming" `<Card>` (lines 394-422) from after the calendar grid to before it — place it right after `<PatientRequestsBadge />` and before the grid div
+- Make it compact: show as a horizontal scrollable row or a small collapsible card (not a full sidebar)
+- Show on all screen sizes (remove `hidden lg:block`)
 
-### 5. Mobile Documents — compact layout
-**File:** `src/pages/patient/PatientDocuments.tsx`
-- Review the top section (heading, upload area, filters) and ensure they stack vertically and fit within 390px
-- Reduce any large padding or fixed-width elements
-- Make the upload button and filter controls full-width on mobile
+### 2. Remove ICE field from database
+- Create a migration to drop the `ice_contacts` column from the `patients` table
 
-### 6. General mobile compactness review
+### 3. Remove ICE from all layouts
 **File:** `src/components/patients/PatientDetailsEditor.tsx`
-- Reduce outer card padding on mobile: change `p-4 md:p-6` to `p-2 md:p-6`
-- Reduce `space-y-4` between sections to `space-y-2` on mobile using responsive classes
-- Section content padding: reduce `p-3` to `p-2` on mobile inside `CollapsibleContent`
-- Tab triggers: ensure text doesn't wrap oddly — already have `whitespace-nowrap` ✓
+- **View mode**: Remove the entire ICE Contacts collapsible section (lines ~982-1020)
+- **Edit mode**: Remove the entire ICE Contacts collapsible section (lines ~1467-1521)
+- Remove ICE-related state variables (`iceContacts`, `showAddICE`, `newICE`, `editingICEId`)
+- Remove ICE-related handler functions (`handleAddICE`, `handleEditICE`, `handleShareICE`, `handleICEAsNOK`)
+- Remove `ICEContact` from imports
+- Clean up the `handleShareRecord` function to remove `'ice'` case
+
+### 4. Delete NOK & ICE tab from all layouts
+**File:** `src/components/patients/PatientDetailsEditor.tsx`
+- Remove `nok-iced` from `SECTION_TABS.health`: change to `health: ["personal", "medical"]`
+- Remove the `TabsTrigger value="nok-iced"` from mobile tab list (line 838)
+- Remove the `TabsTrigger value="nok-iced"` from desktop sub-tabs (line 883)
+- Remove `PROFILE_TABS` entry: change from `["personal", "medical", "nok-iced"]` to `["personal", "medical"]`
+- Remove the `TabsContent value="nok-iced"` block (lines 1336-1344)
+- Remove the `NokIcedTab` lazy import
+
+### 5. Move NOK section to Medical Information tab (under Medical Insurance)
+**File:** `src/components/patients/PatientDetailsEditor.tsx`
+- **View mode**: Move the NOK collapsible section (lines ~948-980) from Personal tab into Medical tab Column 2, placed after Medical Insurance section
+- **Edit mode**: Move the NOK collapsible section (lines ~1409-1465) similarly to Medical tab Column 2, after Medical Insurance
+
+### 6. Remove Share icon from ICE section header (already being removed with ICE)
+- The ICE section header had a Share button on the CollapsibleTrigger — this is moot since ICE is being removed entirely
+- Verify NOK section header uses `SectionHeader` component (no Share on header) — share icons are already on individual records ✓
+
+### 7. Rename "Reporting To Email" label
+**File:** `src/components/patients/PatientDetailsEditor.tsx`
+- **View mode** (line ~1028): Change `"Reporting To Email (Optional)"` to `"Line Manager Email Address (Optional)"`
+- **Edit mode** (line ~1529): Change label to `"Line Manager Email Address (Optional)"` and update placeholder/helper text
+
+### 8. Move My Round Table to last in tab sequence
+**File:** `src/components/patients/PatientDetailsEditor.tsx`
+- **Mobile tabs** (lines 826-839): Move the `roundtable` TabsTrigger to after `nok-iced` (which is being removed, so it goes last after `documents`)
+- **Desktop tabs** (lines 844-896): Move the `roundtable` TabsTrigger to after the My Admin group button
+- **SECTION_TABS**: Reorder `care` to `["doctors", "sessions"]` and add `roundtable` at end: `care: ["doctors", "sessions", "roundtable"]` — already last in care, but on desktop it should appear after My Admin. Move it out of the main tabs row to appear after My Admin button.
+
+Updated mobile order: Dashboard, Personal, Medical, H/Care Providers, Sessions, Calendar, Tasks, Documents, Round Table
+
+Updated desktop order: Dashboard, My Profile (sub-tabs), H/Care Providers, Sessions, My Admin (sub-tabs), Round Table
+
+### 9. Remove duplicate headers within tab content
+**File:** `src/components/patients/PatientDetailsEditor.tsx`
+- The tab already has a trigger label (e.g., "My Documents"), then inside `TabsContent` there's a repeated `<h2>` and `<p>` description. Remove these redundant header blocks from:
+  - Personal tab view (lines 915-918) and edit (lines 1368-1371)
+  - Medical tab view (lines 1043-1046) and edit (lines 1544-1547)
+  - Tasks tab (lines 1274-1276)
+  - Sessions tab (lines 1286-1288)
+  - Doctors tab (lines 1313-1316)
+  - Round Table tab (lines 1325-1328)
+  - NOK & ICE tab (lines 1337-1340) — being removed anyway
+
+**File:** `src/pages/patient/PatientDocuments.tsx`
+- When rendered inside the tab (via `hideHeader={false}` at line 1306), the Documents component shows its own "My Documents" header. Change the call to `<PatientDocuments hideHeader />` (pass `hideHeader={true}`) so the embedded header is suppressed.
+
+**File:** `src/pages/patient/PatientCalendar.tsx`
+- Add a `hideHeader` prop. When true, hide the "My Calendar" heading and description (lines 351-354). Update the call in PatientDetailsEditor to pass `hideHeader`.
 
 ## Files Modified
 
 | File | Changes |
 |------|---------|
-| `src/components/patients/PatientDetailsEditor.tsx` | Section header color to `#F5F4F1`/black; group tabs into My Profile/My Admin on desktop; reduce mobile padding |
-| `src/components/layout/BottomNav.tsx` | Rename "Health" label to "Profile" |
-| `src/pages/patient/PatientCalendar.tsx` | Mobile-compact: stack header, shrink grid, hide sidebar on mobile |
-| `src/pages/patient/PatientDocuments.tsx` | Mobile-compact: stack controls, reduce padding |
+| `src/components/patients/PatientDetailsEditor.tsx` | Remove ICE sections, delete NOK & ICE tab, move NOK to Medical tab, rename email label, reorder Round Table last, remove duplicate tab headers |
+| `src/pages/patient/PatientCalendar.tsx` | Move upcoming appointments to top, add hideHeader prop |
+| `src/pages/patient/PatientDocuments.tsx` | Pass hideHeader when embedded |
+| `src/components/patients/NokIcedTab.tsx` | Can be deleted (no longer referenced) |
+| DB Migration | Drop `ice_contacts` column from `patients` table |
 
