@@ -165,7 +165,14 @@ function AnimatedCounter({ target }: { target: number }) {
   return <span>{count}</span>;
 }
 
-export function PatientDetailsEditor({ patient, onSave, isSelfService = false, userEmail, lollipopCount = 0, rewardsLoading = false }: PatientDetailsEditorProps) {
+const SECTION_TABS: Record<string, string[]> = {
+  profile: ["personal", "nok-iced"],
+  health: ["medical", "overview"],
+  care: ["doctors", "sessions", "calendar", "roundtable"],
+  records: ["documents"],
+};
+
+export function PatientDetailsEditor({ patient, onSave, isSelfService = false, userEmail, lollipopCount = 0, rewardsLoading = false, section }: PatientDetailsEditorProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { isDoctor } = useUserRole();
