@@ -37,6 +37,7 @@ interface PatientDetailsEditorProps {
   userEmail?: string;
   lollipopCount?: number;
   rewardsLoading?: boolean;
+  section?: string;
 }
 
 const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
