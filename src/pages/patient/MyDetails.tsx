@@ -111,23 +111,12 @@ export default function MyDetails() {
 
   return (
     <div className="space-y-4 p-4 md:p-6">
-      {/* Heading row with Vula Vouchers logo */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">My Holarchive</h1>
-          <p className="text-muted-foreground text-[12px]">View and update your personal and medical information</p>
-        </div>
-        <Link to="/patient/rewards" className="hover:opacity-80 transition-opacity shrink-0 flex flex-col items-center gap-0.5">
-          {!rewardsLoading && (
-            <span className="text-sm font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
-              <AnimatedCounter target={lollipopCount} /> Vulas
-            </span>
-          )}
-          <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-10 w-auto object-contain" />
-        </Link>
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">My Holarchive</h1>
+        <p className="text-muted-foreground text-[12px]">View and update your personal and medical information</p>
       </div>
 
-      <PatientDetailsEditor patient={patient} onSave={handleSave} isSelfService userEmail={userEmail} />
+      <PatientDetailsEditor patient={patient} onSave={handleSave} isSelfService userEmail={userEmail} lollipopCount={lollipopCount} rewardsLoading={rewardsLoading} />
     </div>
   );
 }

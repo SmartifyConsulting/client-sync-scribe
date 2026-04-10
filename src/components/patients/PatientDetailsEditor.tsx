@@ -34,6 +34,8 @@ interface PatientDetailsEditorProps {
   onSave: (updates: Partial<Patient>) => Promise<any>;
   isSelfService?: boolean;
   userEmail?: string;
+  lollipopCount?: number;
+  rewardsLoading?: boolean;
 }
 
 const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -671,7 +673,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
           </div>
           <div>
-            <p className="text-[10px] text-muted-foreground">Welcome back</p>
+            <p className="text-sm font-semibold text-muted-foreground">Welcome back</p>
             <h3 className="text-sm font-semibold text-foreground">{patient.name}</h3>
             <p className="text-xs text-muted-foreground">
               {(() => {
@@ -680,6 +682,17 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 return `${first}.${last}@holarc.health`;
               })()}
             </p>
+            {!rewardsLoading && lollipopCount !== undefined && (
+              <div className="mt-2">
+                <p className="text-[10px] text-muted-foreground">You have earned</p>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                    <AnimatedCounter target={lollipopCount} />
+                  </span>
+                  <span className="text-xs font-semibold text-muted-foreground">Vulas</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -776,7 +789,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               {isSelfService && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Round Table</TabsTrigger>}
               {isSelfService && <TabsTrigger value="nok-iced" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">NOK & ICE</TabsTrigger>}
               {isSelfService && isDoctor && <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap" onClick={(e) => { e.preventDefault(); navigate("/practice"); }}>My Practice</TabsTrigger>}
-              {isSelfService && <TabsTrigger value="settings" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap"><Settings className="h-3.5 w-3.5 mr-1" />Settings</TabsTrigger>}
             </TabsList>
             <div className="flex justify-end mt-2">
               <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={() => setIsEditing(true)}>
@@ -1164,7 +1176,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             {isSelfService && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Round Table</TabsTrigger>}
             {isSelfService && <TabsTrigger value="nok-iced" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">NOK & ICE</TabsTrigger>}
             {isSelfService && isDoctor && <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap" onClick={(e) => { e.preventDefault(); navigate("/practice"); }}>My Practice</TabsTrigger>}
-              {isSelfService && <TabsTrigger value="settings" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap"><Settings className="h-3.5 w-3.5 mr-1" />Settings</TabsTrigger>}
             </TabsList>
             <div className="flex justify-end mt-2 items-center gap-2">
               {saving && <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Loader2 className="h-3 w-3 animate-spin" />Saving...</span>}
