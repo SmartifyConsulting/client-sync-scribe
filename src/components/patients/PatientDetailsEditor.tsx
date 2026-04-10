@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { AddressAutocomplete } from "@/components/patients/AddressAutocomplete";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart, User, MapPin, Users, Briefcase, ShieldCheck, Store, Activity, Droplets, Scissors, GitBranch, Share2, Camera, Mail, Link2, Eye, Phone, HeartPulse, Settings, ChevronDown } from "lucide-react";
+import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart, User, MapPin, Users, Briefcase, ShieldCheck, Store, Activity, Droplets, Scissors, GitBranch, Share2, Camera, Mail, Link2, Eye, Phone, HeartPulse, Settings, ChevronDown, Bell, LayoutDashboard, CheckSquare } from "lucide-react";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,9 +28,10 @@ const MyDoctors = lazy(() => import("@/pages/patient/MyDoctors"));
 const PatientRoundTable = lazy(() => import("@/pages/patient/PatientRoundTable"));
 const PatientCalendarLazy = lazy(() => import("@/pages/patient/PatientCalendar"));
 const NokIcedTab = lazy(() => import("@/components/patients/NokIcedTab"));
-const PatientOverviewLazy = lazy(() => import("@/components/patients/PatientOverview").then(m => ({ default: m.PatientOverview })));
 const SettingsContentLazy = lazy(() => import("@/components/settings/SettingsContent").then(m => ({ default: m.SettingsContent })));
 const SessionHistoryTableLazy = lazy(() => import("@/components/patients/SessionHistoryTable").then(m => ({ default: m.SessionHistoryTable })));
+const PatientDashboardLazy = lazy(() => import("@/pages/patient/PatientDashboard"));
+const PatientTasksLazy = lazy(() => import("@/pages/patient/PatientTasks"));
 
 interface PatientDetailsEditorProps {
   patient: Patient;
@@ -71,7 +72,7 @@ const sectionFrame = "rounded-xl border border-primary bg-card p-4 shadow-sm";
 // Reusable collapsible section header with green background and white text
 const SectionHeader = ({ icon: Icon, label, extra }: { icon: any; label: string; extra?: React.ReactNode }) => (
   <CollapsibleTrigger className="flex w-full items-center justify-between bg-primary rounded-lg px-3 py-2 group">
-    <h3 className="text-xs font-semibold text-white uppercase tracking-wide flex items-center gap-1.5 text-left">
+    <h3 className="text-xs font-semibold text-white tracking-wide flex items-center gap-1.5 text-left">
       <Icon className="h-3.5 w-3.5" /> {label}
     </h3>
     <div className="flex items-center gap-2">
@@ -181,10 +182,10 @@ function AnimatedCounter({ target }: { target: number }) {
 }
 
 const SECTION_TABS: Record<string, string[]> = {
-  profile: ["personal", "nok-iced"],
-  health: ["medical", "overview"],
-  care: ["doctors", "sessions", "calendar", "roundtable"],
-  records: ["documents"],
+  home: ["dashboard"],
+  health: ["personal", "medical", "nok-iced"],
+  care: ["doctors", "sessions", "roundtable"],
+  admin: ["calendar", "tasks", "documents"],
 };
 
 export function PatientDetailsEditor({ patient, onSave, isSelfService = false, userEmail, lollipopCount = 0, rewardsLoading = false, section }: PatientDetailsEditorProps) {
