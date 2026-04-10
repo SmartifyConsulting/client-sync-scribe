@@ -1171,15 +1171,24 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               </div>
             </TabsContent>
 
-            {/* === MEDICAL OVERVIEW TAB === */}
+            {/* === DASHBOARD TAB === */}
             {isSelfService && (
-              <TabsContent value="overview" className="mt-4">
+              <TabsContent value="dashboard" className="mt-4">
+                <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                  <PatientDashboardLazy />
+                </Suspense>
+              </TabsContent>
+            )}
+
+            {/* === TASKS TAB === */}
+            {isSelfService && (
+              <TabsContent value="tasks" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">Medical Overview</h2>
-                  <p className="text-xs text-muted-foreground">Summary of your medical history and sessions</p>
+                  <h2 className="text-lg font-semibold text-foreground">My Tasks</h2>
+                  <p className="text-xs text-muted-foreground">Manage your health tasks and to-dos</p>
                 </div>
                 <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-                  <PatientOverviewLazy patient={patient} sessions={[]} isSelfService />
+                  <PatientTasksLazy />
                 </Suspense>
               </TabsContent>
             )}
@@ -1424,7 +1433,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   <div className="space-y-1.5"><Label htmlFor="employer">Employer</Label><Input id="employer" className="text-sm" value={formData.employer} onChange={(e) => updateFormData({ employer: e.target.value })} placeholder="Company name" /></div>
                   <div className="space-y-1.5"><Label htmlFor="occupation">Occupation</Label><Input id="occupation" className="text-sm" value={formData.occupation} onChange={(e) => updateFormData({ occupation: e.target.value })} placeholder="Job title" /></div>
-                  <div className="space-y-1.5"><Label htmlFor="reporting_to_email">Reporting To (Email)</Label><Input id="reporting_to_email" className="text-sm" type="email" value={formData.reporting_to_email} onChange={(e) => updateFormData({ reporting_to_email: e.target.value })} placeholder="manager@company.com" /></div>
+                  <div className="space-y-1.5"><Label htmlFor="reporting_to_email">Reporting To Email (Optional)</Label><Input id="reporting_to_email" className="text-sm" type="email" value={formData.reporting_to_email} onChange={(e) => updateFormData({ reporting_to_email: e.target.value })} placeholder="manager@company.com" /><p className="text-[10px] text-muted-foreground">Used for e-mailing of Medical Certificates</p></div>
                 </div>
               </CollapsibleContent>
             </Collapsible>
