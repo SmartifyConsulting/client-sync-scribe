@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import holarcLogo from "@/assets/holarc-logo.png";
+import holarcLogo from "@/assets/holarc-logo-clear-2.png";
 import { Mail, Loader2, ArrowLeft, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

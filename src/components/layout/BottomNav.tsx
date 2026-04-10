@@ -6,7 +6,6 @@ import {
   Settings,
   Mic,
   Briefcase,
-  User,
   HeartPulse,
   Handshake,
   FolderOpen,
@@ -23,10 +22,10 @@ const doctorNavItems = [
 ];
 
 const patientSections = [
-  { icon: User, label: "Profile", section: "profile" },
+  { icon: LayoutDashboard, label: "Home", section: "home" },
   { icon: HeartPulse, label: "Health", section: "health" },
   { icon: Handshake, label: "Care", section: "care" },
-  { icon: FolderOpen, label: "Records", section: "records" },
+  { icon: FolderOpen, label: "Admin", section: "admin" },
   { icon: Gift, label: "Rewards", section: "rewards" },
 ];
 

@@ -16,7 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO, addDays } from "date-fns";
-import holarcLogo from "@/assets/holarc-logo.png";
+import holarcLogo from "@/assets/holarc-logo-clear-2.png";
 
 export function PatientAppLayout() {
   const location = useLocation();
@@ -120,7 +120,7 @@ export function PatientAppLayout() {
         <div className="px-4 md:px-8 py-3 flex items-center justify-between max-w-7xl mx-auto w-full">
           {/* Left: Logo */}
           <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <img src={holarcLogo} alt="Holarc" className="h-11 w-auto object-contain" />
+            <img src={holarcLogo} alt="Holarc" className="h-[62px] w-auto object-contain" />
           </button>
 
           {/* Center: Upcoming Appointments */}

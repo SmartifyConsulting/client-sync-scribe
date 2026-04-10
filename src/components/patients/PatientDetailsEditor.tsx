@@ -1495,14 +1495,14 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   <CollapsibleContent className="px-3 pb-3 space-y-3">
                     {/* Allergies */}
                     <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
-                      <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</Label>
+                      <Label className="text-xs font-semibold tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</Label>
                       <Textarea id="allergies" className="text-sm" value={formData.allergies} onChange={(e) => updateFormData({ allergies: e.target.value })} placeholder="List any allergies (medications, food, etc.)" rows={2} />
                     </div>
 
                     {/* Medication */}
                     <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
                       <div className="flex items-center justify-between mb-2">
-                        <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Medication</Label>
+                        <Label className="text-xs font-semibold tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Medication</Label>
                         {!showAddMed && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddMed(true)}><Plus className="h-3 w-3" />Add</Button>}
                       </div>
                       {showAddMed && (
@@ -1574,7 +1574,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                     {/* Conditions & Diagnoses */}
                     <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
                       <div className="flex items-center justify-between mb-2">
-                        <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><HeartPulse className="h-3.5 w-3.5" /> Conditions & Diagnoses</Label>
+                        <Label className="text-xs font-semibold tracking-wide flex items-center gap-1.5"><HeartPulse className="h-3.5 w-3.5" /> Conditions & Diagnoses</Label>
                         {!showAddCondition && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddCondition(true)}><Plus className="h-3 w-3" />Add</Button>}
                       </div>
                       {showAddCondition && (

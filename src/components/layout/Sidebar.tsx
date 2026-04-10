@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import holarcLogo from "@/assets/holarc-logo.png";
+import holarcLogo from "@/assets/holarc-logo-clear-2.png";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
