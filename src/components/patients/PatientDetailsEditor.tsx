@@ -459,7 +459,24 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   const updateFormData = (updates: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
     setHasChanges(true);
+    if (!isEditing) setIsEditing(true);
   };
+
+  const toggleSectionEdit = (section: string) => {
+    setEditingSections(prev => ({ ...prev, [section]: !prev[section] }));
+    if (!isEditing) setIsEditing(true);
+  };
+
+  const cancelSectionEdit = (section: string) => {
+    setEditingSections(prev => ({ ...prev, [section]: false }));
+  };
+
+  const saveSectionNow = () => {
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    performSave(formData, surgeries);
+  };
+
+  const isSectionEditing = (section: string) => editingSections[section] || false;
 
   const toggleOrganDonorOrgan = (organ: string) => {
     setOrganDonorOrgans(prev => prev.includes(organ) ? prev.filter(o => o !== organ) : [...prev, organ]);
