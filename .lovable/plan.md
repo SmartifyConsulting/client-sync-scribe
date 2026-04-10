@@ -1,58 +1,41 @@
 
 
-# Fix Partner App RLS Error, Vula Icon, Rename, Transfer Button, Admin Logo Fix, Adherence Tab
+# Address Autocomplete Fix, Record Shading, Section Frames
 
-## 1. Fix RLS / storage upload error for partner apps
+## 1. Fix Google Maps address autocomplete
 
-**File:** `src/pages/admin/GamificationAdmin.tsx`
+The `AddressAutocomplete` component and the edge function code both look correct, and the `GOOGLE_MAPS_API_KEY` secret is configured. The issue is likely that the edge function needs redeployment. I will redeploy `google-places-autocomplete` and also add a visible loading/error indicator to the `AddressAutocomplete` component so users know it's working (or why it's not).
 
-Change logo upload path from `partner-apps/${timestamp}.ext` to `${user.id}/partner-apps/${timestamp}.ext` to satisfy the storage RLS policy. Get user via `supabase.auth.getUser()` before upload.
+**File:** `src/components/patients/AddressAutocomplete.tsx` — Add a subtle "Searching..." indicator when fetching, and log errors to help debug if the API key or function has issues.
 
-## 2. Add `google_play_url` and `app_store_url` columns
+## 2. Shade surgery and family history records with light teal
 
-**Migration SQL:** Add two nullable text columns to `moola_partner_apps`.
+**View mode** (lines 908-916, 928-934): Change record background from `bg-muted/30 border-border/50` to `bg-primary/5 border-primary/20` (light teal).
 
-## 3. Add store URL fields to admin Add/Edit Partner App dialogs
+**Edit mode** (lines 1350-1363, 1391-1403): Same change — records get `bg-primary/5 border-primary/20`.
 
-**File:** `src/pages/admin/GamificationAdmin.tsx`
+## 3. Wrap Current Medications in its own bordered frame + heading
 
-Add input fields for Google Play URL and App Store URL in both the "Add Partner App" dialog and inline edit mode. Include in insert/update mutations.
+**View mode** (lines 875-898): Wrap in a `<div className={sectionFrame}>` with an h3 heading: `<h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Current Medications</h3>`. Remove the existing `<Label>Current Medications</Label>`.
 
-## 4. Display install links on partner app cards
+**Edit mode** (lines 1260-1308): Wrap in `<div className={sectionFrame}>`. Change the `<Label>` to an `<h3>` heading matching the standard format.
 
-**Files:** `src/pages/doctor/DoctorRewards.tsx`, `src/pages/patient/MyRewards.tsx`
+## 4. Wrap Surgeries and Dates in its own bordered frame
 
-Show "Get it on Google Play" and "Download on App Store" links on each partner app card when URLs exist.
+**View mode** (lines 900-918): Wrap the entire surgery block in `<div className={sectionFrame}>`.
 
-## 5. Replace green Ⓜ with Vula logo in Rewards Admin
+**Edit mode** (lines 1310-1366): Wrap in `<div className={sectionFrame}>`.
 
-**File:** `src/pages/admin/GamificationAdmin.tsx`
+## 5. Wrap Family History in its own bordered frame
 
-- Import `vulaSymbol` from `@/assets/vula-symbol.png`
-- Replace all `Ⓜ` text (lines 311, 422, 614) with `<img src={vulaSymbol} alt="Vula" className="h-5 w-5 inline" />`
-- Update the Max Vulas/Visit card (line 310-311) to use the Vula icon instead of the green Ⓜ
+**View mode** (lines 920-937): Wrap in `<div className={sectionFrame}>`.
 
-## 6. Add "Adherence Rewards" tab to Rewards Admin
-
-**File:** `src/pages/admin/GamificationAdmin.tsx`
-
-Add a new tab after "Visit Rewards" called "Adherence Rewards" with a `Pill` icon. This tab will allow admins to configure Vula rewards for medication adherence (e.g., Vulas per verified dose, streak bonuses for consecutive days). Initial implementation: a simple config table mirroring the Visit Rewards pattern with fields for medication category, Vulas awarded per verified dose, and active toggle.
-
-**Migration SQL:** Create `moola_adherence_configs` table:
-- `id` uuid PK
-- `medication_category` text
-- `lollipops_awarded` integer default 1
-- `description` text
-- `is_active` boolean default true
-- `created_at` timestamptz
-- RLS: admin-only insert/update/delete, authenticated select
+**Edit mode** (lines 1368-1406): Wrap in `<div className={sectionFrame}>`.
 
 ## Technical Summary
 
 | File | Change |
 |------|--------|
-| Migration SQL | Add `google_play_url`, `app_store_url` to `moola_partner_apps`; create `moola_adherence_configs` table |
-| `src/pages/admin/GamificationAdmin.tsx` | Fix upload path; add store URL fields; replace Ⓜ with Vula icon; add Adherence Rewards tab |
-| `src/pages/doctor/DoctorRewards.tsx` | Show app store install links on partner app cards |
-| `src/pages/patient/MyRewards.tsx` | Show app store install links on partner app cards |
+| `src/components/patients/AddressAutocomplete.tsx` | Redeploy edge function; add loading indicator |
+| `src/components/patients/PatientDetailsEditor.tsx` | Shade surgery/family records with `bg-primary/5`; wrap Medications, Surgeries, Family History in `sectionFrame` divs with proper headings (both view and edit modes) |
 
