@@ -779,10 +779,42 @@ export type Database = {
           },
         ]
       }
-      moola_partner_apps: {
+      moola_adherence_configs: {
         Row: {
           created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          lollipops_awarded: number
+          medication_category: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          lollipops_awarded?: number
+          medication_category: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          lollipops_awarded?: number
+          medication_category?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      moola_partner_apps: {
+        Row: {
+          app_store_url: string | null
+          created_at: string
           creator: string | null
+          google_play_url: string | null
           id: string
           is_active: boolean
           logo_url: string | null
@@ -790,8 +822,10 @@ export type Database = {
           signup_url: string | null
         }
         Insert: {
+          app_store_url?: string | null
           created_at?: string
           creator?: string | null
+          google_play_url?: string | null
           id?: string
           is_active?: boolean
           logo_url?: string | null
@@ -799,8 +833,10 @@ export type Database = {
           signup_url?: string | null
         }
         Update: {
+          app_store_url?: string | null
           created_at?: string
           creator?: string | null
+          google_play_url?: string | null
           id?: string
           is_active?: boolean
           logo_url?: string | null
