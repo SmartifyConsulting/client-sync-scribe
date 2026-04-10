@@ -693,6 +693,44 @@ export default function MyRewards() {
               )}
             </CardContent>
           </Card>
+          {/* Partner Apps - merged into Vulas tab */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Gift className="h-5 w-5 text-primary" />
+                Approved Vula Partner Apps
+              </CardTitle>
+              <CardDescription>Apps that accept Vulas. Transfer directly below.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {partnerApps.length === 0 ? (
+                <p className="text-center text-muted-foreground text-sm py-4">No partner apps available yet.</p>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {partnerApps.map((app) => (
+                    <div key={app.id} className="p-4 rounded-xl border border-border hover:border-primary/30 hover:shadow-md transition-all">
+                      <div className="flex items-center gap-3">
+                        {app.logo_url ? (
+                          <img src={app.logo_url} alt={app.name} className="h-10 w-10 rounded-lg object-contain" />
+                        ) : (
+                          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Gift className="h-5 w-5 text-primary" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-foreground">{app.name}</p>
+                          {app.creator && <p className="text-xs text-muted-foreground">by {app.creator}</p>}
+                        </div>
+                      </div>
+                      <Button size="sm" className="w-full mt-3 gap-1 text-xs" onClick={() => { setTransferAppId(app.id); setShowTransferDialog(true); }}>
+                        <Send className="h-3 w-3" /> Transfer Vulas
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="history" className="space-y-6">
@@ -702,9 +740,7 @@ export default function MyRewards() {
                 <Calendar className="h-5 w-5 text-primary" />
                 Full Reward History
               </CardTitle>
-              <CardDescription>
-                Complete log of all Vulas earned
-              </CardDescription>
+              <CardDescription>Complete log of all Vulas earned</CardDescription>
             </CardHeader>
             <CardContent>
               {rewards.length === 0 ? (
@@ -725,17 +761,11 @@ export default function MyRewards() {
                     {rewards.map((reward) => (
                       <TableRow key={reward.id}>
                         <TableCell>
-                          <div>
-                            {format(parseISO(reward.awarded_at), "MMM d, yyyy")}
-                          </div>
-                          <span className="text-xs text-muted-foreground">
-                            {format(parseISO(reward.awarded_at), "h:mm a")}
-                          </span>
+                          <div>{format(parseISO(reward.awarded_at), "MMM d, yyyy")}</div>
+                          <span className="text-xs text-muted-foreground">{format(parseISO(reward.awarded_at), "h:mm a")}</span>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="secondary" className="bg-primary/10 text-primary">
-                            {reward.visit_category}
-                          </Badge>
+                          <Badge variant="secondary" className="bg-primary/10 text-primary">{reward.visit_category}</Badge>
                         </TableCell>
                         <TableCell className="text-right">
                           <span className={`font-semibold ${reward.lollipops_count < 0 ? "text-blue-600" : "text-emerald-600"}`}>
@@ -746,74 +776,6 @@ export default function MyRewards() {
                     ))}
                   </TableBody>
                 </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="vula-apps" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Gift className="h-5 w-5 text-primary" />
-                Vula Partner Apps
-              </CardTitle>
-              <CardDescription>
-                Apps and services that accept Vulas as currency
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {partnerApps.length === 0 ? (
-                <div className="text-center py-8">
-                  <Gift className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No partner apps available yet. Check back soon!</p>
-                </div>
-              ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {partnerApps.map((app) => (
-                    <div key={app.id} className="p-4 rounded-xl border border-border hover:border-primary/30 hover:shadow-md transition-all">
-                      <div className="flex items-center gap-3">
-                        {app.logo_url ? (
-                          <img src={app.logo_url} alt={app.name} className="h-10 w-10 rounded-lg object-contain" />
-                        ) : (
-                          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                            <Gift className="h-5 w-5 text-primary" />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-foreground">{app.name}</p>
-                          {app.creator && (
-                            <p className="text-xs text-muted-foreground">by {app.creator}</p>
-                          )}
-                          <div className="flex items-center gap-2 mt-1 flex-wrap">
-                            <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0 text-[10px]">
-                              Active
-                            </Badge>
-                            {app.signup_url && (
-                              <a href={app.signup_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary underline hover:text-primary/80">
-                                Sign up
-                              </a>
-                            )}
-                          </div>
-                          {(app.google_play_url || app.app_store_url) && (
-                            <div className="flex items-center gap-2 mt-2 flex-wrap">
-                              {app.google_play_url && (
-                                <a href={app.google_play_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md bg-muted hover:bg-muted/80 text-foreground transition-colors">
-                                  ▶ Google Play
-                                </a>
-                              )}
-                              {app.app_store_url && (
-                                <a href={app.app_store_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md bg-muted hover:bg-muted/80 text-foreground transition-colors">
-                                   App Store
-                                </a>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               )}
             </CardContent>
           </Card>
