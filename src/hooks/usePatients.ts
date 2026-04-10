@@ -126,24 +126,48 @@ const parseFamilyHistory = (fh: Json | null): FamilyHistoryEntry[] | null => {
   return null;
 };
 
+const parseICEContacts = (data: Json | null): ICEContact[] | null => {
+  if (!data) return null;
+  if (Array.isArray(data)) return data as unknown as ICEContact[];
+  return null;
+};
+
+const parseNOKMembers = (data: Json | null): NextOfKinMember[] | null => {
+  if (!data) return null;
+  if (Array.isArray(data)) return data as unknown as NextOfKinMember[];
+  return null;
+};
+
+const parseCurrentMedications = (data: Json | null): CurrentMedication[] | null => {
+  if (!data) return null;
+  if (Array.isArray(data)) return data as unknown as CurrentMedication[];
+  return null;
+};
+
 // Helper to convert patient from DB to typed Patient
 const toPatient = (data: any, lastVisit?: string | null): Patient => ({
   ...data,
   surgeries: parseSurgeries(data.surgeries),
   pharmacies: parsePharmacies(data.pharmacies),
   family_history: parseFamilyHistory(data.family_history),
+  ice_contacts: parseICEContacts(data.ice_contacts),
+  next_of_kin_members: parseNOKMembers(data.next_of_kin_members),
+  current_medications: parseCurrentMedications(data.current_medications),
   last_visit: lastVisit ?? data.last_visit ?? null,
 });
 
 // Helper to prepare patient data for DB (convert surgeries/pharmacies to JSON)
 const toDbPatient = (updates: Partial<Patient>): Record<string, any> => {
-  const { surgeries, pharmacies, family_history, organ_donor_organs, last_visit, ...rest } = updates;
+  const { surgeries, pharmacies, family_history, organ_donor_organs, last_visit, ice_contacts, next_of_kin_members, current_medications, ...rest } = updates;
   return {
     ...rest,
     ...(surgeries !== undefined ? { surgeries: surgeries as unknown as Json } : {}),
     ...(pharmacies !== undefined ? { pharmacies: pharmacies as unknown as Json } : {}),
     ...(family_history !== undefined ? { family_history: family_history as unknown as Json } : {}),
     ...(organ_donor_organs !== undefined ? { organ_donor_organs: organ_donor_organs as unknown as Json } : {}),
+    ...(ice_contacts !== undefined ? { ice_contacts: ice_contacts as unknown as Json } : {}),
+    ...(next_of_kin_members !== undefined ? { next_of_kin_members: next_of_kin_members as unknown as Json } : {}),
+    ...(current_medications !== undefined ? { current_medications: current_medications as unknown as Json } : {}),
   };
 };
 
