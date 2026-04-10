@@ -681,9 +681,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   // Organ donor view
   const OrganDonorView = () => (
     <div>
-      <Label>Organ Donor</Label>
+      <Label className="mb-2 block">Organ Donor</Label>
       {patient.organ_donor ? (
-        <div>
+        <div className="mt-2">
           <span className="inline-flex items-center gap-1 rounded-full bg-green-100 dark:bg-green-900/30 px-2.5 py-0.5 text-xs font-semibold text-green-700 dark:text-green-300">Yes</span>
           {(patient.organ_donor_organs?.length ?? 0) > 0 && (
             <div className="mt-2 flex flex-wrap gap-1.5">
@@ -693,7 +693,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             </div>
           )}
         </div>
-      ) : <span className="text-xs text-muted-foreground">No</span>}
+      ) : <span className="text-xs text-muted-foreground mt-2 block">No</span>}
     </div>
   );
 
@@ -757,15 +757,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
       <div className="space-y-0">
         <ProfileBanner />
         <div className="rounded-xl border border-primary bg-card p-4 md:p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-foreground">My Details</h2>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={() => setIsEditing(true)}>
-                <Pencil className="h-3.5 w-3.5" /> Edit
-              </Button>
-            </div>
-          </div>
-
           <Tabs defaultValue="personal">
             <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
               <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Personal Information</TabsTrigger>
@@ -777,6 +768,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               {isSelfService && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Round Table</TabsTrigger>}
               {isSelfService && <TabsTrigger value="nok-iced" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">NOK & ICE</TabsTrigger>}
               {isSelfService && isDoctor && <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap" onClick={(e) => { e.preventDefault(); navigate("/practice"); }}>My Practice</TabsTrigger>}
+              <Button variant="outline" size="sm" className="gap-2 text-xs ml-auto bg-white/90 hover:bg-white text-foreground" onClick={() => setIsEditing(true)}>
+                <Pencil className="h-3.5 w-3.5" /> Edit
+              </Button>
             </TabsList>
 
             {/* === PERSONAL INFORMATION TAB === */}
@@ -892,15 +886,21 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Medical Information</h3>
 
                   <div>
-                    <div className="grid gap-3 sm:grid-cols-3">
+                    <div className="grid gap-3 sm:grid-cols-4">
                       <ViewField label="Height (cm)" value={patient.height_cm ? `${patient.height_cm}` : undefined} />
                       <ViewField label="Weight (kg)" value={patient.weight_kg ? `${patient.weight_kg}` : undefined} />
                       <ViewField label="BMI" value={bmi || undefined} />
+                      <ViewField label="Blood Type" value={patient.blood_type} />
                     </div>
                   </div>
 
-                  <div><ViewField label="Blood Type" value={patient.blood_type} /></div>
-                  <div><ViewField label="Allergies" value={patient.allergies || "None recorded"} /></div>
+                  {/* Allergies */}
+                  <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
+                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
+                      <AlertCircle className="h-3.5 w-3.5" /> Allergies
+                    </h3>
+                    <p className="text-xs text-foreground">{patient.allergies || "None recorded"}</p>
+                  </div>
 
                   {/* Medication */}
                   <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
@@ -1130,15 +1130,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
     <div className="space-y-0">
       <ProfileBanner />
       <div className="rounded-xl border border-primary bg-card p-4 md:p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h2 className="text-sm font-semibold text-foreground">Edit Patient Details</h2>
-            {saving && <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Loader2 className="h-3 w-3 animate-spin" />Saving...</span>}
-            {!saving && !hasChanges && isEditing && <span className="flex items-center gap-1.5 text-xs text-green-600"><Check className="h-3 w-3" />Saved</span>}
-          </div>
-          <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={handleCancel} disabled={saving}><X className="h-3.5 w-3.5" />Done</Button>
-        </div>
-
         <Tabs defaultValue="personal">
           <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
             <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Personal Information</TabsTrigger>
@@ -1150,6 +1141,11 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             {isSelfService && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Round Table</TabsTrigger>}
             {isSelfService && <TabsTrigger value="nok-iced" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">NOK & ICE</TabsTrigger>}
             {isSelfService && isDoctor && <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap" onClick={(e) => { e.preventDefault(); navigate("/practice"); }}>My Practice</TabsTrigger>}
+            <div className="ml-auto flex items-center gap-2">
+              {saving && <span className="flex items-center gap-1.5 text-xs text-white"><Loader2 className="h-3 w-3 animate-spin" />Saving...</span>}
+              {!saving && !hasChanges && isEditing && <span className="flex items-center gap-1.5 text-xs text-green-300"><Check className="h-3 w-3" />Saved</span>}
+              <Button variant="outline" size="sm" className="gap-2 text-xs bg-white/90 hover:bg-white text-foreground" onClick={handleCancel} disabled={saving}><X className="h-3.5 w-3.5" />Done</Button>
+            </div>
           </TabsList>
 
           {/* === PERSONAL TAB (EDIT) === */}
@@ -1320,21 +1316,22 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Medical Information</h3>
 
                 <div>
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid gap-3 sm:grid-cols-4">
                     <div className="space-y-1.5"><Label htmlFor="height_cm">Height (cm)</Label><Input id="height_cm" className="text-sm" type="number" step="0.1" value={formData.height_cm} onChange={(e) => updateFormData({ height_cm: e.target.value })} placeholder="e.g., 175" /></div>
                     <div className="space-y-1.5"><Label htmlFor="weight_kg">Weight (kg)</Label><Input id="weight_kg" className="text-sm" type="number" step="0.1" value={formData.weight_kg} onChange={(e) => updateFormData({ weight_kg: e.target.value })} placeholder="e.g., 70" /></div>
+                    <div className="space-y-1.5"><Label>BMI</Label><Input className="text-sm bg-muted" value={bmi || "—"} disabled /></div>
+                    <div className="space-y-1.5">
+                      <Label className="flex items-center gap-1.5"><Droplets className="h-3.5 w-3.5" /> Blood Type</Label>
+                      <Select value={formData.blood_type} onValueChange={(value) => updateFormData({ blood_type: value })}>
+                        <SelectTrigger className="text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
+                        <SelectContent>{BLOOD_TYPES.map(bt => <SelectItem key={bt} value={bt}>{bt}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
 
-                <div>
-                  <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Droplets className="h-3.5 w-3.5" /> Blood Type</Label>
-                  <Select value={formData.blood_type} onValueChange={(value) => updateFormData({ blood_type: value })}>
-                    <SelectTrigger className="w-[180px] text-sm"><SelectValue placeholder="Select blood type" /></SelectTrigger>
-                    <SelectContent>{BLOOD_TYPES.map(bt => <SelectItem key={bt} value={bt}>{bt}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-
-                <div>
+                {/* Allergies */}
+                <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
                   <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</Label>
                   <Textarea id="allergies" className="text-sm" value={formData.allergies} onChange={(e) => updateFormData({ allergies: e.target.value })} placeholder="List any allergies (medications, food, etc.)" rows={2} />
                 </div>
