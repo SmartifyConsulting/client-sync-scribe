@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart, User, MapPin, Users, Briefcase, ShieldCheck, Store, Activity, Droplets, Scissors, GitBranch, Share2, Camera } from "lucide-react";
+import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart, User, MapPin, Users, Briefcase, ShieldCheck, Store, Activity, Droplets, Scissors, GitBranch, Share2, Camera, Mail, Link2, Eye, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,8 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Patient, Surgery, Pharmacy, FamilyHistoryEntry } from "@/hooks/usePatients";
+import { Patient, Surgery, Pharmacy, FamilyHistoryEntry, ICEContact, NextOfKinMember, CurrentMedication } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -36,7 +37,103 @@ const ORGAN_OPTIONS = [
   "Heart", "Lungs", "Kidneys", "Liver", "Pancreas", "Corneas", "Skin", "Bone Marrow", "Intestines",
 ];
 
+const RELATIONSHIP_OPTIONS = ["Spouse", "Parent", "Child", "Sibling", "Grandparent", "Friend", "Partner", "Guardian"];
+
+const COUNTRY_CODES = [
+  { code: "+27", label: "🇿🇦 +27" },
+  { code: "+1", label: "🇺🇸 +1" },
+  { code: "+44", label: "🇬🇧 +44" },
+  { code: "+61", label: "🇦🇺 +61" },
+  { code: "+91", label: "🇮🇳 +91" },
+  { code: "+49", label: "🇩🇪 +49" },
+  { code: "+33", label: "🇫🇷 +33" },
+  { code: "+86", label: "🇨🇳 +86" },
+  { code: "+81", label: "🇯🇵 +81" },
+  { code: "+55", label: "🇧🇷 +55" },
+  { code: "+234", label: "🇳🇬 +234" },
+  { code: "+254", label: "🇰🇪 +254" },
+  { code: "+971", label: "🇦🇪 +971" },
+];
+
 const sectionFrame = "rounded-xl border border-primary bg-card p-4 shadow-sm";
+
+// Phone input with country code
+const PhoneInput = ({ value, onChange, placeholder = "Phone number" }: { value: string; onChange: (v: string) => void; placeholder?: string }) => {
+  const getCountryCode = (phone: string) => {
+    for (const cc of COUNTRY_CODES) {
+      if (phone.startsWith(cc.code)) return cc.code;
+    }
+    return "+27";
+  };
+  const getNumber = (phone: string) => {
+    const cc = getCountryCode(phone);
+    return phone.startsWith(cc) ? phone.slice(cc.length).trim() : phone;
+  };
+  const [countryCode, setCountryCode] = useState(getCountryCode(value || ""));
+  const [number, setNumber] = useState(getNumber(value || ""));
+
+  useEffect(() => {
+    if (value) {
+      setCountryCode(getCountryCode(value));
+      setNumber(getNumber(value));
+    }
+  }, [value]);
+
+  const handleChange = (newCode: string, newNum: string) => {
+    setCountryCode(newCode);
+    setNumber(newNum);
+    onChange(newNum ? `${newCode} ${newNum}` : "");
+  };
+
+  return (
+    <div className="flex gap-1">
+      <Select value={countryCode} onValueChange={(v) => handleChange(v, number)}>
+        <SelectTrigger className="w-[90px] text-xs shrink-0"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          {COUNTRY_CODES.map(cc => <SelectItem key={cc.code} value={cc.code}>{cc.label}</SelectItem>)}
+        </SelectContent>
+      </Select>
+      <Input className="text-sm flex-1" value={number} onChange={(e) => handleChange(countryCode, e.target.value)} placeholder={placeholder} />
+    </div>
+  );
+};
+
+// Relationship select with "Other" option
+const RelationshipSelect = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
+  const [showOther, setShowOther] = useState(!RELATIONSHIP_OPTIONS.includes(value) && !!value);
+
+  if (showOther) {
+    return (
+      <div className="flex gap-1">
+        <Input className="text-sm flex-1" value={value} onChange={(e) => onChange(e.target.value)} placeholder="Type relationship" />
+        <Button variant="ghost" size="sm" className="text-xs h-9 shrink-0" onClick={() => { setShowOther(false); onChange(""); }}>List</Button>
+      </div>
+    );
+  }
+
+  return (
+    <Select value={RELATIONSHIP_OPTIONS.includes(value) ? value : ""} onValueChange={(v) => { if (v === "__other__") { setShowOther(true); onChange(""); } else onChange(v); }}>
+      <SelectTrigger className="text-sm"><SelectValue placeholder="Select relationship" /></SelectTrigger>
+      <SelectContent>
+        {RELATIONSHIP_OPTIONS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+        <SelectItem value="__other__">Other...</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+};
+
+// Format surgery date based on precision
+const formatSurgeryDate = (date: string, precision?: string) => {
+  try {
+    if (precision === 'year') return date.slice(0, 4);
+    if (precision === 'month') {
+      const [y, m] = date.split('-');
+      const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+      return `${months[parseInt(m) - 1]} ${y}`;
+    }
+    return format(new Date(date), "MMMM d, yyyy");
+  } catch { return date; }
+};
 
 export function PatientDetailsEditor({ patient, onSave, isSelfService = false, userEmail }: PatientDetailsEditorProps) {
   const { toast } = useToast();
@@ -49,8 +146,20 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  // Split name helper
+  const splitName = (fullName: string) => {
+    const parts = fullName.trim().split(/\s+/);
+    if (parts.length <= 1) return { first: fullName, last: "" };
+    return { first: parts.slice(0, -1).join(" "), last: parts[parts.length - 1] };
+  };
+
+  const initFirst = patient.first_name || splitName(patient.name).first;
+  const initLast = patient.last_name || splitName(patient.name).last;
+
   const [formData, setFormData] = useState({
-    name: "",
+    first_name: initFirst,
+    last_name: initLast,
     email: "",
     phone: "",
     dob: "",
@@ -87,12 +196,30 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   const [surgeries, setSurgeries] = useState<Surgery[]>([]);
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [familyHistory, setFamilyHistory] = useState<FamilyHistoryEntry[]>([]);
-  const [newSurgery, setNewSurgery] = useState({ name: "", date: "", notes: "" });
+  const [iceContacts, setIceContacts] = useState<ICEContact[]>([]);
+  const [nokMembers, setNokMembers] = useState<NextOfKinMember[]>([]);
+  const [currentMedications, setCurrentMedications] = useState<CurrentMedication[]>([]);
+  const [newSurgery, setNewSurgery] = useState({ name: "", date: "", notes: "", date_precision: "exact" as 'exact' | 'month' | 'year' });
   const [showAddSurgery, setShowAddSurgery] = useState(false);
-  const [newPharmacy, setNewPharmacy] = useState({ name: "", email: "" });
+  const [editingSurgeryId, setEditingSurgeryId] = useState<string | null>(null);
+  const [newPharmacy, setNewPharmacy] = useState({ name: "", email: "", branch: "" });
   const [showAddPharmacy, setShowAddPharmacy] = useState(false);
+  const [editingPharmacyId, setEditingPharmacyId] = useState<string | null>(null);
   const [newFamilyEntry, setNewFamilyEntry] = useState({ relation: "", condition: "" });
   const [showAddFamily, setShowAddFamily] = useState(false);
+  const [editingFamilyId, setEditingFamilyId] = useState<string | null>(null);
+  const [showAddICE, setShowAddICE] = useState(false);
+  const [newICE, setNewICE] = useState({ name: "", phone: "", email: "", relationship: "" });
+  const [showAddNOK, setShowAddNOK] = useState(false);
+  const [newNOK, setNewNOK] = useState({ name: "", phone: "", email: "", relationship: "" });
+  const [editingNOKId, setEditingNOKId] = useState<string | null>(null);
+  const [editingICEId, setEditingICEId] = useState<string | null>(null);
+  const [showAddMed, setShowAddMed] = useState(false);
+  const [newMed, setNewMed] = useState({ name: "", dosage: "", is_chronic: false });
+  const [editingMedId, setEditingMedId] = useState<string | null>(null);
+  const [gpSearchResults, setGpSearchResults] = useState<any[]>([]);
+  const [gpSearchOpen, setGpSearchOpen] = useState(false);
+  const [gpSearchTerm, setGpSearchTerm] = useState("");
 
   // Fetch avatar for self-service patients
   useEffect(() => {
@@ -133,8 +260,11 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
   useEffect(() => {
     if (patient) {
+      const fn = patient.first_name || splitName(patient.name).first;
+      const ln = patient.last_name || splitName(patient.name).last;
       setFormData({
-        name: patient.name || "",
+        first_name: fn,
+        last_name: ln,
         email: patient.email || "",
         phone: patient.phone || "",
         dob: patient.dob || "",
@@ -170,6 +300,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
       setOrganDonorOrgans(patient.organ_donor_organs || []);
       setSurgeries(patient.surgeries || []);
       setFamilyHistory(patient.family_history || []);
+      setIceContacts(patient.ice_contacts || []);
+      setNokMembers(patient.next_of_kin_members || []);
+      setCurrentMedications(patient.current_medications || []);
       const existingPharmacies = patient.pharmacies || [];
       if (existingPharmacies.length === 0 && (patient.pharmacy_name || patient.pharmacy_email)) {
         setPharmacies([{ id: crypto.randomUUID(), name: patient.pharmacy_name || "", email: patient.pharmacy_email || "", is_primary: true }]);
@@ -181,10 +314,14 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   }, [patient]);
 
   const performSave = useCallback(async (data: typeof formData, surgeriesData: Surgery[]) => {
-    if (!data.name.trim()) return;
+    if (!data.first_name.trim() && !data.last_name.trim()) return;
+    const fullName = `${data.first_name.trim()} ${data.last_name.trim()}`.trim();
+    const isChronic = currentMedications.some(m => m.is_chronic);
     setSaving(true);
     await onSave({
-      name: data.name,
+      name: fullName,
+      first_name: data.first_name.trim() || null,
+      last_name: data.last_name.trim() || null,
       email: data.email || null,
       phone: data.phone || null,
       dob: data.dob || null,
@@ -220,10 +357,14 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
       family_history: familyHistory,
       organ_donor: data.organ_donor,
       organ_donor_organs: organDonorOrgans,
+      ice_contacts: iceContacts,
+      next_of_kin_members: nokMembers,
+      current_medications: currentMedications,
+      is_chronic: isChronic,
     });
     setSaving(false);
     setHasChanges(false);
-  }, [onSave, pharmacies, familyHistory, organDonorOrgans]);
+  }, [onSave, pharmacies, familyHistory, organDonorOrgans, iceContacts, nokMembers, currentMedications]);
 
   useEffect(() => {
     if (!isEditing || !hasChanges) return;
@@ -232,7 +373,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
       performSave(formData, surgeries);
     }, 1500);
     return () => { if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current); };
-  }, [formData, surgeries, pharmacies, familyHistory, organDonorOrgans, isEditing, hasChanges, performSave]);
+  }, [formData, surgeries, pharmacies, familyHistory, organDonorOrgans, iceContacts, nokMembers, currentMedications, isEditing, hasChanges, performSave]);
 
   const updateFormData = (updates: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
@@ -244,16 +385,39 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
     setHasChanges(true);
   };
 
+  // Surgery handlers
   const handleAddSurgery = () => {
-    if (!newSurgery.name.trim() || !newSurgery.date) {
-      toast({ title: "Required Fields", description: "Please enter surgery name and date", variant: "destructive" });
+    if (!newSurgery.name.trim()) {
+      toast({ title: "Required Fields", description: "Please enter surgery name", variant: "destructive" });
       return;
     }
-    const surgery: Surgery = { id: crypto.randomUUID(), name: newSurgery.name.trim(), date: newSurgery.date, notes: newSurgery.notes.trim() || undefined };
-    setSurgeries(prev => [...prev, surgery]);
-    setNewSurgery({ name: "", date: "", notes: "" });
+    let dateVal = newSurgery.date;
+    if (newSurgery.date_precision === 'year' && !dateVal) {
+      toast({ title: "Required", description: "Please enter a year", variant: "destructive" }); return;
+    }
+    if (newSurgery.date_precision === 'month' && !dateVal) {
+      toast({ title: "Required", description: "Please enter month/year", variant: "destructive" }); return;
+    }
+    if (newSurgery.date_precision === 'exact' && !dateVal) {
+      toast({ title: "Required", description: "Please enter date", variant: "destructive" }); return;
+    }
+
+    if (editingSurgeryId) {
+      setSurgeries(prev => prev.map(s => s.id === editingSurgeryId ? { ...s, name: newSurgery.name.trim(), date: dateVal, notes: newSurgery.notes.trim() || undefined, date_precision: newSurgery.date_precision } : s));
+      setEditingSurgeryId(null);
+    } else {
+      const surgery: Surgery = { id: crypto.randomUUID(), name: newSurgery.name.trim(), date: dateVal, notes: newSurgery.notes.trim() || undefined, date_precision: newSurgery.date_precision };
+      setSurgeries(prev => [...prev, surgery]);
+    }
+    setNewSurgery({ name: "", date: "", notes: "", date_precision: "exact" });
     setShowAddSurgery(false);
     setHasChanges(true);
+  };
+
+  const handleEditSurgery = (s: Surgery) => {
+    setNewSurgery({ name: s.name, date: s.date, notes: s.notes || "", date_precision: s.date_precision || "exact" });
+    setEditingSurgeryId(s.id);
+    setShowAddSurgery(true);
   };
 
   const handleRemoveSurgery = (id: string) => {
@@ -261,29 +425,33 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
     setHasChanges(true);
   };
 
+  // Pharmacy handlers
   const handleAddPharmacy = () => {
     if (!newPharmacy.name.trim()) {
-      toast({ title: "Required", description: "Pharmacy name is required", variant: "destructive" });
-      return;
+      toast({ title: "Required", description: "Pharmacy name is required", variant: "destructive" }); return;
     }
-    const pharmacy: Pharmacy = {
-      id: crypto.randomUUID(),
-      name: newPharmacy.name.trim(),
-      email: newPharmacy.email.trim() || "",
-      is_primary: pharmacies.length === 0,
-    };
-    setPharmacies(prev => [...prev, pharmacy]);
-    setNewPharmacy({ name: "", email: "" });
+    if (editingPharmacyId) {
+      setPharmacies(prev => prev.map(p => p.id === editingPharmacyId ? { ...p, name: newPharmacy.name.trim(), email: newPharmacy.email.trim(), branch: newPharmacy.branch.trim() || undefined } : p));
+      setEditingPharmacyId(null);
+    } else {
+      const pharmacy: Pharmacy = { id: crypto.randomUUID(), name: newPharmacy.name.trim(), email: newPharmacy.email.trim() || "", branch: newPharmacy.branch.trim() || undefined, is_primary: pharmacies.length === 0 };
+      setPharmacies(prev => [...prev, pharmacy]);
+    }
+    setNewPharmacy({ name: "", email: "", branch: "" });
     setShowAddPharmacy(false);
     setHasChanges(true);
+  };
+
+  const handleEditPharmacy = (p: Pharmacy) => {
+    setNewPharmacy({ name: p.name, email: p.email, branch: p.branch || "" });
+    setEditingPharmacyId(p.id);
+    setShowAddPharmacy(true);
   };
 
   const handleRemovePharmacy = (id: string) => {
     setPharmacies(prev => {
       const updated = prev.filter(p => p.id !== id);
-      if (updated.length > 0 && !updated.some(p => p.is_primary)) {
-        updated[0].is_primary = true;
-      }
+      if (updated.length > 0 && !updated.some(p => p.is_primary)) updated[0].is_primary = true;
       return updated;
     });
     setHasChanges(true);
@@ -294,15 +462,26 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
     setHasChanges(true);
   };
 
+  // Family history handlers
   const handleAddFamilyEntry = () => {
     if (!newFamilyEntry.relation.trim() || !newFamilyEntry.condition.trim()) {
-      toast({ title: "Required", description: "Both relation and condition are required", variant: "destructive" });
-      return;
+      toast({ title: "Required", description: "Both relation and condition are required", variant: "destructive" }); return;
     }
-    setFamilyHistory(prev => [...prev, { id: crypto.randomUUID(), relation: newFamilyEntry.relation.trim(), condition: newFamilyEntry.condition.trim() }]);
+    if (editingFamilyId) {
+      setFamilyHistory(prev => prev.map(f => f.id === editingFamilyId ? { ...f, relation: newFamilyEntry.relation.trim(), condition: newFamilyEntry.condition.trim() } : f));
+      setEditingFamilyId(null);
+    } else {
+      setFamilyHistory(prev => [...prev, { id: crypto.randomUUID(), relation: newFamilyEntry.relation.trim(), condition: newFamilyEntry.condition.trim() }]);
+    }
     setNewFamilyEntry({ relation: "", condition: "" });
     setShowAddFamily(false);
     setHasChanges(true);
+  };
+
+  const handleEditFamilyEntry = (f: FamilyHistoryEntry) => {
+    setNewFamilyEntry({ relation: f.relation, condition: f.condition });
+    setEditingFamilyId(f.id);
+    setShowAddFamily(true);
   };
 
   const handleRemoveFamilyEntry = (id: string) => {
@@ -310,9 +489,90 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
     setHasChanges(true);
   };
 
+  // NOK members handlers
+  const handleAddNOK = () => {
+    if (!newNOK.name.trim()) { toast({ title: "Required", description: "Name is required", variant: "destructive" }); return; }
+    if (editingNOKId) {
+      setNokMembers(prev => prev.map(n => n.id === editingNOKId ? { ...n, ...newNOK, name: newNOK.name.trim() } : n));
+      setEditingNOKId(null);
+    } else {
+      setNokMembers(prev => [...prev, { id: crypto.randomUUID(), ...newNOK, name: newNOK.name.trim() }]);
+    }
+    setNewNOK({ name: "", phone: "", email: "", relationship: "" });
+    setShowAddNOK(false);
+    setHasChanges(true);
+  };
+
+  const handleEditNOK = (n: NextOfKinMember) => {
+    setNewNOK({ name: n.name, phone: n.phone, email: n.email, relationship: n.relationship });
+    setEditingNOKId(n.id);
+    setShowAddNOK(true);
+  };
+
+  // ICE contacts handlers
+  const handleAddICE = () => {
+    if (!newICE.name.trim()) { toast({ title: "Required", description: "Name is required", variant: "destructive" }); return; }
+    if (editingICEId) {
+      setIceContacts(prev => prev.map(c => c.id === editingICEId ? { ...c, ...newICE, name: newICE.name.trim() } : c));
+      setEditingICEId(null);
+    } else {
+      setIceContacts(prev => [...prev, { id: crypto.randomUUID(), ...newICE, name: newICE.name.trim() }]);
+    }
+    setNewICE({ name: "", phone: "", email: "", relationship: "" });
+    setShowAddICE(false);
+    setHasChanges(true);
+  };
+
+  const handleEditICE = (c: ICEContact) => {
+    setNewICE({ name: c.name, phone: c.phone, email: c.email, relationship: c.relationship });
+    setEditingICEId(c.id);
+    setShowAddICE(true);
+  };
+
+  // Current medications handlers
+  const handleAddMed = () => {
+    if (!newMed.name.trim()) { toast({ title: "Required", description: "Medication name is required", variant: "destructive" }); return; }
+    if (editingMedId) {
+      setCurrentMedications(prev => prev.map(m => m.id === editingMedId ? { ...m, name: newMed.name.trim(), dosage: newMed.dosage.trim() || undefined, is_chronic: newMed.is_chronic } : m));
+      setEditingMedId(null);
+    } else {
+      setCurrentMedications(prev => [...prev, { id: crypto.randomUUID(), name: newMed.name.trim(), dosage: newMed.dosage.trim() || undefined, is_chronic: newMed.is_chronic }]);
+    }
+    setNewMed({ name: "", dosage: "", is_chronic: false });
+    setShowAddMed(false);
+    setHasChanges(true);
+  };
+
+  const handleEditMed = (m: CurrentMedication) => {
+    setNewMed({ name: m.name, dosage: m.dosage || "", is_chronic: m.is_chronic });
+    setEditingMedId(m.id);
+    setShowAddMed(true);
+  };
+
+  const handleToggleMedChronic = (id: string) => {
+    setCurrentMedications(prev => prev.map(m => m.id === id ? { ...m, is_chronic: !m.is_chronic } : m));
+    setHasChanges(true);
+  };
+
+  // GP search
+  const searchGP = async (term: string) => {
+    setGpSearchTerm(term);
+    updateFormData({ general_practitioner: term });
+    if (term.length < 2) { setGpSearchResults([]); return; }
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, full_name, practice_number, doctor_number, specialty")
+      .or(`full_name.ilike.%${term}%,practice_number.ilike.%${term}%,doctor_number.ilike.%${term}%`)
+      .limit(5);
+    setGpSearchResults(data || []);
+    if ((data || []).length > 0) setGpSearchOpen(true);
+  };
+
   const handleCancel = () => {
+    const fn = patient.first_name || splitName(patient.name).first;
+    const ln = patient.last_name || splitName(patient.name).last;
     setFormData({
-      name: patient.name || "", email: patient.email || "", phone: patient.phone || "",
+      first_name: fn, last_name: ln, email: patient.email || "", phone: patient.phone || "",
       dob: patient.dob || "", occupation: patient.occupation || "", employer: patient.employer || "",
       reporting_to_email: patient.reporting_to_email || "",
       referred_by: patient.referred_by || "", marital_status: patient.marital_status || "",
@@ -327,13 +587,14 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
       next_of_kin_relationship: patient.next_of_kin_relationship || "",
       height_cm: patient.height_cm?.toString() || "", weight_kg: patient.weight_kg?.toString() || "",
       pharmacy_name: patient.pharmacy_name || "", pharmacy_email: patient.pharmacy_email || "",
-      notes: patient.notes || "",
-      blood_type: patient.blood_type || "",
-      organ_donor: patient.organ_donor || false,
+      notes: patient.notes || "", blood_type: patient.blood_type || "", organ_donor: patient.organ_donor || false,
     });
     setOrganDonorOrgans(patient.organ_donor_organs || []);
     setSurgeries(patient.surgeries || []);
     setFamilyHistory(patient.family_history || []);
+    setIceContacts(patient.ice_contacts || []);
+    setNokMembers(patient.next_of_kin_members || []);
+    setCurrentMedications(patient.current_medications || []);
     setIsEditing(false);
   };
 
@@ -348,6 +609,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   };
 
   const bmi = calculateBMI();
+  const isChronic = currentMedications.some(m => m.is_chronic);
 
   const ViewField = ({ label, value }: { label: string; value: string | null | undefined }) => (
     <div className="space-y-1.5">
@@ -359,55 +621,33 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   // Profile banner for self-service patients
   const ProfileBanner = () => {
     if (!isSelfService) return null;
-    const initials = patient.name
-      ?.split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2) || "?";
-
+    const initials = patient.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "?";
     return (
       <div className={sectionFrame + " mb-4"}>
         <div className="flex items-center gap-4">
           <div className="flex flex-col items-center gap-1 cursor-pointer" onClick={() => avatarInputRef.current?.click()}>
             <div className="relative">
               <Avatar className="h-20 w-20 border-2 border-primary">
-                {avatarUrl ? (
-                  <AvatarImage src={avatarUrl} alt={patient.name} />
-                ) : null}
+                {avatarUrl ? <AvatarImage src={avatarUrl} alt={patient.name} /> : null}
                 <AvatarFallback className="bg-primary/10 text-primary text-xl font-semibold">{initials}</AvatarFallback>
               </Avatar>
               <div className={`absolute inset-0 flex items-center justify-center rounded-full transition-opacity ${avatarUrl ? "bg-black/40 opacity-0 group-hover:opacity-100" : "bg-black/30"}`}>
-                {uploadingAvatar ? (
-                  <Loader2 className="h-5 w-5 animate-spin text-white" />
-                ) : (
-                  <Camera className="h-5 w-5 text-white" />
-                )}
+                {uploadingAvatar ? <Loader2 className="h-5 w-5 animate-spin text-white" /> : <Camera className="h-5 w-5 text-white" />}
               </div>
             </div>
-            {!avatarUrl && (
-              <span className="text-[10px] text-muted-foreground">Tap to add photo</span>
-            )}
-            <input
-              ref={avatarInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleAvatarUpload}
-            />
+            {!avatarUrl && <span className="text-[10px] text-muted-foreground">Tap to add photo</span>}
+            <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-foreground">{patient.name}</h3>
-            {(userEmail || patient.email) && (
-              <p className="text-xs text-muted-foreground">{userEmail || patient.email}</p>
-            )}
+            {(userEmail || patient.email) && <p className="text-xs text-muted-foreground">{userEmail || patient.email}</p>}
           </div>
         </div>
       </div>
     );
   };
 
-  // Shared organ donor display
+  // Organ donor view
   const OrganDonorView = () => (
     <div>
       <Label>Organ Donor</Label>
@@ -422,11 +662,28 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             </div>
           )}
         </div>
-      ) : (
-        <span className="text-xs text-muted-foreground">No</span>
-      )}
+      ) : <span className="text-xs text-muted-foreground">No</span>}
     </div>
   );
+
+  // ICE share handler
+  const handleShareICE = () => {
+    const info = [
+      `Patient: ${patient.name}`,
+      `DOB: ${patient.dob || 'N/A'}`,
+      `Blood Type: ${patient.blood_type || 'N/A'}`,
+      `Allergies: ${patient.allergies || 'None'}`,
+      `Medications: ${currentMedications.map(m => m.name).join(', ') || 'None'}`,
+      `GP: ${patient.general_practitioner || 'N/A'}`,
+    ].join('\n');
+
+    if (navigator.share) {
+      navigator.share({ title: 'ICE - Patient Information', text: info });
+    } else {
+      navigator.clipboard.writeText(info);
+      toast({ title: "Copied", description: "ICE information copied to clipboard" });
+    }
+  };
 
   // ==================== VIEW MODE ====================
   if (!isEditing) {
@@ -464,15 +721,16 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               <div className={sectionFrame}>
                 <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> Personal Details</h3>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  <ViewField label="Full Name" value={patient.name} />
+                  <ViewField label="First Name(s)" value={patient.first_name || splitName(patient.name).first} />
+                  <ViewField label="Last Name" value={patient.last_name || splitName(patient.name).last} />
                   <ViewField label="ID/Passport Number" value={patient.id_passport_number} />
                   <ViewField label="Gender" value={patient.gender} />
                   <ViewField label="Date of Birth" value={patient.dob ? format(new Date(patient.dob), "MMMM d, yyyy") : null} />
                   <ViewField label="Email" value={patient.email} />
                   <ViewField label="Phone" value={patient.phone} />
-                   <ViewField label="Marital Status" value={patient.marital_status} />
-                   <ViewField label="Language" value="English" />
-                   <ViewField label="Referred By" value={patient.referred_by} />
+                  <ViewField label="Marital Status" value={patient.marital_status} />
+                  <ViewField label="Language" value="English" />
+                  <ViewField label="Referred By" value={patient.referred_by} />
                 </div>
               </div>
 
@@ -484,14 +742,48 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 </div>
               </div>
 
+              {/* Next of Kin - show legacy single or new list */}
               <div className={sectionFrame}>
                 <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Next of Kin</h3>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                  <ViewField label="Name" value={patient.next_of_kin_name} />
-                  <ViewField label="Relationship" value={patient.next_of_kin_relationship} />
-                  <ViewField label="Phone" value={patient.next_of_kin_phone} />
-                  <ViewField label="Email" value={patient.next_of_kin_email} />
+                {nokMembers.length > 0 ? (
+                  <div className="space-y-2">
+                    {nokMembers.map(nok => (
+                      <div key={nok.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                        <p className="text-xs font-medium text-foreground">{nok.name} {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}</p>
+                        {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
+                        {nok.email && <p className="text-[10px] text-muted-foreground">{nok.email}</p>}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <ViewField label="Name" value={patient.next_of_kin_name} />
+                    <ViewField label="Relationship" value={patient.next_of_kin_relationship} />
+                    <ViewField label="Phone" value={patient.next_of_kin_phone} />
+                    <ViewField label="Email" value={patient.next_of_kin_email} />
+                  </div>
+                )}
+              </div>
+
+              {/* ICE Contacts */}
+              <div className={sectionFrame}>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> ICE Contacts (In Case of Emergency)</h3>
+                  {isSelfService && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={handleShareICE}><Share2 className="h-3 w-3" />Share</Button>}
                 </div>
+                {iceContacts.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">No ICE contacts recorded</p>
+                ) : (
+                  <div className="space-y-2">
+                    {iceContacts.map(c => (
+                      <div key={c.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                        <p className="text-xs font-medium text-foreground">{c.name} {c.relationship && <span className="text-muted-foreground">({c.relationship})</span>}</p>
+                        {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
+                        {c.email && <p className="text-[10px] text-muted-foreground">{c.email}</p>}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className={sectionFrame}>
@@ -504,9 +796,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               </div>
 
               <div className={sectionFrame}>
-                <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
-                  <StickyNote className="h-3.5 w-3.5" /> General Notes
-                </h3>
+                <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><StickyNote className="h-3.5 w-3.5" /> General Notes</h3>
                 <p className="text-sm text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
               </div>
             </TabsContent>
@@ -518,47 +808,57 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 <p className="text-xs text-muted-foreground">View and manage medical records</p>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Column 1: Medical Information (single frame) */}
                 <div className={sectionFrame + " space-y-5"}>
                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Medical Information</h3>
 
-                   {/* Physical Measurements */}
-                   <div>
-                     <div className="grid gap-3 sm:grid-cols-3">
+                  <div>
+                    <div className="grid gap-3 sm:grid-cols-3">
                       <ViewField label="Height (cm)" value={patient.height_cm ? `${patient.height_cm}` : undefined} />
                       <ViewField label="Weight (kg)" value={patient.weight_kg ? `${patient.weight_kg}` : undefined} />
                       <ViewField label="BMI" value={bmi || undefined} />
                     </div>
                   </div>
 
-                  {/* Blood Type */}
+                  <div><ViewField label="Blood Type" value={patient.blood_type} /></div>
+                  <div><ViewField label="Allergies" value={patient.allergies || "None recorded"} /></div>
+
+                  {/* Current Medications */}
                   <div>
-                    <ViewField label="Blood Type" value={patient.blood_type} />
+                    <Label>Current Medications</Label>
+                    {currentMedications.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No medications recorded</p>
+                    ) : (
+                      <div className="space-y-1">
+                        {currentMedications.map(m => (
+                          <div key={m.id} className="flex items-center gap-2 p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                            <Pill className="h-3 w-3 text-muted-foreground shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-foreground">{m.name}{m.dosage ? ` — ${m.dosage}` : ""}</p>
+                            </div>
+                            {m.is_chronic && <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[9px] font-bold text-destructive shrink-0">Chronic</span>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {isChronic && (
+                      <div className="mt-2">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive"><Pill className="h-2.5 w-2.5" />Chronic Patient</span>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Allergies */}
+                  {/* Surgeries */}
                   <div>
-                    <ViewField label="Allergies" value={patient.allergies || "None recorded"} />
-                  </div>
-
-                  {/* Chronic Medication */}
-                  <div>
-                    <Label>Chronic Medication</Label>
-                    <Input value={patient.is_chronic ? (patient as any).chronic_medications || "Yes - Chronic" : "No"} disabled className="bg-muted/50" />
-                  </div>
-
-                  {/* Surgeries and Dates */}
-                  <div>
-                     <Label>Surgeries and Dates</Label>
+                    <Label>Surgeries and Dates</Label>
                     {surgeries.length === 0 ? (
                       <p className="text-xs text-muted-foreground">No surgeries recorded</p>
                     ) : (
-                      <div className="space-y-1.5">
+                      <div className="space-y-1">
                         {surgeries.map((surgery) => (
-                          <div key={surgery.id} className="p-2 rounded-lg bg-muted/30 border border-border/50">
-                            <p className="text-sm font-medium text-foreground">{surgery.name}</p>
-                            <p className="text-xs text-muted-foreground">{format(new Date(surgery.date), "MMMM d, yyyy")}</p>
-                            {surgery.notes && <p className="text-xs text-muted-foreground mt-0.5">{surgery.notes}</p>}
+                          <div key={surgery.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                            <p className="text-xs font-medium text-foreground">{surgery.name}</p>
+                            <p className="text-[10px] text-muted-foreground">{formatSurgeryDate(surgery.date, surgery.date_precision)}</p>
+                            {surgery.notes && <p className="text-[10px] text-muted-foreground mt-0.5">{surgery.notes}</p>}
                           </div>
                         ))}
                       </div>
@@ -567,28 +867,25 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Family History */}
                   <div>
-                     <Label>Family History</Label>
+                    <Label>Family History</Label>
                     {familyHistory.length === 0 ? (
                       <p className="text-xs text-muted-foreground">No family history recorded</p>
                     ) : (
-                      <div className="space-y-1.5">
+                      <div className="space-y-1">
                         {familyHistory.map((entry) => (
-                          <div key={entry.id} className="p-2 rounded-lg bg-muted/30 border border-border/50">
-                            <p className="text-sm font-medium text-foreground">{entry.relation}</p>
-                            <p className="text-xs text-muted-foreground">{entry.condition}</p>
+                          <div key={entry.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                            <p className="text-xs font-medium text-foreground">{entry.relation}</p>
+                            <p className="text-[10px] text-muted-foreground">{entry.condition}</p>
                           </div>
                         ))}
                       </div>
                     )}
                   </div>
 
-                  {/* Organ Donor */}
-                  <div>
-                    <OrganDonorView />
-                  </div>
+                  <div><OrganDonorView /></div>
                 </div>
 
-                {/* Column 2: Insurance, GP & Pharmacies */}
+                {/* Column 2 */}
                 <div className="space-y-4">
                   <div className={sectionFrame}>
                     <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> Medical Insurance</h3>
@@ -597,7 +894,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                       <ViewField label="Insurance Product" value={patient.medical_insurance_product} />
                       <ViewField label="Insurance Number" value={patient.medical_aid_number} />
                       <ViewField label="Primary Member" value={patient.primary_member} />
-                      <ViewField label="Claims Email" value={patient.claims_email} />
+                      <ViewField label="Claims Email (auto-submission)" value={patient.claims_email} />
                     </div>
                   </div>
 
@@ -615,11 +912,12 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                         {pharmacies.map((pharmacy) => (
                           <div key={pharmacy.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/50">
                             <div>
-                              <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                              <p className="text-xs font-medium text-foreground flex items-center gap-2">
                                 {pharmacy.name}
+                                {pharmacy.branch && <span className="text-muted-foreground">({pharmacy.branch})</span>}
                                 {pharmacy.is_primary && <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">Primary</span>}
                               </p>
-                              {pharmacy.email && <p className="text-xs text-muted-foreground">{pharmacy.email}</p>}
+                              {pharmacy.email && <p className="text-[10px] text-muted-foreground">{pharmacy.email}</p>}
                             </div>
                           </div>
                         ))}
@@ -630,7 +928,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               </div>
             </TabsContent>
 
-            {/* === MEDICAL OVERVIEW TAB (only for self-service) === */}
+            {/* === MEDICAL OVERVIEW TAB === */}
             {isSelfService && (
               <TabsContent value="overview" className="mt-4">
                 <div className="mb-4">
@@ -643,7 +941,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               </TabsContent>
             )}
 
-            {/* === MY SESSIONS TAB (only for self-service) === */}
             {isSelfService && (
               <TabsContent value="sessions" className="mt-4">
                 <div className="mb-4">
@@ -656,16 +953,14 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               </TabsContent>
             )}
 
-            {/* === MY DOCUMENTS TAB (only for self-service) === */}
             {isSelfService && (
-               <TabsContent value="documents" className="mt-4">
+              <TabsContent value="documents" className="mt-4">
                 <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
                   <PatientDocuments hideHeader={false} />
                 </Suspense>
               </TabsContent>
             )}
 
-            {/* === MY HEALTHCARE PROVIDERS TAB (only for self-service) === */}
             {isSelfService && (
               <TabsContent value="doctors" className="mt-4">
                 <div className="mb-4">
@@ -678,7 +973,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               </TabsContent>
             )}
 
-            {/* === MY ROUND TABLE TAB (only for self-service) === */}
             {isSelfService && (
               <TabsContent value="roundtable" className="mt-4">
                 <div className="mb-4">
@@ -731,7 +1025,8 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             <div className={sectionFrame}>
               <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> Personal Information</h3>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                <div className="space-y-1.5"><Label htmlFor="name">Full Name *</Label><Input id="name" className="text-sm" value={formData.name} onChange={(e) => updateFormData({ name: e.target.value })} placeholder="Patient name" /></div>
+                <div className="space-y-1.5"><Label htmlFor="first_name">First Name(s) *</Label><Input id="first_name" className="text-sm" value={formData.first_name} onChange={(e) => updateFormData({ first_name: e.target.value })} placeholder="First name(s)" /></div>
+                <div className="space-y-1.5"><Label htmlFor="last_name">Last Name *</Label><Input id="last_name" className="text-sm" value={formData.last_name} onChange={(e) => updateFormData({ last_name: e.target.value })} placeholder="Last name" /></div>
                 <div className="space-y-1.5"><Label htmlFor="id_passport_number">ID/Passport Number</Label><Input id="id_passport_number" className="text-sm" value={formData.id_passport_number} onChange={(e) => updateFormData({ id_passport_number: e.target.value })} placeholder="ID or passport number" /></div>
                 <div className="space-y-1.5"><Label htmlFor="gender">Gender</Label>
                   <Select value={formData.gender} onValueChange={(value) => updateFormData({ gender: value })}>
@@ -740,7 +1035,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   </Select></div>
                 <div className="space-y-1.5"><Label htmlFor="dob">Date of Birth</Label><Input id="dob" className="text-sm" type="date" value={formData.dob} onChange={(e) => updateFormData({ dob: e.target.value })} /></div>
                 <div className="space-y-1.5"><Label htmlFor="email">Email</Label><Input id="email" className="text-sm" type="email" value={formData.email} onChange={(e) => updateFormData({ email: e.target.value })} placeholder="patient@email.com" /></div>
-                <div className="space-y-1.5"><Label htmlFor="phone">Phone</Label><Input id="phone" className="text-sm" value={formData.phone} onChange={(e) => updateFormData({ phone: e.target.value })} placeholder="+1 (555) 123-4567" /></div>
+                <div className="space-y-1.5"><Label htmlFor="phone">Phone</Label><PhoneInput value={formData.phone} onChange={(v) => updateFormData({ phone: v })} /></div>
                 <div className="space-y-1.5"><Label htmlFor="marital_status">Marital Status</Label>
                   <Select value={formData.marital_status} onValueChange={(value) => updateFormData({ marital_status: value })}>
                     <SelectTrigger id="marital_status" className="text-sm"><SelectValue placeholder="Select status" /></SelectTrigger>
@@ -759,14 +1054,92 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               </div>
             </div>
 
+            {/* Next of Kin (multiple) */}
             <div className={sectionFrame}>
-              <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Next of Kin</h3>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="space-y-1.5"><Label htmlFor="next_of_kin_name">Name</Label><Input id="next_of_kin_name" className="text-sm" value={formData.next_of_kin_name} onChange={(e) => updateFormData({ next_of_kin_name: e.target.value })} placeholder="Full name" /></div>
-                <div className="space-y-1.5"><Label htmlFor="next_of_kin_relationship">Relationship</Label><Input id="next_of_kin_relationship" className="text-sm" value={formData.next_of_kin_relationship} onChange={(e) => updateFormData({ next_of_kin_relationship: e.target.value })} placeholder="e.g. Spouse, Parent" /></div>
-                <div className="space-y-1.5"><Label htmlFor="next_of_kin_phone">Phone</Label><Input id="next_of_kin_phone" className="text-sm" value={formData.next_of_kin_phone} onChange={(e) => updateFormData({ next_of_kin_phone: e.target.value })} placeholder="Phone number" /></div>
-                <div className="space-y-1.5"><Label htmlFor="next_of_kin_email">Email</Label><Input id="next_of_kin_email" className="text-sm" type="email" value={formData.next_of_kin_email} onChange={(e) => updateFormData({ next_of_kin_email: e.target.value })} placeholder="Email address" /></div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Next of Kin</h3>
+                {!showAddNOK && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddNOK(true)}><Plus className="h-3 w-3" />Add</Button>}
               </div>
+
+              {/* Legacy single NOK if no members yet */}
+              {nokMembers.length === 0 && (
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-3">
+                  <div className="space-y-1.5"><Label>Name</Label><Input className="text-sm" value={formData.next_of_kin_name} onChange={(e) => updateFormData({ next_of_kin_name: e.target.value })} placeholder="Full name" /></div>
+                  <div className="space-y-1.5"><Label>Relationship</Label><RelationshipSelect value={formData.next_of_kin_relationship} onChange={(v) => updateFormData({ next_of_kin_relationship: v })} /></div>
+                  <div className="space-y-1.5"><Label>Phone</Label><PhoneInput value={formData.next_of_kin_phone} onChange={(v) => updateFormData({ next_of_kin_phone: v })} /></div>
+                  <div className="space-y-1.5"><Label>Email</Label><Input className="text-sm" type="email" value={formData.next_of_kin_email} onChange={(e) => updateFormData({ next_of_kin_email: e.target.value })} placeholder="Email" /></div>
+                </div>
+              )}
+
+              {showAddNOK && (
+                <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <div className="space-y-1.5"><Label>Name *</Label><Input className="text-sm" value={newNOK.name} onChange={(e) => setNewNOK(p => ({ ...p, name: e.target.value }))} placeholder="Full name" /></div>
+                    <div className="space-y-1.5"><Label>Relationship</Label><RelationshipSelect value={newNOK.relationship} onChange={(v) => setNewNOK(p => ({ ...p, relationship: v }))} /></div>
+                    <div className="space-y-1.5"><Label>Phone</Label><PhoneInput value={newNOK.phone} onChange={(v) => setNewNOK(p => ({ ...p, phone: v }))} /></div>
+                    <div className="space-y-1.5"><Label>Email</Label><Input className="text-sm" type="email" value={newNOK.email} onChange={(e) => setNewNOK(p => ({ ...p, email: e.target.value }))} placeholder="Email" /></div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddNOK(false); setEditingNOKId(null); setNewNOK({ name: "", phone: "", email: "", relationship: "" }); }}>Cancel</Button>
+                    <Button size="sm" className="text-xs h-7" onClick={handleAddNOK}>{editingNOKId ? "Save" : "Add"}</Button>
+                  </div>
+                </div>
+              )}
+
+              {nokMembers.length > 0 && (
+                <div className="space-y-1.5">
+                  {nokMembers.map(nok => (
+                    <div key={nok.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                      <div>
+                        <p className="text-xs font-medium text-foreground">{nok.name} {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}</p>
+                        {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
+                      </div>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditNOK(nok)}><Pencil className="h-3 w-3" /></Button>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => { setNokMembers(prev => prev.filter(n => n.id !== nok.id)); setHasChanges(true); }}><Trash2 className="h-3 w-3" /></Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* ICE Contacts */}
+            <div className={sectionFrame}>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> ICE Contacts</h3>
+                {!showAddICE && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddICE(true)}><Plus className="h-3 w-3" />Add</Button>}
+              </div>
+              {showAddICE && (
+                <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <div className="space-y-1.5"><Label>Name *</Label><Input className="text-sm" value={newICE.name} onChange={(e) => setNewICE(p => ({ ...p, name: e.target.value }))} placeholder="Full name" /></div>
+                    <div className="space-y-1.5"><Label>Relationship</Label><RelationshipSelect value={newICE.relationship} onChange={(v) => setNewICE(p => ({ ...p, relationship: v }))} /></div>
+                    <div className="space-y-1.5"><Label>Phone</Label><PhoneInput value={newICE.phone} onChange={(v) => setNewICE(p => ({ ...p, phone: v }))} /></div>
+                    <div className="space-y-1.5"><Label>Email</Label><Input className="text-sm" type="email" value={newICE.email} onChange={(e) => setNewICE(p => ({ ...p, email: e.target.value }))} placeholder="Email" /></div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddICE(false); setEditingICEId(null); setNewICE({ name: "", phone: "", email: "", relationship: "" }); }}>Cancel</Button>
+                    <Button size="sm" className="text-xs h-7" onClick={handleAddICE}>{editingICEId ? "Save" : "Add"}</Button>
+                  </div>
+                </div>
+              )}
+              {iceContacts.length > 0 && (
+                <div className="space-y-1.5">
+                  {iceContacts.map(c => (
+                    <div key={c.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                      <div>
+                        <p className="text-xs font-medium text-foreground">{c.name} {c.relationship && <span className="text-muted-foreground">({c.relationship})</span>}</p>
+                        {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
+                      </div>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditICE(c)}><Pencil className="h-3 w-3" /></Button>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => { setIceContacts(prev => prev.filter(i => i.id !== c.id)); setHasChanges(true); }}><Trash2 className="h-3 w-3" /></Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className={sectionFrame}>
@@ -779,65 +1152,89 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             </div>
 
             <div className={sectionFrame}>
-              <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5">
-                <StickyNote className="h-3.5 w-3.5" /> General Notes
-              </h3>
-              <Textarea
-                value={formData.notes}
-                onChange={(e) => updateFormData({ notes: e.target.value })}
-                placeholder="General notes about this patient..."
-                rows={4}
-                className="text-sm"
-              />
+              <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><StickyNote className="h-3.5 w-3.5" /> General Notes</h3>
+              <Textarea value={formData.notes} onChange={(e) => updateFormData({ notes: e.target.value })} placeholder="General notes about this patient..." rows={4} className="text-sm" />
             </div>
           </TabsContent>
 
-          {/* === MEDICAL TAB (EDIT) — TWO COLUMNS === */}
+          {/* === MEDICAL TAB (EDIT) === */}
           <TabsContent value="medical" className="mt-4">
             <div className="mb-3">
               <h2 className="text-lg font-semibold text-foreground">Medical Information</h2>
               <p className="text-xs text-muted-foreground">View and manage medical records</p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {/* Column 1: Medical Information (single frame) */}
               <div className={sectionFrame + " space-y-4"}>
                 <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Medical Information</h3>
 
-                 {/* Physical Measurements */}
-                 <div>
-                   <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <div className="grid gap-3 sm:grid-cols-2">
                     <div className="space-y-1.5"><Label htmlFor="height_cm">Height (cm)</Label><Input id="height_cm" className="text-sm" type="number" step="0.1" value={formData.height_cm} onChange={(e) => updateFormData({ height_cm: e.target.value })} placeholder="e.g., 175" /></div>
                     <div className="space-y-1.5"><Label htmlFor="weight_kg">Weight (kg)</Label><Input id="weight_kg" className="text-sm" type="number" step="0.1" value={formData.weight_kg} onChange={(e) => updateFormData({ weight_kg: e.target.value })} placeholder="e.g., 70" /></div>
                   </div>
                 </div>
 
-                {/* Blood Type */}
                 <div>
                   <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Droplets className="h-3.5 w-3.5" /> Blood Type</Label>
                   <Select value={formData.blood_type} onValueChange={(value) => updateFormData({ blood_type: value })}>
                     <SelectTrigger className="w-[180px] text-sm"><SelectValue placeholder="Select blood type" /></SelectTrigger>
-                    <SelectContent>
-                      {BLOOD_TYPES.map(bt => <SelectItem key={bt} value={bt}>{bt}</SelectItem>)}
-                    </SelectContent>
+                    <SelectContent>{BLOOD_TYPES.map(bt => <SelectItem key={bt} value={bt}>{bt}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
 
-                {/* Allergies */}
                 <div>
                   <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</Label>
                   <Textarea id="allergies" className="text-sm" value={formData.allergies} onChange={(e) => updateFormData({ allergies: e.target.value })} placeholder="List any allergies (medications, food, etc.)" rows={2} />
                 </div>
 
-                {/* Chronic Medication */}
+                {/* Current Medications */}
                 <div>
-                  <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Chronic Medication</Label>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="is_chronic" checked={patient.is_chronic || false} onCheckedChange={(checked) => { onSave({ is_chronic: checked as boolean }); }} />
-                    <Label htmlFor="is_chronic">Patient is on chronic medication</Label>
-                    {patient.is_chronic && (
-                      <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive"><Pill className="h-2.5 w-2.5" />Chronic</span>
-                    )}
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Current Medications</Label>
+                    {!showAddMed && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddMed(true)}><Plus className="h-3 w-3" />Add</Button>}
                   </div>
+                  {showAddMed && (
+                    <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <div className="space-y-1.5"><Label>Medication Name *</Label><Input className="text-sm" value={newMed.name} onChange={(e) => setNewMed(p => ({ ...p, name: e.target.value }))} placeholder="e.g., Metformin" /></div>
+                        <div className="space-y-1.5"><Label>Dosage</Label><Input className="text-sm" value={newMed.dosage} onChange={(e) => setNewMed(p => ({ ...p, dosage: e.target.value }))} placeholder="e.g., 500mg twice daily" /></div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox checked={newMed.is_chronic} onCheckedChange={(c) => setNewMed(p => ({ ...p, is_chronic: c as boolean }))} />
+                        <Label className="text-xs">This is a chronic medication</Label>
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddMed(false); setEditingMedId(null); setNewMed({ name: "", dosage: "", is_chronic: false }); }}>Cancel</Button>
+                        <Button size="sm" className="text-xs h-7" onClick={handleAddMed}>{editingMedId ? "Save" : "Add"}</Button>
+                      </div>
+                    </div>
+                  )}
+                  {currentMedications.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No medications recorded</p>
+                  ) : (
+                    <div className="space-y-1">
+                      {currentMedications.map(m => (
+                        <div key={m.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <Switch checked={m.is_chronic} onCheckedChange={() => handleToggleMedChronic(m.id)} className="shrink-0 scale-75" />
+                            <div className="min-w-0">
+                              <p className="text-xs font-medium text-foreground truncate">{m.name}{m.dosage ? ` — ${m.dosage}` : ""}</p>
+                            </div>
+                            {m.is_chronic && <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[9px] font-bold text-destructive shrink-0">Chronic</span>}
+                          </div>
+                          <div className="flex gap-1 shrink-0">
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditMed(m)}><Pencil className="h-3 w-3" /></Button>
+                            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => { setCurrentMedications(prev => prev.filter(x => x.id !== m.id)); setHasChanges(true); }}><Trash2 className="h-3 w-3" /></Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {isChronic && (
+                    <div className="mt-2">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive"><Pill className="h-2.5 w-2.5" />Chronic Patient</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Surgeries */}
@@ -850,27 +1247,46 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                     <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
                       <div className="grid gap-2 sm:grid-cols-2">
                         <div className="space-y-1.5"><Label>Surgery Name *</Label><Input className="text-sm" value={newSurgery.name} onChange={(e) => setNewSurgery(prev => ({ ...prev, name: e.target.value }))} placeholder="e.g., Appendectomy" /></div>
-                        <div className="space-y-1.5"><Label>Date *</Label><Input className="text-sm" type="date" value={newSurgery.date} onChange={(e) => setNewSurgery(prev => ({ ...prev, date: e.target.value }))} /></div>
+                        <div className="space-y-1.5">
+                          <Label>Date Precision</Label>
+                          <Select value={newSurgery.date_precision} onValueChange={(v) => setNewSurgery(prev => ({ ...prev, date_precision: v as any, date: "" }))}>
+                            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="exact">Exact Date</SelectItem>
+                              <SelectItem value="month">Month & Year</SelectItem>
+                              <SelectItem value="year">Year Only</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Date *</Label>
+                        {newSurgery.date_precision === 'exact' && <Input className="text-sm" type="date" value={newSurgery.date} onChange={(e) => setNewSurgery(prev => ({ ...prev, date: e.target.value }))} />}
+                        {newSurgery.date_precision === 'month' && <Input className="text-sm" type="month" value={newSurgery.date} onChange={(e) => setNewSurgery(prev => ({ ...prev, date: e.target.value }))} />}
+                        {newSurgery.date_precision === 'year' && <Input className="text-sm" type="number" min="1900" max="2099" value={newSurgery.date} onChange={(e) => setNewSurgery(prev => ({ ...prev, date: e.target.value }))} placeholder="e.g., 2020" />}
                       </div>
                       <div className="space-y-1.5"><Label>Notes (optional)</Label><Input className="text-sm" value={newSurgery.notes} onChange={(e) => setNewSurgery(prev => ({ ...prev, notes: e.target.value }))} placeholder="Additional notes" /></div>
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddSurgery(false); setNewSurgery({ name: "", date: "", notes: "" }); }}>Cancel</Button>
-                        <Button size="sm" className="text-xs h-7" onClick={handleAddSurgery}>Add</Button>
+                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddSurgery(false); setEditingSurgeryId(null); setNewSurgery({ name: "", date: "", notes: "", date_precision: "exact" }); }}>Cancel</Button>
+                        <Button size="sm" className="text-xs h-7" onClick={handleAddSurgery}>{editingSurgeryId ? "Save" : "Add"}</Button>
                       </div>
                     </div>
                   )}
                   {surgeries.length === 0 ? (
                     <p className="text-xs text-muted-foreground">No surgeries recorded</p>
                   ) : (
-                    <div className="space-y-1.5">
+                    <div className="space-y-1">
                       {surgeries.map((surgery) => (
-                        <div key={surgery.id} className="flex items-start justify-between p-2 rounded-lg bg-muted/30 border border-border/50">
+                        <div key={surgery.id} className="flex items-start justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
                           <div>
-                            <p className="text-sm font-medium text-foreground">{surgery.name}</p>
-                            <p className="text-xs text-muted-foreground">{format(new Date(surgery.date), "MMMM d, yyyy")}</p>
-                            {surgery.notes && <p className="text-xs text-muted-foreground mt-0.5">{surgery.notes}</p>}
+                            <p className="text-xs font-medium text-foreground">{surgery.name}</p>
+                            <p className="text-[10px] text-muted-foreground">{formatSurgeryDate(surgery.date, surgery.date_precision)}</p>
+                            {surgery.notes && <p className="text-[10px] text-muted-foreground mt-0.5">{surgery.notes}</p>}
                           </div>
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => handleRemoveSurgery(surgery.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                          <div className="flex gap-1 shrink-0">
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditSurgery(surgery)}><Pencil className="h-3 w-3" /></Button>
+                            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => handleRemoveSurgery(surgery.id)}><Trash2 className="h-3 w-3" /></Button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -890,22 +1306,25 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                         <div className="space-y-1.5"><Label>Condition *</Label><Input className="text-sm" value={newFamilyEntry.condition} onChange={(e) => setNewFamilyEntry(prev => ({ ...prev, condition: e.target.value }))} placeholder="e.g., Diabetes" /></div>
                       </div>
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddFamily(false); setNewFamilyEntry({ relation: "", condition: "" }); }}>Cancel</Button>
-                        <Button size="sm" className="text-xs h-7" onClick={handleAddFamilyEntry}>Add</Button>
+                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddFamily(false); setEditingFamilyId(null); setNewFamilyEntry({ relation: "", condition: "" }); }}>Cancel</Button>
+                        <Button size="sm" className="text-xs h-7" onClick={handleAddFamilyEntry}>{editingFamilyId ? "Save" : "Add"}</Button>
                       </div>
                     </div>
                   )}
                   {familyHistory.length === 0 ? (
                     <p className="text-xs text-muted-foreground">No family history recorded</p>
                   ) : (
-                    <div className="space-y-1.5">
+                    <div className="space-y-1">
                       {familyHistory.map((entry) => (
-                        <div key={entry.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/50">
+                        <div key={entry.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
                           <div>
-                            <p className="text-sm font-medium text-foreground">{entry.relation}</p>
-                            <p className="text-xs text-muted-foreground">{entry.condition}</p>
+                            <p className="text-xs font-medium text-foreground">{entry.relation}</p>
+                            <p className="text-[10px] text-muted-foreground">{entry.condition}</p>
                           </div>
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => handleRemoveFamilyEntry(entry.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                          <div className="flex gap-1 shrink-0">
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditFamilyEntry(entry)}><Pencil className="h-3 w-3" /></Button>
+                            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => handleRemoveFamilyEntry(entry.id)}><Trash2 className="h-3 w-3" /></Button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -932,7 +1351,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 </div>
               </div>
 
-              {/* Column 2: Insurance, GP & Pharmacies */}
+              {/* Column 2 */}
               <div className="space-y-4">
                 <div className={sectionFrame}>
                   <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> Medical Insurance</h3>
@@ -941,18 +1360,61 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                     <div className="space-y-1.5"><Label>Insurance Product</Label><Input className="text-sm" value={formData.medical_insurance_product} onChange={(e) => updateFormData({ medical_insurance_product: e.target.value })} placeholder="Product name" /></div>
                     <div className="space-y-1.5"><Label>Insurance Number</Label><Input className="text-sm" value={formData.medical_aid_number} onChange={(e) => updateFormData({ medical_aid_number: e.target.value })} placeholder="Member number" /></div>
                     <div className="space-y-1.5"><Label>Primary Member</Label><Input className="text-sm" value={formData.primary_member} onChange={(e) => updateFormData({ primary_member: e.target.value })} placeholder="Primary member name" /></div>
-                    <div className="space-y-1.5"><Label>Claims Email</Label><Input className="text-sm" type="email" value={formData.claims_email} onChange={(e) => updateFormData({ claims_email: e.target.value })} placeholder="claims@insurance.com" /></div>
+                    <div className="space-y-1.5 sm:col-span-2"><Label>Claims Email (for auto-submission of claims)</Label><Input className="text-sm" type="email" value={formData.claims_email} onChange={(e) => updateFormData({ claims_email: e.target.value })} placeholder="claims@insurance.com" /></div>
                   </div>
                 </div>
 
+                {/* GP Search */}
                 <div className={sectionFrame}>
                   <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> General Practitioner</h3>
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 relative">
                     <Label>General Practitioner</Label>
-                    <Input className="text-sm" value={formData.general_practitioner} onChange={(e) => updateFormData({ general_practitioner: e.target.value })} placeholder="Search or type GP name" />
+                    <Input className="text-sm" value={formData.general_practitioner} onChange={(e) => searchGP(e.target.value)} placeholder="Search or type GP name" />
+                    {gpSearchOpen && gpSearchResults.length > 0 && (
+                      <div className="absolute z-10 top-full left-0 right-0 bg-card border border-border rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
+                        {gpSearchResults.map(doc => (
+                          <div key={doc.id} className="flex items-center justify-between px-3 py-2 hover:bg-muted/50 text-xs">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-foreground truncate">{doc.full_name}</p>
+                              <p className="text-[10px] text-muted-foreground">{doc.specialty || "General"} {doc.practice_number ? `• ${doc.practice_number}` : ""}</p>
+                            </div>
+                            <div className="flex gap-1 shrink-0 ml-2">
+                              <Button variant="ghost" size="icon" className="h-6 w-6" title="Select as GP" onClick={() => { updateFormData({ general_practitioner: doc.full_name }); setGpSearchOpen(false); }}>
+                                <Eye className="h-3 w-3" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-6 w-6" title="Connect to profile" onClick={() => {
+                                updateFormData({ general_practitioner: doc.full_name });
+                                setGpSearchOpen(false);
+                                toast({ title: "Connected", description: `${doc.full_name} linked as your GP` });
+                              }}>
+                                <Link2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        <div className="px-3 py-2 border-t border-border">
+                          <p className="text-[10px] text-muted-foreground mb-1">Doctor not on the app?</p>
+                          <div className="flex gap-1">
+                            <Button variant="outline" size="sm" className="gap-1 text-[10px] h-6" onClick={() => {
+                              toast({ title: "Invitation sent", description: "An invitation email will be sent" });
+                              setGpSearchOpen(false);
+                            }}>
+                              <Mail className="h-2.5 w-2.5" />Invite
+                            </Button>
+                            <Button variant="outline" size="sm" className="gap-1 text-[10px] h-6" onClick={() => {
+                              toast({ title: "Invite & Connect", description: "Invitation sent with auto-connect" });
+                              setGpSearchOpen(false);
+                            }}>
+                              <Mail className="h-2.5 w-2.5" /><Link2 className="h-2.5 w-2.5" />Invite & Connect
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
+                {/* Pharmacies */}
                 <div className={sectionFrame}>
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Store className="h-3.5 w-3.5" /> Pharmacies</h3>
@@ -962,11 +1424,12 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                     <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
                       <div className="grid gap-2 sm:grid-cols-2">
                         <div className="space-y-1.5"><Label>Name *</Label><Input className="text-sm" value={newPharmacy.name} onChange={(e) => setNewPharmacy(prev => ({ ...prev, name: e.target.value }))} placeholder="Pharmacy name" /></div>
-                        <div className="space-y-1.5"><Label>Email</Label><Input className="text-sm" type="email" value={newPharmacy.email} onChange={(e) => setNewPharmacy(prev => ({ ...prev, email: e.target.value }))} placeholder="pharmacy@email.com" /></div>
+                        <div className="space-y-1.5"><Label>Branch</Label><Input className="text-sm" value={newPharmacy.branch} onChange={(e) => setNewPharmacy(prev => ({ ...prev, branch: e.target.value }))} placeholder="Branch name" /></div>
+                        <div className="space-y-1.5 sm:col-span-2"><Label>Email</Label><Input className="text-sm" type="email" value={newPharmacy.email} onChange={(e) => setNewPharmacy(prev => ({ ...prev, email: e.target.value }))} placeholder="pharmacy@email.com" /></div>
                       </div>
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddPharmacy(false); setNewPharmacy({ name: "", email: "" }); }}>Cancel</Button>
-                        <Button size="sm" className="text-xs h-7" onClick={handleAddPharmacy}>Add</Button>
+                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddPharmacy(false); setEditingPharmacyId(null); setNewPharmacy({ name: "", email: "", branch: "" }); }}>Cancel</Button>
+                        <Button size="sm" className="text-xs h-7" onClick={handleAddPharmacy}>{editingPharmacyId ? "Save" : "Add"}</Button>
                       </div>
                     </div>
                   )}
@@ -975,17 +1438,23 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   ) : (
                     <div className="space-y-1.5">
                       {pharmacies.map((pharmacy) => (
-                        <div key={pharmacy.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/50">
+                        <div key={pharmacy.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
                           <div className="flex items-center gap-2">
                             <button onClick={() => handleSetPrimaryPharmacy(pharmacy.id)} className="text-xs text-primary hover:underline">
                               {pharmacy.is_primary ? <Star className="h-3.5 w-3.5 fill-primary text-primary" /> : <Star className="h-3.5 w-3.5 text-muted-foreground" />}
                             </button>
                             <div>
-                              <p className="text-sm font-medium text-foreground">{pharmacy.name}</p>
-                              {pharmacy.email && <p className="text-xs text-muted-foreground">{pharmacy.email}</p>}
+                              <p className="text-xs font-medium text-foreground">
+                                {pharmacy.name}
+                                {pharmacy.branch && <span className="text-muted-foreground ml-1">({pharmacy.branch})</span>}
+                              </p>
+                              {pharmacy.email && <p className="text-[10px] text-muted-foreground">{pharmacy.email}</p>}
                             </div>
                           </div>
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => handleRemovePharmacy(pharmacy.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                          <div className="flex gap-1 shrink-0">
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditPharmacy(pharmacy)}><Pencil className="h-3 w-3" /></Button>
+                            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => handleRemovePharmacy(pharmacy.id)}><Trash2 className="h-3 w-3" /></Button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -995,7 +1464,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             </div>
           </TabsContent>
 
-          {/* === MEDICAL OVERVIEW TAB (EDIT — same as view) === */}
+          {/* === Remaining tabs (same as view mode) === */}
           {isSelfService && (
             <TabsContent value="overview" className="mt-4">
               <div className="mb-4">
@@ -1008,7 +1477,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             </TabsContent>
           )}
 
-          {/* === MY SESSIONS TAB (EDIT — same as view) === */}
           {isSelfService && (
             <TabsContent value="sessions" className="mt-4">
               <div className="mb-4">
@@ -1021,7 +1489,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             </TabsContent>
           )}
 
-          {/* === DOCUMENTS TAB (EDIT — same as view) === */}
           {isSelfService && (
             <TabsContent value="documents" className="mt-4">
               <div className="mb-4">
@@ -1034,7 +1501,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             </TabsContent>
           )}
 
-          {/* === MY HEALTHCARE PROVIDERS TAB (EDIT — same as view) === */}
           {isSelfService && (
             <TabsContent value="doctors" className="mt-4">
               <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
@@ -1043,7 +1509,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             </TabsContent>
           )}
 
-          {/* === MY ROUND TABLE TAB (EDIT — same as view) === */}
           {isSelfService && (
             <TabsContent value="roundtable" className="mt-4">
               <div className="mb-4">
