@@ -941,10 +941,10 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
           <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             {renderTabsList()}
-            <div className="flex justify-end mt-2">
-              <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={() => setIsEditing(true)}>
-                <Pencil className="h-3.5 w-3.5" /> Edit
-              </Button>
+            {/* Status bar */}
+            <div className="flex justify-end mt-2 items-center gap-2 min-h-[24px]">
+              {saving && <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Loader2 className="h-3 w-3 animate-spin" />Saving...</span>}
+              {!saving && isEditing && !hasChanges && <span className="flex items-center gap-1.5 text-xs text-green-600"><Check className="h-3 w-3" />Saved</span>}
             </div>
 
             {/* === PERSONAL INFORMATION TAB === */}
