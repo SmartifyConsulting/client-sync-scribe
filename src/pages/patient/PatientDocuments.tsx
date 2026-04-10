@@ -591,56 +591,56 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-3 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         {!hideHeader ? (
           <div>
-            <h1 className="text-2xl font-bold text-foreground">My Documents</h1>
-            <p className="text-muted-foreground text-[12px]">
+            <h1 className="text-lg md:text-2xl font-bold text-foreground">My Documents</h1>
+            <p className="text-muted-foreground text-[11px] md:text-[12px]">
               All your prescriptions, invoices, certificates and uploaded files.
             </p>
           </div>
         ) : <div />}
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 flex-wrap">
           <Button
             variant="outline"
             size="icon"
-            className="h-10 w-10 rounded-full"
+            className="h-8 w-8 rounded-full"
             onClick={() => startRecording("audio")}
             disabled={isRecording}
             title="Record Audio"
           >
-            <Mic className="h-4 w-4" />
+            <Mic className="h-3.5 w-3.5" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            className="h-10 w-10 rounded-full"
+            className="h-8 w-8 rounded-full"
             onClick={() => startRecording("video")}
             disabled={isRecording}
             title="Record Video"
           >
-            <Video className="h-4 w-4" />
+            <Video className="h-3.5 w-3.5" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            className="h-10 w-10 rounded-full"
+            className="h-8 w-8 rounded-full"
             onClick={() => fileInputRef.current?.click()}
             disabled={isRecording || isSaving}
             title="Upload File"
           >
-            <Upload className="h-4 w-4" />
+            <Upload className="h-3.5 w-3.5" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            className="h-10 w-10 rounded-full"
+            className="h-8 w-8 rounded-full"
             onClick={() => setShowCompareDialog(true)}
             title="Compare Images"
           >
-            <GitCompare className="h-4 w-4" />
+            <GitCompare className="h-3.5 w-3.5" />
           </Button>
           <input
             ref={fileInputRef}

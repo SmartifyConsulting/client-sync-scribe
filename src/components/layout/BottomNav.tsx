@@ -23,7 +23,7 @@ const doctorNavItems = [
 
 const patientSections = [
   { icon: LayoutDashboard, label: "Home", section: "home" },
-  { icon: HeartPulse, label: "Health", section: "health" },
+  { icon: HeartPulse, label: "Profile", section: "health" },
   { icon: Handshake, label: "Care", section: "care" },
   { icon: FolderOpen, label: "Admin", section: "admin" },
   { icon: Gift, label: "Rewards", section: "rewards" },

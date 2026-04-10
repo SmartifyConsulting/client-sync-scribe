@@ -69,15 +69,15 @@ const COUNTRY_CODES = [
 
 const sectionFrame = "rounded-xl border border-primary bg-card p-4 shadow-sm";
 
-// Reusable collapsible section header with green background and white text
+// Reusable collapsible section header with neutral background and black text
 const SectionHeader = ({ icon: Icon, label, extra }: { icon: any; label: string; extra?: React.ReactNode }) => (
-  <CollapsibleTrigger className="flex w-full items-center justify-between bg-primary rounded-lg px-3 py-2 group">
-    <h3 className="text-xs font-semibold text-white tracking-wide flex items-center gap-1.5 text-left">
+  <CollapsibleTrigger className="flex w-full items-center justify-between bg-[#F5F4F1] rounded-lg px-3 py-2 group">
+    <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5 text-left">
       <Icon className="h-3.5 w-3.5" /> {label}
     </h3>
     <div className="flex items-center gap-2">
       {extra}
-      <ChevronDown className="h-4 w-4 text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
+      <ChevronDown className="h-4 w-4 text-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
     </div>
   </CollapsibleTrigger>
 );
@@ -194,6 +194,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   const navigate = useNavigate();
   const { isDoctor } = useUserRole();
   const [isEditing, setIsEditing] = useState(false);
+  const [activeParentTab, setActiveParentTab] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -798,24 +799,100 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
     setHasChanges(true);
   };
 
+  // Parent tab groups for desktop/tablet
+  const PROFILE_TABS = ["personal", "medical", "nok-iced"];
+  const ADMIN_TABS = ["calendar", "tasks", "documents"];
+
+  const handleParentTabClick = (parent: string, tabs: string[]) => {
+    if (activeParentTab === parent) return;
+    setActiveParentTab(parent);
+    setActiveTab(tabs[0]);
+  };
+
+  // When activeTab changes, sync activeParentTab
+  useEffect(() => {
+    if (PROFILE_TABS.includes(activeTab)) setActiveParentTab("profile");
+    else if (ADMIN_TABS.includes(activeTab)) setActiveParentTab("admin");
+    else setActiveParentTab(null);
+  }, [activeTab]);
+
   // Tab list renderer
   const renderTabsList = () => {
     const activeTabs = isMobile && isSelfService && section ? SECTION_TABS[section] || null : null;
     const show = (tab: string) => !activeTabs || activeTabs.includes(tab);
+    const triggerClass = "data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap";
+
+    // Mobile: flat filtered tabs
+    if (isMobile && isSelfService && section) {
+      return (
+        <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+          {show("dashboard") && <TabsTrigger value="dashboard" className={triggerClass}>Dashboard</TabsTrigger>}
+          {show("personal") && <TabsTrigger value="personal" className={triggerClass}>Personal Information</TabsTrigger>}
+          {show("medical") && <TabsTrigger value="medical" className={triggerClass}>Medical Information</TabsTrigger>}
+          {show("doctors") && <TabsTrigger value="doctors" className={triggerClass}>My H/Care Providers</TabsTrigger>}
+          {show("sessions") && <TabsTrigger value="sessions" className={triggerClass}>My Sessions</TabsTrigger>}
+          {show("calendar") && <TabsTrigger value="calendar" className={triggerClass}>My Calendar</TabsTrigger>}
+          {show("tasks") && <TabsTrigger value="tasks" className={triggerClass}>My Tasks</TabsTrigger>}
+          {show("documents") && <TabsTrigger value="documents" className={triggerClass}>My Documents</TabsTrigger>}
+          {show("roundtable") && <TabsTrigger value="roundtable" className={triggerClass}>My Round Table</TabsTrigger>}
+          {show("nok-iced") && <TabsTrigger value="nok-iced" className={triggerClass}>NOK & ICE</TabsTrigger>}
+        </TabsList>
+      );
+    }
+
+    // Desktop/Tablet: grouped tabs with My Profile and My Admin parent groups
     return (
-      <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-        {show("dashboard") && isSelfService && <TabsTrigger value="dashboard" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Dashboard</TabsTrigger>}
-        {show("personal") && <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Personal Information</TabsTrigger>}
-        {show("medical") && <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Medical Information</TabsTrigger>}
-        {isSelfService && show("doctors") && <TabsTrigger value="doctors" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My H/Care Providers</TabsTrigger>}
-        {isSelfService && show("sessions") && <TabsTrigger value="sessions" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Sessions</TabsTrigger>}
-        {isSelfService && show("calendar") && <TabsTrigger value="calendar" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Calendar</TabsTrigger>}
-        {isSelfService && show("tasks") && <TabsTrigger value="tasks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Tasks</TabsTrigger>}
-        {isSelfService && show("documents") && <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Documents</TabsTrigger>}
-        {isSelfService && show("roundtable") && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Round Table</TabsTrigger>}
-        {isSelfService && show("nok-iced") && <TabsTrigger value="nok-iced" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">NOK & ICE</TabsTrigger>}
-        {isSelfService && isDoctor && <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap" onClick={(e) => { e.preventDefault(); navigate("/practice"); }}>My Practice</TabsTrigger>}
-      </TabsList>
+      <div className="space-y-1">
+        <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+          {isSelfService && <TabsTrigger value="dashboard" className={triggerClass}>Dashboard</TabsTrigger>}
+          {/* My Profile parent trigger */}
+          <button
+            type="button"
+            onClick={() => handleParentTabClick("profile", PROFILE_TABS)}
+            className={cn(
+              "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-xs font-medium transition-all",
+              activeParentTab === "profile" ? "bg-white text-black shadow-sm" : "text-white hover:bg-white/10"
+            )}
+          >
+            My Profile
+          </button>
+          {isSelfService && <TabsTrigger value="doctors" className={triggerClass}>My H/Care Providers</TabsTrigger>}
+          {isSelfService && <TabsTrigger value="sessions" className={triggerClass}>My Sessions</TabsTrigger>}
+          {isSelfService && <TabsTrigger value="roundtable" className={triggerClass}>My Round Table</TabsTrigger>}
+          {/* My Admin parent trigger */}
+          {isSelfService && (
+            <button
+              type="button"
+              onClick={() => handleParentTabClick("admin", ADMIN_TABS)}
+              className={cn(
+                "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-xs font-medium transition-all",
+                activeParentTab === "admin" ? "bg-white text-black shadow-sm" : "text-white hover:bg-white/10"
+              )}
+            >
+              My Admin
+            </button>
+          )}
+          {isSelfService && isDoctor && <TabsTrigger value="practice" className={triggerClass} onClick={(e) => { e.preventDefault(); navigate("/practice"); }}>My Practice</TabsTrigger>}
+        </TabsList>
+
+        {/* Sub-tab row for My Profile */}
+        {activeParentTab === "profile" && (
+          <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+            <TabsTrigger value="personal" className="text-xs whitespace-nowrap">Personal Information</TabsTrigger>
+            <TabsTrigger value="medical" className="text-xs whitespace-nowrap">Medical Information</TabsTrigger>
+            {isSelfService && <TabsTrigger value="nok-iced" className="text-xs whitespace-nowrap">NOK & ICE</TabsTrigger>}
+          </TabsList>
+        )}
+
+        {/* Sub-tab row for My Admin */}
+        {activeParentTab === "admin" && isSelfService && (
+          <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+            <TabsTrigger value="calendar" className="text-xs whitespace-nowrap">My Calendar</TabsTrigger>
+            <TabsTrigger value="tasks" className="text-xs whitespace-nowrap">My Tasks</TabsTrigger>
+            <TabsTrigger value="documents" className="text-xs whitespace-nowrap">My Documents</TabsTrigger>
+          </TabsList>
+        )}
+      </div>
     );
   };
 
@@ -824,7 +901,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
     return (
       <div className="space-y-0">
         <ProfileBanner />
-        <div className="rounded-xl border border-primary bg-card p-4 md:p-6 space-y-4">
+          <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             {renderTabsList()}
             <div className="flex justify-end mt-2">
@@ -1277,7 +1354,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   return (
     <div className="space-y-0">
       <ProfileBanner />
-      <div className="rounded-xl border border-primary bg-card p-4 md:p-6 space-y-4">
+      <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           {renderTabsList()}
             <div className="flex justify-end mt-2 items-center gap-2">
