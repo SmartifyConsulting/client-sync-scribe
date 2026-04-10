@@ -880,9 +880,14 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                             {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
                             {nok.email && <p className="text-[10px] text-muted-foreground">{nok.email}</p>}
                           </div>
-                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('nok', nok)}>
-                            <Share2 className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")} />
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" className="h-6 w-6" title="Notify" onClick={() => toast({ title: "Notification sent", description: `${nok.name} has been notified` })}>
+                              <Bell className="h-3 w-3 text-primary" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('nok', nok)}>
+                              <Share2 className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")} />
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -1866,15 +1871,24 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             </div>
           </TabsContent>
 
-          {/* === Remaining tabs (same as view mode) === */}
+          {/* === Dashboard tab (edit mode) === */}
           {isSelfService && (
-            <TabsContent value="overview" className="mt-4">
+            <TabsContent value="dashboard" className="mt-4">
+              <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                <PatientDashboardLazy />
+              </Suspense>
+            </TabsContent>
+          )}
+
+          {/* === Tasks tab (edit mode) === */}
+          {isSelfService && (
+            <TabsContent value="tasks" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Medical Overview</h2>
-                <p className="text-xs text-muted-foreground">Summary of your medical history and sessions</p>
+                <h2 className="text-lg font-semibold text-foreground">My Tasks</h2>
+                <p className="text-xs text-muted-foreground">Manage your health tasks and to-dos</p>
               </div>
               <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-                <PatientOverviewLazy patient={patient} sessions={[]} isSelfService />
+                <PatientTasksLazy />
               </Suspense>
             </TabsContent>
           )}
