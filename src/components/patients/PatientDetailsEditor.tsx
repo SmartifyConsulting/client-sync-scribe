@@ -68,6 +68,19 @@ const COUNTRY_CODES = [
 
 const sectionFrame = "rounded-xl border border-primary bg-card p-4 shadow-sm";
 
+// Reusable collapsible section header with green background and white text
+const SectionHeader = ({ icon: Icon, label, extra }: { icon: any; label: string; extra?: React.ReactNode }) => (
+  <CollapsibleTrigger className="flex w-full items-center justify-between bg-primary rounded-lg px-3 py-2 group">
+    <h3 className="text-xs font-semibold text-white uppercase tracking-wide flex items-center gap-1.5 text-left">
+      <Icon className="h-3.5 w-3.5" /> {label}
+    </h3>
+    <div className="flex items-center gap-2">
+      {extra}
+      <ChevronDown className="h-4 w-4 text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
+    </div>
+  </CollapsibleTrigger>
+);
+
 // Phone input with country code
 const PhoneInput = ({ value, onChange, placeholder = "Phone number" }: { value: string; onChange: (v: string) => void; placeholder?: string }) => {
   const getCountryCode = (phone: string) => {
@@ -186,6 +199,21 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  // Controlled tab state for dynamic navigation
+  const getInitialTab = () => {
+    if (isMobile && isSelfService && section && SECTION_TABS[section]) {
+      return SECTION_TABS[section][0];
+    }
+    return "personal";
+  };
+  const [activeTab, setActiveTab] = useState(getInitialTab);
+
+  useEffect(() => {
+    if (isMobile && isSelfService && section && SECTION_TABS[section]) {
+      setActiveTab(SECTION_TABS[section][0]);
+    }
+  }, [section, isMobile, isSelfService]);
 
   // Split name helper
   const splitName = (fullName: string) => {
@@ -307,39 +335,22 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
       const fn = patient.first_name || splitName(patient.name).first;
       const ln = patient.last_name || splitName(patient.name).last;
       setFormData({
-        first_name: fn,
-        last_name: ln,
-        email: patient.email || "",
-        phone: patient.phone || "",
-        dob: patient.dob || "",
-        occupation: patient.occupation || "",
-        employer: patient.employer || "",
+        first_name: fn, last_name: ln, email: patient.email || "", phone: patient.phone || "",
+        dob: patient.dob || "", occupation: patient.occupation || "", employer: patient.employer || "",
         reporting_to_email: patient.reporting_to_email || "",
-        referred_by: patient.referred_by || "",
-        marital_status: patient.marital_status || "",
-        id_passport_number: patient.id_passport_number || "",
-        gender: patient.gender || "",
-        physical_address: patient.physical_address || "",
-        postal_address: patient.postal_address || "",
-        same_as_physical: patient.same_as_physical || false,
-        medical_aid: patient.medical_aid || "",
+        referred_by: patient.referred_by || "", marital_status: patient.marital_status || "",
+        id_passport_number: patient.id_passport_number || "", gender: patient.gender || "",
+        physical_address: patient.physical_address || "", postal_address: patient.postal_address || "",
+        same_as_physical: patient.same_as_physical || false, medical_aid: patient.medical_aid || "",
         medical_insurance_product: patient.medical_insurance_product || "",
-        medical_aid_number: patient.medical_aid_number || "",
-        primary_member: patient.primary_member || "",
-        claims_email: patient.claims_email || "",
-        general_practitioner: patient.general_practitioner || "",
-        allergies: patient.allergies || "",
-        next_of_kin_name: patient.next_of_kin_name || "",
-        next_of_kin_phone: patient.next_of_kin_phone || "",
-        next_of_kin_email: patient.next_of_kin_email || "",
+        medical_aid_number: patient.medical_aid_number || "", primary_member: patient.primary_member || "",
+        claims_email: patient.claims_email || "", general_practitioner: patient.general_practitioner || "",
+        allergies: patient.allergies || "", next_of_kin_name: patient.next_of_kin_name || "",
+        next_of_kin_phone: patient.next_of_kin_phone || "", next_of_kin_email: patient.next_of_kin_email || "",
         next_of_kin_relationship: patient.next_of_kin_relationship || "",
-        height_cm: patient.height_cm?.toString() || "",
-        weight_kg: patient.weight_kg?.toString() || "",
-        pharmacy_name: patient.pharmacy_name || "",
-        pharmacy_email: patient.pharmacy_email || "",
-        notes: patient.notes || "",
-        blood_type: patient.blood_type || "",
-        organ_donor: patient.organ_donor || false,
+        height_cm: patient.height_cm?.toString() || "", weight_kg: patient.weight_kg?.toString() || "",
+        pharmacy_name: patient.pharmacy_name || "", pharmacy_email: patient.pharmacy_email || "",
+        notes: patient.notes || "", blood_type: patient.blood_type || "", organ_donor: patient.organ_donor || false,
       });
       setOrganDonorOrgans(patient.organ_donor_organs || []);
       setSurgeries(patient.surgeries || []);
@@ -732,25 +743,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
     );
   };
 
-  // Organ donor view
-  const OrganDonorView = () => (
-    <div>
-      <Label className="mb-2 block">Organ Donor</Label>
-      {patient.organ_donor ? (
-        <div className="mt-2">
-          <span className="inline-flex items-center gap-1 rounded-full bg-green-100 dark:bg-green-900/30 px-2.5 py-0.5 text-xs font-semibold text-green-700 dark:text-green-300">Yes</span>
-          {(patient.organ_donor_organs?.length ?? 0) > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {patient.organ_donor_organs!.map(organ => (
-                <span key={organ} className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs text-foreground">{organ}</span>
-              ))}
-            </div>
-          )}
-        </div>
-      ) : <span className="text-xs text-muted-foreground mt-2 block">No</span>}
-    </div>
-  );
-
   // ICE share handler
   const handleShareICE = () => {
     const info = [
@@ -805,37 +797,39 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
     setHasChanges(true);
   };
 
+  // Tab list renderer
+  const renderTabsList = () => {
+    const activeTabs = isMobile && isSelfService && section ? SECTION_TABS[section] || null : null;
+    const show = (tab: string) => !activeTabs || activeTabs.includes(tab);
+    return (
+      <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+        {show("personal") && <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Personal Information</TabsTrigger>}
+        {show("medical") && <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Medical Information</TabsTrigger>}
+        {isSelfService && show("overview") && <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Medical Overview</TabsTrigger>}
+        {isSelfService && show("doctors") && <TabsTrigger value="doctors" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My H/Care Providers</TabsTrigger>}
+        {isSelfService && show("sessions") && <TabsTrigger value="sessions" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Sessions</TabsTrigger>}
+        {isSelfService && show("calendar") && <TabsTrigger value="calendar" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Calendar</TabsTrigger>}
+        {isSelfService && show("documents") && <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Documents</TabsTrigger>}
+        {isSelfService && show("roundtable") && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Round Table</TabsTrigger>}
+        {isSelfService && show("nok-iced") && <TabsTrigger value="nok-iced" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">NOK & ICE</TabsTrigger>}
+        {isSelfService && isDoctor && <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap" onClick={(e) => { e.preventDefault(); navigate("/practice"); }}>My Practice</TabsTrigger>}
+      </TabsList>
+    );
+  };
+
   // ==================== VIEW MODE ====================
   if (!isEditing) {
     return (
       <div className="space-y-0">
         <ProfileBanner />
         <div className="rounded-xl border border-primary bg-card p-4 md:p-6 space-y-4">
-          <Tabs defaultValue={isMobile && isSelfService && section ? (SECTION_TABS[section]?.[0] || "personal") : "personal"}>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <div className="flex justify-end mt-2">
               <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={() => setIsEditing(true)}>
                 <Pencil className="h-3.5 w-3.5" /> Edit
               </Button>
             </div>
-          {/* View mode tabs - filtered by section on mobile for self-service */}
-          {(() => {
-            const activeTabs = isMobile && isSelfService && section ? SECTION_TABS[section] || null : null;
-            const show = (tab: string) => !activeTabs || activeTabs.includes(tab);
-            return (
-              <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                {show("personal") && <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Personal Information</TabsTrigger>}
-                {show("medical") && <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Medical Information</TabsTrigger>}
-                {isSelfService && show("overview") && <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Medical Overview</TabsTrigger>}
-                {isSelfService && show("doctors") && <TabsTrigger value="doctors" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Healthcare Providers</TabsTrigger>}
-                {isSelfService && show("sessions") && <TabsTrigger value="sessions" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Sessions</TabsTrigger>}
-                {isSelfService && show("calendar") && <TabsTrigger value="calendar" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Calendar</TabsTrigger>}
-                {isSelfService && show("documents") && <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Documents</TabsTrigger>}
-                {isSelfService && show("roundtable") && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Round Table</TabsTrigger>}
-                {isSelfService && show("nok-iced") && <TabsTrigger value="nok-iced" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">NOK & ICE</TabsTrigger>}
-                {isSelfService && isDoctor && <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap" onClick={(e) => { e.preventDefault(); navigate("/practice"); }}>My Practice</TabsTrigger>}
-              </TabsList>
-            );
-          })()}
+            {renderTabsList()}
 
             {/* === PERSONAL INFORMATION TAB === */}
             <TabsContent value="personal" className="space-y-4 mt-4">
@@ -843,100 +837,116 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
                 <p className="text-xs text-muted-foreground">View and manage personal details</p>
               </div>
-              <div className={sectionFrame}>
-                <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> Personal Details</h3>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  <ViewField label="First Name(s)" value={patient.first_name || splitName(patient.name).first} />
-                  <ViewField label="Last Name" value={patient.last_name || splitName(patient.name).last} />
-                  <ViewField label="ID/Passport Number" value={patient.id_passport_number} />
-                  <ViewField label="Gender" value={patient.gender} />
-                  <ViewField label="Date of Birth" value={patient.dob ? format(new Date(patient.dob), "MMMM d, yyyy") : null} />
-                  <ViewField label="Email" value={patient.email} />
-                  <ViewField label="Phone" value={patient.phone} />
-                  <ViewField label="Marital Status" value={patient.marital_status} />
-                  <ViewField label="Language" value="English" />
-                  <ViewField label="Referred By" value={patient.referred_by} />
-                </div>
-              </div>
 
-              <div className={sectionFrame}>
-                <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Addresses</h3>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <ViewField label="Physical Address" value={patient.physical_address || patient.address} />
-                  <ViewField label="Postal Address" value={patient.same_as_physical ? "Same as physical address" : patient.postal_address} />
-                </div>
-              </div>
-
-              {/* Next of Kin - show legacy single or new list */}
-              <div className={sectionFrame}>
-                <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Next of Kin</h3>
-                {nokMembers.length > 0 ? (
-                  <div className="space-y-2">
-                    {nokMembers.map(nok => (
-                      <div key={nok.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
-                        <div>
-                          <p className="text-xs font-medium text-foreground">{nok.name} {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}</p>
-                          {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
-                          {nok.email && <p className="text-[10px] text-muted-foreground">{nok.email}</p>}
-                        </div>
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('nok', nok)}>
-                          <Share2 className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")} />
-                        </Button>
-                      </div>
-                    ))}
+              <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                <SectionHeader icon={User} label="Personal Details" />
+                <CollapsibleContent className="p-3">
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    <ViewField label="First Name(s)" value={patient.first_name || splitName(patient.name).first} />
+                    <ViewField label="Last Name" value={patient.last_name || splitName(patient.name).last} />
+                    <ViewField label="ID/Passport Number" value={patient.id_passport_number} />
+                    <ViewField label="Gender" value={patient.gender} />
+                    <ViewField label="Date of Birth" value={patient.dob ? format(new Date(patient.dob), "MMMM d, yyyy") : null} />
+                    <ViewField label="Email" value={patient.email} />
+                    <ViewField label="Phone" value={patient.phone} />
+                    <ViewField label="Marital Status" value={patient.marital_status} />
+                    <ViewField label="Language" value="English" />
+                    <ViewField label="Referred By" value={patient.referred_by} />
                   </div>
-                ) : (
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    <ViewField label="Name" value={patient.next_of_kin_name} />
-                    <ViewField label="Relationship" value={patient.next_of_kin_relationship} />
-                    <ViewField label="Phone" value={patient.next_of_kin_phone} />
-                    <ViewField label="Email" value={patient.next_of_kin_email} />
-                  </div>
-                )}
-              </div>
+                </CollapsibleContent>
+              </Collapsible>
 
-              {/* ICE Contacts */}
-              <div className={sectionFrame}>
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> ICE Contacts (In Case of Emergency)</h3>
-                  {isSelfService && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={handleShareICE}><Share2 className="h-3 w-3" />Share</Button>}
-                </div>
-                {iceContacts.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">No ICE contacts recorded</p>
-                ) : (
-                  <div className="space-y-2">
-                    {iceContacts.map(c => (
-                      <div key={c.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
-                        <div className="flex items-center justify-between">
+              <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                <SectionHeader icon={MapPin} label="Addresses" />
+                <CollapsibleContent className="p-3">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <ViewField label="Physical Address" value={patient.physical_address || patient.address} />
+                    <ViewField label="Postal Address" value={patient.same_as_physical ? "Same as physical address" : patient.postal_address} />
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                <SectionHeader icon={Users} label="Next of Kin" />
+                <CollapsibleContent className="p-3">
+                  {nokMembers.length > 0 ? (
+                    <div className="space-y-2">
+                      {nokMembers.map(nok => (
+                        <div key={nok.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
                           <div>
-                            <p className="text-xs font-medium text-foreground">{c.name} {c.relationship && <span className="text-muted-foreground">({c.relationship})</span>}</p>
-                            {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
-                            {c.email && <p className="text-[10px] text-muted-foreground">{c.email}</p>}
+                            <p className="text-xs font-medium text-foreground">{nok.name} {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}</p>
+                            {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
+                            {nok.email && <p className="text-[10px] text-muted-foreground">{nok.email}</p>}
                           </div>
-                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('ice', c)}>
-                            <Share2 className={cn("h-3 w-3", c.shared ? "text-muted-foreground" : "text-primary")} />
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('nok', nok)}>
+                            <Share2 className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")} />
                           </Button>
                         </div>
-                        {c.is_also_nok && <p className="text-[10px] text-primary mt-0.5">✓ Also Next of Kin</p>}
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      <ViewField label="Name" value={patient.next_of_kin_name} />
+                      <ViewField label="Relationship" value={patient.next_of_kin_relationship} />
+                      <ViewField label="Phone" value={patient.next_of_kin_phone} />
+                      <ViewField label="Email" value={patient.next_of_kin_email} />
+                    </div>
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                <CollapsibleTrigger className="flex w-full items-center justify-between bg-primary rounded-lg px-3 py-2 group">
+                  <h3 className="text-xs font-semibold text-white uppercase tracking-wide flex items-center gap-1.5 text-left">
+                    <Phone className="h-3.5 w-3.5" /> ICE Contacts (In Case of Emergency)
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    {isSelfService && <Button variant="outline" size="sm" className="gap-1 text-xs h-6 bg-white/20 border-white/30 text-white hover:bg-white/30" onClick={(e) => { e.stopPropagation(); handleShareICE(); }}><Share2 className="h-3 w-3" />Share</Button>}
+                    <ChevronDown className="h-4 w-4 text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
                   </div>
-                )}
-              </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="p-3">
+                  {iceContacts.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No ICE contacts recorded</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {iceContacts.map(c => (
+                        <div key={c.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-xs font-medium text-foreground">{c.name} {c.relationship && <span className="text-muted-foreground">({c.relationship})</span>}</p>
+                              {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
+                              {c.email && <p className="text-[10px] text-muted-foreground">{c.email}</p>}
+                            </div>
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('ice', c)}>
+                              <Share2 className={cn("h-3 w-3", c.shared ? "text-muted-foreground" : "text-primary")} />
+                            </Button>
+                          </div>
+                          {c.is_also_nok && <p className="text-[10px] text-primary mt-0.5">✓ Also Next of Kin</p>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
 
-              <div className={sectionFrame}>
-                <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Briefcase className="h-3.5 w-3.5" /> Employer</h3>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  <ViewField label="Employer" value={patient.employer} />
-                  <ViewField label="Occupation" value={patient.occupation} />
-                  <ViewField label="Reporting To (Email)" value={patient.reporting_to_email} />
-                </div>
-              </div>
+              <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                <SectionHeader icon={Briefcase} label="Employer" />
+                <CollapsibleContent className="p-3">
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    <ViewField label="Employer" value={patient.employer} />
+                    <ViewField label="Occupation" value={patient.occupation} />
+                    <ViewField label="Reporting To (Email)" value={patient.reporting_to_email} />
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
 
-              <div className={sectionFrame}>
-                <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><StickyNote className="h-3.5 w-3.5" /> General Notes</h3>
-                <p className="text-sm text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
-              </div>
+              <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                <SectionHeader icon={StickyNote} label="General Notes" />
+                <CollapsibleContent className="p-3">
+                  <p className="text-sm text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
+                </CollapsibleContent>
+              </Collapsible>
             </TabsContent>
 
             {/* === MEDICAL INFORMATION TAB — TWO COLUMNS === */}
@@ -948,11 +958,8 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="space-y-3">
                   {/* General Information */}
-                  <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
-                    <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
-                      <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> General Information</h3>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                    </CollapsibleTrigger>
+                  <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                    <SectionHeader icon={Activity} label="General Information" />
                     <CollapsibleContent className="px-3 pb-3">
                       <div className="grid gap-3 sm:grid-cols-4">
                         <ViewField label="Height (cm)" value={patient.height_cm ? `${patient.height_cm}` : undefined} />
@@ -964,11 +971,8 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   </Collapsible>
 
                   {/* Allergies, Medication & Conditions */}
-                  <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
-                    <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
-                      <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Allergies, Medication & Conditions</h3>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                    </CollapsibleTrigger>
+                  <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                    <SectionHeader icon={Pill} label="Allergies, Medication & Conditions" />
                     <CollapsibleContent className="px-3 pb-3 space-y-3">
                       {/* Allergies */}
                       <div className="rounded-lg border border-border/50 p-2.5 space-y-1">
@@ -1045,11 +1049,8 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   </Collapsible>
 
                   {/* Surgeries & Dates */}
-                  <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
-                    <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
-                      <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Scissors className="h-3.5 w-3.5" /> Surgeries & Dates</h3>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                    </CollapsibleTrigger>
+                  <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                    <SectionHeader icon={Scissors} label="Surgeries & Dates" />
                     <CollapsibleContent className="px-3 pb-3">
                       {surgeries.length === 0 ? (
                         <p className="text-xs text-muted-foreground">No surgeries recorded</p>
@@ -1068,11 +1069,8 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   </Collapsible>
 
                   {/* Family History */}
-                  <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
-                    <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
-                      <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><GitBranch className="h-3.5 w-3.5" /> Family History</h3>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                    </CollapsibleTrigger>
+                  <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                    <SectionHeader icon={GitBranch} label="Family History" />
                     <CollapsibleContent className="px-3 pb-3">
                       {familyHistory.length === 0 ? (
                         <p className="text-xs text-muted-foreground">No family history recorded</p>
@@ -1089,48 +1087,84 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                     </CollapsibleContent>
                   </Collapsible>
 
-                  <div><OrganDonorView /></div>
+                  {/* Organ Donor — collapsible with inline Yes/No */}
+                  <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                    <CollapsibleTrigger className="flex w-full items-center justify-between bg-primary rounded-lg px-3 py-2 group">
+                      <h3 className="text-xs font-semibold text-white uppercase tracking-wide flex items-center gap-1.5 text-left">
+                        <Heart className="h-3.5 w-3.5" /> Organ Donor
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <span className={cn(
+                          "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                          patient.organ_donor
+                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                            : "bg-white/20 text-white"
+                        )}>
+                          {patient.organ_donor ? "Yes" : "No"}
+                        </span>
+                        <ChevronDown className="h-4 w-4 text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                      </div>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-3 pb-3">
+                      {patient.organ_donor && (patient.organ_donor_organs?.length ?? 0) > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {patient.organ_donor_organs!.map(organ => (
+                            <span key={organ} className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs text-foreground">{organ}</span>
+                          ))}
+                        </div>
+                      )}
+                      {!patient.organ_donor && (
+                        <p className="text-xs text-muted-foreground mt-2">Not registered as an organ donor</p>
+                      )}
+                    </CollapsibleContent>
+                  </Collapsible>
                 </div>
 
                 {/* Column 2 */}
                 <div className="space-y-4">
-                  <div className={sectionFrame}>
-                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> Medical Insurance</h3>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <ViewField label="Insurance Provider" value={patient.medical_aid} />
-                      <ViewField label="Insurance Product" value={patient.medical_insurance_product} />
-                      <ViewField label="Insurance Number" value={patient.medical_aid_number} />
-                      <ViewField label="Primary Member" value={patient.primary_member} />
-                      <ViewField label="Claims Email (auto-submission)" value={patient.claims_email} />
-                    </div>
-                  </div>
-
-                  <div className={sectionFrame}>
-                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> General Practitioner</h3>
-                    <ViewField label="General Practitioner" value={patient.general_practitioner} />
-                  </div>
-
-                  <div className={sectionFrame}>
-                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Store className="h-3.5 w-3.5" /> Pharmacies</h3>
-                    {pharmacies.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No pharmacies recorded</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {pharmacies.map((pharmacy) => (
-                          <div key={pharmacy.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/50">
-                            <div>
-                              <p className="text-xs font-medium text-foreground flex items-center gap-2">
-                                {pharmacy.name}
-                                {pharmacy.branch && <span className="text-muted-foreground">({pharmacy.branch})</span>}
-                                {pharmacy.is_primary && <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">Primary</span>}
-                              </p>
-                              {pharmacy.email && <p className="text-[10px] text-muted-foreground">{pharmacy.email}</p>}
-                            </div>
-                          </div>
-                        ))}
+                  <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                    <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
+                    <CollapsibleContent className="p-3">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <ViewField label="Insurance Provider" value={patient.medical_aid} />
+                        <ViewField label="Insurance Product" value={patient.medical_insurance_product} />
+                        <ViewField label="Insurance Number" value={patient.medical_aid_number} />
+                        <ViewField label="Primary Member" value={patient.primary_member} />
+                        <ViewField label="Claims Email (auto-submission)" value={patient.claims_email} />
                       </div>
-                    )}
-                  </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+
+                  <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                    <SectionHeader icon={User} label="General Practitioner" />
+                    <CollapsibleContent className="p-3">
+                      <ViewField label="General Practitioner" value={patient.general_practitioner} />
+                    </CollapsibleContent>
+                  </Collapsible>
+
+                  <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                    <SectionHeader icon={Store} label="Pharmacies" />
+                    <CollapsibleContent className="p-3">
+                      {pharmacies.length === 0 ? (
+                        <p className="text-xs text-muted-foreground">No pharmacies recorded</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {pharmacies.map((pharmacy) => (
+                            <div key={pharmacy.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/50">
+                              <div>
+                                <p className="text-xs font-medium text-foreground flex items-center gap-2">
+                                  {pharmacy.name}
+                                  {pharmacy.branch && <span className="text-muted-foreground">({pharmacy.branch})</span>}
+                                  {pharmacy.is_primary && <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">Primary</span>}
+                                </p>
+                                {pharmacy.email && <p className="text-[10px] text-muted-foreground">{pharmacy.email}</p>}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CollapsibleContent>
+                  </Collapsible>
                 </div>
               </div>
             </TabsContent>
@@ -1179,7 +1213,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             {isSelfService && (
               <TabsContent value="doctors" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">My Healthcare Providers</h2>
+                  <h2 className="text-lg font-semibold text-foreground">My H/Care Providers</h2>
                   <p className="text-xs text-muted-foreground">Healthcare providers with access to your profile</p>
                 </div>
                 <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
@@ -1223,25 +1257,8 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
     <div className="space-y-0">
       <ProfileBanner />
       <div className="rounded-xl border border-primary bg-card p-4 md:p-6 space-y-4">
-        <Tabs defaultValue={isMobile && isSelfService && section ? (SECTION_TABS[section]?.[0] || "personal") : "personal"}>
-          {(() => {
-            const activeTabs = isMobile && isSelfService && section ? SECTION_TABS[section] || null : null;
-            const show = (tab: string) => !activeTabs || activeTabs.includes(tab);
-            return (
-              <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                {show("personal") && <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Personal Information</TabsTrigger>}
-                {show("medical") && <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Medical Information</TabsTrigger>}
-                {isSelfService && show("overview") && <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Medical Overview</TabsTrigger>}
-                {isSelfService && show("doctors") && <TabsTrigger value="doctors" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Healthcare Providers</TabsTrigger>}
-                {isSelfService && show("sessions") && <TabsTrigger value="sessions" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Sessions</TabsTrigger>}
-                {isSelfService && show("calendar") && <TabsTrigger value="calendar" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Calendar</TabsTrigger>}
-                {isSelfService && show("documents") && <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Documents</TabsTrigger>}
-                {isSelfService && show("roundtable") && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Round Table</TabsTrigger>}
-                {isSelfService && show("nok-iced") && <TabsTrigger value="nok-iced" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">NOK & ICE</TabsTrigger>}
-                {isSelfService && isDoctor && <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap" onClick={(e) => { e.preventDefault(); navigate("/practice"); }}>My Practice</TabsTrigger>}
-              </TabsList>
-            );
-          })()}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          {renderTabsList()}
             <div className="flex justify-end mt-2 items-center gap-2">
               {saving && <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Loader2 className="h-3 w-3 animate-spin" />Saving...</span>}
               {!saving && !hasChanges && isEditing && <span className="flex items-center gap-1.5 text-xs text-green-600"><Check className="h-3 w-3" />Saved</span>}
@@ -1254,155 +1271,168 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
               <p className="text-xs text-muted-foreground">View and manage personal details</p>
             </div>
-            <div className={sectionFrame}>
-              <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> Personal Information</h3>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                <div className="space-y-1.5"><Label htmlFor="first_name">First Name(s) *</Label><Input id="first_name" className="text-sm" value={formData.first_name} onChange={(e) => updateFormData({ first_name: e.target.value })} placeholder="First name(s)" /></div>
-                <div className="space-y-1.5"><Label htmlFor="last_name">Last Name *</Label><Input id="last_name" className="text-sm" value={formData.last_name} onChange={(e) => updateFormData({ last_name: e.target.value })} placeholder="Last name" /></div>
-                <div className="space-y-1.5"><Label htmlFor="id_passport_number">ID/Passport Number</Label><Input id="id_passport_number" className="text-sm" value={formData.id_passport_number} onChange={(e) => updateFormData({ id_passport_number: e.target.value })} placeholder="ID or passport number" /></div>
-                <div className="space-y-1.5"><Label htmlFor="gender">Gender</Label>
-                  <Select value={formData.gender} onValueChange={(value) => updateFormData({ gender: value })}>
-                    <SelectTrigger id="gender" className="text-sm"><SelectValue placeholder="Select gender" /></SelectTrigger>
-                    <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem><SelectItem value="Other">Other</SelectItem></SelectContent>
-                  </Select></div>
-                <div className="space-y-1.5"><Label htmlFor="dob">Date of Birth</Label><Input id="dob" className="text-sm" type="date" value={formData.dob} onChange={(e) => updateFormData({ dob: e.target.value })} /></div>
-                <div className="space-y-1.5"><Label htmlFor="email">Email</Label><Input id="email" className="text-sm" type="email" value={formData.email} onChange={(e) => updateFormData({ email: e.target.value })} placeholder="patient@email.com" /></div>
-                <div className="space-y-1.5"><Label htmlFor="phone">Phone</Label><PhoneInput value={formData.phone} onChange={(v) => updateFormData({ phone: v })} /></div>
-                <div className="space-y-1.5"><Label htmlFor="marital_status">Marital Status</Label>
-                  <Select value={formData.marital_status} onValueChange={(value) => updateFormData({ marital_status: value })}>
-                    <SelectTrigger id="marital_status" className="text-sm"><SelectValue placeholder="Select status" /></SelectTrigger>
-                    <SelectContent><SelectItem value="Single">Single</SelectItem><SelectItem value="Married">Married</SelectItem><SelectItem value="Divorced">Divorced</SelectItem><SelectItem value="Widowed">Widowed</SelectItem></SelectContent>
-                  </Select></div>
-                <div className="space-y-1.5"><Label htmlFor="referred_by">Referred By</Label><Input id="referred_by" className="text-sm" value={formData.referred_by} onChange={(e) => updateFormData({ referred_by: e.target.value })} placeholder="Referral source" /></div>
-              </div>
-            </div>
 
-            <div className={sectionFrame}>
-              <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Addresses</h3>
-              <div className="space-y-3">
-                <div className="space-y-1.5"><Label htmlFor="physical_address">Physical Address</Label><AddressAutocomplete id="physical_address" value={formData.physical_address} onChange={(v) => updateFormData({ physical_address: v })} placeholder="Start typing to search address..." rows={2} /></div>
-                <div className="flex items-center space-x-2"><Checkbox id="same_as_physical" checked={formData.same_as_physical} onCheckedChange={(checked) => updateFormData({ same_as_physical: checked as boolean })} /><Label htmlFor="same_as_physical">Postal address same as physical address</Label></div>
-                {!formData.same_as_physical && (<div className="space-y-1.5"><Label htmlFor="postal_address">Postal Address</Label><AddressAutocomplete id="postal_address" value={formData.postal_address} onChange={(v) => updateFormData({ postal_address: v })} placeholder="Start typing to search address..." rows={2} /></div>)}
-              </div>
-            </div>
+            <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+              <SectionHeader icon={User} label="Personal Information" />
+              <CollapsibleContent className="p-3">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="space-y-1.5"><Label htmlFor="first_name">First Name(s) *</Label><Input id="first_name" className="text-sm" value={formData.first_name} onChange={(e) => updateFormData({ first_name: e.target.value })} placeholder="First name(s)" /></div>
+                  <div className="space-y-1.5"><Label htmlFor="last_name">Last Name *</Label><Input id="last_name" className="text-sm" value={formData.last_name} onChange={(e) => updateFormData({ last_name: e.target.value })} placeholder="Last name" /></div>
+                  <div className="space-y-1.5"><Label htmlFor="id_passport_number">ID/Passport Number</Label><Input id="id_passport_number" className="text-sm" value={formData.id_passport_number} onChange={(e) => updateFormData({ id_passport_number: e.target.value })} placeholder="ID or passport number" /></div>
+                  <div className="space-y-1.5"><Label htmlFor="gender">Gender</Label>
+                    <Select value={formData.gender} onValueChange={(value) => updateFormData({ gender: value })}>
+                      <SelectTrigger id="gender" className="text-sm"><SelectValue placeholder="Select gender" /></SelectTrigger>
+                      <SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem><SelectItem value="Other">Other</SelectItem></SelectContent>
+                    </Select></div>
+                  <div className="space-y-1.5"><Label htmlFor="dob">Date of Birth</Label><Input id="dob" className="text-sm" type="date" value={formData.dob} onChange={(e) => updateFormData({ dob: e.target.value })} /></div>
+                  <div className="space-y-1.5"><Label htmlFor="email">Email</Label><Input id="email" className="text-sm" type="email" value={formData.email} onChange={(e) => updateFormData({ email: e.target.value })} placeholder="patient@email.com" /></div>
+                  <div className="space-y-1.5"><Label htmlFor="phone">Phone</Label><PhoneInput value={formData.phone} onChange={(v) => updateFormData({ phone: v })} /></div>
+                  <div className="space-y-1.5"><Label htmlFor="marital_status">Marital Status</Label>
+                    <Select value={formData.marital_status} onValueChange={(value) => updateFormData({ marital_status: value })}>
+                      <SelectTrigger id="marital_status" className="text-sm"><SelectValue placeholder="Select status" /></SelectTrigger>
+                      <SelectContent><SelectItem value="Single">Single</SelectItem><SelectItem value="Married">Married</SelectItem><SelectItem value="Divorced">Divorced</SelectItem><SelectItem value="Widowed">Widowed</SelectItem></SelectContent>
+                    </Select></div>
+                  <div className="space-y-1.5"><Label htmlFor="referred_by">Referred By</Label><Input id="referred_by" className="text-sm" value={formData.referred_by} onChange={(e) => updateFormData({ referred_by: e.target.value })} placeholder="Referral source" /></div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+
+            <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+              <SectionHeader icon={MapPin} label="Addresses" />
+              <CollapsibleContent className="p-3">
+                <div className="space-y-3">
+                  <div className="space-y-1.5"><Label htmlFor="physical_address">Physical Address</Label><AddressAutocomplete id="physical_address" value={formData.physical_address} onChange={(v) => updateFormData({ physical_address: v })} placeholder="Start typing to search address..." rows={2} /></div>
+                  <div className="flex items-center space-x-2"><Checkbox id="same_as_physical" checked={formData.same_as_physical} onCheckedChange={(checked) => updateFormData({ same_as_physical: checked as boolean })} /><Label htmlFor="same_as_physical">Postal address same as physical address</Label></div>
+                  {!formData.same_as_physical && (<div className="space-y-1.5"><Label htmlFor="postal_address">Postal Address</Label><AddressAutocomplete id="postal_address" value={formData.postal_address} onChange={(v) => updateFormData({ postal_address: v })} placeholder="Start typing to search address..." rows={2} /></div>)}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
 
             {/* Next of Kin (multiple) */}
-            <div className={sectionFrame}>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Next of Kin</h3>
-                {!showAddNOK && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddNOK(true)}><Plus className="h-3 w-3" />Add</Button>}
-              </div>
-
-              {/* Legacy single NOK if no members yet */}
-              {nokMembers.length === 0 && (
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-3">
-                  <div className="space-y-1.5"><Label>Name</Label><Input className="text-sm" value={formData.next_of_kin_name} onChange={(e) => updateFormData({ next_of_kin_name: e.target.value })} placeholder="Full name" /></div>
-                  <div className="space-y-1.5"><Label>Relationship</Label><RelationshipSelect value={formData.next_of_kin_relationship} onChange={(v) => updateFormData({ next_of_kin_relationship: v })} /></div>
-                  <div className="space-y-1.5"><Label>Phone</Label><PhoneInput value={formData.next_of_kin_phone} onChange={(v) => updateFormData({ next_of_kin_phone: v })} /></div>
-                  <div className="space-y-1.5"><Label>Email</Label><Input className="text-sm" type="email" value={formData.next_of_kin_email} onChange={(e) => updateFormData({ next_of_kin_email: e.target.value })} placeholder="Email" /></div>
+            <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+              <SectionHeader icon={Users} label="Next of Kin" />
+              <CollapsibleContent className="p-3">
+                <div className="flex justify-end mb-3">
+                  {!showAddNOK && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddNOK(true)}><Plus className="h-3 w-3" />Add</Button>}
                 </div>
-              )}
 
-              {showAddNOK && (
-                <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <div className="space-y-1.5"><Label>Name *</Label><Input className="text-sm" value={newNOK.name} onChange={(e) => setNewNOK(p => ({ ...p, name: e.target.value }))} placeholder="Full name" /></div>
-                    <div className="space-y-1.5"><Label>Relationship</Label><RelationshipSelect value={newNOK.relationship} onChange={(v) => setNewNOK(p => ({ ...p, relationship: v }))} /></div>
-                    <div className="space-y-1.5"><Label>Phone</Label><PhoneInput value={newNOK.phone} onChange={(v) => setNewNOK(p => ({ ...p, phone: v }))} /></div>
-                    <div className="space-y-1.5"><Label>Email</Label><Input className="text-sm" type="email" value={newNOK.email} onChange={(e) => setNewNOK(p => ({ ...p, email: e.target.value }))} placeholder="Email" /></div>
+                {/* Legacy single NOK if no members yet */}
+                {nokMembers.length === 0 && (
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-3">
+                    <div className="space-y-1.5"><Label>Name</Label><Input className="text-sm" value={formData.next_of_kin_name} onChange={(e) => updateFormData({ next_of_kin_name: e.target.value })} placeholder="Full name" /></div>
+                    <div className="space-y-1.5"><Label>Relationship</Label><RelationshipSelect value={formData.next_of_kin_relationship} onChange={(v) => updateFormData({ next_of_kin_relationship: v })} /></div>
+                    <div className="space-y-1.5"><Label>Phone</Label><PhoneInput value={formData.next_of_kin_phone} onChange={(v) => updateFormData({ next_of_kin_phone: v })} /></div>
+                    <div className="space-y-1.5"><Label>Email</Label><Input className="text-sm" type="email" value={formData.next_of_kin_email} onChange={(e) => updateFormData({ next_of_kin_email: e.target.value })} placeholder="Email" /></div>
                   </div>
-                  <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddNOK(false); setEditingNOKId(null); setNewNOK({ name: "", phone: "", email: "", relationship: "" }); }}>Cancel</Button>
-                    <Button size="sm" className="text-xs h-7" onClick={handleAddNOK}>{editingNOKId ? "Save" : "Add"}</Button>
-                  </div>
-                </div>
-              )}
+                )}
 
-              {nokMembers.length > 0 && (
-                <div className="space-y-1.5">
-                  {nokMembers.map(nok => (
-                    <div key={nok.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
-                      <div>
-                        <p className="text-xs font-medium text-foreground">{nok.name} {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}</p>
-                        {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
-                      </div>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('nok', nok)}>
-                          <Share2 className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")} />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditNOK(nok)}><Pencil className="h-3 w-3" /></Button>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => { setNokMembers(prev => prev.filter(n => n.id !== nok.id)); setHasChanges(true); }}><Trash2 className="h-3 w-3" /></Button>
-                      </div>
+                {showAddNOK && (
+                  <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <div className="space-y-1.5"><Label>Name *</Label><Input className="text-sm" value={newNOK.name} onChange={(e) => setNewNOK(p => ({ ...p, name: e.target.value }))} placeholder="Full name" /></div>
+                      <div className="space-y-1.5"><Label>Relationship</Label><RelationshipSelect value={newNOK.relationship} onChange={(v) => setNewNOK(p => ({ ...p, relationship: v }))} /></div>
+                      <div className="space-y-1.5"><Label>Phone</Label><PhoneInput value={newNOK.phone} onChange={(v) => setNewNOK(p => ({ ...p, phone: v }))} /></div>
+                      <div className="space-y-1.5"><Label>Email</Label><Input className="text-sm" type="email" value={newNOK.email} onChange={(e) => setNewNOK(p => ({ ...p, email: e.target.value }))} placeholder="Email" /></div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddNOK(false); setEditingNOKId(null); setNewNOK({ name: "", phone: "", email: "", relationship: "" }); }}>Cancel</Button>
+                      <Button size="sm" className="text-xs h-7" onClick={handleAddNOK}>{editingNOKId ? "Save" : "Add"}</Button>
+                    </div>
+                  </div>
+                )}
 
-            {/* ICE Contacts */}
-            <div className={sectionFrame}>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> ICE Contacts (In Case of Emergency)</h3>
-                {!showAddICE && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddICE(true)}><Plus className="h-3 w-3" />Add</Button>}
-              </div>
-              {showAddICE && (
-                <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <div className="space-y-1.5"><Label>Name *</Label><Input className="text-sm" value={newICE.name} onChange={(e) => setNewICE(p => ({ ...p, name: e.target.value }))} placeholder="Full name" /></div>
-                    <div className="space-y-1.5"><Label>Relationship</Label><RelationshipSelect value={newICE.relationship} onChange={(v) => setNewICE(p => ({ ...p, relationship: v }))} /></div>
-                    <div className="space-y-1.5"><Label>Phone</Label><PhoneInput value={newICE.phone} onChange={(v) => setNewICE(p => ({ ...p, phone: v }))} /></div>
-                    <div className="space-y-1.5"><Label>Email</Label><Input className="text-sm" type="email" value={newICE.email} onChange={(e) => setNewICE(p => ({ ...p, email: e.target.value }))} placeholder="Email" /></div>
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddICE(false); setEditingICEId(null); setNewICE({ name: "", phone: "", email: "", relationship: "" }); }}>Cancel</Button>
-                    <Button size="sm" className="text-xs h-7" onClick={handleAddICE}>{editingICEId ? "Save" : "Add"}</Button>
-                  </div>
-                </div>
-              )}
-              {iceContacts.length > 0 && (
-                <div className="space-y-1.5">
-                  {iceContacts.map(c => (
-                    <div key={c.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
-                      <div className="flex items-center justify-between">
+                {nokMembers.length > 0 && (
+                  <div className="space-y-1.5">
+                    {nokMembers.map(nok => (
+                      <div key={nok.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
                         <div>
-                          <p className="text-xs font-medium text-foreground">{c.name} {c.relationship && <span className="text-muted-foreground">({c.relationship})</span>}</p>
-                          {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
+                          <p className="text-xs font-medium text-foreground">{nok.name} {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}</p>
+                          {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
                         </div>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('ice', c)}>
-                            <Share2 className={cn("h-3 w-3", c.shared ? "text-muted-foreground" : "text-primary")} />
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('nok', nok)}>
+                            <Share2 className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")} />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditICE(c)}><Pencil className="h-3 w-3" /></Button>
-                          <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => { setIceContacts(prev => prev.filter(i => i.id !== c.id)); setHasChanges(true); }}><Trash2 className="h-3 w-3" /></Button>
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditNOK(nok)}><Pencil className="h-3 w-3" /></Button>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => { setNokMembers(prev => prev.filter(n => n.id !== nok.id)); setHasChanges(true); }}><Trash2 className="h-3 w-3" /></Button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Checkbox
-                          id={`ice-nok-${c.id}`}
-                          checked={c.is_also_nok || false}
-                          onCheckedChange={(checked) => handleICEAsNOK(c.id, !!checked)}
-                        />
-                        <Label htmlFor={`ice-nok-${c.id}`} className="text-[10px] text-muted-foreground cursor-pointer">Same as Next of Kin</Label>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                )}
+              </CollapsibleContent>
+            </Collapsible>
+
+            {/* ICE Contacts */}
+            <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+              <SectionHeader icon={Phone} label="ICE Contacts (In Case of Emergency)" />
+              <CollapsibleContent className="p-3">
+                <div className="flex justify-end mb-3">
+                  {!showAddICE && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddICE(true)}><Plus className="h-3 w-3" />Add</Button>}
                 </div>
-              )}
-            </div>
+                {showAddICE && (
+                  <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <div className="space-y-1.5"><Label>Name *</Label><Input className="text-sm" value={newICE.name} onChange={(e) => setNewICE(p => ({ ...p, name: e.target.value }))} placeholder="Full name" /></div>
+                      <div className="space-y-1.5"><Label>Relationship</Label><RelationshipSelect value={newICE.relationship} onChange={(v) => setNewICE(p => ({ ...p, relationship: v }))} /></div>
+                      <div className="space-y-1.5"><Label>Phone</Label><PhoneInput value={newICE.phone} onChange={(v) => setNewICE(p => ({ ...p, phone: v }))} /></div>
+                      <div className="space-y-1.5"><Label>Email</Label><Input className="text-sm" type="email" value={newICE.email} onChange={(e) => setNewICE(p => ({ ...p, email: e.target.value }))} placeholder="Email" /></div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddICE(false); setEditingICEId(null); setNewICE({ name: "", phone: "", email: "", relationship: "" }); }}>Cancel</Button>
+                      <Button size="sm" className="text-xs h-7" onClick={handleAddICE}>{editingICEId ? "Save" : "Add"}</Button>
+                    </div>
+                  </div>
+                )}
+                {iceContacts.length > 0 && (
+                  <div className="space-y-1.5">
+                    {iceContacts.map(c => (
+                      <div key={c.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs font-medium text-foreground">{c.name} {c.relationship && <span className="text-muted-foreground">({c.relationship})</span>}</p>
+                            {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
+                          </div>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('ice', c)}>
+                              <Share2 className={cn("h-3 w-3", c.shared ? "text-muted-foreground" : "text-primary")} />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditICE(c)}><Pencil className="h-3 w-3" /></Button>
+                            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => { setIceContacts(prev => prev.filter(i => i.id !== c.id)); setHasChanges(true); }}><Trash2 className="h-3 w-3" /></Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Checkbox
+                            id={`ice-nok-${c.id}`}
+                            checked={c.is_also_nok || false}
+                            onCheckedChange={(checked) => handleICEAsNOK(c.id, !!checked)}
+                          />
+                          <Label htmlFor={`ice-nok-${c.id}`} className="text-[10px] text-muted-foreground cursor-pointer">Same as Next of Kin</Label>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CollapsibleContent>
+            </Collapsible>
 
-            <div className={sectionFrame}>
-              <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><Briefcase className="h-3.5 w-3.5" /> Employer</h3>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                <div className="space-y-1.5"><Label htmlFor="employer">Employer</Label><Input id="employer" className="text-sm" value={formData.employer} onChange={(e) => updateFormData({ employer: e.target.value })} placeholder="Company name" /></div>
-                <div className="space-y-1.5"><Label htmlFor="occupation">Occupation</Label><Input id="occupation" className="text-sm" value={formData.occupation} onChange={(e) => updateFormData({ occupation: e.target.value })} placeholder="Job title" /></div>
-                <div className="space-y-1.5"><Label htmlFor="reporting_to_email">Reporting To (Email)</Label><Input id="reporting_to_email" className="text-sm" type="email" value={formData.reporting_to_email} onChange={(e) => updateFormData({ reporting_to_email: e.target.value })} placeholder="manager@company.com" /></div>
-              </div>
-            </div>
+            <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+              <SectionHeader icon={Briefcase} label="Employer" />
+              <CollapsibleContent className="p-3">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="space-y-1.5"><Label htmlFor="employer">Employer</Label><Input id="employer" className="text-sm" value={formData.employer} onChange={(e) => updateFormData({ employer: e.target.value })} placeholder="Company name" /></div>
+                  <div className="space-y-1.5"><Label htmlFor="occupation">Occupation</Label><Input id="occupation" className="text-sm" value={formData.occupation} onChange={(e) => updateFormData({ occupation: e.target.value })} placeholder="Job title" /></div>
+                  <div className="space-y-1.5"><Label htmlFor="reporting_to_email">Reporting To (Email)</Label><Input id="reporting_to_email" className="text-sm" type="email" value={formData.reporting_to_email} onChange={(e) => updateFormData({ reporting_to_email: e.target.value })} placeholder="manager@company.com" /></div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
 
-            <div className={sectionFrame}>
-              <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><StickyNote className="h-3.5 w-3.5" /> General Notes</h3>
-              <Textarea value={formData.notes} onChange={(e) => updateFormData({ notes: e.target.value })} placeholder="General notes about this patient..." rows={4} className="text-sm" />
-            </div>
+            <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+              <SectionHeader icon={StickyNote} label="General Notes" />
+              <CollapsibleContent className="p-3">
+                <Textarea value={formData.notes} onChange={(e) => updateFormData({ notes: e.target.value })} placeholder="General notes about this patient..." rows={4} className="text-sm" />
+              </CollapsibleContent>
+            </Collapsible>
           </TabsContent>
 
           {/* === MEDICAL TAB (EDIT) === */}
@@ -1414,11 +1444,8 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="space-y-3">
                 {/* General Information */}
-                <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
-                  <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
-                    <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> General Information</h3>
-                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                  </CollapsibleTrigger>
+                <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                  <SectionHeader icon={Activity} label="General Information" />
                   <CollapsibleContent className="px-3 pb-3">
                     <div className="grid gap-3 sm:grid-cols-4">
                       <div className="space-y-1.5"><Label htmlFor="height_cm">Height (cm)</Label><Input id="height_cm" className="text-sm" type="number" step="0.1" value={formData.height_cm} onChange={(e) => updateFormData({ height_cm: e.target.value })} placeholder="e.g., 175" /></div>
@@ -1436,11 +1463,8 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 </Collapsible>
 
                 {/* Allergies, Medication & Conditions */}
-                <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
-                  <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
-                    <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Allergies, Medication & Conditions</h3>
-                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                  </CollapsibleTrigger>
+                <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                  <SectionHeader icon={Pill} label="Allergies, Medication & Conditions" />
                   <CollapsibleContent className="px-3 pb-3 space-y-3">
                     {/* Allergies */}
                     <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
@@ -1578,11 +1602,8 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 </Collapsible>
 
                 {/* Surgeries & Dates */}
-                <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
-                  <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
-                    <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Scissors className="h-3.5 w-3.5" /> Surgeries & Dates</h3>
-                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                  </CollapsibleTrigger>
+                <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                  <SectionHeader icon={Scissors} label="Surgeries & Dates" />
                   <CollapsibleContent className="px-3 pb-3 space-y-2">
                     <div className="flex justify-end">
                       {!showAddSurgery && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddSurgery(true)}><Plus className="h-3 w-3" />Add</Button>}
@@ -1639,11 +1660,8 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 </Collapsible>
 
                 {/* Family History */}
-                <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
-                  <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
-                    <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><GitBranch className="h-3.5 w-3.5" /> Family History</h3>
-                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                  </CollapsibleTrigger>
+                <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                  <SectionHeader icon={GitBranch} label="Family History" />
                   <CollapsibleContent className="px-3 pb-3 space-y-2">
                     <div className="flex justify-end">
                       {!showAddFamily && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddFamily(true)}><Plus className="h-3 w-3" />Add</Button>}
@@ -1681,135 +1699,158 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   </CollapsibleContent>
                 </Collapsible>
 
-                {/* Organ Donor */}
-                <div className="rounded-xl border border-primary/30 bg-card p-3">
-                  <Label className="mb-3 block">Organ Donor</Label>
-                  <div className="flex items-center gap-3 mb-3">
-                    <Switch checked={formData.organ_donor} onCheckedChange={(checked) => { updateFormData({ organ_donor: checked }); if (!checked) { setOrganDonorOrgans([]); setHasChanges(true); } }} />
-                    <Label>{formData.organ_donor ? "Yes" : "No"}</Label>
-                  </div>
-                  {formData.organ_donor && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {ORGAN_OPTIONS.map(organ => (
-                        <div key={organ} className="flex items-center space-x-2">
-                          <Checkbox id={`organ-${organ}`} checked={organDonorOrgans.includes(organ)} onCheckedChange={() => toggleOrganDonorOrgan(organ)} />
-                          <Label htmlFor={`organ-${organ}`}>{organ}</Label>
-                        </div>
-                      ))}
+                {/* Organ Donor — collapsible with inline Yes/No */}
+                <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                  <CollapsibleTrigger className="flex w-full items-center justify-between bg-primary rounded-lg px-3 py-2 group">
+                    <h3 className="text-xs font-semibold text-white uppercase tracking-wide flex items-center gap-1.5 text-left">
+                      <Heart className="h-3.5 w-3.5" /> Organ Donor
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <span className={cn(
+                        "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                        formData.organ_donor
+                          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                          : "bg-white/20 text-white"
+                      )}>
+                        {formData.organ_donor ? "Yes" : "No"}
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
                     </div>
-                  )}
-                </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="p-3">
+                    <div className="flex items-center gap-3 mb-3">
+                      <Switch checked={formData.organ_donor} onCheckedChange={(checked) => { updateFormData({ organ_donor: checked }); if (!checked) { setOrganDonorOrgans([]); setHasChanges(true); } }} />
+                      <Label>{formData.organ_donor ? "Yes" : "No"}</Label>
+                    </div>
+                    {formData.organ_donor && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {ORGAN_OPTIONS.map(organ => (
+                          <div key={organ} className="flex items-center space-x-2">
+                            <Checkbox id={`organ-${organ}`} checked={organDonorOrgans.includes(organ)} onCheckedChange={() => toggleOrganDonorOrgan(organ)} />
+                            <Label htmlFor={`organ-${organ}`}>{organ}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
               </div>
 
               {/* Column 2 */}
               <div className="space-y-4">
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> Medical Insurance</h3>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-1.5"><Label>Insurance Provider</Label><Input className="text-sm" value={formData.medical_aid} onChange={(e) => updateFormData({ medical_aid: e.target.value })} placeholder="Insurance provider" /></div>
-                    <div className="space-y-1.5"><Label>Insurance Product</Label><Input className="text-sm" value={formData.medical_insurance_product} onChange={(e) => updateFormData({ medical_insurance_product: e.target.value })} placeholder="Product name" /></div>
-                    <div className="space-y-1.5"><Label>Insurance Number</Label><Input className="text-sm" value={formData.medical_aid_number} onChange={(e) => updateFormData({ medical_aid_number: e.target.value })} placeholder="Member number" /></div>
-                    <div className="space-y-1.5"><Label>Primary Member</Label><Input className="text-sm" value={formData.primary_member} onChange={(e) => updateFormData({ primary_member: e.target.value })} placeholder="Primary member name" /></div>
-                    <div className="space-y-1.5 sm:col-span-2"><Label>Claims Email (for auto-submission of claims)</Label><Input className="text-sm" type="email" value={formData.claims_email} onChange={(e) => updateFormData({ claims_email: e.target.value })} placeholder="claims@insurance.com" /></div>
-                  </div>
-                </div>
+                <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                  <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
+                  <CollapsibleContent className="p-3">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1.5"><Label>Insurance Provider</Label><Input className="text-sm" value={formData.medical_aid} onChange={(e) => updateFormData({ medical_aid: e.target.value })} placeholder="Insurance provider" /></div>
+                      <div className="space-y-1.5"><Label>Insurance Product</Label><Input className="text-sm" value={formData.medical_insurance_product} onChange={(e) => updateFormData({ medical_insurance_product: e.target.value })} placeholder="Product name" /></div>
+                      <div className="space-y-1.5"><Label>Insurance Number</Label><Input className="text-sm" value={formData.medical_aid_number} onChange={(e) => updateFormData({ medical_aid_number: e.target.value })} placeholder="Member number" /></div>
+                      <div className="space-y-1.5"><Label>Primary Member</Label><Input className="text-sm" value={formData.primary_member} onChange={(e) => updateFormData({ primary_member: e.target.value })} placeholder="Primary member name" /></div>
+                      <div className="space-y-1.5 sm:col-span-2"><Label>Claims Email (for auto-submission of claims)</Label><Input className="text-sm" type="email" value={formData.claims_email} onChange={(e) => updateFormData({ claims_email: e.target.value })} placeholder="claims@insurance.com" /></div>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
 
                 {/* GP Search */}
-                <div className={sectionFrame}>
-                  <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> General Practitioner</h3>
-                  <div className="space-y-1.5 relative">
-                    <Label>General Practitioner</Label>
-                    <Input className="text-sm" value={formData.general_practitioner} onChange={(e) => searchGP(e.target.value)} placeholder="Search or type GP name" />
-                    {gpSearchOpen && gpSearchResults.length > 0 && (
-                      <div className="absolute z-10 top-full left-0 right-0 bg-card border border-border rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
-                        {gpSearchResults.map(doc => (
-                          <div key={doc.id} className="flex items-center justify-between px-3 py-2 hover:bg-muted/50 text-xs">
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-foreground truncate">{doc.full_name}</p>
-                              <p className="text-[10px] text-muted-foreground">{doc.specialty || "General"} {doc.practice_number ? `• ${doc.practice_number}` : ""}</p>
+                <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                  <SectionHeader icon={User} label="General Practitioner" />
+                  <CollapsibleContent className="p-3">
+                    <div className="space-y-1.5 relative">
+                      <Label>General Practitioner</Label>
+                      <Input className="text-sm" value={formData.general_practitioner} onChange={(e) => searchGP(e.target.value)} placeholder="Search or type GP name" />
+                      {gpSearchOpen && gpSearchResults.length > 0 && (
+                        <div className="absolute z-10 top-full left-0 right-0 bg-card border border-border rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
+                          {gpSearchResults.map(doc => (
+                            <div key={doc.id} className="flex items-center justify-between px-3 py-2 hover:bg-muted/50 text-xs">
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-foreground truncate">{doc.full_name}</p>
+                                <p className="text-[10px] text-muted-foreground">{doc.specialty || "General"} {doc.practice_number ? `• ${doc.practice_number}` : ""}</p>
+                              </div>
+                              <div className="flex gap-1 shrink-0 ml-2">
+                                <Button variant="ghost" size="icon" className="h-6 w-6" title="Select as GP" onClick={() => { updateFormData({ general_practitioner: doc.full_name }); setGpSearchOpen(false); }}>
+                                  <Eye className="h-3 w-3" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-6 w-6" title="Connect to profile" onClick={() => {
+                                  updateFormData({ general_practitioner: doc.full_name });
+                                  setGpSearchOpen(false);
+                                  toast({ title: "Connected", description: `${doc.full_name} linked as your GP` });
+                                }}>
+                                  <Link2 className="h-3 w-3" />
+                                </Button>
+                              </div>
                             </div>
-                            <div className="flex gap-1 shrink-0 ml-2">
-                              <Button variant="ghost" size="icon" className="h-6 w-6" title="Select as GP" onClick={() => { updateFormData({ general_practitioner: doc.full_name }); setGpSearchOpen(false); }}>
-                                <Eye className="h-3 w-3" />
-                              </Button>
-                              <Button variant="ghost" size="icon" className="h-6 w-6" title="Connect to profile" onClick={() => {
-                                updateFormData({ general_practitioner: doc.full_name });
+                          ))}
+                          <div className="px-3 py-2 border-t border-border">
+                            <p className="text-[10px] text-muted-foreground mb-1">Doctor not on the app?</p>
+                            <div className="flex gap-1">
+                              <Button variant="outline" size="sm" className="gap-1 text-[10px] h-6" onClick={() => {
+                                toast({ title: "Invitation sent", description: "An invitation email will be sent" });
                                 setGpSearchOpen(false);
-                                toast({ title: "Connected", description: `${doc.full_name} linked as your GP` });
                               }}>
-                                <Link2 className="h-3 w-3" />
+                                <Mail className="h-2.5 w-2.5" />Invite
+                              </Button>
+                              <Button variant="outline" size="sm" className="gap-1 text-[10px] h-6" onClick={() => {
+                                toast({ title: "Invite & Connect", description: "Invitation sent with auto-connect" });
+                                setGpSearchOpen(false);
+                              }}>
+                                <Mail className="h-2.5 w-2.5" /><Link2 className="h-2.5 w-2.5" />Invite & Connect
                               </Button>
                             </div>
                           </div>
-                        ))}
-                        <div className="px-3 py-2 border-t border-border">
-                          <p className="text-[10px] text-muted-foreground mb-1">Doctor not on the app?</p>
-                          <div className="flex gap-1">
-                            <Button variant="outline" size="sm" className="gap-1 text-[10px] h-6" onClick={() => {
-                              toast({ title: "Invitation sent", description: "An invitation email will be sent" });
-                              setGpSearchOpen(false);
-                            }}>
-                              <Mail className="h-2.5 w-2.5" />Invite
-                            </Button>
-                            <Button variant="outline" size="sm" className="gap-1 text-[10px] h-6" onClick={() => {
-                              toast({ title: "Invite & Connect", description: "Invitation sent with auto-connect" });
-                              setGpSearchOpen(false);
-                            }}>
-                              <Mail className="h-2.5 w-2.5" /><Link2 className="h-2.5 w-2.5" />Invite & Connect
-                            </Button>
-                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Pharmacies */}
+                <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                  <SectionHeader icon={Store} label="Pharmacies" />
+                  <CollapsibleContent className="p-3">
+                    <div className="flex justify-end mb-3">
+                      {!showAddPharmacy && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddPharmacy(true)}><Plus className="h-3 w-3" />Add</Button>}
+                    </div>
+                    {showAddPharmacy && (
+                      <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          <div className="space-y-1.5"><Label>Name *</Label><Input className="text-sm" value={newPharmacy.name} onChange={(e) => setNewPharmacy(prev => ({ ...prev, name: e.target.value }))} placeholder="Pharmacy name" /></div>
+                          <div className="space-y-1.5"><Label>Branch</Label><Input className="text-sm" value={newPharmacy.branch} onChange={(e) => setNewPharmacy(prev => ({ ...prev, branch: e.target.value }))} placeholder="Branch name" /></div>
+                          <div className="space-y-1.5 sm:col-span-2"><Label>Email</Label><Input className="text-sm" type="email" value={newPharmacy.email} onChange={(e) => setNewPharmacy(prev => ({ ...prev, email: e.target.value }))} placeholder="pharmacy@email.com" /></div>
+                        </div>
+                        <div className="flex justify-end gap-2">
+                          <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddPharmacy(false); setEditingPharmacyId(null); setNewPharmacy({ name: "", email: "", branch: "" }); }}>Cancel</Button>
+                          <Button size="sm" className="text-xs h-7" onClick={handleAddPharmacy}>{editingPharmacyId ? "Save" : "Add"}</Button>
                         </div>
                       </div>
                     )}
-                  </div>
-                </div>
-
-                {/* Pharmacies */}
-                <div className={sectionFrame}>
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Store className="h-3.5 w-3.5" /> Pharmacies</h3>
-                    {!showAddPharmacy && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddPharmacy(true)}><Plus className="h-3 w-3" />Add</Button>}
-                  </div>
-                  {showAddPharmacy && (
-                    <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <div className="space-y-1.5"><Label>Name *</Label><Input className="text-sm" value={newPharmacy.name} onChange={(e) => setNewPharmacy(prev => ({ ...prev, name: e.target.value }))} placeholder="Pharmacy name" /></div>
-                        <div className="space-y-1.5"><Label>Branch</Label><Input className="text-sm" value={newPharmacy.branch} onChange={(e) => setNewPharmacy(prev => ({ ...prev, branch: e.target.value }))} placeholder="Branch name" /></div>
-                        <div className="space-y-1.5 sm:col-span-2"><Label>Email</Label><Input className="text-sm" type="email" value={newPharmacy.email} onChange={(e) => setNewPharmacy(prev => ({ ...prev, email: e.target.value }))} placeholder="pharmacy@email.com" /></div>
-                      </div>
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddPharmacy(false); setEditingPharmacyId(null); setNewPharmacy({ name: "", email: "", branch: "" }); }}>Cancel</Button>
-                        <Button size="sm" className="text-xs h-7" onClick={handleAddPharmacy}>{editingPharmacyId ? "Save" : "Add"}</Button>
-                      </div>
-                    </div>
-                  )}
-                  {pharmacies.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No pharmacies recorded</p>
-                  ) : (
-                    <div className="space-y-1.5">
-                      {pharmacies.map((pharmacy) => (
-                        <div key={pharmacy.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
-                          <div className="flex items-center gap-2">
-                            <button onClick={() => handleSetPrimaryPharmacy(pharmacy.id)} className="text-xs text-primary hover:underline">
-                              {pharmacy.is_primary ? <Star className="h-3.5 w-3.5 fill-primary text-primary" /> : <Star className="h-3.5 w-3.5 text-muted-foreground" />}
-                            </button>
-                            <div>
-                              <p className="text-xs font-medium text-foreground">
-                                {pharmacy.name}
-                                {pharmacy.branch && <span className="text-muted-foreground ml-1">({pharmacy.branch})</span>}
-                              </p>
-                              {pharmacy.email && <p className="text-[10px] text-muted-foreground">{pharmacy.email}</p>}
+                    {pharmacies.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No pharmacies recorded</p>
+                    ) : (
+                      <div className="space-y-1.5">
+                        {pharmacies.map((pharmacy) => (
+                          <div key={pharmacy.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                            <div className="flex items-center gap-2">
+                              <button onClick={() => handleSetPrimaryPharmacy(pharmacy.id)} className="text-xs text-primary hover:underline">
+                                {pharmacy.is_primary ? <Star className="h-3.5 w-3.5 fill-primary text-primary" /> : <Star className="h-3.5 w-3.5 text-muted-foreground" />}
+                              </button>
+                              <div>
+                                <p className="text-xs font-medium text-foreground">
+                                  {pharmacy.name}
+                                  {pharmacy.branch && <span className="text-muted-foreground ml-1">({pharmacy.branch})</span>}
+                                </p>
+                                {pharmacy.email && <p className="text-[10px] text-muted-foreground">{pharmacy.email}</p>}
+                              </div>
+                            </div>
+                            <div className="flex gap-1 shrink-0">
+                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditPharmacy(pharmacy)}><Pencil className="h-3 w-3" /></Button>
+                              <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => handleRemovePharmacy(pharmacy.id)}><Trash2 className="h-3 w-3" /></Button>
                             </div>
                           </div>
-                          <div className="flex gap-1 shrink-0">
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditPharmacy(pharmacy)}><Pencil className="h-3 w-3" /></Button>
-                            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => handleRemovePharmacy(pharmacy.id)}><Trash2 className="h-3 w-3" /></Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                        ))}
+                      </div>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
               </div>
             </div>
           </TabsContent>
