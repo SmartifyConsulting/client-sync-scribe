@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, Trophy, Target, Flame, Gift, Star, Calendar, CheckSquare, Clock, AlertCircle, Video, Send, ArrowRightLeft, Pill } from "lucide-react";
+import { Loader2, Trophy, Target, Flame, Gift, Star, Calendar, CheckSquare, Clock, AlertCircle, Video, Send, ArrowRightLeft, Pill, ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { format, parseISO, differenceInDays } from "date-fns";
+import { useNavigate } from "react-router-dom";
 import { useMyRewards, useMyStreaks } from "@/hooks/usePatientRewards";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -89,6 +90,7 @@ export default function MyRewards() {
   const [transferAmount, setTransferAmount] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   // Get patient record for chronic meds tab
   const { data: patientRecord } = useQuery({
@@ -245,11 +247,16 @@ export default function MyRewards() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">My Rewards</h1>
-          <p className="mt-1 text-muted-foreground text-[12px]">
-            Track your Vulas, milestones, and health streaks
-          </p>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="h-8 w-8">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">My Rewards</h1>
+            <p className="mt-1 text-muted-foreground text-[12px]">
+              Track your Vulas, milestones, and health streaks
+            </p>
+          </div>
         </div>
         {partnerApps.length > 0 && (
           <Button onClick={() => setShowTransferDialog(true)} className="gap-2">
@@ -310,12 +317,12 @@ export default function MyRewards() {
 
       {/* Hero Stats */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="bg-gradient-to-br from-yellow-300 to-lime-400 dark:from-yellow-600/40 dark:to-lime-700/30 border-yellow-400 dark:border-yellow-600/40">
+        <Card className="bg-gradient-to-br from-blue-500 to-cyan-400 dark:from-blue-700/40 dark:to-cyan-700/30 border-blue-400 dark:border-blue-600/40">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-yellow-900 dark:text-yellow-200">Total Vulas</p>
-                <p className="text-4xl font-bold text-yellow-900 dark:text-yellow-100">{lollipopCount}</p>
+                <p className="text-sm font-medium text-blue-100">Total Vulas</p>
+                <p className="text-4xl font-bold text-white">{lollipopCount}</p>
               </div>
               <div className="h-14 w-14 rounded-full bg-white shadow-sm flex items-center justify-center">
                 <img src={vulaSymbol} alt="Vulas" className="h-10 w-10 object-contain" />
@@ -324,11 +331,11 @@ export default function MyRewards() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-fuchsia-400 to-pink-500 dark:from-fuchsia-700/40 dark:to-pink-800/30 border-fuchsia-400 dark:border-fuchsia-600/40">
+        <Card className="bg-gradient-to-br from-blue-600 to-teal-500 dark:from-blue-800/40 dark:to-teal-700/30 border-blue-500 dark:border-blue-700/40">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-fuchsia-100">Current Level</p>
+                <p className="text-sm font-medium text-blue-100">Current Level</p>
                 <p className="text-xl font-bold text-white">
                   {currentMilestone?.label || "Beginner"}
                 </p>
@@ -338,11 +345,11 @@ export default function MyRewards() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-orange-400 to-red-500 dark:from-orange-700/40 dark:to-red-800/30 border-orange-400 dark:border-orange-600/40">
+        <Card className="bg-gradient-to-br from-sky-400 to-teal-400 dark:from-sky-700/40 dark:to-teal-700/30 border-sky-400 dark:border-sky-600/40">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-orange-100">Active Streaks</p>
+                <p className="text-sm font-medium text-sky-100">Active Streaks</p>
                 <p className="text-4xl font-bold text-white">{activeStreaks.length}</p>
               </div>
               <Flame className="h-12 w-12 text-white/90" />
@@ -350,11 +357,11 @@ export default function MyRewards() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-sky-400 to-cyan-500 dark:from-sky-700/40 dark:to-cyan-800/30 border-sky-400 dark:border-sky-600/40">
+        <Card className="bg-gradient-to-br from-indigo-400 to-blue-500 dark:from-indigo-700/40 dark:to-blue-800/30 border-indigo-400 dark:border-indigo-600/40">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-sky-100">Transferred</p>
+                <p className="text-sm font-medium text-indigo-100">Transferred</p>
                 <p className="text-4xl font-bold text-white">{totalTransferred}</p>
               </div>
               <ArrowRightLeft className="h-12 w-12 text-white/90" />
