@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar as CalendarIcon, Clock, MapPin, Loader2, Plus, User, DollarSign } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, MapPin, Loader2, Plus, User, DollarSign, ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,8 @@ import { format, addDays, addMonths, subMonths, startOfWeek, endOfWeek, eachDayO
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { BookAppointmentDialog } from "@/components/appointments/BookAppointmentDialog";
 import { BookAppointmentDialog } from "@/components/appointments/BookAppointmentDialog";
 import { PatientRequestsBadge } from "@/components/appointments/PatientRequestsBadge";
 
@@ -28,6 +30,7 @@ type CalendarViewMode = "week" | "month" | "year";
 
 export default function PatientCalendar() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -346,9 +349,14 @@ export default function PatientCalendar() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">My Calendar</h1>
-          <p className="text-muted-foreground text-[12px]">View and manage your appointments</p>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="h-8 w-8">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">My Calendar</h1>
+            <p className="text-muted-foreground text-[12px]">View and manage your appointments</p>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <ViewToggle />
