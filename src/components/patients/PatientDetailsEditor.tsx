@@ -1339,10 +1339,10 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   <Textarea id="allergies" className="text-sm" value={formData.allergies} onChange={(e) => updateFormData({ allergies: e.target.value })} placeholder="List any allergies (medications, food, etc.)" rows={2} />
                 </div>
 
-                {/* Current Medications */}
+                {/* Medication */}
                 <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
                   <div className="flex items-center justify-between mb-2">
-                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Current Medications</Label>
+                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Medication</Label>
                     {!showAddMed && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddMed(true)}><Plus className="h-3 w-3" />Add</Button>}
                   </div>
                   {showAddMed && (
@@ -1350,6 +1350,20 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                       <div className="grid gap-2 sm:grid-cols-2">
                         <div className="space-y-1.5"><Label>Medication Name *</Label><Input className="text-sm" value={newMed.name} onChange={(e) => setNewMed(p => ({ ...p, name: e.target.value }))} placeholder="e.g., Metformin" /></div>
                         <div className="space-y-1.5"><Label>Dosage</Label><Input className="text-sm" value={newMed.dosage} onChange={(e) => setNewMed(p => ({ ...p, dosage: e.target.value }))} placeholder="e.g., 500mg twice daily" /></div>
+                        <div className="space-y-1.5">
+                          <Label>Status</Label>
+                          <Select value={newMed.status} onValueChange={(v) => setNewMed(p => ({ ...p, status: v as "current" | "past" }))}>
+                            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="current">Current</SelectItem>
+                              <SelectItem value="past">Past</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1.5"><Label>Start Date</Label><Input className="text-sm" type="date" value={newMed.start_date} onChange={(e) => setNewMed(p => ({ ...p, start_date: e.target.value }))} /></div>
+                        {newMed.status === 'past' && (
+                          <div className="space-y-1.5"><Label>End Date</Label><Input className="text-sm" type="date" value={newMed.end_date} onChange={(e) => setNewMed(p => ({ ...p, end_date: e.target.value }))} /></div>
+                        )}
                       </div>
                       <div className="flex items-center space-x-2">
                         <Checkbox checked={newMed.is_chronic} onCheckedChange={(c) => setNewMed(p => ({ ...p, is_chronic: c as boolean }))} />
@@ -1371,7 +1385,15 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                             <Switch checked={m.is_chronic} onCheckedChange={() => handleToggleMedChronic(m.id)} className="shrink-0 scale-75" />
                             <div className="min-w-0">
                               <p className="text-xs font-medium text-foreground truncate">{m.name}{m.dosage ? ` — ${m.dosage}` : ""}</p>
+                              {(m.start_date || m.end_date) && (
+                                <p className="text-[10px] text-muted-foreground">
+                                  {m.start_date ? format(new Date(m.start_date), "MMM yyyy") : "?"} — {m.end_date ? format(new Date(m.end_date), "MMM yyyy") : "Present"}
+                                </p>
+                              )}
                             </div>
+                            <Badge className={`text-[8px] border-0 ${m.status === 'past' ? 'bg-muted text-muted-foreground' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'}`}>
+                              {m.status === 'past' ? 'Past' : 'Current'}
+                            </Badge>
                             {m.is_chronic && <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[9px] font-bold text-destructive shrink-0">Chronic</span>}
                           </div>
                           <div className="flex gap-1 shrink-0">
@@ -1385,6 +1407,61 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   {isChronic && (
                     <div className="mt-2">
                       <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive"><Pill className="h-2.5 w-2.5" />Chronic Patient</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Conditions & Diagnoses */}
+                <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><HeartPulse className="h-3.5 w-3.5" /> Conditions & Diagnoses</Label>
+                    {!showAddCondition && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddCondition(true)}><Plus className="h-3 w-3" />Add</Button>}
+                  </div>
+                  {showAddCondition && (
+                    <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <div className="space-y-1.5"><Label>Condition/Diagnosis *</Label><Input className="text-sm" value={newCondition.name} onChange={(e) => setNewCondition(p => ({ ...p, name: e.target.value }))} placeholder="e.g., Type 2 Diabetes" /></div>
+                        <div className="space-y-1.5"><Label>Date Diagnosed</Label><Input className="text-sm" type="date" value={newCondition.diagnosed_date} onChange={(e) => setNewCondition(p => ({ ...p, diagnosed_date: e.target.value }))} /></div>
+                        <div className="space-y-1.5"><Label>Diagnosed By</Label><Input className="text-sm" value={newCondition.diagnosed_by} onChange={(e) => setNewCondition(p => ({ ...p, diagnosed_by: e.target.value }))} placeholder="Doctor name" /></div>
+                        <div className="space-y-1.5">
+                          <Label>Status</Label>
+                          <Select value={newCondition.status} onValueChange={(v) => setNewCondition(p => ({ ...p, status: v as "active" | "resolved" }))}>
+                            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="active">Active</SelectItem>
+                              <SelectItem value="resolved">Resolved</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddCondition(false); setEditingConditionId(null); setNewCondition({ name: "", diagnosed_date: "", diagnosed_by: "", status: "active" }); }}>Cancel</Button>
+                        <Button size="sm" className="text-xs h-7" onClick={handleAddCondition}>{editingConditionId ? "Save" : "Add"}</Button>
+                      </div>
+                    </div>
+                  )}
+                  {conditionsDiagnoses.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No conditions recorded</p>
+                  ) : (
+                    <div className="space-y-1">
+                      {conditionsDiagnoses.map(c => (
+                        <div key={c.id} className="flex items-center justify-between p-1.5 rounded-lg bg-primary/5 border border-primary/20">
+                          <div>
+                            <p className="text-xs font-medium text-foreground">{c.name}</p>
+                            <p className="text-[10px] text-muted-foreground">
+                              {c.diagnosed_date ? format(new Date(c.diagnosed_date), "MMM d, yyyy") : "Date unknown"}
+                              {c.diagnosed_by ? ` · Dr. ${c.diagnosed_by}` : ""}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Badge className={`text-[8px] border-0 ${c.status === 'resolved' ? 'bg-muted text-muted-foreground' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'}`}>
+                              {c.status === 'resolved' ? 'Resolved' : 'Active'}
+                            </Badge>
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditCondition(c)}><Pencil className="h-3 w-3" /></Button>
+                            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => { setConditionsDiagnoses(prev => prev.filter(x => x.id !== c.id)); setHasChanges(true); }}><Trash2 className="h-3 w-3" /></Button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
