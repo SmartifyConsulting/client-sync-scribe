@@ -70,13 +70,34 @@ const COUNTRY_CODES = [
 const sectionFrame = "rounded-xl border border-primary bg-card p-4 shadow-sm";
 
 // Reusable collapsible section header with neutral background and black text
-const SectionHeader = ({ icon: Icon, label, extra }: { icon: any; label: string; extra?: React.ReactNode }) => (
+// Supports optional per-section edit/save/cancel icons
+const SectionHeader = ({ icon: Icon, label, extra, isEditing, isSaving, hasChanges, onEdit, onSave, onCancel }: {
+  icon: any; label: string; extra?: React.ReactNode;
+  isEditing?: boolean; isSaving?: boolean; hasChanges?: boolean;
+  onEdit?: () => void; onSave?: () => void; onCancel?: () => void;
+}) => (
   <CollapsibleTrigger className="flex w-full items-center justify-between bg-[#F5F4F1] rounded-lg px-3 py-2 group">
     <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5 text-left">
       <Icon className="h-3.5 w-3.5" /> {label}
     </h3>
     <div className="flex items-center gap-2">
       {extra}
+      {isSaving && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+      {isEditing && hasChanges && onSave && (
+        <button type="button" onClick={(e) => { e.stopPropagation(); onSave(); }} className="p-0.5 rounded hover:bg-green-100 text-green-600" title="Save">
+          <Check className="h-3.5 w-3.5" />
+        </button>
+      )}
+      {isEditing && onCancel && (
+        <button type="button" onClick={(e) => { e.stopPropagation(); onCancel(); }} className="p-0.5 rounded hover:bg-red-100 text-red-500" title="Cancel">
+          <X className="h-3.5 w-3.5" />
+        </button>
+      )}
+      {!isEditing && onEdit && (
+        <button type="button" onClick={(e) => { e.stopPropagation(); onEdit(); }} className="p-0.5 rounded hover:bg-muted text-muted-foreground" title="Edit">
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      )}
       <ChevronDown className="h-4 w-4 text-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
     </div>
   </CollapsibleTrigger>
