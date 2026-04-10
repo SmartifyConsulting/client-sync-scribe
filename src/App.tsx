@@ -51,6 +51,12 @@ import ExpiringRecordings from "./pages/ExpiringRecordings";
 
 const queryClient = new QueryClient();
 
+// Invalidate all queries on auth state change to prevent stale cached profiles
+import { supabase } from "@/integrations/supabase/client";
+supabase.auth.onAuthStateChange(() => {
+  queryClient.invalidateQueries();
+});
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
 
