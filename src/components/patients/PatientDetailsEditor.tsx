@@ -312,6 +312,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
       setNokMembers(patient.next_of_kin_members || []);
       setCurrentMedications(patient.current_medications || []);
       setConditionsDiagnoses(patient.conditions_diagnoses || []);
+      const existingPharmacies = patient.pharmacies || [];
       if (existingPharmacies.length === 0 && (patient.pharmacy_name || patient.pharmacy_email)) {
         setPharmacies([{ id: crypto.randomUUID(), name: patient.pharmacy_name || "", email: patient.pharmacy_email || "", is_primary: true }]);
       } else {
