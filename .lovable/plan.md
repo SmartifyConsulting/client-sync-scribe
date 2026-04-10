@@ -1,76 +1,53 @@
 
 
-# Change from 7-Day Trial to 30-Day Free Access + Subscription Gate
+# Dashboard Cleanup, Medical Tab Improvements, Edit Button Repositioning
 
-## Summary
+## Changes
 
-Replace the current "7-day trial with immediate PayPal setup" flow with a new model: users sign up freely, get 30 days of full access with no payment required, and after 30 days are prompted to subscribe before they can use features.
+### 1. Patient Dashboard cleanup (`src/pages/patient/PatientDashboard.tsx`)
 
-## How it works
+- **Remove "My Calendar" quick action** (lines 604-631): Delete the entire quick actions grid at the bottom that contains "My Calendar" and "Documentation"
+- **Remove Medications, Healthcare Providers, Pharmacies row** (lines 385-476): Delete the entire 3-column grid (Row 2)
+- **Remove Vula logo** from "My Vulas Balance" card (line 484): Remove the `<img>` tag showing vulaSymbol, keep only the text
+- **Clean up Row 3**: Make it a proper 2-column grid with "My Vulas Balance" in col 1 and "Earn More Vulas" in col 2. Move "Recent Claims" into a new Row 4 as col 1, and "Documentation" as col 2 (link card to `/patient/documentation`)
 
-1. **Signup**: No PayPal required. User is told they get 30 days free, after which they must subscribe.
-2. **Subscription record**: Created with `status: 'free_period'` and `trial_ends_at` set to 30 days from signup.
-3. **Access gate**: A new `useSubscriptionGate` hook checks if the free period has expired AND the user has no active subscription. If expired, a full-screen modal blocks the app and directs the user to Settings > Billing to subscribe.
-4. **Settings/Billing**: Already has the PayPal subscribe flow — no changes needed there.
+### 2. Blood Type on same row as Height/Weight/BMI (`PatientDetailsEditor.tsx`)
 
-## Plan
+**View mode** (lines 894-902): Move Blood Type into the `grid-cols-3` grid alongside Height, Weight, BMI — change to `grid-cols-4` and add Blood Type as the 4th field. Remove the standalone `<div><ViewField label="Blood Type" ...>` below.
 
-### 1. Update `TrialSignupSection` messaging
+**Edit mode**: Same change — add Blood Type select into the Height/Weight/BMI row.
 
-**File:** `src/components/auth/TrialSignupSection.tsx`
+### 3. Allergies in its own frame with icon (`PatientDetailsEditor.tsx`)
 
-- Change "7-Day Free Trial" to "30-Day Free Access"
-- Remove PayPal references from signup — say "No payment required to start"
-- Update bullet points: "Full access for 30 days", "No credit card or PayPal needed", "Subscribe after 30 days to continue"
-- Update the terms checkbox text to reflect 30-day free period and that subscription is required after
+**View mode** (line 903): Replace the plain `<ViewField label="Allergies">` with a bordered frame matching the Medication/Surgeries pattern:
+```
+<div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
+  <h3 ...><AlertCircle icon /> Allergies</h3>
+  <p>{allergies text}</p>
+</div>
+```
 
-### 2. Update signup flow to skip PayPal
+**Edit mode**: Wrap the allergies textarea in a similar frame with the AlertCircle icon heading.
 
-**File:** `src/pages/Auth.tsx` (lines 420-448)
+### 4. Space after Organ Donor label (`PatientDetailsEditor.tsx`, line 682-697)
 
-- Change trial duration from 7 days to 30 days
-- Change status from `trial_pending` to `free_period`
-- Remove the PayPal `create-trial` invocation entirely
-- Navigate directly to `/dashboard` after signup
+Add `className="mb-2"` to the `<Label>Organ Donor</Label>` or add a `mt-2` to the content below it, creating visual separation between the label and the Yes/No badge.
 
-### 3. Create `useSubscriptionGate` hook
+### 5. Remove "My Details" heading + move Edit button to tab bar (`PatientDetailsEditor.tsx`)
 
-**New file:** `src/hooks/useSubscriptionGate.ts`
+**View mode** (lines 760-767):
+- Remove the `<h2>My Details</h2>` heading and its container div
+- Move the Edit button into the `TabsList` — place it as the last element inside the tab bar, aligned to the right end using `ml-auto`
+- The button sits visually in the green tab bar but is not a tab trigger
 
-- Fetches the user's subscription from `subscriptions` table
-- Returns `{ isBlocked, daysRemaining, loading }`
-- `isBlocked = true` when: status is `free_period` AND `trial_ends_at < now()` AND no active/paid subscription exists
-- Also returns `daysRemaining` for showing a countdown banner
-
-### 4. Create `SubscriptionGateModal` component
-
-**New file:** `src/components/auth/SubscriptionGateModal.tsx`
-
-- Full-screen overlay (not dismissible) shown when `isBlocked` is true
-- Message: "Your 30-day free access has ended. Subscribe to continue using the app."
-- "Subscribe Now" button links to `/settings?tab=billing`
-- Shows pricing info (monthly/annual)
-
-### 5. Add gate check to `AppLayout`
-
-**File:** `src/components/layout/AppLayout.tsx`
-
-- Use `useSubscriptionGate()` hook
-- If `isBlocked`, render `SubscriptionGateModal` instead of the normal layout
-- Optionally show a banner when `daysRemaining <= 7` warning the user their free period is ending
-
-### 6. Database migration
-
-Update `subscriptions` table to allow `free_period` as a valid status value (check if status is an enum or text — if text, no migration needed).
+**Edit mode** (lines 1133-1140):
+- Remove "Edit Patient Details" heading
+- Move the "Done" button into the TabsList similarly
 
 ## Technical Summary
 
 | File | Change |
 |------|--------|
-| `src/components/auth/TrialSignupSection.tsx` | Update messaging to 30-day free, remove PayPal references |
-| `src/pages/Auth.tsx` | Change trial to 30 days, skip PayPal call, set status `free_period` |
-| `src/hooks/useSubscriptionGate.ts` | New hook: check if free period expired + no active sub |
-| `src/components/auth/SubscriptionGateModal.tsx` | New: blocking modal when access expired |
-| `src/components/layout/AppLayout.tsx` | Integrate gate check, show modal or warning banner |
-| Migration (if needed) | Allow `free_period` status in subscriptions |
+| `src/pages/patient/PatientDashboard.tsx` | Remove My Calendar, Medications row, Providers row, Pharmacies row, Vula logo; clean up rows to: Row 1 (AI+Appointments), Row 2 (Vulas+Earn), Row 3 (Claims+Documentation) |
+| `src/components/patients/PatientDetailsEditor.tsx` | Blood type in same row as height/weight/BMI; Allergies in bordered frame with icon; space after Organ Donor label; remove "My Details" heading; move Edit/Done button into tab bar |
 
