@@ -133,36 +133,32 @@ export default function Landing() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
+      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-8">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6">
               One Ecosystem.
               <span className="block text-gradient pb-4">360° Healthcare Intelligence.</span>
             </h1>
-            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="my-10"
+            >
+              <img src={holarcLogo} alt="Holarc Health" className="h-32 sm:h-40 w-auto mx-auto drop-shadow-lg" />
+            </motion.div>
+
+            <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
               Powerful practice management for providers. A complete 360° health profile for patients. 
               One unified ecosystem where every consultation, prescription, and clinical note connects 
               seamlessly—putting the patient at the center of their care.
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10 max-w-3xl mx-auto">
-              {ecosystemFeatures.map((feature, index) => (
-                <motion.div
-                  key={feature}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.3 + index * 0.05 }}
-                  className="flex items-center gap-2 justify-center"
-                >
-                  <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
-                  <span className="text-xs text-foreground">{feature}</span>
-                </motion.div>
-              ))}
-            </div>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button
                 size="lg"
