@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
+import { cn } from "@/lib/utils";
 import { AddressAutocomplete } from "@/components/patients/AddressAutocomplete";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -684,6 +685,41 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
       navigator.clipboard.writeText(info);
       toast({ title: "Copied", description: "ICE information copied to clipboard" });
     }
+  };
+
+  // Per-record share handler for NOK and ICE contacts
+  const handleShareRecord = (type: 'nok' | 'ice', record: { id: string; name: string; phone: string; email: string }) => {
+    const shareUrl = `${window.location.origin}/patient/${patient.id}`;
+    const text = `${record.name} - Emergency Contact for ${patient.name}\n${shareUrl}`;
+
+    if (type === 'ice') {
+      setIceContacts(prev => prev.map(c => c.id === record.id ? { ...c, shared: true } : c));
+    } else {
+      setNokMembers(prev => prev.map(n => n.id === record.id ? { ...n, shared: true } : n));
+    }
+    setHasChanges(true);
+
+    if (navigator.share) {
+      navigator.share({ title: `Emergency Contact - ${record.name}`, text, url: shareUrl });
+    } else {
+      navigator.clipboard.writeText(text);
+      toast({ title: "Link copied", description: `Share link for ${record.name} copied to clipboard` });
+    }
+  };
+
+  // Handle ICE "Also Next of Kin" toggle
+  const handleICEAsNOK = (iceId: string, checked: boolean) => {
+    setIceContacts(prev => prev.map(c => c.id === iceId ? { ...c, is_also_nok: checked } : c));
+    const contact = iceContacts.find(c => c.id === iceId);
+    if (checked && contact) {
+      const alreadyExists = nokMembers.some(n => n.name === contact.name && n.phone === contact.phone);
+      if (!alreadyExists) {
+        setNokMembers(prev => [...prev, { id: crypto.randomUUID(), name: contact.name, phone: contact.phone, email: contact.email, relationship: contact.relationship }]);
+      }
+    } else if (!checked && contact) {
+      setNokMembers(prev => prev.filter(n => !(n.name === contact.name && n.phone === contact.phone)));
+    }
+    setHasChanges(true);
   };
 
   // ==================== VIEW MODE ====================
