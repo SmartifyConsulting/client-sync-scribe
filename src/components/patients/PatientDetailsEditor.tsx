@@ -873,8 +873,10 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   <div><ViewField label="Allergies" value={patient.allergies || "None recorded"} /></div>
 
                   {/* Current Medications */}
-                  <div>
-                    <Label>Current Medications</Label>
+                  <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
+                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
+                      <Pill className="h-3.5 w-3.5" /> Current Medications
+                    </h3>
                     {currentMedications.length === 0 ? (
                       <p className="text-xs text-muted-foreground">No medications recorded</p>
                     ) : (
@@ -898,7 +900,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   </div>
 
                   {/* Surgeries */}
-                  <div>
+                  <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
                      <Scissors className="h-3.5 w-3.5" /> Surgeries and Dates
                    </h3>
@@ -907,7 +909,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                     ) : (
                       <div className="space-y-1">
                         {surgeries.map((surgery) => (
-                          <div key={surgery.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                          <div key={surgery.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
                             <p className="text-xs font-medium text-foreground">{surgery.name}</p>
                             <p className="text-[10px] text-muted-foreground">{formatSurgeryDate(surgery.date, surgery.date_precision)}</p>
                             {surgery.notes && <p className="text-[10px] text-muted-foreground mt-0.5">{surgery.notes}</p>}
@@ -918,7 +920,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   </div>
 
                   {/* Family History */}
-                  <div>
+                  <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
                      <GitBranch className="h-3.5 w-3.5" /> Family History
                    </h3>
@@ -927,7 +929,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                     ) : (
                       <div className="space-y-1">
                         {familyHistory.map((entry) => (
-                          <div key={entry.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                          <div key={entry.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
                             <p className="text-xs font-medium text-foreground">{entry.relation}</p>
                             <p className="text-[10px] text-muted-foreground">{entry.condition}</p>
                           </div>
@@ -1258,7 +1260,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 </div>
 
                 {/* Current Medications */}
-                <div>
+                <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
                   <div className="flex items-center justify-between mb-2">
                     <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Current Medications</Label>
                     {!showAddMed && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddMed(true)}><Plus className="h-3 w-3" />Add</Button>}
@@ -1308,7 +1310,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 </div>
 
                 {/* Surgeries */}
-                <div>
+                <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
                   <div className="flex items-center justify-between mb-2">
                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
                      <Scissors className="h-3.5 w-3.5" /> Surgeries and Dates
@@ -1349,7 +1351,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   ) : (
                     <div className="space-y-1">
                       {surgeries.map((surgery) => (
-                        <div key={surgery.id} className="flex items-start justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                        <div key={surgery.id} className="flex items-start justify-between p-1.5 rounded-lg bg-primary/5 border border-primary/20">
                           <div>
                             <p className="text-xs font-medium text-foreground">{surgery.name}</p>
                             <p className="text-[10px] text-muted-foreground">{formatSurgeryDate(surgery.date, surgery.date_precision)}</p>
@@ -1366,7 +1368,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 </div>
 
                 {/* Family History */}
-                <div>
+                <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
                   <div className="flex items-center justify-between mb-2">
                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
                      <GitBranch className="h-3.5 w-3.5" /> Family History
@@ -1390,7 +1392,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   ) : (
                     <div className="space-y-1">
                       {familyHistory.map((entry) => (
-                        <div key={entry.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                        <div key={entry.id} className="flex items-center justify-between p-1.5 rounded-lg bg-primary/5 border border-primary/20">
                           <div>
                             <p className="text-xs font-medium text-foreground">{entry.relation}</p>
                             <p className="text-[10px] text-muted-foreground">{entry.condition}</p>
