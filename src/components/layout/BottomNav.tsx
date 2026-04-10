@@ -15,6 +15,7 @@ const doctorNavItems = [
   { icon: LayoutDashboard, label: "Home", to: "/dashboard" },
   { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
+  { icon: Briefcase, label: "Holarprac", to: "/practice" },
   { icon: Settings, label: "Settings", to: "/settings" },
 ];
 
