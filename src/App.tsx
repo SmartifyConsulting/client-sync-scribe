@@ -87,7 +87,11 @@ function RoleBasedDashboard() {
     );
   }
 
-  return isPatient ? <MyDetails /> : <Dashboard />;
+  if (isPatient) {
+    return <Navigate to="/patient/details" replace />;
+  }
+
+  return <Dashboard />;
 }
 
 const App = () => (
