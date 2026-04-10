@@ -1368,7 +1368,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 </div>
 
                 {/* Family History */}
-                <div>
+                <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
                   <div className="flex items-center justify-between mb-2">
                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
                      <GitBranch className="h-3.5 w-3.5" /> Family History
