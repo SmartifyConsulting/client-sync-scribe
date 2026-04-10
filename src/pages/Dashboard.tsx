@@ -241,11 +241,14 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-4 md:space-y-8 animate-fade-in">
       {/* Header with Profile */}
       <div className="flex items-start justify-between pb-2">
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">{greeting}{displayName ? `, ${displayName}` : ''}</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">
+            {greeting}{displayName ? ',' : ''}
+            {displayName && <span className="block">{displayName}</span>}
+          </h1>
           <p className="mt-2 text-muted-foreground text-[12px]">
             Here's what's happening with your practice today, {formattedDate}
           </p>
@@ -257,7 +260,7 @@ export default function Dashboard() {
       <DoctorAccessRequests />
 
       {/* Stats Grid */}
-      <div className="grid gap-5 grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-2 md:gap-5 grid-cols-2 lg:grid-cols-5">
         <StatsCard
           title="Total Patients"
           value={128}
@@ -304,7 +307,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid gap-6 grid-cols-1 lg:grid-cols-5">
+      <div className="grid gap-3 md:gap-6 grid-cols-1 lg:grid-cols-5">
         <div className="lg:col-span-3 space-y-6">
           <TodaysBriefing />
           <RecentActivity />
