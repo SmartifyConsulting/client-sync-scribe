@@ -951,7 +951,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             <TabsContent value="personal" className="space-y-4 mt-4">
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <SectionHeader icon={User} label="Personal Details" />
+                <SectionHeader icon={User} label="Personal Details" onEdit={() => { setIsEditing(true); setEditingSections(prev => ({ ...prev, personal: true })); }} />
                 <CollapsibleContent className="p-3">
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     <ViewField label="First Name(s)" value={patient.first_name || splitName(patient.name).first} />
@@ -969,7 +969,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               </Collapsible>
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <SectionHeader icon={MapPin} label="Addresses" />
+                <SectionHeader icon={MapPin} label="Addresses" onEdit={() => { setIsEditing(true); setEditingSections(prev => ({ ...prev, addresses: true })); }} />
                 <CollapsibleContent className="p-3">
                   <div className="grid gap-3 sm:grid-cols-2">
                     <ViewField label="Physical Address" value={patient.physical_address || patient.address} />
@@ -980,7 +980,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <SectionHeader icon={Briefcase} label="Employer" />
+                <SectionHeader icon={Briefcase} label="Employer" onEdit={() => { setIsEditing(true); setEditingSections(prev => ({ ...prev, employer: true })); }} />
                 <CollapsibleContent className="p-3">
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     <ViewField label="Employer" value={patient.employer} />
@@ -991,7 +991,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               </Collapsible>
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <SectionHeader icon={StickyNote} label="General Notes" />
+                <SectionHeader icon={StickyNote} label="General Notes" onEdit={() => { setIsEditing(true); setEditingSections(prev => ({ ...prev, notes: true })); }} />
                 <CollapsibleContent className="p-3">
                   <p className="text-sm text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
                 </CollapsibleContent>
