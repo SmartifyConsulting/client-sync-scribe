@@ -1392,7 +1392,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   ) : (
                     <div className="space-y-1">
                       {familyHistory.map((entry) => (
-                        <div key={entry.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                        <div key={entry.id} className="flex items-center justify-between p-1.5 rounded-lg bg-primary/5 border border-primary/20">
                           <div>
                             <p className="text-xs font-medium text-foreground">{entry.relation}</p>
                             <p className="text-[10px] text-muted-foreground">{entry.condition}</p>
