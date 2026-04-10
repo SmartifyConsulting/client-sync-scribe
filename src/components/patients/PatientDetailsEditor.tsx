@@ -17,7 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Patient, Surgery, Pharmacy, FamilyHistoryEntry, ICEContact, NextOfKinMember, CurrentMedication, ConditionDiagnosis } from "@/hooks/usePatients";
+import { Patient, Surgery, Pharmacy, FamilyHistoryEntry, NextOfKinMember, CurrentMedication, ConditionDiagnosis } from "@/hooks/usePatients";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
@@ -27,7 +27,7 @@ const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
 const MyDoctors = lazy(() => import("@/pages/patient/MyDoctors"));
 const PatientRoundTable = lazy(() => import("@/pages/patient/PatientRoundTable"));
 const PatientCalendarLazy = lazy(() => import("@/pages/patient/PatientCalendar"));
-const NokIcedTab = lazy(() => import("@/components/patients/NokIcedTab"));
+
 const SettingsContentLazy = lazy(() => import("@/components/settings/SettingsContent").then(m => ({ default: m.SettingsContent })));
 const SessionHistoryTableLazy = lazy(() => import("@/components/patients/SessionHistoryTable").then(m => ({ default: m.SessionHistoryTable })));
 const PatientDashboardLazy = lazy(() => import("@/pages/patient/PatientDashboard"));
