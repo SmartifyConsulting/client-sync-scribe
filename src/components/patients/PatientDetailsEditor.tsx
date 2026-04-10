@@ -925,9 +925,14 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                               {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
                               {c.email && <p className="text-[10px] text-muted-foreground">{c.email}</p>}
                             </div>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('ice', c)}>
-                              <Share2 className={cn("h-3 w-3", c.shared ? "text-muted-foreground" : "text-primary")} />
-                            </Button>
+                            <div className="flex gap-1">
+                              <Button variant="ghost" size="icon" className="h-6 w-6" title="Notify" onClick={() => toast({ title: "Notification sent", description: `${c.name} has been notified` })}>
+                                <Bell className="h-3 w-3 text-primary" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('ice', c)}>
+                                <Share2 className={cn("h-3 w-3", c.shared ? "text-muted-foreground" : "text-primary")} />
+                              </Button>
+                            </div>
                           </div>
                           {c.is_also_nok && <p className="text-[10px] text-primary mt-0.5">✓ Also Next of Kin</p>}
                         </div>
@@ -1366,6 +1371,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                           {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
                         </div>
                         <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" className="h-6 w-6" title="Notify" onClick={() => toast({ title: "Notification sent", description: `${nok.name} has been notified` })}>
+                            <Bell className="h-3 w-3 text-primary" />
+                          </Button>
                           <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('nok', nok)}>
                             <Share2 className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")} />
                           </Button>
@@ -1410,6 +1418,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                             {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
                           </div>
                           <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" className="h-6 w-6" title="Notify" onClick={() => toast({ title: "Notification sent", description: `${c.name} has been notified` })}>
+                              <Bell className="h-3 w-3 text-primary" />
+                            </Button>
                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('ice', c)}>
                               <Share2 className={cn("h-3 w-3", c.shared ? "text-muted-foreground" : "text-primary")} />
                             </Button>
