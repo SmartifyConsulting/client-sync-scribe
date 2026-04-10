@@ -390,49 +390,29 @@ export default function PatientCalendar() {
           )}
         </div>
 
-        {/* Upcoming Appointments Sidebar */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Upcoming Appointments</CardTitle>
-            <CardDescription>Your next scheduled visits</CardDescription>
+        {/* Upcoming Appointments Sidebar - hidden on mobile */}
+        <Card className="hidden lg:block">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Upcoming</CardTitle>
+            <CardDescription className="text-xs">Your next visits</CardDescription>
           </CardHeader>
           <CardContent>
             {upcomingAppointments.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No upcoming appointments</p>
+              <p className="text-center text-muted-foreground py-4 text-xs">No upcoming appointments</p>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {upcomingAppointments.map((apt) => (
-                  <div key={apt.id} className="p-3 rounded-xl bg-muted/50 space-y-2">
-                    <p className="font-medium text-sm">{apt.title}</p>
+                  <div key={apt.id} className="p-2 rounded-lg bg-muted/50 space-y-1">
+                    <p className="font-medium text-xs">{apt.title}</p>
                     {apt.doctor_name && (
-                      <p className="text-xs text-primary font-medium flex items-center gap-1">
-                        <User className="h-3 w-3" />
+                      <p className="text-[10px] text-primary font-medium flex items-center gap-1">
+                        <User className="h-2.5 w-2.5" />
                         Dr. {apt.doctor_name}
                       </p>
                     )}
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <CalendarIcon className="h-3 w-3" />
-                      {format(parseISO(apt.start_time), "MMM d, yyyy")}
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      {format(parseISO(apt.start_time), "h:mm a")}
-                    </div>
-                    {apt.location && (
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <MapPin className="h-3 w-3" />
-                        {apt.location}
-                      </div>
-                    )}
-                    <div className="flex flex-wrap gap-1">
-                      {apt.service_name && (
-                        <Badge variant="secondary" className="text-[10px]">{apt.service_name}</Badge>
-                      )}
-                      {apt.service_price != null && apt.service_price > 0 && (
-                        <Badge className="text-[10px] bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0">
-                          {formatCurrency(apt.service_price)}
-                        </Badge>
-                      )}
+                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                      <CalendarIcon className="h-2.5 w-2.5" />
+                      {format(parseISO(apt.start_time), "MMM d")} · {format(parseISO(apt.start_time), "h:mm a")}
                     </div>
                   </div>
                 ))}
