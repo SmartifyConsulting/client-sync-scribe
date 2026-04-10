@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { AddressAutocomplete } from "@/components/patients/AddressAutocomplete";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart, User, MapPin, Users, Briefcase, ShieldCheck, Store, Activity, Droplets, Scissors, GitBranch, Share2, Camera, Mail, Link2, Eye, Phone, HeartPulse, Settings, ChevronDown } from "lucide-react";
+import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart, User, MapPin, Users, Briefcase, ShieldCheck, Store, Activity, Droplets, Scissors, GitBranch, Share2, Camera, Mail, Link2, Eye, Phone, HeartPulse, Settings, ChevronDown, Bell, LayoutDashboard, CheckSquare } from "lucide-react";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,9 +28,10 @@ const MyDoctors = lazy(() => import("@/pages/patient/MyDoctors"));
 const PatientRoundTable = lazy(() => import("@/pages/patient/PatientRoundTable"));
 const PatientCalendarLazy = lazy(() => import("@/pages/patient/PatientCalendar"));
 const NokIcedTab = lazy(() => import("@/components/patients/NokIcedTab"));
-const PatientOverviewLazy = lazy(() => import("@/components/patients/PatientOverview").then(m => ({ default: m.PatientOverview })));
 const SettingsContentLazy = lazy(() => import("@/components/settings/SettingsContent").then(m => ({ default: m.SettingsContent })));
 const SessionHistoryTableLazy = lazy(() => import("@/components/patients/SessionHistoryTable").then(m => ({ default: m.SessionHistoryTable })));
+const PatientDashboardLazy = lazy(() => import("@/pages/patient/PatientDashboard"));
+const PatientTasksLazy = lazy(() => import("@/pages/patient/PatientTasks"));
 
 interface PatientDetailsEditorProps {
   patient: Patient;
@@ -71,7 +72,7 @@ const sectionFrame = "rounded-xl border border-primary bg-card p-4 shadow-sm";
 // Reusable collapsible section header with green background and white text
 const SectionHeader = ({ icon: Icon, label, extra }: { icon: any; label: string; extra?: React.ReactNode }) => (
   <CollapsibleTrigger className="flex w-full items-center justify-between bg-primary rounded-lg px-3 py-2 group">
-    <h3 className="text-xs font-semibold text-white uppercase tracking-wide flex items-center gap-1.5 text-left">
+    <h3 className="text-xs font-semibold text-white tracking-wide flex items-center gap-1.5 text-left">
       <Icon className="h-3.5 w-3.5" /> {label}
     </h3>
     <div className="flex items-center gap-2">
@@ -181,10 +182,10 @@ function AnimatedCounter({ target }: { target: number }) {
 }
 
 const SECTION_TABS: Record<string, string[]> = {
-  profile: ["personal", "nok-iced"],
-  health: ["medical", "overview"],
-  care: ["doctors", "sessions", "calendar", "roundtable"],
-  records: ["documents"],
+  home: ["dashboard"],
+  health: ["personal", "medical", "nok-iced"],
+  care: ["doctors", "sessions", "roundtable"],
+  admin: ["calendar", "tasks", "documents"],
 };
 
 export function PatientDetailsEditor({ patient, onSave, isSelfService = false, userEmail, lollipopCount = 0, rewardsLoading = false, section }: PatientDetailsEditorProps) {
@@ -803,12 +804,13 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
     const show = (tab: string) => !activeTabs || activeTabs.includes(tab);
     return (
       <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+        {show("dashboard") && isSelfService && <TabsTrigger value="dashboard" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Dashboard</TabsTrigger>}
         {show("personal") && <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Personal Information</TabsTrigger>}
         {show("medical") && <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Medical Information</TabsTrigger>}
-        {isSelfService && show("overview") && <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Medical Overview</TabsTrigger>}
         {isSelfService && show("doctors") && <TabsTrigger value="doctors" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My H/Care Providers</TabsTrigger>}
         {isSelfService && show("sessions") && <TabsTrigger value="sessions" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Sessions</TabsTrigger>}
         {isSelfService && show("calendar") && <TabsTrigger value="calendar" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Calendar</TabsTrigger>}
+        {isSelfService && show("tasks") && <TabsTrigger value="tasks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Tasks</TabsTrigger>}
         {isSelfService && show("documents") && <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Documents</TabsTrigger>}
         {isSelfService && show("roundtable") && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Round Table</TabsTrigger>}
         {isSelfService && show("nok-iced") && <TabsTrigger value="nok-iced" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">NOK & ICE</TabsTrigger>}
@@ -824,12 +826,12 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
         <ProfileBanner />
         <div className="rounded-xl border border-primary bg-card p-4 md:p-6 space-y-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
+            {renderTabsList()}
             <div className="flex justify-end mt-2">
               <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={() => setIsEditing(true)}>
                 <Pencil className="h-3.5 w-3.5" /> Edit
               </Button>
             </div>
-            {renderTabsList()}
 
             {/* === PERSONAL INFORMATION TAB === */}
             <TabsContent value="personal" className="space-y-4 mt-4">
@@ -878,9 +880,14 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                             {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
                             {nok.email && <p className="text-[10px] text-muted-foreground">{nok.email}</p>}
                           </div>
-                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('nok', nok)}>
-                            <Share2 className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")} />
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" className="h-6 w-6" title="Notify" onClick={() => toast({ title: "Notification sent", description: `${nok.name} has been notified` })}>
+                              <Bell className="h-3 w-3 text-primary" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('nok', nok)}>
+                              <Share2 className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")} />
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -897,7 +904,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
                 <CollapsibleTrigger className="flex w-full items-center justify-between bg-primary rounded-lg px-3 py-2 group">
-                  <h3 className="text-xs font-semibold text-white uppercase tracking-wide flex items-center gap-1.5 text-left">
+                   <h3 className="text-xs font-semibold text-white tracking-wide flex items-center gap-1.5 text-left">
                     <Phone className="h-3.5 w-3.5" /> ICE Contacts (In Case of Emergency)
                   </h3>
                   <div className="flex items-center gap-2">
@@ -918,9 +925,14 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                               {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
                               {c.email && <p className="text-[10px] text-muted-foreground">{c.email}</p>}
                             </div>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('ice', c)}>
-                              <Share2 className={cn("h-3 w-3", c.shared ? "text-muted-foreground" : "text-primary")} />
-                            </Button>
+                            <div className="flex gap-1">
+                              <Button variant="ghost" size="icon" className="h-6 w-6" title="Notify" onClick={() => toast({ title: "Notification sent", description: `${c.name} has been notified` })}>
+                                <Bell className="h-3 w-3 text-primary" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('ice', c)}>
+                                <Share2 className={cn("h-3 w-3", c.shared ? "text-muted-foreground" : "text-primary")} />
+                              </Button>
+                            </div>
                           </div>
                           {c.is_also_nok && <p className="text-[10px] text-primary mt-0.5">✓ Also Next of Kin</p>}
                         </div>
@@ -936,7 +948,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     <ViewField label="Employer" value={patient.employer} />
                     <ViewField label="Occupation" value={patient.occupation} />
-                    <ViewField label="Reporting To (Email)" value={patient.reporting_to_email} />
+                    <ViewField label="Reporting To Email (Optional)" value={patient.reporting_to_email} />
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -976,7 +988,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                     <CollapsibleContent className="px-3 pb-3 space-y-3">
                       {/* Allergies */}
                       <div className="rounded-lg border border-border/50 p-2.5 space-y-1">
-                        <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5">
+                        <h4 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5">
                           <AlertCircle className="h-3.5 w-3.5" /> Allergies
                         </h4>
                         <p className="text-xs text-foreground">{patient.allergies || "None recorded"}</p>
@@ -984,7 +996,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                       {/* Medication */}
                       <div className="rounded-lg border border-border/50 p-2.5 space-y-1">
-                        <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5">
+                        <h4 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5">
                           <Pill className="h-3.5 w-3.5" /> Medication
                         </h4>
                         {currentMedications.length === 0 ? (
@@ -1019,7 +1031,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                       {/* Conditions & Diagnoses */}
                       <div className="rounded-lg border border-border/50 p-2.5 space-y-1">
-                        <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5">
+                        <h4 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5">
                           <HeartPulse className="h-3.5 w-3.5" /> Conditions & Diagnoses
                         </h4>
                         {conditionsDiagnoses.length === 0 ? (
@@ -1090,7 +1102,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   {/* Organ Donor — collapsible with inline Yes/No */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
                     <CollapsibleTrigger className="flex w-full items-center justify-between bg-primary rounded-lg px-3 py-2 group">
-                      <h3 className="text-xs font-semibold text-white uppercase tracking-wide flex items-center gap-1.5 text-left">
+                       <h3 className="text-xs font-semibold text-white tracking-wide flex items-center gap-1.5 text-left">
                         <Heart className="h-3.5 w-3.5" /> Organ Donor
                       </h3>
                       <div className="flex items-center gap-2">
@@ -1169,15 +1181,24 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               </div>
             </TabsContent>
 
-            {/* === MEDICAL OVERVIEW TAB === */}
+            {/* === DASHBOARD TAB === */}
             {isSelfService && (
-              <TabsContent value="overview" className="mt-4">
+              <TabsContent value="dashboard" className="mt-4">
+                <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                  <PatientDashboardLazy />
+                </Suspense>
+              </TabsContent>
+            )}
+
+            {/* === TASKS TAB === */}
+            {isSelfService && (
+              <TabsContent value="tasks" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">Medical Overview</h2>
-                  <p className="text-xs text-muted-foreground">Summary of your medical history and sessions</p>
+                  <h2 className="text-lg font-semibold text-foreground">My Tasks</h2>
+                  <p className="text-xs text-muted-foreground">Manage your health tasks and to-dos</p>
                 </div>
                 <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-                  <PatientOverviewLazy patient={patient} sessions={[]} isSelfService />
+                  <PatientTasksLazy />
                 </Suspense>
               </TabsContent>
             )}
@@ -1350,6 +1371,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                           {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
                         </div>
                         <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" className="h-6 w-6" title="Notify" onClick={() => toast({ title: "Notification sent", description: `${nok.name} has been notified` })}>
+                            <Bell className="h-3 w-3 text-primary" />
+                          </Button>
                           <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('nok', nok)}>
                             <Share2 className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")} />
                           </Button>
@@ -1394,6 +1418,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                             {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
                           </div>
                           <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" className="h-6 w-6" title="Notify" onClick={() => toast({ title: "Notification sent", description: `${c.name} has been notified` })}>
+                              <Bell className="h-3 w-3 text-primary" />
+                            </Button>
                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('ice', c)}>
                               <Share2 className={cn("h-3 w-3", c.shared ? "text-muted-foreground" : "text-primary")} />
                             </Button>
@@ -1422,7 +1449,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   <div className="space-y-1.5"><Label htmlFor="employer">Employer</Label><Input id="employer" className="text-sm" value={formData.employer} onChange={(e) => updateFormData({ employer: e.target.value })} placeholder="Company name" /></div>
                   <div className="space-y-1.5"><Label htmlFor="occupation">Occupation</Label><Input id="occupation" className="text-sm" value={formData.occupation} onChange={(e) => updateFormData({ occupation: e.target.value })} placeholder="Job title" /></div>
-                  <div className="space-y-1.5"><Label htmlFor="reporting_to_email">Reporting To (Email)</Label><Input id="reporting_to_email" className="text-sm" type="email" value={formData.reporting_to_email} onChange={(e) => updateFormData({ reporting_to_email: e.target.value })} placeholder="manager@company.com" /></div>
+                  <div className="space-y-1.5"><Label htmlFor="reporting_to_email">Reporting To Email (Optional)</Label><Input id="reporting_to_email" className="text-sm" type="email" value={formData.reporting_to_email} onChange={(e) => updateFormData({ reporting_to_email: e.target.value })} placeholder="manager@company.com" /><p className="text-[10px] text-muted-foreground">Used for e-mailing of Medical Certificates</p></div>
                 </div>
               </CollapsibleContent>
             </Collapsible>
@@ -1468,14 +1495,14 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   <CollapsibleContent className="px-3 pb-3 space-y-3">
                     {/* Allergies */}
                     <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
-                      <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</Label>
+                      <Label className="text-xs font-semibold tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</Label>
                       <Textarea id="allergies" className="text-sm" value={formData.allergies} onChange={(e) => updateFormData({ allergies: e.target.value })} placeholder="List any allergies (medications, food, etc.)" rows={2} />
                     </div>
 
                     {/* Medication */}
                     <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
                       <div className="flex items-center justify-between mb-2">
-                        <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Medication</Label>
+                        <Label className="text-xs font-semibold tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Medication</Label>
                         {!showAddMed && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddMed(true)}><Plus className="h-3 w-3" />Add</Button>}
                       </div>
                       {showAddMed && (
@@ -1547,7 +1574,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                     {/* Conditions & Diagnoses */}
                     <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
                       <div className="flex items-center justify-between mb-2">
-                        <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><HeartPulse className="h-3.5 w-3.5" /> Conditions & Diagnoses</Label>
+                        <Label className="text-xs font-semibold tracking-wide flex items-center gap-1.5"><HeartPulse className="h-3.5 w-3.5" /> Conditions & Diagnoses</Label>
                         {!showAddCondition && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddCondition(true)}><Plus className="h-3 w-3" />Add</Button>}
                       </div>
                       {showAddCondition && (
@@ -1702,7 +1729,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 {/* Organ Donor — collapsible with inline Yes/No */}
                 <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
                   <CollapsibleTrigger className="flex w-full items-center justify-between bg-primary rounded-lg px-3 py-2 group">
-                    <h3 className="text-xs font-semibold text-white uppercase tracking-wide flex items-center gap-1.5 text-left">
+                    <h3 className="text-xs font-semibold text-white tracking-wide flex items-center gap-1.5 text-left">
                       <Heart className="h-3.5 w-3.5" /> Organ Donor
                     </h3>
                     <div className="flex items-center gap-2">
@@ -1855,15 +1882,24 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             </div>
           </TabsContent>
 
-          {/* === Remaining tabs (same as view mode) === */}
+          {/* === Dashboard tab (edit mode) === */}
           {isSelfService && (
-            <TabsContent value="overview" className="mt-4">
+            <TabsContent value="dashboard" className="mt-4">
+              <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                <PatientDashboardLazy />
+              </Suspense>
+            </TabsContent>
+          )}
+
+          {/* === Tasks tab (edit mode) === */}
+          {isSelfService && (
+            <TabsContent value="tasks" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Medical Overview</h2>
-                <p className="text-xs text-muted-foreground">Summary of your medical history and sessions</p>
+                <h2 className="text-lg font-semibold text-foreground">My Tasks</h2>
+                <p className="text-xs text-muted-foreground">Manage your health tasks and to-dos</p>
               </div>
               <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-                <PatientOverviewLazy patient={patient} sessions={[]} isSelfService />
+                <PatientTasksLazy />
               </Suspense>
             </TabsContent>
           )}

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Sidebar } from "./Sidebar";
-import holarcLogo from "@/assets/holarc-logo.png";
+import holarcLogo from "@/assets/holarc-logo-clear-2.png";
 
 export function MobileHeader() {
   const [open, setOpen] = useState(false);
