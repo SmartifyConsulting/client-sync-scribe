@@ -94,7 +94,7 @@ export default function MyDetails() {
         <p className="text-muted-foreground text-[12px]">View and update your personal and medical information</p>
       </div>
 
-      <PatientDetailsEditor patient={patient} onSave={handleSave} isSelfService userEmail={userEmail} lollipopCount={lollipopCount} rewardsLoading={rewardsLoading} />
+      <PatientDetailsEditor patient={patient} onSave={handleSave} isSelfService userEmail={userEmail} lollipopCount={lollipopCount} rewardsLoading={rewardsLoading} section={section} />
     </div>
   );
 }
