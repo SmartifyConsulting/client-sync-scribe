@@ -357,6 +357,11 @@ export default function MyRewards() {
               </div>
               <ArrowRightLeft className="h-12 w-12 text-white/90" />
             </div>
+            {partnerApps.length > 0 && (
+              <Button variant="ghost" size="sm" className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-xs flex items-center gap-1 mt-2" onClick={() => setShowTransferDialog(true)}>
+                Transfer Vulas <Send className="h-3 w-3" />
+              </Button>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -392,7 +397,7 @@ export default function MyRewards() {
              Vulas
            </TabsTrigger>
           <TabsTrigger value="vula-apps" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-             Vula Apps
+             Vula Partner Apps
            </TabsTrigger>
          </TabsList>
 
@@ -436,7 +441,7 @@ export default function MyRewards() {
             <CardContent>
               {rewards.length === 0 ? (
                 <div className="text-center py-8">
-                  <span className="text-5xl mb-4 block font-bold text-emerald-600">Ⓜ</span>
+                  <img src={vulaSymbol} alt="Vula" className="h-12 w-12 object-contain mx-auto mb-4" />
                   <p className="text-muted-foreground">No rewards yet. Start your health journey!</p>
                 </div>
               ) : (
@@ -444,7 +449,7 @@ export default function MyRewards() {
                   {rewards.slice(0, 5).map((reward) => (
                     <div key={reward.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl font-bold text-emerald-600">Ⓜ</span>
+                        <img src={vulaSymbol} alt="Vula" className="h-7 w-7 object-contain" />
                         <div>
                           <p className="font-medium">{reward.visit_category}</p>
                           <p className="text-sm text-muted-foreground">
@@ -773,7 +778,7 @@ export default function MyRewards() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Gift className="h-5 w-5 text-primary" />
-                Vula Apps
+                Vula Partner Apps
               </CardTitle>
               <CardDescription>
                 Apps and services that accept Vulas as currency
