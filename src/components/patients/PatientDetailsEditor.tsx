@@ -543,20 +543,40 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   const handleAddMed = () => {
     if (!newMed.name.trim()) { toast({ title: "Required", description: "Medication name is required", variant: "destructive" }); return; }
     if (editingMedId) {
-      setCurrentMedications(prev => prev.map(m => m.id === editingMedId ? { ...m, name: newMed.name.trim(), dosage: newMed.dosage.trim() || undefined, is_chronic: newMed.is_chronic } : m));
+      setCurrentMedications(prev => prev.map(m => m.id === editingMedId ? { ...m, name: newMed.name.trim(), dosage: newMed.dosage.trim() || undefined, is_chronic: newMed.is_chronic, status: newMed.status, start_date: newMed.start_date || undefined, end_date: newMed.end_date || undefined } : m));
       setEditingMedId(null);
     } else {
-      setCurrentMedications(prev => [...prev, { id: crypto.randomUUID(), name: newMed.name.trim(), dosage: newMed.dosage.trim() || undefined, is_chronic: newMed.is_chronic }]);
+      setCurrentMedications(prev => [...prev, { id: crypto.randomUUID(), name: newMed.name.trim(), dosage: newMed.dosage.trim() || undefined, is_chronic: newMed.is_chronic, status: newMed.status, start_date: newMed.start_date || undefined, end_date: newMed.end_date || undefined }]);
     }
-    setNewMed({ name: "", dosage: "", is_chronic: false });
+    setNewMed({ name: "", dosage: "", is_chronic: false, status: "current", start_date: "", end_date: "" });
     setShowAddMed(false);
     setHasChanges(true);
   };
 
   const handleEditMed = (m: CurrentMedication) => {
-    setNewMed({ name: m.name, dosage: m.dosage || "", is_chronic: m.is_chronic });
+    setNewMed({ name: m.name, dosage: m.dosage || "", is_chronic: m.is_chronic, status: m.status || "current", start_date: m.start_date || "", end_date: m.end_date || "" });
     setEditingMedId(m.id);
     setShowAddMed(true);
+  };
+
+  // Conditions handlers
+  const handleAddCondition = () => {
+    if (!newCondition.name.trim()) { toast({ title: "Required", description: "Condition name is required", variant: "destructive" }); return; }
+    if (editingConditionId) {
+      setConditionsDiagnoses(prev => prev.map(c => c.id === editingConditionId ? { ...c, name: newCondition.name.trim(), diagnosed_date: newCondition.diagnosed_date || undefined, diagnosed_by: newCondition.diagnosed_by.trim() || undefined, status: newCondition.status } : c));
+      setEditingConditionId(null);
+    } else {
+      setConditionsDiagnoses(prev => [...prev, { id: crypto.randomUUID(), name: newCondition.name.trim(), diagnosed_date: newCondition.diagnosed_date || undefined, diagnosed_by: newCondition.diagnosed_by.trim() || undefined, status: newCondition.status }]);
+    }
+    setNewCondition({ name: "", diagnosed_date: "", diagnosed_by: "", status: "active" });
+    setShowAddCondition(false);
+    setHasChanges(true);
+  };
+
+  const handleEditCondition = (c: ConditionDiagnosis) => {
+    setNewCondition({ name: c.name, diagnosed_date: c.diagnosed_date || "", diagnosed_by: c.diagnosed_by || "", status: c.status });
+    setEditingConditionId(c.id);
+    setShowAddCondition(true);
   };
 
   const handleToggleMedChronic = (id: string) => {
