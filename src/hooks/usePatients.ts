@@ -31,6 +31,8 @@ export interface ICEContact {
   phone: string;
   email: string;
   relationship: string;
+  is_also_nok?: boolean;
+  shared?: boolean;
 }
 
 export interface NextOfKinMember {
@@ -39,6 +41,7 @@ export interface NextOfKinMember {
   phone: string;
   email: string;
   relationship: string;
+  shared?: boolean;
 }
 
 export interface CurrentMedication {
