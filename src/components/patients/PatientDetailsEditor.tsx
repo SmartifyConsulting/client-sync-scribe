@@ -311,7 +311,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
       setIceContacts(patient.ice_contacts || []);
       setNokMembers(patient.next_of_kin_members || []);
       setCurrentMedications(patient.current_medications || []);
-      const existingPharmacies = patient.pharmacies || [];
+      setConditionsDiagnoses(patient.conditions_diagnoses || []);
       if (existingPharmacies.length === 0 && (patient.pharmacy_name || patient.pharmacy_email)) {
         setPharmacies([{ id: crypto.randomUUID(), name: patient.pharmacy_name || "", email: patient.pharmacy_email || "", is_primary: true }]);
       } else {
@@ -368,11 +368,12 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
       ice_contacts: iceContacts,
       next_of_kin_members: nokMembers,
       current_medications: currentMedications,
+      conditions_diagnoses: conditionsDiagnoses,
       is_chronic: isChronic,
     });
     setSaving(false);
     setHasChanges(false);
-  }, [onSave, pharmacies, familyHistory, organDonorOrgans, iceContacts, nokMembers, currentMedications]);
+  }, [onSave, pharmacies, familyHistory, organDonorOrgans, iceContacts, nokMembers, currentMedications, conditionsDiagnoses]);
 
   useEffect(() => {
     if (!isEditing || !hasChanges) return;
@@ -381,7 +382,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
       performSave(formData, surgeries);
     }, 1500);
     return () => { if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current); };
-  }, [formData, surgeries, pharmacies, familyHistory, organDonorOrgans, iceContacts, nokMembers, currentMedications, isEditing, hasChanges, performSave]);
+  }, [formData, surgeries, pharmacies, familyHistory, organDonorOrgans, iceContacts, nokMembers, currentMedications, conditionsDiagnoses, isEditing, hasChanges, performSave]);
 
   const updateFormData = (updates: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
