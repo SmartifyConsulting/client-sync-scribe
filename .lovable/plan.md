@@ -1,41 +1,57 @@
 
 
-# Address Autocomplete Fix, Record Shading, Section Frames
+# Add "NOK & ICE" Tab + Mobile Tab Handling
 
-## 1. Fix Google Maps address autocomplete
+## How it works
 
-The `AddressAutocomplete` component and the edge function code both look correct, and the `GOOGLE_MAPS_API_KEY` secret is configured. The issue is likely that the edge function needs redeployment. I will redeploy `google-places-autocomplete` and also add a visible loading/error indicator to the `AddressAutocomplete` component so users know it's working (or why it's not).
+When a user is listed as a NOK or ICE contact on **another person's** patient profile (matched by email), those people appear in this tab. This lets the user know they're a designated contact.
 
-**File:** `src/components/patients/AddressAutocomplete.tsx` — Add a subtle "Searching..." indicator when fetching, and log errors to help debug if the API key or function has issues.
+## Mobile tab strategy
 
-## 2. Shade surgery and family history records with light teal
+With 8+ tabs, the current `flex-wrap` approach will stack tabs into 2-3 rows on mobile, which gets cramped. The solution: **replace `flex-wrap` with horizontal scroll on mobile**. This is the standard pattern used by apps like Google, Airbnb, and most mobile-first interfaces.
 
-**View mode** (lines 908-916, 928-934): Change record background from `bg-muted/30 border-border/50` to `bg-primary/5 border-primary/20` (light teal).
+```text
+Desktop (wide):  [Tab1] [Tab2] [Tab3] [Tab4] [Tab5] [Tab6] [Tab7] [Tab8]  ← wraps naturally
 
-**Edit mode** (lines 1350-1363, 1391-1403): Same change — records get `bg-primary/5 border-primary/20`.
+Mobile (narrow): ◀ [Tab1] [Tab2] [Tab3] [Tab4] ▸  ← horizontal scroll, swipeable
+```
 
-## 3. Wrap Current Medications in its own bordered frame + heading
+The tabs remain in a single scrollable row. The user swipes left/right to reveal more tabs. A subtle gradient fade on the right edge hints at more content.
 
-**View mode** (lines 875-898): Wrap in a `<div className={sectionFrame}>` with an h3 heading: `<h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Current Medications</h3>`. Remove the existing `<Label>Current Medications</Label>`.
+## Plan
 
-**Edit mode** (lines 1260-1308): Wrap in `<div className={sectionFrame}>`. Change the `<Label>` to an `<h3>` heading matching the standard format.
+### 1. Create `NokIcedTab` component
 
-## 4. Wrap Surgeries and Dates in its own bordered frame
+**New file:** `src/components/patients/NokIcedTab.tsx`
 
-**View mode** (lines 900-918): Wrap the entire surgery block in `<div className={sectionFrame}>`.
+- On mount, get current user's email
+- Query `patients` table for all records where `ice_contacts` or `next_of_kin_members` JSONB arrays contain an entry with a matching email and `shared: true`
+- Display two sections: "Listed as Next of Kin for" and "Listed as ICE Contact for" showing the patient name, relationship, and phone
+- Empty state if not listed anywhere
 
-**Edit mode** (lines 1310-1366): Wrap in `<div className={sectionFrame}>`.
+### 2. Add "NOK & ICE" tab after "My Round Table"
 
-## 5. Wrap Family History in its own bordered frame
+**File:** `src/components/patients/PatientDetailsEditor.tsx`
 
-**View mode** (lines 920-937): Wrap in `<div className={sectionFrame}>`.
+- Add `TabsTrigger value="nok-iced"` after the roundtable trigger (both view and edit mode, lines ~748-749 and ~1071-1072)
+- Add `TabsContent value="nok-iced"` after roundtable content (both modes)
+- Lazy-load the new component with `Suspense`
 
-**Edit mode** (lines 1368-1406): Wrap in `<div className={sectionFrame}>`.
+### 3. Make tabs horizontally scrollable on mobile
+
+**File:** `src/components/patients/PatientDetailsEditor.tsx`
+
+- Change both `TabsList` instances from `flex-wrap` to `overflow-x-auto flex-nowrap scrollbar-hide` on mobile
+- Add a utility class `scrollbar-hide` in `index.css` (if not present) to hide the scrollbar while keeping swipe functional
+- Add `whitespace-nowrap` to ensure tabs don't wrap
 
 ## Technical Summary
 
 | File | Change |
 |------|--------|
-| `src/components/patients/AddressAutocomplete.tsx` | Redeploy edge function; add loading indicator |
-| `src/components/patients/PatientDetailsEditor.tsx` | Shade surgery/family records with `bg-primary/5`; wrap Medications, Surgeries, Family History in `sectionFrame` divs with proper headings (both view and edit modes) |
+| `src/components/patients/NokIcedTab.tsx` | New component: queries patients where current user's email appears in ICE/NOK contacts |
+| `src/components/patients/PatientDetailsEditor.tsx` | Add NOK & ICE tab trigger + content (both modes); change TabsList to horizontal scroll on mobile |
+| `src/index.css` | Add `.scrollbar-hide` utility if missing |
+
+No database migration needed — queries use existing JSONB columns with email matching.
 
