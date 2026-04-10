@@ -1,38 +1,58 @@
 
 
-# Vula Icon Fix, Rename Partner Apps, Transfer Button on Transferred Card
+# Fix Partner App RLS Error, Vula Icon, Rename, Transfer Button, Admin Logo Fix, Adherence Tab
 
-## 1. Replace green Ⓜ icon with Vula symbol in Recent Rewards
+## 1. Fix RLS / storage upload error for partner apps
 
-**Files:** `src/pages/patient/MyRewards.tsx`, `src/pages/doctor/DoctorRewards.tsx`
+**File:** `src/pages/admin/GamificationAdmin.tsx`
 
-Replace all `<span className="text-2xl font-bold text-emerald-600">Ⓜ</span>` in the Recent Rewards section (and the empty state) with `<img src={vulaSymbol} alt="Vula" className="h-7 w-7 object-contain" />`. The `vulaSymbol` import already exists in both files.
+Change logo upload path from `partner-apps/${timestamp}.ext` to `${user.id}/partner-apps/${timestamp}.ext` to satisfy the storage RLS policy. Get user via `supabase.auth.getUser()` before upload.
 
-Affected lines:
-- Patient: lines 439, 447 (empty state big icon and per-reward icon)
-- Doctor: lines 198, 206
+## 2. Add `google_play_url` and `app_store_url` columns
 
-## 2. Rename "Vula Apps" to "Vula Partner Apps"
+**Migration SQL:** Add two nullable text columns to `moola_partner_apps`.
 
-**Files:** `src/pages/patient/MyRewards.tsx`, `src/pages/doctor/DoctorRewards.tsx`
+## 3. Add store URL fields to admin Add/Edit Partner App dialogs
 
-- Tab trigger label: change `Vula Apps` → `Vula Partner Apps` (patient line 395, doctor line 172)
-- Card title inside the tab content: change `Vula Apps` → `Vula Partner Apps` (patient line 776, doctor line 352)
+**File:** `src/pages/admin/GamificationAdmin.tsx`
 
-## 3. Add "Transfer Vulas" button on the Transferred stats card
+Add input fields for Google Play URL and App Store URL in both the "Add Partner App" dialog and inline edit mode. Include in insert/update mutations.
 
-**Files:** `src/pages/patient/MyRewards.tsx`, `src/pages/doctor/DoctorRewards.tsx`
+## 4. Display install links on partner app cards
 
-Add a small `Transfer Vulas` button inside the Transferred card (the sky/cyan gradient card). This button opens the same `showTransferDialog` dialog that already exists. Place it below the transferred amount as a compact link-style button.
+**Files:** `src/pages/doctor/DoctorRewards.tsx`, `src/pages/patient/MyRewards.tsx`
 
-The existing "Transfer Vulas" button at the top-right (conditionally shown when partner apps exist) can remain as-is for quick access; the card button provides a second entry point.
+Show "Get it on Google Play" and "Download on App Store" links on each partner app card when URLs exist.
+
+## 5. Replace green Ⓜ with Vula logo in Rewards Admin
+
+**File:** `src/pages/admin/GamificationAdmin.tsx`
+
+- Import `vulaSymbol` from `@/assets/vula-symbol.png`
+- Replace all `Ⓜ` text (lines 311, 422, 614) with `<img src={vulaSymbol} alt="Vula" className="h-5 w-5 inline" />`
+- Update the Max Vulas/Visit card (line 310-311) to use the Vula icon instead of the green Ⓜ
+
+## 6. Add "Adherence Rewards" tab to Rewards Admin
+
+**File:** `src/pages/admin/GamificationAdmin.tsx`
+
+Add a new tab after "Visit Rewards" called "Adherence Rewards" with a `Pill` icon. This tab will allow admins to configure Vula rewards for medication adherence (e.g., Vulas per verified dose, streak bonuses for consecutive days). Initial implementation: a simple config table mirroring the Visit Rewards pattern with fields for medication category, Vulas awarded per verified dose, and active toggle.
+
+**Migration SQL:** Create `moola_adherence_configs` table:
+- `id` uuid PK
+- `medication_category` text
+- `lollipops_awarded` integer default 1
+- `description` text
+- `is_active` boolean default true
+- `created_at` timestamptz
+- RLS: admin-only insert/update/delete, authenticated select
 
 ## Technical Summary
 
 | File | Change |
 |------|--------|
-| `src/pages/patient/MyRewards.tsx` | Replace Ⓜ with vulaSymbol img in Recent Rewards; rename tab/title to "Vula Partner Apps"; add Transfer button to Transferred card |
-| `src/pages/doctor/DoctorRewards.tsx` | Same three changes |
-
-No database migration needed.
+| Migration SQL | Add `google_play_url`, `app_store_url` to `moola_partner_apps`; create `moola_adherence_configs` table |
+| `src/pages/admin/GamificationAdmin.tsx` | Fix upload path; add store URL fields; replace Ⓜ with Vula icon; add Adherence Rewards tab |
+| `src/pages/doctor/DoctorRewards.tsx` | Show app store install links on partner app cards |
+| `src/pages/patient/MyRewards.tsx` | Show app store install links on partner app cards |
 
