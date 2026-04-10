@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { AddressAutocomplete } from "@/components/patients/AddressAutocomplete";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart, User, MapPin, Users, Briefcase, ShieldCheck, Store, Activity, Droplets, Scissors, GitBranch, Share2, Camera, Mail, Link2, Eye, Phone, HeartPulse } from "lucide-react";
+import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart, User, MapPin, Users, Briefcase, ShieldCheck, Store, Activity, Droplets, Scissors, GitBranch, Share2, Camera, Mail, Link2, Eye, Phone, HeartPulse, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,6 +26,7 @@ const MyDoctors = lazy(() => import("@/pages/patient/MyDoctors"));
 const PatientRoundTable = lazy(() => import("@/pages/patient/PatientRoundTable"));
 const NokIcedTab = lazy(() => import("@/components/patients/NokIcedTab"));
 const PatientOverviewLazy = lazy(() => import("@/components/patients/PatientOverview").then(m => ({ default: m.PatientOverview })));
+const SettingsContentLazy = lazy(() => import("@/components/settings/SettingsContent").then(m => ({ default: m.SettingsContent })));
 const SessionHistoryTableLazy = lazy(() => import("@/components/patients/SessionHistoryTable").then(m => ({ default: m.SessionHistoryTable })));
 
 interface PatientDetailsEditorProps {
@@ -768,6 +769,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               {isSelfService && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Round Table</TabsTrigger>}
               {isSelfService && <TabsTrigger value="nok-iced" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">NOK & ICE</TabsTrigger>}
               {isSelfService && isDoctor && <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap" onClick={(e) => { e.preventDefault(); navigate("/practice"); }}>My Practice</TabsTrigger>}
+              {isSelfService && <TabsTrigger value="settings" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap"><Settings className="h-3.5 w-3.5 mr-1" />Settings</TabsTrigger>}
               <Button variant="outline" size="sm" className="gap-2 text-xs ml-auto bg-white/90 hover:bg-white text-foreground" onClick={() => setIsEditing(true)}>
                 <Pencil className="h-3.5 w-3.5" /> Edit
               </Button>
@@ -1119,6 +1121,18 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 </Suspense>
               </TabsContent>
             )}
+
+            {isSelfService && (
+              <TabsContent value="settings" className="mt-4">
+                <div className="mb-4">
+                  <h2 className="text-lg font-semibold text-foreground">Settings</h2>
+                  <p className="text-xs text-muted-foreground">Manage your preferences, security, and billing</p>
+                </div>
+                <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                  <SettingsContentLazy />
+                </Suspense>
+              </TabsContent>
+            )}
           </Tabs>
         </div>
       </div>
@@ -1141,6 +1155,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             {isSelfService && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Round Table</TabsTrigger>}
             {isSelfService && <TabsTrigger value="nok-iced" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">NOK & ICE</TabsTrigger>}
             {isSelfService && isDoctor && <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap" onClick={(e) => { e.preventDefault(); navigate("/practice"); }}>My Practice</TabsTrigger>}
+            {isSelfService && <TabsTrigger value="settings" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap"><Settings className="h-3.5 w-3.5 mr-1" />Settings</TabsTrigger>}
             <div className="ml-auto flex items-center gap-2">
               {saving && <span className="flex items-center gap-1.5 text-xs text-white"><Loader2 className="h-3 w-3 animate-spin" />Saving...</span>}
               {!saving && !hasChanges && isEditing && <span className="flex items-center gap-1.5 text-xs text-green-300"><Check className="h-3 w-3" />Saved</span>}
