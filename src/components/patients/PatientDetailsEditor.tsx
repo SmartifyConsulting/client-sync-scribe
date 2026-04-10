@@ -902,10 +902,10 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   <div><ViewField label="Blood Type" value={patient.blood_type} /></div>
                   <div><ViewField label="Allergies" value={patient.allergies || "None recorded"} /></div>
 
-                  {/* Current Medications */}
+                  {/* Medication */}
                   <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
                     <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
-                      <Pill className="h-3.5 w-3.5" /> Current Medications
+                      <Pill className="h-3.5 w-3.5" /> Medication
                     </h3>
                     {currentMedications.length === 0 ? (
                       <p className="text-xs text-muted-foreground">No medications recorded</p>
@@ -916,7 +916,15 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                             <Pill className="h-3 w-3 text-muted-foreground shrink-0" />
                             <div className="flex-1 min-w-0">
                               <p className="text-xs font-medium text-foreground">{m.name}{m.dosage ? ` — ${m.dosage}` : ""}</p>
+                              {(m.start_date || m.end_date) && (
+                                <p className="text-[10px] text-muted-foreground">
+                                  {m.start_date ? format(new Date(m.start_date), "MMM yyyy") : "?"} — {m.end_date ? format(new Date(m.end_date), "MMM yyyy") : "Present"}
+                                </p>
+                              )}
                             </div>
+                            <Badge className={`text-[8px] border-0 ${m.status === 'past' ? 'bg-muted text-muted-foreground' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'}`}>
+                              {m.status === 'past' ? 'Past' : 'Current'}
+                            </Badge>
                             {m.is_chronic && <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[9px] font-bold text-destructive shrink-0">Chronic</span>}
                           </div>
                         ))}
@@ -925,6 +933,35 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                     {isChronic && (
                       <div className="mt-2">
                         <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive"><Pill className="h-2.5 w-2.5" />Chronic Patient</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Conditions & Diagnoses */}
+                  <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
+                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
+                      <HeartPulse className="h-3.5 w-3.5" /> Conditions & Diagnoses
+                    </h3>
+                    {conditionsDiagnoses.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No conditions recorded</p>
+                    ) : (
+                      <div className="space-y-1">
+                        {conditionsDiagnoses.map(c => (
+                          <div key={c.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-medium text-foreground">{c.name}</p>
+                                <p className="text-[10px] text-muted-foreground">
+                                  {c.diagnosed_date ? format(new Date(c.diagnosed_date), "MMM d, yyyy") : "Date unknown"}
+                                  {c.diagnosed_by ? ` · Dr. ${c.diagnosed_by}` : ""}
+                                </p>
+                              </div>
+                              <Badge className={`text-[8px] border-0 ${c.status === 'resolved' ? 'bg-muted text-muted-foreground' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'}`}>
+                                {c.status === 'resolved' ? 'Resolved' : 'Active'}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
