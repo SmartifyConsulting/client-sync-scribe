@@ -511,74 +511,8 @@ export default function MyRewards() {
             </CardContent>
           </Card>
         </TabsContent>
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <CheckSquare className="h-5 w-5 text-primary" />
-                    Assigned Tasks
-                  </CardTitle>
-                  <CardDescription>
-                    Tasks assigned by your healthcare provider. Complete activities to earn Vulas!
-                  </CardDescription>
-                </div>
-                <ActivityProofCapture tasks={pendingActivityTasks} onProofSubmitted={refetchTasks} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              {tasksLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                </div>
-              ) : tasks.length === 0 ? (
-                <div className="text-center py-8">
-                  <CheckSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No tasks assigned yet.</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {tasks.map((task) => (
-                    <div key={task.id} className={`flex items-start gap-3 p-3 rounded-lg border ${task.status === "completed" ? "opacity-60 bg-muted/30" : "bg-background"}`}>
-                      {getStatusIcon(task.status)}
-                      <div className="flex-1 min-w-0">
-                        <p className={`font-medium text-foreground ${task.status === "completed" ? "line-through" : ""}`}>
-                          {task.title}
-                        </p>
-                        {task.description && (
-                          <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
-                        )}
-                        <div className="flex items-center gap-2 mt-2 flex-wrap">
-                          <Badge variant={getPriorityColor(task.priority) as any} className="text-xs">
-                            {task.priority}
-                          </Badge>
-                          {task.task_type === "activity" && (
-                            <Badge className="bg-primary/10 text-primary text-xs gap-1">
-                              <Video className="h-3 w-3" /> Activity
-                            </Badge>
-                          )}
-                          {task.moolas_reward > 0 && (
-                            <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 text-xs">
-                              +{task.moolas_reward} Ⓜ
-                            </Badge>
-                          )}
-                          {task.due_date && (
-                            <span className="text-xs text-muted-foreground">
-                              Due: {format(new Date(task.due_date), "dd MMM yyyy")}
-                            </span>
-                          )}
-                          {task.proof_url && (
-                            <Badge variant="outline" className="text-xs text-green-600">✓ Proof submitted</Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+
+
 
         <TabsContent value="milestones" className="space-y-6">
           <Card>
