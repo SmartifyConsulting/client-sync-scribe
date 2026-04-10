@@ -315,59 +315,59 @@ export default function MyRewards() {
         </DialogContent>
       </Dialog>
 
-      {/* Hero Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      {/* Hero Stats — compact on mobile */}
+      <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-4">
         <Card className="bg-gradient-to-br from-blue-500 to-cyan-400 dark:from-blue-700/40 dark:to-cyan-700/30 border-blue-400 dark:border-blue-600/40">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-100">Total Vulas</p>
-                <p className="text-4xl font-bold text-white">{lollipopCount}</p>
+                <p className="text-[10px] md:text-sm font-medium text-blue-100">Total Vulas</p>
+                <p className="text-2xl md:text-4xl font-bold text-white">{lollipopCount}</p>
               </div>
-              <div className="h-14 w-14 rounded-full bg-white shadow-sm flex items-center justify-center">
-                <img src={vulaSymbol} alt="Vulas" className="h-10 w-10 object-contain" />
+              <div className="h-10 w-10 md:h-14 md:w-14 rounded-full bg-white shadow-sm flex items-center justify-center">
+                <img src={vulaSymbol} alt="Vulas" className="h-7 w-7 md:h-10 md:w-10 object-contain" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-blue-600 to-teal-500 dark:from-blue-800/40 dark:to-teal-700/30 border-blue-500 dark:border-blue-700/40">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-100">Current Level</p>
-                <p className="text-xl font-bold text-white">
+                <p className="text-[10px] md:text-sm font-medium text-blue-100">Current Level</p>
+                <p className="text-sm md:text-xl font-bold text-white">
                   {currentMilestone?.label || "Beginner"}
                 </p>
               </div>
-              <span className="text-4xl">{currentMilestone?.icon || "🌱"}</span>
+              <span className="text-2xl md:text-4xl">{currentMilestone?.icon || "🌱"}</span>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-sky-400 to-teal-400 dark:from-sky-700/40 dark:to-teal-700/30 border-sky-400 dark:border-sky-600/40">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-sky-100">Active Streaks</p>
-                <p className="text-4xl font-bold text-white">{activeStreaks.length}</p>
+                <p className="text-[10px] md:text-sm font-medium text-sky-100">Active Streaks</p>
+                <p className="text-2xl md:text-4xl font-bold text-white">{activeStreaks.length}</p>
               </div>
-              <Flame className="h-12 w-12 text-white/90" />
+              <Flame className="h-8 w-8 md:h-12 md:w-12 text-white/90" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-indigo-400 to-blue-500 dark:from-indigo-700/40 dark:to-blue-800/30 border-indigo-400 dark:border-indigo-600/40">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-indigo-100">Transferred</p>
-                <p className="text-4xl font-bold text-white">{totalTransferred}</p>
+                <p className="text-[10px] md:text-sm font-medium text-indigo-100">Transferred</p>
+                <p className="text-2xl md:text-4xl font-bold text-white">{totalTransferred}</p>
               </div>
-              <ArrowRightLeft className="h-12 w-12 text-white/90" />
+              <ArrowRightLeft className="h-8 w-8 md:h-12 md:w-12 text-white/90" />
             </div>
             {partnerApps.length > 0 && (
-              <Button variant="ghost" size="sm" className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-xs flex items-center gap-1 mt-2" onClick={() => setShowTransferDialog(true)}>
+              <Button variant="ghost" size="sm" className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-[10px] md:text-xs flex items-center gap-1 mt-1 md:mt-2" onClick={() => setShowTransferDialog(true)}>
                 Transfer Vulas <Send className="h-3 w-3" />
               </Button>
             )}
