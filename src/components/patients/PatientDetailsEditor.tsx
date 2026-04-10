@@ -850,7 +850,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Surgeries */}
                   <div>
-                    <Label>Surgeries and Dates</Label>
+                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
+                     <Scissors className="h-3.5 w-3.5" /> Surgeries and Dates
+                   </h3>
                     {surgeries.length === 0 ? (
                       <p className="text-xs text-muted-foreground">No surgeries recorded</p>
                     ) : (
@@ -868,7 +870,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Family History */}
                   <div>
-                    <Label>Family History</Label>
+                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
+                     <GitBranch className="h-3.5 w-3.5" /> Family History
+                   </h3>
                     {familyHistory.length === 0 ? (
                       <p className="text-xs text-muted-foreground">No family history recorded</p>
                     ) : (
@@ -1241,7 +1245,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 {/* Surgeries */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <Label>Surgeries and Dates</Label>
+                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
+                     <Scissors className="h-3.5 w-3.5" /> Surgeries and Dates
+                   </h3>
                     {!showAddSurgery && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddSurgery(true)}><Plus className="h-3 w-3" />Add</Button>}
                   </div>
                   {showAddSurgery && (
@@ -1297,7 +1303,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 {/* Family History */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <Label>Family History</Label>
+                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
+                     <GitBranch className="h-3.5 w-3.5" /> Family History
+                   </h3>
                     {!showAddFamily && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddFamily(true)}><Plus className="h-3 w-3" />Add</Button>}
                   </div>
                   {showAddFamily && (

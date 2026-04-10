@@ -161,9 +161,6 @@ export function TopBarIcons() {
             <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
             <p className="text-[10px] text-muted-foreground capitalize">{isDoctor ? "Doctor" : "Patient"}</p>
           </div>
-          <Link to="/profile" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
-            <User className="h-3.5 w-3.5" /> Profile
-          </Link>
           <Link to="/settings" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
             <Settings className="h-3.5 w-3.5" /> Settings
           </Link>
