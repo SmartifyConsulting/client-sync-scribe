@@ -671,8 +671,15 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
           </div>
           <div>
+            <p className="text-[10px] text-muted-foreground">Welcome back</p>
             <h3 className="text-sm font-semibold text-foreground">{patient.name}</h3>
-            {(userEmail || patient.email) && <p className="text-xs text-muted-foreground">{userEmail || patient.email}</p>}
+            <p className="text-xs text-muted-foreground">
+              {(() => {
+                const first = (patient.first_name || splitName(patient.name).first || "user").toLowerCase().replace(/\s+/g, "");
+                const last = (patient.last_name || splitName(patient.name).last || "patient").toLowerCase().replace(/\s+/g, "");
+                return `${first}.${last}@holarc.health`;
+              })()}
+            </p>
           </div>
         </div>
       </div>
@@ -770,10 +777,12 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               {isSelfService && <TabsTrigger value="nok-iced" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">NOK & ICE</TabsTrigger>}
               {isSelfService && isDoctor && <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap" onClick={(e) => { e.preventDefault(); navigate("/practice"); }}>My Practice</TabsTrigger>}
               {isSelfService && <TabsTrigger value="settings" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap"><Settings className="h-3.5 w-3.5 mr-1" />Settings</TabsTrigger>}
-              <Button variant="outline" size="sm" className="gap-2 text-xs ml-auto bg-white/90 hover:bg-white text-foreground" onClick={() => setIsEditing(true)}>
+            </TabsList>
+            <div className="flex justify-end mt-2">
+              <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={() => setIsEditing(true)}>
                 <Pencil className="h-3.5 w-3.5" /> Edit
               </Button>
-            </TabsList>
+            </div>
 
             {/* === PERSONAL INFORMATION TAB === */}
             <TabsContent value="personal" className="space-y-4 mt-4">
@@ -1155,13 +1164,13 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             {isSelfService && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Round Table</TabsTrigger>}
             {isSelfService && <TabsTrigger value="nok-iced" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">NOK & ICE</TabsTrigger>}
             {isSelfService && isDoctor && <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap" onClick={(e) => { e.preventDefault(); navigate("/practice"); }}>My Practice</TabsTrigger>}
-            {isSelfService && <TabsTrigger value="settings" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap"><Settings className="h-3.5 w-3.5 mr-1" />Settings</TabsTrigger>}
-            <div className="ml-auto flex items-center gap-2">
-              {saving && <span className="flex items-center gap-1.5 text-xs text-white"><Loader2 className="h-3 w-3 animate-spin" />Saving...</span>}
-              {!saving && !hasChanges && isEditing && <span className="flex items-center gap-1.5 text-xs text-green-300"><Check className="h-3 w-3" />Saved</span>}
-              <Button variant="outline" size="sm" className="gap-2 text-xs bg-white/90 hover:bg-white text-foreground" onClick={handleCancel} disabled={saving}><X className="h-3.5 w-3.5" />Done</Button>
+              {isSelfService && <TabsTrigger value="settings" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap"><Settings className="h-3.5 w-3.5 mr-1" />Settings</TabsTrigger>}
+            </TabsList>
+            <div className="flex justify-end mt-2 items-center gap-2">
+              {saving && <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Loader2 className="h-3 w-3 animate-spin" />Saving...</span>}
+              {!saving && !hasChanges && isEditing && <span className="flex items-center gap-1.5 text-xs text-green-600"><Check className="h-3 w-3" />Saved</span>}
+              <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={handleCancel} disabled={saving}><X className="h-3.5 w-3.5" />Done</Button>
             </div>
-          </TabsList>
 
           {/* === PERSONAL TAB (EDIT) === */}
           <TabsContent value="personal" className="space-y-4 mt-4">

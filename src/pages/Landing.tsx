@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import holarcLogo from "@/assets/holarc-logo.png";
+import holarcLogo from "@/assets/holarc-logo-clear.png";
 import { motion } from "framer-motion";
 import {
   Stethoscope,
@@ -139,19 +139,19 @@ export default function Landing() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="mb-8"
+            >
+              <img src={holarcLogo} alt="Holarc Health" className="h-32 sm:h-40 w-auto mx-auto drop-shadow-lg" />
+            </motion.div>
+
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6">
               One Ecosystem.
               <span className="block text-gradient pb-4">360° Healthcare Intelligence.</span>
             </h1>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="my-10"
-            >
-              <img src={holarcLogo} alt="Holarc Health" className="h-32 sm:h-40 w-auto mx-auto drop-shadow-lg" />
-            </motion.div>
 
             <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
               Powerful practice management for providers. A complete 360° health profile for patients. 
@@ -313,13 +313,6 @@ export default function Landing() {
           </motion.div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="py-8 px-4 border-t border-border">
-        <div className="max-w-7xl mx-auto text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} Holarc Health. All rights reserved.</p>
-        </div>
-      </footer>
 
       {/* Role Selection Dialog */}
       <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
