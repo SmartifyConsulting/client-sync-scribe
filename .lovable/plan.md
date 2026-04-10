@@ -1,87 +1,72 @@
 
 
-# Navigation, ICE Removal, Tab Reordering & Header Cleanup
+# Organ Donor Styling, Rewards Updates, Edit UX Overhaul
 
 ## Summary
-Move upcoming appointments to top of calendar, remove ICE from DB and all layouts, delete NOK & ICE tab, move NOK under Medical Insurance, remove Share from section headers (keep on records), rename email label, reorder Round Table to last, and remove duplicate headers in tab content.
+Fix Organ Donor section header to match grey style, add partner apps and transfer to Vulas tab, merge Assigned Tasks into Overview, shrink reward cards on mobile, and move Edit functionality into each collapsible section header with autosave + save/cancel icons.
 
 ## Changes
 
-### 1. Calendar: Move Upcoming Appointments to top
-**File:** `src/pages/patient/PatientCalendar.tsx`
-- Move the "Upcoming" `<Card>` (lines 394-422) from after the calendar grid to before it — place it right after `<PatientRequestsBadge />` and before the grid div
-- Make it compact: show as a horizontal scrollable row or a small collapsible card (not a full sidebar)
-- Show on all screen sizes (remove `hidden lg:block`)
-
-### 2. Remove ICE field from database
-- Create a migration to drop the `ice_contacts` column from the `patients` table
-
-### 3. Remove ICE from all layouts
+### 1. Organ Donor — grey section header
 **File:** `src/components/patients/PatientDetailsEditor.tsx`
-- **View mode**: Remove the entire ICE Contacts collapsible section (lines ~982-1020)
-- **Edit mode**: Remove the entire ICE Contacts collapsible section (lines ~1467-1521)
-- Remove ICE-related state variables (`iceContacts`, `showAddICE`, `newICE`, `editingICEId`)
-- Remove ICE-related handler functions (`handleAddICE`, `handleEditICE`, `handleShareICE`, `handleICEAsNOK`)
-- Remove `ICEContact` from imports
-- Clean up the `handleShareRecord` function to remove `'ice'` case
+- Lines ~1097-1113 (view mode) and the matching edit mode block: Replace the custom `bg-primary` + `text-white` `CollapsibleTrigger` with `bg-[#F5F4F1]` + `text-foreground` to match the `SectionHeader` component style. Keep the inline Yes/No badge and chevron but change chevron from `text-white` to `text-foreground`.
+- Refactor to reuse `SectionHeader` with an `extra` prop for the Yes/No badge.
 
-### 4. Delete NOK & ICE tab from all layouts
+### 2. Show Approved Vula Partner Apps under Vulas tab with transfer
+**File:** `src/pages/patient/MyRewards.tsx`
+- In `TabsContent value="transfers"` (the Vulas tab), append the partner apps grid (currently in `vula-apps` tab) below the transfer history
+- Add a "Transfer Vulas" button inline with each partner app card (select app + enter amount + submit)
+- Remove the separate `vula-apps` tab trigger and content since it's now merged into the Vulas/transfers tab
+- Keep the existing transfer dialog and mutation logic
+
+### 3. Combine Assigned Tasks into Overview tab
+**File:** `src/pages/patient/MyRewards.tsx`
+- Move the Assigned Tasks card (lines ~480-548) into the Overview `TabsContent` (after Recent Rewards)
+- Remove the separate `tasks` TabsTrigger and `TabsContent`
+- Keep the `ActivityProofCapture` component and all task rendering logic
+
+### 4. Reduce reward card size on mobile — single row
+**File:** `src/pages/patient/MyRewards.tsx`
+- Hero stats grid (lines ~319-376): Change from `grid gap-4 md:grid-cols-4` to `grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-4`
+- Inside each card's `CardContent`: reduce padding and font sizes on mobile (`text-2xl md:text-4xl` for numbers, `h-10 w-10 md:h-14 md:w-14` for icons)
+- Make cards more compact on small screens
+
+### 5. Move Edit button into section headers — autosave with save/cancel icons
 **File:** `src/components/patients/PatientDetailsEditor.tsx`
-- Remove `nok-iced` from `SECTION_TABS.health`: change to `health: ["personal", "medical"]`
-- Remove the `TabsTrigger value="nok-iced"` from mobile tab list (line 838)
-- Remove the `TabsTrigger value="nok-iced"` from desktop sub-tabs (line 883)
-- Remove `PROFILE_TABS` entry: change from `["personal", "medical", "nok-iced"]` to `["personal", "medical"]`
-- Remove the `TabsContent value="nok-iced"` block (lines 1336-1344)
-- Remove the `NokIcedTab` lazy import
 
-### 5. Move NOK section to Medical Information tab (under Medical Insurance)
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- **View mode**: Move the NOK collapsible section (lines ~948-980) from Personal tab into Medical tab Column 2, placed after Medical Insurance section
-- **Edit mode**: Move the NOK collapsible section (lines ~1409-1465) similarly to Medical tab Column 2, after Medical Insurance
+This is the most significant change. The approach:
 
-### 6. Remove Share icon from ICE section header (already being removed with ICE)
-- The ICE section header had a Share button on the CollapsibleTrigger — this is moot since ICE is being removed entirely
-- Verify NOK section header uses `SectionHeader` component (no Share on header) — share icons are already on individual records ✓
+- **Remove the top-level Edit/Done button** (lines ~905-909 in view mode, ~1285-1289 in edit mode)
+- **Eliminate the global view/edit mode toggle** — instead, each collapsible section manages its own editing state independently
+- **Update `SectionHeader`** to accept optional `onEdit`, `onSave`, `onCancel`, `isEditing`, `isSaving`, and `hasChanges` props
+- When a section is expanded in view mode, show a small `Pencil` icon in the header area
+- When clicked, that section switches to edit mode (inline)
+- When edits are detected (`hasChanges`), show `Check` (save) and `X` (cancel) icons in the header
+- **Autosave**: Use a debounced save (e.g., 2-second debounce after last change) calling `onSave` with the section's changed fields
+- The save/cancel icons provide immediate manual save and revert options
 
-### 7. Rename "Reporting To Email" label
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- **View mode** (line ~1028): Change `"Reporting To Email (Optional)"` to `"Line Manager Email Address (Optional)"`
-- **Edit mode** (line ~1529): Change label to `"Line Manager Email Address (Optional)"` and update placeholder/helper text
+Implementation approach:
+- Create a new `EditableSectionHeader` component that wraps `CollapsibleTrigger` and includes edit/save/cancel icon buttons
+- Each section (Personal Details, Addresses, Employer, etc.) uses local state to track if that specific section is being edited
+- A `useSectionEdit` hook or inline state per section manages `isEditing`, `hasChanges`, debounced autosave
+- The global `isEditing` state is removed; the `formData` and `updateFormData` remain shared
+- When any section enters edit mode, its content renders form fields; when in view mode, renders `ViewField`s
+- This applies to Personal, Medical, and all expandable sections across all tabs
 
-### 8. Move My Round Table to last in tab sequence
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- **Mobile tabs** (lines 826-839): Move the `roundtable` TabsTrigger to after `nok-iced` (which is being removed, so it goes last after `documents`)
-- **Desktop tabs** (lines 844-896): Move the `roundtable` TabsTrigger to after the My Admin group button
-- **SECTION_TABS**: Reorder `care` to `["doctors", "sessions"]` and add `roundtable` at end: `care: ["doctors", "sessions", "roundtable"]` — already last in care, but on desktop it should appear after My Admin. Move it out of the main tabs row to appear after My Admin button.
+Given the complexity, a pragmatic first pass:
+- Keep global `formData` state but remove the top-level Edit button
+- Each `SectionHeader` gets an edit pencil icon that sets a per-section editing flag
+- When editing, show save (Check) and cancel (X) icons in the header
+- Autosave via `useEffect` with debounce on `formData` changes
+- Apply to all collapsible sections in Personal and Medical tabs
 
-Updated mobile order: Dashboard, Personal, Medical, H/Care Providers, Sessions, Calendar, Tasks, Documents, Round Table
-
-Updated desktop order: Dashboard, My Profile (sub-tabs), H/Care Providers, Sessions, My Admin (sub-tabs), Round Table
-
-### 9. Remove duplicate headers within tab content
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- The tab already has a trigger label (e.g., "My Documents"), then inside `TabsContent` there's a repeated `<h2>` and `<p>` description. Remove these redundant header blocks from:
-  - Personal tab view (lines 915-918) and edit (lines 1368-1371)
-  - Medical tab view (lines 1043-1046) and edit (lines 1544-1547)
-  - Tasks tab (lines 1274-1276)
-  - Sessions tab (lines 1286-1288)
-  - Doctors tab (lines 1313-1316)
-  - Round Table tab (lines 1325-1328)
-  - NOK & ICE tab (lines 1337-1340) — being removed anyway
-
-**File:** `src/pages/patient/PatientDocuments.tsx`
-- When rendered inside the tab (via `hideHeader={false}` at line 1306), the Documents component shows its own "My Documents" header. Change the call to `<PatientDocuments hideHeader />` (pass `hideHeader={true}`) so the embedded header is suppressed.
-
-**File:** `src/pages/patient/PatientCalendar.tsx`
-- Add a `hideHeader` prop. When true, hide the "My Calendar" heading and description (lines 351-354). Update the call in PatientDetailsEditor to pass `hideHeader`.
+### 6. Apply section-level edit to all layouts
+The `SectionHeader` component is already used across all layouts (mobile, tablet, desktop), so updating it once applies everywhere.
 
 ## Files Modified
 
 | File | Changes |
 |------|---------|
-| `src/components/patients/PatientDetailsEditor.tsx` | Remove ICE sections, delete NOK & ICE tab, move NOK to Medical tab, rename email label, reorder Round Table last, remove duplicate tab headers |
-| `src/pages/patient/PatientCalendar.tsx` | Move upcoming appointments to top, add hideHeader prop |
-| `src/pages/patient/PatientDocuments.tsx` | Pass hideHeader when embedded |
-| `src/components/patients/NokIcedTab.tsx` | Can be deleted (no longer referenced) |
-| DB Migration | Drop `ice_contacts` column from `patients` table |
+| `src/components/patients/PatientDetailsEditor.tsx` | Grey Organ Donor header; remove top-level Edit button; add edit/save/cancel icons to each SectionHeader; autosave with debounce |
+| `src/pages/patient/MyRewards.tsx` | Merge tasks into overview; merge partner apps into Vulas tab; compact mobile reward cards; remove separate tabs |
 
