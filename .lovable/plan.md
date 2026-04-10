@@ -1,60 +1,47 @@
 
 
-# Updated Plan: Remove Navigation, Tab-Based Patient App + Vula-Themed Rewards Cards
+# Updated Plan: Vulas Counter, Edit Button Repositioning, Profile Banner Changes, Landing & Footer Fixes
 
-## Summary
+## All previous plan items remain (PatientAppLayout, routing, Settings tab, rewards recoloring, back-to-home, Vula logo asset, remove nav). This plan adds the following edits:
 
-Everything from the previously proposed plan (remove sidebar/bottom nav, create `PatientAppLayout`, add Settings tab, Vula Vouchers logo, back-to-home navigation, upcoming appointments in top bar, sign-out under avatar) **plus** recoloring the My Rewards hero stat cards to match the Vula logo color scheme.
+## New Changes
 
-## Additional Change: Rewards Card Colors
+### 1. Animated Vulas counter above Vula Vouchers logo (`MyDetails.tsx`)
+- Fetch vulas balance using `useMyRewards()` hook (returns `lollipopCount`)
+- Display the count just above the Vula Vouchers logo on the right side of the heading row
+- Implement an animated counter that counts up from 0 to the actual value over ~1.5 seconds using a `useEffect` with `requestAnimationFrame` or interval-based easing
+- Style: bold number with a small "Vulas" label, e.g. "127 Vulas" in the Vula blue-teal color
 
-**File:** `src/pages/patient/MyRewards.tsx` (lines 312-368) and `src/components/gamification/LollipopReport.tsx` (line 33)
+### 2. Move Edit button off the tab bar (`PatientDetailsEditor.tsx`)
+- **View mode** (line 773): Remove the `<Button>Edit</Button>` from inside the `<TabsList>`
+- Place it below the tab bar, right-aligned (`flex justify-end mt-2`), before the `<TabsContent>` blocks
+- **Edit mode** (line 1159-1163): Same treatment for the Done/Saving indicators — move them below the tab bar, right-aligned
 
-The Vula logo uses a blue-to-teal gradient palette. The four hero stat cards currently use yellow/lime, fuchsia/pink, orange/red, and sky/cyan gradients — these will be updated to variations within the Vula blue-teal spectrum:
+### 3. Profile banner: "Welcome back" + patient name, hide email, show holarc email (`PatientDetailsEditor.tsx` lines 673-676)
+- Change the banner text from just showing the patient name to:
+  - Line 1: "Welcome back" (smaller text, muted)
+  - Line 2: Patient full name (bold, larger)
+- Hide the real email address
+- Generate and display a Holarc email address derived from patient name: `firstname.lastname@holarc.health` (lowercase, no spaces)
 
-| Card | Current Colors | New Colors |
-|------|---------------|------------|
-| Total Vulas | yellow-300 → lime-400 | blue-500 → cyan-400 |
-| Current Level | fuchsia-400 → pink-500 | blue-600 → teal-500 |
-| Active Streaks | orange-400 → red-500 | sky-400 → teal-400 |
-| Transferred | sky-400 → cyan-500 | indigo-400 → blue-500 |
+### 4. Remove duplicate footer on Landing page (`Landing.tsx`)
+- Remove lines 317-322 (the inline `<footer>` block) — keep only the `<Footer />` component on line 359
 
-Text colors on the cards will be updated to white/blue tones for contrast. The LollipopReport summary card gradient will also change from emerald/teal to the same blue-teal palette.
+### 5. Move logo above "One Ecosystem" on Landing hero (`Landing.tsx`)
+- Move the `<motion.div>` containing the logo image (lines 147-154) above the `<h1>` (line 142)
+- Replace `holarcLogo` import with the new clear-background logo asset (`holarc-logo-clear.png`)
 
-## Full Plan (all changes)
-
-### 1. Create `PatientAppLayout` component
-New layout with top bar (Holarc logo, upcoming appointments for next 2 weeks clickable → calendar, avatar with sign-out popover). No sidebar or bottom nav.
-
-### 2. Modify routing in `App.tsx`
-Separate patient routes under `PatientAppLayout`; doctor/admin routes stay under `AppLayout`.
-
-### 3. Restructure `MyDetails.tsx`
-Logo above "My Holarchive" heading. Horizontal Vula Vouchers logo on the right → links to `/patient/rewards`. This page becomes the patient home.
-
-### 4. Add "Settings" tab to `PatientDetailsEditor.tsx`
-New tab with sub-tabs: Preferences, Notifications, Security, Billing. Extract Settings page content into reusable `SettingsContent` component.
-
-### 5. Back-to-home on Calendar and Rewards pages
-Add "← Back to Home" button on `PatientCalendar.tsx` and `MyRewards.tsx`.
-
-### 6. Recolor My Rewards cards to Vula blue-teal palette
-Update all 4 hero stat cards and the LollipopReport summary card gradients to use blue/cyan/teal/indigo tones matching the Vula logo.
-
-### 7. Copy Vula Vouchers logo asset
-Save uploaded image as `src/assets/vula-vouchers-logo.png`.
+### 6. Remove centered logo from MyDetails, increase top-bar logo size
+- Remove lines 89-92 in `MyDetails.tsx` (the centered logo div)
+- In `PatientAppLayout.tsx`, change top-bar logo from `h-8` to `h-11` (35% larger)
 
 ## Technical Summary
 
 | File | Change |
 |------|--------|
-| `src/components/layout/PatientAppLayout.tsx` | New: top bar layout, no sidebar/bottom nav |
-| `src/App.tsx` | Split patient routes under new layout |
-| `src/pages/patient/MyDetails.tsx` | Logo above heading, Vula Vouchers logo linking to rewards |
-| `src/components/patients/PatientDetailsEditor.tsx` | Add Settings tab with sub-tabs |
-| `src/pages/Settings.tsx` | Extract `SettingsContent` for reuse |
-| `src/pages/patient/PatientCalendar.tsx` | Add back-to-home button |
-| `src/pages/patient/MyRewards.tsx` | Back-to-home button + recolor 4 hero cards to blue-teal Vula palette |
-| `src/components/gamification/LollipopReport.tsx` | Recolor summary card to blue-teal palette |
-| `src/assets/vula-vouchers-logo.png` | New asset from uploaded image |
+| `src/pages/patient/MyDetails.tsx` | Add animated Vulas counter above Vula logo; remove centered logo |
+| `src/components/patients/PatientDetailsEditor.tsx` | Move Edit/Done buttons below tab bar, right-aligned; ProfileBanner shows "Welcome back" + name + holarc email |
+| `src/pages/Landing.tsx` | Remove inline footer; move logo above heading; use clear-background logo |
+| `src/components/layout/PatientAppLayout.tsx` | Increase logo to `h-11` |
+| `src/assets/holarc-logo-clear.png` | New asset from uploaded image |
 
