@@ -1280,7 +1280,7 @@ export function PatientDetailsEditor({
           </button>
           {isSelfService && (
             <TabsTrigger value="doctors" className={triggerClass}>
-              My Care Panel;
+              My Care Panel
             </TabsTrigger>
           )}
           {isSelfService && (
