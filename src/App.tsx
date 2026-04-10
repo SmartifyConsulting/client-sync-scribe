@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { PatientAppLayout } from "@/components/layout/PatientAppLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import Landing from "./pages/Landing";
@@ -86,7 +87,7 @@ function RoleBasedDashboard() {
     );
   }
 
-  return isPatient ? <PatientDashboard /> : <Dashboard />;
+  return isPatient ? <MyDetails /> : <Dashboard />;
 }
 
 const App = () => (
@@ -105,7 +106,28 @@ const App = () => (
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           
-          {/* Protected routes */}
+          {/* Patient routes - using PatientAppLayout (no sidebar/bottom nav) */}
+          <Route
+            element={
+              <ProtectedRoute>
+                <PatientAppLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/patient/doctors" element={<MyDoctors />} />
+            <Route path="/patient/calendar" element={<PatientCalendar />} />
+            <Route path="/patient/documentation" element={<Documentation />} />
+            <Route path="/patient/invoices" element={<Invoices />} />
+            <Route path="/patient/invites" element={<PatientAccessManagement />} />
+            <Route path="/patient/rewards" element={<MyRewards />} />
+            <Route path="/patient/health-album" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/patient/tasks" element={<PatientTasks />} />
+            <Route path="/patient/documents" element={<PatientDocuments />} />
+            <Route path="/patient/round-table" element={<PatientRoundTable />} />
+            <Route path="/patient/details" element={<MyDetails />} />
+          </Route>
+
+          {/* Protected routes with full layout (doctors/admins + shared) */}
           <Route
             element={
               <ProtectedRoute>
@@ -130,21 +152,7 @@ const App = () => (
             <Route path="/referral-doctors" element={<ReferralDoctors />} />
             <Route path="/cpd-certificates" element={<Navigate to="/profile" replace />} />
             <Route path="/expiring-recordings" element={<ExpiringRecordings />} />
-            {/* Notifications removed from route - now a dashboard badge */}
             <Route path="/connections" element={<Connections />} />
-            
-            {/* Patient routes */}
-            <Route path="/patient/doctors" element={<MyDoctors />} />
-            <Route path="/patient/calendar" element={<PatientCalendar />} />
-            <Route path="/patient/documentation" element={<Documentation />} />
-            <Route path="/patient/invoices" element={<Invoices />} />
-            <Route path="/patient/invites" element={<PatientAccessManagement />} />
-            <Route path="/patient/rewards" element={<MyRewards />} />
-            <Route path="/patient/health-album" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/patient/tasks" element={<PatientTasks />} />
-            <Route path="/patient/documents" element={<PatientDocuments />} />
-            <Route path="/patient/round-table" element={<PatientRoundTable />} />
-            <Route path="/patient/details" element={<MyDetails />} />
             
             {/* Admin routes */}
             <Route path="/admin/pricing" element={<PricingAdmin />} />
