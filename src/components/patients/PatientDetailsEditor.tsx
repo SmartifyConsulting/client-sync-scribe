@@ -1164,17 +1164,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               </TabsContent>
             )}
 
-            {isSelfService && (
-              <TabsContent value="settings" className="mt-4">
-                <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">Settings</h2>
-                  <p className="text-xs text-muted-foreground">Manage your preferences, security, and billing</p>
-                </div>
-                <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-                  <SettingsContentLazy />
-                </Suspense>
-              </TabsContent>
-            )}
           </Tabs>
         </div>
       </div>

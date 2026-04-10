@@ -1,13 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { Patient } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
 import { useMyRewards } from "@/hooks/usePatientRewards";
-import holarcLogo from "@/assets/holarc-logo.png";
-import vulaVouchersLogo from "@/assets/vula-vouchers-logo.png";
 
 function AnimatedCounter({ target }: { target: number }) {
   const [count, setCount] = useState(0);
