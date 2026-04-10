@@ -2,15 +2,12 @@ import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
-  Users,
   Calendar,
-  FileText,
   Settings,
   Mic,
-  Pill,
-  Receipt,
   Stethoscope,
   CheckSquare,
+  Briefcase,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 
