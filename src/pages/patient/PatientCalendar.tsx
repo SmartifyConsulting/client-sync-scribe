@@ -363,63 +363,57 @@ export default function PatientCalendar() {
 
       <PatientRequestsBadge />
 
-      <div className="grid gap-3 md:gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-4">
-          {calendarView === "week" && renderWeekView()}
-          {calendarView === "month" && renderMonthView()}
-          {calendarView === "year" && renderYearView()}
-
-          {calendarView !== "year" && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">{format(selectedDate, "EEEE, MMMM d")}</CardTitle>
-                <CardDescription>{selectedDayAppointments.length} appointment(s)</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {selectedDayAppointments.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No appointments scheduled for this day</p>
-                ) : (
-                  <div className="space-y-3">
-                    {selectedDayAppointments.map((apt) => (
-                      <AppointmentCard key={apt.id} apt={apt} />
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-        </div>
-
-        {/* Upcoming Appointments Sidebar - hidden on mobile */}
-        <Card className="hidden lg:block">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Upcoming</CardTitle>
-            <CardDescription className="text-xs">Your next visits</CardDescription>
+      {/* Upcoming Appointments - compact at top */}
+      {upcomingAppointments.length > 0 && (
+        <Card className="bg-muted/30">
+          <CardHeader className="pb-1 pt-2 px-3">
+            <CardTitle className="text-xs">Upcoming</CardTitle>
           </CardHeader>
-          <CardContent>
-            {upcomingAppointments.length === 0 ? (
-              <p className="text-center text-muted-foreground py-4 text-xs">No upcoming appointments</p>
-            ) : (
-              <div className="space-y-3">
-                {upcomingAppointments.map((apt) => (
-                  <div key={apt.id} className="p-2 rounded-lg bg-muted/50 space-y-1">
-                    <p className="font-medium text-xs">{apt.title}</p>
-                    {apt.doctor_name && (
-                      <p className="text-[10px] text-primary font-medium flex items-center gap-1">
-                        <User className="h-2.5 w-2.5" />
-                        Dr. {apt.doctor_name}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                      <CalendarIcon className="h-2.5 w-2.5" />
-                      {format(parseISO(apt.start_time), "MMM d")} · {format(parseISO(apt.start_time), "h:mm a")}
-                    </div>
+          <CardContent className="px-3 pb-2">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+              {upcomingAppointments.slice(0, 5).map((apt) => (
+                <div key={apt.id} className="p-2 rounded-lg bg-card border border-border/50 min-w-[140px] shrink-0 space-y-0.5">
+                  <p className="font-medium text-[10px] truncate">{apt.title}</p>
+                  {apt.doctor_name && (
+                    <p className="text-[9px] text-primary font-medium flex items-center gap-0.5">
+                      <User className="h-2 w-2" /> Dr. {apt.doctor_name}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-0.5 text-[9px] text-muted-foreground">
+                    <CalendarIcon className="h-2 w-2" />
+                    {format(parseISO(apt.start_time), "MMM d")} · {format(parseISO(apt.start_time), "h:mm a")}
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
+      )}
+
+      <div className="space-y-4">
+        {calendarView === "week" && renderWeekView()}
+        {calendarView === "month" && renderMonthView()}
+        {calendarView === "year" && renderYearView()}
+
+        {calendarView !== "year" && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">{format(selectedDate, "EEEE, MMMM d")}</CardTitle>
+              <CardDescription>{selectedDayAppointments.length} appointment(s)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {selectedDayAppointments.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No appointments scheduled for this day</p>
+              ) : (
+                <div className="space-y-3">
+                  {selectedDayAppointments.map((apt) => (
+                    <AppointmentCard key={apt.id} apt={apt} />
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <BookAppointmentDialog open={bookDialogOpen} onOpenChange={setBookDialogOpen} onBooked={fetchAppointments} />
