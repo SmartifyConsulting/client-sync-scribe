@@ -72,7 +72,7 @@ const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
 const MyDoctors = lazy(() => import("@/pages/patient/MyDoctors"));
 const PatientRoundTable = lazy(() => import("@/pages/patient/PatientRoundTable"));
 const PatientCalendarLazy = lazy(() => import("@/pages/patient/PatientCalendar"));
-const NokIcedTab = lazy(() => import("@/components/patients/NokIcedTab"));
+
 const SettingsContentLazy = lazy(() =>
   import("@/components/settings/SettingsContent").then((m) => ({ default: m.SettingsContent })),
 );
