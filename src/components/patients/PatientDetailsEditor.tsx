@@ -58,7 +58,6 @@ import {
   Surgery,
   Pharmacy,
   FamilyHistoryEntry,
-  ICEContact,
   NextOfKinMember,
   CurrentMedication,
   ConditionDiagnosis,
@@ -308,7 +307,7 @@ function AnimatedCounter({ target }: { target: number }) {
 
 const SECTION_TABS: Record<string, string[]> = {
   home: ["dashboard"],
-  health: ["personal", "medical", "nok-iced"],
+  health: ["personal", "medical"],
   care: ["doctors", "sessions", "roundtable"],
   admin: ["calendar", "tasks", "documents"],
 };
@@ -399,7 +398,7 @@ export function PatientDetailsEditor({
   const [surgeries, setSurgeries] = useState<Surgery[]>([]);
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [familyHistory, setFamilyHistory] = useState<FamilyHistoryEntry[]>([]);
-  const [iceContacts, setIceContacts] = useState<ICEContact[]>([]);
+  
   const [nokMembers, setNokMembers] = useState<NextOfKinMember[]>([]);
   const [currentMedications, setCurrentMedications] = useState<CurrentMedication[]>([]);
   const [conditionsDiagnoses, setConditionsDiagnoses] = useState<ConditionDiagnosis[]>([]);
@@ -417,12 +416,9 @@ export function PatientDetailsEditor({
   const [newFamilyEntry, setNewFamilyEntry] = useState({ relation: "", condition: "" });
   const [showAddFamily, setShowAddFamily] = useState(false);
   const [editingFamilyId, setEditingFamilyId] = useState<string | null>(null);
-  const [showAddICE, setShowAddICE] = useState(false);
-  const [newICE, setNewICE] = useState({ name: "", phone: "", email: "", relationship: "" });
   const [showAddNOK, setShowAddNOK] = useState(false);
   const [newNOK, setNewNOK] = useState({ name: "", phone: "", email: "", relationship: "" });
   const [editingNOKId, setEditingNOKId] = useState<string | null>(null);
-  const [editingICEId, setEditingICEId] = useState<string | null>(null);
   const [showAddMed, setShowAddMed] = useState(false);
   const [newMed, setNewMed] = useState({
     name: "",
@@ -522,7 +518,6 @@ export function PatientDetailsEditor({
       setOrganDonorOrgans(patient.organ_donor_organs || []);
       setSurgeries(patient.surgeries || []);
       setFamilyHistory(patient.family_history || []);
-      setIceContacts(patient.ice_contacts || []);
       setNokMembers(patient.next_of_kin_members || []);
       setCurrentMedications(patient.current_medications || []);
       setConditionsDiagnoses(patient.conditions_diagnoses || []);
@@ -588,7 +583,6 @@ export function PatientDetailsEditor({
         family_history: familyHistory,
         organ_donor: data.organ_donor,
         organ_donor_organs: organDonorOrgans,
-        ice_contacts: iceContacts,
         next_of_kin_members: nokMembers,
         current_medications: currentMedications,
         conditions_diagnoses: conditionsDiagnoses,
@@ -602,7 +596,6 @@ export function PatientDetailsEditor({
       pharmacies,
       familyHistory,
       organDonorOrgans,
-      iceContacts,
       nokMembers,
       currentMedications,
       conditionsDiagnoses,
@@ -624,7 +617,7 @@ export function PatientDetailsEditor({
     pharmacies,
     familyHistory,
     organDonorOrgans,
-    iceContacts,
+    
     nokMembers,
     currentMedications,
     conditionsDiagnoses,
@@ -825,30 +818,6 @@ export function PatientDetailsEditor({
     setShowAddNOK(true);
   };
 
-  // ICE contacts handlers
-  const handleAddICE = () => {
-    if (!newICE.name.trim()) {
-      toast({ title: "Required", description: "Name is required", variant: "destructive" });
-      return;
-    }
-    if (editingICEId) {
-      setIceContacts((prev) =>
-        prev.map((c) => (c.id === editingICEId ? { ...c, ...newICE, name: newICE.name.trim() } : c)),
-      );
-      setEditingICEId(null);
-    } else {
-      setIceContacts((prev) => [...prev, { id: crypto.randomUUID(), ...newICE, name: newICE.name.trim() }]);
-    }
-    setNewICE({ name: "", phone: "", email: "", relationship: "" });
-    setShowAddICE(false);
-    setHasChanges(true);
-  };
-
-  const handleEditICE = (c: ICEContact) => {
-    setNewICE({ name: c.name, phone: c.phone, email: c.email, relationship: c.relationship });
-    setEditingICEId(c.id);
-    setShowAddICE(true);
-  };
 
   // Current medications handlers
   const handleAddMed = () => {
@@ -1017,7 +986,7 @@ export function PatientDetailsEditor({
     setOrganDonorOrgans(patient.organ_donor_organs || []);
     setSurgeries(patient.surgeries || []);
     setFamilyHistory(patient.family_history || []);
-    setIceContacts(patient.ice_contacts || []);
+    
     setNokMembers(patient.next_of_kin_members || []);
     setCurrentMedications(patient.current_medications || []);
     setConditionsDiagnoses(patient.conditions_diagnoses || []);
@@ -1110,38 +1079,15 @@ export function PatientDetailsEditor({
     );
   };
 
-  // ICE share handler
-  const handleShareICE = () => {
-    const info = [
-      `Patient: ${patient.name}`,
-      `DOB: ${patient.dob || "N/A"}`,
-      `Blood Type: ${patient.blood_type || "N/A"}`,
-      `Allergies: ${patient.allergies || "None"}`,
-      `Medications: ${currentMedications.map((m) => m.name).join(", ") || "None"}`,
-      `GP: ${patient.general_practitioner || "N/A"}`,
-    ].join("\n");
-
-    if (navigator.share) {
-      navigator.share({ title: "ICE - Patient Information", text: info });
-    } else {
-      navigator.clipboard.writeText(info);
-      toast({ title: "Copied", description: "ICE information copied to clipboard" });
-    }
-  };
-
-  // Per-record share handler for NOK and ICE contacts
+  // Per-record share handler for NOK contacts
   const handleShareRecord = (
-    type: "nok" | "ice",
+    type: "nok",
     record: { id: string; name: string; phone: string; email: string },
   ) => {
     const shareUrl = `${window.location.origin}/patient/${patient.id}`;
     const text = `${record.name} - Emergency Contact for ${patient.name}\n${shareUrl}`;
 
-    if (type === "ice") {
-      setIceContacts((prev) => prev.map((c) => (c.id === record.id ? { ...c, shared: true } : c)));
-    } else {
-      setNokMembers((prev) => prev.map((n) => (n.id === record.id ? { ...n, shared: true } : n)));
-    }
+    setNokMembers((prev) => prev.map((n) => (n.id === record.id ? { ...n, shared: true } : n)));
     setHasChanges(true);
 
     if (navigator.share) {
@@ -1152,32 +1098,8 @@ export function PatientDetailsEditor({
     }
   };
 
-  // Handle ICE "Also Next of Kin" toggle
-  const handleICEAsNOK = (iceId: string, checked: boolean) => {
-    setIceContacts((prev) => prev.map((c) => (c.id === iceId ? { ...c, is_also_nok: checked } : c)));
-    const contact = iceContacts.find((c) => c.id === iceId);
-    if (checked && contact) {
-      const alreadyExists = nokMembers.some((n) => n.name === contact.name && n.phone === contact.phone);
-      if (!alreadyExists) {
-        setNokMembers((prev) => [
-          ...prev,
-          {
-            id: crypto.randomUUID(),
-            name: contact.name,
-            phone: contact.phone,
-            email: contact.email,
-            relationship: contact.relationship,
-          },
-        ]);
-      }
-    } else if (!checked && contact) {
-      setNokMembers((prev) => prev.filter((n) => !(n.name === contact.name && n.phone === contact.phone)));
-    }
-    setHasChanges(true);
-  };
-
   // Parent tab groups for desktop/tablet
-  const PROFILE_TABS = ["personal", "medical", "nok-iced"];
+  const PROFILE_TABS = ["personal", "medical"];
   const ADMIN_TABS = ["calendar", "tasks", "documents"];
 
   const handleParentTabClick = (parent: string, tabs: string[]) => {
