@@ -873,8 +873,10 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   <div><ViewField label="Allergies" value={patient.allergies || "None recorded"} /></div>
 
                   {/* Current Medications */}
-                  <div>
-                    <Label>Current Medications</Label>
+                  <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
+                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
+                      <Pill className="h-3.5 w-3.5" /> Current Medications
+                    </h3>
                     {currentMedications.length === 0 ? (
                       <p className="text-xs text-muted-foreground">No medications recorded</p>
                     ) : (
