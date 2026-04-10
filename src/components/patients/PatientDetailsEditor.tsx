@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { AddressAutocomplete } from "@/components/patients/AddressAutocomplete";
 import { useNavigate } from "react-router-dom";
@@ -174,6 +175,7 @@ const SECTION_TABS: Record<string, string[]> = {
 
 export function PatientDetailsEditor({ patient, onSave, isSelfService = false, userEmail, lollipopCount = 0, rewardsLoading = false, section }: PatientDetailsEditorProps) {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { isDoctor } = useUserRole();
   const [isEditing, setIsEditing] = useState(false);
@@ -808,7 +810,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
       <div className="space-y-0">
         <ProfileBanner />
         <div className="rounded-xl border border-primary bg-card p-4 md:p-6 space-y-4">
-          <Tabs defaultValue={isSelfService && section ? (SECTION_TABS[section]?.[0] || "personal") : "personal"}>
+          <Tabs defaultValue={isMobile && isSelfService && section ? (SECTION_TABS[section]?.[0] || "personal") : "personal"}>
             <div className="flex justify-end mt-2">
               <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={() => setIsEditing(true)}>
                 <Pencil className="h-3.5 w-3.5" /> Edit
@@ -816,7 +818,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             </div>
           {/* View mode tabs - filtered by section on mobile for self-service */}
           {(() => {
-            const activeTabs = isSelfService && section ? SECTION_TABS[section] || null : null;
+            const activeTabs = isMobile && isSelfService && section ? SECTION_TABS[section] || null : null;
             const show = (tab: string) => !activeTabs || activeTabs.includes(tab);
             return (
               <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
@@ -1200,9 +1202,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
     <div className="space-y-0">
       <ProfileBanner />
       <div className="rounded-xl border border-primary bg-card p-4 md:p-6 space-y-4">
-        <Tabs defaultValue={isSelfService && section ? (SECTION_TABS[section]?.[0] || "personal") : "personal"}>
+        <Tabs defaultValue={isMobile && isSelfService && section ? (SECTION_TABS[section]?.[0] || "personal") : "personal"}>
           {(() => {
-            const activeTabs = isSelfService && section ? SECTION_TABS[section] || null : null;
+            const activeTabs = isMobile && isSelfService && section ? SECTION_TABS[section] || null : null;
             const show = (tab: string) => !activeTabs || activeTabs.includes(tab);
             return (
               <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">

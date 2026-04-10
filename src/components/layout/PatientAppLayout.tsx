@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { PageTransition } from "./PageTransition";
+import { BottomNav } from "./BottomNav";
 import { AnimatePresence } from "framer-motion";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { SubscriptionGateModal } from "@/components/auth/SubscriptionGateModal";
@@ -279,7 +280,7 @@ export function PatientAppLayout() {
       </header>
 
       {/* Main content */}
-      <main className="flex-1">
+      <main className="flex-1 pb-20 md:pb-0">
         <div className="px-4 py-6 md:px-8 md:pt-6 md:pb-8 max-w-7xl mx-auto">
           <AnimatePresence mode="wait">
             <PageTransition key={location.pathname}>
@@ -288,6 +289,8 @@ export function PatientAppLayout() {
           </AnimatePresence>
         </div>
       </main>
+
+      <BottomNav />
     </div>
   );
 }
