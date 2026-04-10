@@ -19,7 +19,7 @@ Group tabs into "My Profile" and "My Admin" parent tabs on web/tablet. Rename "H
 - In `renderTabsList()`, on non-mobile (desktop/iPad), replace flat tabs with grouped parent tabs:
   - **My Profile** parent tab → sub-tabs: Personal Information, Medical Information, NOK & ICE
   - **My Admin** parent tab → sub-tabs: My Calendar, My Tasks, My Documents
-  - Other tabs (Dashboard, My H/Care Panel, My Sessions, My Round Table) remain as flat top-level tabs
+  - Other tabs (Dashboard, My Care Panel, My Sessions, My Round Table) remain as flat top-level tabs
 - Implementation: Use a two-tier approach — top-level tabs include "My Profile" and "My Admin" as values. When selected, show a secondary sub-tab row below. The `activeTab` state will track the actual content tab (personal, medical, etc.), while a separate state tracks which parent group is active
 - On mobile, keep the existing section-filtered flat tab behavior unchanged
 
