@@ -4,7 +4,8 @@ import { cn } from "@/lib/utils";
 import { AddressAutocomplete } from "@/components/patients/AddressAutocomplete";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart, User, MapPin, Users, Briefcase, ShieldCheck, Store, Activity, Droplets, Scissors, GitBranch, Share2, Camera, Mail, Link2, Eye, Phone, HeartPulse, Settings } from "lucide-react";
+import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart, User, MapPin, Users, Briefcase, ShieldCheck, Store, Activity, Droplets, Scissors, GitBranch, Share2, Camera, Mail, Link2, Eye, Phone, HeartPulse, Settings, ChevronDown } from "lucide-react";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -945,128 +946,148 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 <p className="text-xs text-muted-foreground">View and manage medical records</p>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div className={sectionFrame + " space-y-5"}>
-                  <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Medical Information</h3>
-
-                  <div>
-                    <div className="grid gap-3 sm:grid-cols-4">
-                      <ViewField label="Height (cm)" value={patient.height_cm ? `${patient.height_cm}` : undefined} />
-                      <ViewField label="Weight (kg)" value={patient.weight_kg ? `${patient.weight_kg}` : undefined} />
-                      <ViewField label="BMI" value={bmi || undefined} />
-                      <ViewField label="Blood Type" value={patient.blood_type} />
-                    </div>
-                  </div>
-
-                  {/* Allergies */}
-                  <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
-                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
-                      <AlertCircle className="h-3.5 w-3.5" /> Allergies
-                    </h3>
-                    <p className="text-xs text-foreground">{patient.allergies || "None recorded"}</p>
-                  </div>
-
-                  {/* Medication */}
-                  <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
-                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
-                      <Pill className="h-3.5 w-3.5" /> Medication
-                    </h3>
-                    {currentMedications.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No medications recorded</p>
-                    ) : (
-                      <div className="space-y-1">
-                        {currentMedications.map(m => (
-                          <div key={m.id} className="flex items-center gap-2 p-1.5 rounded-lg bg-muted/30 border border-border/50">
-                            <Pill className="h-3 w-3 text-muted-foreground shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-medium text-foreground">{m.name}{m.dosage ? ` — ${m.dosage}` : ""}</p>
-                              {(m.start_date || m.end_date) && (
-                                <p className="text-[10px] text-muted-foreground">
-                                  {m.start_date ? format(new Date(m.start_date), "MMM yyyy") : "?"} — {m.end_date ? format(new Date(m.end_date), "MMM yyyy") : "Present"}
-                                </p>
-                              )}
-                            </div>
-                            <Badge className={`text-[8px] border-0 ${m.status === 'past' ? 'bg-muted text-muted-foreground' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'}`}>
-                              {m.status === 'past' ? 'Past' : 'Current'}
-                            </Badge>
-                            {m.is_chronic && <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[9px] font-bold text-destructive shrink-0">Chronic</span>}
-                          </div>
-                        ))}
+                <div className="space-y-3">
+                  {/* General Information */}
+                  <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
+                    <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
+                      <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> General Information</h3>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-3 pb-3">
+                      <div className="grid gap-3 sm:grid-cols-4">
+                        <ViewField label="Height (cm)" value={patient.height_cm ? `${patient.height_cm}` : undefined} />
+                        <ViewField label="Weight (kg)" value={patient.weight_kg ? `${patient.weight_kg}` : undefined} />
+                        <ViewField label="BMI" value={bmi || undefined} />
+                        <ViewField label="Blood Type" value={patient.blood_type} />
                       </div>
-                    )}
-                    {isChronic && (
-                      <div className="mt-2">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive"><Pill className="h-2.5 w-2.5" />Chronic Patient</span>
-                      </div>
-                    )}
-                  </div>
+                    </CollapsibleContent>
+                  </Collapsible>
 
-                  {/* Conditions & Diagnoses */}
-                  <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
-                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
-                      <HeartPulse className="h-3.5 w-3.5" /> Conditions & Diagnoses
-                    </h3>
-                    {conditionsDiagnoses.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No conditions recorded</p>
-                    ) : (
-                      <div className="space-y-1">
-                        {conditionsDiagnoses.map(c => (
-                          <div key={c.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
-                            <div className="flex items-center gap-2">
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-medium text-foreground">{c.name}</p>
-                                <p className="text-[10px] text-muted-foreground">
-                                  {c.diagnosed_date ? format(new Date(c.diagnosed_date), "MMM d, yyyy") : "Date unknown"}
-                                  {c.diagnosed_by ? ` · Dr. ${c.diagnosed_by}` : ""}
-                                </p>
+                  {/* Allergies, Medication & Conditions */}
+                  <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
+                    <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
+                      <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Allergies, Medication & Conditions</h3>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-3 pb-3 space-y-3">
+                      {/* Allergies */}
+                      <div className="rounded-lg border border-border/50 p-2.5 space-y-1">
+                        <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5">
+                          <AlertCircle className="h-3.5 w-3.5" /> Allergies
+                        </h4>
+                        <p className="text-xs text-foreground">{patient.allergies || "None recorded"}</p>
+                      </div>
+
+                      {/* Medication */}
+                      <div className="rounded-lg border border-border/50 p-2.5 space-y-1">
+                        <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5">
+                          <Pill className="h-3.5 w-3.5" /> Medication
+                        </h4>
+                        {currentMedications.length === 0 ? (
+                          <p className="text-xs text-muted-foreground">No medications recorded</p>
+                        ) : (
+                          <div className="space-y-1">
+                            {currentMedications.map(m => (
+                              <div key={m.id} className="flex items-center gap-2 p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                                <Pill className="h-3 w-3 text-muted-foreground shrink-0" />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-medium text-foreground">{m.name}{m.dosage ? ` — ${m.dosage}` : ""}</p>
+                                  {(m.start_date || m.end_date) && (
+                                    <p className="text-[10px] text-muted-foreground">
+                                      {m.start_date ? format(new Date(m.start_date), "MMM yyyy") : "?"} — {m.end_date ? format(new Date(m.end_date), "MMM yyyy") : "Present"}
+                                    </p>
+                                  )}
+                                </div>
+                                <Badge className={`text-[8px] border-0 ${m.status === 'past' ? 'bg-muted text-muted-foreground' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'}`}>
+                                  {m.status === 'past' ? 'Past' : 'Current'}
+                                </Badge>
+                                {m.is_chronic && <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[9px] font-bold text-destructive shrink-0">Chronic</span>}
                               </div>
-                              <Badge className={`text-[8px] border-0 ${c.status === 'resolved' ? 'bg-muted text-muted-foreground' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'}`}>
-                                {c.status === 'resolved' ? 'Resolved' : 'Active'}
-                              </Badge>
-                            </div>
+                            ))}
                           </div>
-                        ))}
+                        )}
+                        {isChronic && (
+                          <div className="mt-2">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive"><Pill className="h-2.5 w-2.5" />Chronic Patient</span>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
 
-                  {/* Surgeries */}
-                  <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
-                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
-                     <Scissors className="h-3.5 w-3.5" /> Surgeries and Dates
-                   </h3>
-                    {surgeries.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No surgeries recorded</p>
-                    ) : (
-                      <div className="space-y-1">
-                        {surgeries.map((surgery) => (
-                          <div key={surgery.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
-                            <p className="text-xs font-medium text-foreground">{surgery.name}</p>
-                            <p className="text-[10px] text-muted-foreground">{formatSurgeryDate(surgery.date, surgery.date_precision)}</p>
-                            {surgery.notes && <p className="text-[10px] text-muted-foreground mt-0.5">{surgery.notes}</p>}
+                      {/* Conditions & Diagnoses */}
+                      <div className="rounded-lg border border-border/50 p-2.5 space-y-1">
+                        <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5">
+                          <HeartPulse className="h-3.5 w-3.5" /> Conditions & Diagnoses
+                        </h4>
+                        {conditionsDiagnoses.length === 0 ? (
+                          <p className="text-xs text-muted-foreground">No conditions recorded</p>
+                        ) : (
+                          <div className="space-y-1">
+                            {conditionsDiagnoses.map(c => (
+                              <div key={c.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
+                                <div className="flex items-center gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-medium text-foreground">{c.name}</p>
+                                    <p className="text-[10px] text-muted-foreground">
+                                      {c.diagnosed_date ? format(new Date(c.diagnosed_date), "MMM d, yyyy") : "Date unknown"}
+                                      {c.diagnosed_by ? ` · Dr. ${c.diagnosed_by}` : ""}
+                                    </p>
+                                  </div>
+                                  <Badge className={`text-[8px] border-0 ${c.status === 'resolved' ? 'bg-muted text-muted-foreground' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'}`}>
+                                    {c.status === 'resolved' ? 'Resolved' : 'Active'}
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        )}
                       </div>
-                    )}
-                  </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+
+                  {/* Surgeries & Dates */}
+                  <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
+                    <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
+                      <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Scissors className="h-3.5 w-3.5" /> Surgeries & Dates</h3>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-3 pb-3">
+                      {surgeries.length === 0 ? (
+                        <p className="text-xs text-muted-foreground">No surgeries recorded</p>
+                      ) : (
+                        <div className="space-y-1">
+                          {surgeries.map((surgery) => (
+                            <div key={surgery.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
+                              <p className="text-xs font-medium text-foreground">{surgery.name}</p>
+                              <p className="text-[10px] text-muted-foreground">{formatSurgeryDate(surgery.date, surgery.date_precision)}</p>
+                              {surgery.notes && <p className="text-[10px] text-muted-foreground mt-0.5">{surgery.notes}</p>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CollapsibleContent>
+                  </Collapsible>
 
                   {/* Family History */}
-                  <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
-                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
-                     <GitBranch className="h-3.5 w-3.5" /> Family History
-                   </h3>
-                    {familyHistory.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No family history recorded</p>
-                    ) : (
-                      <div className="space-y-1">
-                        {familyHistory.map((entry) => (
-                          <div key={entry.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
-                            <p className="text-xs font-medium text-foreground">{entry.relation}</p>
-                            <p className="text-[10px] text-muted-foreground">{entry.condition}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
+                    <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
+                      <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><GitBranch className="h-3.5 w-3.5" /> Family History</h3>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-3 pb-3">
+                      {familyHistory.length === 0 ? (
+                        <p className="text-xs text-muted-foreground">No family history recorded</p>
+                      ) : (
+                        <div className="space-y-1">
+                          {familyHistory.map((entry) => (
+                            <div key={entry.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
+                              <p className="text-xs font-medium text-foreground">{entry.relation}</p>
+                              <p className="text-[10px] text-muted-foreground">{entry.condition}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CollapsibleContent>
+                  </Collapsible>
 
                   <div><OrganDonorView /></div>
                 </div>
@@ -1391,257 +1412,277 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               <p className="text-xs text-muted-foreground">View and manage medical records</p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className={sectionFrame + " space-y-4"}>
-                <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> Medical Information</h3>
-
-                <div>
-                  <div className="grid gap-3 sm:grid-cols-4">
-                    <div className="space-y-1.5"><Label htmlFor="height_cm">Height (cm)</Label><Input id="height_cm" className="text-sm" type="number" step="0.1" value={formData.height_cm} onChange={(e) => updateFormData({ height_cm: e.target.value })} placeholder="e.g., 175" /></div>
-                    <div className="space-y-1.5"><Label htmlFor="weight_kg">Weight (kg)</Label><Input id="weight_kg" className="text-sm" type="number" step="0.1" value={formData.weight_kg} onChange={(e) => updateFormData({ weight_kg: e.target.value })} placeholder="e.g., 70" /></div>
-                    <div className="space-y-1.5"><Label>BMI</Label><Input className="text-sm bg-muted" value={bmi || "—"} disabled /></div>
-                    <div className="space-y-1.5">
-                      <Label className="flex items-center gap-1.5"><Droplets className="h-3.5 w-3.5" /> Blood Type</Label>
-                      <Select value={formData.blood_type} onValueChange={(value) => updateFormData({ blood_type: value })}>
-                        <SelectTrigger className="text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
-                        <SelectContent>{BLOOD_TYPES.map(bt => <SelectItem key={bt} value={bt}>{bt}</SelectItem>)}</SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Allergies */}
-                <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
-                  <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</Label>
-                  <Textarea id="allergies" className="text-sm" value={formData.allergies} onChange={(e) => updateFormData({ allergies: e.target.value })} placeholder="List any allergies (medications, food, etc.)" rows={2} />
-                </div>
-
-                {/* Medication */}
-                <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
-                  <div className="flex items-center justify-between mb-2">
-                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Medication</Label>
-                    {!showAddMed && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddMed(true)}><Plus className="h-3 w-3" />Add</Button>}
-                  </div>
-                  {showAddMed && (
-                    <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <div className="space-y-1.5"><Label>Medication Name *</Label><Input className="text-sm" value={newMed.name} onChange={(e) => setNewMed(p => ({ ...p, name: e.target.value }))} placeholder="e.g., Metformin" /></div>
-                        <div className="space-y-1.5"><Label>Dosage</Label><Input className="text-sm" value={newMed.dosage} onChange={(e) => setNewMed(p => ({ ...p, dosage: e.target.value }))} placeholder="e.g., 500mg twice daily" /></div>
-                        <div className="space-y-1.5">
-                          <Label>Status</Label>
-                          <Select value={newMed.status} onValueChange={(v) => setNewMed(p => ({ ...p, status: v as "current" | "past" }))}>
-                            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="current">Current</SelectItem>
-                              <SelectItem value="past">Past</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-1.5"><Label>Start Date</Label><Input className="text-sm" type="date" value={newMed.start_date} onChange={(e) => setNewMed(p => ({ ...p, start_date: e.target.value }))} /></div>
-                        {newMed.status === 'past' && (
-                          <div className="space-y-1.5"><Label>End Date</Label><Input className="text-sm" type="date" value={newMed.end_date} onChange={(e) => setNewMed(p => ({ ...p, end_date: e.target.value }))} /></div>
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox checked={newMed.is_chronic} onCheckedChange={(c) => setNewMed(p => ({ ...p, is_chronic: c as boolean }))} />
-                        <Label className="text-xs">This is a chronic medication</Label>
-                      </div>
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddMed(false); setEditingMedId(null); setNewMed({ name: "", dosage: "", is_chronic: false, status: "current", start_date: "", end_date: "" }); }}>Cancel</Button>
-                        <Button size="sm" className="text-xs h-7" onClick={handleAddMed}>{editingMedId ? "Save" : "Add"}</Button>
-                      </div>
-                    </div>
-                  )}
-                  {currentMedications.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No medications recorded</p>
-                  ) : (
-                    <div className="space-y-1">
-                      {currentMedications.map(m => (
-                        <div key={m.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <Switch checked={m.is_chronic} onCheckedChange={() => handleToggleMedChronic(m.id)} className="shrink-0 scale-75" />
-                            <div className="min-w-0">
-                              <p className="text-xs font-medium text-foreground truncate">{m.name}{m.dosage ? ` — ${m.dosage}` : ""}</p>
-                              {(m.start_date || m.end_date) && (
-                                <p className="text-[10px] text-muted-foreground">
-                                  {m.start_date ? format(new Date(m.start_date), "MMM yyyy") : "?"} — {m.end_date ? format(new Date(m.end_date), "MMM yyyy") : "Present"}
-                                </p>
-                              )}
-                            </div>
-                            <Badge className={`text-[8px] border-0 ${m.status === 'past' ? 'bg-muted text-muted-foreground' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'}`}>
-                              {m.status === 'past' ? 'Past' : 'Current'}
-                            </Badge>
-                            {m.is_chronic && <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[9px] font-bold text-destructive shrink-0">Chronic</span>}
-                          </div>
-                          <div className="flex gap-1 shrink-0">
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditMed(m)}><Pencil className="h-3 w-3" /></Button>
-                            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => { setCurrentMedications(prev => prev.filter(x => x.id !== m.id)); setHasChanges(true); }}><Trash2 className="h-3 w-3" /></Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {isChronic && (
-                    <div className="mt-2">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive"><Pill className="h-2.5 w-2.5" />Chronic Patient</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Conditions & Diagnoses */}
-                <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
-                  <div className="flex items-center justify-between mb-2">
-                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><HeartPulse className="h-3.5 w-3.5" /> Conditions & Diagnoses</Label>
-                    {!showAddCondition && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddCondition(true)}><Plus className="h-3 w-3" />Add</Button>}
-                  </div>
-                  {showAddCondition && (
-                    <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <div className="space-y-1.5"><Label>Condition/Diagnosis *</Label><Input className="text-sm" value={newCondition.name} onChange={(e) => setNewCondition(p => ({ ...p, name: e.target.value }))} placeholder="e.g., Type 2 Diabetes" /></div>
-                        <div className="space-y-1.5"><Label>Date Diagnosed</Label><Input className="text-sm" type="date" value={newCondition.diagnosed_date} onChange={(e) => setNewCondition(p => ({ ...p, diagnosed_date: e.target.value }))} /></div>
-                        <div className="space-y-1.5"><Label>Diagnosed By</Label><Input className="text-sm" value={newCondition.diagnosed_by} onChange={(e) => setNewCondition(p => ({ ...p, diagnosed_by: e.target.value }))} placeholder="Doctor name" /></div>
-                        <div className="space-y-1.5">
-                          <Label>Status</Label>
-                          <Select value={newCondition.status} onValueChange={(v) => setNewCondition(p => ({ ...p, status: v as "active" | "resolved" }))}>
-                            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="active">Active</SelectItem>
-                              <SelectItem value="resolved">Resolved</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddCondition(false); setEditingConditionId(null); setNewCondition({ name: "", diagnosed_date: "", diagnosed_by: "", status: "active" }); }}>Cancel</Button>
-                        <Button size="sm" className="text-xs h-7" onClick={handleAddCondition}>{editingConditionId ? "Save" : "Add"}</Button>
-                      </div>
-                    </div>
-                  )}
-                  {conditionsDiagnoses.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No conditions recorded</p>
-                  ) : (
-                    <div className="space-y-1">
-                      {conditionsDiagnoses.map(c => (
-                        <div key={c.id} className="flex items-center justify-between p-1.5 rounded-lg bg-primary/5 border border-primary/20">
-                          <div>
-                            <p className="text-xs font-medium text-foreground">{c.name}</p>
-                            <p className="text-[10px] text-muted-foreground">
-                              {c.diagnosed_date ? format(new Date(c.diagnosed_date), "MMM d, yyyy") : "Date unknown"}
-                              {c.diagnosed_by ? ` · Dr. ${c.diagnosed_by}` : ""}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-1 shrink-0">
-                            <Badge className={`text-[8px] border-0 ${c.status === 'resolved' ? 'bg-muted text-muted-foreground' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'}`}>
-                              {c.status === 'resolved' ? 'Resolved' : 'Active'}
-                            </Badge>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditCondition(c)}><Pencil className="h-3 w-3" /></Button>
-                            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => { setConditionsDiagnoses(prev => prev.filter(x => x.id !== c.id)); setHasChanges(true); }}><Trash2 className="h-3 w-3" /></Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Surgeries */}
-                <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
-                  <div className="flex items-center justify-between mb-2">
-                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
-                     <Scissors className="h-3.5 w-3.5" /> Surgeries and Dates
-                   </h3>
-                    {!showAddSurgery && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddSurgery(true)}><Plus className="h-3 w-3" />Add</Button>}
-                  </div>
-                  {showAddSurgery && (
-                    <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <div className="space-y-1.5"><Label>Surgery Name *</Label><Input className="text-sm" value={newSurgery.name} onChange={(e) => setNewSurgery(prev => ({ ...prev, name: e.target.value }))} placeholder="e.g., Appendectomy" /></div>
-                        <div className="space-y-1.5">
-                          <Label>Date Precision</Label>
-                          <Select value={newSurgery.date_precision} onValueChange={(v) => setNewSurgery(prev => ({ ...prev, date_precision: v as any, date: "" }))}>
-                            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="exact">Exact Date</SelectItem>
-                              <SelectItem value="month">Month & Year</SelectItem>
-                              <SelectItem value="year">Year Only</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
+              <div className="space-y-3">
+                {/* General Information */}
+                <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
+                  <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
+                    <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Activity className="h-3.5 w-3.5" /> General Information</h3>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="px-3 pb-3">
+                    <div className="grid gap-3 sm:grid-cols-4">
+                      <div className="space-y-1.5"><Label htmlFor="height_cm">Height (cm)</Label><Input id="height_cm" className="text-sm" type="number" step="0.1" value={formData.height_cm} onChange={(e) => updateFormData({ height_cm: e.target.value })} placeholder="e.g., 175" /></div>
+                      <div className="space-y-1.5"><Label htmlFor="weight_kg">Weight (kg)</Label><Input id="weight_kg" className="text-sm" type="number" step="0.1" value={formData.weight_kg} onChange={(e) => updateFormData({ weight_kg: e.target.value })} placeholder="e.g., 70" /></div>
+                      <div className="space-y-1.5"><Label>BMI</Label><Input className="text-sm bg-muted" value={bmi || "—"} disabled /></div>
                       <div className="space-y-1.5">
-                        <Label>Date *</Label>
-                        {newSurgery.date_precision === 'exact' && <Input className="text-sm" type="date" value={newSurgery.date} onChange={(e) => setNewSurgery(prev => ({ ...prev, date: e.target.value }))} />}
-                        {newSurgery.date_precision === 'month' && <Input className="text-sm" type="month" value={newSurgery.date} onChange={(e) => setNewSurgery(prev => ({ ...prev, date: e.target.value }))} />}
-                        {newSurgery.date_precision === 'year' && <Input className="text-sm" type="number" min="1900" max="2099" value={newSurgery.date} onChange={(e) => setNewSurgery(prev => ({ ...prev, date: e.target.value }))} placeholder="e.g., 2020" />}
-                      </div>
-                      <div className="space-y-1.5"><Label>Notes (optional)</Label><Input className="text-sm" value={newSurgery.notes} onChange={(e) => setNewSurgery(prev => ({ ...prev, notes: e.target.value }))} placeholder="Additional notes" /></div>
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddSurgery(false); setEditingSurgeryId(null); setNewSurgery({ name: "", date: "", notes: "", date_precision: "exact" }); }}>Cancel</Button>
-                        <Button size="sm" className="text-xs h-7" onClick={handleAddSurgery}>{editingSurgeryId ? "Save" : "Add"}</Button>
+                        <Label className="flex items-center gap-1.5"><Droplets className="h-3.5 w-3.5" /> Blood Type</Label>
+                        <Select value={formData.blood_type} onValueChange={(value) => updateFormData({ blood_type: value })}>
+                          <SelectTrigger className="text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
+                          <SelectContent>{BLOOD_TYPES.map(bt => <SelectItem key={bt} value={bt}>{bt}</SelectItem>)}</SelectContent>
+                        </Select>
                       </div>
                     </div>
-                  )}
-                  {surgeries.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No surgeries recorded</p>
-                  ) : (
-                    <div className="space-y-1">
-                      {surgeries.map((surgery) => (
-                        <div key={surgery.id} className="flex items-start justify-between p-1.5 rounded-lg bg-primary/5 border border-primary/20">
-                          <div>
-                            <p className="text-xs font-medium text-foreground">{surgery.name}</p>
-                            <p className="text-[10px] text-muted-foreground">{formatSurgeryDate(surgery.date, surgery.date_precision)}</p>
-                            {surgery.notes && <p className="text-[10px] text-muted-foreground mt-0.5">{surgery.notes}</p>}
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Allergies, Medication & Conditions */}
+                <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
+                  <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
+                    <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Allergies, Medication & Conditions</h3>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="px-3 pb-3 space-y-3">
+                    {/* Allergies */}
+                    <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
+                      <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5" /> Allergies</Label>
+                      <Textarea id="allergies" className="text-sm" value={formData.allergies} onChange={(e) => updateFormData({ allergies: e.target.value })} placeholder="List any allergies (medications, food, etc.)" rows={2} />
+                    </div>
+
+                    {/* Medication */}
+                    <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
+                      <div className="flex items-center justify-between mb-2">
+                        <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Medication</Label>
+                        {!showAddMed && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddMed(true)}><Plus className="h-3 w-3" />Add</Button>}
+                      </div>
+                      {showAddMed && (
+                        <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            <div className="space-y-1.5"><Label>Medication Name *</Label><Input className="text-sm" value={newMed.name} onChange={(e) => setNewMed(p => ({ ...p, name: e.target.value }))} placeholder="e.g., Metformin" /></div>
+                            <div className="space-y-1.5"><Label>Dosage</Label><Input className="text-sm" value={newMed.dosage} onChange={(e) => setNewMed(p => ({ ...p, dosage: e.target.value }))} placeholder="e.g., 500mg twice daily" /></div>
+                            <div className="space-y-1.5">
+                              <Label>Status</Label>
+                              <Select value={newMed.status} onValueChange={(v) => setNewMed(p => ({ ...p, status: v as "current" | "past" }))}>
+                                <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="current">Current</SelectItem>
+                                  <SelectItem value="past">Past</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-1.5"><Label>Start Date</Label><Input className="text-sm" type="date" value={newMed.start_date} onChange={(e) => setNewMed(p => ({ ...p, start_date: e.target.value }))} /></div>
+                            {newMed.status === 'past' && (
+                              <div className="space-y-1.5"><Label>End Date</Label><Input className="text-sm" type="date" value={newMed.end_date} onChange={(e) => setNewMed(p => ({ ...p, end_date: e.target.value }))} /></div>
+                            )}
                           </div>
-                          <div className="flex gap-1 shrink-0">
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditSurgery(surgery)}><Pencil className="h-3 w-3" /></Button>
-                            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => handleRemoveSurgery(surgery.id)}><Trash2 className="h-3 w-3" /></Button>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox checked={newMed.is_chronic} onCheckedChange={(c) => setNewMed(p => ({ ...p, is_chronic: c as boolean }))} />
+                            <Label className="text-xs">This is a chronic medication</Label>
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddMed(false); setEditingMedId(null); setNewMed({ name: "", dosage: "", is_chronic: false, status: "current", start_date: "", end_date: "" }); }}>Cancel</Button>
+                            <Button size="sm" className="text-xs h-7" onClick={handleAddMed}>{editingMedId ? "Save" : "Add"}</Button>
                           </div>
                         </div>
-                      ))}
+                      )}
+                      {currentMedications.length === 0 ? (
+                        <p className="text-xs text-muted-foreground">No medications recorded</p>
+                      ) : (
+                        <div className="space-y-1">
+                          {currentMedications.map(m => (
+                            <div key={m.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <Switch checked={m.is_chronic} onCheckedChange={() => handleToggleMedChronic(m.id)} className="shrink-0 scale-75" />
+                                <div className="min-w-0">
+                                  <p className="text-xs font-medium text-foreground truncate">{m.name}{m.dosage ? ` — ${m.dosage}` : ""}</p>
+                                  {(m.start_date || m.end_date) && (
+                                    <p className="text-[10px] text-muted-foreground">
+                                      {m.start_date ? format(new Date(m.start_date), "MMM yyyy") : "?"} — {m.end_date ? format(new Date(m.end_date), "MMM yyyy") : "Present"}
+                                    </p>
+                                  )}
+                                </div>
+                                <Badge className={`text-[8px] border-0 ${m.status === 'past' ? 'bg-muted text-muted-foreground' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'}`}>
+                                  {m.status === 'past' ? 'Past' : 'Current'}
+                                </Badge>
+                                {m.is_chronic && <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[9px] font-bold text-destructive shrink-0">Chronic</span>}
+                              </div>
+                              <div className="flex gap-1 shrink-0">
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditMed(m)}><Pencil className="h-3 w-3" /></Button>
+                                <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => { setCurrentMedications(prev => prev.filter(x => x.id !== m.id)); setHasChanges(true); }}><Trash2 className="h-3 w-3" /></Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {isChronic && (
+                        <div className="mt-2">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive"><Pill className="h-2.5 w-2.5" />Chronic Patient</span>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+
+                    {/* Conditions & Diagnoses */}
+                    <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
+                      <div className="flex items-center justify-between mb-2">
+                        <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><HeartPulse className="h-3.5 w-3.5" /> Conditions & Diagnoses</Label>
+                        {!showAddCondition && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddCondition(true)}><Plus className="h-3 w-3" />Add</Button>}
+                      </div>
+                      {showAddCondition && (
+                        <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            <div className="space-y-1.5"><Label>Condition/Diagnosis *</Label><Input className="text-sm" value={newCondition.name} onChange={(e) => setNewCondition(p => ({ ...p, name: e.target.value }))} placeholder="e.g., Type 2 Diabetes" /></div>
+                            <div className="space-y-1.5"><Label>Date Diagnosed</Label><Input className="text-sm" type="date" value={newCondition.diagnosed_date} onChange={(e) => setNewCondition(p => ({ ...p, diagnosed_date: e.target.value }))} /></div>
+                            <div className="space-y-1.5"><Label>Diagnosed By</Label><Input className="text-sm" value={newCondition.diagnosed_by} onChange={(e) => setNewCondition(p => ({ ...p, diagnosed_by: e.target.value }))} placeholder="Doctor name" /></div>
+                            <div className="space-y-1.5">
+                              <Label>Status</Label>
+                              <Select value={newCondition.status} onValueChange={(v) => setNewCondition(p => ({ ...p, status: v as "active" | "resolved" }))}>
+                                <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="active">Active</SelectItem>
+                                  <SelectItem value="resolved">Resolved</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddCondition(false); setEditingConditionId(null); setNewCondition({ name: "", diagnosed_date: "", diagnosed_by: "", status: "active" }); }}>Cancel</Button>
+                            <Button size="sm" className="text-xs h-7" onClick={handleAddCondition}>{editingConditionId ? "Save" : "Add"}</Button>
+                          </div>
+                        </div>
+                      )}
+                      {conditionsDiagnoses.length === 0 ? (
+                        <p className="text-xs text-muted-foreground">No conditions recorded</p>
+                      ) : (
+                        <div className="space-y-1">
+                          {conditionsDiagnoses.map(c => (
+                            <div key={c.id} className="flex items-center justify-between p-1.5 rounded-lg bg-primary/5 border border-primary/20">
+                              <div>
+                                <p className="text-xs font-medium text-foreground">{c.name}</p>
+                                <p className="text-[10px] text-muted-foreground">
+                                  {c.diagnosed_date ? format(new Date(c.diagnosed_date), "MMM d, yyyy") : "Date unknown"}
+                                  {c.diagnosed_by ? ` · Dr. ${c.diagnosed_by}` : ""}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <Badge className={`text-[8px] border-0 ${c.status === 'resolved' ? 'bg-muted text-muted-foreground' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'}`}>
+                                  {c.status === 'resolved' ? 'Resolved' : 'Active'}
+                                </Badge>
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditCondition(c)}><Pencil className="h-3 w-3" /></Button>
+                                <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => { setConditionsDiagnoses(prev => prev.filter(x => x.id !== c.id)); setHasChanges(true); }}><Trash2 className="h-3 w-3" /></Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Surgeries & Dates */}
+                <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
+                  <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
+                    <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Scissors className="h-3.5 w-3.5" /> Surgeries & Dates</h3>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="px-3 pb-3 space-y-2">
+                    <div className="flex justify-end">
+                      {!showAddSurgery && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddSurgery(true)}><Plus className="h-3 w-3" />Add</Button>}
+                    </div>
+                    {showAddSurgery && (
+                      <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          <div className="space-y-1.5"><Label>Surgery Name *</Label><Input className="text-sm" value={newSurgery.name} onChange={(e) => setNewSurgery(prev => ({ ...prev, name: e.target.value }))} placeholder="e.g., Appendectomy" /></div>
+                          <div className="space-y-1.5">
+                            <Label>Date Precision</Label>
+                            <Select value={newSurgery.date_precision} onValueChange={(v) => setNewSurgery(prev => ({ ...prev, date_precision: v as any, date: "" }))}>
+                              <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="exact">Exact Date</SelectItem>
+                                <SelectItem value="month">Month & Year</SelectItem>
+                                <SelectItem value="year">Year Only</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label>Date *</Label>
+                          {newSurgery.date_precision === 'exact' && <Input className="text-sm" type="date" value={newSurgery.date} onChange={(e) => setNewSurgery(prev => ({ ...prev, date: e.target.value }))} />}
+                          {newSurgery.date_precision === 'month' && <Input className="text-sm" type="month" value={newSurgery.date} onChange={(e) => setNewSurgery(prev => ({ ...prev, date: e.target.value }))} />}
+                          {newSurgery.date_precision === 'year' && <Input className="text-sm" type="number" min="1900" max="2099" value={newSurgery.date} onChange={(e) => setNewSurgery(prev => ({ ...prev, date: e.target.value }))} placeholder="e.g., 2020" />}
+                        </div>
+                        <div className="space-y-1.5"><Label>Notes (optional)</Label><Input className="text-sm" value={newSurgery.notes} onChange={(e) => setNewSurgery(prev => ({ ...prev, notes: e.target.value }))} placeholder="Additional notes" /></div>
+                        <div className="flex justify-end gap-2">
+                          <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddSurgery(false); setEditingSurgeryId(null); setNewSurgery({ name: "", date: "", notes: "", date_precision: "exact" }); }}>Cancel</Button>
+                          <Button size="sm" className="text-xs h-7" onClick={handleAddSurgery}>{editingSurgeryId ? "Save" : "Add"}</Button>
+                        </div>
+                      </div>
+                    )}
+                    {surgeries.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No surgeries recorded</p>
+                    ) : (
+                      <div className="space-y-1">
+                        {surgeries.map((surgery) => (
+                          <div key={surgery.id} className="flex items-start justify-between p-1.5 rounded-lg bg-primary/5 border border-primary/20">
+                            <div>
+                              <p className="text-xs font-medium text-foreground">{surgery.name}</p>
+                              <p className="text-[10px] text-muted-foreground">{formatSurgeryDate(surgery.date, surgery.date_precision)}</p>
+                              {surgery.notes && <p className="text-[10px] text-muted-foreground mt-0.5">{surgery.notes}</p>}
+                            </div>
+                            <div className="flex gap-1 shrink-0">
+                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditSurgery(surgery)}><Pencil className="h-3 w-3" /></Button>
+                              <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => handleRemoveSurgery(surgery.id)}><Trash2 className="h-3 w-3" /></Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
 
                 {/* Family History */}
-                <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
-                  <div className="flex items-center justify-between mb-2">
-                   <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
-                     <GitBranch className="h-3.5 w-3.5" /> Family History
-                   </h3>
-                    {!showAddFamily && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddFamily(true)}><Plus className="h-3 w-3" />Add</Button>}
-                  </div>
-                  {showAddFamily && (
-                    <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <div className="space-y-1.5"><Label>Relation *</Label><Input className="text-sm" value={newFamilyEntry.relation} onChange={(e) => setNewFamilyEntry(prev => ({ ...prev, relation: e.target.value }))} placeholder="e.g., Mother" /></div>
-                        <div className="space-y-1.5"><Label>Condition *</Label><Input className="text-sm" value={newFamilyEntry.condition} onChange={(e) => setNewFamilyEntry(prev => ({ ...prev, condition: e.target.value }))} placeholder="e.g., Diabetes" /></div>
-                      </div>
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddFamily(false); setEditingFamilyId(null); setNewFamilyEntry({ relation: "", condition: "" }); }}>Cancel</Button>
-                        <Button size="sm" className="text-xs h-7" onClick={handleAddFamilyEntry}>{editingFamilyId ? "Save" : "Add"}</Button>
-                      </div>
+                <Collapsible defaultOpen className="rounded-xl border border-primary/30 bg-card">
+                  <CollapsibleTrigger className="flex w-full items-center justify-between p-3 group">
+                    <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><GitBranch className="h-3.5 w-3.5" /> Family History</h3>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="px-3 pb-3 space-y-2">
+                    <div className="flex justify-end">
+                      {!showAddFamily && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddFamily(true)}><Plus className="h-3 w-3" />Add</Button>}
                     </div>
-                  )}
-                  {familyHistory.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No family history recorded</p>
-                  ) : (
-                    <div className="space-y-1">
-                      {familyHistory.map((entry) => (
-                        <div key={entry.id} className="flex items-center justify-between p-1.5 rounded-lg bg-primary/5 border border-primary/20">
-                          <div>
-                            <p className="text-xs font-medium text-foreground">{entry.relation}</p>
-                            <p className="text-[10px] text-muted-foreground">{entry.condition}</p>
-                          </div>
-                          <div className="flex gap-1 shrink-0">
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditFamilyEntry(entry)}><Pencil className="h-3 w-3" /></Button>
-                            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => handleRemoveFamilyEntry(entry.id)}><Trash2 className="h-3 w-3" /></Button>
-                          </div>
+                    {showAddFamily && (
+                      <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          <div className="space-y-1.5"><Label>Relation *</Label><Input className="text-sm" value={newFamilyEntry.relation} onChange={(e) => setNewFamilyEntry(prev => ({ ...prev, relation: e.target.value }))} placeholder="e.g., Mother" /></div>
+                          <div className="space-y-1.5"><Label>Condition *</Label><Input className="text-sm" value={newFamilyEntry.condition} onChange={(e) => setNewFamilyEntry(prev => ({ ...prev, condition: e.target.value }))} placeholder="e.g., Diabetes" /></div>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                        <div className="flex justify-end gap-2">
+                          <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddFamily(false); setEditingFamilyId(null); setNewFamilyEntry({ relation: "", condition: "" }); }}>Cancel</Button>
+                          <Button size="sm" className="text-xs h-7" onClick={handleAddFamilyEntry}>{editingFamilyId ? "Save" : "Add"}</Button>
+                        </div>
+                      </div>
+                    )}
+                    {familyHistory.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No family history recorded</p>
+                    ) : (
+                      <div className="space-y-1">
+                        {familyHistory.map((entry) => (
+                          <div key={entry.id} className="flex items-center justify-between p-1.5 rounded-lg bg-primary/5 border border-primary/20">
+                            <div>
+                              <p className="text-xs font-medium text-foreground">{entry.relation}</p>
+                              <p className="text-[10px] text-muted-foreground">{entry.condition}</p>
+                            </div>
+                            <div className="flex gap-1 shrink-0">
+                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditFamilyEntry(entry)}><Pencil className="h-3 w-3" /></Button>
+                              <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => handleRemoveFamilyEntry(entry.id)}><Trash2 className="h-3 w-3" /></Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
 
                 {/* Organ Donor */}
-                <div>
+                <div className="rounded-xl border border-primary/30 bg-card p-3">
                   <Label className="mb-3 block">Organ Donor</Label>
                   <div className="flex items-center gap-3 mb-3">
                     <Switch checked={formData.organ_donor} onCheckedChange={(checked) => { updateFormData({ organ_donor: checked }); if (!checked) { setOrganDonorOrgans([]); setHasChanges(true); } }} />
