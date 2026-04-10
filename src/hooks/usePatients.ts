@@ -108,7 +108,7 @@ export interface Patient {
   family_history: FamilyHistoryEntry[] | null;
   organ_donor: boolean | null;
   organ_donor_organs: string[] | null;
-  ice_contacts: ICEContact[] | null;
+  ice_contacts?: ICEContact[] | null;
   next_of_kin_members: NextOfKinMember[] | null;
   current_medications: CurrentMedication[] | null;
   conditions_diagnoses?: ConditionDiagnosis[] | null;
@@ -171,7 +171,7 @@ const toPatient = (data: any, lastVisit?: string | null): Patient => ({
   surgeries: parseSurgeries(data.surgeries),
   pharmacies: parsePharmacies(data.pharmacies),
   family_history: parseFamilyHistory(data.family_history),
-  ice_contacts: parseICEContacts(data.ice_contacts),
+  ice_contacts: parseICEContacts(data.ice_contacts ?? null),
   next_of_kin_members: parseNOKMembers(data.next_of_kin_members),
   current_medications: parseCurrentMedications(data.current_medications),
   conditions_diagnoses: parseConditionsDiagnoses(data.conditions_diagnoses),
@@ -180,7 +180,7 @@ const toPatient = (data: any, lastVisit?: string | null): Patient => ({
 
 // Helper to prepare patient data for DB (convert surgeries/pharmacies to JSON)
 const toDbPatient = (updates: Partial<Patient>): Record<string, any> => {
-  const { surgeries, pharmacies, family_history, organ_donor_organs, last_visit, ice_contacts, next_of_kin_members, current_medications, conditions_diagnoses, ...rest } = updates;
+  const { surgeries, pharmacies, family_history, organ_donor_organs, last_visit, ice_contacts, next_of_kin_members, current_medications, conditions_diagnoses, ...rest } = updates as any;
   return {
     ...rest,
     ...(surgeries !== undefined ? { surgeries: surgeries as unknown as Json } : {}),
