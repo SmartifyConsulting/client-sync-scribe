@@ -1385,61 +1385,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               </CollapsibleContent>
             </Collapsible>
 
-            {/* ICE Contacts */}
-            <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-              <SectionHeader icon={Phone} label="ICE Contacts (In Case of Emergency)" />
-              <CollapsibleContent className="p-3">
-                <div className="flex justify-end mb-3">
-                  {!showAddICE && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddICE(true)}><Plus className="h-3 w-3" />Add</Button>}
-                </div>
-                {showAddICE && (
-                  <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <div className="space-y-1.5"><Label>Name *</Label><Input className="text-sm" value={newICE.name} onChange={(e) => setNewICE(p => ({ ...p, name: e.target.value }))} placeholder="Full name" /></div>
-                      <div className="space-y-1.5"><Label>Relationship</Label><RelationshipSelect value={newICE.relationship} onChange={(v) => setNewICE(p => ({ ...p, relationship: v }))} /></div>
-                      <div className="space-y-1.5"><Label>Phone</Label><PhoneInput value={newICE.phone} onChange={(v) => setNewICE(p => ({ ...p, phone: v }))} /></div>
-                      <div className="space-y-1.5"><Label>Email</Label><Input className="text-sm" type="email" value={newICE.email} onChange={(e) => setNewICE(p => ({ ...p, email: e.target.value }))} placeholder="Email" /></div>
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddICE(false); setEditingICEId(null); setNewICE({ name: "", phone: "", email: "", relationship: "" }); }}>Cancel</Button>
-                      <Button size="sm" className="text-xs h-7" onClick={handleAddICE}>{editingICEId ? "Save" : "Add"}</Button>
-                    </div>
-                  </div>
-                )}
-                {iceContacts.length > 0 && (
-                  <div className="space-y-1.5">
-                    {iceContacts.map(c => (
-                      <div key={c.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-xs font-medium text-foreground">{c.name} {c.relationship && <span className="text-muted-foreground">({c.relationship})</span>}</p>
-                            {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
-                          </div>
-                          <div className="flex gap-1">
-                            <Button variant="ghost" size="icon" className="h-6 w-6" title="Notify" onClick={() => toast({ title: "Notification sent", description: `${c.name} has been notified` })}>
-                              <Bell className="h-3 w-3 text-primary" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('ice', c)}>
-                              <Share2 className={cn("h-3 w-3", c.shared ? "text-muted-foreground" : "text-primary")} />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditICE(c)}><Pencil className="h-3 w-3" /></Button>
-                            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => { setIceContacts(prev => prev.filter(i => i.id !== c.id)); setHasChanges(true); }}><Trash2 className="h-3 w-3" /></Button>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Checkbox
-                            id={`ice-nok-${c.id}`}
-                            checked={c.is_also_nok || false}
-                            onCheckedChange={(checked) => handleICEAsNOK(c.id, !!checked)}
-                          />
-                          <Label htmlFor={`ice-nok-${c.id}`} className="text-[10px] text-muted-foreground cursor-pointer">Same as Next of Kin</Label>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CollapsibleContent>
-            </Collapsible>
 
             <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
               <SectionHeader icon={Briefcase} label="Employer" />
@@ -1447,7 +1392,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   <div className="space-y-1.5"><Label htmlFor="employer">Employer</Label><Input id="employer" className="text-sm" value={formData.employer} onChange={(e) => updateFormData({ employer: e.target.value })} placeholder="Company name" /></div>
                   <div className="space-y-1.5"><Label htmlFor="occupation">Occupation</Label><Input id="occupation" className="text-sm" value={formData.occupation} onChange={(e) => updateFormData({ occupation: e.target.value })} placeholder="Job title" /></div>
-                  <div className="space-y-1.5"><Label htmlFor="reporting_to_email">Reporting To Email (Optional)</Label><Input id="reporting_to_email" className="text-sm" type="email" value={formData.reporting_to_email} onChange={(e) => updateFormData({ reporting_to_email: e.target.value })} placeholder="manager@company.com" /><p className="text-[10px] text-muted-foreground">Used for e-mailing of Medical Certificates</p></div>
+                  <div className="space-y-1.5"><Label htmlFor="reporting_to_email">Line Manager Email Address (Optional)</Label><Input id="reporting_to_email" className="text-sm" type="email" value={formData.reporting_to_email} onChange={(e) => updateFormData({ reporting_to_email: e.target.value })} placeholder="manager@company.com" /><p className="text-[10px] text-muted-foreground">Used for e-mailing of Medical Certificates</p></div>
                 </div>
               </CollapsibleContent>
             </Collapsible>
@@ -1462,10 +1407,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
           {/* === MEDICAL TAB (EDIT) === */}
           <TabsContent value="medical" className="mt-4">
-            <div className="mb-3">
-              <h2 className="text-lg font-semibold text-foreground">Medical Information</h2>
-              <p className="text-xs text-muted-foreground">View and manage medical records</p>
-            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="space-y-3">
                 {/* General Information */}
