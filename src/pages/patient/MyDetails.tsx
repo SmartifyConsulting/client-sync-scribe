@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
@@ -8,6 +9,8 @@ import { useMyRewards } from "@/hooks/usePatientRewards";
 
 
 export default function MyDetails() {
+  const [searchParams] = useSearchParams();
+  const section = searchParams.get("section") || "profile";
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string>("");
@@ -91,7 +94,7 @@ export default function MyDetails() {
         <p className="text-muted-foreground text-[12px]">View and update your personal and medical information</p>
       </div>
 
-      <PatientDetailsEditor patient={patient} onSave={handleSave} isSelfService userEmail={userEmail} lollipopCount={lollipopCount} rewardsLoading={rewardsLoading} />
+      <PatientDetailsEditor patient={patient} onSave={handleSave} isSelfService userEmail={userEmail} lollipopCount={lollipopCount} rewardsLoading={rewardsLoading} section={section} />
     </div>
   );
 }
