@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 interface AddressAutocompleteProps {
   value: string;
@@ -13,6 +14,7 @@ interface AddressAutocompleteProps {
 export function AddressAutocomplete({ value, onChange, placeholder, id, rows = 2 }: AddressAutocompleteProps) {
   const [suggestions, setSuggestions] = useState<{ description: string; place_id: string }[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [loading, setLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -29,18 +31,25 @@ export function AddressAutocomplete({ value, onChange, placeholder, id, rows = 2
   const fetchSuggestions = async (input: string) => {
     if (input.length < 3) {
       setSuggestions([]);
+      setLoading(false);
       return;
     }
+    setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("google-places-autocomplete", {
         body: { input },
       });
+      if (error) {
+        console.error("Places autocomplete error:", error);
+      }
       if (!error && data?.predictions) {
         setSuggestions(data.predictions.map((p: any) => ({ description: p.description, place_id: p.place_id })));
         setShowSuggestions(true);
       }
-    } catch {
-      // silently fail - user can still type manually
+    } catch (err) {
+      console.error("Places autocomplete fetch failed:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,14 +67,21 @@ export function AddressAutocomplete({ value, onChange, placeholder, id, rows = 2
 
   return (
     <div ref={containerRef} className="relative">
-      <Textarea
-        id={id}
-        className="text-sm"
-        value={value}
-        onChange={(e) => handleChange(e.target.value)}
-        placeholder={placeholder}
-        rows={rows}
-      />
+      <div className="relative">
+        <Textarea
+          id={id}
+          className="text-sm"
+          value={value}
+          onChange={(e) => handleChange(e.target.value)}
+          placeholder={placeholder}
+          rows={rows}
+        />
+        {loading && (
+          <div className="absolute right-2 top-2">
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+          </div>
+        )}
+      </div>
       {showSuggestions && suggestions.length > 0 && (
         <div className="absolute z-20 top-full left-0 right-0 bg-card border border-border rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
           {suggestions.map((s) => (
