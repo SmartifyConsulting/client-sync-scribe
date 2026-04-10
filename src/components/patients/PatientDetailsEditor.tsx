@@ -671,8 +671,15 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
           </div>
           <div>
+            <p className="text-[10px] text-muted-foreground">Welcome back</p>
             <h3 className="text-sm font-semibold text-foreground">{patient.name}</h3>
-            {(userEmail || patient.email) && <p className="text-xs text-muted-foreground">{userEmail || patient.email}</p>}
+            <p className="text-xs text-muted-foreground">
+              {(() => {
+                const first = (patient.first_name || splitName(patient.name).first || "user").toLowerCase().replace(/\s+/g, "");
+                const last = (patient.last_name || splitName(patient.name).last || "patient").toLowerCase().replace(/\s+/g, "");
+                return `${first}.${last}@holarc.health`;
+              })()}
+            </p>
           </div>
         </div>
       </div>
