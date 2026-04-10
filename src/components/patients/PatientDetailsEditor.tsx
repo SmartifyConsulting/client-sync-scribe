@@ -809,23 +809,25 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
         <ProfileBanner />
         <div className="rounded-xl border border-primary bg-card p-4 md:p-6 space-y-4">
           <Tabs defaultValue="personal">
-            <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-              <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Personal Information</TabsTrigger>
-              <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Medical Information</TabsTrigger>
-              {isSelfService && <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Medical Overview</TabsTrigger>}
-              {isSelfService && <TabsTrigger value="doctors" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Healthcare Providers</TabsTrigger>}
-              {isSelfService && <TabsTrigger value="sessions" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Sessions</TabsTrigger>}
-              {isSelfService && <TabsTrigger value="calendar" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Calendar</TabsTrigger>}
-              {isSelfService && <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Documents</TabsTrigger>}
-              {isSelfService && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Round Table</TabsTrigger>}
-              {isSelfService && <TabsTrigger value="nok-iced" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">NOK & ICE</TabsTrigger>}
-              {isSelfService && isDoctor && <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap" onClick={(e) => { e.preventDefault(); navigate("/practice"); }}>My Practice</TabsTrigger>}
-            </TabsList>
-            <div className="flex justify-end mt-2">
-              <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={() => setIsEditing(true)}>
-                <Pencil className="h-3.5 w-3.5" /> Edit
-              </Button>
-            </div>
+          {/* View mode tabs - filtered by section on mobile for self-service */}
+          {(() => {
+            const activeTabs = isSelfService && section ? SECTION_TABS[section] || null : null;
+            const show = (tab: string) => !activeTabs || activeTabs.includes(tab);
+            return (
+              <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+                {show("personal") && <TabsTrigger value="personal" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Personal Information</TabsTrigger>}
+                {show("medical") && <TabsTrigger value="medical" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Medical Information</TabsTrigger>}
+                {isSelfService && show("overview") && <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Medical Overview</TabsTrigger>}
+                {isSelfService && show("doctors") && <TabsTrigger value="doctors" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Healthcare Providers</TabsTrigger>}
+                {isSelfService && show("sessions") && <TabsTrigger value="sessions" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Sessions</TabsTrigger>}
+                {isSelfService && show("calendar") && <TabsTrigger value="calendar" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Calendar</TabsTrigger>}
+                {isSelfService && show("documents") && <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Documents</TabsTrigger>}
+                {isSelfService && show("roundtable") && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Round Table</TabsTrigger>}
+                {isSelfService && show("nok-iced") && <TabsTrigger value="nok-iced" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">NOK & ICE</TabsTrigger>}
+                {isSelfService && isDoctor && <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap" onClick={(e) => { e.preventDefault(); navigate("/practice"); }}>My Practice</TabsTrigger>}
+              </TabsList>
+            );
+          })()}
 
             {/* === PERSONAL INFORMATION TAB === */}
             <TabsContent value="personal" className="space-y-4 mt-4">
