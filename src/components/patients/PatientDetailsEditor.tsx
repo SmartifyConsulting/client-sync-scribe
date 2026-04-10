@@ -582,7 +582,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
     setHasChanges(true);
   };
 
-  const handleEditICE = (c: ICEContact) => {
+  const handleEditICE = (c: any) => {
     setNewICE({ name: c.name, phone: c.phone, email: c.email, relationship: c.relationship });
     setEditingICEId(c.id);
     setShowAddICE(true);
