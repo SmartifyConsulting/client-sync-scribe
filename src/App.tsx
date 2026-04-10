@@ -129,6 +129,7 @@ const App = () => (
             <Route path="/patient/documents" element={<PatientDocuments />} />
             <Route path="/patient/round-table" element={<PatientRoundTable />} />
             <Route path="/patient/details" element={<MyDetails />} />
+            <Route path="/settings" element={<Settings />} />
           </Route>
 
           {/* Protected routes with full layout (doctors/admins + shared) */}

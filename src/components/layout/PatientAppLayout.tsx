@@ -249,10 +249,23 @@ export function PatientAppLayout() {
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-48 p-1.5" align="end">
-                <div className="px-2 py-1.5 border-b border-border mb-1">
+              <div className="px-2 py-1.5 border-b border-border mb-1">
                   <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
-                  <p className="text-[10px] text-muted-foreground">Patient</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {(() => {
+                      const parts = (profile?.full_name || "user").toLowerCase().split(/\s+/);
+                      const first = parts[0] || "user";
+                      const last = parts.length > 1 ? parts[parts.length - 1] : "patient";
+                      return `${first}.${last}@holarc.health`;
+                    })()}
+                  </p>
                 </div>
+                <button
+                  onClick={() => navigate("/settings")}
+                  className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors w-full"
+                >
+                  <User className="h-3.5 w-3.5" /> Settings
+                </button>
                 <button
                   onClick={handleSignOut}
                   className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-destructive/10 text-destructive transition-colors w-full"

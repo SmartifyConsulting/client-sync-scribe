@@ -1,36 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { Patient } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
 import { useMyRewards } from "@/hooks/usePatientRewards";
-import holarcLogo from "@/assets/holarc-logo.png";
-import vulaVouchersLogo from "@/assets/vula-vouchers-logo.png";
 
-function AnimatedCounter({ target }: { target: number }) {
-  const [count, setCount] = useState(0);
-  const rafRef = useRef<number>();
-  const startRef = useRef<number>();
-
-  useEffect(() => {
-    if (target <= 0) { setCount(0); return; }
-    startRef.current = undefined;
-    const duration = 1500;
-    const step = (ts: number) => {
-      if (!startRef.current) startRef.current = ts;
-      const progress = Math.min((ts - startRef.current) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.round(eased * target));
-      if (progress < 1) rafRef.current = requestAnimationFrame(step);
-    };
-    rafRef.current = requestAnimationFrame(step);
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [target]);
-
-  return <span>{count}</span>;
-}
 
 export default function MyDetails() {
   const [patient, setPatient] = useState<Patient | null>(null);
@@ -111,23 +86,12 @@ export default function MyDetails() {
 
   return (
     <div className="space-y-4 p-4 md:p-6">
-      {/* Heading row with Vula Vouchers logo */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">My Holarchive</h1>
-          <p className="text-muted-foreground text-[12px]">View and update your personal and medical information</p>
-        </div>
-        <Link to="/patient/rewards" className="hover:opacity-80 transition-opacity shrink-0 flex flex-col items-center gap-0.5">
-          {!rewardsLoading && (
-            <span className="text-sm font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
-              <AnimatedCounter target={lollipopCount} /> Vulas
-            </span>
-          )}
-          <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-10 w-auto object-contain" />
-        </Link>
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">My Holarchive</h1>
+        <p className="text-muted-foreground text-[12px]">View and update your personal and medical information</p>
       </div>
 
-      <PatientDetailsEditor patient={patient} onSave={handleSave} isSelfService userEmail={userEmail} />
+      <PatientDetailsEditor patient={patient} onSave={handleSave} isSelfService userEmail={userEmail} lollipopCount={lollipopCount} rewardsLoading={rewardsLoading} />
     </div>
   );
 }
