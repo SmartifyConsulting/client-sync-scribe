@@ -1290,10 +1290,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
           {/* === PERSONAL TAB (EDIT) === */}
           <TabsContent value="personal" className="space-y-4 mt-4">
-            <div className="mb-1">
-              <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
-              <p className="text-xs text-muted-foreground">View and manage personal details</p>
-            </div>
 
             <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
               <SectionHeader icon={User} label="Personal Information" />
