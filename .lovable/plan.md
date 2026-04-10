@@ -1,50 +1,31 @@
 
 
-# Mobile Bottom Tab Bar Navigation Restructure
+# Fix: Mobile-Only Bottom Tab Navigation (Restore Desktop/iPad Layout)
 
-## Summary
-Replace the 5-item patient bottom nav with category-based tabs that filter which top tabs appear in PatientDetailsEditor. All content stays on `/patient/details` — the bottom nav passes a `?section=` query param.
+## Problem
+The section-based tab filtering currently applies to all screen sizes. On desktop and iPad, the original layout showed all tabs in a single scrollable row — which was working perfectly and should be preserved.
 
-## Bottom Nav → Top Tabs Mapping
-
-```text
-Bottom Bar:  👤 Profile  |  🏥 Health  |  🤝 Care  |  📁 Records  |  🎁 Rewards
-Top Tabs:    Personal     Medical       Providers    Documents     My Vulas
-             NOK & ICE    Med Overview  Sessions
-                                        My Calendar
-                                        Round Table
-```
+## Solution
+Make the `section` filtering **mobile-only** by using a responsive check. On `md:` and above, all tabs remain visible as before (the full scrollable tab bar). The `BottomNav` already hides on `md:` screens, so this is consistent.
 
 ## Changes
 
-### 1. `src/components/layout/BottomNav.tsx`
-- Replace `patientNavItems` with 5 category items, all linking to `/patient/details?section=X`:
-  - `User` icon → "Profile" → `?section=profile`
-  - `HeartPulse` icon → "Health" → `?section=health`
-  - `Handshake` icon → "Care" → `?section=care`
-  - `FolderOpen` icon → "Records" → `?section=records`
-  - `Gift` icon → "Rewards" → `?section=rewards`
-- Use `useSearchParams` to determine active state based on `section` param instead of route matching
+### 1. `src/components/patients/PatientDetailsEditor.tsx`
+- Import `useIsMobile` from `@/hooks/use-mobile`
+- Change the `activeTabs` logic in both view and edit modes: only apply section filtering when `isMobile` is true
+  - Before: `const activeTabs = isSelfService && section ? SECTION_TABS[section] || null : null;`
+  - After: `const activeTabs = isMobile && isSelfService && section ? SECTION_TABS[section] || null : null;`
+- Same change for `defaultValue`: only use section-based default on mobile; on desktop default to `"personal"` always
+  - Before: `defaultValue={isSelfService && section ? (SECTION_TABS[section]?.[0] || "personal") : "personal"}`
+  - After: `defaultValue={isMobile && isSelfService && section ? (SECTION_TABS[section]?.[0] || "personal") : "personal"}`
 
-### 2. `src/components/patients/PatientDetailsEditor.tsx`
-- Accept a `section` prop (string)
-- Filter visible `TabsTrigger` items based on section:
-  - **profile**: `personal`, `nok-iced`
-  - **health**: `medical`, `overview`
-  - **care**: `doctors`, `sessions`, `calendar`, `roundtable`
-  - **records**: `documents`
-  - **rewards**: navigate to `/patient/rewards`
-- Default the first tab in each group as the active tab
-- Apply in both view and edit mode tab bars
-
-### 3. `src/pages/patient/MyDetails.tsx`
-- Read `section` from `useSearchParams`, default to `"profile"`
-- Pass `section` to `PatientDetailsEditor`
-- If section is `"rewards"`, redirect to `/patient/rewards`
+### 2. `src/components/layout/PatientAppLayout.tsx`
+- Import `BottomNav` from `./BottomNav`
+- Render `<BottomNav />` after `</main>` (it already has `md:hidden` so it won't show on desktop/iPad)
+- Add `pb-20 md:pb-0` to `<main>` to prevent content from being hidden behind the fixed bottom nav on mobile
 
 | File | Change |
 |------|--------|
-| `src/components/layout/BottomNav.tsx` | Replace patient nav items with 5 section-based items |
-| `src/components/patients/PatientDetailsEditor.tsx` | Filter tabs by `section` prop in both view/edit modes |
-| `src/pages/patient/MyDetails.tsx` | Read `section` param, pass to editor, redirect for rewards |
+| `src/components/patients/PatientDetailsEditor.tsx` | Gate section filtering behind `isMobile` check |
+| `src/components/layout/PatientAppLayout.tsx` | Add `<BottomNav />` and mobile bottom padding |
 
