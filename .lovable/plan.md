@@ -1,31 +1,55 @@
 
 
-# Fix: Mobile-Only Bottom Tab Navigation (Restore Desktop/iPad Layout)
+# Collapsible Accordion Sections in Medical Information Tab
 
-## Problem
-The section-based tab filtering currently applies to all screen sizes. On desktop and iPad, the original layout showed all tabs in a single scrollable row — which was working perfectly and should be preserved.
+## Summary
+Reorganize the Medical Information tab content into four collapsible accordion groups. Rename the vitals section to "General Information". Apply to both view and edit modes, across all screen sizes (mobile, tablet, desktop).
 
-## Solution
-Make the `section` filtering **mobile-only** by using a responsive check. On `md:` and above, all tabs remain visible as before (the full scrollable tab bar). The `BottomNav` already hides on `md:` screens, so this is consistent.
+## Accordion Groups
+
+```text
+1. General Information (expanded by default)
+   → Height, Weight, BMI, Blood Type
+
+2. Allergies, Medication & Conditions
+   → Allergies, Medication list, Conditions & Diagnoses
+
+3. Surgeries & Dates
+   → Surgical history entries
+
+4. Family History
+   → Family history entries
+```
 
 ## Changes
 
-### 1. `src/components/patients/PatientDetailsEditor.tsx`
-- Import `useIsMobile` from `@/hooks/use-mobile`
-- Change the `activeTabs` logic in both view and edit modes: only apply section filtering when `isMobile` is true
-  - Before: `const activeTabs = isSelfService && section ? SECTION_TABS[section] || null : null;`
-  - After: `const activeTabs = isMobile && isSelfService && section ? SECTION_TABS[section] || null : null;`
-- Same change for `defaultValue`: only use section-based default on mobile; on desktop default to `"personal"` always
-  - Before: `defaultValue={isSelfService && section ? (SECTION_TABS[section]?.[0] || "personal") : "personal"}`
-  - After: `defaultValue={isMobile && isSelfService && section ? (SECTION_TABS[section]?.[0] || "personal") : "personal"}`
+### `src/components/patients/PatientDetailsEditor.tsx`
 
-### 2. `src/components/layout/PatientAppLayout.tsx`
-- Import `BottomNav` from `./BottomNav`
-- Render `<BottomNav />` after `</main>` (it already has `md:hidden` so it won't show on desktop/iPad)
-- Add `pb-20 md:pb-0` to `<main>` to prevent content from being hidden behind the fixed bottom nav on mobile
+**Import**: Add `Collapsible, CollapsibleTrigger, CollapsibleContent` from `@/components/ui/collapsible` and `ChevronDown` from lucide-react (if not already imported).
+
+**View mode** (lines ~948-1071):
+- Remove the outer `sectionFrame` wrapper that currently groups everything
+- Rename the "Medical Information" h3 heading to "General Information"
+- Wrap the Height/Weight/BMI/Blood Type grid in a `Collapsible` defaultOpen, with a clickable trigger header showing "General Information" + chevron icon
+- Wrap Allergies + Medication + Conditions & Diagnoses into a second `Collapsible` defaultOpen, with trigger "Allergies, Medication & Conditions"
+- Wrap Surgeries into a third `Collapsible` with trigger "Surgeries & Dates"
+- Wrap Family History into a fourth `Collapsible` with trigger "Family History"
+- Each trigger will have a rotating chevron indicator
+- Organ Donor remains outside accordions (at the bottom)
+
+**Edit mode** (lines ~1394-1650):
+- Same restructure: rename heading, wrap the same groups in `Collapsible` components
+- All collapsibles defaultOpen in edit mode so users can immediately interact
+- Each group has the same chevron toggle behavior
+
+**Styling**:
+- Each collapsible trigger: styled as a compact header bar with icon, uppercase label, and chevron
+- Reuse existing `rounded-xl border border-primary/30 bg-card p-3` styling for each group
+- Chevron rotates 180deg when open using `data-[state=open]:rotate-180` transition
 
 | File | Change |
 |------|--------|
-| `src/components/patients/PatientDetailsEditor.tsx` | Gate section filtering behind `isMobile` check |
-| `src/components/layout/PatientAppLayout.tsx` | Add `<BottomNav />` and mobile bottom padding |
+| `src/components/patients/PatientDetailsEditor.tsx` | Wrap medical sections in Collapsible groups (both view and edit modes); rename "Medical Information" vitals heading to "General Information" |
+
+No new components or dependencies needed — `Collapsible` UI component already exists in the project.
 
