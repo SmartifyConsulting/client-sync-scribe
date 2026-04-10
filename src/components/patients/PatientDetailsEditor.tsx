@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
+import { AddressAutocomplete } from "@/components/patients/AddressAutocomplete";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart, User, MapPin, Users, Briefcase, ShieldCheck, Store, Activity, Droplets, Scissors, GitBranch, Share2, Camera, Mail, Link2, Eye, Phone } from "lucide-react";
@@ -1048,9 +1049,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             <div className={sectionFrame}>
               <h3 className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Addresses</h3>
               <div className="space-y-3">
-                <div className="space-y-1.5"><Label htmlFor="physical_address">Physical Address</Label><Textarea id="physical_address" className="text-sm" value={formData.physical_address} onChange={(e) => updateFormData({ physical_address: e.target.value })} placeholder="Enter physical address" rows={2} /></div>
+                <div className="space-y-1.5"><Label htmlFor="physical_address">Physical Address</Label><AddressAutocomplete id="physical_address" value={formData.physical_address} onChange={(v) => updateFormData({ physical_address: v })} placeholder="Start typing to search address..." rows={2} /></div>
                 <div className="flex items-center space-x-2"><Checkbox id="same_as_physical" checked={formData.same_as_physical} onCheckedChange={(checked) => updateFormData({ same_as_physical: checked as boolean })} /><Label htmlFor="same_as_physical">Postal address same as physical address</Label></div>
-                {!formData.same_as_physical && (<div className="space-y-1.5"><Label htmlFor="postal_address">Postal Address</Label><Textarea id="postal_address" className="text-sm" value={formData.postal_address} onChange={(e) => updateFormData({ postal_address: e.target.value })} placeholder="Enter postal address" rows={2} /></div>)}
+                {!formData.same_as_physical && (<div className="space-y-1.5"><Label htmlFor="postal_address">Postal Address</Label><AddressAutocomplete id="postal_address" value={formData.postal_address} onChange={(v) => updateFormData({ postal_address: v })} placeholder="Start typing to search address..." rows={2} /></div>)}
               </div>
             </div>
 
