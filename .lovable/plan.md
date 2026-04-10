@@ -1,55 +1,72 @@
 
 
-# Collapsible Accordion Sections in Medical Information Tab
+# Collapsible Sections, Styling & Navigation Fixes
 
 ## Summary
-Reorganize the Medical Information tab content into four collapsible accordion groups. Rename the vitals section to "General Information". Apply to both view and edit modes, across all screen sizes (mobile, tablet, desktop).
-
-## Accordion Groups
-
-```text
-1. General Information (expanded by default)
-   → Height, Weight, BMI, Blood Type
-
-2. Allergies, Medication & Conditions
-   → Allergies, Medication list, Conditions & Diagnoses
-
-3. Surgeries & Dates
-   → Surgical history entries
-
-4. Family History
-   → Family history entries
-```
+Make every section/frame across all tabs collapsible (defaulting to collapsed). Style section headings with green background and white text. Fix Organ Donor layout, left-align headings on mobile, rename tab, and ensure bottom nav dynamically loads first tab content.
 
 ## Changes
 
-### `src/components/patients/PatientDetailsEditor.tsx`
+### 1. `src/components/patients/PatientDetailsEditor.tsx`
 
-**Import**: Add `Collapsible, CollapsibleTrigger, CollapsibleContent` from `@/components/ui/collapsible` and `ChevronDown` from lucide-react (if not already imported).
+**A. Wrap ALL section frames in Collapsible (both view and edit modes, all tabs)**
 
-**View mode** (lines ~948-1071):
-- Remove the outer `sectionFrame` wrapper that currently groups everything
-- Rename the "Medical Information" h3 heading to "General Information"
-- Wrap the Height/Weight/BMI/Blood Type grid in a `Collapsible` defaultOpen, with a clickable trigger header showing "General Information" + chevron icon
-- Wrap Allergies + Medication + Conditions & Diagnoses into a second `Collapsible` defaultOpen, with trigger "Allergies, Medication & Conditions"
-- Wrap Surgeries into a third `Collapsible` with trigger "Surgeries & Dates"
-- Wrap Family History into a fourth `Collapsible` with trigger "Family History"
-- Each trigger will have a rotating chevron indicator
-- Organ Donor remains outside accordions (at the bottom)
+Every `<div className={sectionFrame}>` block across all tabs (Personal, Medical, etc.) will be converted to a `Collapsible` with a styled trigger header. This applies to:
 
-**Edit mode** (lines ~1394-1650):
-- Same restructure: rename heading, wrap the same groups in `Collapsible` components
-- All collapsibles defaultOpen in edit mode so users can immediately interact
-- Each group has the same chevron toggle behavior
+- **Personal tab (view)**: Personal Details, Addresses, Next of Kin, ICE Contacts, Employer, General Notes (6 sections)
+- **Personal tab (edit)**: Same 6 sections
+- **Medical tab (view)**: Already done for 4 sections in column 1; add for Medical Insurance, General Practitioner, Pharmacies in column 2
+- **Medical tab (edit)**: Same column 2 sections
 
-**Styling**:
-- Each collapsible trigger: styled as a compact header bar with icon, uppercase label, and chevron
-- Reuse existing `rounded-xl border border-primary/30 bg-card p-3` styling for each group
-- Chevron rotates 180deg when open using `data-[state=open]:rotate-180` transition
+**Default state**: All `Collapsible` components use `defaultOpen={false}` (collapsed by default).
+
+**B. Section heading style — green background, white text**
+
+Replace current heading style:
+```
+text-xs font-semibold text-foreground uppercase tracking-wide
+```
+With collapsible trigger header:
+```
+bg-primary text-white rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide
+```
+The `ChevronDown` icon also becomes white.
+
+**C. Organ Donor — collapsible, inline Yes/No**
+
+Convert `OrganDonorView` into a `Collapsible` section:
+- Trigger shows "Organ Donor" label + "Yes"/"No" badge on the same line (inline, right-aligned before chevron)
+- Content (organ list) is hidden inside `CollapsibleContent`, only relevant when "Yes"
+
+**D. Left-align "Allergies, Medication & Conditions" heading**
+
+The heading text within the `CollapsibleTrigger` already uses `flex items-center` — ensure no `text-center` is applied. Add `text-left` explicitly to the h3 for safety.
+
+**E. Rename tab**
+
+Change "My Healthcare Providers" to "My H/Care Providers" in both view and edit mode `TabsTrigger` labels (lines 829, 1235) and the `h2` heading inside the doctors tab content (line 1182).
+
+**F. Bottom nav — dynamic first-tab loading**
+
+Currently, when clicking a bottom nav icon, it navigates to `/patient/details?section=X`. The `Tabs` component uses `defaultValue` which only works on initial mount. When navigating between sections without unmounting, the tab doesn't switch.
+
+Fix: Use controlled `Tabs` with a `value` state derived from `section` prop. When `section` changes, update the active tab to the first tab of that section. This ensures clicking a bottom nav icon immediately shows the correct content.
+
+Add a `useEffect` or derive state from `section`:
+```typescript
+const [activeTab, setActiveTab] = useState(...)
+useEffect(() => {
+  if (isMobile && isSelfService && section && SECTION_TABS[section]) {
+    setActiveTab(SECTION_TABS[section][0]);
+  }
+}, [section]);
+```
+
+Then use `<Tabs value={activeTab} onValueChange={setActiveTab}>` instead of `defaultValue`.
+
+## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/components/patients/PatientDetailsEditor.tsx` | Wrap medical sections in Collapsible groups (both view and edit modes); rename "Medical Information" vitals heading to "General Information" |
-
-No new components or dependencies needed — `Collapsible` UI component already exists in the project.
+| `src/components/patients/PatientDetailsEditor.tsx` | All changes above: collapsible sections (default collapsed), green+white heading style, organ donor inline + collapsible, left-align heading, rename tab, controlled tab switching |
 
