@@ -134,19 +134,19 @@ export default function PatientCalendar() {
   }
 
   const AppointmentCard = ({ apt }: { apt: Appointment }) => (
-    <div className="flex items-start gap-4 p-4 rounded-xl border border-border">
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-        <CalendarIcon className="h-5 w-5 text-primary" />
+    <div className="flex items-start gap-2 md:gap-4 p-2 md:p-4 rounded-xl border border-border">
+      <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+        <CalendarIcon className="h-4 w-4 md:h-5 md:w-5 text-primary" />
       </div>
-      <div className="flex-1">
-        <p className="font-medium">{apt.title}</p>
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-sm">{apt.title}</p>
         {apt.doctor_name && (
-          <p className="text-sm text-primary font-medium flex items-center gap-1 mt-0.5">
+          <p className="text-xs text-primary font-medium flex items-center gap-1 mt-0.5">
             <User className="h-3 w-3" />
             with Dr. {apt.doctor_name}
           </p>
         )}
-        <div className="mt-1 flex flex-wrap gap-3 text-sm text-muted-foreground">
+        <div className="mt-1 flex flex-wrap gap-2 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
             {format(parseISO(apt.start_time), "h:mm a")} - {format(parseISO(apt.end_time), "h:mm a")}
@@ -155,18 +155,18 @@ export default function PatientCalendar() {
             <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{apt.location}</span>
           )}
         </div>
-        <div className="mt-2 flex flex-wrap gap-2">
+        <div className="mt-1 flex flex-wrap gap-1">
           {apt.service_name && (
-            <Badge variant="secondary" className="text-xs">{apt.service_name}</Badge>
+            <Badge variant="secondary" className="text-[10px]">{apt.service_name}</Badge>
           )}
           {apt.service_price != null && apt.service_price > 0 && (
-            <Badge className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0">
+            <Badge className="text-[10px] bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0">
               <DollarSign className="h-3 w-3 mr-0.5" />
               {formatCurrency(apt.service_price)}
             </Badge>
           )}
         </div>
-        {apt.description && <p className="mt-2 text-sm text-muted-foreground">{apt.description}</p>}
+        {apt.description && <p className="mt-1 text-xs text-muted-foreground truncate">{apt.description}</p>}
       </div>
     </div>
   );
@@ -208,10 +208,10 @@ export default function PatientCalendar() {
           <CardTitle className="text-lg">
             {format(currentWeekStart, "MMMM yyyy")}
           </CardTitle>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))}>Previous</Button>
-            <Button variant="outline" size="sm" onClick={() => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}>Today</Button>
-            <Button variant="outline" size="sm" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))}>Next</Button>
+          <div className="flex gap-1">
+            <Button variant="outline" size="sm" className="text-xs px-2" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))}>Prev</Button>
+            <Button variant="outline" size="sm" className="text-xs px-2" onClick={() => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}>Today</Button>
+            <Button variant="outline" size="sm" className="text-xs px-2" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))}>Next</Button>
           </div>
         </div>
       </CardHeader>
@@ -247,10 +247,10 @@ export default function PatientCalendar() {
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">{format(currentMonth, "MMMM yyyy")}</CardTitle>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>Previous</Button>
-            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(new Date())}>Today</Button>
-            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>Next</Button>
+          <div className="flex gap-1">
+            <Button variant="outline" size="sm" className="text-xs px-2" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>Prev</Button>
+            <Button variant="outline" size="sm" className="text-xs px-2" onClick={() => setCurrentMonth(new Date())}>Today</Button>
+            <Button variant="outline" size="sm" className="text-xs px-2" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>Next</Button>
           </div>
         </div>
       </CardHeader>
@@ -260,7 +260,7 @@ export default function PatientCalendar() {
             <div key={d} className="py-2 text-center text-sm font-medium text-muted-foreground">{d}</div>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 gap-0 md:gap-1">
           {Array.from({ length: (firstDayOfMonth + 6) % 7 }).map((_, i) => (
             <div key={`empty-${i}`} className="aspect-square p-1" />
           ))}
@@ -346,29 +346,24 @@ export default function PatientCalendar() {
   );
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="h-8 w-8">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">My Calendar</h1>
-            <p className="text-muted-foreground text-[12px]">View and manage your appointments</p>
-          </div>
+    <div className="space-y-3 md:space-y-6 animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+          <h1 className="text-lg md:text-2xl font-bold text-foreground">My Calendar</h1>
+          <p className="text-muted-foreground text-[11px] md:text-[12px]">View and manage your appointments</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
           <ViewToggle />
-          <Button onClick={() => setBookDialogOpen(true)} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Book Appointment
+          <Button onClick={() => setBookDialogOpen(true)} size="sm" className="gap-1 text-xs">
+            <Plus className="h-3.5 w-3.5" />
+            Book
           </Button>
         </div>
       </div>
 
       <PatientRequestsBadge />
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-3 md:gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-4">
           {calendarView === "week" && renderWeekView()}
           {calendarView === "month" && renderMonthView()}
