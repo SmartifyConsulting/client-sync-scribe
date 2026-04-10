@@ -800,7 +800,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   };
 
   // Parent tab groups for desktop/tablet
-  const PROFILE_TABS = ["personal", "medical", "nok-iced"];
+  const PROFILE_TABS = ["personal", "medical"];
   const ADMIN_TABS = ["calendar", "tasks", "documents"];
 
   const handleParentTabClick = (parent: string, tabs: string[]) => {
@@ -835,7 +835,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
           {show("tasks") && <TabsTrigger value="tasks" className={triggerClass}>My Tasks</TabsTrigger>}
           {show("documents") && <TabsTrigger value="documents" className={triggerClass}>My Documents</TabsTrigger>}
           {show("roundtable") && <TabsTrigger value="roundtable" className={triggerClass}>My Round Table</TabsTrigger>}
-          {show("nok-iced") && <TabsTrigger value="nok-iced" className={triggerClass}>NOK & ICE</TabsTrigger>}
+          
         </TabsList>
       );
     }
@@ -858,7 +858,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
           </button>
           {isSelfService && <TabsTrigger value="doctors" className={triggerClass}>My H/Care Providers</TabsTrigger>}
           {isSelfService && <TabsTrigger value="sessions" className={triggerClass}>My Sessions</TabsTrigger>}
-          {isSelfService && <TabsTrigger value="roundtable" className={triggerClass}>My Round Table</TabsTrigger>}
           {/* My Admin parent trigger */}
           {isSelfService && (
             <button
@@ -872,7 +871,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               My Admin
             </button>
           )}
-          {isSelfService && isDoctor && <TabsTrigger value="practice" className={triggerClass} onClick={(e) => { e.preventDefault(); navigate("/practice"); }}>My Practice</TabsTrigger>}
+          {isSelfService && <TabsTrigger value="roundtable" className={triggerClass}>My Round Table</TabsTrigger>}
         </TabsList>
 
         {/* Sub-tab row for My Profile */}
@@ -880,7 +879,6 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
           <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
             <TabsTrigger value="personal" className="text-xs whitespace-nowrap">Personal Information</TabsTrigger>
             <TabsTrigger value="medical" className="text-xs whitespace-nowrap">Medical Information</TabsTrigger>
-            {isSelfService && <TabsTrigger value="nok-iced" className="text-xs whitespace-nowrap">NOK & ICE</TabsTrigger>}
           </TabsList>
         )}
 
