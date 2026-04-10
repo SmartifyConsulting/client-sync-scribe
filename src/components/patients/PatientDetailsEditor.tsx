@@ -1004,7 +1004,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 <div className="space-y-3">
                   {/* General Information */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={Activity} label="General Information" />
+                    <SectionHeader icon={Activity} label="General Information" onEdit={() => { setIsEditing(true); }} />
                     <CollapsibleContent className="px-3 pb-3">
                       <div className="grid gap-3 sm:grid-cols-4">
                         <ViewField label="Height (cm)" value={patient.height_cm ? `${patient.height_cm}` : undefined} />
@@ -1017,7 +1017,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Allergies, Medication & Conditions */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={Pill} label="Allergies, Medication & Conditions" />
+                    <SectionHeader icon={Pill} label="Allergies, Medication & Conditions" onEdit={() => { setIsEditing(true); }} />
                     <CollapsibleContent className="px-3 pb-3 space-y-3">
                       {/* Allergies */}
                       <div className="rounded-lg border border-border/50 p-2.5 space-y-1">
@@ -1095,7 +1095,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Surgeries & Dates */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={Scissors} label="Surgeries & Dates" />
+                    <SectionHeader icon={Scissors} label="Surgeries & Dates" onEdit={() => { setIsEditing(true); }} />
                     <CollapsibleContent className="px-3 pb-3">
                       {surgeries.length === 0 ? (
                         <p className="text-xs text-muted-foreground">No surgeries recorded</p>
@@ -1115,7 +1115,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Family History */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={GitBranch} label="Family History" />
+                    <SectionHeader icon={GitBranch} label="Family History" onEdit={() => { setIsEditing(true); }} />
                     <CollapsibleContent className="px-3 pb-3">
                       {familyHistory.length === 0 ? (
                         <p className="text-xs text-muted-foreground">No family history recorded</p>
@@ -1162,7 +1162,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 {/* Column 2 */}
                 <div className="space-y-4">
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
+                    <SectionHeader icon={ShieldCheck} label="Medical Insurance" onEdit={() => { setIsEditing(true); }} />
                     <CollapsibleContent className="p-3">
                       <div className="grid gap-3 sm:grid-cols-2">
                         <ViewField label="Insurance Provider" value={patient.medical_aid} />
@@ -1176,7 +1176,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Next of Kin - moved from Personal to Medical */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={Users} label="Next of Kin" />
+                    <SectionHeader icon={Users} label="Next of Kin" onEdit={() => { setIsEditing(true); }} />
                     <CollapsibleContent className="p-3">
                       {nokMembers.length > 0 ? (
                         <div className="space-y-2">
@@ -1210,7 +1210,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   </Collapsible>
 
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={User} label="General Practitioner" />
+                    <SectionHeader icon={User} label="General Practitioner" onEdit={() => { setIsEditing(true); }} />
                     <CollapsibleContent className="p-3">
                       <ViewField label="General Practitioner" value={patient.general_practitioner} />
                     </CollapsibleContent>
