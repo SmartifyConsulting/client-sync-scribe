@@ -1260,7 +1260,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 </div>
 
                 {/* Current Medications */}
-                <div>
+                <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
                   <div className="flex items-center justify-between mb-2">
                     <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Current Medications</Label>
                     {!showAddMed && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddMed(true)}><Plus className="h-3 w-3" />Add</Button>}
