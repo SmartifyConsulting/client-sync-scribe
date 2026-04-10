@@ -142,7 +142,28 @@ const formatSurgeryDate = (date: string, precision?: string) => {
   } catch { return date; }
 };
 
-export function PatientDetailsEditor({ patient, onSave, isSelfService = false, userEmail }: PatientDetailsEditorProps) {
+function AnimatedCounter({ target }: { target: number }) {
+  const [count, setCount] = useState(0);
+  const rafRef = useRef<number>();
+  const startRef = useRef<number>();
+  useEffect(() => {
+    if (target <= 0) { setCount(0); return; }
+    startRef.current = undefined;
+    const duration = 1500;
+    const step = (ts: number) => {
+      if (!startRef.current) startRef.current = ts;
+      const progress = Math.min((ts - startRef.current) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.round(eased * target));
+      if (progress < 1) rafRef.current = requestAnimationFrame(step);
+    };
+    rafRef.current = requestAnimationFrame(step);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, [target]);
+  return <span>{count}</span>;
+}
+
+export function PatientDetailsEditor({ patient, onSave, isSelfService = false, userEmail, lollipopCount = 0, rewardsLoading = false }: PatientDetailsEditorProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { isDoctor } = useUserRole();
