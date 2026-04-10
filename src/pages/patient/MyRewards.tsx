@@ -380,13 +380,6 @@ export default function MyRewards() {
           <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
             Overview
           </TabsTrigger>
-          <TabsTrigger value="tasks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-            Assigned Tasks {tasks.filter(t => t.status !== "completed").length > 0 && (
-              <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
-                {tasks.filter(t => t.status !== "completed").length}
-              </Badge>
-            )}
-          </TabsTrigger>
           {patientRecord?.is_chronic && (
             <TabsTrigger value="chronic-meds" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
               <Pill className="h-4 w-4 mr-1" />
@@ -404,9 +397,6 @@ export default function MyRewards() {
           </TabsTrigger>
           <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
              Vulas
-           </TabsTrigger>
-          <TabsTrigger value="vula-apps" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-             Vula Partner Apps
            </TabsTrigger>
          </TabsList>
 
