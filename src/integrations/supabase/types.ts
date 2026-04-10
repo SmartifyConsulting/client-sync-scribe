@@ -1063,6 +1063,7 @@ export type Database = {
           blood_type: string | null
           chronic_medications: string | null
           claims_email: string | null
+          conditions_diagnoses: Json | null
           created_at: string
           current_medications: Json | null
           dob: string | null
@@ -1115,6 +1116,7 @@ export type Database = {
           blood_type?: string | null
           chronic_medications?: string | null
           claims_email?: string | null
+          conditions_diagnoses?: Json | null
           created_at?: string
           current_medications?: Json | null
           dob?: string | null
@@ -1167,6 +1169,7 @@ export type Database = {
           blood_type?: string | null
           chronic_medications?: string | null
           claims_email?: string | null
+          conditions_diagnoses?: Json | null
           created_at?: string
           current_medications?: Json | null
           dob?: string | null

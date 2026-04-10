@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { AddressAutocomplete } from "@/components/patients/AddressAutocomplete";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart, User, MapPin, Users, Briefcase, ShieldCheck, Store, Activity, Droplets, Scissors, GitBranch, Share2, Camera, Mail, Link2, Eye, Phone } from "lucide-react";
+import { Pencil, Check, X, Loader2, AlertCircle, Plus, Trash2, Ruler, Scale, StickyNote, Star, Pill, Heart, User, MapPin, Users, Briefcase, ShieldCheck, Store, Activity, Droplets, Scissors, GitBranch, Share2, Camera, Mail, Link2, Eye, Phone, HeartPulse } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,7 +15,8 @@ import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Patient, Surgery, Pharmacy, FamilyHistoryEntry, ICEContact, NextOfKinMember, CurrentMedication } from "@/hooks/usePatients";
+import { Patient, Surgery, Pharmacy, FamilyHistoryEntry, ICEContact, NextOfKinMember, CurrentMedication, ConditionDiagnosis } from "@/hooks/usePatients";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -202,6 +203,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   const [iceContacts, setIceContacts] = useState<ICEContact[]>([]);
   const [nokMembers, setNokMembers] = useState<NextOfKinMember[]>([]);
   const [currentMedications, setCurrentMedications] = useState<CurrentMedication[]>([]);
+  const [conditionsDiagnoses, setConditionsDiagnoses] = useState<ConditionDiagnosis[]>([]);
   const [newSurgery, setNewSurgery] = useState({ name: "", date: "", notes: "", date_precision: "exact" as 'exact' | 'month' | 'year' });
   const [showAddSurgery, setShowAddSurgery] = useState(false);
   const [editingSurgeryId, setEditingSurgeryId] = useState<string | null>(null);
@@ -218,8 +220,11 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   const [editingNOKId, setEditingNOKId] = useState<string | null>(null);
   const [editingICEId, setEditingICEId] = useState<string | null>(null);
   const [showAddMed, setShowAddMed] = useState(false);
-  const [newMed, setNewMed] = useState({ name: "", dosage: "", is_chronic: false });
+  const [newMed, setNewMed] = useState({ name: "", dosage: "", is_chronic: false, status: "current" as "current" | "past", start_date: "", end_date: "" });
   const [editingMedId, setEditingMedId] = useState<string | null>(null);
+  const [showAddCondition, setShowAddCondition] = useState(false);
+  const [newCondition, setNewCondition] = useState({ name: "", diagnosed_date: "", diagnosed_by: "", status: "active" as "active" | "resolved" });
+  const [editingConditionId, setEditingConditionId] = useState<string | null>(null);
   const [gpSearchResults, setGpSearchResults] = useState<any[]>([]);
   const [gpSearchOpen, setGpSearchOpen] = useState(false);
   const [gpSearchTerm, setGpSearchTerm] = useState("");
@@ -306,6 +311,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
       setIceContacts(patient.ice_contacts || []);
       setNokMembers(patient.next_of_kin_members || []);
       setCurrentMedications(patient.current_medications || []);
+      setConditionsDiagnoses(patient.conditions_diagnoses || []);
       const existingPharmacies = patient.pharmacies || [];
       if (existingPharmacies.length === 0 && (patient.pharmacy_name || patient.pharmacy_email)) {
         setPharmacies([{ id: crypto.randomUUID(), name: patient.pharmacy_name || "", email: patient.pharmacy_email || "", is_primary: true }]);
@@ -363,11 +369,12 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
       ice_contacts: iceContacts,
       next_of_kin_members: nokMembers,
       current_medications: currentMedications,
+      conditions_diagnoses: conditionsDiagnoses,
       is_chronic: isChronic,
     });
     setSaving(false);
     setHasChanges(false);
-  }, [onSave, pharmacies, familyHistory, organDonorOrgans, iceContacts, nokMembers, currentMedications]);
+  }, [onSave, pharmacies, familyHistory, organDonorOrgans, iceContacts, nokMembers, currentMedications, conditionsDiagnoses]);
 
   useEffect(() => {
     if (!isEditing || !hasChanges) return;
@@ -376,7 +383,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
       performSave(formData, surgeries);
     }, 1500);
     return () => { if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current); };
-  }, [formData, surgeries, pharmacies, familyHistory, organDonorOrgans, iceContacts, nokMembers, currentMedications, isEditing, hasChanges, performSave]);
+  }, [formData, surgeries, pharmacies, familyHistory, organDonorOrgans, iceContacts, nokMembers, currentMedications, conditionsDiagnoses, isEditing, hasChanges, performSave]);
 
   const updateFormData = (updates: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
@@ -536,20 +543,40 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   const handleAddMed = () => {
     if (!newMed.name.trim()) { toast({ title: "Required", description: "Medication name is required", variant: "destructive" }); return; }
     if (editingMedId) {
-      setCurrentMedications(prev => prev.map(m => m.id === editingMedId ? { ...m, name: newMed.name.trim(), dosage: newMed.dosage.trim() || undefined, is_chronic: newMed.is_chronic } : m));
+      setCurrentMedications(prev => prev.map(m => m.id === editingMedId ? { ...m, name: newMed.name.trim(), dosage: newMed.dosage.trim() || undefined, is_chronic: newMed.is_chronic, status: newMed.status, start_date: newMed.start_date || undefined, end_date: newMed.end_date || undefined } : m));
       setEditingMedId(null);
     } else {
-      setCurrentMedications(prev => [...prev, { id: crypto.randomUUID(), name: newMed.name.trim(), dosage: newMed.dosage.trim() || undefined, is_chronic: newMed.is_chronic }]);
+      setCurrentMedications(prev => [...prev, { id: crypto.randomUUID(), name: newMed.name.trim(), dosage: newMed.dosage.trim() || undefined, is_chronic: newMed.is_chronic, status: newMed.status, start_date: newMed.start_date || undefined, end_date: newMed.end_date || undefined }]);
     }
-    setNewMed({ name: "", dosage: "", is_chronic: false });
+    setNewMed({ name: "", dosage: "", is_chronic: false, status: "current", start_date: "", end_date: "" });
     setShowAddMed(false);
     setHasChanges(true);
   };
 
   const handleEditMed = (m: CurrentMedication) => {
-    setNewMed({ name: m.name, dosage: m.dosage || "", is_chronic: m.is_chronic });
+    setNewMed({ name: m.name, dosage: m.dosage || "", is_chronic: m.is_chronic, status: m.status || "current", start_date: m.start_date || "", end_date: m.end_date || "" });
     setEditingMedId(m.id);
     setShowAddMed(true);
+  };
+
+  // Conditions handlers
+  const handleAddCondition = () => {
+    if (!newCondition.name.trim()) { toast({ title: "Required", description: "Condition name is required", variant: "destructive" }); return; }
+    if (editingConditionId) {
+      setConditionsDiagnoses(prev => prev.map(c => c.id === editingConditionId ? { ...c, name: newCondition.name.trim(), diagnosed_date: newCondition.diagnosed_date || undefined, diagnosed_by: newCondition.diagnosed_by.trim() || undefined, status: newCondition.status } : c));
+      setEditingConditionId(null);
+    } else {
+      setConditionsDiagnoses(prev => [...prev, { id: crypto.randomUUID(), name: newCondition.name.trim(), diagnosed_date: newCondition.diagnosed_date || undefined, diagnosed_by: newCondition.diagnosed_by.trim() || undefined, status: newCondition.status }]);
+    }
+    setNewCondition({ name: "", diagnosed_date: "", diagnosed_by: "", status: "active" });
+    setShowAddCondition(false);
+    setHasChanges(true);
+  };
+
+  const handleEditCondition = (c: ConditionDiagnosis) => {
+    setNewCondition({ name: c.name, diagnosed_date: c.diagnosed_date || "", diagnosed_by: c.diagnosed_by || "", status: c.status });
+    setEditingConditionId(c.id);
+    setShowAddCondition(true);
   };
 
   const handleToggleMedChronic = (id: string) => {
@@ -598,6 +625,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
     setIceContacts(patient.ice_contacts || []);
     setNokMembers(patient.next_of_kin_members || []);
     setCurrentMedications(patient.current_medications || []);
+    setConditionsDiagnoses(patient.conditions_diagnoses || []);
     setIsEditing(false);
   };
 
@@ -874,10 +902,10 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   <div><ViewField label="Blood Type" value={patient.blood_type} /></div>
                   <div><ViewField label="Allergies" value={patient.allergies || "None recorded"} /></div>
 
-                  {/* Current Medications */}
+                  {/* Medication */}
                   <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
                     <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
-                      <Pill className="h-3.5 w-3.5" /> Current Medications
+                      <Pill className="h-3.5 w-3.5" /> Medication
                     </h3>
                     {currentMedications.length === 0 ? (
                       <p className="text-xs text-muted-foreground">No medications recorded</p>
@@ -888,7 +916,15 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                             <Pill className="h-3 w-3 text-muted-foreground shrink-0" />
                             <div className="flex-1 min-w-0">
                               <p className="text-xs font-medium text-foreground">{m.name}{m.dosage ? ` — ${m.dosage}` : ""}</p>
+                              {(m.start_date || m.end_date) && (
+                                <p className="text-[10px] text-muted-foreground">
+                                  {m.start_date ? format(new Date(m.start_date), "MMM yyyy") : "?"} — {m.end_date ? format(new Date(m.end_date), "MMM yyyy") : "Present"}
+                                </p>
+                              )}
                             </div>
+                            <Badge className={`text-[8px] border-0 ${m.status === 'past' ? 'bg-muted text-muted-foreground' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'}`}>
+                              {m.status === 'past' ? 'Past' : 'Current'}
+                            </Badge>
                             {m.is_chronic && <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[9px] font-bold text-destructive shrink-0">Chronic</span>}
                           </div>
                         ))}
@@ -897,6 +933,35 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                     {isChronic && (
                       <div className="mt-2">
                         <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive"><Pill className="h-2.5 w-2.5" />Chronic Patient</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Conditions & Diagnoses */}
+                  <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
+                    <h3 className="text-xs font-semibold text-foreground mb-2 uppercase tracking-wide flex items-center gap-1.5">
+                      <HeartPulse className="h-3.5 w-3.5" /> Conditions & Diagnoses
+                    </h3>
+                    {conditionsDiagnoses.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No conditions recorded</p>
+                    ) : (
+                      <div className="space-y-1">
+                        {conditionsDiagnoses.map(c => (
+                          <div key={c.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-medium text-foreground">{c.name}</p>
+                                <p className="text-[10px] text-muted-foreground">
+                                  {c.diagnosed_date ? format(new Date(c.diagnosed_date), "MMM d, yyyy") : "Date unknown"}
+                                  {c.diagnosed_by ? ` · Dr. ${c.diagnosed_by}` : ""}
+                                </p>
+                              </div>
+                              <Badge className={`text-[8px] border-0 ${c.status === 'resolved' ? 'bg-muted text-muted-foreground' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'}`}>
+                                {c.status === 'resolved' ? 'Resolved' : 'Active'}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -994,7 +1059,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   <p className="text-xs text-muted-foreground">Summary of your medical history and sessions</p>
                 </div>
                 <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-                  <PatientOverviewLazy patient={patient} sessions={[]} />
+                  <PatientOverviewLazy patient={patient} sessions={[]} isSelfService />
                 </Suspense>
               </TabsContent>
             )}
@@ -1274,10 +1339,10 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   <Textarea id="allergies" className="text-sm" value={formData.allergies} onChange={(e) => updateFormData({ allergies: e.target.value })} placeholder="List any allergies (medications, food, etc.)" rows={2} />
                 </div>
 
-                {/* Current Medications */}
+                {/* Medication */}
                 <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
                   <div className="flex items-center justify-between mb-2">
-                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Current Medications</Label>
+                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Pill className="h-3.5 w-3.5" /> Medication</Label>
                     {!showAddMed && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddMed(true)}><Plus className="h-3 w-3" />Add</Button>}
                   </div>
                   {showAddMed && (
@@ -1285,13 +1350,27 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                       <div className="grid gap-2 sm:grid-cols-2">
                         <div className="space-y-1.5"><Label>Medication Name *</Label><Input className="text-sm" value={newMed.name} onChange={(e) => setNewMed(p => ({ ...p, name: e.target.value }))} placeholder="e.g., Metformin" /></div>
                         <div className="space-y-1.5"><Label>Dosage</Label><Input className="text-sm" value={newMed.dosage} onChange={(e) => setNewMed(p => ({ ...p, dosage: e.target.value }))} placeholder="e.g., 500mg twice daily" /></div>
+                        <div className="space-y-1.5">
+                          <Label>Status</Label>
+                          <Select value={newMed.status} onValueChange={(v) => setNewMed(p => ({ ...p, status: v as "current" | "past" }))}>
+                            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="current">Current</SelectItem>
+                              <SelectItem value="past">Past</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1.5"><Label>Start Date</Label><Input className="text-sm" type="date" value={newMed.start_date} onChange={(e) => setNewMed(p => ({ ...p, start_date: e.target.value }))} /></div>
+                        {newMed.status === 'past' && (
+                          <div className="space-y-1.5"><Label>End Date</Label><Input className="text-sm" type="date" value={newMed.end_date} onChange={(e) => setNewMed(p => ({ ...p, end_date: e.target.value }))} /></div>
+                        )}
                       </div>
                       <div className="flex items-center space-x-2">
                         <Checkbox checked={newMed.is_chronic} onCheckedChange={(c) => setNewMed(p => ({ ...p, is_chronic: c as boolean }))} />
                         <Label className="text-xs">This is a chronic medication</Label>
                       </div>
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddMed(false); setEditingMedId(null); setNewMed({ name: "", dosage: "", is_chronic: false }); }}>Cancel</Button>
+                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddMed(false); setEditingMedId(null); setNewMed({ name: "", dosage: "", is_chronic: false, status: "current", start_date: "", end_date: "" }); }}>Cancel</Button>
                         <Button size="sm" className="text-xs h-7" onClick={handleAddMed}>{editingMedId ? "Save" : "Add"}</Button>
                       </div>
                     </div>
@@ -1306,7 +1385,15 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                             <Switch checked={m.is_chronic} onCheckedChange={() => handleToggleMedChronic(m.id)} className="shrink-0 scale-75" />
                             <div className="min-w-0">
                               <p className="text-xs font-medium text-foreground truncate">{m.name}{m.dosage ? ` — ${m.dosage}` : ""}</p>
+                              {(m.start_date || m.end_date) && (
+                                <p className="text-[10px] text-muted-foreground">
+                                  {m.start_date ? format(new Date(m.start_date), "MMM yyyy") : "?"} — {m.end_date ? format(new Date(m.end_date), "MMM yyyy") : "Present"}
+                                </p>
+                              )}
                             </div>
+                            <Badge className={`text-[8px] border-0 ${m.status === 'past' ? 'bg-muted text-muted-foreground' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'}`}>
+                              {m.status === 'past' ? 'Past' : 'Current'}
+                            </Badge>
                             {m.is_chronic && <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[9px] font-bold text-destructive shrink-0">Chronic</span>}
                           </div>
                           <div className="flex gap-1 shrink-0">
@@ -1320,6 +1407,61 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   {isChronic && (
                     <div className="mt-2">
                       <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive"><Pill className="h-2.5 w-2.5" />Chronic Patient</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Conditions & Diagnoses */}
+                <div className="rounded-xl border border-primary/30 bg-card p-3 space-y-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><HeartPulse className="h-3.5 w-3.5" /> Conditions & Diagnoses</Label>
+                    {!showAddCondition && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddCondition(true)}><Plus className="h-3 w-3" />Add</Button>}
+                  </div>
+                  {showAddCondition && (
+                    <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <div className="space-y-1.5"><Label>Condition/Diagnosis *</Label><Input className="text-sm" value={newCondition.name} onChange={(e) => setNewCondition(p => ({ ...p, name: e.target.value }))} placeholder="e.g., Type 2 Diabetes" /></div>
+                        <div className="space-y-1.5"><Label>Date Diagnosed</Label><Input className="text-sm" type="date" value={newCondition.diagnosed_date} onChange={(e) => setNewCondition(p => ({ ...p, diagnosed_date: e.target.value }))} /></div>
+                        <div className="space-y-1.5"><Label>Diagnosed By</Label><Input className="text-sm" value={newCondition.diagnosed_by} onChange={(e) => setNewCondition(p => ({ ...p, diagnosed_by: e.target.value }))} placeholder="Doctor name" /></div>
+                        <div className="space-y-1.5">
+                          <Label>Status</Label>
+                          <Select value={newCondition.status} onValueChange={(v) => setNewCondition(p => ({ ...p, status: v as "active" | "resolved" }))}>
+                            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="active">Active</SelectItem>
+                              <SelectItem value="resolved">Resolved</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddCondition(false); setEditingConditionId(null); setNewCondition({ name: "", diagnosed_date: "", diagnosed_by: "", status: "active" }); }}>Cancel</Button>
+                        <Button size="sm" className="text-xs h-7" onClick={handleAddCondition}>{editingConditionId ? "Save" : "Add"}</Button>
+                      </div>
+                    </div>
+                  )}
+                  {conditionsDiagnoses.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No conditions recorded</p>
+                  ) : (
+                    <div className="space-y-1">
+                      {conditionsDiagnoses.map(c => (
+                        <div key={c.id} className="flex items-center justify-between p-1.5 rounded-lg bg-primary/5 border border-primary/20">
+                          <div>
+                            <p className="text-xs font-medium text-foreground">{c.name}</p>
+                            <p className="text-[10px] text-muted-foreground">
+                              {c.diagnosed_date ? format(new Date(c.diagnosed_date), "MMM d, yyyy") : "Date unknown"}
+                              {c.diagnosed_by ? ` · Dr. ${c.diagnosed_by}` : ""}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Badge className={`text-[8px] border-0 ${c.status === 'resolved' ? 'bg-muted text-muted-foreground' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'}`}>
+                              {c.status === 'resolved' ? 'Resolved' : 'Active'}
+                            </Badge>
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditCondition(c)}><Pencil className="h-3 w-3" /></Button>
+                            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => { setConditionsDiagnoses(prev => prev.filter(x => x.id !== c.id)); setHasChanges(true); }}><Trash2 className="h-3 w-3" /></Button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -1563,7 +1705,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 <p className="text-xs text-muted-foreground">Summary of your medical history and sessions</p>
               </div>
               <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-                <PatientOverviewLazy patient={patient} sessions={[]} />
+                <PatientOverviewLazy patient={patient} sessions={[]} isSelfService />
               </Suspense>
             </TabsContent>
           )}
