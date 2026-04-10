@@ -464,6 +464,8 @@ export default function MyRewards() {
                 </div>
               )}
             </CardContent>
+          </Card>
+
           {/* Assigned Tasks - merged into overview */}
           <Card>
             <CardHeader>
