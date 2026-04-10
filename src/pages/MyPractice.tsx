@@ -573,7 +573,7 @@ export default function MyPractice() {
 
       {/* Tabs */}
       <Tabs defaultValue="practice" className="w-full">
-        <TabsList className="flex w-full flex-wrap bg-primary justify-start">
+        <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger value="practice" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">My Practice</TabsTrigger>
           <TabsTrigger value="referrals" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Referrals</TabsTrigger>
           <TabsTrigger value="certificates" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Certificates{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}</TabsTrigger>
@@ -771,16 +771,11 @@ export default function MyPractice() {
           {/* Digital Signature Frame */}
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-2">
             <Label className="text-sm font-semibold">Digital Signature</Label>
-            <div className="p-3 border border-border rounded-lg bg-background">
-              <p style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), color: getSignatureColor(sigFormData.signature_color), fontSize: `${sigFormData.signature_font_size}px`, fontWeight: sigFormData.signature_bold ? 'bold' : 'normal', fontStyle: sigFormData.signature_italic ? 'italic' : 'normal' }}>{combinedFullName}</p>
-              <p className="text-xs text-muted-foreground mt-1">{new Date().toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">Font</Label>
+            <div className="flex items-center gap-2 flex-wrap">
               <Select value={sigFormData.signature_font} onValueChange={(v) => setSigFormData({ ...sigFormData, signature_font: v })}>
-                <SelectTrigger>
-                  <span style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), fontSize: '16px' }}>
-                    {SIGNATURE_FONTS.find(f => f.value === sigFormData.signature_font)?.label || "Select font"}
+                <SelectTrigger className="w-[120px] h-8 text-xs">
+                  <span style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), fontSize: '14px' }}>
+                    {SIGNATURE_FONTS.find(f => f.value === sigFormData.signature_font)?.label || "Font"}
                   </span>
                 </SelectTrigger>
                 <SelectContent className="max-h-[300px]">
@@ -800,32 +795,34 @@ export default function MyPractice() {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label className="text-xs">Color</Label>
-                <Select value={sigFormData.signature_color} onValueChange={(v) => setSigFormData({ ...sigFormData, signature_color: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {SIGNATURE_COLORS.map(c => (
-                      <SelectItem key={c.value} value={c.value}>
-                        <span className="flex items-center gap-2">
-                          <span className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: c.color }} />
-                          {c.label}
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <Select value={sigFormData.signature_color} onValueChange={(v) => setSigFormData({ ...sigFormData, signature_color: v })}>
+                <SelectTrigger className="w-[100px] h-8 text-xs">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: getSignatureColor(sigFormData.signature_color) }} />
+                    <span className="truncate">{SIGNATURE_COLORS.find(c => c.value === sigFormData.signature_color)?.label || "Color"}</span>
+                  </span>
+                </SelectTrigger>
+                <SelectContent>
+                  {SIGNATURE_COLORS.map(c => (
+                    <SelectItem key={c.value} value={c.value}>
+                      <span className="flex items-center gap-2">
+                        <span className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: c.color }} />
+                        {c.label}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex items-center gap-1.5 min-w-[80px] flex-1">
+                <span className="text-[10px] text-muted-foreground whitespace-nowrap">{sigFormData.signature_font_size}px</span>
+                <Slider min={16} max={48} step={2} value={[sigFormData.signature_font_size]} onValueChange={([v]) => setSigFormData({ ...sigFormData, signature_font_size: v })} className="flex-1" />
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Size: {sigFormData.signature_font_size}px</Label>
-                <Slider min={16} max={48} step={2} value={[sigFormData.signature_font_size]} onValueChange={([v]) => setSigFormData({ ...sigFormData, signature_font_size: v })} />
-              </div>
-            </div>
-            <div className="flex gap-2">
               <Toggle pressed={sigFormData.signature_bold} onPressedChange={(v) => setSigFormData({ ...sigFormData, signature_bold: v })} size="sm" aria-label="Bold" className="h-8 w-8 p-0"><Bold className="h-4 w-4" /></Toggle>
               <Toggle pressed={sigFormData.signature_italic} onPressedChange={(v) => setSigFormData({ ...sigFormData, signature_italic: v })} size="sm" aria-label="Italic" className="h-8 w-8 p-0"><Italic className="h-4 w-4" /></Toggle>
+            </div>
+            <div className="p-3 border border-border rounded-lg bg-background">
+              <p style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), color: getSignatureColor(sigFormData.signature_color), fontSize: `${sigFormData.signature_font_size}px`, fontWeight: sigFormData.signature_bold ? 'bold' : 'normal', fontStyle: sigFormData.signature_italic ? 'italic' : 'normal' }}>{combinedFullName}</p>
+              <p className="text-xs text-muted-foreground mt-1">{new Date().toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
             </div>
           </div>
 
