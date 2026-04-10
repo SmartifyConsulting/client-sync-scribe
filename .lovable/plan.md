@@ -1,115 +1,59 @@
 
 
-# Multi-Change Plan: Navigation, Logo, Layout, and Styling Updates
+# Navigation Grouping, Section Header Styling & Mobile Compactness
 
 ## Summary
-This plan covers 10 distinct changes across navigation restructuring, logo updates, layout fixes, content reorganization, and styling adjustments.
+Group tabs into "My Profile" and "My Admin" parent tabs on web/tablet. Rename "Health" to "Profile" on mobile. Update section header colors. Make calendar and documents mobile-compact.
 
 ## Changes
 
-### 1. Replace logo with transparent background version
-**Files:** `src/assets/`, `src/components/layout/PatientAppLayout.tsx`, `src/components/layout/Sidebar.tsx`, `src/components/layout/MobileHeader.tsx`, `src/pages/Auth.tsx`, `src/pages/ResetPassword.tsx`, `src/pages/ForgotPassword.tsx`
-- Copy uploaded `HolarcLogoClear-2.png` to `src/assets/holarc-logo-clear-2.png`
-- Replace `import holarcLogo from "@/assets/holarc-logo.png"` with the new transparent logo in all files that use `holarc-logo.png` (PatientAppLayout, Sidebar, MobileHeader, Auth, ResetPassword, ForgotPassword)
-- Landing.tsx already uses `holarc-logo-clear.png` — leave as-is
-
-### 2. Increase logo size by 40% in PatientAppLayout
-**File:** `src/components/layout/PatientAppLayout.tsx`
-- Change `h-11` to `h-[62px]` (11 * 1.4 ≈ 15.4 = ~62px) on the `<img>` tag at line 123
-
-### 3. Move Edit button below tabs on mobile
+### 1. Section Header Background — `#F5F4F1` with black text
 **File:** `src/components/patients/PatientDetailsEditor.tsx`
-- In view mode (line ~826-832): swap the order so `renderTabsList()` comes before the Edit button div
-- In edit mode (line ~1260-1266): same — tabs first, then Done button
-- This places the button below the tab bar, not touching it
+- In `SectionHeader` component (line ~74): change `bg-primary` to `bg-[#F5F4F1]`, change `text-white` to `text-foreground` (black), change chevron from `text-white` to `text-foreground`
 
-### 4. Rename bottom nav "Records" to "Admin" with Calendar, Tasks, Documents tabs
+### 2. Web/Tablet: Group tabs into "My Profile" and "My Admin"
+**File:** `src/components/patients/PatientDetailsEditor.tsx`
+- In `renderTabsList()`, on non-mobile (desktop/iPad), replace flat tabs with grouped parent tabs:
+  - **My Profile** parent tab → sub-tabs: Personal Information, Medical Information, NOK & ICE
+  - **My Admin** parent tab → sub-tabs: My Calendar, My Tasks, My Documents
+  - Other tabs (Dashboard, My H/Care Providers, My Sessions, My Round Table) remain as flat top-level tabs
+- Implementation: Use a two-tier approach — top-level tabs include "My Profile" and "My Admin" as values. When selected, show a secondary sub-tab row below. The `activeTab` state will track the actual content tab (personal, medical, etc.), while a separate state tracks which parent group is active
+- On mobile, keep the existing section-filtered flat tab behavior unchanged
+
+### 3. Mobile: Rename "Health" to "Profile"
 **File:** `src/components/layout/BottomNav.tsx`
-- Change `{ icon: FolderOpen, label: "Records", section: "records" }` to `{ icon: FolderOpen, label: "Admin", section: "admin" }`
+- Change `{ icon: HeartPulse, label: "Health", section: "health" }` to `{ icon: HeartPulse, label: "Profile", section: "health" }`
+- The `section` key stays `"health"` so the SECTION_TABS mapping still works
 
+### 4. Mobile Calendar — compact layout
+**File:** `src/pages/patient/PatientCalendar.tsx`
+- Header area (lines 348-367): Stack the title, view toggle, and "Book Appointment" button vertically on mobile. Use `flex-col` on small screens:
+  - Title row: remove back arrow (not needed inside tab), shrink heading to `text-lg`
+  - View toggle + Book button: wrap into a row with `w-full` buttons on mobile, use smaller `size="sm"` 
+- Month grid (line 263): reduce `gap-1` to `gap-0`, reduce cell padding
+- `AppointmentCard`: reduce padding from `p-4` to `p-2` on mobile, shrink icon from `h-10 w-10` to `h-8 w-8`
+- Upcoming sidebar card: hide on mobile (`hidden lg:block`) since it duplicates the day view
+- Week view buttons (line 212-214): use icon-only on mobile or abbreviate to `<` and `>`
+
+### 5. Mobile Documents — compact layout
+**File:** `src/pages/patient/PatientDocuments.tsx`
+- Review the top section (heading, upload area, filters) and ensure they stack vertically and fit within 390px
+- Reduce any large padding or fixed-width elements
+- Make the upload button and filter controls full-width on mobile
+
+### 6. General mobile compactness review
 **File:** `src/components/patients/PatientDetailsEditor.tsx`
-- Update `SECTION_TABS`: rename `records` key to `admin` and add `"calendar"` and `"tasks"` tabs: `admin: ["calendar", "tasks", "documents"]`
-- Remove `"calendar"` from the `care` section: `care: ["doctors", "sessions", "roundtable"]`
-- Add a new `TabsTrigger` for "My Tasks" pointing to a `tasks` tab value
-- Add a `TabsContent` for `tasks` that renders `<PatientTasks />` (already lazy-importable)
-- Import `PatientTasks` as a lazy component
+- Reduce outer card padding on mobile: change `p-4 md:p-6` to `p-2 md:p-6`
+- Reduce `space-y-4` between sections to `space-y-2` on mobile using responsive classes
+- Section content padding: reduce `p-3` to `p-2` on mobile inside `CollapsibleContent`
+- Tab triggers: ensure text doesn't wrap oddly — already have `whitespace-nowrap` ✓
 
-### 5. Remove Medical Overview from patient profile (all layouts)
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- Remove the `overview` tab trigger from `renderTabsList()`
-- Remove the `TabsContent value="overview"` block (lines ~1172-1183)
-- Update `SECTION_TABS.health` from `["medical", "overview"]` to `["medical", "personal"]` (mobile only — see next point)
-
-### 6. Bring Personal Information to Health bottom tab (mobile only)
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- Update `SECTION_TABS`: `health: ["medical", "personal"]` (replacing `"overview"`)
-- Update `SECTION_TABS`: `profile` section becomes `["nok-iced"]` only (since personal moves to health on mobile) — actually, we need a dashboard here now (see point 7)
-
-### 7. Rename "Profile" to "Home" in bottom nav, add patient dashboard
-**File:** `src/components/layout/BottomNav.tsx`
-- Change `{ icon: User, label: "Profile", section: "profile" }` to `{ icon: LayoutDashboard, label: "Home", section: "home" }`
-
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- Add `home` to `SECTION_TABS`: `home: ["dashboard"]`
-- Add a `TabsTrigger` for "Dashboard" (only shown on mobile via the `show()` filter)
-- Add a `TabsContent value="dashboard"` that renders `<PatientDashboard />` (lazy-loaded)
-- Import `PatientDashboard` as lazy component
-- Update `SECTION_TABS.profile` to `["personal", "nok-iced"]` — keeping personal in profile for desktop, but on mobile the home section will show dashboard and health section will show personal + medical
-
-Wait — let me reconsider the mapping. On mobile:
-- **Home** (bottom nav): Dashboard
-- **Health**: Personal Info, Medical Info
-- **Care**: Providers, Sessions, Round Table
-- **Admin**: Calendar, Tasks, Documents
-- **Rewards**: navigates to `/patient/rewards`
-
-On desktop/iPad: all tabs visible (dashboard tab added, overview removed, calendar stays as a tab).
-
-Updated `SECTION_TABS`:
-```typescript
-const SECTION_TABS: Record<string, string[]> = {
-  home: ["dashboard"],
-  health: ["personal", "medical"],
-  care: ["doctors", "sessions", "roundtable"],
-  admin: ["calendar", "tasks", "documents"],
-};
-```
-
-The `nok-iced` tab remains visible on desktop but doesn't map to any mobile section — it will be accessible via the Personal Information tab or kept in the health section. Actually, NOK & ICE should stay accessible. Let me put it in health: `health: ["personal", "medical", "nok-iced"]`.
-
-### 8. Reporting To Email — add "(Optional)" label
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- View mode (line ~939): Change label from `"Reporting To (Email)"` to `"Reporting To Email (Optional)"`
-- Edit mode (line ~1425): Change label similarly and add helper text about medical certificates
-
-### 9. Add Notify and Share to each NOK and ICE record (edit mode)
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- In edit mode NOK records (line ~1347-1360): Add a `Bell` (notify) icon button alongside the existing Share2 button
-- In edit mode ICE records (line ~1389-1412): Same — add `Bell` (notify) icon button
-- In view mode NOK records (line ~874-884): Add notify + share buttons (currently only share exists for NOK; ICE view has share)
-- In view mode ICE records (line ~913-927): Add notify button
-
-### 10. Make all section/frame headings Title Case instead of UPPERCASE
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- In `SectionHeader` component (line ~74): Remove `uppercase` from the className
-- Change all `label` props passed to `SectionHeader` to Title Case (they already are Title Case strings like "Personal Details", "Addresses", etc.)
-- The `uppercase` CSS class was forcing them to caps lock — removing it will show them in Title Case as written
-
-### 11. Email branding with logo
-This requires scaffolding auth email templates. Will use the email template scaffolding tool to set up branded emails with the Holarc logo. This is a separate step that can be done after the UI changes.
-
-## Files Modified Summary
+## Files Modified
 
 | File | Changes |
 |------|---------|
-| `src/assets/holarc-logo-clear-2.png` | New file (copy from upload) |
-| `src/components/layout/BottomNav.tsx` | Rename Profile→Home, Records→Admin, update icons |
-| `src/components/layout/PatientAppLayout.tsx` | Use transparent logo, increase size 40% |
-| `src/components/layout/Sidebar.tsx` | Use transparent logo |
-| `src/components/layout/MobileHeader.tsx` | Use transparent logo |
-| `src/pages/Auth.tsx` | Use transparent logo |
-| `src/pages/ResetPassword.tsx` | Use transparent logo |
-| `src/pages/ForgotPassword.tsx` | Use transparent logo |
-| `src/components/patients/PatientDetailsEditor.tsx` | Move Edit below tabs, remove Medical Overview, add Dashboard/Tasks tabs, update SECTION_TABS, add notify buttons to NOK/ICE, Title Case headings, rename reporting_to_email label |
-| Email templates | Scaffold branded auth emails with Holarc logo |
+| `src/components/patients/PatientDetailsEditor.tsx` | Section header color to `#F5F4F1`/black; group tabs into My Profile/My Admin on desktop; reduce mobile padding |
+| `src/components/layout/BottomNav.tsx` | Rename "Health" label to "Profile" |
+| `src/pages/patient/PatientCalendar.tsx` | Mobile-compact: stack header, shrink grid, hide sidebar on mobile |
+| `src/pages/patient/PatientDocuments.tsx` | Mobile-compact: stack controls, reduce padding |
 
