@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Calendar, FileText, Clock, User, Loader2, Pill, ListChecks, ArrowRight, Info, Sparkles, Building2, Receipt, Star, Camera, Trophy, Heart } from "lucide-react";
-import vulaSymbol from "@/assets/vula-symbol.png";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -382,106 +381,13 @@ export default function PatientDashboard() {
         </Card>
       </div>
 
-      {/* Row 2: Medications + Healthcare Providers + Pharmacies */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <Pill className="h-4 w-4 text-primary" />
-                My Medications
-              </CardTitle>
-              <Link to="/patient/details?tab=medical">
-                <Button variant="ghost" size="sm" className="text-[10px] h-6 text-primary gap-1">
-                  View All <ArrowRight className="h-3 w-3" />
-                </Button>
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {medications.length === 0 ? (
-              <p className="text-[11px] text-muted-foreground text-center py-4">No medications on record.</p>
-            ) : (
-              <div className="space-y-1.5">
-                {activeMeds.slice(0, 3).map((med) => (
-                  <div key={med.id} className="flex items-center justify-between p-2 rounded-lg border border-border bg-card">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-foreground truncate">{med.medication}</p>
-                      <p className="text-[10px] text-muted-foreground">{med.dosage}</p>
-                    </div>
-                    <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0 text-[8px]">Active</Badge>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Healthcare Providers */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm">
-              <Heart className="h-4 w-4 text-primary" />
-              My Healthcare Providers
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {doctors.length === 0 ? (
-              <p className="text-[11px] text-muted-foreground text-center py-4">No providers connected.</p>
-            ) : (
-              <div className="space-y-1.5">
-                {doctors.slice(0, 3).map((doc) => (
-                  <div key={doc.id} className="p-2 rounded-lg border border-border">
-                    <p className="text-xs font-medium text-foreground truncate">{doc.doctor_profile?.full_name || "Unknown"}</p>
-                    {doc.doctor_profile?.specialty && (
-                      <Badge className={`text-[8px] border-0 mt-0.5 ${getSpecialtyColor(doc.doctor_profile.specialty)}`}>{doc.doctor_profile.specialty}</Badge>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Pharmacies */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm">
-              <Building2 className="h-4 w-4 text-primary" />
-              My Pharmacies
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {pharmacies.length === 0 ? (
-              <p className="text-[11px] text-muted-foreground text-center py-4">No pharmacies on record.</p>
-            ) : (
-              <div className="space-y-1.5">
-                {pharmacies.slice(0, 3).map((pharm, i) => (
-                  <div key={i} className="flex items-center justify-between p-2 rounded-lg border border-border">
-                    <div>
-                      <p className="text-xs font-medium text-foreground">{pharm.name}</p>
-                      {pharm.email && <p className="text-[10px] text-muted-foreground">{pharm.email}</p>}
-                    </div>
-                    {pharm.is_primary && (
-                      <Badge className="bg-primary/10 text-primary border-0 text-[8px]">
-                        <Star className="h-2.5 w-2.5 mr-0.5 fill-current" /> Primary
-                      </Badge>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Row 3: Vulas Balance + Earn More */}
+      {/* Row 2: Vulas Balance + Earn More Vulas */}
       <div className="grid gap-4 md:grid-cols-2">
         <Link to="/patient/rewards">
           <Card className="h-full border-primary/20 bg-gradient-to-br from-primary/5 via-card to-secondary/5 hover:shadow-lg transition-all cursor-pointer">
             <CardContent className="flex items-center gap-4 p-5">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 shrink-0">
-                 <img src={vulaSymbol} alt="Vulas" className="h-7 w-7 object-contain" />
+                <Trophy className="h-7 w-7 text-primary" />
               </div>
               <div className="flex-1">
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">My Vulas Balance</p>
@@ -491,6 +397,38 @@ export default function PatientDashboard() {
             </CardContent>
           </Card>
         </Link>
+
+        <Card className="border-primary/10 bg-gradient-to-br from-primary/3 to-card">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Trophy className="h-4 w-4 text-primary" />
+              Earn More Vulas
+            </CardTitle>
+            <CardDescription className="text-[10px]">Tips to boost your rewards</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {[
+                { icon: Pill, text: "Log daily medication intake", link: "/patient/prescriptions" },
+                { icon: ListChecks, text: "Complete tasks from your doctor", link: "/patient/tasks" },
+                { icon: Camera, text: "Upload health photos regularly", link: "/patient/health-album" },
+                { icon: Calendar, text: "Keep visit streaks going", link: "/patient/calendar" },
+              ].map((tip, i) => (
+                <Link key={i} to={tip.link} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-primary/5 transition-colors group">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                    <tip.icon className="h-3.5 w-3.5 text-primary" />
+                  </div>
+                  <p className="text-[11px] text-foreground group-hover:text-primary transition-colors">{tip.text}</p>
+                  <ArrowRight className="h-3 w-3 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Link>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Row 3: Recent Claims + Documentation */}
+      <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
@@ -530,34 +468,19 @@ export default function PatientDashboard() {
           </CardContent>
         </Card>
 
-        {/* Earn More Vulas */}
-        <Card className="border-primary/10 bg-gradient-to-br from-primary/3 to-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm">
-              <Trophy className="h-4 w-4 text-primary" />
-              Earn More Vulas
-            </CardTitle>
-            <CardDescription className="text-[10px]">Tips to boost your rewards</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {[
-                { icon: Pill, text: "Log daily medication intake", link: "/patient/prescriptions" },
-                { icon: ListChecks, text: "Complete tasks from your doctor", link: "/patient/tasks" },
-                { icon: Camera, text: "Upload health photos regularly", link: "/patient/health-album" },
-                { icon: Calendar, text: "Keep visit streaks going", link: "/patient/calendar" },
-              ].map((tip, i) => (
-                <Link key={i} to={tip.link} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-primary/5 transition-colors group">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0">
-                    <tip.icon className="h-3.5 w-3.5 text-primary" />
-                  </div>
-                  <p className="text-[11px] text-foreground group-hover:text-primary transition-colors">{tip.text}</p>
-                  <ArrowRight className="h-3 w-3 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                </Link>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <Link to="/patient/documentation">
+          <Card className="cursor-pointer border-primary/10 hover:border-primary/30 hover:shadow-md transition-all h-full">
+            <CardHeader className="p-4">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
+                  <FileText className="h-4 w-4 text-primary" />
+                </div>
+                Documentation
+              </CardTitle>
+              <CardDescription className="text-[10px]">View your documents and records</CardDescription>
+            </CardHeader>
+          </Card>
+        </Link>
       </div>
 
       {/* Assigned Tasks */}
@@ -600,36 +523,6 @@ export default function PatientDashboard() {
           </CardContent>
         </Card>
       )}
-
-      {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Link to="/patient/calendar">
-          <Card className="cursor-pointer border-primary/10 hover:border-primary/30 hover:shadow-md transition-all h-full">
-            <CardHeader className="p-4">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
-                  <Calendar className="h-4 w-4 text-primary" />
-                </div>
-                My Calendar
-              </CardTitle>
-              <CardDescription className="text-[10px]">View and manage appointments</CardDescription>
-            </CardHeader>
-          </Card>
-        </Link>
-        <Link to="/patient/documentation">
-          <Card className="cursor-pointer border-primary/10 hover:border-primary/30 hover:shadow-md transition-all h-full">
-            <CardHeader className="p-4">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
-                  <FileText className="h-4 w-4 text-primary" />
-                </div>
-                Documentation
-              </CardTitle>
-              <CardDescription className="text-[10px]">View your documents and records</CardDescription>
-            </CardHeader>
-          </Card>
-        </Link>
-      </div>
     </div>
   );
 }
