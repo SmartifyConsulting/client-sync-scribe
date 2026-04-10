@@ -68,6 +68,8 @@ interface PartnerApp {
   is_active: boolean;
   creator: string | null;
   signup_url: string | null;
+  google_play_url: string | null;
+  app_store_url: string | null;
 }
 
 interface VulaTransfer {
