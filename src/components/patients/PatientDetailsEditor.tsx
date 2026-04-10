@@ -183,7 +183,7 @@ function AnimatedCounter({ target }: { target: number }) {
 
 const SECTION_TABS: Record<string, string[]> = {
   home: ["dashboard"],
-  health: ["personal", "medical", "nok-iced"],
+  health: ["personal", "medical"],
   care: ["doctors", "sessions", "roundtable"],
   admin: ["calendar", "tasks", "documents"],
 };
@@ -266,7 +266,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   const [surgeries, setSurgeries] = useState<Surgery[]>([]);
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [familyHistory, setFamilyHistory] = useState<FamilyHistoryEntry[]>([]);
-  const [iceContacts, setIceContacts] = useState<ICEContact[]>([]);
+  const [iceContacts, setIceContacts] = useState<any[]>([]);
   const [nokMembers, setNokMembers] = useState<NextOfKinMember[]>([]);
   const [currentMedications, setCurrentMedications] = useState<CurrentMedication[]>([]);
   const [conditionsDiagnoses, setConditionsDiagnoses] = useState<ConditionDiagnosis[]>([]);
