@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { Patient } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
+import holarcLogo from "@/assets/holarc-logo.png";
+import vulaVouchersLogo from "@/assets/vula-vouchers-logo.png";
 
 export default function MyDetails() {
   const [patient, setPatient] = useState<Patient | null>(null);
@@ -82,11 +85,23 @@ export default function MyDetails() {
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">My Holarchive</h1>
-        <p className="text-muted-foreground text-[12px]">View and update your personal and medical information</p>
+    <div className="space-y-4 p-4 md:p-6">
+      {/* Logo above heading */}
+      <div className="flex items-center justify-center">
+        <img src={holarcLogo} alt="Holarc" className="h-10 w-auto object-contain" />
       </div>
+
+      {/* Heading row with Vula Vouchers logo */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">My Holarchive</h1>
+          <p className="text-muted-foreground text-[12px]">View and update your personal and medical information</p>
+        </div>
+        <Link to="/patient/rewards" className="hover:opacity-80 transition-opacity shrink-0">
+          <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-10 w-auto object-contain" />
+        </Link>
+      </div>
+
       <PatientDetailsEditor patient={patient} onSave={handleSave} isSelfService userEmail={userEmail} />
     </div>
   );

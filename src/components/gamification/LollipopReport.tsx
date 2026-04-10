@@ -30,10 +30,10 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
   return (
     <div className="space-y-6">
       {/* Summary Card */}
-      <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 border-emerald-200 dark:border-emerald-800/30">
+      <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 border-blue-200 dark:border-blue-800/30">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <span className="text-3xl font-bold text-emerald-600">Ⓜ</span>
+            <span className="text-3xl font-bold text-blue-600">Ⓜ</span>
             Vula Summary
           </CardTitle>
           <CardDescription>
@@ -47,7 +47,7 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
                 <Award className="h-4 w-4" />
                 Total Vulas
               </div>
-              <div className="text-4xl font-bold text-emerald-600 dark:text-emerald-400">
+              <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">
                 {totalCount}
               </div>
             </div>
@@ -56,7 +56,7 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
                 <Gift className="h-4 w-4" />
                 Rewards Earned
               </div>
-              <div className="text-4xl font-bold text-teal-600 dark:text-teal-400">
+              <div className="text-4xl font-bold text-cyan-600 dark:text-cyan-400">
                 {rewards.length}
               </div>
             </div>
@@ -80,7 +80,7 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Gift className="h-5 w-5 text-emerald-500" />
+            <Gift className="h-5 w-5 text-blue-500" />
             Reward History
           </CardTitle>
           <CardDescription>
@@ -90,7 +90,7 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
         <CardContent>
           {rewards.length === 0 ? (
             <div className="text-center py-12">
-              <span className="text-5xl mb-4 block font-bold text-emerald-600">Ⓜ</span>
+              <span className="text-5xl mb-4 block font-bold text-blue-600">Ⓜ</span>
               <p className="text-muted-foreground">No Vulas earned yet</p>
               <p className="text-sm text-muted-foreground mt-1">
                 Attend healthy visits to start collecting Vulas!
@@ -123,7 +123,7 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold">
+                      <span className="inline-flex items-center gap-1 text-blue-600 font-semibold">
                         +{reward.lollipops_count || 1} Ⓜ
                       </span>
                     </TableCell>
