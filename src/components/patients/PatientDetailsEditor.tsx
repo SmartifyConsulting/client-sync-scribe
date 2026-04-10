@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
 const MyDoctors = lazy(() => import("@/pages/patient/MyDoctors"));
 const PatientRoundTable = lazy(() => import("@/pages/patient/PatientRoundTable"));
+const PatientCalendarLazy = lazy(() => import("@/pages/patient/PatientCalendar"));
 const NokIcedTab = lazy(() => import("@/components/patients/NokIcedTab"));
 const PatientOverviewLazy = lazy(() => import("@/components/patients/PatientOverview").then(m => ({ default: m.PatientOverview })));
 const SettingsContentLazy = lazy(() => import("@/components/settings/SettingsContent").then(m => ({ default: m.SettingsContent })));
@@ -806,6 +807,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               {isSelfService && <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Medical Overview</TabsTrigger>}
               {isSelfService && <TabsTrigger value="doctors" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Healthcare Providers</TabsTrigger>}
               {isSelfService && <TabsTrigger value="sessions" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Sessions</TabsTrigger>}
+              {isSelfService && <TabsTrigger value="calendar" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Calendar</TabsTrigger>}
               {isSelfService && <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Documents</TabsTrigger>}
               {isSelfService && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Round Table</TabsTrigger>}
               {isSelfService && <TabsTrigger value="nok-iced" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">NOK & ICE</TabsTrigger>}
@@ -1121,6 +1123,14 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             )}
 
             {isSelfService && (
+              <TabsContent value="calendar" className="mt-4">
+                <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                  <PatientCalendarLazy />
+                </Suspense>
+              </TabsContent>
+            )}
+
+            {isSelfService && (
               <TabsContent value="documents" className="mt-4">
                 <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
                   <PatientDocuments hideHeader={false} />
@@ -1182,6 +1192,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             {isSelfService && <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">Medical Overview</TabsTrigger>}
             {isSelfService && <TabsTrigger value="doctors" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Healthcare Providers</TabsTrigger>}
             {isSelfService && <TabsTrigger value="sessions" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Sessions</TabsTrigger>}
+            {isSelfService && <TabsTrigger value="calendar" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Calendar</TabsTrigger>}
             {isSelfService && <TabsTrigger value="documents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Documents</TabsTrigger>}
             {isSelfService && <TabsTrigger value="roundtable" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">My Round Table</TabsTrigger>}
             {isSelfService && <TabsTrigger value="nok-iced" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap">NOK & ICE</TabsTrigger>}
@@ -1760,6 +1771,14 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               </div>
               <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
                 <SessionHistoryTableLazy sessions={[]} patientId={patient.id} patientName={patient.name} />
+              </Suspense>
+          </TabsContent>
+          )}
+
+          {isSelfService && (
+            <TabsContent value="calendar" className="mt-4">
+              <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                <PatientCalendarLazy />
               </Suspense>
             </TabsContent>
           )}
