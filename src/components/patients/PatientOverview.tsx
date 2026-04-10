@@ -20,8 +20,10 @@ interface PatientOverviewProps {
     notes?: string | null;
     allergies?: string | null;
     is_chronic?: boolean | null;
+    blood_type?: string | null;
   };
   sessions: Session[];
+  isSelfService?: boolean;
 }
 
 interface StatusItem {
@@ -196,7 +198,7 @@ function ChronicAdherenceSection({ patientId, patientName }: { patientId: string
   );
 }
 
-export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
+export function PatientOverview({ patient, sessions, isSelfService = false }: PatientOverviewProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [summaryData, setSummaryData] = useState<SummaryData | null>(null);
@@ -477,6 +479,16 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
 
   return (
     <div className="space-y-6">
+      {/* Blood Type Badge */}
+      {patient.blood_type && (
+        <div className="flex items-center gap-2 -mt-2">
+          <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 border-0 text-xs font-bold">
+            <Droplets className="h-3 w-3 mr-1" />
+            Blood Type: {patient.blood_type}
+          </Badge>
+        </div>
+      )}
+
       {/* AI Summary Card - Timeline */}
       <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
@@ -489,12 +501,27 @@ export function PatientOverview({ patient, sessions }: PatientOverviewProps) {
               <p className="text-xs text-muted-foreground">Summarized from all session transcriptions and history</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={generateSummary} className="gap-2">
-            <RefreshCw className="h-4 w-4" />
-            Refresh
-          </Button>
+          {!isSelfService && (
+            <Button variant="ghost" size="sm" onClick={generateSummary} className="gap-2">
+              <RefreshCw className="h-4 w-4" />
+              Refresh
+            </Button>
+          )}
         </div>
+
+        {/* Overall AI narrative summary first */}
+        {summaryData.summary && (
+          <div className="mb-4 p-4 rounded-lg bg-primary/5 border border-primary/10">
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Summary</h4>
+            <p className="text-sm text-foreground leading-relaxed">
+              {summaryData.summary.replace(/<\/?(?:med|symptom|condition)>/g, '').split(/(?<=[.!?])\s+/).slice(0, 3).join(' ')}
+            </p>
+          </div>
+        )}
+
+        {/* Timeline breakdown */}
         <div className="prose prose-sm max-w-none">
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Timeline</h4>
           {renderSummaryTimeline(summaryData.summary)}
         </div>
       </div>
