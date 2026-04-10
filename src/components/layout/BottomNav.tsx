@@ -1,13 +1,16 @@
-import { NavLink } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Calendar,
   Settings,
   Mic,
-  Stethoscope,
-  CheckSquare,
   Briefcase,
+  User,
+  HeartPulse,
+  Handshake,
+  FolderOpen,
+  Gift,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 
@@ -19,36 +22,38 @@ const doctorNavItems = [
   { icon: Settings, label: "Settings", to: "/settings" },
 ];
 
-const patientNavItems = [
-  { icon: LayoutDashboard, label: "Home", to: "/dashboard" },
-  { icon: Stethoscope, label: "My Holarchive", to: "/patient/details" },
-  { icon: Calendar, label: "Calendar", to: "/patient/calendar" },
-  { icon: CheckSquare, label: "To-Do", to: "/patient/tasks" },
-  { icon: Settings, label: "Settings", to: "/settings" },
+const patientSections = [
+  { icon: User, label: "Profile", section: "profile" },
+  { icon: HeartPulse, label: "Health", section: "health" },
+  { icon: Handshake, label: "Care", section: "care" },
+  { icon: FolderOpen, label: "Records", section: "records" },
+  { icon: Gift, label: "Rewards", section: "rewards" },
 ];
 
 export function BottomNav() {
   const { isPatient } = useUserRole();
-  const navItems = isPatient ? patientNavItems : doctorNavItems;
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
 
-  return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg safe-area-pb md:hidden font-size-preserve">
-      <div className="flex items-center justify-around px-2 py-2">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) =>
-              cn(
-                "flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 min-w-[64px]",
-                isActive
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              )
-            }
-          >
-            {({ isActive }) => (
-              <>
+  if (!isPatient) {
+    // Doctor nav - route-based
+    return (
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg safe-area-pb md:hidden font-size-preserve">
+        <div className="flex items-center justify-around px-2 py-2">
+          {doctorNavItems.map((item) => {
+            const isActive = location.pathname.startsWith(item.to);
+            return (
+              <button
+                key={item.to}
+                onClick={() => navigate(item.to)}
+                className={cn(
+                  "flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 min-w-[64px]",
+                  isActive
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
                 <div
                   className={cn(
                     "flex items-center justify-center h-8 w-8 rounded-xl transition-all duration-200",
@@ -60,10 +65,58 @@ export function BottomNav() {
                 <span className={cn("text-[10px] font-medium", isActive && "text-primary")}>
                   {item.label}
                 </span>
-              </>
-            )}
-          </NavLink>
-        ))}
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+    );
+  }
+
+  // Patient nav - section-based
+  const currentSection = searchParams.get("section") || "profile";
+  const isOnDetails = location.pathname === "/patient/details";
+  const isOnRewards = location.pathname === "/patient/rewards";
+
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg safe-area-pb md:hidden font-size-preserve">
+      <div className="flex items-center justify-around px-2 py-2">
+        {patientSections.map((item) => {
+          const isActive =
+            item.section === "rewards"
+              ? isOnRewards
+              : isOnDetails && currentSection === item.section;
+          return (
+            <button
+              key={item.section}
+              onClick={() => {
+                if (item.section === "rewards") {
+                  navigate("/patient/rewards");
+                } else {
+                  navigate(`/patient/details?section=${item.section}`);
+                }
+              }}
+              className={cn(
+                "flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 min-w-[64px]",
+                isActive
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <div
+                className={cn(
+                  "flex items-center justify-center h-8 w-8 rounded-xl transition-all duration-200",
+                  isActive && "bg-primary/15 scale-110"
+                )}
+              >
+                <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
+              </div>
+              <span className={cn("text-[10px] font-medium", isActive && "text-primary")}>
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </nav>
   );
