@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface StatsCardProps {
   title: string;
@@ -10,6 +11,7 @@ interface StatsCardProps {
   imageUrl?: string;
   iconSize?: "default" | "large";
   className?: string;
+  href?: string;
 }
 
 export function StatsCard({
@@ -21,11 +23,13 @@ export function StatsCard({
   imageUrl,
   iconSize = "default",
   className,
+  href,
 }: StatsCardProps) {
-  return (
+  const content = (
     <div
       className={cn(
         "group relative overflow-hidden rounded-2xl border border-primary bg-card p-2 md:p-3 transition-all duration-300 shadow-card hover:shadow-card-hover",
+        href && "cursor-pointer",
         className
       )}
     >
@@ -47,11 +51,12 @@ export function StatsCard({
           )}
         </div>
         <div className={cn(
-          "flex items-center justify-center transition-all duration-300 group-hover:scale-105 overflow-hidden rounded-xl bg-primary/10 group-hover:bg-primary/15",
+          "flex items-center justify-center transition-all duration-300 group-hover:scale-105 overflow-hidden rounded-xl",
+          imageUrl ? "" : "bg-primary/10 group-hover:bg-primary/15",
           iconSize === "large" ? "h-9 w-9 md:h-11 md:w-11" : "h-7 w-7 md:h-9 md:w-9"
         )}>
           {imageUrl ? (
-            <img src={imageUrl} alt={title} className={iconSize === "large" ? "h-5 w-5 md:h-7 md:w-7 object-contain" : "h-4 w-4 md:h-5 md:w-5 object-contain"} />
+            <img src={imageUrl} alt={title} className="h-8 w-8 md:h-12 md:w-12 object-contain" />
           ) : (
             <Icon className={iconSize === "large" ? "h-5 w-5 md:h-6 md:w-6 text-primary" : "h-4 w-4 md:h-5 md:w-5 text-primary"} />
           )}
@@ -59,4 +64,10 @@ export function StatsCard({
       </div>
     </div>
   );
+
+  if (href) {
+    return <Link to={href}>{content}</Link>;
+  }
+
+  return content;
 }

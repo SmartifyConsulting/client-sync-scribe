@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
+import { cn } from "@/lib/utils";
 import { AddressAutocomplete } from "@/components/patients/AddressAutocomplete";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -686,6 +687,41 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
     }
   };
 
+  // Per-record share handler for NOK and ICE contacts
+  const handleShareRecord = (type: 'nok' | 'ice', record: { id: string; name: string; phone: string; email: string }) => {
+    const shareUrl = `${window.location.origin}/patient/${patient.id}`;
+    const text = `${record.name} - Emergency Contact for ${patient.name}\n${shareUrl}`;
+
+    if (type === 'ice') {
+      setIceContacts(prev => prev.map(c => c.id === record.id ? { ...c, shared: true } : c));
+    } else {
+      setNokMembers(prev => prev.map(n => n.id === record.id ? { ...n, shared: true } : n));
+    }
+    setHasChanges(true);
+
+    if (navigator.share) {
+      navigator.share({ title: `Emergency Contact - ${record.name}`, text, url: shareUrl });
+    } else {
+      navigator.clipboard.writeText(text);
+      toast({ title: "Link copied", description: `Share link for ${record.name} copied to clipboard` });
+    }
+  };
+
+  // Handle ICE "Also Next of Kin" toggle
+  const handleICEAsNOK = (iceId: string, checked: boolean) => {
+    setIceContacts(prev => prev.map(c => c.id === iceId ? { ...c, is_also_nok: checked } : c));
+    const contact = iceContacts.find(c => c.id === iceId);
+    if (checked && contact) {
+      const alreadyExists = nokMembers.some(n => n.name === contact.name && n.phone === contact.phone);
+      if (!alreadyExists) {
+        setNokMembers(prev => [...prev, { id: crypto.randomUUID(), name: contact.name, phone: contact.phone, email: contact.email, relationship: contact.relationship }]);
+      }
+    } else if (!checked && contact) {
+      setNokMembers(prev => prev.filter(n => !(n.name === contact.name && n.phone === contact.phone)));
+    }
+    setHasChanges(true);
+  };
+
   // ==================== VIEW MODE ====================
   if (!isEditing) {
     return (
@@ -749,10 +785,15 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 {nokMembers.length > 0 ? (
                   <div className="space-y-2">
                     {nokMembers.map(nok => (
-                      <div key={nok.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
-                        <p className="text-xs font-medium text-foreground">{nok.name} {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}</p>
-                        {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
-                        {nok.email && <p className="text-[10px] text-muted-foreground">{nok.email}</p>}
+                      <div key={nok.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                        <div>
+                          <p className="text-xs font-medium text-foreground">{nok.name} {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}</p>
+                          {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
+                          {nok.email && <p className="text-[10px] text-muted-foreground">{nok.email}</p>}
+                        </div>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('nok', nok)}>
+                          <Share2 className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")} />
+                        </Button>
                       </div>
                     ))}
                   </div>
@@ -778,9 +819,17 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   <div className="space-y-2">
                     {iceContacts.map(c => (
                       <div key={c.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
-                        <p className="text-xs font-medium text-foreground">{c.name} {c.relationship && <span className="text-muted-foreground">({c.relationship})</span>}</p>
-                        {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
-                        {c.email && <p className="text-[10px] text-muted-foreground">{c.email}</p>}
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs font-medium text-foreground">{c.name} {c.relationship && <span className="text-muted-foreground">({c.relationship})</span>}</p>
+                            {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
+                            {c.email && <p className="text-[10px] text-muted-foreground">{c.email}</p>}
+                          </div>
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('ice', c)}>
+                            <Share2 className={cn("h-3 w-3", c.shared ? "text-muted-foreground" : "text-primary")} />
+                          </Button>
+                        </div>
+                        {c.is_also_nok && <p className="text-[10px] text-primary mt-0.5">✓ Also Next of Kin</p>}
                       </div>
                     ))}
                   </div>
@@ -1100,6 +1149,9 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                         {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
                       </div>
                       <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('nok', nok)}>
+                          <Share2 className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")} />
+                        </Button>
                         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditNOK(nok)}><Pencil className="h-3 w-3" /></Button>
                         <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => { setNokMembers(prev => prev.filter(n => n.id !== nok.id)); setHasChanges(true); }}><Trash2 className="h-3 w-3" /></Button>
                       </div>
@@ -1112,7 +1164,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             {/* ICE Contacts */}
             <div className={sectionFrame}>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> ICE Contacts</h3>
+                <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> ICE Contacts (In Case of Emergency)</h3>
                 {!showAddICE && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddICE(true)}><Plus className="h-3 w-3" />Add</Button>}
               </div>
               {showAddICE && (
@@ -1132,14 +1184,27 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               {iceContacts.length > 0 && (
                 <div className="space-y-1.5">
                   {iceContacts.map(c => (
-                    <div key={c.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
-                      <div>
-                        <p className="text-xs font-medium text-foreground">{c.name} {c.relationship && <span className="text-muted-foreground">({c.relationship})</span>}</p>
-                        {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
+                    <div key={c.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs font-medium text-foreground">{c.name} {c.relationship && <span className="text-muted-foreground">({c.relationship})</span>}</p>
+                          {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
+                        </div>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('ice', c)}>
+                            <Share2 className={cn("h-3 w-3", c.shared ? "text-muted-foreground" : "text-primary")} />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditICE(c)}><Pencil className="h-3 w-3" /></Button>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => { setIceContacts(prev => prev.filter(i => i.id !== c.id)); setHasChanges(true); }}><Trash2 className="h-3 w-3" /></Button>
+                        </div>
                       </div>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditICE(c)}><Pencil className="h-3 w-3" /></Button>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => { setIceContacts(prev => prev.filter(i => i.id !== c.id)); setHasChanges(true); }}><Trash2 className="h-3 w-3" /></Button>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Checkbox
+                          id={`ice-nok-${c.id}`}
+                          checked={c.is_also_nok || false}
+                          onCheckedChange={(checked) => handleICEAsNOK(c.id, !!checked)}
+                        />
+                        <Label htmlFor={`ice-nok-${c.id}`} className="text-[10px] text-muted-foreground cursor-pointer">Same as Next of Kin</Label>
                       </div>
                     </div>
                   ))}

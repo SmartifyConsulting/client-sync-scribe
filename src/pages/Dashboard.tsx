@@ -267,6 +267,7 @@ export default function Dashboard() {
           change="+12 this month"
           trend="up"
           icon={Users}
+          href="/patients"
         />
         <StatsCard
           title="Appointments Today"
@@ -274,6 +275,7 @@ export default function Dashboard() {
           change="2 completed"
           trend="neutral"
           icon={Calendar}
+          href="/calendar"
         />
         <StatsCard
           title="This Week"
@@ -281,6 +283,7 @@ export default function Dashboard() {
           change="+8% from last week"
           trend="up"
           icon={TrendingUp}
+          href="/calendar"
         />
         {isDoctor && (
           <StatsCard
@@ -291,6 +294,7 @@ export default function Dashboard() {
               : "No ratings yet"}
             trend="neutral"
             icon={Star}
+            href="/profile"
           />
         )}
         {isDoctor && (
@@ -302,6 +306,7 @@ export default function Dashboard() {
             icon={Award}
             imageUrl={vulaSymbol}
             iconSize="large"
+            href="/doctor/rewards"
           />
         )}
       </div>
