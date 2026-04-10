@@ -8,12 +8,14 @@ export interface Surgery {
   name: string;
   date: string;
   notes?: string;
+  date_precision?: 'exact' | 'month' | 'year';
 }
 
 export interface Pharmacy {
   id: string;
   name: string;
   email: string;
+  branch?: string;
   is_primary: boolean;
 }
 
@@ -23,10 +25,35 @@ export interface FamilyHistoryEntry {
   condition: string;
 }
 
+export interface ICEContact {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  relationship: string;
+}
+
+export interface NextOfKinMember {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  relationship: string;
+}
+
+export interface CurrentMedication {
+  id: string;
+  name: string;
+  dosage?: string;
+  is_chronic: boolean;
+}
+
 export interface Patient {
   id: string;
   user_id: string;
   name: string;
+  first_name: string | null;
+  last_name: string | null;
   email: string | null;
   phone: string | null;
   dob: string | null;
@@ -67,6 +94,9 @@ export interface Patient {
   family_history: FamilyHistoryEntry[] | null;
   organ_donor: boolean | null;
   organ_donor_organs: string[] | null;
+  ice_contacts: ICEContact[] | null;
+  next_of_kin_members: NextOfKinMember[] | null;
+  current_medications: CurrentMedication[] | null;
   last_visit?: string | null;
   patient_user_id?: string | null;
 }
