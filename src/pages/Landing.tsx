@@ -5,6 +5,14 @@ import { motion } from "framer-motion";
 import {
   Stethoscope,
   UserCircle,
+  Calendar,
+  FileText,
+  Brain,
+  Shield,
+  Eye,
+  Users,
+  Share2,
+  Heart,
   ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
