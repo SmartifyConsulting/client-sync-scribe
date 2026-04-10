@@ -327,23 +327,8 @@ export default function PatientDashboard() {
         </div>
       )}
 
-      {/* Row 1: Vulas + AI Health Summary */}
+      {/* Row 1: AI Health Summary + Upcoming Appointments */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Link to="/patient/rewards">
-          <Card className="h-full border-primary/20 bg-gradient-to-br from-primary/5 via-card to-secondary/5 hover:shadow-lg transition-all cursor-pointer">
-            <CardContent className="flex items-center gap-4 p-5">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 shrink-0">
-                 <img src={vulaSymbol} alt="Vulas" className="h-7 w-7 object-contain" />
-              </div>
-              <div className="flex-1">
-                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">My Vulas Balance</p>
-                <p className="text-2xl font-bold text-foreground">{lollipopCount}</p>
-              </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground" />
-            </CardContent>
-          </Card>
-        </Link>
-
         <Card className="border-primary/10">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm">
@@ -367,98 +352,90 @@ export default function PatientDashboard() {
             )}
           </CardContent>
         </Card>
+
+        <Card className="border-primary/10">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Calendar className="h-4 w-4 text-primary" />
+              Upcoming Appointments
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {doctors.filter(d => d.nextAppointment).length === 0 ? (
+              <p className="text-[11px] text-muted-foreground text-center py-4">No upcoming appointments.</p>
+            ) : (
+              <div className="space-y-1.5">
+                {doctors.filter(d => d.nextAppointment).map(doc => (
+                  <div key={doc.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border">
+                    <div>
+                      <p className="text-xs font-medium text-foreground">{doc.doctor_profile?.full_name || "Doctor"}</p>
+                      <p className="text-[10px] text-muted-foreground">{doc.nextAppointment ? format(parseISO(doc.nextAppointment), "MMM d, h:mm a") : ""}</p>
+                    </div>
+                    {doc.doctor_profile?.specialty && (
+                      <Badge className={`text-[8px] border-0 ${getSpecialtyColor(doc.doctor_profile.specialty)}`}>{doc.doctor_profile.specialty}</Badge>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Row 2: My Medications */}
-      <Card>
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-sm">
-              <Pill className="h-4 w-4 text-primary" />
-              My Medications
-            </CardTitle>
-            <Link to="/patient/prescriptions">
-              <Button variant="ghost" size="sm" className="text-[10px] h-6 text-primary gap-1">
-                View All <ArrowRight className="h-3 w-3" />
-              </Button>
-            </Link>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {medications.length === 0 ? (
-            <p className="text-[11px] text-muted-foreground text-center py-4">No medications on record.</p>
-          ) : (
-            <div className="space-y-1.5">
-              {activeMeds.map((med) => (
-                <div key={med.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border bg-card">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-foreground">{med.medication}</p>
-                    <p className="text-[10px] text-muted-foreground">{med.dosage} · {med.frequency}</p>
-                  </div>
-                  <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0 text-[8px]">Active</Badge>
-                </div>
-              ))}
-              {pastMeds.map((med) => (
-                <div key={med.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border/50 opacity-50">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-muted-foreground">{med.medication}</p>
-                    <p className="text-[10px] text-muted-foreground">{med.dosage} · {med.frequency}</p>
-                  </div>
-                  <Badge variant="outline" className="text-[8px] text-muted-foreground">{med.status}</Badge>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Row 3: Doctors + Pharmacies */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Healthcare Providers */}
+      {/* Row 2: Medications + Healthcare Providers + Pharmacies */}
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-sm">
-                <Heart className="h-4 w-4 text-primary" />
-                My Healthcare Providers
+                <Pill className="h-4 w-4 text-primary" />
+                My Medications
               </CardTitle>
-              <Link to="/patient/access">
+              <Link to="/patient/details?tab=medical">
                 <Button variant="ghost" size="sm" className="text-[10px] h-6 text-primary gap-1">
-                  Manage <ArrowRight className="h-3 w-3" />
+                  View All <ArrowRight className="h-3 w-3" />
                 </Button>
               </Link>
             </div>
           </CardHeader>
           <CardContent>
-            {doctors.length === 0 ? (
-              <div className="text-center py-4">
-               <p className="text-[11px] text-muted-foreground">No healthcare providers connected yet.</p>
-                 <Link to="/patient/access" className="text-primary hover:underline text-[10px]">
-                   Invite a healthcare provider
-                </Link>
-              </div>
+            {medications.length === 0 ? (
+              <p className="text-[11px] text-muted-foreground text-center py-4">No medications on record.</p>
             ) : (
               <div className="space-y-1.5">
-                {doctors.map((doc) => (
-                  <div key={doc.id} className="p-2.5 rounded-lg border border-border hover:bg-muted/30 transition-colors">
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-xs font-medium text-foreground truncate">{doc.doctor_profile?.full_name || "Unknown"}</p>
-                      {doc.doctor_profile?.specialty && (
-                        <Badge className={`text-[8px] font-medium border-0 ${getSpecialtyColor(doc.doctor_profile.specialty)}`}>
-                          {doc.doctor_profile.specialty}
-                        </Badge>
-                      )}
+                {activeMeds.slice(0, 3).map((med) => (
+                  <div key={med.id} className="flex items-center justify-between p-2 rounded-lg border border-border bg-card">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-foreground truncate">{med.medication}</p>
+                      <p className="text-[10px] text-muted-foreground">{med.dosage}</p>
                     </div>
-                    <div className="flex gap-3 text-[10px] text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-2.5 w-2.5" />
-                        Last: {doc.lastSeen ? format(parseISO(doc.lastSeen), "MMM d") : "Never"}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-2.5 w-2.5" />
-                        Next: {doc.nextAppointment ? format(parseISO(doc.nextAppointment), "MMM d") : "None"}
-                      </span>
-                    </div>
+                    <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0 text-[8px]">Active</Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Healthcare Providers */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Heart className="h-4 w-4 text-primary" />
+              My Healthcare Providers
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {doctors.length === 0 ? (
+              <p className="text-[11px] text-muted-foreground text-center py-4">No providers connected.</p>
+            ) : (
+              <div className="space-y-1.5">
+                {doctors.slice(0, 3).map((doc) => (
+                  <div key={doc.id} className="p-2 rounded-lg border border-border">
+                    <p className="text-xs font-medium text-foreground truncate">{doc.doctor_profile?.full_name || "Unknown"}</p>
+                    {doc.doctor_profile?.specialty && (
+                      <Badge className={`text-[8px] border-0 mt-0.5 ${getSpecialtyColor(doc.doctor_profile.specialty)}`}>{doc.doctor_profile.specialty}</Badge>
+                    )}
                   </div>
                 ))}
               </div>
@@ -476,11 +453,11 @@ export default function PatientDashboard() {
           </CardHeader>
           <CardContent>
             {pharmacies.length === 0 ? (
-              <p className="text-[11px] text-muted-foreground text-center py-4">No pharmacies on record. Update your profile to add one.</p>
+              <p className="text-[11px] text-muted-foreground text-center py-4">No pharmacies on record.</p>
             ) : (
               <div className="space-y-1.5">
-                {pharmacies.map((pharm, i) => (
-                  <div key={i} className="flex items-center justify-between p-2.5 rounded-lg border border-border">
+                {pharmacies.slice(0, 3).map((pharm, i) => (
+                  <div key={i} className="flex items-center justify-between p-2 rounded-lg border border-border">
                     <div>
                       <p className="text-xs font-medium text-foreground">{pharm.name}</p>
                       {pharm.email && <p className="text-[10px] text-muted-foreground">{pharm.email}</p>}
@@ -498,9 +475,22 @@ export default function PatientDashboard() {
         </Card>
       </div>
 
-      {/* Row 4: Claims + Earn Vulas */}
+      {/* Row 3: Vulas Balance + Earn More */}
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Recent Claims */}
+        <Link to="/patient/rewards">
+          <Card className="h-full border-primary/20 bg-gradient-to-br from-primary/5 via-card to-secondary/5 hover:shadow-lg transition-all cursor-pointer">
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                 <img src={vulaSymbol} alt="Vulas" className="h-7 w-7 object-contain" />
+              </div>
+              <div className="flex-1">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">My Vulas Balance</p>
+                <p className="text-2xl font-bold text-foreground">{lollipopCount}</p>
+              </div>
+              <ArrowRight className="h-4 w-4 text-muted-foreground" />
+            </CardContent>
+          </Card>
+        </Link>
         <Card>
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">

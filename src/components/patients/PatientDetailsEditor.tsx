@@ -1059,7 +1059,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   <p className="text-xs text-muted-foreground">Summary of your medical history and sessions</p>
                 </div>
                 <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-                  <PatientOverviewLazy patient={patient} sessions={[]} />
+                  <PatientOverviewLazy patient={patient} sessions={[]} isSelfService />
                 </Suspense>
               </TabsContent>
             )}
@@ -1705,7 +1705,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 <p className="text-xs text-muted-foreground">Summary of your medical history and sessions</p>
               </div>
               <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-                <PatientOverviewLazy patient={patient} sessions={[]} />
+                <PatientOverviewLazy patient={patient} sessions={[]} isSelfService />
               </Suspense>
             </TabsContent>
           )}
