@@ -1,92 +1,76 @@
 
 
-# Medication Rename, Conditions/Diagnoses, Dashboard Restructure, Overview Fixes
+# Change from 7-Day Trial to 30-Day Free Access + Subscription Gate
 
 ## Summary
-Rename "Current Medications" to "Medication" with past/current + date ranges, add "Conditions & Diagnoses" section, restructure patient dashboard layout, fix Vula logo size, fix cached profile issue, fix Medical Overview (remove edit button, add blood type badge, AI summary before timeline).
 
----
+Replace the current "7-day trial with immediate PayPal setup" flow with a new model: users sign up freely, get 30 days of full access with no payment required, and after 30 days are prompted to subscribe before they can use features.
 
-## 1. Expand CurrentMedication interface + rename to "Medication"
+## How it works
 
-**File:** `src/hooks/usePatients.ts`
-- Add `status: "current" | "past"`, `start_date?: string`, `end_date?: string` to `CurrentMedication` interface
+1. **Signup**: No PayPal required. User is told they get 30 days free, after which they must subscribe.
+2. **Subscription record**: Created with `status: 'free_period'` and `trial_ends_at` set to 30 days from signup.
+3. **Access gate**: A new `useSubscriptionGate` hook checks if the free period has expired AND the user has no active subscription. If expired, a full-screen modal blocks the app and directs the user to Settings > Billing to subscribe.
+4. **Settings/Billing**: Already has the PayPal subscribe flow — no changes needed there.
 
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- Rename heading from "Current Medications" to "Medication"
-- In view mode: show status badge (Current/Past) and date range per medication
-- In edit mode: add status dropdown (Current/Past) and start/end date fields per medication entry
+## Plan
 
-## 2. Add "Conditions & Diagnoses" section to Medical Information tab
+### 1. Update `TrialSignupSection` messaging
 
-**File:** `src/hooks/usePatients.ts`
-- Add `ConditionDiagnosis` interface: `{ id, name, diagnosed_date, diagnosed_by, status }`
-- Add `conditions_diagnoses: ConditionDiagnosis[] | null` to `Patient` interface
+**File:** `src/components/auth/TrialSignupSection.tsx`
 
-**Database migration:** Add `conditions_diagnoses` JSONB column (default `'[]'`) to `patients` table.
+- Change "7-Day Free Trial" to "30-Day Free Access"
+- Remove PayPal references from signup — say "No payment required to start"
+- Update bullet points: "Full access for 30 days", "No credit card or PayPal needed", "Subscribe after 30 days to continue"
+- Update the terms checkbox text to reflect 30-day free period and that subscription is required after
 
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- Add a new bordered frame after Family History in both view and edit modes
-- Icon: `HeartPulse`; heading: "Conditions & Diagnoses"
-- Fields per entry: condition name, date diagnosed, diagnosed by (doctor name), status (active/resolved)
-- These will automatically show in Medical Overview since the AI summarizer already reads patient data
+### 2. Update signup flow to skip PayPal
 
-## 3. Restructure Patient Dashboard layout
+**File:** `src/pages/Auth.tsx` (lines 420-448)
 
-**File:** `src/pages/patient/PatientDashboard.tsx`
+- Change trial duration from 7 days to 30 days
+- Change status from `trial_pending` to `free_period`
+- Remove the PayPal `create-trial` invocation entirely
+- Navigate directly to `/dashboard` after signup
 
-New layout:
-- **Row 1:** AI Health Summary (col 1) | Upcoming Appointments (col 2) -- new appointments card needed
-- **Row 2 (3-col):** My Medications | My Healthcare Providers | My Pharmacies
-- **Row 3:** My Vula Balance (col 1) | Earn More Vulas (col 2)
-- **Row 4:** Recent Claims (col 1) | Documentation (col 2)
-- Remove "My Calendar" quick action card
-- Fix "My Medications" link to navigate to `/patient/details` with medical tab (use `?tab=medical`)
-- Remove Assigned Tasks section (keep if tasks exist but move after row 4)
+### 3. Create `useSubscriptionGate` hook
 
-## 4. Enlarge Vula logo on Doctor Dashboard by 100%
+**New file:** `src/hooks/useSubscriptionGate.ts`
 
-**File:** `src/components/dashboard/StatsCard.tsx`
-- Change the `imageUrl` img class from `h-8 w-8 md:h-12 md:w-12` to `h-16 w-16 md:h-24 md:w-24`
-- Increase the container size for `iconSize === "large"` accordingly
+- Fetches the user's subscription from `subscriptions` table
+- Returns `{ isBlocked, daysRemaining, loading }`
+- `isBlocked = true` when: status is `free_period` AND `trial_ends_at < now()` AND no active/paid subscription exists
+- Also returns `daysRemaining` for showing a countdown banner
 
-## 5. Fix cached profile issue
+### 4. Create `SubscriptionGateModal` component
 
-**File:** `src/pages/patient/PatientDashboard.tsx` and routing
-- The issue is likely the user role check. When a user logs in, the app may briefly show the doctor dashboard before redirecting to patient dashboard. This is a routing/role caching issue.
-- Add `queryClient.invalidateQueries()` on auth state change to clear all cached data on login/logout
-- Ensure the patient dashboard query uses the fresh user ID and doesn't serve stale data
+**New file:** `src/components/auth/SubscriptionGateModal.tsx`
 
-**File:** `src/App.tsx` — Check the routing logic to ensure proper role-based redirect on login.
+- Full-screen overlay (not dismissible) shown when `isBlocked` is true
+- Message: "Your 30-day free access has ended. Subscribe to continue using the app."
+- "Subscribe Now" button links to `/settings?tab=billing`
+- Shows pricing info (monthly/annual)
 
-## 6. Fix Medical Overview tab
+### 5. Add gate check to `AppLayout`
 
-**File:** `src/components/patients/PatientOverview.tsx`
+**File:** `src/components/layout/AppLayout.tsx`
 
-- **Remove Edit button**: The overview is AI-generated read-only. Remove the edit button from the view when rendered in self-service/patient mode (pass a prop or check context).
-- **Blood Type badge**: Add a badge showing blood type under the Medical Overview heading (pass `blood_type` from patient data, display as a colored badge)
-- **AI Summary first, then timeline**: Restructure the AI Summary card to show the plain text summary paragraph first, followed by the timeline breakdown below it. Currently it goes straight to timeline — add a "Summary" section above with the overall narrative, then "Timeline" section below.
+- Use `useSubscriptionGate()` hook
+- If `isBlocked`, render `SubscriptionGateModal` instead of the normal layout
+- Optionally show a banner when `daysRemaining <= 7` warning the user their free period is ending
 
-## 7. Update PatientOverview patient prop to include blood_type
+### 6. Database migration
 
-**File:** `src/components/patients/PatientOverview.tsx`
-- Add `blood_type?: string | null` to the patient prop interface
-- Render blood type as a badge: `<Badge className="bg-red-100 text-red-700">O+</Badge>` style
-
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- Pass `blood_type` to `PatientOverviewLazy` component
-
----
+Update `subscriptions` table to allow `free_period` as a valid status value (check if status is an enum or text — if text, no migration needed).
 
 ## Technical Summary
 
 | File | Change |
 |------|--------|
-| Migration SQL | Add `conditions_diagnoses` JSONB column to `patients` |
-| `src/hooks/usePatients.ts` | Add `ConditionDiagnosis` interface; expand `CurrentMedication` with status/dates; add field to `Patient` |
-| `src/components/patients/PatientDetailsEditor.tsx` | Rename meds heading; add date ranges; add Conditions section; pass blood_type to overview |
-| `src/pages/patient/PatientDashboard.tsx` | Full layout restructure (AI+Appointments row 1, Meds+Providers+Pharmacies row 2, Vulas+Earn row 3, Claims+Docs row 4); remove Calendar; fix med link |
-| `src/components/dashboard/StatsCard.tsx` | Double Vula logo size for `large` iconSize |
-| `src/components/patients/PatientOverview.tsx` | Remove edit button; add blood type badge; show AI summary paragraph before timeline |
-| `src/App.tsx` | Invalidate queries on auth change to prevent stale cached profiles |
+| `src/components/auth/TrialSignupSection.tsx` | Update messaging to 30-day free, remove PayPal references |
+| `src/pages/Auth.tsx` | Change trial to 30 days, skip PayPal call, set status `free_period` |
+| `src/hooks/useSubscriptionGate.ts` | New hook: check if free period expired + no active sub |
+| `src/components/auth/SubscriptionGateModal.tsx` | New: blocking modal when access expired |
+| `src/components/layout/AppLayout.tsx` | Integrate gate check, show modal or warning banner |
+| Migration (if needed) | Allow `free_period` status in subscriptions |
 
