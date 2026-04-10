@@ -315,59 +315,59 @@ export default function MyRewards() {
         </DialogContent>
       </Dialog>
 
-      {/* Hero Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      {/* Hero Stats — compact on mobile */}
+      <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-4">
         <Card className="bg-gradient-to-br from-blue-500 to-cyan-400 dark:from-blue-700/40 dark:to-cyan-700/30 border-blue-400 dark:border-blue-600/40">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-100">Total Vulas</p>
-                <p className="text-4xl font-bold text-white">{lollipopCount}</p>
+                <p className="text-[10px] md:text-sm font-medium text-blue-100">Total Vulas</p>
+                <p className="text-2xl md:text-4xl font-bold text-white">{lollipopCount}</p>
               </div>
-              <div className="h-14 w-14 rounded-full bg-white shadow-sm flex items-center justify-center">
-                <img src={vulaSymbol} alt="Vulas" className="h-10 w-10 object-contain" />
+              <div className="h-10 w-10 md:h-14 md:w-14 rounded-full bg-white shadow-sm flex items-center justify-center">
+                <img src={vulaSymbol} alt="Vulas" className="h-7 w-7 md:h-10 md:w-10 object-contain" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-blue-600 to-teal-500 dark:from-blue-800/40 dark:to-teal-700/30 border-blue-500 dark:border-blue-700/40">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-100">Current Level</p>
-                <p className="text-xl font-bold text-white">
+                <p className="text-[10px] md:text-sm font-medium text-blue-100">Current Level</p>
+                <p className="text-sm md:text-xl font-bold text-white">
                   {currentMilestone?.label || "Beginner"}
                 </p>
               </div>
-              <span className="text-4xl">{currentMilestone?.icon || "🌱"}</span>
+              <span className="text-2xl md:text-4xl">{currentMilestone?.icon || "🌱"}</span>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-sky-400 to-teal-400 dark:from-sky-700/40 dark:to-teal-700/30 border-sky-400 dark:border-sky-600/40">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-sky-100">Active Streaks</p>
-                <p className="text-4xl font-bold text-white">{activeStreaks.length}</p>
+                <p className="text-[10px] md:text-sm font-medium text-sky-100">Active Streaks</p>
+                <p className="text-2xl md:text-4xl font-bold text-white">{activeStreaks.length}</p>
               </div>
-              <Flame className="h-12 w-12 text-white/90" />
+              <Flame className="h-8 w-8 md:h-12 md:w-12 text-white/90" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-indigo-400 to-blue-500 dark:from-indigo-700/40 dark:to-blue-800/30 border-indigo-400 dark:border-indigo-600/40">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-indigo-100">Transferred</p>
-                <p className="text-4xl font-bold text-white">{totalTransferred}</p>
+                <p className="text-[10px] md:text-sm font-medium text-indigo-100">Transferred</p>
+                <p className="text-2xl md:text-4xl font-bold text-white">{totalTransferred}</p>
               </div>
-              <ArrowRightLeft className="h-12 w-12 text-white/90" />
+              <ArrowRightLeft className="h-8 w-8 md:h-12 md:w-12 text-white/90" />
             </div>
             {partnerApps.length > 0 && (
-              <Button variant="ghost" size="sm" className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-xs flex items-center gap-1 mt-2" onClick={() => setShowTransferDialog(true)}>
+              <Button variant="ghost" size="sm" className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-[10px] md:text-xs flex items-center gap-1 mt-1 md:mt-2" onClick={() => setShowTransferDialog(true)}>
                 Transfer Vulas <Send className="h-3 w-3" />
               </Button>
             )}
@@ -379,13 +379,6 @@ export default function MyRewards() {
         <TabsList className="bg-primary">
           <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
             Overview
-          </TabsTrigger>
-          <TabsTrigger value="tasks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-            Assigned Tasks {tasks.filter(t => t.status !== "completed").length > 0 && (
-              <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
-                {tasks.filter(t => t.status !== "completed").length}
-              </Badge>
-            )}
           </TabsTrigger>
           {patientRecord?.is_chronic && (
             <TabsTrigger value="chronic-meds" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
@@ -404,9 +397,6 @@ export default function MyRewards() {
           </TabsTrigger>
           <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
              Vulas
-           </TabsTrigger>
-          <TabsTrigger value="vula-apps" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-             Vula Partner Apps
            </TabsTrigger>
          </TabsList>
 
@@ -475,9 +465,8 @@ export default function MyRewards() {
               )}
             </CardContent>
           </Card>
-        </TabsContent>
 
-        <TabsContent value="tasks" className="space-y-6">
+          {/* Assigned Tasks - merged into overview */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -485,58 +474,36 @@ export default function MyRewards() {
                   <CardTitle className="flex items-center gap-2">
                     <CheckSquare className="h-5 w-5 text-primary" />
                     Assigned Tasks
+                    {tasks.filter(t => t.status !== "completed").length > 0 && (
+                      <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
+                        {tasks.filter(t => t.status !== "completed").length}
+                      </Badge>
+                    )}
                   </CardTitle>
-                  <CardDescription>
-                    Tasks assigned by your healthcare provider. Complete activities to earn Vulas!
-                  </CardDescription>
+                  <CardDescription>Complete activities to earn Vulas!</CardDescription>
                 </div>
                 <ActivityProofCapture tasks={pendingActivityTasks} onProofSubmitted={refetchTasks} />
               </div>
             </CardHeader>
             <CardContent>
               {tasksLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                </div>
+                <div className="flex items-center justify-center py-4"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
               ) : tasks.length === 0 ? (
-                <div className="text-center py-8">
-                  <CheckSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No tasks assigned yet.</p>
-                </div>
+                <p className="text-center text-muted-foreground text-sm py-4">No tasks assigned yet.</p>
               ) : (
                 <div className="space-y-3">
                   {tasks.map((task) => (
                     <div key={task.id} className={`flex items-start gap-3 p-3 rounded-lg border ${task.status === "completed" ? "opacity-60 bg-muted/30" : "bg-background"}`}>
                       {getStatusIcon(task.status)}
                       <div className="flex-1 min-w-0">
-                        <p className={`font-medium text-foreground ${task.status === "completed" ? "line-through" : ""}`}>
-                          {task.title}
-                        </p>
-                        {task.description && (
-                          <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
-                        )}
+                        <p className={`font-medium text-foreground ${task.status === "completed" ? "line-through" : ""}`}>{task.title}</p>
+                        {task.description && <p className="text-sm text-muted-foreground mt-1">{task.description}</p>}
                         <div className="flex items-center gap-2 mt-2 flex-wrap">
-                          <Badge variant={getPriorityColor(task.priority) as any} className="text-xs">
-                            {task.priority}
-                          </Badge>
-                          {task.task_type === "activity" && (
-                            <Badge className="bg-primary/10 text-primary text-xs gap-1">
-                              <Video className="h-3 w-3" /> Activity
-                            </Badge>
-                          )}
-                          {task.moolas_reward > 0 && (
-                            <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 text-xs">
-                              +{task.moolas_reward} Ⓜ
-                            </Badge>
-                          )}
-                          {task.due_date && (
-                            <span className="text-xs text-muted-foreground">
-                              Due: {format(new Date(task.due_date), "dd MMM yyyy")}
-                            </span>
-                          )}
-                          {task.proof_url && (
-                            <Badge variant="outline" className="text-xs text-green-600">✓ Proof submitted</Badge>
-                          )}
+                          <Badge variant={getPriorityColor(task.priority) as any} className="text-xs">{task.priority}</Badge>
+                          {task.task_type === "activity" && <Badge className="bg-primary/10 text-primary text-xs gap-1"><Video className="h-3 w-3" /> Activity</Badge>}
+                          {task.moolas_reward > 0 && <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 text-xs">+{task.moolas_reward} Ⓜ</Badge>}
+                          {task.due_date && <span className="text-xs text-muted-foreground">Due: {format(new Date(task.due_date), "dd MMM yyyy")}</span>}
+                          {task.proof_url && <Badge variant="outline" className="text-xs text-green-600">✓ Proof submitted</Badge>}
                         </div>
                       </div>
                     </div>
@@ -546,6 +513,8 @@ export default function MyRewards() {
             </CardContent>
           </Card>
         </TabsContent>
+
+
 
         <TabsContent value="milestones" className="space-y-6">
           <Card>
@@ -724,6 +693,44 @@ export default function MyRewards() {
               )}
             </CardContent>
           </Card>
+          {/* Partner Apps - merged into Vulas tab */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Gift className="h-5 w-5 text-primary" />
+                Approved Vula Partner Apps
+              </CardTitle>
+              <CardDescription>Apps that accept Vulas. Transfer directly below.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {partnerApps.length === 0 ? (
+                <p className="text-center text-muted-foreground text-sm py-4">No partner apps available yet.</p>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {partnerApps.map((app) => (
+                    <div key={app.id} className="p-4 rounded-xl border border-border hover:border-primary/30 hover:shadow-md transition-all">
+                      <div className="flex items-center gap-3">
+                        {app.logo_url ? (
+                          <img src={app.logo_url} alt={app.name} className="h-10 w-10 rounded-lg object-contain" />
+                        ) : (
+                          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Gift className="h-5 w-5 text-primary" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-foreground">{app.name}</p>
+                          {app.creator && <p className="text-xs text-muted-foreground">by {app.creator}</p>}
+                        </div>
+                      </div>
+                      <Button size="sm" className="w-full mt-3 gap-1 text-xs" onClick={() => { setTransferAppId(app.id); setShowTransferDialog(true); }}>
+                        <Send className="h-3 w-3" /> Transfer Vulas
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="history" className="space-y-6">
@@ -733,9 +740,7 @@ export default function MyRewards() {
                 <Calendar className="h-5 w-5 text-primary" />
                 Full Reward History
               </CardTitle>
-              <CardDescription>
-                Complete log of all Vulas earned
-              </CardDescription>
+              <CardDescription>Complete log of all Vulas earned</CardDescription>
             </CardHeader>
             <CardContent>
               {rewards.length === 0 ? (
@@ -756,17 +761,11 @@ export default function MyRewards() {
                     {rewards.map((reward) => (
                       <TableRow key={reward.id}>
                         <TableCell>
-                          <div>
-                            {format(parseISO(reward.awarded_at), "MMM d, yyyy")}
-                          </div>
-                          <span className="text-xs text-muted-foreground">
-                            {format(parseISO(reward.awarded_at), "h:mm a")}
-                          </span>
+                          <div>{format(parseISO(reward.awarded_at), "MMM d, yyyy")}</div>
+                          <span className="text-xs text-muted-foreground">{format(parseISO(reward.awarded_at), "h:mm a")}</span>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="secondary" className="bg-primary/10 text-primary">
-                            {reward.visit_category}
-                          </Badge>
+                          <Badge variant="secondary" className="bg-primary/10 text-primary">{reward.visit_category}</Badge>
                         </TableCell>
                         <TableCell className="text-right">
                           <span className={`font-semibold ${reward.lollipops_count < 0 ? "text-blue-600" : "text-emerald-600"}`}>
@@ -777,74 +776,6 @@ export default function MyRewards() {
                     ))}
                   </TableBody>
                 </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="vula-apps" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Gift className="h-5 w-5 text-primary" />
-                Vula Partner Apps
-              </CardTitle>
-              <CardDescription>
-                Apps and services that accept Vulas as currency
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {partnerApps.length === 0 ? (
-                <div className="text-center py-8">
-                  <Gift className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No partner apps available yet. Check back soon!</p>
-                </div>
-              ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {partnerApps.map((app) => (
-                    <div key={app.id} className="p-4 rounded-xl border border-border hover:border-primary/30 hover:shadow-md transition-all">
-                      <div className="flex items-center gap-3">
-                        {app.logo_url ? (
-                          <img src={app.logo_url} alt={app.name} className="h-10 w-10 rounded-lg object-contain" />
-                        ) : (
-                          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                            <Gift className="h-5 w-5 text-primary" />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-foreground">{app.name}</p>
-                          {app.creator && (
-                            <p className="text-xs text-muted-foreground">by {app.creator}</p>
-                          )}
-                          <div className="flex items-center gap-2 mt-1 flex-wrap">
-                            <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0 text-[10px]">
-                              Active
-                            </Badge>
-                            {app.signup_url && (
-                              <a href={app.signup_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary underline hover:text-primary/80">
-                                Sign up
-                              </a>
-                            )}
-                          </div>
-                          {(app.google_play_url || app.app_store_url) && (
-                            <div className="flex items-center gap-2 mt-2 flex-wrap">
-                              {app.google_play_url && (
-                                <a href={app.google_play_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md bg-muted hover:bg-muted/80 text-foreground transition-colors">
-                                  ▶ Google Play
-                                </a>
-                              )}
-                              {app.app_store_url && (
-                                <a href={app.app_store_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md bg-muted hover:bg-muted/80 text-foreground transition-colors">
-                                   App Store
-                                </a>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               )}
             </CardContent>
           </Card>

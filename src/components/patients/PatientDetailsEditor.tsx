@@ -70,13 +70,34 @@ const COUNTRY_CODES = [
 const sectionFrame = "rounded-xl border border-primary bg-card p-4 shadow-sm";
 
 // Reusable collapsible section header with neutral background and black text
-const SectionHeader = ({ icon: Icon, label, extra }: { icon: any; label: string; extra?: React.ReactNode }) => (
+// Supports optional per-section edit/save/cancel icons
+const SectionHeader = ({ icon: Icon, label, extra, isEditing, isSaving, hasChanges, onEdit, onSave, onCancel }: {
+  icon: any; label: string; extra?: React.ReactNode;
+  isEditing?: boolean; isSaving?: boolean; hasChanges?: boolean;
+  onEdit?: () => void; onSave?: () => void; onCancel?: () => void;
+}) => (
   <CollapsibleTrigger className="flex w-full items-center justify-between bg-[#F5F4F1] rounded-lg px-3 py-2 group">
     <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5 text-left">
       <Icon className="h-3.5 w-3.5" /> {label}
     </h3>
     <div className="flex items-center gap-2">
       {extra}
+      {isSaving && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+      {isEditing && hasChanges && onSave && (
+        <button type="button" onClick={(e) => { e.stopPropagation(); onSave(); }} className="p-0.5 rounded hover:bg-green-100 text-green-600" title="Save">
+          <Check className="h-3.5 w-3.5" />
+        </button>
+      )}
+      {isEditing && onCancel && (
+        <button type="button" onClick={(e) => { e.stopPropagation(); onCancel(); }} className="p-0.5 rounded hover:bg-red-100 text-red-500" title="Cancel">
+          <X className="h-3.5 w-3.5" />
+        </button>
+      )}
+      {!isEditing && onEdit && (
+        <button type="button" onClick={(e) => { e.stopPropagation(); onEdit(); }} className="p-0.5 rounded hover:bg-muted text-muted-foreground" title="Edit">
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      )}
       <ChevronDown className="h-4 w-4 text-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
     </div>
   </CollapsibleTrigger>
@@ -194,6 +215,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   const navigate = useNavigate();
   const { isDoctor } = useUserRole();
   const [isEditing, setIsEditing] = useState(false);
+  const [editingSections, setEditingSections] = useState<Record<string, boolean>>({});
   const [activeParentTab, setActiveParentTab] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -437,7 +459,24 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
   const updateFormData = (updates: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
     setHasChanges(true);
+    if (!isEditing) setIsEditing(true);
   };
+
+  const toggleSectionEdit = (section: string) => {
+    setEditingSections(prev => ({ ...prev, [section]: !prev[section] }));
+    if (!isEditing) setIsEditing(true);
+  };
+
+  const cancelSectionEdit = (section: string) => {
+    setEditingSections(prev => ({ ...prev, [section]: false }));
+  };
+
+  const saveSectionNow = () => {
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    performSave(formData, surgeries);
+  };
+
+  const isSectionEditing = (section: string) => editingSections[section] || false;
 
   const toggleOrganDonorOrgan = (organ: string) => {
     setOrganDonorOrgans(prev => prev.includes(organ) ? prev.filter(o => o !== organ) : [...prev, organ]);
@@ -902,17 +941,17 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
           <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             {renderTabsList()}
-            <div className="flex justify-end mt-2">
-              <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={() => setIsEditing(true)}>
-                <Pencil className="h-3.5 w-3.5" /> Edit
-              </Button>
+            {/* Status bar */}
+            <div className="flex justify-end mt-2 items-center gap-2 min-h-[24px]">
+              {saving && <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Loader2 className="h-3 w-3 animate-spin" />Saving...</span>}
+              {!saving && isEditing && !hasChanges && <span className="flex items-center gap-1.5 text-xs text-green-600"><Check className="h-3 w-3" />Saved</span>}
             </div>
 
             {/* === PERSONAL INFORMATION TAB === */}
             <TabsContent value="personal" className="space-y-4 mt-4">
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <SectionHeader icon={User} label="Personal Details" />
+                <SectionHeader icon={User} label="Personal Details" onEdit={() => { setIsEditing(true); setEditingSections(prev => ({ ...prev, personal: true })); }} />
                 <CollapsibleContent className="p-3">
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     <ViewField label="First Name(s)" value={patient.first_name || splitName(patient.name).first} />
@@ -930,7 +969,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               </Collapsible>
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <SectionHeader icon={MapPin} label="Addresses" />
+                <SectionHeader icon={MapPin} label="Addresses" onEdit={() => { setIsEditing(true); setEditingSections(prev => ({ ...prev, addresses: true })); }} />
                 <CollapsibleContent className="p-3">
                   <div className="grid gap-3 sm:grid-cols-2">
                     <ViewField label="Physical Address" value={patient.physical_address || patient.address} />
@@ -941,7 +980,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <SectionHeader icon={Briefcase} label="Employer" />
+                <SectionHeader icon={Briefcase} label="Employer" onEdit={() => { setIsEditing(true); setEditingSections(prev => ({ ...prev, employer: true })); }} />
                 <CollapsibleContent className="p-3">
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     <ViewField label="Employer" value={patient.employer} />
@@ -952,7 +991,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               </Collapsible>
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <SectionHeader icon={StickyNote} label="General Notes" />
+                <SectionHeader icon={StickyNote} label="General Notes" onEdit={() => { setIsEditing(true); setEditingSections(prev => ({ ...prev, notes: true })); }} />
                 <CollapsibleContent className="p-3">
                   <p className="text-sm text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
                 </CollapsibleContent>
@@ -965,7 +1004,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 <div className="space-y-3">
                   {/* General Information */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={Activity} label="General Information" />
+                    <SectionHeader icon={Activity} label="General Information" onEdit={() => { setIsEditing(true); }} />
                     <CollapsibleContent className="px-3 pb-3">
                       <div className="grid gap-3 sm:grid-cols-4">
                         <ViewField label="Height (cm)" value={patient.height_cm ? `${patient.height_cm}` : undefined} />
@@ -978,7 +1017,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Allergies, Medication & Conditions */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={Pill} label="Allergies, Medication & Conditions" />
+                    <SectionHeader icon={Pill} label="Allergies, Medication & Conditions" onEdit={() => { setIsEditing(true); }} />
                     <CollapsibleContent className="px-3 pb-3 space-y-3">
                       {/* Allergies */}
                       <div className="rounded-lg border border-border/50 p-2.5 space-y-1">
@@ -1056,7 +1095,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Surgeries & Dates */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={Scissors} label="Surgeries & Dates" />
+                    <SectionHeader icon={Scissors} label="Surgeries & Dates" onEdit={() => { setIsEditing(true); }} />
                     <CollapsibleContent className="px-3 pb-3">
                       {surgeries.length === 0 ? (
                         <p className="text-xs text-muted-foreground">No surgeries recorded</p>
@@ -1076,7 +1115,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Family History */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={GitBranch} label="Family History" />
+                    <SectionHeader icon={GitBranch} label="Family History" onEdit={() => { setIsEditing(true); }} />
                     <CollapsibleContent className="px-3 pb-3">
                       {familyHistory.length === 0 ? (
                         <p className="text-xs text-muted-foreground">No family history recorded</p>
@@ -1095,22 +1134,16 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Organ Donor — collapsible with inline Yes/No */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <CollapsibleTrigger className="flex w-full items-center justify-between bg-primary rounded-lg px-3 py-2 group">
-                       <h3 className="text-xs font-semibold text-white tracking-wide flex items-center gap-1.5 text-left">
-                        <Heart className="h-3.5 w-3.5" /> Organ Donor
-                      </h3>
-                      <div className="flex items-center gap-2">
-                        <span className={cn(
-                          "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
-                          patient.organ_donor
-                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                            : "bg-white/20 text-white"
-                        )}>
-                          {patient.organ_donor ? "Yes" : "No"}
-                        </span>
-                        <ChevronDown className="h-4 w-4 text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                      </div>
-                    </CollapsibleTrigger>
+                    <SectionHeader icon={Heart} label="Organ Donor" extra={
+                      <span className={cn(
+                        "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                        patient.organ_donor
+                          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                          : "bg-muted text-muted-foreground"
+                      )}>
+                        {patient.organ_donor ? "Yes" : "No"}
+                      </span>
+                    } onEdit={() => { setIsEditing(true); setEditingSections(prev => ({ ...prev, organDonor: true })); }} />
                     <CollapsibleContent className="px-3 pb-3">
                       {patient.organ_donor && (patient.organ_donor_organs?.length ?? 0) > 0 && (
                         <div className="mt-2 flex flex-wrap gap-1.5">
@@ -1129,7 +1162,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 {/* Column 2 */}
                 <div className="space-y-4">
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
+                    <SectionHeader icon={ShieldCheck} label="Medical Insurance" onEdit={() => { setIsEditing(true); }} />
                     <CollapsibleContent className="p-3">
                       <div className="grid gap-3 sm:grid-cols-2">
                         <ViewField label="Insurance Provider" value={patient.medical_aid} />
@@ -1143,7 +1176,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                   {/* Next of Kin - moved from Personal to Medical */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={Users} label="Next of Kin" />
+                    <SectionHeader icon={Users} label="Next of Kin" onEdit={() => { setIsEditing(true); }} />
                     <CollapsibleContent className="p-3">
                       {nokMembers.length > 0 ? (
                         <div className="space-y-2">
@@ -1177,14 +1210,14 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   </Collapsible>
 
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={User} label="General Practitioner" />
+                    <SectionHeader icon={User} label="General Practitioner" onEdit={() => { setIsEditing(true); }} />
                     <CollapsibleContent className="p-3">
                       <ViewField label="General Practitioner" value={patient.general_practitioner} />
                     </CollapsibleContent>
                   </Collapsible>
 
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={Store} label="Pharmacies" />
+                    <SectionHeader icon={Store} label="Pharmacies" onEdit={() => { setIsEditing(true); }} />
                     <CollapsibleContent className="p-3">
                       {pharmacies.length === 0 ? (
                         <p className="text-xs text-muted-foreground">No pharmacies recorded</p>
@@ -1282,17 +1315,17 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
       <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           {renderTabsList()}
-            <div className="flex justify-end mt-2 items-center gap-2">
+            {/* Status bar */}
+            <div className="flex justify-end mt-2 items-center gap-2 min-h-[24px]">
               {saving && <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Loader2 className="h-3 w-3 animate-spin" />Saving...</span>}
               {!saving && !hasChanges && isEditing && <span className="flex items-center gap-1.5 text-xs text-green-600"><Check className="h-3 w-3" />Saved</span>}
-              <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={handleCancel} disabled={saving}><X className="h-3.5 w-3.5" />Done</Button>
             </div>
 
           {/* === PERSONAL TAB (EDIT) === */}
           <TabsContent value="personal" className="space-y-4 mt-4">
 
             <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-              <SectionHeader icon={User} label="Personal Information" />
+              <SectionHeader icon={User} label="Personal Information" isEditing={true} isSaving={saving} hasChanges={hasChanges} onSave={saveSectionNow} onCancel={handleCancel} />
               <CollapsibleContent className="p-3">
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   <div className="space-y-1.5"><Label htmlFor="first_name">First Name(s) *</Label><Input id="first_name" className="text-sm" value={formData.first_name} onChange={(e) => updateFormData({ first_name: e.target.value })} placeholder="First name(s)" /></div>
@@ -1317,7 +1350,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             </Collapsible>
 
             <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-              <SectionHeader icon={MapPin} label="Addresses" />
+              <SectionHeader icon={MapPin} label="Addresses" isEditing={true} isSaving={saving} hasChanges={hasChanges} onSave={saveSectionNow} onCancel={handleCancel} />
               <CollapsibleContent className="p-3">
                 <div className="space-y-3">
                   <div className="space-y-1.5"><Label htmlFor="physical_address">Physical Address</Label><AddressAutocomplete id="physical_address" value={formData.physical_address} onChange={(v) => updateFormData({ physical_address: v })} placeholder="Start typing to search address..." rows={2} /></div>
@@ -1329,7 +1362,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
             {/* Next of Kin (multiple) */}
             <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-              <SectionHeader icon={Users} label="Next of Kin" />
+              <SectionHeader icon={Users} label="Next of Kin" isEditing={true} isSaving={saving} hasChanges={hasChanges} onSave={saveSectionNow} onCancel={handleCancel} />
               <CollapsibleContent className="p-3">
                 <div className="flex justify-end mb-3">
                   {!showAddNOK && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddNOK(true)}><Plus className="h-3 w-3" />Add</Button>}
@@ -1387,7 +1420,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
 
             <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-              <SectionHeader icon={Briefcase} label="Employer" />
+              <SectionHeader icon={Briefcase} label="Employer" isEditing={true} isSaving={saving} hasChanges={hasChanges} onSave={saveSectionNow} onCancel={handleCancel} />
               <CollapsibleContent className="p-3">
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   <div className="space-y-1.5"><Label htmlFor="employer">Employer</Label><Input id="employer" className="text-sm" value={formData.employer} onChange={(e) => updateFormData({ employer: e.target.value })} placeholder="Company name" /></div>
@@ -1398,7 +1431,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             </Collapsible>
 
             <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-              <SectionHeader icon={StickyNote} label="General Notes" />
+              <SectionHeader icon={StickyNote} label="General Notes" isEditing={true} isSaving={saving} hasChanges={hasChanges} onSave={saveSectionNow} onCancel={handleCancel} />
               <CollapsibleContent className="p-3">
                 <Textarea value={formData.notes} onChange={(e) => updateFormData({ notes: e.target.value })} placeholder="General notes about this patient..." rows={4} className="text-sm" />
               </CollapsibleContent>
@@ -1411,7 +1444,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               <div className="space-y-3">
                 {/* General Information */}
                 <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <SectionHeader icon={Activity} label="General Information" />
+                  <SectionHeader icon={Activity} label="General Information" isEditing={true} isSaving={saving} hasChanges={hasChanges} onSave={saveSectionNow} onCancel={handleCancel} />
                   <CollapsibleContent className="px-3 pb-3">
                     <div className="grid gap-3 sm:grid-cols-4">
                       <div className="space-y-1.5"><Label htmlFor="height_cm">Height (cm)</Label><Input id="height_cm" className="text-sm" type="number" step="0.1" value={formData.height_cm} onChange={(e) => updateFormData({ height_cm: e.target.value })} placeholder="e.g., 175" /></div>
@@ -1430,7 +1463,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                 {/* Allergies, Medication & Conditions */}
                 <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <SectionHeader icon={Pill} label="Allergies, Medication & Conditions" />
+                  <SectionHeader icon={Pill} label="Allergies, Medication & Conditions" isEditing={true} isSaving={saving} hasChanges={hasChanges} onSave={saveSectionNow} onCancel={handleCancel} />
                   <CollapsibleContent className="px-3 pb-3 space-y-3">
                     {/* Allergies */}
                     <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
@@ -1569,7 +1602,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                 {/* Surgeries & Dates */}
                 <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <SectionHeader icon={Scissors} label="Surgeries & Dates" />
+                  <SectionHeader icon={Scissors} label="Surgeries & Dates" isEditing={true} isSaving={saving} hasChanges={hasChanges} onSave={saveSectionNow} onCancel={handleCancel} />
                   <CollapsibleContent className="px-3 pb-3 space-y-2">
                     <div className="flex justify-end">
                       {!showAddSurgery && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddSurgery(true)}><Plus className="h-3 w-3" />Add</Button>}
@@ -1627,7 +1660,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                 {/* Family History */}
                 <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <SectionHeader icon={GitBranch} label="Family History" />
+                  <SectionHeader icon={GitBranch} label="Family History" isEditing={true} isSaving={saving} hasChanges={hasChanges} onSave={saveSectionNow} onCancel={handleCancel} />
                   <CollapsibleContent className="px-3 pb-3 space-y-2">
                     <div className="flex justify-end">
                       {!showAddFamily && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddFamily(true)}><Plus className="h-3 w-3" />Add</Button>}
@@ -1667,22 +1700,16 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                 {/* Organ Donor — collapsible with inline Yes/No */}
                 <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <CollapsibleTrigger className="flex w-full items-center justify-between bg-primary rounded-lg px-3 py-2 group">
-                    <h3 className="text-xs font-semibold text-white tracking-wide flex items-center gap-1.5 text-left">
-                      <Heart className="h-3.5 w-3.5" /> Organ Donor
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      <span className={cn(
-                        "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
-                        formData.organ_donor
-                          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                          : "bg-white/20 text-white"
-                      )}>
-                        {formData.organ_donor ? "Yes" : "No"}
-                      </span>
-                      <ChevronDown className="h-4 w-4 text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                    </div>
-                  </CollapsibleTrigger>
+                  <SectionHeader icon={Heart} label="Organ Donor" isEditing={true} isSaving={saving} hasChanges={hasChanges} onSave={saveSectionNow} onCancel={() => cancelSectionEdit('organDonor')} extra={
+                    <span className={cn(
+                      "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                      formData.organ_donor
+                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                        : "bg-muted text-muted-foreground"
+                    )}>
+                      {formData.organ_donor ? "Yes" : "No"}
+                    </span>
+                  } />
                   <CollapsibleContent className="p-3">
                     <div className="flex items-center gap-3 mb-3">
                       <Switch checked={formData.organ_donor} onCheckedChange={(checked) => { updateFormData({ organ_donor: checked }); if (!checked) { setOrganDonorOrgans([]); setHasChanges(true); } }} />
@@ -1705,7 +1732,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
               {/* Column 2 */}
               <div className="space-y-4">
                 <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
+                  <SectionHeader icon={ShieldCheck} label="Medical Insurance" isEditing={true} isSaving={saving} hasChanges={hasChanges} onSave={saveSectionNow} onCancel={handleCancel} />
                   <CollapsibleContent className="p-3">
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div className="space-y-1.5"><Label>Insurance Provider</Label><Input className="text-sm" value={formData.medical_aid} onChange={(e) => updateFormData({ medical_aid: e.target.value })} placeholder="Insurance provider" /></div>
@@ -1719,7 +1746,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                 {/* Next of Kin - moved from Personal to Medical */}
                 <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <SectionHeader icon={Users} label="Next of Kin" />
+                  <SectionHeader icon={Users} label="Next of Kin" isEditing={true} isSaving={saving} hasChanges={hasChanges} onSave={saveSectionNow} onCancel={handleCancel} />
                   <CollapsibleContent className="p-3">
                     <div className="flex justify-end mb-3">
                       {!showAddNOK && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddNOK(true)}><Plus className="h-3 w-3" />Add</Button>}
@@ -1769,7 +1796,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                 {/* GP Search */}
                 <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <SectionHeader icon={User} label="General Practitioner" />
+                  <SectionHeader icon={User} label="General Practitioner" isEditing={true} isSaving={saving} hasChanges={hasChanges} onSave={saveSectionNow} onCancel={handleCancel} />
                   <CollapsibleContent className="p-3">
                     <div className="space-y-1.5 relative">
                       <Label>General Practitioner</Label>
@@ -1821,7 +1848,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
                 {/* Pharmacies */}
                 <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <SectionHeader icon={Store} label="Pharmacies" />
+                  <SectionHeader icon={Store} label="Pharmacies" isEditing={true} isSaving={saving} hasChanges={hasChanges} onSave={saveSectionNow} onCancel={handleCancel} />
                   <CollapsibleContent className="p-3">
                     <div className="flex justify-end mb-3">
                       {!showAddPharmacy && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddPharmacy(true)}><Plus className="h-3 w-3" />Add</Button>}
@@ -1883,10 +1910,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
           {/* === Tasks tab (edit mode) === */}
           {isSelfService && (
             <TabsContent value="tasks" className="mt-4">
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">My Tasks</h2>
-                <p className="text-xs text-muted-foreground">Manage your health tasks and to-dos</p>
-              </div>
+
               <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
                 <PatientTasksLazy />
               </Suspense>
@@ -1895,10 +1919,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
           {isSelfService && (
             <TabsContent value="sessions" className="mt-4">
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">My Sessions</h2>
-                <p className="text-xs text-muted-foreground">History of your consultations</p>
-              </div>
+
               <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
                 <SessionHistoryTableLazy sessions={[]} patientId={patient.id} patientName={patient.name} />
               </Suspense>
@@ -1915,10 +1936,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
           {isSelfService && (
             <TabsContent value="documents" className="mt-4">
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">My Documents</h2>
-                <p className="text-xs text-muted-foreground">All your prescriptions, invoices, certificates and uploaded files</p>
-              </div>
+
               <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
                 <PatientDocuments hideHeader />
               </Suspense>
@@ -1935,10 +1953,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
 
           {isSelfService && (
             <TabsContent value="roundtable" className="mt-4">
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">My Round Table</h2>
-                <p className="text-xs text-muted-foreground">Notes shared by your healthcare providers about your care</p>
-              </div>
+
               <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
                 <PatientRoundTable hideHeader />
               </Suspense>
