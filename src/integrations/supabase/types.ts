@@ -1028,22 +1028,27 @@ export type Database = {
           chronic_medications: string | null
           claims_email: string | null
           created_at: string
+          current_medications: Json | null
           dob: string | null
           email: string | null
           employer: string | null
           family_history: Json | null
+          first_name: string | null
           gender: string | null
           general_practitioner: string | null
           height_cm: number | null
+          ice_contacts: Json | null
           id: string
           id_passport_number: string | null
           is_chronic: boolean | null
+          last_name: string | null
           marital_status: string | null
           medical_aid: string | null
           medical_aid_number: string | null
           medical_insurance_product: string | null
           name: string
           next_of_kin_email: string | null
+          next_of_kin_members: Json | null
           next_of_kin_name: string | null
           next_of_kin_phone: string | null
           next_of_kin_relationship: string | null
@@ -1075,22 +1080,27 @@ export type Database = {
           chronic_medications?: string | null
           claims_email?: string | null
           created_at?: string
+          current_medications?: Json | null
           dob?: string | null
           email?: string | null
           employer?: string | null
           family_history?: Json | null
+          first_name?: string | null
           gender?: string | null
           general_practitioner?: string | null
           height_cm?: number | null
+          ice_contacts?: Json | null
           id?: string
           id_passport_number?: string | null
           is_chronic?: boolean | null
+          last_name?: string | null
           marital_status?: string | null
           medical_aid?: string | null
           medical_aid_number?: string | null
           medical_insurance_product?: string | null
           name: string
           next_of_kin_email?: string | null
+          next_of_kin_members?: Json | null
           next_of_kin_name?: string | null
           next_of_kin_phone?: string | null
           next_of_kin_relationship?: string | null
@@ -1122,22 +1132,27 @@ export type Database = {
           chronic_medications?: string | null
           claims_email?: string | null
           created_at?: string
+          current_medications?: Json | null
           dob?: string | null
           email?: string | null
           employer?: string | null
           family_history?: Json | null
+          first_name?: string | null
           gender?: string | null
           general_practitioner?: string | null
           height_cm?: number | null
+          ice_contacts?: Json | null
           id?: string
           id_passport_number?: string | null
           is_chronic?: boolean | null
+          last_name?: string | null
           marital_status?: string | null
           medical_aid?: string | null
           medical_aid_number?: string | null
           medical_insurance_product?: string | null
           name?: string
           next_of_kin_email?: string | null
+          next_of_kin_members?: Json | null
           next_of_kin_name?: string | null
           next_of_kin_phone?: string | null
           next_of_kin_relationship?: string | null
