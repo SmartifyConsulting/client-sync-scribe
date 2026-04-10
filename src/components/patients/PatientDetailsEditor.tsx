@@ -1315,17 +1315,17 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
       <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           {renderTabsList()}
-            <div className="flex justify-end mt-2 items-center gap-2">
+            {/* Status bar */}
+            <div className="flex justify-end mt-2 items-center gap-2 min-h-[24px]">
               {saving && <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><Loader2 className="h-3 w-3 animate-spin" />Saving...</span>}
               {!saving && !hasChanges && isEditing && <span className="flex items-center gap-1.5 text-xs text-green-600"><Check className="h-3 w-3" />Saved</span>}
-              <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={handleCancel} disabled={saving}><X className="h-3.5 w-3.5" />Done</Button>
             </div>
 
           {/* === PERSONAL TAB (EDIT) === */}
           <TabsContent value="personal" className="space-y-4 mt-4">
 
             <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-              <SectionHeader icon={User} label="Personal Information" />
+              <SectionHeader icon={User} label="Personal Information" isEditing={true} isSaving={saving} hasChanges={hasChanges} onSave={saveSectionNow} onCancel={handleCancel} />
               <CollapsibleContent className="p-3">
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   <div className="space-y-1.5"><Label htmlFor="first_name">First Name(s) *</Label><Input id="first_name" className="text-sm" value={formData.first_name} onChange={(e) => updateFormData({ first_name: e.target.value })} placeholder="First name(s)" /></div>
