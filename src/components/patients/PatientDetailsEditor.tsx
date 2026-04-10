@@ -1171,11 +1171,6 @@ export function PatientDetailsEditor({
               My Round Table
             </TabsTrigger>
           )}
-          {show("nok-iced") && (
-            <TabsTrigger value="nok-iced" className={triggerClass}>
-              NOK & ICE
-            </TabsTrigger>
-          )}
         </TabsList>
       );
     }
@@ -1251,11 +1246,6 @@ export function PatientDetailsEditor({
             <TabsTrigger value="medical" className="text-xs whitespace-nowrap">
               Medical Information
             </TabsTrigger>
-            {isSelfService && (
-              <TabsTrigger value="nok-iced" className="text-xs whitespace-nowrap">
-                NOK & ICE
-              </TabsTrigger>
-            )}
           </TabsList>
         )}
 
@@ -1285,11 +1275,6 @@ export function PatientDetailsEditor({
         <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             {renderTabsList()}
-            <div className="flex justify-end mt-2">
-              <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={() => setIsEditing(true)}>
-                <Pencil className="h-3.5 w-3.5" /> Edit
-              </Button>
-            </div>
 
             {/* === PERSONAL INFORMATION TAB === */}
             <TabsContent value="personal" className="space-y-4 mt-4">
@@ -1387,76 +1372,6 @@ export function PatientDetailsEditor({
                 </CollapsibleContent>
               </Collapsible>
 
-              <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <CollapsibleTrigger className="flex w-full items-center justify-between bg-primary rounded-lg px-3 py-2 group">
-                  <h3 className="text-xs font-semibold text-white tracking-wide flex items-center gap-1.5 text-left">
-                    <Phone className="h-3.5 w-3.5" /> ICE Contacts (In Case of Emergency)
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    {isSelfService && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-1 text-xs h-6 bg-white/20 border-white/30 text-white hover:bg-white/30"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleShareICE();
-                        }}
-                      >
-                        <Share2 className="h-3 w-3" />
-                        Share
-                      </Button>
-                    )}
-                    <ChevronDown className="h-4 w-4 text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="p-3">
-                  {iceContacts.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No ICE contacts recorded</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {iceContacts.map((c) => (
-                        <div key={c.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-xs font-medium text-foreground">
-                                {c.name}{" "}
-                                {c.relationship && <span className="text-muted-foreground">({c.relationship})</span>}
-                              </p>
-                              {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
-                              {c.email && <p className="text-[10px] text-muted-foreground">{c.email}</p>}
-                            </div>
-                            <div className="flex gap-1">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                title="Notify"
-                                onClick={() =>
-                                  toast({ title: "Notification sent", description: `${c.name} has been notified` })
-                                }
-                              >
-                                <Bell className="h-3 w-3 text-primary" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={() => handleShareRecord("ice", c)}
-                              >
-                                <Share2
-                                  className={cn("h-3 w-3", c.shared ? "text-muted-foreground" : "text-primary")}
-                                />
-                              </Button>
-                            </div>
-                          </div>
-                          {c.is_also_nok && <p className="text-[10px] text-primary mt-0.5">✓ Also Next of Kin</p>}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CollapsibleContent>
-              </Collapsible>
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
                 <SectionHeader icon={Briefcase} label="Employer" />
@@ -2203,143 +2118,6 @@ export function PatientDetailsEditor({
               </CollapsibleContent>
             </Collapsible>
 
-            {/* ICE Contacts */}
-            <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-              <SectionHeader icon={Phone} label="ICE Contacts (In Case of Emergency)" />
-              <CollapsibleContent className="p-3">
-                <div className="flex justify-end mb-3">
-                  {!showAddICE && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1 text-xs h-7"
-                      onClick={() => setShowAddICE(true)}
-                    >
-                      <Plus className="h-3 w-3" />
-                      Add
-                    </Button>
-                  )}
-                </div>
-                {showAddICE && (
-                  <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <div className="space-y-1.5">
-                        <Label>Name *</Label>
-                        <Input
-                          className="text-sm"
-                          value={newICE.name}
-                          onChange={(e) => setNewICE((p) => ({ ...p, name: e.target.value }))}
-                          placeholder="Full name"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Relationship</Label>
-                        <RelationshipSelect
-                          value={newICE.relationship}
-                          onChange={(v) => setNewICE((p) => ({ ...p, relationship: v }))}
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Phone</Label>
-                        <PhoneInput value={newICE.phone} onChange={(v) => setNewICE((p) => ({ ...p, phone: v }))} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Email</Label>
-                        <Input
-                          className="text-sm"
-                          type="email"
-                          value={newICE.email}
-                          onChange={(e) => setNewICE((p) => ({ ...p, email: e.target.value }))}
-                          placeholder="Email"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-xs h-7"
-                        onClick={() => {
-                          setShowAddICE(false);
-                          setEditingICEId(null);
-                          setNewICE({ name: "", phone: "", email: "", relationship: "" });
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button size="sm" className="text-xs h-7" onClick={handleAddICE}>
-                        {editingICEId ? "Save" : "Add"}
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                {iceContacts.length > 0 && (
-                  <div className="space-y-1.5">
-                    {iceContacts.map((c) => (
-                      <div key={c.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-xs font-medium text-foreground">
-                              {c.name}{" "}
-                              {c.relationship && <span className="text-muted-foreground">({c.relationship})</span>}
-                            </p>
-                            {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
-                          </div>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              title="Notify"
-                              onClick={() =>
-                                toast({ title: "Notification sent", description: `${c.name} has been notified` })
-                              }
-                            >
-                              <Bell className="h-3 w-3 text-primary" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => handleShareRecord("ice", c)}
-                            >
-                              <Share2 className={cn("h-3 w-3", c.shared ? "text-muted-foreground" : "text-primary")} />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditICE(c)}>
-                              <Pencil className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6 text-destructive"
-                              onClick={() => {
-                                setIceContacts((prev) => prev.filter((i) => i.id !== c.id));
-                                setHasChanges(true);
-                              }}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Checkbox
-                            id={`ice-nok-${c.id}`}
-                            checked={c.is_also_nok || false}
-                            onCheckedChange={(checked) => handleICEAsNOK(c.id, !!checked)}
-                          />
-                          <Label
-                            htmlFor={`ice-nok-${c.id}`}
-                            className="text-[10px] text-muted-foreground cursor-pointer"
-                          >
-                            Same as Next of Kin
-                          </Label>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CollapsibleContent>
-            </Collapsible>
 
             <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
               <SectionHeader icon={Briefcase} label="Employer" />
