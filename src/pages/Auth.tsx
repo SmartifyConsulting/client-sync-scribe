@@ -417,34 +417,22 @@ export default function Auth() {
         }
       }
 
-      // Create trial subscription
-      const trialEndsAt = new Date();
-      trialEndsAt.setDate(trialEndsAt.getDate() + 7);
+      // Create free period subscription (30 days)
+      const freeEndsAt = new Date();
+      freeEndsAt.setDate(freeEndsAt.getDate() + 30);
 
       await supabase.from("subscriptions").upsert({
         user_id: userId,
         plan_type: userRole,
         billing_cycle: "monthly",
-        status: "trial_pending",
+        status: "free_period",
         is_trial: true,
-        trial_ends_at: trialEndsAt.toISOString(),
+        trial_ends_at: freeEndsAt.toISOString(),
         accepted_terms_at: new Date().toISOString(),
       }, { onConflict: "user_id" });
 
-      try {
-        const { data: paypalData } = await supabase.functions.invoke("paypal-subscription", {
-          body: { action: "create-trial", planType: userRole, billingCycle: "monthly", userId },
-        });
-        if (paypalData?.approvalUrl) {
-          clearDraft();
-          toast({ title: "Account created!", description: "Redirecting to PayPal..." });
-          window.location.href = paypalData.approvalUrl;
-          return;
-        }
-      } catch {}
-
       clearDraft();
-      toast({ title: "Account created!", description: "Welcome to Holarc!" });
+      toast({ title: "Account created!", description: "Welcome to Holarc! You have 30 days of free access." });
       navigate("/dashboard");
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });

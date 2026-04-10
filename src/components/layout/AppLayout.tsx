@@ -6,12 +6,30 @@ import { PageTransition } from "./PageTransition";
 import { Footer } from "./Footer";
 import { TopBarIcons } from "./TopBarIcons";
 import { AnimatePresence } from "framer-motion";
+import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
+import { SubscriptionGateModal } from "@/components/auth/SubscriptionGateModal";
+import { AlertCircle } from "lucide-react";
 
 export function AppLayout() {
   const location = useLocation();
+  const { isBlocked, daysRemaining, loading } = useSubscriptionGate();
+
+  // Allow access to settings page even when blocked (so they can subscribe)
+  const isSettingsPage = location.pathname.startsWith("/settings");
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* Subscription gate modal */}
+      {!loading && isBlocked && !isSettingsPage && <SubscriptionGateModal />}
+
+      {/* Expiring soon banner */}
+      {!loading && !isBlocked && daysRemaining !== null && daysRemaining <= 7 && (
+        <div className="bg-amber-500/15 border-b border-amber-500/30 px-4 py-2 text-center text-xs text-amber-700 flex items-center justify-center gap-2">
+          <AlertCircle className="h-3.5 w-3.5" />
+          Your free access ends in {daysRemaining} day{daysRemaining !== 1 ? 's' : ''}. Subscribe in Settings to continue using the app.
+        </div>
+      )}
+
       {/* Mobile header - hidden on desktop */}
       <MobileHeader />
       
