@@ -43,7 +43,6 @@ export default function MyDetails() {
           surgeries: Array.isArray(data.surgeries) ? data.surgeries as unknown as Patient["surgeries"] : [],
           pharmacies: Array.isArray(data.pharmacies) ? data.pharmacies as unknown as Patient["pharmacies"] : [],
           family_history: Array.isArray(data.family_history) ? data.family_history as unknown as Patient["family_history"] : [],
-          ice_contacts: Array.isArray(data.ice_contacts) ? data.ice_contacts as unknown as Patient["ice_contacts"] : [],
           next_of_kin_members: Array.isArray(data.next_of_kin_members) ? data.next_of_kin_members as unknown as Patient["next_of_kin_members"] : [],
           current_medications: Array.isArray(data.current_medications) ? data.current_medications as unknown as Patient["current_medications"] : [],
         } as unknown as Patient);

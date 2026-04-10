@@ -1074,7 +1074,6 @@ export type Database = {
           gender: string | null
           general_practitioner: string | null
           height_cm: number | null
-          ice_contacts: Json | null
           id: string
           id_passport_number: string | null
           is_chronic: boolean | null
@@ -1127,7 +1126,6 @@ export type Database = {
           gender?: string | null
           general_practitioner?: string | null
           height_cm?: number | null
-          ice_contacts?: Json | null
           id?: string
           id_passport_number?: string | null
           is_chronic?: boolean | null
@@ -1180,7 +1178,6 @@ export type Database = {
           gender?: string | null
           general_practitioner?: string | null
           height_cm?: number | null
-          ice_contacts?: Json | null
           id?: string
           id_passport_number?: string | null
           is_chronic?: boolean | null
