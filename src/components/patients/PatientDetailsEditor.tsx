@@ -749,10 +749,15 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                 {nokMembers.length > 0 ? (
                   <div className="space-y-2">
                     {nokMembers.map(nok => (
-                      <div key={nok.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
-                        <p className="text-xs font-medium text-foreground">{nok.name} {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}</p>
-                        {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
-                        {nok.email && <p className="text-[10px] text-muted-foreground">{nok.email}</p>}
+                      <div key={nok.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                        <div>
+                          <p className="text-xs font-medium text-foreground">{nok.name} {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}</p>
+                          {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
+                          {nok.email && <p className="text-[10px] text-muted-foreground">{nok.email}</p>}
+                        </div>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('nok', nok)}>
+                          <Share2 className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")} />
+                        </Button>
                       </div>
                     ))}
                   </div>
@@ -778,9 +783,17 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
                   <div className="space-y-2">
                     {iceContacts.map(c => (
                       <div key={c.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
-                        <p className="text-xs font-medium text-foreground">{c.name} {c.relationship && <span className="text-muted-foreground">({c.relationship})</span>}</p>
-                        {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
-                        {c.email && <p className="text-[10px] text-muted-foreground">{c.email}</p>}
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs font-medium text-foreground">{c.name} {c.relationship && <span className="text-muted-foreground">({c.relationship})</span>}</p>
+                            {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
+                            {c.email && <p className="text-[10px] text-muted-foreground">{c.email}</p>}
+                          </div>
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord('ice', c)}>
+                            <Share2 className={cn("h-3 w-3", c.shared ? "text-muted-foreground" : "text-primary")} />
+                          </Button>
+                        </div>
+                        {c.is_also_nok && <p className="text-[10px] text-primary mt-0.5">✓ Also Next of Kin</p>}
                       </div>
                     ))}
                   </div>
@@ -1112,7 +1125,7 @@ export function PatientDetailsEditor({ patient, onSave, isSelfService = false, u
             {/* ICE Contacts */}
             <div className={sectionFrame}>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> ICE Contacts</h3>
+                <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> ICE Contacts (In Case of Emergency)</h3>
                 {!showAddICE && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddICE(true)}><Plus className="h-3 w-3" />Add</Button>}
               </div>
               {showAddICE && (
