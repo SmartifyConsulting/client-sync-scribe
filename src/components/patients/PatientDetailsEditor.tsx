@@ -1163,11 +1163,6 @@ export function PatientDetailsEditor({
     if (isMobile && isSelfService && section) {
       return (
         <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-          {show("dashboard") && (
-            <TabsTrigger value="dashboard" className={triggerClass}>
-              Dashboard
-            </TabsTrigger>
-          )}
           {show("personal") && (
             <TabsTrigger value="personal" className={triggerClass}>
               Personal Information
