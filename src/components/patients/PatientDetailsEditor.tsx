@@ -1487,20 +1487,32 @@ export function PatientDetailsEditor({
               </Collapsible>
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <SectionHeader icon={Briefcase} label="Employer" />
+                <SectionHeader icon={Briefcase} label="Employer" sectionKey="employer" isEditing={editingSections["employer"]} onEdit={() => startEditing("employer")} onSave={() => saveSection("employer")} onCancel={() => cancelSection("employer")} />
                 <CollapsibleContent className="p-3">
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    <ViewField label="Employer" value={patient.employer} />
-                    <ViewField label="Occupation" value={patient.occupation} />
-                    <ViewField label="Reporting To Email (Optional)" value={patient.reporting_to_email} />
-                  </div>
+                  {editingSections["employer"] ? (
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      <div className="space-y-1.5"><Label>Employer</Label><Input className="text-sm" value={formData.employer} onChange={(e) => updateFormData({ employer: e.target.value })} placeholder="Company name" /></div>
+                      <div className="space-y-1.5"><Label>Occupation</Label><Input className="text-sm" value={formData.occupation} onChange={(e) => updateFormData({ occupation: e.target.value })} placeholder="Job title" /></div>
+                      <div className="space-y-1.5"><Label>Reporting To Email (Optional)</Label><Input className="text-sm" type="email" value={formData.reporting_to_email} onChange={(e) => updateFormData({ reporting_to_email: e.target.value })} placeholder="manager@company.com" /><p className="text-[10px] text-muted-foreground">Used for e-mailing of Medical Certificates</p></div>
+                    </div>
+                  ) : (
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      <ViewField label="Employer" value={patient.employer} />
+                      <ViewField label="Occupation" value={patient.occupation} />
+                      <ViewField label="Reporting To Email (Optional)" value={patient.reporting_to_email} />
+                    </div>
+                  )}
                 </CollapsibleContent>
               </Collapsible>
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <SectionHeader icon={StickyNote} label="General Notes" />
+                <SectionHeader icon={StickyNote} label="General Notes" sectionKey="notes" isEditing={editingSections["notes"]} onEdit={() => startEditing("notes")} onSave={() => saveSection("notes")} onCancel={() => cancelSection("notes")} />
                 <CollapsibleContent className="p-3">
-                  <p className="text-sm text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
+                  {editingSections["notes"] ? (
+                    <Textarea value={formData.notes} onChange={(e) => updateFormData({ notes: e.target.value })} placeholder="General notes about this patient..." rows={4} className="text-sm" />
+                  ) : (
+                    <p className="text-sm text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
+                  )}
                 </CollapsibleContent>
               </Collapsible>
             </TabsContent>
