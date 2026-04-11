@@ -14,6 +14,7 @@ import {
 import { useUserRole } from "@/hooks/useUserRole";
 
 const doctorNavItems = [
+  { icon: LayoutDashboard, label: "Home", to: "/dashboard" },
   { icon: Calendar, label: "Calendar", to: "/calendar" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
   { icon: Briefcase, label: "Holarprac", to: "/practice" },
@@ -21,6 +22,7 @@ const doctorNavItems = [
 ];
 
 const patientSections = [
+  { icon: LayoutDashboard, label: "Home", section: "home" },
   { icon: HeartPulse, label: "Profile", section: "health" },
   { icon: Handshake, label: "Care", section: "care" },
   { icon: FolderOpen, label: "Admin", section: "admin" },
@@ -71,7 +73,7 @@ export function BottomNav() {
   }
 
   // Patient nav - section-based
-  const currentSection = searchParams.get("section") || "health";
+  const currentSection = searchParams.get("section") || "profile";
   const isOnDetails = location.pathname === "/patient/details";
   const isOnRewards = location.pathname === "/patient/rewards";
 
