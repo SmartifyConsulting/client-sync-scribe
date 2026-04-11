@@ -1,75 +1,51 @@
 
 
-# Multi-Fix Plan: ICE Removal, Edit UX, Rewards Fixes, Heading Consistency, Top Bar Cleanup
+# Remove Home Nav, Add Dashboard to Profile, Implement Per-Section Editing
 
 ## Summary
-Remove all remaining ICE contact references, fix the edit button UX, rename Milestones to Wins, fix rewards tab visibility on web/tablet, standardize heading sizes, move mic/calendar from top bar to dashboard, and move Partner Apps to top of Vulas tab.
+Remove "Home" from bottom nav (all layouts), merge dashboard elements (welcome banner, quick actions, upcoming appointments) into the Profile view on mobile, and implement per-section inline editing with pencil/save/cancel icons on each collapsible section header.
 
 ## Changes
 
-### 1. Remove all ICE contacts from code and DB
-**Files:** `src/components/patients/PatientDetailsEditor.tsx`, `src/hooks/usePatients.ts`
-- Remove `ICEContact` interface import and usage
-- Remove state variables: `iceContacts`, `showAddICE`, `newICE`, `editingICEId`
-- Remove handlers: `handleAddICE`, `handleEditICE`, `handleShareICE`, `handleICEAsNOK`
-- Remove `handleShareRecord` "ice" case and `setIceContacts` references
-- Remove ICE collapsible sections in both view mode (~lines 1468-1537) and edit mode (~lines 2284-2420)
-- Remove `nok-iced` from `SECTION_TABS.health` → `["personal", "medical"]`
-- Remove `nok-iced` from `PROFILE_TABS` → `["personal", "medical"]`
-- Remove NOK & ICE tab triggers from both mobile and desktop tab lists
-- Remove `ice_contacts` from `handleCancel` reset, `saveChanges`, initial state load
-- In `usePatients.ts`: Remove `ICEContact` interface, `parseICEContacts`, `ice_contacts` from Patient type and `toDbPatient`
+### 1. Remove "Home" from bottom navigation
+**File:** `src/components/layout/BottomNav.tsx`
+- **Patient**: Remove `{ icon: LayoutDashboard, label: "Home", section: "home" }` from `patientSections` array
+- **Doctor**: Remove `{ icon: LayoutDashboard, label: "Home", to: "/dashboard" }` from `doctorNavItems` array
+- Update default section fallback from `"profile"` to `"health"` (line 76)
 
-### 2. Remove Edit button, keep per-section pencil approach
+### 2. Merge Dashboard elements into Profile/Health section on mobile
 **File:** `src/components/patients/PatientDetailsEditor.tsx`
-- Remove the global Edit button block (view mode ~line 1366-1370)
-- Remove the global Done button block (edit mode ~line 1950-1967)
-- Remove the global `isEditing` state toggle — instead, always render edit-capable sections
-- Each `SectionHeader` should show a pencil icon when expanded; clicking toggles that section to edit mode
-- Enhanced `SectionHeader` already has `isEditing`, `onEdit`, `onSave`, `onCancel` props (from previous changes). Ensure all sections use them consistently
-- The approach: remove the bifurcated "VIEW MODE" / "EDIT MODE" rendering. Instead, render a single set of tab contents where each collapsible section independently manages view vs edit via `editingSections` state map
+- When mobile patient lands on `section=health`, show the `ProfileBanner` (already exists) + Quick Actions (Calendar button, Record Task button) + Upcoming Appointments summary **above** the Personal/Medical sub-tabs
+- Move the `ProfileBanner` render to always show at the top of the health section on mobile (currently it renders once outside tabs — keep it there but add Quick Actions row below it)
+- Add a "Quick Actions" row with Calendar and Record Task buttons (matching the screenshot) below the profile banner, before the tab content
+- Remove `dashboard` from `SECTION_TABS.home` and the `home` section entirely since Home bottom nav is gone
 
-### 3. Remove Edit button from Dashboard tab
+### 3. Implement per-section inline editing with pencil/save/cancel
 **File:** `src/components/patients/PatientDetailsEditor.tsx`
-- The dashboard tab content doesn't have form fields, so no edit button should appear when dashboard tab is active. With removal of the global edit button (step 2), this is automatically resolved.
 
-### 4. Rename "Milestones" to "Wins" in Rewards
-**File:** `src/pages/patient/MyRewards.tsx`
-- Change TabsTrigger label from "Milestones" to "Wins" (line 389-391)
-- Change CardTitle from "Milestone Achievements" to "Wins" (line 523)
-- Keep the `MILESTONES` constant name as-is internally
+This is the core fix. Currently there are two separate render blocks (VIEW MODE line 1271, EDIT MODE line 1779) and no way to enter edit mode.
 
-### 5. Move Approved Vula Partner Apps to top of Vulas tab
-**File:** `src/pages/patient/MyRewards.tsx`
-- In `TabsContent value="transfers"` (line 644-734), move the "Approved Vula Partner Apps" card (lines 697-733) to before the "Transfer History" card (lines 645-695)
-- Add a "Transfer" button to each partner app card (already present at line 725)
+**Approach**: Merge view and edit into a single render. Add `editingSections` state map. Update `SectionHeader` to accept editing props.
 
-### 6. Fix "My Rewards" tab missing on web/tablet
+- Add state: `const [editingSections, setEditingSections] = useState<Record<string, boolean>>({});`
+- Remove the global `isEditing` state and the `if (!isEditing)` branch — merge into one unified render
+- Update `SectionHeader` component to accept: `sectionKey`, `isEditing`, `hasChanges`, `onEdit`, `onSave`, `onCancel`
+  - Show Pencil icon when not editing (visible when section is expanded)
+  - Show Check (save) and X (cancel) icons when editing and changes exist
+- Each collapsible section renders either `ViewField` components or form `Input` components based on `editingSections[sectionKey]`
+- `onSave` calls `saveChanges()` for that section then sets `editingSections[key] = false`
+- `onCancel` reverts form data for that section and sets `editingSections[key] = false`
+- Delete the entire EDIT MODE block (lines 1779-3271) — all edit fields will be inline within the single unified render
+
+### 4. Remove "Dashboard" tab from mobile section mapping
 **File:** `src/components/patients/PatientDetailsEditor.tsx`
-- In the desktop/tablet `renderTabsList()`, add a "My Rewards" tab trigger that navigates to `/patient/rewards` (similar to "My Practice" pattern at lines 1309-1320)
-- Place it after the "My Admin" group button
-
-### 7. Standardize main heading sizes across app
-**File:** `src/pages/patient/MyRewards.tsx`
-- Change `text-3xl` on h1 (line 255) to `text-2xl` to match "My Holarchive" heading size consistently
-
-### 8. Remove Mic and Calendar from patient top bar, move to dashboard
-**File:** `src/components/layout/PatientAppLayout.tsx`
-- Remove the Mic button (lines 184-197)
-- Remove the mobile Calendar indicator (lines 162-182)
-- Keep Bell and Avatar only in top bar
-
-**File:** `src/pages/patient/PatientDashboard.tsx`
-- Add a "Record a Task" (Mic) quick action button to the dashboard
-- Add a "Calendar" quick action button to the dashboard (if not already present — it likely already has calendar links)
+- Remove `home: ["dashboard"]` from `SECTION_TABS`
+- Keep the `TabsContent value="dashboard"` for desktop/tablet only (when not filtered by mobile section)
 
 ## Files Modified
 
 | File | Changes |
 |------|---------|
-| `src/components/patients/PatientDetailsEditor.tsx` | Remove all ICE code, remove nok-iced tab, remove global Edit/Done buttons, add Rewards tab on desktop |
-| `src/hooks/usePatients.ts` | Remove ICEContact interface and ice_contacts handling |
-| `src/pages/patient/MyRewards.tsx` | Rename Milestones→Wins, move Partner Apps to top, fix heading size |
-| `src/components/layout/PatientAppLayout.tsx` | Remove Mic and Calendar from top bar |
-| `src/pages/patient/PatientDashboard.tsx` | Add Mic quick action |
+| `src/components/layout/BottomNav.tsx` | Remove "Home" from both doctor and patient nav arrays |
+| `src/components/patients/PatientDetailsEditor.tsx` | Remove global edit/view bifurcation; implement `editingSections` state; update `SectionHeader` with pencil/save/cancel; merge dashboard elements into health section on mobile; remove `home` section mapping |
 
