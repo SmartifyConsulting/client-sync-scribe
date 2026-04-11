@@ -398,7 +398,7 @@ export function PatientDetailsEditor({
   const [surgeries, setSurgeries] = useState<Surgery[]>([]);
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [familyHistory, setFamilyHistory] = useState<FamilyHistoryEntry[]>([]);
-  
+
   const [nokMembers, setNokMembers] = useState<NextOfKinMember[]>([]);
   const [currentMedications, setCurrentMedications] = useState<CurrentMedication[]>([]);
   const [conditionsDiagnoses, setConditionsDiagnoses] = useState<ConditionDiagnosis[]>([]);
@@ -591,15 +591,7 @@ export function PatientDetailsEditor({
       setSaving(false);
       setHasChanges(false);
     },
-    [
-      onSave,
-      pharmacies,
-      familyHistory,
-      organDonorOrgans,
-      nokMembers,
-      currentMedications,
-      conditionsDiagnoses,
-    ],
+    [onSave, pharmacies, familyHistory, organDonorOrgans, nokMembers, currentMedications, conditionsDiagnoses],
   );
 
   useEffect(() => {
@@ -617,7 +609,7 @@ export function PatientDetailsEditor({
     pharmacies,
     familyHistory,
     organDonorOrgans,
-    
+
     nokMembers,
     currentMedications,
     conditionsDiagnoses,
@@ -818,7 +810,6 @@ export function PatientDetailsEditor({
     setShowAddNOK(true);
   };
 
-
   // Current medications handlers
   const handleAddMed = () => {
     if (!newMed.name.trim()) {
@@ -986,7 +977,7 @@ export function PatientDetailsEditor({
     setOrganDonorOrgans(patient.organ_donor_organs || []);
     setSurgeries(patient.surgeries || []);
     setFamilyHistory(patient.family_history || []);
-    
+
     setNokMembers(patient.next_of_kin_members || []);
     setCurrentMedications(patient.current_medications || []);
     setConditionsDiagnoses(patient.conditions_diagnoses || []);
@@ -1080,10 +1071,7 @@ export function PatientDetailsEditor({
   };
 
   // Per-record share handler for NOK contacts
-  const handleShareRecord = (
-    type: "nok",
-    record: { id: string; name: string; phone: string; email: string },
-  ) => {
+  const handleShareRecord = (type: "nok", record: { id: string; name: string; phone: string; email: string }) => {
     const shareUrl = `${window.location.origin}/patient/${patient.id}`;
     const text = `${record.name} - Emergency Contact for ${patient.name}\n${shareUrl}`;
 
@@ -1143,7 +1131,7 @@ export function PatientDetailsEditor({
           )}
           {show("doctors") && (
             <TabsTrigger value="doctors" className={triggerClass}>
-              My Care Panel
+              My Care Team
             </TabsTrigger>
           )}
           {show("sessions") && (
@@ -1197,7 +1185,7 @@ export function PatientDetailsEditor({
           </button>
           {isSelfService && (
             <TabsTrigger value="doctors" className={triggerClass}>
-              My Care Panel
+              My Care Team
             </TabsTrigger>
           )}
           {isSelfService && (
@@ -1383,7 +1371,6 @@ export function PatientDetailsEditor({
                   )}
                 </CollapsibleContent>
               </Collapsible>
-
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
                 <SectionHeader icon={Briefcase} label="Employer" />
@@ -2127,7 +2114,6 @@ export function PatientDetailsEditor({
                 )}
               </CollapsibleContent>
             </Collapsible>
-
 
             <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
               <SectionHeader icon={Briefcase} label="Employer" />
