@@ -372,7 +372,7 @@ export function PatientDetailsEditor({
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { isDoctor } = useUserRole();
-  const [isEditing, setIsEditing] = useState(false);
+  const [editingSections, setEditingSections] = useState<Record<string, boolean>>({});
   const [activeParentTab, setActiveParentTab] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
