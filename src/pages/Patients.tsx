@@ -228,7 +228,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
         organ_donor_organs: null,
         first_name: null,
         last_name: null,
-        ice_contacts: null,
+        
         next_of_kin_members: null,
         current_medications: null,
         patient_user_id: user.id,

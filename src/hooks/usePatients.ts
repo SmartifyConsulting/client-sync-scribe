@@ -25,16 +25,6 @@ export interface FamilyHistoryEntry {
   condition: string;
 }
 
-export interface ICEContact {
-  id: string;
-  name: string;
-  phone: string;
-  email: string;
-  relationship: string;
-  is_also_nok?: boolean;
-  shared?: boolean;
-}
-
 export interface NextOfKinMember {
   id: string;
   name: string;
@@ -108,7 +98,6 @@ export interface Patient {
   family_history: FamilyHistoryEntry[] | null;
   organ_donor: boolean | null;
   organ_donor_organs: string[] | null;
-  ice_contacts?: ICEContact[] | null;
   next_of_kin_members: NextOfKinMember[] | null;
   current_medications: CurrentMedication[] | null;
   conditions_diagnoses?: ConditionDiagnosis[] | null;
@@ -141,12 +130,6 @@ const parseFamilyHistory = (fh: Json | null): FamilyHistoryEntry[] | null => {
   return null;
 };
 
-const parseICEContacts = (data: Json | null): ICEContact[] | null => {
-  if (!data) return null;
-  if (Array.isArray(data)) return data as unknown as ICEContact[];
-  return null;
-};
-
 const parseNOKMembers = (data: Json | null): NextOfKinMember[] | null => {
   if (!data) return null;
   if (Array.isArray(data)) return data as unknown as NextOfKinMember[];
@@ -171,7 +154,6 @@ const toPatient = (data: any, lastVisit?: string | null): Patient => ({
   surgeries: parseSurgeries(data.surgeries),
   pharmacies: parsePharmacies(data.pharmacies),
   family_history: parseFamilyHistory(data.family_history),
-  ice_contacts: parseICEContacts(data.ice_contacts ?? null),
   next_of_kin_members: parseNOKMembers(data.next_of_kin_members),
   current_medications: parseCurrentMedications(data.current_medications),
   conditions_diagnoses: parseConditionsDiagnoses(data.conditions_diagnoses),
@@ -180,14 +162,13 @@ const toPatient = (data: any, lastVisit?: string | null): Patient => ({
 
 // Helper to prepare patient data for DB (convert surgeries/pharmacies to JSON)
 const toDbPatient = (updates: Partial<Patient>): Record<string, any> => {
-  const { surgeries, pharmacies, family_history, organ_donor_organs, last_visit, ice_contacts, next_of_kin_members, current_medications, conditions_diagnoses, ...rest } = updates as any;
+  const { surgeries, pharmacies, family_history, organ_donor_organs, last_visit, next_of_kin_members, current_medications, conditions_diagnoses, ...rest } = updates as any;
   return {
     ...rest,
     ...(surgeries !== undefined ? { surgeries: surgeries as unknown as Json } : {}),
     ...(pharmacies !== undefined ? { pharmacies: pharmacies as unknown as Json } : {}),
     ...(family_history !== undefined ? { family_history: family_history as unknown as Json } : {}),
     ...(organ_donor_organs !== undefined ? { organ_donor_organs: organ_donor_organs as unknown as Json } : {}),
-    ...(ice_contacts !== undefined ? { ice_contacts: ice_contacts as unknown as Json } : {}),
     ...(next_of_kin_members !== undefined ? { next_of_kin_members: next_of_kin_members as unknown as Json } : {}),
     ...(current_medications !== undefined ? { current_medications: current_medications as unknown as Json } : {}),
     ...(conditions_diagnoses !== undefined ? { conditions_diagnoses: conditions_diagnoses as unknown as Json } : {}),
@@ -196,7 +177,7 @@ const toDbPatient = (updates: Partial<Patient>): Record<string, any> => {
 
 // Helper to determine if patient should be inactive based on last visit and threshold
 const shouldBeInactive = (lastVisit: string | null, thresholdMonths: number): boolean => {
-  if (!lastVisit) return false; // No visits yet, keep status as-is
+  if (!lastVisit) return false;
   const lastVisitDate = new Date(lastVisit);
   const thresholdDate = new Date();
   thresholdDate.setMonth(thresholdDate.getMonth() - thresholdMonths);
@@ -212,9 +193,8 @@ export function usePatients() {
     try {
       setLoading(true);
       
-      // First get the user's inactive threshold setting
       const { data: { user } } = await supabase.auth.getUser();
-      let inactiveThresholdMonths = 12; // Default to 12 months
+      let inactiveThresholdMonths = 12;
       
       if (user) {
         const { data: profileData } = await supabase
@@ -235,7 +215,6 @@ export function usePatients() {
 
       if (error) throw error;
 
-      // Fetch last visit for each patient and update status if needed
       const patientsWithLastVisit = await Promise.all(
         (data || []).map(async (patient) => {
           const { data: sessionData } = await supabase
@@ -250,17 +229,14 @@ export function usePatients() {
           const lastVisit = sessionData?.started_at || null;
           const typedPatient = toPatient(patient, lastVisit);
           
-          // Auto-update status based on last visit threshold
           const shouldSetInactive = shouldBeInactive(lastVisit, inactiveThresholdMonths);
           if (shouldSetInactive && typedPatient.status === 'active') {
-            // Update patient status to inactive in database
             await supabase
               .from('patients')
               .update({ status: 'inactive' })
               .eq('id', patient.id);
             typedPatient.status = 'inactive';
           } else if (!shouldSetInactive && lastVisit && typedPatient.status === 'inactive') {
-            // Reactivate if they visited recently (within threshold)
             await supabase
               .from('patients')
               .update({ status: 'active' })
@@ -272,7 +248,6 @@ export function usePatients() {
         })
       );
 
-      // Sort by last name, then first name
       patientsWithLastVisit.sort((a, b) => {
         const aLast = a.name.trim().split(/\s+/).pop()?.toLowerCase() || '';
         const bLast = b.name.trim().split(/\s+/).pop()?.toLowerCase() || '';
@@ -402,7 +377,6 @@ export function usePatient(id: string) {
 
       if (error) throw error;
       
-      // Fetch last visit from sessions
       if (data) {
         const { data: sessionData } = await supabase
           .from('sessions')

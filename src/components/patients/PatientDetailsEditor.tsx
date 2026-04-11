@@ -58,7 +58,6 @@ import {
   Surgery,
   Pharmacy,
   FamilyHistoryEntry,
-  ICEContact,
   NextOfKinMember,
   CurrentMedication,
   ConditionDiagnosis,
@@ -308,7 +307,7 @@ function AnimatedCounter({ target }: { target: number }) {
 
 const SECTION_TABS: Record<string, string[]> = {
   home: ["dashboard"],
-  health: ["personal", "medical", "nok-iced"],
+  health: ["personal", "medical"],
   care: ["doctors", "sessions", "roundtable"],
   admin: ["calendar", "tasks", "documents"],
 };
@@ -399,7 +398,7 @@ export function PatientDetailsEditor({
   const [surgeries, setSurgeries] = useState<Surgery[]>([]);
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [familyHistory, setFamilyHistory] = useState<FamilyHistoryEntry[]>([]);
-  const [iceContacts, setIceContacts] = useState<ICEContact[]>([]);
+  
   const [nokMembers, setNokMembers] = useState<NextOfKinMember[]>([]);
   const [currentMedications, setCurrentMedications] = useState<CurrentMedication[]>([]);
   const [conditionsDiagnoses, setConditionsDiagnoses] = useState<ConditionDiagnosis[]>([]);
@@ -417,12 +416,9 @@ export function PatientDetailsEditor({
   const [newFamilyEntry, setNewFamilyEntry] = useState({ relation: "", condition: "" });
   const [showAddFamily, setShowAddFamily] = useState(false);
   const [editingFamilyId, setEditingFamilyId] = useState<string | null>(null);
-  const [showAddICE, setShowAddICE] = useState(false);
-  const [newICE, setNewICE] = useState({ name: "", phone: "", email: "", relationship: "" });
   const [showAddNOK, setShowAddNOK] = useState(false);
   const [newNOK, setNewNOK] = useState({ name: "", phone: "", email: "", relationship: "" });
   const [editingNOKId, setEditingNOKId] = useState<string | null>(null);
-  const [editingICEId, setEditingICEId] = useState<string | null>(null);
   const [showAddMed, setShowAddMed] = useState(false);
   const [newMed, setNewMed] = useState({
     name: "",
@@ -522,7 +518,6 @@ export function PatientDetailsEditor({
       setOrganDonorOrgans(patient.organ_donor_organs || []);
       setSurgeries(patient.surgeries || []);
       setFamilyHistory(patient.family_history || []);
-      setIceContacts(patient.ice_contacts || []);
       setNokMembers(patient.next_of_kin_members || []);
       setCurrentMedications(patient.current_medications || []);
       setConditionsDiagnoses(patient.conditions_diagnoses || []);
@@ -588,7 +583,6 @@ export function PatientDetailsEditor({
         family_history: familyHistory,
         organ_donor: data.organ_donor,
         organ_donor_organs: organDonorOrgans,
-        ice_contacts: iceContacts,
         next_of_kin_members: nokMembers,
         current_medications: currentMedications,
         conditions_diagnoses: conditionsDiagnoses,
@@ -602,7 +596,6 @@ export function PatientDetailsEditor({
       pharmacies,
       familyHistory,
       organDonorOrgans,
-      iceContacts,
       nokMembers,
       currentMedications,
       conditionsDiagnoses,
@@ -624,7 +617,7 @@ export function PatientDetailsEditor({
     pharmacies,
     familyHistory,
     organDonorOrgans,
-    iceContacts,
+    
     nokMembers,
     currentMedications,
     conditionsDiagnoses,
@@ -825,30 +818,6 @@ export function PatientDetailsEditor({
     setShowAddNOK(true);
   };
 
-  // ICE contacts handlers
-  const handleAddICE = () => {
-    if (!newICE.name.trim()) {
-      toast({ title: "Required", description: "Name is required", variant: "destructive" });
-      return;
-    }
-    if (editingICEId) {
-      setIceContacts((prev) =>
-        prev.map((c) => (c.id === editingICEId ? { ...c, ...newICE, name: newICE.name.trim() } : c)),
-      );
-      setEditingICEId(null);
-    } else {
-      setIceContacts((prev) => [...prev, { id: crypto.randomUUID(), ...newICE, name: newICE.name.trim() }]);
-    }
-    setNewICE({ name: "", phone: "", email: "", relationship: "" });
-    setShowAddICE(false);
-    setHasChanges(true);
-  };
-
-  const handleEditICE = (c: ICEContact) => {
-    setNewICE({ name: c.name, phone: c.phone, email: c.email, relationship: c.relationship });
-    setEditingICEId(c.id);
-    setShowAddICE(true);
-  };
 
   // Current medications handlers
   const handleAddMed = () => {
@@ -1017,7 +986,7 @@ export function PatientDetailsEditor({
     setOrganDonorOrgans(patient.organ_donor_organs || []);
     setSurgeries(patient.surgeries || []);
     setFamilyHistory(patient.family_history || []);
-    setIceContacts(patient.ice_contacts || []);
+    
     setNokMembers(patient.next_of_kin_members || []);
     setCurrentMedications(patient.current_medications || []);
     setConditionsDiagnoses(patient.conditions_diagnoses || []);
@@ -1110,38 +1079,15 @@ export function PatientDetailsEditor({
     );
   };
 
-  // ICE share handler
-  const handleShareICE = () => {
-    const info = [
-      `Patient: ${patient.name}`,
-      `DOB: ${patient.dob || "N/A"}`,
-      `Blood Type: ${patient.blood_type || "N/A"}`,
-      `Allergies: ${patient.allergies || "None"}`,
-      `Medications: ${currentMedications.map((m) => m.name).join(", ") || "None"}`,
-      `GP: ${patient.general_practitioner || "N/A"}`,
-    ].join("\n");
-
-    if (navigator.share) {
-      navigator.share({ title: "ICE - Patient Information", text: info });
-    } else {
-      navigator.clipboard.writeText(info);
-      toast({ title: "Copied", description: "ICE information copied to clipboard" });
-    }
-  };
-
-  // Per-record share handler for NOK and ICE contacts
+  // Per-record share handler for NOK contacts
   const handleShareRecord = (
-    type: "nok" | "ice",
+    type: "nok",
     record: { id: string; name: string; phone: string; email: string },
   ) => {
     const shareUrl = `${window.location.origin}/patient/${patient.id}`;
     const text = `${record.name} - Emergency Contact for ${patient.name}\n${shareUrl}`;
 
-    if (type === "ice") {
-      setIceContacts((prev) => prev.map((c) => (c.id === record.id ? { ...c, shared: true } : c)));
-    } else {
-      setNokMembers((prev) => prev.map((n) => (n.id === record.id ? { ...n, shared: true } : n)));
-    }
+    setNokMembers((prev) => prev.map((n) => (n.id === record.id ? { ...n, shared: true } : n)));
     setHasChanges(true);
 
     if (navigator.share) {
@@ -1152,32 +1098,8 @@ export function PatientDetailsEditor({
     }
   };
 
-  // Handle ICE "Also Next of Kin" toggle
-  const handleICEAsNOK = (iceId: string, checked: boolean) => {
-    setIceContacts((prev) => prev.map((c) => (c.id === iceId ? { ...c, is_also_nok: checked } : c)));
-    const contact = iceContacts.find((c) => c.id === iceId);
-    if (checked && contact) {
-      const alreadyExists = nokMembers.some((n) => n.name === contact.name && n.phone === contact.phone);
-      if (!alreadyExists) {
-        setNokMembers((prev) => [
-          ...prev,
-          {
-            id: crypto.randomUUID(),
-            name: contact.name,
-            phone: contact.phone,
-            email: contact.email,
-            relationship: contact.relationship,
-          },
-        ]);
-      }
-    } else if (!checked && contact) {
-      setNokMembers((prev) => prev.filter((n) => !(n.name === contact.name && n.phone === contact.phone)));
-    }
-    setHasChanges(true);
-  };
-
   // Parent tab groups for desktop/tablet
-  const PROFILE_TABS = ["personal", "medical", "nok-iced"];
+  const PROFILE_TABS = ["personal", "medical"];
   const ADMIN_TABS = ["calendar", "tasks", "documents"];
 
   const handleParentTabClick = (parent: string, tabs: string[]) => {
@@ -1249,11 +1171,6 @@ export function PatientDetailsEditor({
               My Round Table
             </TabsTrigger>
           )}
-          {show("nok-iced") && (
-            <TabsTrigger value="nok-iced" className={triggerClass}>
-              NOK & ICE
-            </TabsTrigger>
-          )}
         </TabsList>
       );
     }
@@ -1318,6 +1235,18 @@ export function PatientDetailsEditor({
               My Practice
             </TabsTrigger>
           )}
+          {isSelfService && (
+            <TabsTrigger
+              value="rewards"
+              className={triggerClass}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate("/patient/rewards");
+              }}
+            >
+              My Rewards
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Sub-tab row for My Profile */}
@@ -1329,11 +1258,6 @@ export function PatientDetailsEditor({
             <TabsTrigger value="medical" className="text-xs whitespace-nowrap">
               Medical Information
             </TabsTrigger>
-            {isSelfService && (
-              <TabsTrigger value="nok-iced" className="text-xs whitespace-nowrap">
-                NOK & ICE
-              </TabsTrigger>
-            )}
           </TabsList>
         )}
 
@@ -1363,11 +1287,6 @@ export function PatientDetailsEditor({
         <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             {renderTabsList()}
-            <div className="flex justify-end mt-2">
-              <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={() => setIsEditing(true)}>
-                <Pencil className="h-3.5 w-3.5" /> Edit
-              </Button>
-            </div>
 
             {/* === PERSONAL INFORMATION TAB === */}
             <TabsContent value="personal" className="space-y-4 mt-4">
@@ -1465,76 +1384,6 @@ export function PatientDetailsEditor({
                 </CollapsibleContent>
               </Collapsible>
 
-              <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <CollapsibleTrigger className="flex w-full items-center justify-between bg-primary rounded-lg px-3 py-2 group">
-                  <h3 className="text-xs font-semibold text-white tracking-wide flex items-center gap-1.5 text-left">
-                    <Phone className="h-3.5 w-3.5" /> ICE Contacts (In Case of Emergency)
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    {isSelfService && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-1 text-xs h-6 bg-white/20 border-white/30 text-white hover:bg-white/30"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleShareICE();
-                        }}
-                      >
-                        <Share2 className="h-3 w-3" />
-                        Share
-                      </Button>
-                    )}
-                    <ChevronDown className="h-4 w-4 text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="p-3">
-                  {iceContacts.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No ICE contacts recorded</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {iceContacts.map((c) => (
-                        <div key={c.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-xs font-medium text-foreground">
-                                {c.name}{" "}
-                                {c.relationship && <span className="text-muted-foreground">({c.relationship})</span>}
-                              </p>
-                              {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
-                              {c.email && <p className="text-[10px] text-muted-foreground">{c.email}</p>}
-                            </div>
-                            <div className="flex gap-1">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                title="Notify"
-                                onClick={() =>
-                                  toast({ title: "Notification sent", description: `${c.name} has been notified` })
-                                }
-                              >
-                                <Bell className="h-3 w-3 text-primary" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={() => handleShareRecord("ice", c)}
-                              >
-                                <Share2
-                                  className={cn("h-3 w-3", c.shared ? "text-muted-foreground" : "text-primary")}
-                                />
-                              </Button>
-                            </div>
-                          </div>
-                          {c.is_also_nok && <p className="text-[10px] text-primary mt-0.5">✓ Also Next of Kin</p>}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CollapsibleContent>
-              </Collapsible>
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
                 <SectionHeader icon={Briefcase} label="Employer" />
@@ -1719,8 +1568,8 @@ export function PatientDetailsEditor({
 
                   {/* Organ Donor — collapsible with inline Yes/No */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <CollapsibleTrigger className="flex w-full items-center justify-between bg-primary rounded-lg px-3 py-2 group">
-                      <h3 className="text-xs font-semibold text-white tracking-wide flex items-center gap-1.5 text-left">
+                    <CollapsibleTrigger className="flex w-full items-center justify-between bg-[#F5F4F1] rounded-lg px-3 py-2 group">
+                      <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5 text-left">
                         <Heart className="h-3.5 w-3.5" /> Organ Donor
                       </h3>
                       <div className="flex items-center gap-2">
@@ -1729,12 +1578,12 @@ export function PatientDetailsEditor({
                             "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
                             patient.organ_donor
                               ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                              : "bg-white/20 text-white",
+                              : "bg-muted text-muted-foreground",
                           )}
                         >
                           {patient.organ_donor ? "Yes" : "No"}
                         </span>
-                        <ChevronDown className="h-4 w-4 text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                        <ChevronDown className="h-4 w-4 text-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
                       </div>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="px-3 pb-3">
@@ -1947,24 +1796,22 @@ export function PatientDetailsEditor({
       <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           {renderTabsList()}
-          <div className="flex justify-end mt-2 items-center gap-2">
-            {saving && (
+          {saving && (
+            <div className="flex justify-end mt-2">
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 Saving...
               </span>
-            )}
-            {!saving && !hasChanges && isEditing && (
+            </div>
+          )}
+          {!saving && !hasChanges && isEditing && (
+            <div className="flex justify-end mt-2">
               <span className="flex items-center gap-1.5 text-xs text-green-600">
                 <Check className="h-3 w-3" />
                 Saved
               </span>
-            )}
-            <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={handleCancel} disabled={saving}>
-              <X className="h-3.5 w-3.5" />
-              Done
-            </Button>
-          </div>
+            </div>
+          )}
 
           {/* === PERSONAL TAB (EDIT) === */}
           <TabsContent value="personal" className="space-y-4 mt-4">
@@ -2281,143 +2128,6 @@ export function PatientDetailsEditor({
               </CollapsibleContent>
             </Collapsible>
 
-            {/* ICE Contacts */}
-            <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-              <SectionHeader icon={Phone} label="ICE Contacts (In Case of Emergency)" />
-              <CollapsibleContent className="p-3">
-                <div className="flex justify-end mb-3">
-                  {!showAddICE && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1 text-xs h-7"
-                      onClick={() => setShowAddICE(true)}
-                    >
-                      <Plus className="h-3 w-3" />
-                      Add
-                    </Button>
-                  )}
-                </div>
-                {showAddICE && (
-                  <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <div className="space-y-1.5">
-                        <Label>Name *</Label>
-                        <Input
-                          className="text-sm"
-                          value={newICE.name}
-                          onChange={(e) => setNewICE((p) => ({ ...p, name: e.target.value }))}
-                          placeholder="Full name"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Relationship</Label>
-                        <RelationshipSelect
-                          value={newICE.relationship}
-                          onChange={(v) => setNewICE((p) => ({ ...p, relationship: v }))}
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Phone</Label>
-                        <PhoneInput value={newICE.phone} onChange={(v) => setNewICE((p) => ({ ...p, phone: v }))} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Email</Label>
-                        <Input
-                          className="text-sm"
-                          type="email"
-                          value={newICE.email}
-                          onChange={(e) => setNewICE((p) => ({ ...p, email: e.target.value }))}
-                          placeholder="Email"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-xs h-7"
-                        onClick={() => {
-                          setShowAddICE(false);
-                          setEditingICEId(null);
-                          setNewICE({ name: "", phone: "", email: "", relationship: "" });
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button size="sm" className="text-xs h-7" onClick={handleAddICE}>
-                        {editingICEId ? "Save" : "Add"}
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                {iceContacts.length > 0 && (
-                  <div className="space-y-1.5">
-                    {iceContacts.map((c) => (
-                      <div key={c.id} className="p-1.5 rounded-lg bg-muted/30 border border-border/50">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-xs font-medium text-foreground">
-                              {c.name}{" "}
-                              {c.relationship && <span className="text-muted-foreground">({c.relationship})</span>}
-                            </p>
-                            {c.phone && <p className="text-[10px] text-muted-foreground">{c.phone}</p>}
-                          </div>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              title="Notify"
-                              onClick={() =>
-                                toast({ title: "Notification sent", description: `${c.name} has been notified` })
-                              }
-                            >
-                              <Bell className="h-3 w-3 text-primary" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => handleShareRecord("ice", c)}
-                            >
-                              <Share2 className={cn("h-3 w-3", c.shared ? "text-muted-foreground" : "text-primary")} />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditICE(c)}>
-                              <Pencil className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6 text-destructive"
-                              onClick={() => {
-                                setIceContacts((prev) => prev.filter((i) => i.id !== c.id));
-                                setHasChanges(true);
-                              }}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Checkbox
-                            id={`ice-nok-${c.id}`}
-                            checked={c.is_also_nok || false}
-                            onCheckedChange={(checked) => handleICEAsNOK(c.id, !!checked)}
-                          />
-                          <Label
-                            htmlFor={`ice-nok-${c.id}`}
-                            className="text-[10px] text-muted-foreground cursor-pointer"
-                          >
-                            Same as Next of Kin
-                          </Label>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CollapsibleContent>
-            </Collapsible>
 
             <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
               <SectionHeader icon={Briefcase} label="Employer" />
@@ -3122,8 +2832,8 @@ export function PatientDetailsEditor({
 
                 {/* Organ Donor — collapsible with inline Yes/No */}
                 <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <CollapsibleTrigger className="flex w-full items-center justify-between bg-primary rounded-lg px-3 py-2 group">
-                    <h3 className="text-xs font-semibold text-white tracking-wide flex items-center gap-1.5 text-left">
+                  <CollapsibleTrigger className="flex w-full items-center justify-between bg-[#F5F4F1] rounded-lg px-3 py-2 group">
+                    <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5 text-left">
                       <Heart className="h-3.5 w-3.5" /> Organ Donor
                     </h3>
                     <div className="flex items-center gap-2">
@@ -3132,12 +2842,12 @@ export function PatientDetailsEditor({
                           "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
                           formData.organ_donor
                             ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                            : "bg-white/20 text-white",
+                            : "bg-muted text-muted-foreground",
                         )}
                       >
                         {formData.organ_donor ? "Yes" : "No"}
                       </span>
-                      <ChevronDown className="h-4 w-4 text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                      <ChevronDown className="h-4 w-4 text-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="p-3">

@@ -52,7 +52,7 @@ function AutoCreatePatientFallback({ user, onCreated }: { user: any; onCreated: 
           surgeries: [],
           pharmacies: [],
           family_history: [],
-          ice_contacts: [],
+          
           next_of_kin_members: [],
           current_medications: [],
         } as unknown as Patient);

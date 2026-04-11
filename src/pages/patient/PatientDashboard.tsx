@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Calendar, FileText, Clock, User, Loader2, Pill, ListChecks, ArrowRight, Info, Sparkles, Building2, Receipt, Star, Camera, Trophy, Heart } from "lucide-react";
+import { Calendar, FileText, Clock, User, Loader2, Pill, ListChecks, ArrowRight, Info, Sparkles, Building2, Receipt, Star, Camera, Trophy, Heart, Mic } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -296,6 +296,18 @@ export default function PatientDashboard() {
             </h1>
             <p className="text-muted-foreground text-[12px]">Your health dashboard at a glance</p>
           </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link to="/patient/calendar">
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+              <Calendar className="h-3.5 w-3.5" /> Calendar
+            </Button>
+          </Link>
+          <Link to="/todos?autoRecord=true">
+            <Button size="sm" className="gap-1.5 text-xs bg-primary">
+              <Mic className="h-3.5 w-3.5" /> Record Task
+            </Button>
+          </Link>
         </div>
       </div>
 
