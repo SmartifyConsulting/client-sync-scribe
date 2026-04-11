@@ -157,44 +157,7 @@ export function PatientAppLayout() {
             )}
           </div>
 
-          {/* Right: Mic, Bell, Avatar */}
           <div className="flex items-center gap-2">
-            {/* Mobile upcoming indicator */}
-            <div className="md:hidden">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => navigate("/patient/calendar")}
-                      className="relative h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors"
-                    >
-                      <Calendar className="h-4 w-4 text-primary" />
-                      {upcomingAppointments.length > 0 && (
-                        <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[8px] font-bold text-primary-foreground">
-                          {upcomingAppointments.length}
-                        </span>
-                      )}
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Upcoming Appointments</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-
-            {/* Mic */}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => navigate("/todos?autoRecord=true")}
-                    className="h-9 w-9 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors"
-                  >
-                    <Mic className="h-4 w-4 text-white stroke-white fill-none" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>Record a Task</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
 
             {/* Bell */}
             <Popover>
