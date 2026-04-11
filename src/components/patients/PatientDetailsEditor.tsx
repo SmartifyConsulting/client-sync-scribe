@@ -125,14 +125,62 @@ const COUNTRY_CODES = [
 
 const sectionFrame = "rounded-xl border border-primary bg-card p-4 shadow-sm";
 
-// Reusable collapsible section header with neutral background and black text
-const SectionHeader = ({ icon: Icon, label, extra }: { icon: any; label: string; extra?: React.ReactNode }) => (
+// Reusable collapsible section header with neutral background, pencil/save/cancel icons
+const SectionHeader = ({
+  icon: Icon,
+  label,
+  extra,
+  sectionKey,
+  isEditing,
+  onEdit,
+  onSave,
+  onCancel,
+}: {
+  icon: any;
+  label: string;
+  extra?: React.ReactNode;
+  sectionKey?: string;
+  isEditing?: boolean;
+  onEdit?: () => void;
+  onSave?: () => void;
+  onCancel?: () => void;
+}) => (
   <CollapsibleTrigger className="flex w-full items-center justify-between bg-[#F5F4F1] rounded-lg px-3 py-2 group">
     <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5 text-left">
       <Icon className="h-3.5 w-3.5" /> {label}
     </h3>
     <div className="flex items-center gap-2">
       {extra}
+      {sectionKey && !isEditing && onEdit && (
+        <button
+          type="button"
+          className="hidden group-data-[state=open]:inline-flex items-center justify-center h-5 w-5 rounded hover:bg-black/10 transition-colors"
+          onClick={(e) => { e.stopPropagation(); onEdit(); }}
+          title="Edit"
+        >
+          <Pencil className="h-3 w-3 text-foreground" />
+        </button>
+      )}
+      {sectionKey && isEditing && (
+        <>
+          <button
+            type="button"
+            className="hidden group-data-[state=open]:inline-flex items-center justify-center h-5 w-5 rounded hover:bg-green-100 transition-colors"
+            onClick={(e) => { e.stopPropagation(); onSave?.(); }}
+            title="Save"
+          >
+            <Check className="h-3 w-3 text-green-600" />
+          </button>
+          <button
+            type="button"
+            className="hidden group-data-[state=open]:inline-flex items-center justify-center h-5 w-5 rounded hover:bg-red-100 transition-colors"
+            onClick={(e) => { e.stopPropagation(); onCancel?.(); }}
+            title="Cancel"
+          >
+            <X className="h-3 w-3 text-destructive" />
+          </button>
+        </>
+      )}
       <ChevronDown className="h-4 w-4 text-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
     </div>
   </CollapsibleTrigger>
