@@ -1409,56 +1409,79 @@ export function PatientDetailsEditor({
               </Collapsible>
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <SectionHeader icon={Users} label="Next of Kin" />
+                <SectionHeader icon={Users} label="Next of Kin" sectionKey="nok" isEditing={editingSections["nok"]} onEdit={() => startEditing("nok")} onSave={() => saveSection("nok")} onCancel={() => cancelSection("nok")} />
                 <CollapsibleContent className="p-3">
-                  {nokMembers.length > 0 ? (
-                    <div className="space-y-2">
-                      {nokMembers.map((nok) => (
-                        <div
-                          key={nok.id}
-                          className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50"
-                        >
-                          <div>
-                            <p className="text-xs font-medium text-foreground">
-                              {nok.name}{" "}
-                              {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}
-                            </p>
-                            {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
-                            {nok.email && <p className="text-[10px] text-muted-foreground">{nok.email}</p>}
+                  {editingSections["nok"] ? (
+                    <>
+                      <div className="flex justify-end mb-3">
+                        {!showAddNOK && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddNOK(true)}><Plus className="h-3 w-3" />Add</Button>}
+                      </div>
+                      {nokMembers.length === 0 && (
+                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-3">
+                          <div className="space-y-1.5"><Label>Name</Label><Input className="text-sm" value={formData.next_of_kin_name} onChange={(e) => updateFormData({ next_of_kin_name: e.target.value })} placeholder="Full name" /></div>
+                          <div className="space-y-1.5"><Label>Relationship</Label><RelationshipSelect value={formData.next_of_kin_relationship} onChange={(v) => updateFormData({ next_of_kin_relationship: v })} /></div>
+                          <div className="space-y-1.5"><Label>Phone</Label><PhoneInput value={formData.next_of_kin_phone} onChange={(v) => updateFormData({ next_of_kin_phone: v })} /></div>
+                          <div className="space-y-1.5"><Label>Email</Label><Input className="text-sm" type="email" value={formData.next_of_kin_email} onChange={(e) => updateFormData({ next_of_kin_email: e.target.value })} placeholder="Email" /></div>
+                        </div>
+                      )}
+                      {showAddNOK && (
+                        <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            <div className="space-y-1.5"><Label>Name *</Label><Input className="text-sm" value={newNOK.name} onChange={(e) => setNewNOK(p => ({ ...p, name: e.target.value }))} placeholder="Full name" /></div>
+                            <div className="space-y-1.5"><Label>Relationship</Label><RelationshipSelect value={newNOK.relationship} onChange={(v) => setNewNOK(p => ({ ...p, relationship: v }))} /></div>
+                            <div className="space-y-1.5"><Label>Phone</Label><PhoneInput value={newNOK.phone} onChange={(v) => setNewNOK(p => ({ ...p, phone: v }))} /></div>
+                            <div className="space-y-1.5"><Label>Email</Label><Input className="text-sm" type="email" value={newNOK.email} onChange={(e) => setNewNOK(p => ({ ...p, email: e.target.value }))} placeholder="Email" /></div>
                           </div>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              title="Notify"
-                              onClick={() =>
-                                toast({ title: "Notification sent", description: `${nok.name} has been notified` })
-                              }
-                            >
-                              <Bell className="h-3 w-3 text-primary" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => handleShareRecord("nok", nok)}
-                            >
-                              <Share2
-                                className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")}
-                              />
-                            </Button>
+                          <div className="flex justify-end gap-2">
+                            <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddNOK(false); setEditingNOKId(null); setNewNOK({ name: "", phone: "", email: "", relationship: "" }); }}>Cancel</Button>
+                            <Button size="sm" className="text-xs h-7" onClick={handleAddNOK}>{editingNOKId ? "Save" : "Add"}</Button>
                           </div>
                         </div>
-                      ))}
-                    </div>
+                      )}
+                      {nokMembers.length > 0 && (
+                        <div className="space-y-1.5">
+                          {nokMembers.map((nok) => (
+                            <div key={nok.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                              <div>
+                                <p className="text-xs font-medium text-foreground">{nok.name} {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}</p>
+                                {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
+                              </div>
+                              <div className="flex gap-1">
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditNOK(nok)}><Pencil className="h-3 w-3" /></Button>
+                                <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => { setNokMembers(prev => prev.filter(n => n.id !== nok.id)); setHasChanges(true); }}><Trash2 className="h-3 w-3" /></Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
                   ) : (
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                      <ViewField label="Name" value={patient.next_of_kin_name} />
-                      <ViewField label="Relationship" value={patient.next_of_kin_relationship} />
-                      <ViewField label="Phone" value={patient.next_of_kin_phone} />
-                      <ViewField label="Email" value={patient.next_of_kin_email} />
-                    </div>
+                    <>
+                      {nokMembers.length > 0 ? (
+                        <div className="space-y-2">
+                          {nokMembers.map((nok) => (
+                            <div key={nok.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                              <div>
+                                <p className="text-xs font-medium text-foreground">{nok.name} {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}</p>
+                                {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
+                                {nok.email && <p className="text-[10px] text-muted-foreground">{nok.email}</p>}
+                              </div>
+                              <div className="flex gap-1">
+                                <Button variant="ghost" size="icon" className="h-6 w-6" title="Notify" onClick={() => toast({ title: "Notification sent", description: `${nok.name} has been notified` })}><Bell className="h-3 w-3 text-primary" /></Button>
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord("nok", nok)}><Share2 className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")} /></Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                          <ViewField label="Name" value={patient.next_of_kin_name} />
+                          <ViewField label="Relationship" value={patient.next_of_kin_relationship} />
+                          <ViewField label="Phone" value={patient.next_of_kin_phone} />
+                          <ViewField label="Email" value={patient.next_of_kin_email} />
+                        </div>
+                      )}
+                    </>
                   )}
                 </CollapsibleContent>
               </Collapsible>
