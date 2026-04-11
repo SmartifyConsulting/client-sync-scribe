@@ -1247,6 +1247,7 @@ export function PatientDetailsEditor({
               My Rewards
             </TabsTrigger>
           )}
+        </TabsList>
 
         {/* Sub-tab row for My Profile */}
         {activeParentTab === "profile" && (
