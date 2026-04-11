@@ -1850,9 +1850,6 @@ export function PatientDetailsEditor({
       </div>
     );
 }
-  return (
-    <div className="space-y-0">
-      <ProfileBanner />
       <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           {renderTabsList()}
