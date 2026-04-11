@@ -1235,7 +1235,18 @@ export function PatientDetailsEditor({
               My Practice
             </TabsTrigger>
           )}
-        </TabsList>
+          {isSelfService && (
+            <TabsTrigger
+              value="rewards"
+              className={triggerClass}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate("/patient/rewards");
+              }}
+            >
+              My Rewards
+            </TabsTrigger>
+          )}
 
         {/* Sub-tab row for My Profile */}
         {activeParentTab === "profile" && (
@@ -1556,8 +1567,8 @@ export function PatientDetailsEditor({
 
                   {/* Organ Donor — collapsible with inline Yes/No */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <CollapsibleTrigger className="flex w-full items-center justify-between bg-primary rounded-lg px-3 py-2 group">
-                      <h3 className="text-xs font-semibold text-white tracking-wide flex items-center gap-1.5 text-left">
+                    <CollapsibleTrigger className="flex w-full items-center justify-between bg-[#F5F4F1] rounded-lg px-3 py-2 group">
+                      <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5 text-left">
                         <Heart className="h-3.5 w-3.5" /> Organ Donor
                       </h3>
                       <div className="flex items-center gap-2">
@@ -1566,12 +1577,12 @@ export function PatientDetailsEditor({
                             "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
                             patient.organ_donor
                               ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                              : "bg-white/20 text-white",
+                              : "bg-muted text-muted-foreground",
                           )}
                         >
                           {patient.organ_donor ? "Yes" : "No"}
                         </span>
-                        <ChevronDown className="h-4 w-4 text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                        <ChevronDown className="h-4 w-4 text-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
                       </div>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="px-3 pb-3">
@@ -1784,24 +1795,22 @@ export function PatientDetailsEditor({
       <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           {renderTabsList()}
-          <div className="flex justify-end mt-2 items-center gap-2">
-            {saving && (
+          {saving && (
+            <div className="flex justify-end mt-2">
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 Saving...
               </span>
-            )}
-            {!saving && !hasChanges && isEditing && (
+            </div>
+          )}
+          {!saving && !hasChanges && isEditing && (
+            <div className="flex justify-end mt-2">
               <span className="flex items-center gap-1.5 text-xs text-green-600">
                 <Check className="h-3 w-3" />
                 Saved
               </span>
-            )}
-            <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={handleCancel} disabled={saving}>
-              <X className="h-3.5 w-3.5" />
-              Done
-            </Button>
-          </div>
+            </div>
+          )}
 
           {/* === PERSONAL TAB (EDIT) === */}
           <TabsContent value="personal" className="space-y-4 mt-4">
@@ -2822,8 +2831,8 @@ export function PatientDetailsEditor({
 
                 {/* Organ Donor — collapsible with inline Yes/No */}
                 <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <CollapsibleTrigger className="flex w-full items-center justify-between bg-primary rounded-lg px-3 py-2 group">
-                    <h3 className="text-xs font-semibold text-white tracking-wide flex items-center gap-1.5 text-left">
+                  <CollapsibleTrigger className="flex w-full items-center justify-between bg-[#F5F4F1] rounded-lg px-3 py-2 group">
+                    <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5 text-left">
                       <Heart className="h-3.5 w-3.5" /> Organ Donor
                     </h3>
                     <div className="flex items-center gap-2">
@@ -2832,12 +2841,12 @@ export function PatientDetailsEditor({
                           "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
                           formData.organ_donor
                             ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                            : "bg-white/20 text-white",
+                            : "bg-muted text-muted-foreground",
                         )}
                       >
                         {formData.organ_donor ? "Yes" : "No"}
                       </span>
-                      <ChevronDown className="h-4 w-4 text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                      <ChevronDown className="h-4 w-4 text-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="p-3">
