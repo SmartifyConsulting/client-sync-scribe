@@ -1651,7 +1651,7 @@ export function PatientDetailsEditor({
 
                   {/* Surgeries & Dates */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={Scissors} label="Surgeries & Dates" />
+                    <SectionHeader icon={Scissors} label="Surgeries & Dates" sectionKey="surgeries" isEditing={editingSections["surgeries"]} onEdit={() => startEditing("surgeries")} onSave={() => saveSection("surgeries")} onCancel={() => cancelSection("surgeries")} />
                     <CollapsibleContent className="px-3 pb-3">
                       {surgeries.length === 0 ? (
                         <p className="text-xs text-muted-foreground">No surgeries recorded</p>
@@ -1675,7 +1675,7 @@ export function PatientDetailsEditor({
 
                   {/* Family History */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={GitBranch} label="Family History" />
+                    <SectionHeader icon={GitBranch} label="Family History" sectionKey="family" isEditing={editingSections["family"]} onEdit={() => startEditing("family")} onSave={() => saveSection("family")} onCancel={() => cancelSection("family")} />
                     <CollapsibleContent className="px-3 pb-3">
                       {familyHistory.length === 0 ? (
                         <p className="text-xs text-muted-foreground">No family history recorded</p>
@@ -1735,27 +1735,52 @@ export function PatientDetailsEditor({
                 {/* Column 2 */}
                 <div className="space-y-4">
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
+                    <SectionHeader icon={ShieldCheck} label="Medical Insurance" sectionKey="insurance" isEditing={editingSections["insurance"]} onEdit={() => startEditing("insurance")} onSave={() => saveSection("insurance")} onCancel={() => cancelSection("insurance")} />
                     <CollapsibleContent className="p-3">
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <ViewField label="Insurance Provider" value={patient.medical_aid} />
-                        <ViewField label="Insurance Product" value={patient.medical_insurance_product} />
-                        <ViewField label="Insurance Number" value={patient.medical_aid_number} />
-                        <ViewField label="Primary Member" value={patient.primary_member} />
-                        <ViewField label="Claims Email (auto-submission)" value={patient.claims_email} />
-                      </div>
+                      {editingSections["insurance"] ? (
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div className="space-y-1.5"><Label>Insurance Provider</Label><Input className="text-sm" value={formData.medical_aid} onChange={(e) => updateFormData({ medical_aid: e.target.value })} placeholder="Insurance provider" /></div>
+                          <div className="space-y-1.5"><Label>Insurance Product</Label><Input className="text-sm" value={formData.medical_insurance_product} onChange={(e) => updateFormData({ medical_insurance_product: e.target.value })} placeholder="Product name" /></div>
+                          <div className="space-y-1.5"><Label>Insurance Number</Label><Input className="text-sm" value={formData.medical_aid_number} onChange={(e) => updateFormData({ medical_aid_number: e.target.value })} placeholder="Member number" /></div>
+                          <div className="space-y-1.5"><Label>Primary Member</Label><Input className="text-sm" value={formData.primary_member} onChange={(e) => updateFormData({ primary_member: e.target.value })} placeholder="Primary member name" /></div>
+                          <div className="space-y-1.5 sm:col-span-2"><Label>Claims Email (for auto-submission)</Label><Input className="text-sm" type="email" value={formData.claims_email} onChange={(e) => updateFormData({ claims_email: e.target.value })} placeholder="claims@insurance.com" /></div>
+                        </div>
+                      ) : (
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <ViewField label="Insurance Provider" value={patient.medical_aid} />
+                          <ViewField label="Insurance Product" value={patient.medical_insurance_product} />
+                          <ViewField label="Insurance Number" value={patient.medical_aid_number} />
+                          <ViewField label="Primary Member" value={patient.primary_member} />
+                          <ViewField label="Claims Email (auto-submission)" value={patient.claims_email} />
+                        </div>
+                      )}
                     </CollapsibleContent>
                   </Collapsible>
 
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={User} label="General Practitioner" />
+                    <SectionHeader icon={User} label="General Practitioner" sectionKey="gp" isEditing={editingSections["gp"]} onEdit={() => startEditing("gp")} onSave={() => saveSection("gp")} onCancel={() => cancelSection("gp")} />
                     <CollapsibleContent className="p-3">
-                      <ViewField label="General Practitioner" value={patient.general_practitioner} />
-                    </CollapsibleContent>
+                      {editingSections["gp"] ? (
+                        <div className="space-y-1.5 relative">
+                          <Label>General Practitioner</Label>
+                          <Input className="text-sm" value={formData.general_practitioner} onChange={(e) => searchGP(e.target.value)} placeholder="Search or type GP name" />
+                          {gpSearchOpen && gpSearchResults.length > 0 && (
+                            <div className="absolute z-10 top-full left-0 right-0 bg-card border border-border rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
+                              {gpSearchResults.map((doc) => (
+                                <div key={doc.id} className="flex items-center justify-between px-3 py-2 hover:bg-muted/50 text-xs cursor-pointer" onClick={() => { updateFormData({ general_practitioner: doc.full_name }); setGpSearchOpen(false); }}>
+                                  <div><p className="font-medium text-foreground">{doc.full_name}</p><p className="text-[10px] text-muted-foreground">{doc.specialty || "General"}</p></div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <ViewField label="General Practitioner" value={patient.general_practitioner} />
+                      )}
                   </Collapsible>
 
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={Store} label="Pharmacies" />
+                    <SectionHeader icon={Store} label="Pharmacies" sectionKey="pharmacies" isEditing={editingSections["pharmacies"]} onEdit={() => startEditing("pharmacies")} onSave={() => saveSection("pharmacies")} onCancel={() => cancelSection("pharmacies")} />
                     <CollapsibleContent className="p-3">
                       {pharmacies.length === 0 ? (
                         <p className="text-xs text-muted-foreground">No pharmacies recorded</p>
