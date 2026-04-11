@@ -1359,23 +1359,34 @@ export function PatientDetailsEditor({
               </div>
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <SectionHeader icon={User} label="Personal Details" />
+                <SectionHeader icon={User} label="Personal Details" sectionKey="personal_details" isEditing={editingSections["personal_details"]} onEdit={() => startEditing("personal_details")} onSave={() => saveSection("personal_details")} onCancel={() => cancelSection("personal_details")} />
                 <CollapsibleContent className="p-3">
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    <ViewField label="First Name(s)" value={patient.first_name || splitName(patient.name).first} />
-                    <ViewField label="Last Name" value={patient.last_name || splitName(patient.name).last} />
-                    <ViewField label="ID/Passport Number" value={patient.id_passport_number} />
-                    <ViewField label="Gender" value={patient.gender} />
-                    <ViewField
-                      label="Date of Birth"
-                      value={patient.dob ? format(new Date(patient.dob), "MMMM d, yyyy") : null}
-                    />
-                    <ViewField label="Email" value={patient.email} />
-                    <ViewField label="Phone" value={patient.phone} />
-                    <ViewField label="Marital Status" value={patient.marital_status} />
-                    <ViewField label="Language" value="English" />
-                    <ViewField label="Referred By" value={patient.referred_by} />
-                  </div>
+                  {editingSections["personal_details"] ? (
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      <div className="space-y-1.5"><Label>First Name(s) *</Label><Input className="text-sm" value={formData.first_name} onChange={(e) => updateFormData({ first_name: e.target.value })} placeholder="First name(s)" /></div>
+                      <div className="space-y-1.5"><Label>Last Name *</Label><Input className="text-sm" value={formData.last_name} onChange={(e) => updateFormData({ last_name: e.target.value })} placeholder="Last name" /></div>
+                      <div className="space-y-1.5"><Label>ID/Passport Number</Label><Input className="text-sm" value={formData.id_passport_number} onChange={(e) => updateFormData({ id_passport_number: e.target.value })} placeholder="ID or passport number" /></div>
+                      <div className="space-y-1.5"><Label>Gender</Label><Select value={formData.gender} onValueChange={(v) => updateFormData({ gender: v })}><SelectTrigger className="text-sm"><SelectValue placeholder="Select gender" /></SelectTrigger><SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem><SelectItem value="Other">Other</SelectItem></SelectContent></Select></div>
+                      <div className="space-y-1.5"><Label>Date of Birth</Label><Input className="text-sm" type="date" value={formData.dob} onChange={(e) => updateFormData({ dob: e.target.value })} /></div>
+                      <div className="space-y-1.5"><Label>Email</Label><Input className="text-sm" type="email" value={formData.email} onChange={(e) => updateFormData({ email: e.target.value })} placeholder="patient@email.com" /></div>
+                      <div className="space-y-1.5"><Label>Phone</Label><PhoneInput value={formData.phone} onChange={(v) => updateFormData({ phone: v })} /></div>
+                      <div className="space-y-1.5"><Label>Marital Status</Label><Select value={formData.marital_status} onValueChange={(v) => updateFormData({ marital_status: v })}><SelectTrigger className="text-sm"><SelectValue placeholder="Select status" /></SelectTrigger><SelectContent><SelectItem value="Single">Single</SelectItem><SelectItem value="Married">Married</SelectItem><SelectItem value="Divorced">Divorced</SelectItem><SelectItem value="Widowed">Widowed</SelectItem></SelectContent></Select></div>
+                      <div className="space-y-1.5"><Label>Referred By</Label><Input className="text-sm" value={formData.referred_by} onChange={(e) => updateFormData({ referred_by: e.target.value })} placeholder="Referral source" /></div>
+                    </div>
+                  ) : (
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      <ViewField label="First Name(s)" value={patient.first_name || splitName(patient.name).first} />
+                      <ViewField label="Last Name" value={patient.last_name || splitName(patient.name).last} />
+                      <ViewField label="ID/Passport Number" value={patient.id_passport_number} />
+                      <ViewField label="Gender" value={patient.gender} />
+                      <ViewField label="Date of Birth" value={patient.dob ? format(new Date(patient.dob), "MMMM d, yyyy") : null} />
+                      <ViewField label="Email" value={patient.email} />
+                      <ViewField label="Phone" value={patient.phone} />
+                      <ViewField label="Marital Status" value={patient.marital_status} />
+                      <ViewField label="Language" value="English" />
+                      <ViewField label="Referred By" value={patient.referred_by} />
+                    </div>
+                  )}
                 </CollapsibleContent>
               </Collapsible>
 
