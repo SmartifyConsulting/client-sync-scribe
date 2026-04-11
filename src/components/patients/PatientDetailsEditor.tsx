@@ -1549,14 +1549,18 @@ export function PatientDetailsEditor({
 
                   {/* Allergies, Medication & Conditions */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={Pill} label="Allergies, Medication & Conditions" />
+                    <SectionHeader icon={Pill} label="Allergies, Medication & Conditions" sectionKey="allergies_meds" isEditing={editingSections["allergies_meds"]} onEdit={() => startEditing("allergies_meds")} onSave={() => saveSection("allergies_meds")} onCancel={() => cancelSection("allergies_meds")} />
                     <CollapsibleContent className="px-3 pb-3 space-y-3">
                       {/* Allergies */}
                       <div className="rounded-lg border border-border/50 p-2.5 space-y-1">
                         <h4 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5">
                           <AlertCircle className="h-3.5 w-3.5" /> Allergies
                         </h4>
-                        <p className="text-xs text-foreground">{patient.allergies || "None recorded"}</p>
+                        {editingSections["allergies_meds"] ? (
+                          <Textarea className="text-sm" value={formData.allergies} onChange={(e) => updateFormData({ allergies: e.target.value })} placeholder="List any allergies..." rows={2} />
+                        ) : (
+                          <p className="text-xs text-foreground">{patient.allergies || "None recorded"}</p>
+                        )}
                       </div>
 
                       {/* Medication */}
