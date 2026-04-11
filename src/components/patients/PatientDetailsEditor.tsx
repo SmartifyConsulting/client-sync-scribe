@@ -1777,6 +1777,7 @@ export function PatientDetailsEditor({
                       ) : (
                         <ViewField label="General Practitioner" value={patient.general_practitioner} />
                       )}
+                    </CollapsibleContent>
                   </Collapsible>
 
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
