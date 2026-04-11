@@ -1527,14 +1527,23 @@ export function PatientDetailsEditor({
                 <div className="space-y-3">
                   {/* General Information */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={Activity} label="General Information" />
+                    <SectionHeader icon={Activity} label="General Information" sectionKey="general_info" isEditing={editingSections["general_info"]} onEdit={() => startEditing("general_info")} onSave={() => saveSection("general_info")} onCancel={() => cancelSection("general_info")} />
                     <CollapsibleContent className="px-3 pb-3">
-                      <div className="grid gap-3 sm:grid-cols-4">
-                        <ViewField label="Height (cm)" value={patient.height_cm ? `${patient.height_cm}` : undefined} />
-                        <ViewField label="Weight (kg)" value={patient.weight_kg ? `${patient.weight_kg}` : undefined} />
-                        <ViewField label="BMI" value={bmi || undefined} />
-                        <ViewField label="Blood Type" value={patient.blood_type} />
-                      </div>
+                      {editingSections["general_info"] ? (
+                        <div className="grid gap-3 sm:grid-cols-4">
+                          <div className="space-y-1.5"><Label>Height (cm)</Label><Input className="text-sm" type="number" step="0.1" value={formData.height_cm} onChange={(e) => updateFormData({ height_cm: e.target.value })} placeholder="e.g., 175" /></div>
+                          <div className="space-y-1.5"><Label>Weight (kg)</Label><Input className="text-sm" type="number" step="0.1" value={formData.weight_kg} onChange={(e) => updateFormData({ weight_kg: e.target.value })} placeholder="e.g., 70" /></div>
+                          <div className="space-y-1.5"><Label>BMI</Label><Input className="text-sm bg-muted" value={bmi || "—"} disabled /></div>
+                          <div className="space-y-1.5"><Label className="flex items-center gap-1.5"><Droplets className="h-3.5 w-3.5" /> Blood Type</Label><Select value={formData.blood_type} onValueChange={(v) => updateFormData({ blood_type: v })}><SelectTrigger className="text-sm"><SelectValue placeholder="Select" /></SelectTrigger><SelectContent>{BLOOD_TYPES.map((bt) => <SelectItem key={bt} value={bt}>{bt}</SelectItem>)}</SelectContent></Select></div>
+                        </div>
+                      ) : (
+                        <div className="grid gap-3 sm:grid-cols-4">
+                          <ViewField label="Height (cm)" value={patient.height_cm ? `${patient.height_cm}` : undefined} />
+                          <ViewField label="Weight (kg)" value={patient.weight_kg ? `${patient.weight_kg}` : undefined} />
+                          <ViewField label="BMI" value={bmi || undefined} />
+                          <ViewField label="Blood Type" value={patient.blood_type} />
+                        </div>
+                      )}
                     </CollapsibleContent>
                   </Collapsible>
 
