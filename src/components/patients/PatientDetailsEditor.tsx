@@ -125,14 +125,62 @@ const COUNTRY_CODES = [
 
 const sectionFrame = "rounded-xl border border-primary bg-card p-4 shadow-sm";
 
-// Reusable collapsible section header with neutral background and black text
-const SectionHeader = ({ icon: Icon, label, extra }: { icon: any; label: string; extra?: React.ReactNode }) => (
+// Reusable collapsible section header with neutral background, pencil/save/cancel icons
+const SectionHeader = ({
+  icon: Icon,
+  label,
+  extra,
+  sectionKey,
+  isEditing,
+  onEdit,
+  onSave,
+  onCancel,
+}: {
+  icon: any;
+  label: string;
+  extra?: React.ReactNode;
+  sectionKey?: string;
+  isEditing?: boolean;
+  onEdit?: () => void;
+  onSave?: () => void;
+  onCancel?: () => void;
+}) => (
   <CollapsibleTrigger className="flex w-full items-center justify-between bg-[#F5F4F1] rounded-lg px-3 py-2 group">
     <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5 text-left">
       <Icon className="h-3.5 w-3.5" /> {label}
     </h3>
     <div className="flex items-center gap-2">
       {extra}
+      {sectionKey && !isEditing && onEdit && (
+        <button
+          type="button"
+          className="hidden group-data-[state=open]:inline-flex items-center justify-center h-5 w-5 rounded hover:bg-black/10 transition-colors"
+          onClick={(e) => { e.stopPropagation(); onEdit(); }}
+          title="Edit"
+        >
+          <Pencil className="h-3 w-3 text-foreground" />
+        </button>
+      )}
+      {sectionKey && isEditing && (
+        <>
+          <button
+            type="button"
+            className="hidden group-data-[state=open]:inline-flex items-center justify-center h-5 w-5 rounded hover:bg-green-100 transition-colors"
+            onClick={(e) => { e.stopPropagation(); onSave?.(); }}
+            title="Save"
+          >
+            <Check className="h-3 w-3 text-green-600" />
+          </button>
+          <button
+            type="button"
+            className="hidden group-data-[state=open]:inline-flex items-center justify-center h-5 w-5 rounded hover:bg-red-100 transition-colors"
+            onClick={(e) => { e.stopPropagation(); onCancel?.(); }}
+            title="Cancel"
+          >
+            <X className="h-3 w-3 text-destructive" />
+          </button>
+        </>
+      )}
       <ChevronDown className="h-4 w-4 text-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
     </div>
   </CollapsibleTrigger>
@@ -306,7 +354,6 @@ function AnimatedCounter({ target }: { target: number }) {
 }
 
 const SECTION_TABS: Record<string, string[]> = {
-  home: ["dashboard"],
   health: ["personal", "medical"],
   care: ["doctors", "sessions", "roundtable"],
   admin: ["calendar", "tasks", "documents"],
@@ -325,7 +372,7 @@ export function PatientDetailsEditor({
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { isDoctor } = useUserRole();
-  const [isEditing, setIsEditing] = useState(false);
+  const [editingSections, setEditingSections] = useState<Record<string, boolean>>({});
   const [activeParentTab, setActiveParentTab] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -594,8 +641,10 @@ export function PatientDetailsEditor({
     [onSave, pharmacies, familyHistory, organDonorOrgans, nokMembers, currentMedications, conditionsDiagnoses],
   );
 
+  const anySectionEditing = Object.values(editingSections).some(Boolean);
+
   useEffect(() => {
-    if (!isEditing || !hasChanges) return;
+    if (!anySectionEditing || !hasChanges) return;
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(() => {
       performSave(formData, surgeries);
@@ -613,7 +662,7 @@ export function PatientDetailsEditor({
     nokMembers,
     currentMedications,
     conditionsDiagnoses,
-    isEditing,
+    anySectionEditing,
     hasChanges,
     performSave,
   ]);
@@ -981,7 +1030,7 @@ export function PatientDetailsEditor({
     setNokMembers(patient.next_of_kin_members || []);
     setCurrentMedications(patient.current_medications || []);
     setConditionsDiagnoses(patient.conditions_diagnoses || []);
-    setIsEditing(false);
+    setEditingSections({});
   };
 
   const calculateBMI = () => {
@@ -1114,11 +1163,6 @@ export function PatientDetailsEditor({
     if (isMobile && isSelfService && section) {
       return (
         <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-          {show("dashboard") && (
-            <TabsTrigger value="dashboard" className={triggerClass}>
-              Dashboard
-            </TabsTrigger>
-          )}
           {show("personal") && (
             <TabsTrigger value="personal" className={triggerClass}>
               Personal Information
@@ -1267,12 +1311,38 @@ export function PatientDetailsEditor({
     );
   };
 
-  // ==================== VIEW MODE ====================
-  if (!isEditing) {
-    return (
+  // Helper to toggle section editing
+  const startEditing = (key: string) => setEditingSections(prev => ({ ...prev, [key]: true }));
+  const stopEditing = (key: string) => setEditingSections(prev => ({ ...prev, [key]: false }));
+  const saveSection = async (key: string) => {
+    await performSave(formData, surgeries);
+    stopEditing(key);
+  };
+  const cancelSection = (key: string) => {
+    handleCancel();
+    stopEditing(key);
+  };
+
+  return (
       <div className="space-y-0">
         <ProfileBanner />
         <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
+          {saving && (
+            <div className="flex justify-end">
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Saving...
+              </span>
+            </div>
+          )}
+          {!saving && !hasChanges && anySectionEditing && (
+            <div className="flex justify-end">
+              <span className="flex items-center gap-1.5 text-xs text-green-600">
+                <Check className="h-3 w-3" />
+                Saved
+              </span>
+            </div>
+          )}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             {renderTabsList()}
 
@@ -1284,109 +1354,160 @@ export function PatientDetailsEditor({
               </div>
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <SectionHeader icon={User} label="Personal Details" />
+                <SectionHeader icon={User} label="Personal Details" sectionKey="personal_details" isEditing={editingSections["personal_details"]} onEdit={() => startEditing("personal_details")} onSave={() => saveSection("personal_details")} onCancel={() => cancelSection("personal_details")} />
                 <CollapsibleContent className="p-3">
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    <ViewField label="First Name(s)" value={patient.first_name || splitName(patient.name).first} />
-                    <ViewField label="Last Name" value={patient.last_name || splitName(patient.name).last} />
-                    <ViewField label="ID/Passport Number" value={patient.id_passport_number} />
-                    <ViewField label="Gender" value={patient.gender} />
-                    <ViewField
-                      label="Date of Birth"
-                      value={patient.dob ? format(new Date(patient.dob), "MMMM d, yyyy") : null}
-                    />
-                    <ViewField label="Email" value={patient.email} />
-                    <ViewField label="Phone" value={patient.phone} />
-                    <ViewField label="Marital Status" value={patient.marital_status} />
-                    <ViewField label="Language" value="English" />
-                    <ViewField label="Referred By" value={patient.referred_by} />
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <SectionHeader icon={MapPin} label="Addresses" />
-                <CollapsibleContent className="p-3">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <ViewField label="Physical Address" value={patient.physical_address || patient.address} />
-                    <ViewField
-                      label="Postal Address"
-                      value={patient.same_as_physical ? "Same as physical address" : patient.postal_address}
-                    />
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <SectionHeader icon={Users} label="Next of Kin" />
-                <CollapsibleContent className="p-3">
-                  {nokMembers.length > 0 ? (
-                    <div className="space-y-2">
-                      {nokMembers.map((nok) => (
-                        <div
-                          key={nok.id}
-                          className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50"
-                        >
-                          <div>
-                            <p className="text-xs font-medium text-foreground">
-                              {nok.name}{" "}
-                              {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}
-                            </p>
-                            {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
-                            {nok.email && <p className="text-[10px] text-muted-foreground">{nok.email}</p>}
-                          </div>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              title="Notify"
-                              onClick={() =>
-                                toast({ title: "Notification sent", description: `${nok.name} has been notified` })
-                              }
-                            >
-                              <Bell className="h-3 w-3 text-primary" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => handleShareRecord("nok", nok)}
-                            >
-                              <Share2
-                                className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")}
-                              />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
+                  {editingSections["personal_details"] ? (
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      <div className="space-y-1.5"><Label>First Name(s) *</Label><Input className="text-sm" value={formData.first_name} onChange={(e) => updateFormData({ first_name: e.target.value })} placeholder="First name(s)" /></div>
+                      <div className="space-y-1.5"><Label>Last Name *</Label><Input className="text-sm" value={formData.last_name} onChange={(e) => updateFormData({ last_name: e.target.value })} placeholder="Last name" /></div>
+                      <div className="space-y-1.5"><Label>ID/Passport Number</Label><Input className="text-sm" value={formData.id_passport_number} onChange={(e) => updateFormData({ id_passport_number: e.target.value })} placeholder="ID or passport number" /></div>
+                      <div className="space-y-1.5"><Label>Gender</Label><Select value={formData.gender} onValueChange={(v) => updateFormData({ gender: v })}><SelectTrigger className="text-sm"><SelectValue placeholder="Select gender" /></SelectTrigger><SelectContent><SelectItem value="Male">Male</SelectItem><SelectItem value="Female">Female</SelectItem><SelectItem value="Other">Other</SelectItem></SelectContent></Select></div>
+                      <div className="space-y-1.5"><Label>Date of Birth</Label><Input className="text-sm" type="date" value={formData.dob} onChange={(e) => updateFormData({ dob: e.target.value })} /></div>
+                      <div className="space-y-1.5"><Label>Email</Label><Input className="text-sm" type="email" value={formData.email} onChange={(e) => updateFormData({ email: e.target.value })} placeholder="patient@email.com" /></div>
+                      <div className="space-y-1.5"><Label>Phone</Label><PhoneInput value={formData.phone} onChange={(v) => updateFormData({ phone: v })} /></div>
+                      <div className="space-y-1.5"><Label>Marital Status</Label><Select value={formData.marital_status} onValueChange={(v) => updateFormData({ marital_status: v })}><SelectTrigger className="text-sm"><SelectValue placeholder="Select status" /></SelectTrigger><SelectContent><SelectItem value="Single">Single</SelectItem><SelectItem value="Married">Married</SelectItem><SelectItem value="Divorced">Divorced</SelectItem><SelectItem value="Widowed">Widowed</SelectItem></SelectContent></Select></div>
+                      <div className="space-y-1.5"><Label>Referred By</Label><Input className="text-sm" value={formData.referred_by} onChange={(e) => updateFormData({ referred_by: e.target.value })} placeholder="Referral source" /></div>
                     </div>
                   ) : (
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                      <ViewField label="Name" value={patient.next_of_kin_name} />
-                      <ViewField label="Relationship" value={patient.next_of_kin_relationship} />
-                      <ViewField label="Phone" value={patient.next_of_kin_phone} />
-                      <ViewField label="Email" value={patient.next_of_kin_email} />
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      <ViewField label="First Name(s)" value={patient.first_name || splitName(patient.name).first} />
+                      <ViewField label="Last Name" value={patient.last_name || splitName(patient.name).last} />
+                      <ViewField label="ID/Passport Number" value={patient.id_passport_number} />
+                      <ViewField label="Gender" value={patient.gender} />
+                      <ViewField label="Date of Birth" value={patient.dob ? format(new Date(patient.dob), "MMMM d, yyyy") : null} />
+                      <ViewField label="Email" value={patient.email} />
+                      <ViewField label="Phone" value={patient.phone} />
+                      <ViewField label="Marital Status" value={patient.marital_status} />
+                      <ViewField label="Language" value="English" />
+                      <ViewField label="Referred By" value={patient.referred_by} />
                     </div>
                   )}
                 </CollapsibleContent>
               </Collapsible>
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <SectionHeader icon={Briefcase} label="Employer" />
+                <SectionHeader icon={MapPin} label="Addresses" sectionKey="addresses" isEditing={editingSections["addresses"]} onEdit={() => startEditing("addresses")} onSave={() => saveSection("addresses")} onCancel={() => cancelSection("addresses")} />
                 <CollapsibleContent className="p-3">
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    <ViewField label="Employer" value={patient.employer} />
-                    <ViewField label="Occupation" value={patient.occupation} />
-                    <ViewField label="Reporting To Email (Optional)" value={patient.reporting_to_email} />
-                  </div>
+                  {editingSections["addresses"] ? (
+                    <div className="space-y-3">
+                      <div className="space-y-1.5"><Label>Physical Address</Label><AddressAutocomplete id="physical_address" value={formData.physical_address} onChange={(v) => updateFormData({ physical_address: v })} placeholder="Start typing to search address..." rows={2} /></div>
+                      <div className="flex items-center space-x-2"><Checkbox id="same_as_physical" checked={formData.same_as_physical} onCheckedChange={(checked) => updateFormData({ same_as_physical: checked as boolean })} /><Label htmlFor="same_as_physical">Postal address same as physical address</Label></div>
+                      {!formData.same_as_physical && <div className="space-y-1.5"><Label>Postal Address</Label><AddressAutocomplete id="postal_address" value={formData.postal_address} onChange={(v) => updateFormData({ postal_address: v })} placeholder="Start typing to search address..." rows={2} /></div>}
+                    </div>
+                  ) : (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <ViewField label="Physical Address" value={patient.physical_address || patient.address} />
+                      <ViewField label="Postal Address" value={patient.same_as_physical ? "Same as physical address" : patient.postal_address} />
+                    </div>
+                  )}
                 </CollapsibleContent>
               </Collapsible>
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <SectionHeader icon={StickyNote} label="General Notes" />
+                <SectionHeader icon={Users} label="Next of Kin" sectionKey="nok" isEditing={editingSections["nok"]} onEdit={() => startEditing("nok")} onSave={() => saveSection("nok")} onCancel={() => cancelSection("nok")} />
                 <CollapsibleContent className="p-3">
-                  <p className="text-sm text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
+                  {editingSections["nok"] ? (
+                    <>
+                      <div className="flex justify-end mb-3">
+                        {!showAddNOK && <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={() => setShowAddNOK(true)}><Plus className="h-3 w-3" />Add</Button>}
+                      </div>
+                      {nokMembers.length === 0 && (
+                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-3">
+                          <div className="space-y-1.5"><Label>Name</Label><Input className="text-sm" value={formData.next_of_kin_name} onChange={(e) => updateFormData({ next_of_kin_name: e.target.value })} placeholder="Full name" /></div>
+                          <div className="space-y-1.5"><Label>Relationship</Label><RelationshipSelect value={formData.next_of_kin_relationship} onChange={(v) => updateFormData({ next_of_kin_relationship: v })} /></div>
+                          <div className="space-y-1.5"><Label>Phone</Label><PhoneInput value={formData.next_of_kin_phone} onChange={(v) => updateFormData({ next_of_kin_phone: v })} /></div>
+                          <div className="space-y-1.5"><Label>Email</Label><Input className="text-sm" type="email" value={formData.next_of_kin_email} onChange={(e) => updateFormData({ next_of_kin_email: e.target.value })} placeholder="Email" /></div>
+                        </div>
+                      )}
+                      {showAddNOK && (
+                        <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            <div className="space-y-1.5"><Label>Name *</Label><Input className="text-sm" value={newNOK.name} onChange={(e) => setNewNOK(p => ({ ...p, name: e.target.value }))} placeholder="Full name" /></div>
+                            <div className="space-y-1.5"><Label>Relationship</Label><RelationshipSelect value={newNOK.relationship} onChange={(v) => setNewNOK(p => ({ ...p, relationship: v }))} /></div>
+                            <div className="space-y-1.5"><Label>Phone</Label><PhoneInput value={newNOK.phone} onChange={(v) => setNewNOK(p => ({ ...p, phone: v }))} /></div>
+                            <div className="space-y-1.5"><Label>Email</Label><Input className="text-sm" type="email" value={newNOK.email} onChange={(e) => setNewNOK(p => ({ ...p, email: e.target.value }))} placeholder="Email" /></div>
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => { setShowAddNOK(false); setEditingNOKId(null); setNewNOK({ name: "", phone: "", email: "", relationship: "" }); }}>Cancel</Button>
+                            <Button size="sm" className="text-xs h-7" onClick={handleAddNOK}>{editingNOKId ? "Save" : "Add"}</Button>
+                          </div>
+                        </div>
+                      )}
+                      {nokMembers.length > 0 && (
+                        <div className="space-y-1.5">
+                          {nokMembers.map((nok) => (
+                            <div key={nok.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                              <div>
+                                <p className="text-xs font-medium text-foreground">{nok.name} {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}</p>
+                                {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
+                              </div>
+                              <div className="flex gap-1">
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditNOK(nok)}><Pencil className="h-3 w-3" /></Button>
+                                <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => { setNokMembers(prev => prev.filter(n => n.id !== nok.id)); setHasChanges(true); }}><Trash2 className="h-3 w-3" /></Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {nokMembers.length > 0 ? (
+                        <div className="space-y-2">
+                          {nokMembers.map((nok) => (
+                            <div key={nok.id} className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50">
+                              <div>
+                                <p className="text-xs font-medium text-foreground">{nok.name} {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}</p>
+                                {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
+                                {nok.email && <p className="text-[10px] text-muted-foreground">{nok.email}</p>}
+                              </div>
+                              <div className="flex gap-1">
+                                <Button variant="ghost" size="icon" className="h-6 w-6" title="Notify" onClick={() => toast({ title: "Notification sent", description: `${nok.name} has been notified` })}><Bell className="h-3 w-3 text-primary" /></Button>
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleShareRecord("nok", nok)}><Share2 className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")} /></Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                          <ViewField label="Name" value={patient.next_of_kin_name} />
+                          <ViewField label="Relationship" value={patient.next_of_kin_relationship} />
+                          <ViewField label="Phone" value={patient.next_of_kin_phone} />
+                          <ViewField label="Email" value={patient.next_of_kin_email} />
+                        </div>
+                      )}
+                    </>
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                <SectionHeader icon={Briefcase} label="Employer" sectionKey="employer" isEditing={editingSections["employer"]} onEdit={() => startEditing("employer")} onSave={() => saveSection("employer")} onCancel={() => cancelSection("employer")} />
+                <CollapsibleContent className="p-3">
+                  {editingSections["employer"] ? (
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      <div className="space-y-1.5"><Label>Employer</Label><Input className="text-sm" value={formData.employer} onChange={(e) => updateFormData({ employer: e.target.value })} placeholder="Company name" /></div>
+                      <div className="space-y-1.5"><Label>Occupation</Label><Input className="text-sm" value={formData.occupation} onChange={(e) => updateFormData({ occupation: e.target.value })} placeholder="Job title" /></div>
+                      <div className="space-y-1.5"><Label>Reporting To Email (Optional)</Label><Input className="text-sm" type="email" value={formData.reporting_to_email} onChange={(e) => updateFormData({ reporting_to_email: e.target.value })} placeholder="manager@company.com" /><p className="text-[10px] text-muted-foreground">Used for e-mailing of Medical Certificates</p></div>
+                    </div>
+                  ) : (
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      <ViewField label="Employer" value={patient.employer} />
+                      <ViewField label="Occupation" value={patient.occupation} />
+                      <ViewField label="Reporting To Email (Optional)" value={patient.reporting_to_email} />
+                    </div>
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                <SectionHeader icon={StickyNote} label="General Notes" sectionKey="notes" isEditing={editingSections["notes"]} onEdit={() => startEditing("notes")} onSave={() => saveSection("notes")} onCancel={() => cancelSection("notes")} />
+                <CollapsibleContent className="p-3">
+                  {editingSections["notes"] ? (
+                    <Textarea value={formData.notes} onChange={(e) => updateFormData({ notes: e.target.value })} placeholder="General notes about this patient..." rows={4} className="text-sm" />
+                  ) : (
+                    <p className="text-sm text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
+                  )}
                 </CollapsibleContent>
               </Collapsible>
             </TabsContent>
@@ -1401,27 +1522,40 @@ export function PatientDetailsEditor({
                 <div className="space-y-3">
                   {/* General Information */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={Activity} label="General Information" />
+                    <SectionHeader icon={Activity} label="General Information" sectionKey="general_info" isEditing={editingSections["general_info"]} onEdit={() => startEditing("general_info")} onSave={() => saveSection("general_info")} onCancel={() => cancelSection("general_info")} />
                     <CollapsibleContent className="px-3 pb-3">
-                      <div className="grid gap-3 sm:grid-cols-4">
-                        <ViewField label="Height (cm)" value={patient.height_cm ? `${patient.height_cm}` : undefined} />
-                        <ViewField label="Weight (kg)" value={patient.weight_kg ? `${patient.weight_kg}` : undefined} />
-                        <ViewField label="BMI" value={bmi || undefined} />
-                        <ViewField label="Blood Type" value={patient.blood_type} />
-                      </div>
+                      {editingSections["general_info"] ? (
+                        <div className="grid gap-3 sm:grid-cols-4">
+                          <div className="space-y-1.5"><Label>Height (cm)</Label><Input className="text-sm" type="number" step="0.1" value={formData.height_cm} onChange={(e) => updateFormData({ height_cm: e.target.value })} placeholder="e.g., 175" /></div>
+                          <div className="space-y-1.5"><Label>Weight (kg)</Label><Input className="text-sm" type="number" step="0.1" value={formData.weight_kg} onChange={(e) => updateFormData({ weight_kg: e.target.value })} placeholder="e.g., 70" /></div>
+                          <div className="space-y-1.5"><Label>BMI</Label><Input className="text-sm bg-muted" value={bmi || "—"} disabled /></div>
+                          <div className="space-y-1.5"><Label className="flex items-center gap-1.5"><Droplets className="h-3.5 w-3.5" /> Blood Type</Label><Select value={formData.blood_type} onValueChange={(v) => updateFormData({ blood_type: v })}><SelectTrigger className="text-sm"><SelectValue placeholder="Select" /></SelectTrigger><SelectContent>{BLOOD_TYPES.map((bt) => <SelectItem key={bt} value={bt}>{bt}</SelectItem>)}</SelectContent></Select></div>
+                        </div>
+                      ) : (
+                        <div className="grid gap-3 sm:grid-cols-4">
+                          <ViewField label="Height (cm)" value={patient.height_cm ? `${patient.height_cm}` : undefined} />
+                          <ViewField label="Weight (kg)" value={patient.weight_kg ? `${patient.weight_kg}` : undefined} />
+                          <ViewField label="BMI" value={bmi || undefined} />
+                          <ViewField label="Blood Type" value={patient.blood_type} />
+                        </div>
+                      )}
                     </CollapsibleContent>
                   </Collapsible>
 
                   {/* Allergies, Medication & Conditions */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={Pill} label="Allergies, Medication & Conditions" />
+                    <SectionHeader icon={Pill} label="Allergies, Medication & Conditions" sectionKey="allergies_meds" isEditing={editingSections["allergies_meds"]} onEdit={() => startEditing("allergies_meds")} onSave={() => saveSection("allergies_meds")} onCancel={() => cancelSection("allergies_meds")} />
                     <CollapsibleContent className="px-3 pb-3 space-y-3">
                       {/* Allergies */}
                       <div className="rounded-lg border border-border/50 p-2.5 space-y-1">
                         <h4 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5">
                           <AlertCircle className="h-3.5 w-3.5" /> Allergies
                         </h4>
-                        <p className="text-xs text-foreground">{patient.allergies || "None recorded"}</p>
+                        {editingSections["allergies_meds"] ? (
+                          <Textarea className="text-sm" value={formData.allergies} onChange={(e) => updateFormData({ allergies: e.target.value })} placeholder="List any allergies..." rows={2} />
+                        ) : (
+                          <p className="text-xs text-foreground">{patient.allergies || "None recorded"}</p>
+                        )}
                       </div>
 
                       {/* Medication */}
@@ -1512,7 +1646,7 @@ export function PatientDetailsEditor({
 
                   {/* Surgeries & Dates */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={Scissors} label="Surgeries & Dates" />
+                    <SectionHeader icon={Scissors} label="Surgeries & Dates" sectionKey="surgeries" isEditing={editingSections["surgeries"]} onEdit={() => startEditing("surgeries")} onSave={() => saveSection("surgeries")} onCancel={() => cancelSection("surgeries")} />
                     <CollapsibleContent className="px-3 pb-3">
                       {surgeries.length === 0 ? (
                         <p className="text-xs text-muted-foreground">No surgeries recorded</p>
@@ -1536,7 +1670,7 @@ export function PatientDetailsEditor({
 
                   {/* Family History */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={GitBranch} label="Family History" />
+                    <SectionHeader icon={GitBranch} label="Family History" sectionKey="family" isEditing={editingSections["family"]} onEdit={() => startEditing("family")} onSave={() => saveSection("family")} onCancel={() => cancelSection("family")} />
                     <CollapsibleContent className="px-3 pb-3">
                       {familyHistory.length === 0 ? (
                         <p className="text-xs text-muted-foreground">No family history recorded</p>
@@ -1596,27 +1730,53 @@ export function PatientDetailsEditor({
                 {/* Column 2 */}
                 <div className="space-y-4">
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
+                    <SectionHeader icon={ShieldCheck} label="Medical Insurance" sectionKey="insurance" isEditing={editingSections["insurance"]} onEdit={() => startEditing("insurance")} onSave={() => saveSection("insurance")} onCancel={() => cancelSection("insurance")} />
                     <CollapsibleContent className="p-3">
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <ViewField label="Insurance Provider" value={patient.medical_aid} />
-                        <ViewField label="Insurance Product" value={patient.medical_insurance_product} />
-                        <ViewField label="Insurance Number" value={patient.medical_aid_number} />
-                        <ViewField label="Primary Member" value={patient.primary_member} />
-                        <ViewField label="Claims Email (auto-submission)" value={patient.claims_email} />
-                      </div>
+                      {editingSections["insurance"] ? (
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div className="space-y-1.5"><Label>Insurance Provider</Label><Input className="text-sm" value={formData.medical_aid} onChange={(e) => updateFormData({ medical_aid: e.target.value })} placeholder="Insurance provider" /></div>
+                          <div className="space-y-1.5"><Label>Insurance Product</Label><Input className="text-sm" value={formData.medical_insurance_product} onChange={(e) => updateFormData({ medical_insurance_product: e.target.value })} placeholder="Product name" /></div>
+                          <div className="space-y-1.5"><Label>Insurance Number</Label><Input className="text-sm" value={formData.medical_aid_number} onChange={(e) => updateFormData({ medical_aid_number: e.target.value })} placeholder="Member number" /></div>
+                          <div className="space-y-1.5"><Label>Primary Member</Label><Input className="text-sm" value={formData.primary_member} onChange={(e) => updateFormData({ primary_member: e.target.value })} placeholder="Primary member name" /></div>
+                          <div className="space-y-1.5 sm:col-span-2"><Label>Claims Email (for auto-submission)</Label><Input className="text-sm" type="email" value={formData.claims_email} onChange={(e) => updateFormData({ claims_email: e.target.value })} placeholder="claims@insurance.com" /></div>
+                        </div>
+                      ) : (
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <ViewField label="Insurance Provider" value={patient.medical_aid} />
+                          <ViewField label="Insurance Product" value={patient.medical_insurance_product} />
+                          <ViewField label="Insurance Number" value={patient.medical_aid_number} />
+                          <ViewField label="Primary Member" value={patient.primary_member} />
+                          <ViewField label="Claims Email (auto-submission)" value={patient.claims_email} />
+                        </div>
+                      )}
                     </CollapsibleContent>
                   </Collapsible>
 
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={User} label="General Practitioner" />
+                    <SectionHeader icon={User} label="General Practitioner" sectionKey="gp" isEditing={editingSections["gp"]} onEdit={() => startEditing("gp")} onSave={() => saveSection("gp")} onCancel={() => cancelSection("gp")} />
                     <CollapsibleContent className="p-3">
-                      <ViewField label="General Practitioner" value={patient.general_practitioner} />
+                      {editingSections["gp"] ? (
+                        <div className="space-y-1.5 relative">
+                          <Label>General Practitioner</Label>
+                          <Input className="text-sm" value={formData.general_practitioner} onChange={(e) => searchGP(e.target.value)} placeholder="Search or type GP name" />
+                          {gpSearchOpen && gpSearchResults.length > 0 && (
+                            <div className="absolute z-10 top-full left-0 right-0 bg-card border border-border rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
+                              {gpSearchResults.map((doc) => (
+                                <div key={doc.id} className="flex items-center justify-between px-3 py-2 hover:bg-muted/50 text-xs cursor-pointer" onClick={() => { updateFormData({ general_practitioner: doc.full_name }); setGpSearchOpen(false); }}>
+                                  <div><p className="font-medium text-foreground">{doc.full_name}</p><p className="text-[10px] text-muted-foreground">{doc.specialty || "General"}</p></div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <ViewField label="General Practitioner" value={patient.general_practitioner} />
+                      )}
                     </CollapsibleContent>
                   </Collapsible>
 
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <SectionHeader icon={Store} label="Pharmacies" />
+                    <SectionHeader icon={Store} label="Pharmacies" sectionKey="pharmacies" isEditing={editingSections["pharmacies"]} onEdit={() => startEditing("pharmacies")} onSave={() => saveSection("pharmacies")} onCancel={() => cancelSection("pharmacies")} />
                     <CollapsibleContent className="p-3">
                       {pharmacies.length === 0 ? (
                         <p className="text-xs text-muted-foreground">No pharmacies recorded</p>
@@ -1774,1498 +1934,4 @@ export function PatientDetailsEditor({
         </div>
       </div>
     );
-  }
-
-  // ==================== EDIT MODE ====================
-  return (
-    <div className="space-y-0">
-      <ProfileBanner />
-      <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          {renderTabsList()}
-          {saving && (
-            <div className="flex justify-end mt-2">
-              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Loader2 className="h-3 w-3 animate-spin" />
-                Saving...
-              </span>
-            </div>
-          )}
-          {!saving && !hasChanges && isEditing && (
-            <div className="flex justify-end mt-2">
-              <span className="flex items-center gap-1.5 text-xs text-green-600">
-                <Check className="h-3 w-3" />
-                Saved
-              </span>
-            </div>
-          )}
-
-          {/* === PERSONAL TAB (EDIT) === */}
-          <TabsContent value="personal" className="space-y-4 mt-4">
-            <div className="mb-1">
-              <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
-              <p className="text-xs text-muted-foreground">View and manage personal details</p>
-            </div>
-
-            <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-              <SectionHeader icon={User} label="Personal Information" />
-              <CollapsibleContent className="p-3">
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="first_name">First Name(s) *</Label>
-                    <Input
-                      id="first_name"
-                      className="text-sm"
-                      value={formData.first_name}
-                      onChange={(e) => updateFormData({ first_name: e.target.value })}
-                      placeholder="First name(s)"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="last_name">Last Name *</Label>
-                    <Input
-                      id="last_name"
-                      className="text-sm"
-                      value={formData.last_name}
-                      onChange={(e) => updateFormData({ last_name: e.target.value })}
-                      placeholder="Last name"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="id_passport_number">ID/Passport Number</Label>
-                    <Input
-                      id="id_passport_number"
-                      className="text-sm"
-                      value={formData.id_passport_number}
-                      onChange={(e) => updateFormData({ id_passport_number: e.target.value })}
-                      placeholder="ID or passport number"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="gender">Gender</Label>
-                    <Select value={formData.gender} onValueChange={(value) => updateFormData({ gender: value })}>
-                      <SelectTrigger id="gender" className="text-sm">
-                        <SelectValue placeholder="Select gender" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Male">Male</SelectItem>
-                        <SelectItem value="Female">Female</SelectItem>
-                        <SelectItem value="Other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="dob">Date of Birth</Label>
-                    <Input
-                      id="dob"
-                      className="text-sm"
-                      type="date"
-                      value={formData.dob}
-                      onChange={(e) => updateFormData({ dob: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      className="text-sm"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => updateFormData({ email: e.target.value })}
-                      placeholder="patient@email.com"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="phone">Phone</Label>
-                    <PhoneInput value={formData.phone} onChange={(v) => updateFormData({ phone: v })} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="marital_status">Marital Status</Label>
-                    <Select
-                      value={formData.marital_status}
-                      onValueChange={(value) => updateFormData({ marital_status: value })}
-                    >
-                      <SelectTrigger id="marital_status" className="text-sm">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Single">Single</SelectItem>
-                        <SelectItem value="Married">Married</SelectItem>
-                        <SelectItem value="Divorced">Divorced</SelectItem>
-                        <SelectItem value="Widowed">Widowed</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="referred_by">Referred By</Label>
-                    <Input
-                      id="referred_by"
-                      className="text-sm"
-                      value={formData.referred_by}
-                      onChange={(e) => updateFormData({ referred_by: e.target.value })}
-                      placeholder="Referral source"
-                    />
-                  </div>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-
-            <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-              <SectionHeader icon={MapPin} label="Addresses" />
-              <CollapsibleContent className="p-3">
-                <div className="space-y-3">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="physical_address">Physical Address</Label>
-                    <AddressAutocomplete
-                      id="physical_address"
-                      value={formData.physical_address}
-                      onChange={(v) => updateFormData({ physical_address: v })}
-                      placeholder="Start typing to search address..."
-                      rows={2}
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="same_as_physical"
-                      checked={formData.same_as_physical}
-                      onCheckedChange={(checked) => updateFormData({ same_as_physical: checked as boolean })}
-                    />
-                    <Label htmlFor="same_as_physical">Postal address same as physical address</Label>
-                  </div>
-                  {!formData.same_as_physical && (
-                    <div className="space-y-1.5">
-                      <Label htmlFor="postal_address">Postal Address</Label>
-                      <AddressAutocomplete
-                        id="postal_address"
-                        value={formData.postal_address}
-                        onChange={(v) => updateFormData({ postal_address: v })}
-                        placeholder="Start typing to search address..."
-                        rows={2}
-                      />
-                    </div>
-                  )}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-
-            {/* Next of Kin (multiple) */}
-            <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-              <SectionHeader icon={Users} label="Next of Kin" />
-              <CollapsibleContent className="p-3">
-                <div className="flex justify-end mb-3">
-                  {!showAddNOK && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1 text-xs h-7"
-                      onClick={() => setShowAddNOK(true)}
-                    >
-                      <Plus className="h-3 w-3" />
-                      Add
-                    </Button>
-                  )}
-                </div>
-
-                {/* Legacy single NOK if no members yet */}
-                {nokMembers.length === 0 && (
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-3">
-                    <div className="space-y-1.5">
-                      <Label>Name</Label>
-                      <Input
-                        className="text-sm"
-                        value={formData.next_of_kin_name}
-                        onChange={(e) => updateFormData({ next_of_kin_name: e.target.value })}
-                        placeholder="Full name"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Relationship</Label>
-                      <RelationshipSelect
-                        value={formData.next_of_kin_relationship}
-                        onChange={(v) => updateFormData({ next_of_kin_relationship: v })}
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Phone</Label>
-                      <PhoneInput
-                        value={formData.next_of_kin_phone}
-                        onChange={(v) => updateFormData({ next_of_kin_phone: v })}
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Email</Label>
-                      <Input
-                        className="text-sm"
-                        type="email"
-                        value={formData.next_of_kin_email}
-                        onChange={(e) => updateFormData({ next_of_kin_email: e.target.value })}
-                        placeholder="Email"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {showAddNOK && (
-                  <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <div className="space-y-1.5">
-                        <Label>Name *</Label>
-                        <Input
-                          className="text-sm"
-                          value={newNOK.name}
-                          onChange={(e) => setNewNOK((p) => ({ ...p, name: e.target.value }))}
-                          placeholder="Full name"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Relationship</Label>
-                        <RelationshipSelect
-                          value={newNOK.relationship}
-                          onChange={(v) => setNewNOK((p) => ({ ...p, relationship: v }))}
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Phone</Label>
-                        <PhoneInput value={newNOK.phone} onChange={(v) => setNewNOK((p) => ({ ...p, phone: v }))} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Email</Label>
-                        <Input
-                          className="text-sm"
-                          type="email"
-                          value={newNOK.email}
-                          onChange={(e) => setNewNOK((p) => ({ ...p, email: e.target.value }))}
-                          placeholder="Email"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-xs h-7"
-                        onClick={() => {
-                          setShowAddNOK(false);
-                          setEditingNOKId(null);
-                          setNewNOK({ name: "", phone: "", email: "", relationship: "" });
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button size="sm" className="text-xs h-7" onClick={handleAddNOK}>
-                        {editingNOKId ? "Save" : "Add"}
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                {nokMembers.length > 0 && (
-                  <div className="space-y-1.5">
-                    {nokMembers.map((nok) => (
-                      <div
-                        key={nok.id}
-                        className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50"
-                      >
-                        <div>
-                          <p className="text-xs font-medium text-foreground">
-                            {nok.name}{" "}
-                            {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}
-                          </p>
-                          {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
-                        </div>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            title="Notify"
-                            onClick={() =>
-                              toast({ title: "Notification sent", description: `${nok.name} has been notified` })
-                            }
-                          >
-                            <Bell className="h-3 w-3 text-primary" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => handleShareRecord("nok", nok)}
-                          >
-                            <Share2 className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")} />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditNOK(nok)}>
-                            <Pencil className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-destructive"
-                            onClick={() => {
-                              setNokMembers((prev) => prev.filter((n) => n.id !== nok.id));
-                              setHasChanges(true);
-                            }}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CollapsibleContent>
-            </Collapsible>
-
-            <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-              <SectionHeader icon={Briefcase} label="Employer" />
-              <CollapsibleContent className="p-3">
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="employer">Employer</Label>
-                    <Input
-                      id="employer"
-                      className="text-sm"
-                      value={formData.employer}
-                      onChange={(e) => updateFormData({ employer: e.target.value })}
-                      placeholder="Company name"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="occupation">Occupation</Label>
-                    <Input
-                      id="occupation"
-                      className="text-sm"
-                      value={formData.occupation}
-                      onChange={(e) => updateFormData({ occupation: e.target.value })}
-                      placeholder="Job title"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="reporting_to_email">Reporting To Email (Optional)</Label>
-                    <Input
-                      id="reporting_to_email"
-                      className="text-sm"
-                      type="email"
-                      value={formData.reporting_to_email}
-                      onChange={(e) => updateFormData({ reporting_to_email: e.target.value })}
-                      placeholder="manager@company.com"
-                    />
-                    <p className="text-[10px] text-muted-foreground">Used for e-mailing of Medical Certificates</p>
-                  </div>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-
-            <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-              <SectionHeader icon={StickyNote} label="General Notes" />
-              <CollapsibleContent className="p-3">
-                <Textarea
-                  value={formData.notes}
-                  onChange={(e) => updateFormData({ notes: e.target.value })}
-                  placeholder="General notes about this patient..."
-                  rows={4}
-                  className="text-sm"
-                />
-              </CollapsibleContent>
-            </Collapsible>
-          </TabsContent>
-
-          {/* === MEDICAL TAB (EDIT) === */}
-          <TabsContent value="medical" className="mt-4">
-            <div className="mb-3">
-              <h2 className="text-lg font-semibold text-foreground">Medical Information</h2>
-              <p className="text-xs text-muted-foreground">View and manage medical records</p>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                {/* General Information */}
-                <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <SectionHeader icon={Activity} label="General Information" />
-                  <CollapsibleContent className="px-3 pb-3">
-                    <div className="grid gap-3 sm:grid-cols-4">
-                      <div className="space-y-1.5">
-                        <Label htmlFor="height_cm">Height (cm)</Label>
-                        <Input
-                          id="height_cm"
-                          className="text-sm"
-                          type="number"
-                          step="0.1"
-                          value={formData.height_cm}
-                          onChange={(e) => updateFormData({ height_cm: e.target.value })}
-                          placeholder="e.g., 175"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="weight_kg">Weight (kg)</Label>
-                        <Input
-                          id="weight_kg"
-                          className="text-sm"
-                          type="number"
-                          step="0.1"
-                          value={formData.weight_kg}
-                          onChange={(e) => updateFormData({ weight_kg: e.target.value })}
-                          placeholder="e.g., 70"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>BMI</Label>
-                        <Input className="text-sm bg-muted" value={bmi || "—"} disabled />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="flex items-center gap-1.5">
-                          <Droplets className="h-3.5 w-3.5" /> Blood Type
-                        </Label>
-                        <Select
-                          value={formData.blood_type}
-                          onValueChange={(value) => updateFormData({ blood_type: value })}
-                        >
-                          <SelectTrigger className="text-sm">
-                            <SelectValue placeholder="Select" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {BLOOD_TYPES.map((bt) => (
-                              <SelectItem key={bt} value={bt}>
-                                {bt}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-
-                {/* Allergies, Medication & Conditions */}
-                <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <SectionHeader icon={Pill} label="Allergies, Medication & Conditions" />
-                  <CollapsibleContent className="px-3 pb-3 space-y-3">
-                    {/* Allergies */}
-                    <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
-                      <Label className="text-xs font-semibold tracking-wide flex items-center gap-1.5">
-                        <AlertCircle className="h-3.5 w-3.5" /> Allergies
-                      </Label>
-                      <Textarea
-                        id="allergies"
-                        className="text-sm"
-                        value={formData.allergies}
-                        onChange={(e) => updateFormData({ allergies: e.target.value })}
-                        placeholder="List any allergies (medications, food, etc.)"
-                        rows={2}
-                      />
-                    </div>
-
-                    {/* Medication */}
-                    <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
-                      <div className="flex items-center justify-between mb-2">
-                        <Label className="text-xs font-semibold tracking-wide flex items-center gap-1.5">
-                          <Pill className="h-3.5 w-3.5" /> Medication
-                        </Label>
-                        {!showAddMed && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="gap-1 text-xs h-7"
-                            onClick={() => setShowAddMed(true)}
-                          >
-                            <Plus className="h-3 w-3" />
-                            Add
-                          </Button>
-                        )}
-                      </div>
-                      {showAddMed && (
-                        <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                          <div className="grid gap-2 sm:grid-cols-2">
-                            <div className="space-y-1.5">
-                              <Label>Medication Name *</Label>
-                              <Input
-                                className="text-sm"
-                                value={newMed.name}
-                                onChange={(e) => setNewMed((p) => ({ ...p, name: e.target.value }))}
-                                placeholder="e.g., Metformin"
-                              />
-                            </div>
-                            <div className="space-y-1.5">
-                              <Label>Dosage</Label>
-                              <Input
-                                className="text-sm"
-                                value={newMed.dosage}
-                                onChange={(e) => setNewMed((p) => ({ ...p, dosage: e.target.value }))}
-                                placeholder="e.g., 500mg twice daily"
-                              />
-                            </div>
-                            <div className="space-y-1.5">
-                              <Label>Status</Label>
-                              <Select
-                                value={newMed.status}
-                                onValueChange={(v) => setNewMed((p) => ({ ...p, status: v as "current" | "past" }))}
-                              >
-                                <SelectTrigger className="text-sm">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="current">Current</SelectItem>
-                                  <SelectItem value="past">Past</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="space-y-1.5">
-                              <Label>Start Date</Label>
-                              <Input
-                                className="text-sm"
-                                type="date"
-                                value={newMed.start_date}
-                                onChange={(e) => setNewMed((p) => ({ ...p, start_date: e.target.value }))}
-                              />
-                            </div>
-                            {newMed.status === "past" && (
-                              <div className="space-y-1.5">
-                                <Label>End Date</Label>
-                                <Input
-                                  className="text-sm"
-                                  type="date"
-                                  value={newMed.end_date}
-                                  onChange={(e) => setNewMed((p) => ({ ...p, end_date: e.target.value }))}
-                                />
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              checked={newMed.is_chronic}
-                              onCheckedChange={(c) => setNewMed((p) => ({ ...p, is_chronic: c as boolean }))}
-                            />
-                            <Label className="text-xs">This is a chronic medication</Label>
-                          </div>
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-xs h-7"
-                              onClick={() => {
-                                setShowAddMed(false);
-                                setEditingMedId(null);
-                                setNewMed({
-                                  name: "",
-                                  dosage: "",
-                                  is_chronic: false,
-                                  status: "current",
-                                  start_date: "",
-                                  end_date: "",
-                                });
-                              }}
-                            >
-                              Cancel
-                            </Button>
-                            <Button size="sm" className="text-xs h-7" onClick={handleAddMed}>
-                              {editingMedId ? "Save" : "Add"}
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                      {currentMedications.length === 0 ? (
-                        <p className="text-xs text-muted-foreground">No medications recorded</p>
-                      ) : (
-                        <div className="space-y-1">
-                          {currentMedications.map((m) => (
-                            <div
-                              key={m.id}
-                              className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50"
-                            >
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <Switch
-                                  checked={m.is_chronic}
-                                  onCheckedChange={() => handleToggleMedChronic(m.id)}
-                                  className="shrink-0 scale-75"
-                                />
-                                <div className="min-w-0">
-                                  <p className="text-xs font-medium text-foreground truncate">
-                                    {m.name}
-                                    {m.dosage ? ` — ${m.dosage}` : ""}
-                                  </p>
-                                  {(m.start_date || m.end_date) && (
-                                    <p className="text-[10px] text-muted-foreground">
-                                      {m.start_date ? format(new Date(m.start_date), "MMM yyyy") : "?"} —{" "}
-                                      {m.end_date ? format(new Date(m.end_date), "MMM yyyy") : "Present"}
-                                    </p>
-                                  )}
-                                </div>
-                                <Badge
-                                  className={`text-[8px] border-0 ${m.status === "past" ? "bg-muted text-muted-foreground" : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"}`}
-                                >
-                                  {m.status === "past" ? "Past" : "Current"}
-                                </Badge>
-                                {m.is_chronic && (
-                                  <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[9px] font-bold text-destructive shrink-0">
-                                    Chronic
-                                  </span>
-                                )}
-                              </div>
-                              <div className="flex gap-1 shrink-0">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6"
-                                  onClick={() => handleEditMed(m)}
-                                >
-                                  <Pencil className="h-3 w-3" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6 text-destructive"
-                                  onClick={() => {
-                                    setCurrentMedications((prev) => prev.filter((x) => x.id !== m.id));
-                                    setHasChanges(true);
-                                  }}
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {isChronic && (
-                        <div className="mt-2">
-                          <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive">
-                            <Pill className="h-2.5 w-2.5" />
-                            Chronic Patient
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Conditions & Diagnoses */}
-                    <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
-                      <div className="flex items-center justify-between mb-2">
-                        <Label className="text-xs font-semibold tracking-wide flex items-center gap-1.5">
-                          <HeartPulse className="h-3.5 w-3.5" /> Conditions & Diagnoses
-                        </Label>
-                        {!showAddCondition && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="gap-1 text-xs h-7"
-                            onClick={() => setShowAddCondition(true)}
-                          >
-                            <Plus className="h-3 w-3" />
-                            Add
-                          </Button>
-                        )}
-                      </div>
-                      {showAddCondition && (
-                        <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                          <div className="grid gap-2 sm:grid-cols-2">
-                            <div className="space-y-1.5">
-                              <Label>Condition/Diagnosis *</Label>
-                              <Input
-                                className="text-sm"
-                                value={newCondition.name}
-                                onChange={(e) => setNewCondition((p) => ({ ...p, name: e.target.value }))}
-                                placeholder="e.g., Type 2 Diabetes"
-                              />
-                            </div>
-                            <div className="space-y-1.5">
-                              <Label>Date Diagnosed</Label>
-                              <Input
-                                className="text-sm"
-                                type="date"
-                                value={newCondition.diagnosed_date}
-                                onChange={(e) => setNewCondition((p) => ({ ...p, diagnosed_date: e.target.value }))}
-                              />
-                            </div>
-                            <div className="space-y-1.5">
-                              <Label>Diagnosed By</Label>
-                              <Input
-                                className="text-sm"
-                                value={newCondition.diagnosed_by}
-                                onChange={(e) => setNewCondition((p) => ({ ...p, diagnosed_by: e.target.value }))}
-                                placeholder="Doctor name"
-                              />
-                            </div>
-                            <div className="space-y-1.5">
-                              <Label>Status</Label>
-                              <Select
-                                value={newCondition.status}
-                                onValueChange={(v) =>
-                                  setNewCondition((p) => ({ ...p, status: v as "active" | "resolved" }))
-                                }
-                              >
-                                <SelectTrigger className="text-sm">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="active">Active</SelectItem>
-                                  <SelectItem value="resolved">Resolved</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-xs h-7"
-                              onClick={() => {
-                                setShowAddCondition(false);
-                                setEditingConditionId(null);
-                                setNewCondition({ name: "", diagnosed_date: "", diagnosed_by: "", status: "active" });
-                              }}
-                            >
-                              Cancel
-                            </Button>
-                            <Button size="sm" className="text-xs h-7" onClick={handleAddCondition}>
-                              {editingConditionId ? "Save" : "Add"}
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                      {conditionsDiagnoses.length === 0 ? (
-                        <p className="text-xs text-muted-foreground">No conditions recorded</p>
-                      ) : (
-                        <div className="space-y-1">
-                          {conditionsDiagnoses.map((c) => (
-                            <div
-                              key={c.id}
-                              className="flex items-center justify-between p-1.5 rounded-lg bg-primary/5 border border-primary/20"
-                            >
-                              <div>
-                                <p className="text-xs font-medium text-foreground">{c.name}</p>
-                                <p className="text-[10px] text-muted-foreground">
-                                  {c.diagnosed_date
-                                    ? format(new Date(c.diagnosed_date), "MMM d, yyyy")
-                                    : "Date unknown"}
-                                  {c.diagnosed_by ? ` · Dr. ${c.diagnosed_by}` : ""}
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-1 shrink-0">
-                                <Badge
-                                  className={`text-[8px] border-0 ${c.status === "resolved" ? "bg-muted text-muted-foreground" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"}`}
-                                >
-                                  {c.status === "resolved" ? "Resolved" : "Active"}
-                                </Badge>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6"
-                                  onClick={() => handleEditCondition(c)}
-                                >
-                                  <Pencil className="h-3 w-3" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6 text-destructive"
-                                  onClick={() => {
-                                    setConditionsDiagnoses((prev) => prev.filter((x) => x.id !== c.id));
-                                    setHasChanges(true);
-                                  }}
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-
-                {/* Surgeries & Dates */}
-                <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <SectionHeader icon={Scissors} label="Surgeries & Dates" />
-                  <CollapsibleContent className="px-3 pb-3 space-y-2">
-                    <div className="flex justify-end">
-                      {!showAddSurgery && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1 text-xs h-7"
-                          onClick={() => setShowAddSurgery(true)}
-                        >
-                          <Plus className="h-3 w-3" />
-                          Add
-                        </Button>
-                      )}
-                    </div>
-                    {showAddSurgery && (
-                      <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                        <div className="grid gap-2 sm:grid-cols-2">
-                          <div className="space-y-1.5">
-                            <Label>Surgery Name *</Label>
-                            <Input
-                              className="text-sm"
-                              value={newSurgery.name}
-                              onChange={(e) => setNewSurgery((prev) => ({ ...prev, name: e.target.value }))}
-                              placeholder="e.g., Appendectomy"
-                            />
-                          </div>
-                          <div className="space-y-1.5">
-                            <Label>Date Precision</Label>
-                            <Select
-                              value={newSurgery.date_precision}
-                              onValueChange={(v) =>
-                                setNewSurgery((prev) => ({ ...prev, date_precision: v as any, date: "" }))
-                              }
-                            >
-                              <SelectTrigger className="text-sm">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="exact">Exact Date</SelectItem>
-                                <SelectItem value="month">Month & Year</SelectItem>
-                                <SelectItem value="year">Year Only</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label>Date *</Label>
-                          {newSurgery.date_precision === "exact" && (
-                            <Input
-                              className="text-sm"
-                              type="date"
-                              value={newSurgery.date}
-                              onChange={(e) => setNewSurgery((prev) => ({ ...prev, date: e.target.value }))}
-                            />
-                          )}
-                          {newSurgery.date_precision === "month" && (
-                            <Input
-                              className="text-sm"
-                              type="month"
-                              value={newSurgery.date}
-                              onChange={(e) => setNewSurgery((prev) => ({ ...prev, date: e.target.value }))}
-                            />
-                          )}
-                          {newSurgery.date_precision === "year" && (
-                            <Input
-                              className="text-sm"
-                              type="number"
-                              min="1900"
-                              max="2099"
-                              value={newSurgery.date}
-                              onChange={(e) => setNewSurgery((prev) => ({ ...prev, date: e.target.value }))}
-                              placeholder="e.g., 2020"
-                            />
-                          )}
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label>Notes (optional)</Label>
-                          <Input
-                            className="text-sm"
-                            value={newSurgery.notes}
-                            onChange={(e) => setNewSurgery((prev) => ({ ...prev, notes: e.target.value }))}
-                            placeholder="Additional notes"
-                          />
-                        </div>
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs h-7"
-                            onClick={() => {
-                              setShowAddSurgery(false);
-                              setEditingSurgeryId(null);
-                              setNewSurgery({ name: "", date: "", notes: "", date_precision: "exact" });
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                          <Button size="sm" className="text-xs h-7" onClick={handleAddSurgery}>
-                            {editingSurgeryId ? "Save" : "Add"}
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                    {surgeries.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No surgeries recorded</p>
-                    ) : (
-                      <div className="space-y-1">
-                        {surgeries.map((surgery) => (
-                          <div
-                            key={surgery.id}
-                            className="flex items-start justify-between p-1.5 rounded-lg bg-primary/5 border border-primary/20"
-                          >
-                            <div>
-                              <p className="text-xs font-medium text-foreground">{surgery.name}</p>
-                              <p className="text-[10px] text-muted-foreground">
-                                {formatSurgeryDate(surgery.date, surgery.date_precision)}
-                              </p>
-                              {surgery.notes && (
-                                <p className="text-[10px] text-muted-foreground mt-0.5">{surgery.notes}</p>
-                              )}
-                            </div>
-                            <div className="flex gap-1 shrink-0">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={() => handleEditSurgery(surgery)}
-                              >
-                                <Pencil className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 text-destructive"
-                                onClick={() => handleRemoveSurgery(surgery.id)}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CollapsibleContent>
-                </Collapsible>
-
-                {/* Family History */}
-                <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <SectionHeader icon={GitBranch} label="Family History" />
-                  <CollapsibleContent className="px-3 pb-3 space-y-2">
-                    <div className="flex justify-end">
-                      {!showAddFamily && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1 text-xs h-7"
-                          onClick={() => setShowAddFamily(true)}
-                        >
-                          <Plus className="h-3 w-3" />
-                          Add
-                        </Button>
-                      )}
-                    </div>
-                    {showAddFamily && (
-                      <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                        <div className="grid gap-2 sm:grid-cols-2">
-                          <div className="space-y-1.5">
-                            <Label>Relation *</Label>
-                            <Input
-                              className="text-sm"
-                              value={newFamilyEntry.relation}
-                              onChange={(e) => setNewFamilyEntry((prev) => ({ ...prev, relation: e.target.value }))}
-                              placeholder="e.g., Mother"
-                            />
-                          </div>
-                          <div className="space-y-1.5">
-                            <Label>Condition *</Label>
-                            <Input
-                              className="text-sm"
-                              value={newFamilyEntry.condition}
-                              onChange={(e) => setNewFamilyEntry((prev) => ({ ...prev, condition: e.target.value }))}
-                              placeholder="e.g., Diabetes"
-                            />
-                          </div>
-                        </div>
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs h-7"
-                            onClick={() => {
-                              setShowAddFamily(false);
-                              setEditingFamilyId(null);
-                              setNewFamilyEntry({ relation: "", condition: "" });
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                          <Button size="sm" className="text-xs h-7" onClick={handleAddFamilyEntry}>
-                            {editingFamilyId ? "Save" : "Add"}
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                    {familyHistory.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No family history recorded</p>
-                    ) : (
-                      <div className="space-y-1">
-                        {familyHistory.map((entry) => (
-                          <div
-                            key={entry.id}
-                            className="flex items-center justify-between p-1.5 rounded-lg bg-primary/5 border border-primary/20"
-                          >
-                            <div>
-                              <p className="text-xs font-medium text-foreground">{entry.relation}</p>
-                              <p className="text-[10px] text-muted-foreground">{entry.condition}</p>
-                            </div>
-                            <div className="flex gap-1 shrink-0">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={() => handleEditFamilyEntry(entry)}
-                              >
-                                <Pencil className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 text-destructive"
-                                onClick={() => handleRemoveFamilyEntry(entry.id)}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CollapsibleContent>
-                </Collapsible>
-
-                {/* Organ Donor — collapsible with inline Yes/No */}
-                <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <CollapsibleTrigger className="flex w-full items-center justify-between bg-[#F5F4F1] rounded-lg px-3 py-2 group">
-                    <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5 text-left">
-                      <Heart className="h-3.5 w-3.5" /> Organ Donor
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={cn(
-                          "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
-                          formData.organ_donor
-                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                            : "bg-muted text-muted-foreground",
-                        )}
-                      >
-                        {formData.organ_donor ? "Yes" : "No"}
-                      </span>
-                      <ChevronDown className="h-4 w-4 text-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                    </div>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="p-3">
-                    <div className="flex items-center gap-3 mb-3">
-                      <Switch
-                        checked={formData.organ_donor}
-                        onCheckedChange={(checked) => {
-                          updateFormData({ organ_donor: checked });
-                          if (!checked) {
-                            setOrganDonorOrgans([]);
-                            setHasChanges(true);
-                          }
-                        }}
-                      />
-                      <Label>{formData.organ_donor ? "Yes" : "No"}</Label>
-                    </div>
-                    {formData.organ_donor && (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {ORGAN_OPTIONS.map((organ) => (
-                          <div key={organ} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`organ-${organ}`}
-                              checked={organDonorOrgans.includes(organ)}
-                              onCheckedChange={() => toggleOrganDonorOrgan(organ)}
-                            />
-                            <Label htmlFor={`organ-${organ}`}>{organ}</Label>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CollapsibleContent>
-                </Collapsible>
-              </div>
-
-              {/* Column 2 */}
-              <div className="space-y-4">
-                <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
-                  <CollapsibleContent className="p-3">
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-1.5">
-                        <Label>Insurance Provider</Label>
-                        <Input
-                          className="text-sm"
-                          value={formData.medical_aid}
-                          onChange={(e) => updateFormData({ medical_aid: e.target.value })}
-                          placeholder="Insurance provider"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Insurance Product</Label>
-                        <Input
-                          className="text-sm"
-                          value={formData.medical_insurance_product}
-                          onChange={(e) => updateFormData({ medical_insurance_product: e.target.value })}
-                          placeholder="Product name"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Insurance Number</Label>
-                        <Input
-                          className="text-sm"
-                          value={formData.medical_aid_number}
-                          onChange={(e) => updateFormData({ medical_aid_number: e.target.value })}
-                          placeholder="Member number"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Primary Member</Label>
-                        <Input
-                          className="text-sm"
-                          value={formData.primary_member}
-                          onChange={(e) => updateFormData({ primary_member: e.target.value })}
-                          placeholder="Primary member name"
-                        />
-                      </div>
-                      <div className="space-y-1.5 sm:col-span-2">
-                        <Label>Claims Email (for auto-submission of claims)</Label>
-                        <Input
-                          className="text-sm"
-                          type="email"
-                          value={formData.claims_email}
-                          onChange={(e) => updateFormData({ claims_email: e.target.value })}
-                          placeholder="claims@insurance.com"
-                        />
-                      </div>
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-
-                {/* GP Search */}
-                <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <SectionHeader icon={User} label="General Practitioner" />
-                  <CollapsibleContent className="p-3">
-                    <div className="space-y-1.5 relative">
-                      <Label>General Practitioner</Label>
-                      <Input
-                        className="text-sm"
-                        value={formData.general_practitioner}
-                        onChange={(e) => searchGP(e.target.value)}
-                        placeholder="Search or type GP name"
-                      />
-                      {gpSearchOpen && gpSearchResults.length > 0 && (
-                        <div className="absolute z-10 top-full left-0 right-0 bg-card border border-border rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
-                          {gpSearchResults.map((doc) => (
-                            <div
-                              key={doc.id}
-                              className="flex items-center justify-between px-3 py-2 hover:bg-muted/50 text-xs"
-                            >
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium text-foreground truncate">{doc.full_name}</p>
-                                <p className="text-[10px] text-muted-foreground">
-                                  {doc.specialty || "General"} {doc.practice_number ? `• ${doc.practice_number}` : ""}
-                                </p>
-                              </div>
-                              <div className="flex gap-1 shrink-0 ml-2">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6"
-                                  title="Select as GP"
-                                  onClick={() => {
-                                    updateFormData({ general_practitioner: doc.full_name });
-                                    setGpSearchOpen(false);
-                                  }}
-                                >
-                                  <Eye className="h-3 w-3" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6"
-                                  title="Connect to profile"
-                                  onClick={() => {
-                                    updateFormData({ general_practitioner: doc.full_name });
-                                    setGpSearchOpen(false);
-                                    toast({ title: "Connected", description: `${doc.full_name} linked as your GP` });
-                                  }}
-                                >
-                                  <Link2 className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                          <div className="px-3 py-2 border-t border-border">
-                            <p className="text-[10px] text-muted-foreground mb-1">Doctor not on the app?</p>
-                            <div className="flex gap-1">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-1 text-[10px] h-6"
-                                onClick={() => {
-                                  toast({ title: "Invitation sent", description: "An invitation email will be sent" });
-                                  setGpSearchOpen(false);
-                                }}
-                              >
-                                <Mail className="h-2.5 w-2.5" />
-                                Invite
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-1 text-[10px] h-6"
-                                onClick={() => {
-                                  toast({
-                                    title: "Invite & Connect",
-                                    description: "Invitation sent with auto-connect",
-                                  });
-                                  setGpSearchOpen(false);
-                                }}
-                              >
-                                <Mail className="h-2.5 w-2.5" />
-                                <Link2 className="h-2.5 w-2.5" />
-                                Invite & Connect
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-
-                {/* Pharmacies */}
-                <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <SectionHeader icon={Store} label="Pharmacies" />
-                  <CollapsibleContent className="p-3">
-                    <div className="flex justify-end mb-3">
-                      {!showAddPharmacy && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1 text-xs h-7"
-                          onClick={() => setShowAddPharmacy(true)}
-                        >
-                          <Plus className="h-3 w-3" />
-                          Add
-                        </Button>
-                      )}
-                    </div>
-                    {showAddPharmacy && (
-                      <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                        <div className="grid gap-2 sm:grid-cols-2">
-                          <div className="space-y-1.5">
-                            <Label>Name *</Label>
-                            <Input
-                              className="text-sm"
-                              value={newPharmacy.name}
-                              onChange={(e) => setNewPharmacy((prev) => ({ ...prev, name: e.target.value }))}
-                              placeholder="Pharmacy name"
-                            />
-                          </div>
-                          <div className="space-y-1.5">
-                            <Label>Branch</Label>
-                            <Input
-                              className="text-sm"
-                              value={newPharmacy.branch}
-                              onChange={(e) => setNewPharmacy((prev) => ({ ...prev, branch: e.target.value }))}
-                              placeholder="Branch name"
-                            />
-                          </div>
-                          <div className="space-y-1.5 sm:col-span-2">
-                            <Label>Email</Label>
-                            <Input
-                              className="text-sm"
-                              type="email"
-                              value={newPharmacy.email}
-                              onChange={(e) => setNewPharmacy((prev) => ({ ...prev, email: e.target.value }))}
-                              placeholder="pharmacy@email.com"
-                            />
-                          </div>
-                        </div>
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs h-7"
-                            onClick={() => {
-                              setShowAddPharmacy(false);
-                              setEditingPharmacyId(null);
-                              setNewPharmacy({ name: "", email: "", branch: "" });
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                          <Button size="sm" className="text-xs h-7" onClick={handleAddPharmacy}>
-                            {editingPharmacyId ? "Save" : "Add"}
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                    {pharmacies.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No pharmacies recorded</p>
-                    ) : (
-                      <div className="space-y-1.5">
-                        {pharmacies.map((pharmacy) => (
-                          <div
-                            key={pharmacy.id}
-                            className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50"
-                          >
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => handleSetPrimaryPharmacy(pharmacy.id)}
-                                className="text-xs text-primary hover:underline"
-                              >
-                                {pharmacy.is_primary ? (
-                                  <Star className="h-3.5 w-3.5 fill-primary text-primary" />
-                                ) : (
-                                  <Star className="h-3.5 w-3.5 text-muted-foreground" />
-                                )}
-                              </button>
-                              <div>
-                                <p className="text-xs font-medium text-foreground">
-                                  {pharmacy.name}
-                                  {pharmacy.branch && (
-                                    <span className="text-muted-foreground ml-1">({pharmacy.branch})</span>
-                                  )}
-                                </p>
-                                {pharmacy.email && (
-                                  <p className="text-[10px] text-muted-foreground">{pharmacy.email}</p>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex gap-1 shrink-0">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={() => handleEditPharmacy(pharmacy)}
-                              >
-                                <Pencil className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 text-destructive"
-                                onClick={() => handleRemovePharmacy(pharmacy.id)}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CollapsibleContent>
-                </Collapsible>
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* === Dashboard tab (edit mode) === */}
-          {isSelfService && (
-            <TabsContent value="dashboard" className="mt-4">
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                }
-              >
-                <PatientDashboardLazy />
-              </Suspense>
-            </TabsContent>
-          )}
-
-          {/* === Tasks tab (edit mode) === */}
-          {isSelfService && (
-            <TabsContent value="tasks" className="mt-4">
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">My Tasks</h2>
-                <p className="text-xs text-muted-foreground">Manage your health tasks and to-dos</p>
-              </div>
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                }
-              >
-                <PatientTasksLazy />
-              </Suspense>
-            </TabsContent>
-          )}
-
-          {isSelfService && (
-            <TabsContent value="sessions" className="mt-4">
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">My Sessions</h2>
-                <p className="text-xs text-muted-foreground">History of your consultations</p>
-              </div>
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                }
-              >
-                <SessionHistoryTableLazy sessions={[]} patientId={patient.id} patientName={patient.name} />
-              </Suspense>
-            </TabsContent>
-          )}
-
-          {isSelfService && (
-            <TabsContent value="calendar" className="mt-4">
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                }
-              >
-                <PatientCalendarLazy />
-              </Suspense>
-            </TabsContent>
-          )}
-
-          {isSelfService && (
-            <TabsContent value="documents" className="mt-4">
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">My Documents</h2>
-                <p className="text-xs text-muted-foreground">
-                  All your prescriptions, invoices, certificates and uploaded files
-                </p>
-              </div>
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                }
-              >
-                <PatientDocuments hideHeader />
-              </Suspense>
-            </TabsContent>
-          )}
-
-          {isSelfService && (
-            <TabsContent value="doctors" className="mt-4">
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                }
-              >
-                <MyDoctors />
-              </Suspense>
-            </TabsContent>
-          )}
-
-          {isSelfService && (
-            <TabsContent value="roundtable" className="mt-4">
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">My Round Table</h2>
-                <p className="text-xs text-muted-foreground">
-                  Notes shared by your healthcare providers about your care
-                </p>
-              </div>
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                }
-              >
-                <PatientRoundTable hideHeader />
-              </Suspense>
-            </TabsContent>
-          )}
-        </Tabs>
-      </div>
-    </div>
-  );
 }
