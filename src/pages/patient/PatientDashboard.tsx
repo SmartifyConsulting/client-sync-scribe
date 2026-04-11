@@ -297,6 +297,18 @@ export default function PatientDashboard() {
             <p className="text-muted-foreground text-[12px]">Your health dashboard at a glance</p>
           </div>
         </div>
+        <div className="flex items-center gap-2">
+          <Link to="/patient/calendar">
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+              <Calendar className="h-3.5 w-3.5" /> Calendar
+            </Button>
+          </Link>
+          <Link to="/todos?autoRecord=true">
+            <Button size="sm" className="gap-1.5 text-xs bg-primary">
+              <Mic className="h-3.5 w-3.5" /> Record Task
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Recent Activity Banner */}
