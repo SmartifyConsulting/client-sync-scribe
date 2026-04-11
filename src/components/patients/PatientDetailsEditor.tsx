@@ -641,8 +641,10 @@ export function PatientDetailsEditor({
     [onSave, pharmacies, familyHistory, organDonorOrgans, nokMembers, currentMedications, conditionsDiagnoses],
   );
 
+  const anySectionEditing = Object.values(editingSections).some(Boolean);
+
   useEffect(() => {
-    if (!isEditing || !hasChanges) return;
+    if (!anySectionEditing || !hasChanges) return;
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(() => {
       performSave(formData, surgeries);
@@ -660,7 +662,7 @@ export function PatientDetailsEditor({
     nokMembers,
     currentMedications,
     conditionsDiagnoses,
-    isEditing,
+    anySectionEditing,
     hasChanges,
     performSave,
   ]);
