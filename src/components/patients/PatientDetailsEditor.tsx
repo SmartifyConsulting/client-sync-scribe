@@ -1316,9 +1316,19 @@ export function PatientDetailsEditor({
     );
   };
 
-  // ==================== VIEW MODE ====================
-  if (!isEditing) {
-    return (
+  // Helper to toggle section editing
+  const startEditing = (key: string) => setEditingSections(prev => ({ ...prev, [key]: true }));
+  const stopEditing = (key: string) => setEditingSections(prev => ({ ...prev, [key]: false }));
+  const saveSection = async (key: string) => {
+    await performSave(formData, surgeries);
+    stopEditing(key);
+  };
+  const cancelSection = (key: string) => {
+    handleCancel();
+    stopEditing(key);
+  };
+
+  return (
       <div className="space-y-0">
         <ProfileBanner />
         <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
