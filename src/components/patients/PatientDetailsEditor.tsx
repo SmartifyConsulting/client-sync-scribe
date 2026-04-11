@@ -1849,9 +1849,7 @@ export function PatientDetailsEditor({
         </div>
       </div>
     );
-  }
-
-  // ==================== EDIT MODE ====================
+}
   return (
     <div className="space-y-0">
       <ProfileBanner />
