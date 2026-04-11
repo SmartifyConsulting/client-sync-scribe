@@ -1030,7 +1030,7 @@ export function PatientDetailsEditor({
     setNokMembers(patient.next_of_kin_members || []);
     setCurrentMedications(patient.current_medications || []);
     setConditionsDiagnoses(patient.conditions_diagnoses || []);
-    setIsEditing(false);
+    setEditingSections({});
   };
 
   const calculateBMI = () => {
