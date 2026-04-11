@@ -1332,8 +1332,22 @@ export function PatientDetailsEditor({
       <div className="space-y-0">
         <ProfileBanner />
         <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            {renderTabsList()}
+          {saving && (
+            <div className="flex justify-end">
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Saving...
+              </span>
+            </div>
+          )}
+          {!saving && !hasChanges && anySectionEditing && (
+            <div className="flex justify-end">
+              <span className="flex items-center gap-1.5 text-xs text-green-600">
+                <Check className="h-3 w-3" />
+                Saved
+              </span>
+            </div>
+          )}
 
             {/* === PERSONAL INFORMATION TAB === */}
             <TabsContent value="personal" className="space-y-4 mt-4">
