@@ -1348,6 +1348,8 @@ export function PatientDetailsEditor({
               </span>
             </div>
           )}
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            {renderTabsList()}
 
             {/* === PERSONAL INFORMATION TAB === */}
             <TabsContent value="personal" className="space-y-4 mt-4">
