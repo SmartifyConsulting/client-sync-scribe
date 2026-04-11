@@ -1391,15 +1391,20 @@ export function PatientDetailsEditor({
               </Collapsible>
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                <SectionHeader icon={MapPin} label="Addresses" />
+                <SectionHeader icon={MapPin} label="Addresses" sectionKey="addresses" isEditing={editingSections["addresses"]} onEdit={() => startEditing("addresses")} onSave={() => saveSection("addresses")} onCancel={() => cancelSection("addresses")} />
                 <CollapsibleContent className="p-3">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <ViewField label="Physical Address" value={patient.physical_address || patient.address} />
-                    <ViewField
-                      label="Postal Address"
-                      value={patient.same_as_physical ? "Same as physical address" : patient.postal_address}
-                    />
-                  </div>
+                  {editingSections["addresses"] ? (
+                    <div className="space-y-3">
+                      <div className="space-y-1.5"><Label>Physical Address</Label><AddressAutocomplete id="physical_address" value={formData.physical_address} onChange={(v) => updateFormData({ physical_address: v })} placeholder="Start typing to search address..." rows={2} /></div>
+                      <div className="flex items-center space-x-2"><Checkbox id="same_as_physical" checked={formData.same_as_physical} onCheckedChange={(checked) => updateFormData({ same_as_physical: checked as boolean })} /><Label htmlFor="same_as_physical">Postal address same as physical address</Label></div>
+                      {!formData.same_as_physical && <div className="space-y-1.5"><Label>Postal Address</Label><AddressAutocomplete id="postal_address" value={formData.postal_address} onChange={(v) => updateFormData({ postal_address: v })} placeholder="Start typing to search address..." rows={2} /></div>}
+                    </div>
+                  ) : (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <ViewField label="Physical Address" value={patient.physical_address || patient.address} />
+                      <ViewField label="Postal Address" value={patient.same_as_physical ? "Same as physical address" : patient.postal_address} />
+                    </div>
+                  )}
                 </CollapsibleContent>
               </Collapsible>
 
