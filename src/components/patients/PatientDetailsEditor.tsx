@@ -1428,10 +1428,10 @@ export function PatientDetailsEditor({
         </div>
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground border-t border-border pt-2">
           <Clock className="h-3 w-3 shrink-0" />
-          {upcomingAppointments.length > 0 ? (
+          {bannerAppointments.length > 0 ? (
             <span>
               Next: {(() => {
-                const appt = upcomingAppointments[0] as any;
+                const appt = bannerAppointments[0] as any;
                 const start = appt.proposed_start || appt.requested_start;
                 const doctorProfile = appt.profiles as any;
                 return `${doctorProfile?.full_name || "Doctor"} — ${format(parseISO(start), "MMM d, h:mm a")}`;
