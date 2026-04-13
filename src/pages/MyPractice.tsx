@@ -1571,7 +1571,6 @@ export default function MyPractice() {
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-2">
             <p className="text-xs text-muted-foreground">Choose the voice used for your daily briefing narration.</p>
-            <p className="text-xs text-muted-foreground">Choose the voice used for your daily briefing narration.</p>
             <div className="space-y-1.5">
               <Label className="text-xs">Narration Voice</Label>
               <Select
@@ -1678,7 +1677,6 @@ export default function MyPractice() {
               <Volume2 className="h-3.5 w-3.5" />
               Sample Voice
             </Button>
-           </div>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
