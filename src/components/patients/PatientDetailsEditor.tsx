@@ -3,6 +3,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { AddressAutocomplete } from "@/components/patients/AddressAutocomplete";
 import { useNavigate } from "react-router-dom";
+import vulaVouchersLogo from "@/assets/vula-vouchers-logo.png";
 import { useUserRole } from "@/hooks/useUserRole";
 import {
   Pencil,
@@ -1092,7 +1093,7 @@ export function PatientDetailsEditor({
           </div>
           {!rewardsLoading && lollipopCount !== undefined && (
             <div className="flex items-center gap-1.5 shrink-0">
-              <img src="/lovable-uploads/dc31f04c-3ee6-44de-9a05-7e0e84bfb213.png" alt="Vula Vouchers" className="h-5 object-contain" />
+              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-5 object-contain" />
               <span className="text-base font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
                 <AnimatedCounter target={lollipopCount} />
               </span>
@@ -1277,11 +1278,11 @@ export function PatientDetailsEditor({
 
         {/* Sub-tab row for My Profile */}
         {activeParentTab === "profile" && (
-          <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-            <TabsTrigger value="personal" className="text-xs whitespace-nowrap">
+          <TabsList className="bg-primary/15 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+            <TabsTrigger value="personal" className="text-xs whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-sm">
               Personal Information
             </TabsTrigger>
-            <TabsTrigger value="medical" className="text-xs whitespace-nowrap">
+            <TabsTrigger value="medical" className="text-xs whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-sm">
               Medical Information
             </TabsTrigger>
           </TabsList>
@@ -1289,14 +1290,14 @@ export function PatientDetailsEditor({
 
         {/* Sub-tab row for My Admin */}
         {activeParentTab === "admin" && isSelfService && (
-          <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-            <TabsTrigger value="calendar" className="text-xs whitespace-nowrap">
+          <TabsList className="bg-primary/15 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+            <TabsTrigger value="calendar" className="text-xs whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-sm">
               My Calendar
             </TabsTrigger>
-            <TabsTrigger value="tasks" className="text-xs whitespace-nowrap">
+            <TabsTrigger value="tasks" className="text-xs whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-sm">
               My Tasks
             </TabsTrigger>
-            <TabsTrigger value="documents" className="text-xs whitespace-nowrap">
+            <TabsTrigger value="documents" className="text-xs whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-sm">
               My Documents
             </TabsTrigger>
           </TabsList>
