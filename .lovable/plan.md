@@ -1,41 +1,40 @@
 
 
-# Fix Login Flash & Remove Logo Shadow
+# Fix Reset Password Race Condition & Harden Recovery Flow
 
-## Summary
-Fix the issue where logging in as a patient briefly shows the doctor Dashboard before redirecting, and remove the drop shadow from the hero logo on the landing page.
+## Problem
 
-## Problem Analysis
+When a user clicks the password reset link, they land on `/reset-password` with a hash fragment containing the recovery token. Supabase's `onAuthStateChange` processes this token asynchronously, but `ResetPassword.tsx` immediately calls `getSession()` — which returns `null` because the token hasn't been exchanged yet. This causes a premature "Invalid or expired link" toast and redirect to `/forgot-password`.
 
-**Login flash issue**: After login, `Auth.tsx` always navigates to `/dashboard` (line 469). The `RoleBasedDashboard` component then fetches the user's role via `useUserRole()`, and while loading, briefly renders the doctor `Dashboard` component (it only redirects patients after the role loads). This causes a flash of the doctor dashboard (which shows "Paula Smart" data from cached/previous queries).
-
-**Fix**: Make `RoleBasedDashboard` show a loading spinner until the role is determined, and also have the Auth login handler check the role first and navigate directly to the correct route.
-
-**Logo shadow**: The hero logo on Landing.tsx (line 148) has `drop-shadow-lg` class.
+There is no conflicting recovery logic in `Auth.tsx` — the entire reset flow lives in `ResetPassword.tsx`. The fix is contained there.
 
 ## Changes
 
-### 1. Fix login redirect — navigate to correct route by role
-**File:** `src/pages/Auth.tsx`
-- In `handleLogin` (line 469): After successful sign-in, query the `user_roles` table for the logged-in user's role before navigating
-- If role is `patient`, navigate to `/patient/details` directly
-- If role is `doctor` or `admin`, navigate to `/dashboard`
-- This eliminates the flash entirely since the correct page loads immediately
+### 1. Rewrite `ResetPassword.tsx` with proper recovery detection
 
-### 2. Fix RoleBasedDashboard flash
-**File:** `src/App.tsx`
-- In `RoleBasedDashboard`, the loading state already shows a spinner (lines 82-87), but on first render `loading` might briefly be `false` with stale role. Ensure the spinner shows until role is definitively loaded for the current user.
+**File:** `src/pages/ResetPassword.tsx`
 
-### 3. Remove logo shadow on landing page
-**File:** `src/pages/Landing.tsx`
-- Line 148: Remove `drop-shadow-lg` from the hero logo's className
-- Change from `"h-32 sm:h-40 w-auto mx-auto drop-shadow-lg"` to `"h-32 sm:h-40 w-auto mx-auto"`
+- Add three local states: `authReady` (boolean, starts false), `recoveryVerified` (boolean), `initialLoading` (boolean, starts true)
+- Replace the `useEffect` with one that:
+  1. Subscribes to `onAuthStateChange` **first**
+  2. Listens for `PASSWORD_RECOVERY` event — when received, sets `recoveryVerified = true` and `authReady = true`
+  3. Also listens for `SIGNED_IN` event as a fallback (some Supabase versions emit this instead)
+  4. After subscribing, calls `getSession()` as a fallback — if a session exists, sets `authReady = true` (recovery may have already been processed)
+  5. Adds a 5-second timeout as a safety net: if neither event fires nor session found, show the "expired link" error and redirect
+  6. Cleans up the subscription on unmount
+- Show a loading spinner while `initialLoading` is true (auth not yet ready)
+- Disable the submit button until `authReady` is true
+- `handleSubmit` calls `updateUser({ password })` only when `authReady` is true
+- After successful password update, clean up the URL hash with `window.history.replaceState` to prevent re-triggering
+- After success, check user role and redirect to the correct page (patient vs doctor)
+
+### 2. No changes needed in Auth.tsx
+
+Auth.tsx has no recovery handling — it only handles login and signup. The user's mention of Auth.tsx race conditions refers to a flow that doesn't exist there. All fixes are in ResetPassword.tsx.
 
 ## Files Modified
 
 | File | Changes |
 |------|---------|
-| `src/pages/Auth.tsx` | Check user role after login and navigate to correct route |
-| `src/App.tsx` | Ensure RoleBasedDashboard doesn't flash doctor content |
-| `src/pages/Landing.tsx` | Remove `drop-shadow-lg` from hero logo |
+| `src/pages/ResetPassword.tsx` | Replace session-check with `onAuthStateChange` listener for `PASSWORD_RECOVERY`, add loading state, timeout fallback, URL cleanup after success |
 
