@@ -1,73 +1,40 @@
-# Multi-Layout Cleanup, Patient List Redesign, Admin Tabs, Sessions Removal, Pricing Fix
+
+
+# Add Icons, Round Tables, Patient List Spacing, and Restore Sidebar
 
 ## Summary
-
-Remove left sidebar from all views, remove Sessions from nav, redesign patient list status column, compact patient profile cards, fix invitation wording, rename tab, fix pricing access, and add Calendar and To-Do tabs to the Admin page.
+Five changes: add icons to Digital Signature and Voice Narration headers in My Practice, add DoctorRoundTables to the dashboard, increase patient list column spacing on mobile, and restore the left sidebar navigation for web/tablet views.
 
 ## Changes
 
-### 1. Remove left sidebar from all layouts
+### 1. Add icons to Digital Signature and Voice Narration accordion triggers
+**File:** `src/pages/MyPractice.tsx`
+- Digital Signature trigger: add `PenTool` icon inline, matching pattern of other accordion headers
+- Voice Narration trigger: add `Volume2` icon inline
 
-**File:** `src/components/layout/AppLayout.tsx`
+### 2. Add DoctorRoundTables to Dashboard
+**File:** `src/pages/Dashboard.tsx`
+- Import `DoctorRoundTables` from `@/components/doctor/DoctorRoundTables`
+- Mobile layout: place below RecentActivity with a "My Round Tables" heading
+- Desktop/tablet layout: place below CompactTodoList in the right column
 
-- Remove the sidebar block and its margin offset from the main content area
-
-### 2. Remove Sessions from bottom nav
-
-**File:** `src/components/layout/BottomNav.tsx`
-
-- Remove `{ icon: Mic, label: "Sessions", to: "/sessions" }` from `doctorNavItems`
-- Final order: Home, Patients, Practice, Admin, Rewards
-
-### 3. Patient list: Replace Status column with inline dot
-
+### 3. Shift patient list columns further right on mobile
 **File:** `src/pages/Patients.tsx`
+- Increase padding on Last Seen and Since columns from `px-1` to `px-3` on mobile
 
-- Remove the "Status" column header
-- Add a small green (active) or red (inactive) dot inline after the patient name
-- Compact padding on Last Seen and Since columns so Actions is visible without scrolling
-
-### 4. Patient profile: Status dot in header, remove Status card, 4 cards in one row
-
-**File:** `src/pages/PatientProfile.tsx`
-
-- Add green/red dot next to patient name in the header banner
-- Remove the "Status" stats card; fit remaining 4 cards in a single `grid-cols-4` row
-- Rename "H/Care Providers" tab to "Healthcare Providers"
-
-### 5. Invitation wording change
-
-**File:** `src/components/doctor/DoctorAccessRequests.tsx`
-
-- Change message to: "{Patient Name} has invited you on their panel of healthcare providers and has provided access to their health information."
-
-### 6. Fix pricing access for doctors
-
-**File:** `src/pages/admin/PricingAdmin.tsx`
-
-- Allow doctors (not just admins) to access pricing management
-- **Database migration:** Add RLS policies on `pricing_config` for doctor role to SELECT, UPDATE, and INSERT
-
-### 7. Add Calendar and To-Do tabs to Admin page
-
-**File:** `src/pages/Admin.tsx`
-
-- Add two new tabs before Pricing: "Calendar" and "To-Do"
-- Calendar tab renders the existing `CalendarView` component
-- To-Do tab renders the existing `TodoList` component
-- Tab order: Calendar, To-Do, Pricing, Invoices, Templates
-- Default tab changes to "calendar"
+### 4. Restore left sidebar for web and tablet views
+**File:** `src/components/layout/AppLayout.tsx`
+- Re-import `Sidebar` from `./Sidebar`
+- Add `<div className="hidden md:block"><Sidebar /></div>` back
+- Add `md:ml-[210px]` to the main content wrapper and footer so content is offset on screens >= 768px
+- Sidebar remains hidden on mobile (bottom nav is used there instead)
 
 ## Files Modified
 
+| File | Changes |
+|------|---------|
+| `src/pages/MyPractice.tsx` | Add PenTool and Volume2 icons to accordion triggers |
+| `src/pages/Dashboard.tsx` | Add DoctorRoundTables below Recent Activity (mobile) and below To-Do (desktop) |
+| `src/pages/Patients.tsx` | Increase mobile column padding from px-1 to px-3 |
+| `src/components/layout/AppLayout.tsx` | Restore Sidebar for md+ screens with ml offset |
 
-| File                                             | Changes                                                              |
-| ------------------------------------------------ | -------------------------------------------------------------------- |
-| `src/components/layout/AppLayout.tsx`            | Remove sidebar, remove ml offset                                     |
-| `src/components/layout/BottomNav.tsx`            | Remove Sessions nav item                                             |
-| `src/pages/Patients.tsx`                         | Replace Status column with inline dot, compact columns               |
-| `src/pages/PatientProfile.tsx`                   | Add status dot to header, remove Status card, 4-col grid, rename tab |
-| `src/components/doctor/DoctorAccessRequests.tsx` | Update invitation wording                                            |
-| `src/pages/admin/PricingAdmin.tsx`               | Allow doctor role access                                             |
-| `src/pages/Admin.tsx`                            | Add Calendar and To-Do tabs before Pricing                           |
-| Database migration                               | Add doctor RLS policies on pricing_config                            |
