@@ -23,10 +23,7 @@ export default function PatientRoundTable({ hideHeader = false }: { hideHeader?:
 
     async function fetchNotes() {
       setLoading(true);
-      const { data: patients } = await supabase
-        .from("patients")
-        .select("id")
-        .eq("patient_user_id", user!.id);
+      const { data: patients } = await supabase.from("patients").select("id").eq("patient_user_id", user!.id);
 
       if (!patients?.length) {
         setLoading(false);
@@ -52,7 +49,7 @@ export default function PatientRoundTable({ hideHeader = false }: { hideHeader?:
     <div className="space-y-6">
       {!hideHeader && (
         <div>
-          <h1 className="text-2xl font-bold text-foreground">My Round Table</h1>
+          <h1 className="text-2xl font-bold text-foreground">Round Table</h1>
           <p className="text-muted-foreground text-[12px]">
             Notes shared by your healthcare providers about your care.
           </p>
@@ -91,16 +88,12 @@ export default function PatientRoundTable({ hideHeader = false }: { hideHeader?:
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-foreground text-sm">
-                        {note.doctor_name}
-                      </span>
+                      <span className="font-medium text-foreground text-sm">{note.doctor_name}</span>
                       <span className="text-xs text-muted-foreground">
                         {format(new Date(note.created_at), "dd MMM yyyy, HH:mm")}
                       </span>
                     </div>
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                      {note.content}
-                    </p>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{note.content}</p>
                   </div>
                 </div>
               </CardContent>

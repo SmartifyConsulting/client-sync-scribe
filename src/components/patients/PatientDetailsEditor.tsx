@@ -1156,7 +1156,7 @@ export function PatientDetailsEditor({
           )}
           {show("roundtable") && (
             <TabsTrigger value="roundtable" className={triggerClass}>
-              My Round Table
+              Round Table
             </TabsTrigger>
           )}
         </TabsList>
@@ -1195,7 +1195,7 @@ export function PatientDetailsEditor({
           )}
           {isSelfService && (
             <TabsTrigger value="roundtable" className={triggerClass}>
-              My Round Table
+              Round Table
             </TabsTrigger>
           )}
           {/* My Admin parent trigger */}
@@ -1754,7 +1754,7 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="roundtable" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">My Round Table</h2>
+                  <h2 className="text-lg font-semibold text-foreground">Round Table</h2>
                   <p className="text-xs text-muted-foreground">
                     Notes shared by your healthcare providers about your care
                   </p>
@@ -3248,7 +3248,7 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="roundtable" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">My Round Table</h2>
+                <h2 className="text-lg font-semibold text-foreground">Round Table</h2>
                 <p className="text-xs text-muted-foreground">
                   Notes shared by your healthcare providers about your care
                 </p>
