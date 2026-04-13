@@ -1123,14 +1123,14 @@ export function PatientDetailsEditor({
         {!rewardsLoading && lollipopCount !== undefined && (
           <div className="mt-3 border-t border-border pt-3">
             <div className="flex items-center rounded-xl border border-border overflow-hidden">
-              <div className="flex-1 flex flex-col items-center justify-center py-3 px-4 bg-gradient-to-br from-blue-50 to-cyan-50">
+              <div className="flex-1 flex flex-col items-center justify-center py-3 px-4 bg-primary/5">
                 <img src="/vula-symbol.png" alt="Vula" className="h-6 w-6 mb-1" />
-                <span className="text-[10px] font-bold tracking-wider text-blue-700 uppercase">Vula Vouchers</span>
+                <span className="text-[10px] font-bold tracking-wider text-primary uppercase">Vula Vouchers</span>
               </div>
               <div className="w-[1px] self-stretch bg-border" />
               <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
                 <span className="text-[10px] text-muted-foreground">You have earned</span>
-                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                <span className="text-2xl font-bold text-primary">
                   <AnimatedCounter target={lollipopCount} />
                 </span>
               </div>
