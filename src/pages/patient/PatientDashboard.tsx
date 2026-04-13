@@ -398,7 +398,7 @@ export default function PatientDashboard() {
       </div>
 
       {/* Row 2: Vulas Balance + Earn More Vulas */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
         <Link to="/patient/rewards">
           <Card className="h-full border-primary/20 bg-gradient-to-br from-primary/5 via-card to-secondary/5 hover:shadow-lg transition-all cursor-pointer">
             <CardContent className="flex items-center gap-4 p-5">
@@ -414,90 +414,94 @@ export default function PatientDashboard() {
           </Card>
         </Link>
 
-        <Card className="border-primary/10 bg-gradient-to-br from-primary/3 to-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm">
-              <Trophy className="h-4 w-4 text-primary" />
-              Earn More Vulas
-            </CardTitle>
-            <CardDescription className="text-[10px]">Tips to boost your rewards</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {[
-                { icon: Pill, text: "Log daily medication intake", link: "/patient/prescriptions" },
-                { icon: ListChecks, text: "Complete tasks from your doctor", link: "/patient/tasks" },
-                { icon: Camera, text: "Upload health photos regularly", link: "/patient/health-album" },
-                { icon: Calendar, text: "Keep visit streaks going", link: "/patient/calendar" },
-              ].map((tip, i) => (
-                <Link key={i} to={tip.link} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-primary/5 transition-colors group">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0">
-                    <tip.icon className="h-3.5 w-3.5 text-primary" />
-                  </div>
-                  <p className="text-[11px] text-foreground group-hover:text-primary transition-colors">{tip.text}</p>
-                  <ArrowRight className="h-3 w-3 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                </Link>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Row 3: Recent Claims + Documentation */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
+        {!isMobile && (
+          <Card className="border-primary/10 bg-gradient-to-br from-primary/3 to-card">
+            <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm">
-                <Receipt className="h-4 w-4 text-primary" />
-                Recent Claims
+                <Trophy className="h-4 w-4 text-primary" />
+                Earn More Vulas
               </CardTitle>
-              <Link to="/patient/invoices">
-                <Button variant="ghost" size="sm" className="text-[10px] h-6 text-primary gap-1">
-                  All Invoices <ArrowRight className="h-3 w-3" />
-                </Button>
-              </Link>
-            </div>
-            <CardDescription className="text-[10px]">Invoices submitted to your medical aid</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {recentClaims.length === 0 ? (
-              <p className="text-[11px] text-muted-foreground text-center py-4">No claims submitted recently.</p>
-            ) : (
-              <div className="space-y-1.5">
-                {recentClaims.map((claim: any) => (
-                  <div key={claim.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border">
-                    <div>
-                      <p className="text-xs font-medium text-foreground">#{claim.invoice_number}</p>
-                      <p className="text-[10px] text-muted-foreground">
-                        Submitted {claim.email_sent_at ? format(parseISO(claim.email_sent_at), "MMM d, yyyy") : "—"}
-                      </p>
+              <CardDescription className="text-[10px]">Tips to boost your rewards</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {[
+                  { icon: Pill, text: "Log daily medication intake", link: "/patient/prescriptions" },
+                  { icon: ListChecks, text: "Complete tasks from your doctor", link: "/patient/tasks" },
+                  { icon: Camera, text: "Upload health photos regularly", link: "/patient/health-album" },
+                  { icon: Calendar, text: "Keep visit streaks going", link: "/patient/calendar" },
+                ].map((tip, i) => (
+                  <Link key={i} to={tip.link} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-primary/5 transition-colors group">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                      <tip.icon className="h-3.5 w-3.5 text-primary" />
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs font-semibold text-foreground">{formatCurrency(Number(claim.amount))}</p>
-                      <Badge variant="outline" className="text-[8px] capitalize">{claim.status}</Badge>
-                    </div>
-                  </div>
+                    <p className="text-[11px] text-foreground group-hover:text-primary transition-colors">{tip.text}</p>
+                    <ArrowRight className="h-3 w-3 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </Link>
                 ))}
               </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Link to="/patient/documentation">
-          <Card className="cursor-pointer border-primary/10 hover:border-primary/30 hover:shadow-md transition-all h-full">
-            <CardHeader className="p-4">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
-                  <FileText className="h-4 w-4 text-primary" />
-                </div>
-                Documentation
-              </CardTitle>
-              <CardDescription className="text-[10px]">View your documents and records</CardDescription>
-            </CardHeader>
+            </CardContent>
           </Card>
-        </Link>
+        )}
       </div>
+
+      {/* Row 3: Recent Claims + Documentation (hidden on mobile) */}
+      {!isMobile && (
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <Receipt className="h-4 w-4 text-primary" />
+                  Recent Claims
+                </CardTitle>
+                <Link to="/patient/invoices">
+                  <Button variant="ghost" size="sm" className="text-[10px] h-6 text-primary gap-1">
+                    All Invoices <ArrowRight className="h-3 w-3" />
+                  </Button>
+                </Link>
+              </div>
+              <CardDescription className="text-[10px]">Invoices submitted to your medical aid</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {recentClaims.length === 0 ? (
+                <p className="text-[11px] text-muted-foreground text-center py-4">No claims submitted recently.</p>
+              ) : (
+                <div className="space-y-1.5">
+                  {recentClaims.map((claim: any) => (
+                    <div key={claim.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border">
+                      <div>
+                        <p className="text-xs font-medium text-foreground">#{claim.invoice_number}</p>
+                        <p className="text-[10px] text-muted-foreground">
+                          Submitted {claim.email_sent_at ? format(parseISO(claim.email_sent_at), "MMM d, yyyy") : "—"}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-semibold text-foreground">{formatCurrency(Number(claim.amount))}</p>
+                        <Badge variant="outline" className="text-[8px] capitalize">{claim.status}</Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Link to="/patient/documentation">
+            <Card className="cursor-pointer border-primary/10 hover:border-primary/30 hover:shadow-md transition-all h-full">
+              <CardHeader className="p-4">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
+                    <FileText className="h-4 w-4 text-primary" />
+                  </div>
+                  Documentation
+                </CardTitle>
+                <CardDescription className="text-[10px]">View your documents and records</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+        </div>
+      )}
 
       {/* Assigned Tasks */}
       {assignedTasks.length > 0 && (
