@@ -4,6 +4,7 @@ import holarcLogo from "@/assets/holarc-logo-clear-2.png";
 import {
   Mail, Lock, Loader2, User, Building2, MapPin, Plus, Trash2, Phone,
   Stethoscope, PenTool, UserCircle, Camera, ChevronLeft, ChevronRight, Globe,
+  Eye, EyeOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,12 +91,15 @@ export default function Auth() {
   const [currentStep, setCurrentStep] = useState(0);
   const [accountCreated, setAccountCreated] = useState(false);
   const [createdUserId, setCreatedUserId] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [userRole, setUserRole] = useState<UserRole>(roleParam || "doctor");
   const [countryCode, setCountryCode] = useState("+27");
 
   // Doctor fields
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const fullName = `${firstName} ${lastName}`.trim();
   const [practiceNumber, setPracticeNumber] = useState("");
   const [doctorNumber, setDoctorNumber] = useState("");
   const [practiceAddress, setPracticeAddress] = useState("");
@@ -144,7 +148,8 @@ export default function Auth() {
     const draft = loadDraft();
     if (draft && !isLogin) {
       setUserRole(draft.userRole || "doctor");
-      setFullName(draft.fullName || "");
+      setFirstName(draft.firstName || draft.fullName || "");
+      setLastName(draft.lastName || "");
       setCountryCode(draft.countryCode || "+27");
       setPhone(draft.phone || "");
       setMobileNumber(draft.mobileNumber || "");
@@ -178,14 +183,14 @@ export default function Auth() {
   useEffect(() => {
     if (!isLogin && currentStep > 0) {
       saveDraft({
-        userRole, fullName, countryCode, phone, mobileNumber, dob, physicalAddress, postalAddress,
+        userRole, firstName, lastName, countryCode, phone, mobileNumber, dob, physicalAddress, postalAddress,
         sameAsPhysical, employer, occupation, medicalInsurance, medicalInsuranceProduct,
         medicalInsuranceNumber, primaryMember, nextOfKinName, nextOfKinPhone, nextOfKinEmail,
         generalPractitioner, allergies, referredBy, practiceNumber, doctorNumber, practiceAddress,
         specialty, partners, currentStep,
       });
     }
-  }, [currentStep, fullName, phone, mobileNumber, dob, physicalAddress]);
+  }, [currentStep, firstName, lastName, phone, mobileNumber, dob, physicalAddress]);
 
   const steps = userRole === "doctor" ? DOCTOR_STEPS : PATIENT_STEPS;
   const totalSteps = steps.length;
@@ -443,8 +448,8 @@ export default function Auth() {
 
   const handleNext = async () => {
     if (currentStep === 0 && !isLogin && !accountCreated) {
-      if (!fullName.trim()) {
-        toast({ title: "Required", description: "Full name is required", variant: "destructive" });
+      if (!firstName.trim() || !lastName.trim()) {
+        toast({ title: "Required", description: "First name and last name are required", variant: "destructive" });
         return;
       }
       const success = await handleCreateAccount();
@@ -535,11 +540,17 @@ export default function Auth() {
                 </div>
               </RadioGroup>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="fullName" placeholder="Dr. John Smith" value={fullName} onChange={(e) => setFullName(e.target.value)} className="pl-10" required />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name(s)</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input id="firstName" placeholder="John" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="pl-10" required />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input id="lastName" placeholder="Smith" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
               </div>
             </div>
             <div className="space-y-2">
@@ -553,7 +564,10 @@ export default function Auth() {
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10" required minLength={6} disabled={accountCreated} />
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" required minLength={6} disabled={accountCreated} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
             <div className="space-y-2">
@@ -706,11 +720,17 @@ export default function Auth() {
               </RadioGroup>
               {inviteToken && <p className="text-xs text-muted-foreground mt-2">You're registering via a doctor's invitation</p>}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="fullName" placeholder="John Smith" value={fullName} onChange={(e) => setFullName(e.target.value)} className="pl-10" required />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name(s)</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input id="firstName" placeholder="John" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="pl-10" required />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input id="lastName" placeholder="Smith" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
               </div>
             </div>
             <div className="space-y-2">
@@ -724,7 +744,10 @@ export default function Auth() {
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10" required minLength={6} disabled={accountCreated} />
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" required minLength={6} disabled={accountCreated} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
           </div>
@@ -867,9 +890,12 @@ export default function Auth() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
-                  <div className="relative">
+                <div className="relative">
                     <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10" required minLength={6} />
+                    <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" required minLength={6} />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                   </div>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>

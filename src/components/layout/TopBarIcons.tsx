@@ -1,4 +1,4 @@
-import { Bell, Mic, User, Settings, LogOut, Award } from "lucide-react";
+import { Bell, Mic, User, Settings, LogOut, Award, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
+import { ShareAppDialog } from "@/components/ShareAppDialog";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -164,6 +165,11 @@ export function TopBarIcons() {
           <Link to="/settings" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
             <Settings className="h-3.5 w-3.5" /> Settings
           </Link>
+          <ShareAppDialog trigger={
+            <button className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors w-full">
+              <Share2 className="h-3.5 w-3.5" /> Share App
+            </button>
+          } />
           <button onClick={async () => { await supabase.auth.signOut(); window.location.href = "/auth"; }} className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-destructive/10 text-destructive transition-colors w-full">
             <LogOut className="h-3.5 w-3.5" /> Sign Out
           </button>
