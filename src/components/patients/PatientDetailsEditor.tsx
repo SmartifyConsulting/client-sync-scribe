@@ -1278,9 +1278,17 @@ export function PatientDetailsEditor({
 
             {/* === PERSONAL INFORMATION TAB === */}
             <TabsContent value="personal" className="space-y-4 mt-4">
-              <div className="mb-1">
-                <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
-                <p className="text-xs text-muted-foreground">View and manage personal details</p>
+              <div className="mb-1 flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
+                  <p className="text-xs text-muted-foreground">View and manage personal details</p>
+                </div>
+                {isSelfService && (
+                  <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} className="gap-1.5">
+                    <Pencil className="h-4 w-4" />
+                    <span className="hidden md:inline">Edit</span>
+                  </Button>
+                )}
               </div>
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
@@ -1393,9 +1401,17 @@ export function PatientDetailsEditor({
 
             {/* === MEDICAL INFORMATION TAB — TWO COLUMNS === */}
             <TabsContent value="medical" className="mt-4">
-              <div className="mb-3">
-                <h2 className="text-lg font-semibold text-foreground">Medical Information</h2>
-                <p className="text-xs text-muted-foreground">View and manage medical records</p>
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">Medical Information</h2>
+                  <p className="text-xs text-muted-foreground">View and manage medical records</p>
+                </div>
+                {isSelfService && (
+                  <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} className="gap-1.5">
+                    <Pencil className="h-4 w-4" />
+                    <span className="hidden md:inline">Edit</span>
+                  </Button>
+                )}
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="space-y-3">

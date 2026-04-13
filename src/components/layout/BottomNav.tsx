@@ -73,7 +73,7 @@ export function BottomNav() {
   }
 
   // Patient nav - section-based
-  const currentSection = searchParams.get("section") || "profile";
+  const currentSection = searchParams.get("section") || "home";
   const isOnDetails = location.pathname === "/patient/details";
   const isOnRewards = location.pathname === "/patient/rewards";
 
