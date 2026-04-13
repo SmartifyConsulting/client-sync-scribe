@@ -26,7 +26,7 @@ const patientSections = [
   { icon: HeartPulse, label: "My Profile", section: "health" },
   { icon: Handshake, label: "My Healthcare", section: "care" },
   { icon: FolderOpen, label: "My Desk", section: "admin" },
-  { icon: Gift, label: "My Vulas", section: "rewards" },
+  { icon: Gift, label: "My Rewards", section: "rewards" },
 ];
 
 export function BottomNav() {
