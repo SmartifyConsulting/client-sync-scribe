@@ -131,7 +131,7 @@ export default function DoctorRewards() {
                 <p className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">{totalVulas}</p>
               </div>
               <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center">
-                <img src={vulaSymbol} alt="Vulas" className="h-9 w-9 object-contain" />
+                <img src={vulaVouchersLogo} alt="Vulas" className="h-9 w-9 object-contain" />
               </div>
             </div>
           </CardContent>
@@ -139,13 +139,13 @@ export default function DoctorRewards() {
         <Card className="border-border">
           <CardContent className="pt-6">
             <p className="text-xs text-muted-foreground">Doctor Vulas</p>
-            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{doctorVulas} <span className="text-base">Ⓜ</span></p>
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{doctorVulas} <span className="text-base"><img src={vulaVouchersLogo} alt="Vula" className="h-4 w-4 inline-block" /></span></p>
           </CardContent>
         </Card>
         <Card className="border-border">
           <CardContent className="pt-6">
             <p className="text-xs text-muted-foreground">Patient Vulas</p>
-            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{patientVulas} <span className="text-base">Ⓜ</span></p>
+            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{patientVulas} <span className="text-base"><img src={vulaVouchersLogo} alt="Vula" className="h-4 w-4 inline-block" /></span></p>
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-sky-400 to-cyan-500 dark:from-sky-700/40 dark:to-cyan-800/30 border-sky-400 dark:border-sky-600/40">
@@ -200,7 +200,7 @@ export default function DoctorRewards() {
             <CardContent>
               {rewards.length === 0 ? (
                 <div className="text-center py-8">
-                  <img src={vulaSymbol} alt="Vula" className="h-12 w-12 object-contain mx-auto mb-4" />
+                  <img src={vulaVouchersLogo} alt="Vula" className="h-12 w-12 object-contain mx-auto mb-4" />
                   <p className="text-muted-foreground">No rewards yet. Start your health journey!</p>
                 </div>
               ) : (
@@ -208,13 +208,13 @@ export default function DoctorRewards() {
                   {rewards.slice(0, 5).map((reward) => (
                     <div key={reward.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                       <div className="flex items-center gap-3">
-                        <img src={vulaSymbol} alt="Vula" className="h-7 w-7 object-contain" />
+                        <img src={vulaVouchersLogo} alt="Vula" className="h-7 w-7 object-contain" />
                         <div>
                           <p className="font-medium">{reward.visit_category}</p>
                           <p className="text-sm text-muted-foreground">{format(parseISO(reward.awarded_at), "MMM d, yyyy")}</p>
                         </div>
                       </div>
-                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">+{reward.lollipops_count} Ⓜ</Badge>
+                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">+{reward.lollipops_count} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-4 inline-block" /></Badge>
                     </div>
                   ))}
                 </div>
@@ -287,7 +287,7 @@ export default function DoctorRewards() {
                           <div><span className="text-muted-foreground">Longest: </span><span className="font-medium">{streak.longest_streak}</span></div>
                           {daysUntilDue !== null && <Badge variant={isOverdue ? "destructive" : "secondary"}>{isOverdue ? `${Math.abs(daysUntilDue)} days overdue` : `Due in ${daysUntilDue} days`}</Badge>}
                         </div>
-                        <div className="mt-2 text-xs text-muted-foreground">Earns: {streak.lollipops_awarded} Ⓜ per completion</div>
+                        <div className="mt-2 text-xs text-muted-foreground">Earns: {streak.lollipops_awarded} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-4 inline-block" /> per completion</div>
                       </div>
                     );
                   })}
@@ -305,7 +305,7 @@ export default function DoctorRewards() {
             </CardHeader>
             <CardContent>
               {rewards.length === 0 ? (
-                <div className="text-center py-8"><span className="text-5xl mb-4 block font-bold text-emerald-600">Ⓜ</span><p className="text-muted-foreground">No rewards yet</p></div>
+                <div className="text-center py-8"><span className="text-5xl mb-4 block font-bold text-emerald-600"><img src={vulaVouchersLogo} alt="Vula" className="h-4 w-4 inline-block" /></span><p className="text-muted-foreground">No rewards yet</p></div>
               ) : (
                 <Table>
                   <TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Visit Type</TableHead><TableHead className="text-right">Vulas</TableHead></TableRow></TableHeader>
@@ -314,7 +314,7 @@ export default function DoctorRewards() {
                       <TableRow key={reward.id}>
                         <TableCell><div>{format(parseISO(reward.awarded_at), "MMM d, yyyy")}</div><span className="text-xs text-muted-foreground">{format(parseISO(reward.awarded_at), "h:mm a")}</span></TableCell>
                         <TableCell><Badge variant="secondary" className="bg-primary/10 text-primary">{reward.visit_category}</Badge></TableCell>
-                        <TableCell className="text-right"><span className={`font-semibold ${reward.lollipops_count < 0 ? "text-blue-600" : "text-emerald-600"}`}>{reward.lollipops_count > 0 ? "+" : ""}{reward.lollipops_count} Ⓜ</span></TableCell>
+                        <TableCell className="text-right"><span className={`font-semibold ${reward.lollipops_count < 0 ? "text-blue-600" : "text-emerald-600"}`}>{reward.lollipops_count > 0 ? "+" : ""}{reward.lollipops_count} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-4 inline-block" /></span></TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -341,7 +341,7 @@ export default function DoctorRewards() {
                       <TableRow key={t.id}>
                         <TableCell>{format(new Date(t.created_at), "MMM d, yyyy")}</TableCell>
                         <TableCell><Badge variant="secondary">{t.moola_partner_apps?.name || "Partner App"}</Badge></TableCell>
-                        <TableCell className="text-right"><span className="text-blue-600 font-semibold">-{t.amount} Ⓜ</span></TableCell>
+                        <TableCell className="text-right"><span className="text-blue-600 font-semibold">-{t.amount} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-4 inline-block" /></span></TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -418,7 +418,7 @@ export default function DoctorRewards() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-card rounded-xl border border-border p-6 w-full max-w-md shadow-lg space-y-4">
             <h3 className="text-lg font-semibold">Transfer Vulas</h3>
-            <p className="text-sm text-muted-foreground">Available balance: {totalVulas} Ⓜ</p>
+            <p className="text-sm text-muted-foreground">Available balance: {totalVulas} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-4 inline-block" /></p>
             <div className="space-y-2">
               <Label>Partner App</Label>
               <Select value={transferAppId} onValueChange={setTransferAppId}>
