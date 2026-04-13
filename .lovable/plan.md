@@ -1,50 +1,73 @@
-
-
-# Nav Reorder, Patient List Compaction, Invitation Redesign, Briefing Enhancement, Recent Activity Move
+# Multi-Layout Cleanup, Patient List Redesign, Admin Tabs, Sessions Removal, Pricing Fix
 
 ## Summary
-Seven groups of changes: move Rewards last in doctor nav, remove email column from patient list on mobile, redesign doctor access request cards, remove "Appointments Today" stats card, show dynamic completion count in TodaysBriefing, and move Recent Activity below the to-do list on mobile.
+
+Remove left sidebar from all views, remove Sessions from nav, redesign patient list status column, compact patient profile cards, fix invitation wording, rename tab, fix pricing access, and add Calendar and To-Do tabs to the Admin page.
 
 ## Changes
 
-### 1. Move Rewards last in doctor bottom nav
+### 1. Remove left sidebar from all layouts
+
+**File:** `src/components/layout/AppLayout.tsx`
+
+- Remove the sidebar block and its margin offset from the main content area
+
+### 2. Remove Sessions from bottom nav
+
 **File:** `src/components/layout/BottomNav.tsx`
-- Reorder `doctorNavItems`: Home, Patients, Sessions, Practice, Admin, Rewards
 
-### 2. Remove Contact column from patient list on mobile, compact columns
+- Remove `{ icon: Mic, label: "Sessions", to: "/sessions" }` from `doctorNavItems`
+- Final order: Home, Patients, Practice, Admin, Rewards
+
+### 3. Patient list: Replace Status column with inline dot
+
 **File:** `src/pages/Patients.tsx`
-- Hide "Contact" column on mobile with `hidden md:table-cell`
-- Reduce padding on remaining columns from `px-4` to `px-2` on mobile
 
-### 3. Redesign DoctorAccessRequests invitation cards
+- Remove the "Status" column header
+- Add a small green (active) or red (inactive) dot inline after the patient name
+- Compact padding on Last Seen and Since columns so Actions is visible without scrolling
+
+### 4. Patient profile: Status dot in header, remove Status card, 4 cards in one row
+
+**File:** `src/pages/PatientProfile.tsx`
+
+- Add green/red dot next to patient name in the header banner
+- Remove the "Status" stats card; fit remaining 4 cards in a single `grid-cols-4` row
+- Rename "H/Care Providers" tab to "Healthcare Providers"
+
+### 5. Invitation wording change
+
 **File:** `src/components/doctor/DoctorAccessRequests.tsx`
-- Redesign each request as a rounded card with avatar circle (initials), patient name prominently displayed
-- Message text: "[Patient Name] has invited you on her panel of healthcare providers and has provided access to their health information."
-- Date/time stamp below message
-- Decline (outline) and Accept (primary filled) buttons at bottom
 
-### 4. Remove "Appointments Today" stats card
-**File:** `src/pages/Dashboard.tsx`
-- Remove the "Appointments Today" `StatsCard`
+- Change message to: "{Patient Name} has invited you on their panel of healthcare providers and has provided access to their health information."
 
-### 5. Dynamic appointment completion in TodaysBriefing
-**File:** `src/components/dashboard/TodaysBriefing.tsx`
-- Change subtitle to "{date} • {completed} of {total} appointments completed"
-- Count appointments with `start_time` before now as completed
+### 6. Fix pricing access for doctors
 
-### 6. Move Recent Activity below the to-do list on mobile
-**File:** `src/pages/Dashboard.tsx`
-- Restructure the main content grid so that on mobile, the order is: TodaysBriefing → CompactTodoList → RecentActivity
-- On desktop, keep the current 3+2 column layout (briefing + activity left, todos right)
-- On mobile (`< lg`), render as single column: TodaysBriefing, CompactTodoList, then RecentActivity last
+**File:** `src/pages/admin/PricingAdmin.tsx`
+
+- Allow doctors (not just admins) to access pricing management
+- **Database migration:** Add RLS policies on `pricing_config` for doctor role to SELECT, UPDATE, and INSERT
+
+### 7. Add Calendar and To-Do tabs to Admin page
+
+**File:** `src/pages/Admin.tsx`
+
+- Add two new tabs before Pricing: "Calendar" and "To-Do"
+- Calendar tab renders the existing `CalendarView` component
+- To-Do tab renders the existing `TodoList` component
+- Tab order: Calendar, To-Do, Pricing, Invoices, Templates
+- Default tab changes to "calendar"
 
 ## Files Modified
 
-| File | Changes |
-|------|---------|
-| `src/components/layout/BottomNav.tsx` | Move Rewards to last position |
-| `src/pages/Patients.tsx` | Hide Contact column on mobile, compact padding |
-| `src/components/doctor/DoctorAccessRequests.tsx` | Redesign invitation cards with patient name and message |
-| `src/pages/Dashboard.tsx` | Remove Appointments Today card, reorder mobile layout |
-| `src/components/dashboard/TodaysBriefing.tsx` | Show dynamic completion count |
 
+| File                                             | Changes                                                              |
+| ------------------------------------------------ | -------------------------------------------------------------------- |
+| `src/components/layout/AppLayout.tsx`            | Remove sidebar, remove ml offset                                     |
+| `src/components/layout/BottomNav.tsx`            | Remove Sessions nav item                                             |
+| `src/pages/Patients.tsx`                         | Replace Status column with inline dot, compact columns               |
+| `src/pages/PatientProfile.tsx`                   | Add status dot to header, remove Status card, 4-col grid, rename tab |
+| `src/components/doctor/DoctorAccessRequests.tsx` | Update invitation wording                                            |
+| `src/pages/admin/PricingAdmin.tsx`               | Allow doctor role access                                             |
+| `src/pages/Admin.tsx`                            | Add Calendar and To-Do tabs before Pricing                           |
+| Database migration                               | Add doctor RLS policies on pricing_config                            |
