@@ -1066,12 +1066,16 @@ export default function MyPractice() {
 
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
         <TabsContent value="practice" className="mt-4 space-y-4">
-          {/* Personal Information Frame */}
-          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">Personal Information</h3>
-            </div>
+          {/* Personal Information Accordion */}
+          <Accordion type="multiple" className="space-y-4">
+            <AccordionItem value="personal" className="rounded-xl border border-primary bg-card shadow-sm">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-semibold text-foreground">Personal Information</h3>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 space-y-4">
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-1.5">
                 <Label>First Name</Label>
@@ -1187,14 +1191,18 @@ export default function MyPractice() {
               </div>
             </div>
             <MailboxSection userId={user?.id} />
-          </div>
+              </AccordionContent>
+            </AccordionItem>
 
-          {/* Practice Details Frame */}
-          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
-            <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">Practice Information</h3>
-            </div>
+          {/* Practice Details Accordion */}
+            <AccordionItem value="practice-details" className="rounded-xl border border-primary bg-card shadow-sm">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-semibold text-foreground">Practice Information</h3>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 space-y-4">
             <p className="text-sm text-muted-foreground">
               This information appears on your document templates and letterheads.
             </p>
@@ -1441,10 +1449,15 @@ export default function MyPractice() {
                 </div>
               )}
             </div>
-          </div>
+              </AccordionContent>
+            </AccordionItem>
 
-          {/* Digital Signature Frame */}
-          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-2">
+          {/* Digital Signature Accordion */}
+            <AccordionItem value="signature" className="rounded-xl border border-primary bg-card shadow-sm">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                <Label className="text-sm font-semibold">Digital Signature</Label>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 space-y-2">
             <Label className="text-sm font-semibold">Digital Signature</Label>
             <div className="flex items-center gap-2 flex-wrap">
               <Select
@@ -1548,11 +1561,16 @@ export default function MyPractice() {
                 {new Date().toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric" })}
               </p>
             </div>
-          </div>
+              </AccordionContent>
+            </AccordionItem>
 
-          {/* Voice Narration Settings Frame */}
-          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-2">
-            <Label className="text-sm font-semibold">Voice Narration Settings</Label>
+          {/* Voice Narration Settings Accordion */}
+            <AccordionItem value="voice" className="rounded-xl border border-primary bg-card shadow-sm">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                <Label className="text-sm font-semibold">Voice Narration Settings</Label>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 space-y-2">
+            <p className="text-xs text-muted-foreground">Choose the voice used for your daily briefing narration.</p>
             <p className="text-xs text-muted-foreground">Choose the voice used for your daily briefing narration.</p>
             <div className="space-y-1.5">
               <Label className="text-xs">Narration Voice</Label>
@@ -1660,7 +1678,10 @@ export default function MyPractice() {
               <Volume2 className="h-3.5 w-3.5" />
               Sample Voice
             </Button>
-          </div>
+           </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </TabsContent>
 
         {/* === REFERRALS TAB === */}
