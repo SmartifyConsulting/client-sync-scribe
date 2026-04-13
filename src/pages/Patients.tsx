@@ -807,7 +807,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-               <thead>
+              <thead>
                 <tr className="bg-primary">
                   <th className="px-2 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Patient
@@ -815,16 +815,13 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   <th className="hidden md:table-cell px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Contact
                   </th>
-                  <th className="px-2 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="px-1 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Last Seen
                   </th>
-                  <th className="px-2 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="px-1 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Since
                   </th>
-                  <th className="px-2 md:px-3 py-2.5 text-center text-xs font-medium text-primary-foreground">
-                    Status
-                  </th>
-                  <th className="px-2 md:px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">
+                  <th className="px-1 md:px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">
                     Actions
                   </th>
                 </tr>
@@ -894,7 +891,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                 {(selectedLetter ? availableLetters.filter(l => l === selectedLetter) : availableLetters.sort()).map((letter) => (
                   <React.Fragment key={letter}>
                     <tr id={`patient-group-${letter}`}>
-                      <td colSpan={6} className="px-4 py-1">
+                      <td colSpan={5} className="px-4 py-1">
                         <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(351,81%,49%)] text-white text-xs font-bold">
                           {letter}
                         </span>

@@ -54,7 +54,7 @@ export function AppLayout() {
       </main>
 
       {/* Footer - hidden on mobile due to bottom nav */}
-      <div className="hidden md:block md:ml-[210px]">
+      <div className="hidden md:block">
         <Footer />
       </div>
 

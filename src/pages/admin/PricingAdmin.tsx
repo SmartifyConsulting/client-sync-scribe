@@ -32,7 +32,7 @@ const calculateSavings = <T extends PricingConfig>(pricing: T[], role: string): 
 export default function PricingAdmin() {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { isAdmin, loading: roleLoading } = useUserRole();
+  const { isAdmin, isDoctor, loading: roleLoading } = useUserRole();
   const [pricing, setPricing] = useState<PricingConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -124,7 +124,7 @@ export default function PricingAdmin() {
     );
   }
 
-  if (!isAdmin) {
+  if (!isAdmin && !isDoctor) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
         <ShieldAlert className="h-16 w-16 text-destructive" />
