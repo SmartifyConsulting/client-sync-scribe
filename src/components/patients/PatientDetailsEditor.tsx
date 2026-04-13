@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import {
   Pencil,
-  Check,
+  Save,
   X,
   Loader2,
   AlertCircle,
@@ -1985,7 +1985,7 @@ export function PatientDetailsEditor({
                   <X className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-green-600" onClick={() => { performSave(formData, surgeries); setIsEditing(false); }}>
-                  <Check className="h-4 w-4" />
+                  <Save className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -2364,7 +2364,7 @@ export function PatientDetailsEditor({
                   <X className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-green-600" onClick={() => { performSave(formData, surgeries); setIsEditing(false); }}>
-                  <Check className="h-4 w-4" />
+                  <Save className="h-4 w-4" />
                 </Button>
               </div>
             </div>

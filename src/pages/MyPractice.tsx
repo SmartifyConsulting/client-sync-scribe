@@ -1334,7 +1334,7 @@ export default function MyPractice() {
                               {isSavingPartner ? (
                                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
                               ) : (
-                                <Check className="h-3.5 w-3.5" />
+                                <Save className="h-3.5 w-3.5" />
                               )}
                             </Button>
                             <Button variant="ghost" size="icon" onClick={cancelEditingPartner} className="h-7 w-7">
