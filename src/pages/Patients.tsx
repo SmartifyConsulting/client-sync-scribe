@@ -905,7 +905,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                         key={patient.id}
                         className="group transition-colors hover:bg-muted/30"
                       >
-                        <td className="px-4 py-2.5">
+                        <td className="px-2 md:px-4 py-2.5">
                           <Link
                             to={`/patients/${patient.id}`}
                             className="flex items-center gap-2.5"
@@ -940,7 +940,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                             </span>
                           </Link>
                         </td>
-                        <td className="px-4 py-2.5">
+                        <td className="hidden md:table-cell px-4 py-2.5">
                           <div className="space-y-0.5">
                             {patient.email && (
                               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -959,16 +959,16 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                        <td className="px-2 md:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
                           {patient.last_visit 
                             ? new Date(patient.last_visit).toLocaleDateString() 
                             : <span className="text-muted-foreground/50">—</span>
                           }
                         </td>
-                        <td className="px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                        <td className="px-2 md:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
                           {new Date(patient.created_at).toLocaleDateString()}
                         </td>
-                        <td className="px-3 py-2.5 text-center">
+                        <td className="px-2 md:px-3 py-2.5 text-center">
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -978,7 +978,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                             </Tooltip>
                           </TooltipProvider>
                         </td>
-                        <td className="px-4 py-2.5 text-right">
+                        <td className="px-2 md:px-4 py-2.5 text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-7 w-7">
