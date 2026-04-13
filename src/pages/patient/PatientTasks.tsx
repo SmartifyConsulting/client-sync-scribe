@@ -1,8 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { CheckSquare, Loader2, Clock, CheckCircle2, Video, Check, Pill, Square, Play } from "lucide-react";
+import { CheckSquare, Loader2, Clock, CheckCircle2, Video, Check, Pill, Square, Play, Mic, MicOff, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -74,6 +75,73 @@ export default function PatientTasks() {
     );
   }
 
+  // --- Task input state ---
+  const [taskText, setTaskText] = useState("");
+  const [isRecordingTask, setIsRecordingTask] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [addingTask, setAddingTask] = useState(false);
+  const taskRecorderRef = useRef<MediaRecorder | null>(null);
+  const taskChunksRef = useRef<Blob[]>([]);
+
+  const startTaskRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "audio/mp4";
+      const recorder = new MediaRecorder(stream, { mimeType });
+      taskChunksRef.current = [];
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) taskChunksRef.current.push(e.data); };
+      recorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        const blob = new Blob(taskChunksRef.current, { type: mimeType });
+        setIsTranscribing(true);
+        try {
+          const formData = new FormData();
+          formData.append("file", blob, `task-${Date.now()}.webm`);
+          const { data, error } = await supabase.functions.invoke("transcribe-audio", { body: formData });
+          if (error) throw error;
+          if (data?.text) setTaskText((prev) => (prev ? prev + " " : "") + data.text);
+        } catch (err: any) {
+          toast({ title: "Transcription failed", description: err.message, variant: "destructive" });
+        } finally {
+          setIsTranscribing(false);
+        }
+      };
+      recorder.start();
+      taskRecorderRef.current = recorder;
+      setIsRecordingTask(true);
+    } catch {
+      toast({ title: "Mic Error", description: "Could not access microphone.", variant: "destructive" });
+    }
+  }, [toast]);
+
+  const stopTaskRecording = useCallback(() => {
+    taskRecorderRef.current?.stop();
+    setIsRecordingTask(false);
+  }, []);
+
+  const handleAddTask = async () => {
+    if (!taskText.trim() || !user) return;
+    setAddingTask(true);
+    try {
+      const { error } = await supabase.from("todos").insert({
+        title: taskText.trim(),
+        user_id: user.id,
+        patient_id: patientIds[0] || null,
+        status: "pending",
+        priority: "medium",
+        task_type: "general",
+      });
+      if (error) throw error;
+      setTaskText("");
+      toast({ title: "Task added" });
+      fetchTodos();
+    } catch (err: any) {
+      toast({ title: "Failed to add task", description: err.message, variant: "destructive" });
+    } finally {
+      setAddingTask(false);
+    }
+  };
+
   return (
     <div className="space-y-6 p-4 md:p-6">
       <div>
@@ -82,6 +150,40 @@ export default function PatientTasks() {
           My To-Do List
         </h1>
         <p className="text-xs text-muted-foreground">Tasks assigned to you by your healthcare providers</p>
+      </div>
+
+      {/* Task Input Area */}
+      <div className="flex flex-col items-center gap-3 py-4">
+        <Button
+          variant={isRecordingTask ? "destructive" : "outline"}
+          size="icon"
+          className="h-14 w-14 rounded-full shadow-md"
+          onClick={isRecordingTask ? stopTaskRecording : startTaskRecording}
+          disabled={isTranscribing}
+        >
+          {isTranscribing ? (
+            <Loader2 className="h-6 w-6 animate-spin" />
+          ) : isRecordingTask ? (
+            <MicOff className="h-6 w-6" />
+          ) : (
+            <Mic className="h-6 w-6" />
+          )}
+        </Button>
+        <p className="text-[10px] text-muted-foreground">
+          {isRecordingTask ? "Recording... tap to stop" : isTranscribing ? "Transcribing..." : "Tap to dictate a task"}
+        </p>
+        <div className="flex w-full max-w-md gap-2">
+          <Input
+            placeholder="Type a task..."
+            value={taskText}
+            onChange={(e) => setTaskText(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAddTask()}
+            disabled={addingTask}
+          />
+          <Button size="icon" onClick={handleAddTask} disabled={!taskText.trim() || addingTask}>
+            {addingTask ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          </Button>
+        </div>
       </div>
 
       {todos.length === 0 ? (
