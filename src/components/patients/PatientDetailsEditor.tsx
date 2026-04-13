@@ -53,6 +53,7 @@ import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format, parseISO, isFuture, isAfter } from "date-fns";
+import vulaVouchersLogo from "@/assets/vula-vouchers-logo.png";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Mic, Clock } from "lucide-react";
 import {
@@ -1124,7 +1125,7 @@ export function PatientDetailsEditor({
           <div className="mt-3 border-t border-border pt-3">
             <div className="flex items-center rounded-xl border border-border overflow-hidden">
               <div className="flex-1 flex items-center justify-center py-3 px-4 bg-primary/5">
-                <img src="/src/assets/vula-vouchers-logo.png" alt="Vula Vouchers" className="h-8 w-auto object-contain" />
+                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-8 w-auto object-contain" />
               </div>
               <div className="w-[1px] self-stretch bg-border" />
               <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
