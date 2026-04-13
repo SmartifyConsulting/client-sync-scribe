@@ -9,7 +9,7 @@ import {
   Handshake,
   FolderOpen,
   Gift,
-  User,
+  Shield,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 
@@ -19,7 +19,7 @@ const doctorNavItems = [
   { icon: Mic, label: "Sessions", to: "/sessions" },
   { icon: Briefcase, label: "Practice", to: "/practice" },
   { icon: Gift, label: "Rewards", to: "/doctor/rewards" },
-  { icon: User, label: "Profile", to: "/profile" },
+  { icon: Shield, label: "Admin", to: "/admin" },
 ];
 
 const patientSections = [

@@ -1,6 +1,8 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Calendar, Clock, LogOut, User, Bell, Share2 } from "lucide-react";
+import { Calendar, Clock, LogOut, User, Bell, Share2, Stethoscope, HeartPulse } from "lucide-react";
+import { useUserRole } from "@/hooks/useUserRole";
+import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -214,17 +216,8 @@ export function PatientAppLayout() {
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-48 p-1.5" align="end">
-              <div className="px-2 py-1.5 border-b border-border mb-1">
-                  <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
-                  <p className="text-[10px] text-muted-foreground">
-                    {(() => {
-                      const parts = (profile?.full_name || "user").toLowerCase().split(/\s+/);
-                      const first = parts[0] || "user";
-                      const last = parts.length > 1 ? parts[parts.length - 1] : "patient";
-                      return `${first}.${last}@holarc.health`;
-                    })()}
-                  </p>
-                </div>
+              {/* Profile switcher for doctors viewing patient view */}
+              <ProfileSwitcher profile={profile} navigate={navigate} />
                 <button
                   onClick={() => navigate("/settings")}
                   className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors w-full"

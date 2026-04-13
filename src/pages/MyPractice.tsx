@@ -1044,25 +1044,6 @@ export default function MyPractice() {
           >
             Certificates{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}
           </TabsTrigger>
-          <TabsTrigger
-            value="pricing"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs"
-          >
-            Pricing
-          </TabsTrigger>
-          <TabsTrigger
-            value="invoices"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs"
-          >
-            Invoices
-          </TabsTrigger>
-
-          <TabsTrigger
-            value="templates"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs"
-          >
-            Templates
-          </TabsTrigger>
         </TabsList>
 
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
@@ -2051,15 +2032,6 @@ export default function MyPractice() {
           </div>
         </TabsContent>
 
-        {/* === INVOICES TAB === */}
-        <TabsContent value="invoices" className="mt-4">
-          <DoctorInvoices hideHeader />
-        </TabsContent>
-
-        {/* === TEMPLATES TAB === */}
-        <TabsContent value="templates" className="mt-4">
-          <Documents hideHeader />
-        </TabsContent>
       </Tabs>
     </div>
   );

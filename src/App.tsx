@@ -49,6 +49,7 @@ import GamificationAdmin from "./pages/admin/GamificationAdmin";
 import UserManagement from "./pages/admin/UserManagement";
 import ReferralDoctors from "./pages/ReferralDoctors";
 import ExpiringRecordings from "./pages/ExpiringRecordings";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -160,6 +161,7 @@ const App = () => (
             <Route path="/connections" element={<Connections />} />
             
             {/* Admin routes */}
+            <Route path="/admin" element={<Admin />} />
             <Route path="/admin/pricing" element={<PricingAdmin />} />
             <Route path="/admin/gamification" element={<GamificationAdmin />} />
             <Route path="/admin/users" element={<UserManagement />} />
