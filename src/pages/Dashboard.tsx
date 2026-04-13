@@ -7,6 +7,7 @@ import { StatsCard } from "@/components/dashboard/StatsCard";
 import { TodaysBriefing } from "@/components/dashboard/TodaysBriefing";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { DoctorAccessRequests } from "@/components/doctor/DoctorAccessRequests";
+import { DoctorRoundTables } from "@/components/doctor/DoctorRoundTables";
 import { useProfile } from "@/hooks/useProfile";
 
 import { useUserRole } from "@/hooks/useUserRole";
@@ -312,9 +313,25 @@ export default function Dashboard() {
         </div>
         <div className="lg:col-span-2 space-y-6">
           {isDoctor && <CompactTodoList />}
+          {isDoctor && (
+            <div className="hidden lg:block">
+              <section>
+                <h2 className="text-lg font-semibold mb-3 text-foreground">My Round Tables</h2>
+                <DoctorRoundTables />
+              </section>
+            </div>
+          )}
           <div className="lg:hidden">
             <RecentActivity />
           </div>
+          {isDoctor && (
+            <div className="lg:hidden">
+              <section>
+                <h2 className="text-lg font-semibold mb-3 text-foreground">My Round Tables</h2>
+                <DoctorRoundTables />
+              </section>
+            </div>
+          )}
         </div>
       </div>
     </div>

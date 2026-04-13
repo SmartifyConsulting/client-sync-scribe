@@ -815,13 +815,13 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   <th className="hidden md:table-cell px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Contact
                   </th>
-                  <th className="px-1 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="px-3 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Last Seen
                   </th>
-                  <th className="px-1 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="px-3 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Since
                   </th>
-                  <th className="px-1 md:px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">
+                  <th className="px-3 md:px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">
                     Actions
                   </th>
                 </tr>
@@ -865,13 +865,13 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                           )}
                         </div>
                       </td>
-                      <td className="px-1 md:px-4 py-2.5 text-xs text-muted-foreground">
+                      <td className="px-3 md:px-4 py-2.5 text-xs text-muted-foreground">
                         {mePatient.last_visit ? new Date(mePatient.last_visit).toLocaleDateString() : <span className="text-muted-foreground/50">—</span>}
                       </td>
-                      <td className="px-1 md:px-4 py-2.5 text-xs text-muted-foreground">
+                      <td className="px-3 md:px-4 py-2.5 text-xs text-muted-foreground">
                         {new Date(mePatient.created_at).toLocaleDateString()}
                       </td>
-                      <td className="px-1 md:px-4 py-2.5 text-right">
+                      <td className="px-3 md:px-4 py-2.5 text-right">
                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => navigate(`/patients/${mePatient.id}`)}>
                           <Edit3 className="h-3.5 w-3.5" />
                         </Button>
@@ -948,16 +948,16 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                             )}
                           </div>
                         </td>
-                        <td className="px-1 md:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                        <td className="px-3 md:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
                           {patient.last_visit 
                             ? new Date(patient.last_visit).toLocaleDateString() 
                             : <span className="text-muted-foreground/50">—</span>
                           }
                         </td>
-                        <td className="px-1 md:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                        <td className="px-3 md:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
                           {new Date(patient.created_at).toLocaleDateString()}
                         </td>
-                        <td className="px-1 md:px-4 py-2.5 text-right">
+                        <td className="px-3 md:px-4 py-2.5 text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-7 w-7">

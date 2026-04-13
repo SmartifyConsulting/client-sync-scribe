@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
 import { MobileHeader } from "./MobileHeader";
+import { Sidebar } from "./Sidebar";
 import { PageTransition } from "./PageTransition";
 import { Footer } from "./Footer";
 import { TopBarIcons } from "./TopBarIcons";
@@ -29,11 +30,16 @@ export function AppLayout() {
         </div>
       )}
 
+      {/* Sidebar - hidden on mobile */}
+      <div className="hidden md:block">
+        <Sidebar />
+      </div>
+
       {/* Mobile header - hidden on desktop */}
       <MobileHeader />
       
       {/* Main content */}
-      <main className="flex-1 pb-24 md:pb-0">
+      <main className="flex-1 pb-24 md:pb-0 md:ml-[210px]">
         {/* Persistent top-right icons on desktop */}
         <div className="hidden md:flex justify-end px-8 pt-4">
           <TopBarIcons />
@@ -48,7 +54,7 @@ export function AppLayout() {
       </main>
 
       {/* Footer - hidden on mobile due to bottom nav */}
-      <div className="hidden md:block">
+      <div className="hidden md:block md:ml-[210px]">
         <Footer />
       </div>
 
