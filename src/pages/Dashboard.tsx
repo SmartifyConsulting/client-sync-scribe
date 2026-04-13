@@ -8,7 +8,7 @@ import { TodaysBriefing } from "@/components/dashboard/TodaysBriefing";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { DoctorAccessRequests } from "@/components/doctor/DoctorAccessRequests";
 import { useProfile } from "@/hooks/useProfile";
-import { ShareAppDialog } from "@/components/ShareAppDialog";
+
 import { useUserRole } from "@/hooks/useUserRole";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -253,7 +253,6 @@ export default function Dashboard() {
             Here's what's happening with your practice today, {formattedDate}
           </p>
         </div>
-        <ShareAppDialog />
       </div>
 
       {/* Patient Access Requests */}
