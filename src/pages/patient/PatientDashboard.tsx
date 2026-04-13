@@ -287,7 +287,7 @@ export default function PatientDashboard() {
   return (
     <div className="space-y-5 animate-fade-in">
       {/* Welcome Header */}
-      <div className="flex items-center justify-between">
+      <div className={isMobile ? "space-y-3" : "flex items-center justify-between"}>
         <div className="flex items-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
             <User className="h-7 w-7 text-primary" />
