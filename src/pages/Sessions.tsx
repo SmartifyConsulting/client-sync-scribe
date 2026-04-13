@@ -1466,7 +1466,8 @@ export default function Sessions() {
               </div>
             ))}
           </div>
-        )}
+          );
+        })()}
       </div>
       {/* Prescription Editor Modal */}
       {showPrescriptionEditor && currentPatient && patientId && (
