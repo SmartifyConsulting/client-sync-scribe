@@ -289,3 +289,10 @@
     padding-bottom: env(safe-area-inset-bottom, 8px);
   }
 }
+
+/* Mobile font compaction */
+@media (max-width: 767px) {
+  html {
+    font-size: 14px;
+  }
+}

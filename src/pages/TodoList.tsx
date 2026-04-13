@@ -507,7 +507,7 @@ export default function TodoList() {
                           {editingId === todo.id ? (
                             <div className="flex-1 flex items-center gap-2">
                               <Input value={editText} onChange={(e) => setEditText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") saveEdit(todo.id); if (e.key === "Escape") cancelEdit(); }} className="flex-1" autoFocus />
-                              <Button size="icon" variant="ghost" onClick={() => saveEdit(todo.id)}><Check className="h-4 w-4 text-success" /></Button>
+                              <Button size="icon" variant="ghost" onClick={() => saveEdit(todo.id)}><Save className="h-4 w-4 text-success" /></Button>
                               <Button size="icon" variant="ghost" onClick={cancelEdit}><X className="h-4 w-4" /></Button>
                             </div>
                           ) : (
