@@ -9,6 +9,8 @@ import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { DoctorAccessRequests } from "@/components/doctor/DoctorAccessRequests";
 import { DoctorRoundTables } from "@/components/doctor/DoctorRoundTables";
 import { useProfile } from "@/hooks/useProfile";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { lazy, Suspense } from "react";
 
 import { useUserRole } from "@/hooks/useUserRole";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,6 +20,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+
+// Lazy load tab page components for desktop
+const Patients = lazy(() => import("@/pages/Patients"));
+const MyPractice = lazy(() => import("@/pages/MyPractice"));
+const Admin = lazy(() => import("@/pages/Admin"));
+const DoctorRewards = lazy(() => import("@/pages/doctor/DoctorRewards"));
 
 export default function Dashboard() {
   const { profile, loading: profileLoading } = useProfile();
