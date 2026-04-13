@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
 import { MobileHeader } from "./MobileHeader";
+import { Sidebar } from "./Sidebar";
 import { PageTransition } from "./PageTransition";
 import { Footer } from "./Footer";
 import { TopBarIcons } from "./TopBarIcons";
@@ -13,12 +14,15 @@ export function AppLayout() {
   const location = useLocation();
   const { isBlocked, daysRemaining, loading } = useSubscriptionGate();
 
+  // Allow access to settings page even when blocked (so they can subscribe)
   const isSettingsPage = location.pathname.startsWith("/settings");
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* Subscription gate modal */}
       {!loading && isBlocked && !isSettingsPage && <SubscriptionGateModal />}
 
+      {/* Expiring soon banner */}
       {!loading && !isBlocked && daysRemaining !== null && daysRemaining <= 7 && (
         <div className="bg-amber-500/15 border-b border-amber-500/30 px-4 py-2 text-center text-xs text-amber-700 flex items-center justify-center gap-2">
           <AlertCircle className="h-3.5 w-3.5" />
@@ -26,13 +30,21 @@ export function AppLayout() {
         </div>
       )}
 
+      {/* Sidebar - hidden on mobile */}
+      <div className="hidden md:block">
+        <Sidebar />
+      </div>
+
+      {/* Mobile header - hidden on desktop */}
       <MobileHeader />
       
-      <main className="flex-1 pb-24 md:pb-0">
+      {/* Main content */}
+      <main className="flex-1 pb-24 md:pb-0 md:ml-[210px]">
+        {/* Persistent top-right icons on desktop */}
         <div className="hidden md:flex justify-end px-8 pt-4">
           <TopBarIcons />
         </div>
-        <div className="px-4 py-6 md:px-8 md:pt-2 md:pb-8 max-w-7xl mx-auto">
+        <div className="px-4 py-6 md:px-8 md:pt-2 md:pb-8 max-w-7xl">
           <AnimatePresence mode="wait">
             <PageTransition key={location.pathname}>
               <Outlet />
@@ -41,10 +53,12 @@ export function AppLayout() {
         </div>
       </main>
 
-      <div className="hidden md:block">
+      {/* Footer - hidden on mobile due to bottom nav */}
+      <div className="hidden md:block md:ml-[210px]">
         <Footer />
       </div>
 
+      {/* Mobile bottom navigation */}
       <BottomNav />
     </div>
   );
