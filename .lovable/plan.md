@@ -1,40 +1,46 @@
 
 
-# Fix Reset Password Race Condition & Harden Recovery Flow
+# Fix Reset Password Race Condition
 
-## Problem
+## Root Cause
 
-When a user clicks the password reset link, they land on `/reset-password` with a hash fragment containing the recovery token. Supabase's `onAuthStateChange` processes this token asynchronously, but `ResetPassword.tsx` immediately calls `getSession()` — which returns `null` because the token hasn't been exchanged yet. This causes a premature "Invalid or expired link" toast and redirect to `/forgot-password`.
+Two bugs in `ResetPassword.tsx`:
 
-There is no conflicting recovery logic in `Auth.tsx` — the entire reset flow lives in `ResetPassword.tsx`. The fix is contained there.
+1. **Stale closure in timeout**: Line 48 checks `!authReady`, but `authReady` is captured from the initial render closure — it's always `false`. So even if `setAuthReady(true)` was called via `getSession()`, the timeout still sees `false`.
 
-## Changes
+2. **Missing ref update in getSession fallback**: The `getSession()` path (line 39-44) sets `authReady` state but does NOT set `recoveryVerifiedRef.current = true`. Since the timeout only reliably checks the ref (due to bug #1), the 5-second timeout always fires and redirects to `/forgot-password`.
 
-### 1. Rewrite `ResetPassword.tsx` with proper recovery detection
+Combined effect: Recovery token gets processed, session exists, but the timeout fires anyway and kicks the user back to forgot-password.
+
+## Fix
 
 **File:** `src/pages/ResetPassword.tsx`
 
-- Add three local states: `authReady` (boolean, starts false), `recoveryVerified` (boolean), `initialLoading` (boolean, starts true)
-- Replace the `useEffect` with one that:
-  1. Subscribes to `onAuthStateChange` **first**
-  2. Listens for `PASSWORD_RECOVERY` event — when received, sets `recoveryVerified = true` and `authReady = true`
-  3. Also listens for `SIGNED_IN` event as a fallback (some Supabase versions emit this instead)
-  4. After subscribing, calls `getSession()` as a fallback — if a session exists, sets `authReady = true` (recovery may have already been processed)
-  5. Adds a 5-second timeout as a safety net: if neither event fires nor session found, show the "expired link" error and redirect
-  6. Cleans up the subscription on unmount
-- Show a loading spinner while `initialLoading` is true (auth not yet ready)
-- Disable the submit button until `authReady` is true
-- `handleSubmit` calls `updateUser({ password })` only when `authReady` is true
-- After successful password update, clean up the URL hash with `window.history.replaceState` to prevent re-triggering
-- After success, check user role and redirect to the correct page (patient vs doctor)
+Two small changes:
 
-### 2. No changes needed in Auth.tsx
+1. In the `getSession()` fallback (line 40-43), also set `recoveryVerifiedRef.current = true` so the timeout won't fire.
 
-Auth.tsx has no recovery handling — it only handles login and signup. The user's mention of Auth.tsx race conditions refers to a flow that doesn't exist there. All fixes are in ResetPassword.tsx.
+2. Remove the `!authReady` check from the timeout condition (line 48) since it's always stale. Only rely on `recoveryVerifiedRef.current`.
 
-## Files Modified
+```typescript
+// Line 39-44: Add ref update
+supabase.auth.getSession().then(({ data: { session } }) => {
+  if (session) {
+    recoveryVerifiedRef.current = true;  // <-- add this
+    setAuthReady(true);
+    setInitialLoading(false);
+  }
+});
 
-| File | Changes |
-|------|---------|
-| `src/pages/ResetPassword.tsx` | Replace session-check with `onAuthStateChange` listener for `PASSWORD_RECOVERY`, add loading state, timeout fallback, URL cleanup after success |
+// Line 47-57: Only check the ref (remove stale authReady)
+timeoutId = setTimeout(() => {
+  if (!recoveryVerifiedRef.current) {  // <-- remove && !authReady
+    setInitialLoading(false);
+    toast({ ... });
+    navigate("/forgot-password");
+  }
+}, 5000);
+```
+
+No other files need changes.
 
