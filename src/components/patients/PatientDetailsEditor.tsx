@@ -1226,7 +1226,7 @@ export function PatientDetailsEditor({
           )}
           {show("doctors") && (
             <TabsTrigger value="doctors" className={triggerClass}>
-              Care Team
+              My H/Care Providers
             </TabsTrigger>
           )}
           {show("sessions") && (
