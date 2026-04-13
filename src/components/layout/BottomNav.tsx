@@ -26,7 +26,7 @@ const patientSections = [
   { icon: HeartPulse, label: "My Profile", section: "health" },
   { icon: Handshake, label: "My Healthcare", section: "care" },
   { icon: FolderOpen, label: "My Desk", section: "admin" },
-  { icon: Gift, label: "My Vulas", section: "rewards" },
+  { icon: Gift, label: "My Rewards", section: "rewards" },
 ];
 
 export function BottomNav() {
@@ -96,7 +96,7 @@ export function BottomNav() {
                 }
               }}
               className={cn(
-                "flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 min-w-[64px]",
+                "flex flex-1 flex-col items-center gap-0.5 px-1 py-2 rounded-xl transition-all duration-200 min-w-0",
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"

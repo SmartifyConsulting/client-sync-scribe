@@ -433,14 +433,14 @@ export default function MyRewards() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Gift className="h-5 w-5 text-emerald-500" />
+                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-6 w-auto object-contain" />
                 Recent Rewards
               </CardTitle>
             </CardHeader>
             <CardContent>
               {rewards.length === 0 ? (
                 <div className="text-center py-8">
-                  <img src={vulaVouchersLogo} alt="Vula" className="h-12 w-12 object-contain mx-auto mb-4" />
+                  <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-16 w-auto object-contain mx-auto mb-4" />
                   <p className="text-muted-foreground">No rewards yet. Start your health journey!</p>
                 </div>
               ) : (
