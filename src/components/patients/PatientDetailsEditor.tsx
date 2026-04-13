@@ -1186,6 +1186,7 @@ export function PatientDetailsEditor({
 
   // Parent tab groups for desktop/tablet
   const PROFILE_TABS = ["personal", "medical"];
+  const CARE_TABS = ["doctors", "sessions", "roundtable"];
   const ADMIN_TABS = ["calendar", "tasks", "documents"];
 
   const handleParentTabClick = (parent: string, tabs: string[]) => {
@@ -1197,6 +1198,7 @@ export function PatientDetailsEditor({
   // When activeTab changes, sync activeParentTab
   useEffect(() => {
     if (PROFILE_TABS.includes(activeTab)) setActiveParentTab("profile");
+    else if (CARE_TABS.includes(activeTab)) setActiveParentTab("care");
     else if (ADMIN_TABS.includes(activeTab)) setActiveParentTab("admin");
     else setActiveParentTab(null);
   }, [activeTab]);
@@ -1256,7 +1258,7 @@ export function PatientDetailsEditor({
       );
     }
 
-    // Desktop/Tablet: grouped tabs with My Profile and My Admin parent groups
+    // Desktop/Tablet: grouped tabs
     return (
       <div className="space-y-1">
         <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
@@ -1271,22 +1273,20 @@ export function PatientDetailsEditor({
           >
             My Profile
           </button>
+          {/* My Healthcare parent trigger */}
           {isSelfService && (
-            <TabsTrigger value="doctors" className={triggerClass}>
-              My Care Team
-            </TabsTrigger>
+            <button
+              type="button"
+              onClick={() => handleParentTabClick("care", CARE_TABS)}
+              className={cn(
+                "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-xs font-medium transition-all",
+                activeParentTab === "care" ? "bg-white text-black shadow-sm" : "text-white hover:bg-white/10",
+              )}
+            >
+              My Healthcare
+            </button>
           )}
-          {isSelfService && (
-            <TabsTrigger value="sessions" className={triggerClass}>
-              My Sessions
-            </TabsTrigger>
-          )}
-          {isSelfService && (
-            <TabsTrigger value="roundtable" className={triggerClass}>
-              My Round Table
-            </TabsTrigger>
-          )}
-          {/* My Admin parent trigger */}
+          {/* My Desk parent trigger */}
           {isSelfService && (
             <button
               type="button"
@@ -1296,7 +1296,7 @@ export function PatientDetailsEditor({
                 activeParentTab === "admin" ? "bg-white text-black shadow-sm" : "text-white hover:bg-white/10",
               )}
             >
-              My Admin
+              My Desk
             </button>
           )}
           {isSelfService && isDoctor && (
@@ -1320,7 +1320,7 @@ export function PatientDetailsEditor({
                 navigate("/patient/rewards");
               }}
             >
-              My Rewards
+              My Vulas
             </TabsTrigger>
           )}
         </TabsList>
