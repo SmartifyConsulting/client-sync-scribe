@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Users,
-  Mic,
   Briefcase,
   HeartPulse,
   Handshake,
@@ -16,7 +15,6 @@ import { useUserRole } from "@/hooks/useUserRole";
 const doctorNavItems = [
   { icon: LayoutDashboard, label: "Home", to: "/dashboard" },
   { icon: Users, label: "Patients", to: "/patients" },
-  { icon: Mic, label: "Sessions", to: "/sessions" },
   { icon: Briefcase, label: "Practice", to: "/practice" },
   { icon: Shield, label: "Admin", to: "/admin" },
   { icon: Gift, label: "Rewards", to: "/doctor/rewards" },

@@ -807,7 +807,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-               <thead>
+              <thead>
                 <tr className="bg-primary">
                   <th className="px-2 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Patient
@@ -815,16 +815,13 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   <th className="hidden md:table-cell px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Contact
                   </th>
-                  <th className="px-2 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="px-1 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Last Seen
                   </th>
-                  <th className="px-2 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="px-1 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Since
                   </th>
-                  <th className="px-2 md:px-3 py-2.5 text-center text-xs font-medium text-primary-foreground">
-                    Status
-                  </th>
-                  <th className="px-2 md:px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">
+                  <th className="px-1 md:px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">
                     Actions
                   </th>
                 </tr>
@@ -848,6 +845,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                               return `${lastName}, ${firstNames}`;
                             })()}
                           </span>
+                          <div className={cn("h-2 w-2 rounded-full flex-shrink-0", mePatient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
                         </Link>
                       </td>
                       <td className="hidden md:table-cell px-4 py-2.5">
@@ -867,23 +865,13 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                           )}
                         </div>
                       </td>
-                      <td className="px-2 md:px-4 py-2.5 text-xs text-muted-foreground">
+                      <td className="px-1 md:px-4 py-2.5 text-xs text-muted-foreground">
                         {mePatient.last_visit ? new Date(mePatient.last_visit).toLocaleDateString() : <span className="text-muted-foreground/50">—</span>}
                       </td>
-                      <td className="px-2 md:px-4 py-2.5 text-xs text-muted-foreground">
+                      <td className="px-1 md:px-4 py-2.5 text-xs text-muted-foreground">
                         {new Date(mePatient.created_at).toLocaleDateString()}
                       </td>
-                      <td className="px-2 md:px-3 py-2.5 text-center">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className={cn("mx-auto h-2.5 w-2.5 rounded-full", mePatient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
-                            </TooltipTrigger>
-                            <TooltipContent>{mePatient.status === "active" ? "Active" : "Inactive"}</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </td>
-                      <td className="px-4 py-2.5 text-right">
+                      <td className="px-1 md:px-4 py-2.5 text-right">
                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => navigate(`/patients/${mePatient.id}`)}>
                           <Edit3 className="h-3.5 w-3.5" />
                         </Button>
@@ -894,7 +882,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                 {(selectedLetter ? availableLetters.filter(l => l === selectedLetter) : availableLetters.sort()).map((letter) => (
                   <React.Fragment key={letter}>
                     <tr id={`patient-group-${letter}`}>
-                      <td colSpan={6} className="px-4 py-1">
+                      <td colSpan={5} className="px-4 py-1">
                         <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(351,81%,49%)] text-white text-xs font-bold">
                           {letter}
                         </span>
@@ -938,6 +926,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                                 </span>
                               )}
                             </span>
+                            <div className={cn("h-2 w-2 rounded-full flex-shrink-0", patient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
                           </Link>
                         </td>
                         <td className="hidden md:table-cell px-4 py-2.5">
@@ -959,26 +948,16 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                             )}
                           </div>
                         </td>
-                        <td className="px-2 md:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                        <td className="px-1 md:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
                           {patient.last_visit 
                             ? new Date(patient.last_visit).toLocaleDateString() 
                             : <span className="text-muted-foreground/50">—</span>
                           }
                         </td>
-                        <td className="px-2 md:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                        <td className="px-1 md:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
                           {new Date(patient.created_at).toLocaleDateString()}
                         </td>
-                        <td className="px-2 md:px-3 py-2.5 text-center">
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className={cn("mx-auto h-2.5 w-2.5 rounded-full", patient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
-                              </TooltipTrigger>
-                              <TooltipContent>{patient.status === "active" ? "Active" : "Inactive"}</TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </td>
-                        <td className="px-2 md:px-4 py-2.5 text-right">
+                        <td className="px-1 md:px-4 py-2.5 text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-7 w-7">

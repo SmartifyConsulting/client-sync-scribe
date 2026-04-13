@@ -229,7 +229,10 @@ export default function PatientProfile() {
               {initials}
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-foreground">{patient.name}</h1>
+              <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+                {patient.name}
+                <div className={cn("h-2.5 w-2.5 rounded-full flex-shrink-0", patient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
+              </h1>
               <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mt-1">
                 {patient.email && (
                   <span className="flex items-center gap-1.5">
@@ -274,22 +277,13 @@ export default function PatientProfile() {
 
       {/* Stats Cards - hide when doctor views their own patient record */}
       {(patient as any).patient_user_id !== currentUserId && (
-        <div className="grid gap-2 grid-cols-3 lg:grid-cols-5">
+        <div className="grid gap-2 grid-cols-2 md:grid-cols-4">
           <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
             <div className="flex items-center justify-between">
               <p className="text-[10px] font-medium text-muted-foreground">Total Sessions</p>
               <FileText className="h-3 w-3 text-primary" />
             </div>
             <p className="mt-1 text-sm font-bold text-foreground">{completedSessions.length}</p>
-          </div>
-          <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] font-medium text-muted-foreground">Status</p>
-              <div
-                className={`h-2 w-2 rounded-full ${patient.status === "active" ? "bg-green-500" : "bg-muted-foreground"}`}
-              />
-            </div>
-            <p className="mt-1 text-sm font-bold text-foreground capitalize">{patient.status}</p>
           </div>
           <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
             <div className="flex items-center justify-between">
@@ -351,7 +345,7 @@ export default function PatientProfile() {
             value="doctors"
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            H/Care Providers
+            Healthcare Providers
           </TabsTrigger>
           <TabsTrigger
             value="documents"

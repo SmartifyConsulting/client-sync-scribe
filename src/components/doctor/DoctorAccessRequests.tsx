@@ -272,7 +272,7 @@ export function DoctorAccessRequests() {
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm text-foreground">{patientName}</p>
                   <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    {patientName} has invited you on {patientName.split(" ")[0]}'s panel of healthcare providers and has provided access to their health information.
+                    {patientName} has invited you on their panel of healthcare providers and has provided access to their health information.
                   </p>
                   <p className="text-[10px] text-muted-foreground/70 mt-2">
                     {format(new Date(request.created_at), "d MMM yyyy 'at' h:mm a")}
