@@ -1234,7 +1234,7 @@ export function PatientDetailsEditor({
           )}
           {show("doctors") && (
             <TabsTrigger value="doctors" className={triggerClass}>
-              My H/Care Providers
+              My H/Care Team
             </TabsTrigger>
           )}
           {show("sessions") && (
@@ -1349,7 +1349,7 @@ export function PatientDetailsEditor({
         {activeParentTab === "care" && isSelfService && (
           <TabsList className="bg-primary/15 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
             <TabsTrigger value="doctors" className="text-xs whitespace-nowrap">
-              My H/Care Providers
+              My H/Care Team
             </TabsTrigger>
             <TabsTrigger value="sessions" className="text-xs whitespace-nowrap">
               My Sessions
