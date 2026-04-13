@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { ShareAppDialog } from "@/components/ShareAppDialog";
 import { useUserRole } from "@/hooks/useUserRole";
+import { cn } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function TopBarIcons() {
