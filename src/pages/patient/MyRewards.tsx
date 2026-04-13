@@ -432,8 +432,7 @@ export default function MyRewards() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-6 w-auto object-contain" />
+              <CardTitle>
                 Recent Rewards
               </CardTitle>
             </CardHeader>
