@@ -52,7 +52,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
+import { format, parseISO, isFuture, isAfter } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
+import { Calendar, Mic, Clock } from "lucide-react";
 import {
   Patient,
   Surgery,
@@ -306,7 +308,7 @@ function AnimatedCounter({ target }: { target: number }) {
 }
 
 const SECTION_TABS: Record<string, string[]> = {
-  home: ["dashboard"],
+  home: ["personal", "medical"],
   health: ["personal", "medical"],
   care: ["doctors", "sessions", "roundtable"],
   admin: ["calendar", "tasks", "documents"],
@@ -1014,11 +1016,36 @@ export function PatientDetailsEditor({
         .join("")
         .toUpperCase()
         .slice(0, 2) || "?";
+
+    // Fetch upcoming appointments for this patient
+    const { data: upcomingAppointments = [] } = useQuery({
+      queryKey: ["banner-appointments", patient.id],
+      queryFn: async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+        // Get appointment requests for this patient
+        const { data, error } = await supabase
+          .from("appointment_requests")
+          .select("*, profiles:doctor_id(full_name, specialty)")
+          .eq("patient_user_id", user.id)
+          .in("status", ["approved", "pending"])
+          .order("requested_start", { ascending: true })
+          .limit(3);
+        if (error) { console.error(error); return []; }
+        // Filter to future appointments only
+        return (data || []).filter((a: any) => {
+          const start = a.proposed_start || a.requested_start;
+          return start && isAfter(parseISO(start), new Date());
+        });
+      },
+      enabled: isSelfService,
+    });
+
     return (
       <div className={sectionFrame + " mb-4"}>
-        <div className="flex items-center gap-4">
+        <div className="flex items-start gap-4">
           <div
-            className="flex flex-col items-center gap-1 cursor-pointer"
+            className="flex flex-col items-center gap-1 cursor-pointer shrink-0"
             onClick={() => avatarInputRef.current?.click()}
           >
             <div className="relative">
@@ -1039,22 +1066,50 @@ export function PatientDetailsEditor({
             {!avatarUrl && <span className="text-[10px] text-muted-foreground">Tap to add photo</span>}
             <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
           </div>
-          <div>
-            <p className="text-sm font-semibold text-muted-foreground">Welcome back</p>
-            <h3 className="text-sm font-semibold text-foreground">{patient.name}</h3>
-            <p className="text-xs text-muted-foreground">
-              {(() => {
-                const first = (patient.first_name || splitName(patient.name).first || "user")
-                  .toLowerCase()
-                  .replace(/\s+/g, "");
-                const last = (patient.last_name || splitName(patient.name).last || "patient")
-                  .toLowerCase()
-                  .replace(/\s+/g, "");
-                return `${first}.${last}@holarc.health`;
-              })()}
-            </p>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-semibold text-muted-foreground">Welcome back</p>
+                <h3 className="text-sm font-semibold text-foreground">{patient.name}</h3>
+                <p className="text-xs text-muted-foreground">
+                  {(() => {
+                    const first = (patient.first_name || splitName(patient.name).first || "user")
+                      .toLowerCase()
+                      .replace(/\s+/g, "");
+                    const last = (patient.last_name || splitName(patient.name).last || "patient")
+                      .toLowerCase()
+                      .replace(/\s+/g, "");
+                    return `${first}.${last}@holarc.health`;
+                  })()}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={() => {
+                    setActiveTab("calendar");
+                    if (isMobile && isSelfService) navigate("/patient/details?section=admin");
+                  }}
+                >
+                  <Calendar className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  className="h-8 text-xs gap-1"
+                  onClick={() => {
+                    setActiveTab("tasks");
+                    if (isMobile && isSelfService) navigate("/patient/details?section=admin");
+                  }}
+                >
+                  <CheckSquare className="h-3.5 w-3.5" />
+                  Record Task
+                </Button>
+              </div>
+            </div>
             {!rewardsLoading && lollipopCount !== undefined && (
-              <div className="mt-2">
+              <div className="mt-1">
                 <p className="text-[10px] text-muted-foreground">You have earned</p>
                 <div className="flex items-center gap-1.5">
                   <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
@@ -1066,6 +1121,39 @@ export function PatientDetailsEditor({
             )}
           </div>
         </div>
+
+        {/* Upcoming Appointments mini-list */}
+        {upcomingAppointments.length > 0 && (
+          <div className="mt-3 border-t border-border pt-3">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-xs font-semibold text-foreground">Upcoming Appointments</span>
+            </div>
+            <div className="space-y-1.5">
+              {upcomingAppointments.map((appt: any) => {
+                const start = appt.proposed_start || appt.requested_start;
+                const doctorProfile = appt.profiles as any;
+                return (
+                  <div key={appt.id} className="flex items-center justify-between text-xs bg-muted/50 rounded-md px-2.5 py-1.5">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="font-medium text-foreground truncate">
+                        {doctorProfile?.full_name || "Doctor"}
+                      </span>
+                      {doctorProfile?.specialty && (
+                        <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 shrink-0">
+                          {doctorProfile.specialty}
+                        </Badge>
+                      )}
+                    </div>
+                    <span className="text-muted-foreground shrink-0 ml-2">
+                      {format(parseISO(start), "MMM d, h:mm a")}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -1114,11 +1202,6 @@ export function PatientDetailsEditor({
     if (isMobile && isSelfService && section) {
       return (
         <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-          {show("dashboard") && (
-            <TabsTrigger value="dashboard" className={triggerClass}>
-              Dashboard
-            </TabsTrigger>
-          )}
           {show("personal") && (
             <TabsTrigger value="personal" className={triggerClass}>
               Personal Information
@@ -1167,11 +1250,6 @@ export function PatientDetailsEditor({
     return (
       <div className="space-y-1">
         <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-          {isSelfService && (
-            <TabsTrigger value="dashboard" className={triggerClass}>
-              Dashboard
-            </TabsTrigger>
-          )}
           {/* My Profile parent trigger */}
           <button
             type="button"
@@ -1653,20 +1731,6 @@ export function PatientDetailsEditor({
               </div>
             </TabsContent>
 
-            {/* === DASHBOARD TAB === */}
-            {isSelfService && (
-              <TabsContent value="dashboard" className="mt-4">
-                <Suspense
-                  fallback={
-                    <div className="flex items-center justify-center py-12">
-                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                    </div>
-                  }
-                >
-                  <PatientDashboardLazy />
-                </Suspense>
-              </TabsContent>
-            )}
 
             {/* === TASKS TAB === */}
             {isSelfService && (
@@ -3145,20 +3209,6 @@ export function PatientDetailsEditor({
             </div>
           </TabsContent>
 
-          {/* === Dashboard tab (edit mode) === */}
-          {isSelfService && (
-            <TabsContent value="dashboard" className="mt-4">
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                }
-              >
-                <PatientDashboardLazy />
-              </Suspense>
-            </TabsContent>
-          )}
 
           {/* === Tasks tab (edit mode) === */}
           {isSelfService && (
