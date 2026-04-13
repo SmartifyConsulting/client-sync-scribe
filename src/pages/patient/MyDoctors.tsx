@@ -129,18 +129,21 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                 {doctor.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
               </AvatarFallback>
             </Avatar>
-            <span className="font-medium text-foreground">{doctor.full_name || "Unknown Doctor"}</span>
+            <div className="flex flex-col">
+              <span className="font-medium text-foreground">{doctor.full_name || "Unknown Doctor"}</span>
+              {doctor.practice_number && (
+                <span className="text-[10px] text-muted-foreground">PR#: {doctor.practice_number}</span>
+              )}
+            </div>
           </div>
         </TableCell>
         <TableCell>
           {doctor.specialty && (
-            <Badge className={`text-xs font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
+            <Badge className={`text-[10px] font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
               {doctor.specialty}
             </Badge>
           )}
         </TableCell>
-        <TableCell className="text-muted-foreground">{doctor.mobile_number || "—"}</TableCell>
-        <TableCell className="text-muted-foreground">{doctor.practice_number || "—"}</TableCell>
         <TableCell>
           {filteredPermissions.length > 0 && (
             <TooltipProvider>
@@ -211,38 +214,39 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
               ) : (
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Provider</TableHead>
-                      <TableHead>Specialty</TableHead>
-                      <TableHead>Phone</TableHead>
-                      <TableHead>Practice #</TableHead>
-                      <TableHead>Action</TableHead>
-                    </TableRow>
+                     <TableRow>
+                       <TableHead>Provider</TableHead>
+                       <TableHead>Specialty</TableHead>
+                       <TableHead>Action</TableHead>
+                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {searchResults.map((doctor) => (
-                      <TableRow key={doctor.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-9 w-9">
-                              <AvatarImage src={doctor.avatar_url || undefined} />
-                              <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                                {doctor.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="font-medium text-foreground">{doctor.full_name || "Unknown"}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {doctor.specialty && (
-                            <Badge className={`text-xs font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
-                              {doctor.specialty}
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">{doctor.mobile_number || "—"}</TableCell>
-                        <TableCell className="text-muted-foreground">{doctor.practice_number || "—"}</TableCell>
-                        <TableCell>
+                       <TableRow key={doctor.id}>
+                         <TableCell>
+                           <div className="flex items-center gap-3">
+                             <Avatar className="h-9 w-9">
+                               <AvatarImage src={doctor.avatar_url || undefined} />
+                               <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                                 {doctor.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
+                               </AvatarFallback>
+                             </Avatar>
+                             <div className="flex flex-col">
+                               <span className="font-medium text-foreground">{doctor.full_name || "Unknown"}</span>
+                               {doctor.practice_number && (
+                                 <span className="text-[10px] text-muted-foreground">PR#: {doctor.practice_number}</span>
+                               )}
+                             </div>
+                           </div>
+                         </TableCell>
+                         <TableCell>
+                           {doctor.specialty && (
+                             <Badge className={`text-[10px] font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
+                               {doctor.specialty}
+                             </Badge>
+                           )}
+                         </TableCell>
+                         <TableCell>
                           <InviteDoctorDialog
                             prefillPracticeNumber={doctor.practice_number || ""}
                             prefillRegistrationNumber={doctor.doctor_number || ""}
@@ -278,13 +282,11 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
           <CardContent className="p-0">
             <Table>
               <TableHeader>
-                <TableRow>
-                   <TableHead>Provider</TableHead>
-                   <TableHead>Specialty</TableHead>
-                   <TableHead>Phone</TableHead>
-                   <TableHead>Practice #</TableHead>
-                   <TableHead className="w-[50px]">Access</TableHead>
-                </TableRow>
+                 <TableRow>
+                    <TableHead>Provider</TableHead>
+                    <TableHead>Specialty</TableHead>
+                    <TableHead className="w-[50px]">Access</TableHead>
+                 </TableRow>
               </TableHeader>
               <TableBody>
                 {doctors.map((access) =>
