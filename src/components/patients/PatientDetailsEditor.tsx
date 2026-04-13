@@ -1186,6 +1186,7 @@ export function PatientDetailsEditor({
 
   // Parent tab groups for desktop/tablet
   const PROFILE_TABS = ["personal", "medical"];
+  const CARE_TABS = ["doctors", "sessions", "roundtable"];
   const ADMIN_TABS = ["calendar", "tasks", "documents"];
 
   const handleParentTabClick = (parent: string, tabs: string[]) => {
@@ -1197,6 +1198,7 @@ export function PatientDetailsEditor({
   // When activeTab changes, sync activeParentTab
   useEffect(() => {
     if (PROFILE_TABS.includes(activeTab)) setActiveParentTab("profile");
+    else if (CARE_TABS.includes(activeTab)) setActiveParentTab("care");
     else if (ADMIN_TABS.includes(activeTab)) setActiveParentTab("admin");
     else setActiveParentTab(null);
   }, [activeTab]);
