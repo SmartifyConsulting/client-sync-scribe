@@ -1131,7 +1131,7 @@ export function PatientDetailsEditor({
           )}
           {show("doctors") && (
             <TabsTrigger value="doctors" className={triggerClass}>
-              My Care Team
+              Care Team
             </TabsTrigger>
           )}
           {show("sessions") && (
@@ -1185,7 +1185,7 @@ export function PatientDetailsEditor({
           </button>
           {isSelfService && (
             <TabsTrigger value="doctors" className={triggerClass}>
-              My Care Team
+              Care Team
             </TabsTrigger>
           )}
           {isSelfService && (
