@@ -74,15 +74,6 @@ export default function PatientTasks() {
   const [addingTask, setAddingTask] = useState(false);
   const taskRecorderRef = useRef<MediaRecorder | null>(null);
   const taskChunksRef = useRef<Blob[]>([]);
-
-  if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   const startTaskRecording = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -141,6 +132,14 @@ export default function PatientTasks() {
       setAddingTask(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 p-4 md:p-6">
