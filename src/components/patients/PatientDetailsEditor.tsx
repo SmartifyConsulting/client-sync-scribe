@@ -1043,6 +1043,7 @@ export function PatientDetailsEditor({
 
     return (
       <div className={sectionFrame + " mb-4"}>
+        {/* Row 1: Avatar + Greeting */}
         <div className="flex items-start gap-4">
           <div
             className="flex flex-col items-center gap-1 cursor-pointer shrink-0"
@@ -1067,68 +1068,29 @@ export function PatientDetailsEditor({
             <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-semibold text-muted-foreground">Welcome back</p>
-                <h3 className="text-sm font-semibold text-foreground">{patient.name}</h3>
-                <p className="text-xs text-muted-foreground">
-                  {(() => {
-                    const first = (patient.first_name || splitName(patient.name).first || "user")
-                      .toLowerCase()
-                      .replace(/\s+/g, "");
-                    const last = (patient.last_name || splitName(patient.name).last || "patient")
-                      .toLowerCase()
-                      .replace(/\s+/g, "");
-                    return `${first}.${last}@holarc.health`;
-                  })()}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 w-8 p-0"
-                  onClick={() => {
-                    setActiveTab("calendar");
-                    if (isMobile && isSelfService) navigate("/patient/details?section=admin");
-                  }}
-                >
-                  <Calendar className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  className="h-8 text-xs gap-1"
-                  onClick={() => {
-                    setActiveTab("tasks");
-                    if (isMobile && isSelfService) navigate("/patient/details?section=admin");
-                  }}
-                >
-                  <CheckSquare className="h-3.5 w-3.5" />
-                  Record Task
-                </Button>
-              </div>
-            </div>
-            {!rewardsLoading && lollipopCount !== undefined && (
-              <div className="mt-1">
-                <p className="text-[10px] text-muted-foreground">You have earned</p>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-                    <AnimatedCounter target={lollipopCount} />
-                  </span>
-                  <span className="text-xs font-semibold text-muted-foreground">Vulas</span>
-                </div>
-              </div>
-            )}
+            <p className="text-sm font-semibold text-muted-foreground">Welcome back,</p>
+            <h3 className="text-sm font-semibold text-foreground">{patient.name}</h3>
+            <p className="text-xs text-muted-foreground">
+              {(() => {
+                const first = (patient.first_name || splitName(patient.name).first || "user")
+                  .toLowerCase()
+                  .replace(/\s+/g, "");
+                const last = (patient.last_name || splitName(patient.name).last || "patient")
+                  .toLowerCase()
+                  .replace(/\s+/g, "");
+                return `${first}.${last}@holarc.health`;
+              })()}
+            </p>
           </div>
         </div>
 
-        {/* Upcoming Appointments mini-list */}
-        {upcomingAppointments.length > 0 && (
-          <div className="mt-3 border-t border-border pt-3">
-            <div className="flex items-center gap-1.5 mb-2">
-              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-xs font-semibold text-foreground">Upcoming Appointments</span>
-            </div>
+        {/* Row 2: Upcoming Appointments */}
+        <div className="mt-3 border-t border-border pt-3">
+          <div className="flex items-center gap-1.5 mb-2">
+            <Calendar className="h-3.5 w-3.5 text-primary" />
+            <span className="text-xs font-semibold text-foreground">Upcoming Appointments</span>
+          </div>
+          {upcomingAppointments.length > 0 ? (
             <div className="space-y-1.5">
               {upcomingAppointments.map((appt: any) => {
                 const start = appt.proposed_start || appt.requested_start;
@@ -1152,8 +1114,56 @@ export function PatientDetailsEditor({
                 );
               })}
             </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">No upcoming appointments.</p>
+          )}
+        </div>
+
+        {/* Row 3: Vula Vouchers */}
+        {!rewardsLoading && lollipopCount !== undefined && (
+          <div className="mt-3 border-t border-border pt-3">
+            <div className="flex items-center rounded-xl border border-border overflow-hidden">
+              <div className="flex-1 flex flex-col items-center justify-center py-3 px-4 bg-primary/5">
+                <img src="/vula-symbol.png" alt="Vula" className="h-6 w-6 mb-1" />
+                <span className="text-[10px] font-bold tracking-wider text-primary uppercase">Vula Vouchers</span>
+              </div>
+              <div className="w-[1px] self-stretch bg-border" />
+              <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
+                <span className="text-[10px] text-muted-foreground">You have earned</span>
+                <span className="text-2xl font-bold text-primary">
+                  <AnimatedCounter target={lollipopCount} />
+                </span>
+              </div>
+            </div>
           </div>
         )}
+
+        {/* Row 4: Action Buttons */}
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full h-9 text-xs gap-1.5"
+            onClick={() => {
+              setActiveTab("calendar");
+              if (isMobile && isSelfService) navigate("/patient/details?section=admin");
+            }}
+          >
+            <Calendar className="h-3.5 w-3.5" />
+            Calendar
+          </Button>
+          <Button
+            size="sm"
+            className="w-full h-9 text-xs gap-1.5"
+            onClick={() => {
+              setActiveTab("tasks");
+              if (isMobile && isSelfService) navigate("/patient/details?section=admin");
+            }}
+          >
+            <CheckSquare className="h-3.5 w-3.5" />
+            Record Task
+          </Button>
+        </div>
       </div>
     );
   };
