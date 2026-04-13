@@ -305,7 +305,7 @@ export default function DoctorRewards() {
             </CardHeader>
             <CardContent>
               {rewards.length === 0 ? (
-                <div className="text-center py-8"><span className="text-5xl mb-4 block font-bold text-emerald-600"><img src={vulaVouchersLogo} alt="Vula" className="h-4 w-4 inline-block" /></span><p className="text-muted-foreground">No rewards yet</p></div>
+                <div className="text-center py-8"><img src={vulaVouchersLogo} alt="Vula" className="h-12 w-12 object-contain mx-auto mb-4" /><p className="text-muted-foreground">No rewards yet</p></div>
               ) : (
                 <Table>
                   <TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Visit Type</TableHead><TableHead className="text-right">Vulas</TableHead></TableRow></TableHeader>
