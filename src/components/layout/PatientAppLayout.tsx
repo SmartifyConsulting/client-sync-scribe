@@ -26,6 +26,7 @@ export function PatientAppLayout() {
   const navigate = useNavigate();
   const { isBlocked, daysRemaining, loading } = useSubscriptionGate();
   const { profile } = useProfile();
+  const { isDoctor } = useUserRole();
   const queryClient = useQueryClient();
 
   const isSettingsPage = location.pathname.startsWith("/settings");
@@ -216,8 +217,34 @@ export function PatientAppLayout() {
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-48 p-1.5" align="end">
-              {/* Profile switcher for doctors viewing patient view */}
-              <ProfileSwitcher profile={profile} navigate={navigate} />
+              {isDoctor ? (
+                <div className="border-b border-border mb-1">
+                  <button
+                    onClick={() => navigate("/dashboard")}
+                    className="flex items-center gap-2 px-2 py-1.5 w-full rounded-md hover:bg-accent transition-colors"
+                  >
+                    <Stethoscope className="h-3.5 w-3.5 text-primary" />
+                    <div className="text-left">
+                      <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
+                      <p className="text-[10px] text-muted-foreground">Doctor</p>
+                    </div>
+                  </button>
+                  <button
+                    className={cn("flex items-center gap-2 px-2 py-1.5 w-full rounded-md bg-primary/10")}
+                  >
+                    <HeartPulse className="h-3.5 w-3.5 text-primary" />
+                    <div className="text-left">
+                      <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
+                      <p className="text-[10px] text-muted-foreground">Patient</p>
+                    </div>
+                  </button>
+                </div>
+              ) : (
+                <div className="px-2 py-1.5 border-b border-border mb-1">
+                  <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
+                  <p className="text-[10px] text-muted-foreground">Patient</p>
+                </div>
+              )}
                 <button
                   onClick={() => navigate("/settings")}
                   className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors w-full"
