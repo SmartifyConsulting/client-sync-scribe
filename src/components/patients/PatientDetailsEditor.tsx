@@ -1136,7 +1136,7 @@ export function PatientDetailsEditor({
           )}
           {show("sessions") && (
             <TabsTrigger value="sessions" className={triggerClass}>
-              My Sessions
+              Sessions
             </TabsTrigger>
           )}
           {show("calendar") && (
@@ -1190,7 +1190,7 @@ export function PatientDetailsEditor({
           )}
           {isSelfService && (
             <TabsTrigger value="sessions" className={triggerClass}>
-              My Sessions
+              Sessions
             </TabsTrigger>
           )}
           {isSelfService && (
