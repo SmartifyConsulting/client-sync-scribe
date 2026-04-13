@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock, X, CalendarIcon, Upload, Pill, Send, Share2 } from "lucide-react";
+import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock, X, CalendarIcon, Upload, Pill, Send, Share2, MessageCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -384,7 +384,12 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           </div>
         )}
         <div className="flex gap-2 ml-auto justify-center flex-wrap">
-          
+          <Button variant="outline" className="gap-2" asChild>
+            <Link to="/practice?tab=roundtables">
+              <MessageCircle className="h-4 w-4" />
+              <span className="hidden sm:inline">View</span> Round Tables
+            </Link>
+          </Button>
           <PatientImportDialog 
             trigger={
               <Button variant="outline" className="gap-2">
@@ -398,7 +403,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
-                Add New Patient
+                Patient
               </Button>
             </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh]">
