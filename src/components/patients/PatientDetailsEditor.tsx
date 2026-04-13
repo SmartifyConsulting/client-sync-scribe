@@ -1231,7 +1231,7 @@ export function PatientDetailsEditor({
           )}
           {show("sessions") && (
             <TabsTrigger value="sessions" className={triggerClass}>
-              Sessions
+              My Sessions
             </TabsTrigger>
           )}
           {show("calendar") && (
@@ -1251,7 +1251,7 @@ export function PatientDetailsEditor({
           )}
           {show("roundtable") && (
             <TabsTrigger value="roundtable" className={triggerClass}>
-              Round Table
+              My Round Table
             </TabsTrigger>
           )}
         </TabsList>
@@ -1320,14 +1320,14 @@ export function PatientDetailsEditor({
                 navigate("/patient/rewards");
               }}
             >
-              My Vulas
+              My Rewards
             </TabsTrigger>
           )}
         </TabsList>
 
         {/* Sub-tab row for My Profile */}
         {activeParentTab === "profile" && (
-          <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+          <TabsList className="bg-primary/15 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
             <TabsTrigger value="personal" className="text-xs whitespace-nowrap">
               Personal Information
             </TabsTrigger>
@@ -1339,7 +1339,7 @@ export function PatientDetailsEditor({
 
         {/* Sub-tab row for My Healthcare */}
         {activeParentTab === "care" && isSelfService && (
-          <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+          <TabsList className="bg-primary/15 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
             <TabsTrigger value="doctors" className="text-xs whitespace-nowrap">
               My H/Care Providers
             </TabsTrigger>
@@ -1354,7 +1354,7 @@ export function PatientDetailsEditor({
 
         {/* Sub-tab row for My Desk */}
         {activeParentTab === "admin" && isSelfService && (
-          <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+          <TabsList className="bg-primary/15 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
             <TabsTrigger value="calendar" className="text-xs whitespace-nowrap">
               My Calendar
             </TabsTrigger>
@@ -1386,7 +1386,6 @@ export function PatientDetailsEditor({
           {/* Vula counter + logo */}
           <div className="flex-1 min-w-0 flex items-center gap-2">
             <div className="flex flex-col">
-              <span className="text-[10px] text-muted-foreground">You have earned</span>
               <span className="text-xl font-bold text-primary"><AnimatedCounter target={lollipopCount} /></span>
             </div>
             <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-7 w-auto object-contain" />
@@ -1825,7 +1824,7 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="sessions" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">Sessions</h2>
+                  <h2 className="text-lg font-semibold text-foreground">My Sessions</h2>
                   <p className="text-xs text-muted-foreground">History of your consultations</p>
                 </div>
                 <Suspense
@@ -1889,7 +1888,7 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="roundtable" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">Round Table</h2>
+                  <h2 className="text-lg font-semibold text-foreground">My Round Table</h2>
                   <p className="text-xs text-muted-foreground">
                     Notes shared by your healthcare providers about your care
                   </p>
@@ -3303,7 +3302,7 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="sessions" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Sessions</h2>
+                <h2 className="text-lg font-semibold text-foreground">My Sessions</h2>
                 <p className="text-xs text-muted-foreground">History of your consultations</p>
               </div>
               <Suspense
@@ -3369,7 +3368,7 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="roundtable" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Round Table</h2>
+                <h2 className="text-lg font-semibold text-foreground">My Round Table</h2>
                 <p className="text-xs text-muted-foreground">
                   Notes shared by your healthcare providers about your care
                 </p>
