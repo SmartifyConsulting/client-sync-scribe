@@ -1327,11 +1327,11 @@ export function PatientDetailsEditor({
 
         {/* Sub-tab row for My Profile */}
         {activeParentTab === "profile" && (
-          <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-            <TabsTrigger value="personal" className="text-xs whitespace-nowrap">
+          <TabsList className="bg-primary/15 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+            <TabsTrigger value="personal" className="text-xs whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-sm">
               Personal Information
             </TabsTrigger>
-            <TabsTrigger value="medical" className="text-xs whitespace-nowrap">
+            <TabsTrigger value="medical" className="text-xs whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-sm">
               Medical Information
             </TabsTrigger>
           </TabsList>
@@ -1339,14 +1339,14 @@ export function PatientDetailsEditor({
 
         {/* Sub-tab row for My Healthcare */}
         {activeParentTab === "care" && isSelfService && (
-          <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-            <TabsTrigger value="doctors" className="text-xs whitespace-nowrap">
+          <TabsList className="bg-primary/15 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+            <TabsTrigger value="doctors" className="text-xs whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-sm">
               My H/Care Providers
             </TabsTrigger>
-            <TabsTrigger value="sessions" className="text-xs whitespace-nowrap">
+            <TabsTrigger value="sessions" className="text-xs whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-sm">
               My Sessions
             </TabsTrigger>
-            <TabsTrigger value="roundtable" className="text-xs whitespace-nowrap">
+            <TabsTrigger value="roundtable" className="text-xs whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-sm">
               My Round Table
             </TabsTrigger>
           </TabsList>
@@ -1354,14 +1354,14 @@ export function PatientDetailsEditor({
 
         {/* Sub-tab row for My Desk */}
         {activeParentTab === "admin" && isSelfService && (
-          <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-            <TabsTrigger value="calendar" className="text-xs whitespace-nowrap">
+          <TabsList className="bg-primary/15 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+            <TabsTrigger value="calendar" className="text-xs whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-sm">
               My Calendar
             </TabsTrigger>
-            <TabsTrigger value="tasks" className="text-xs whitespace-nowrap">
+            <TabsTrigger value="tasks" className="text-xs whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-sm">
               My Tasks
             </TabsTrigger>
-            <TabsTrigger value="documents" className="text-xs whitespace-nowrap">
+            <TabsTrigger value="documents" className="text-xs whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-sm">
               My Documents
             </TabsTrigger>
           </TabsList>
@@ -1395,7 +1395,6 @@ export function PatientDetailsEditor({
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-6 w-auto object-contain shrink-0" />
               <div className="flex items-baseline gap-1">
-                <span className="text-xs text-muted-foreground">Earned:</span>
                 <span className="text-lg font-bold text-primary">
                   <AnimatedCounter target={lollipopCount} />
                 </span>
