@@ -1,25 +1,40 @@
 
 
-# Healthcare Provider Screen Cleanup
+# UI Fixes: Button Padding, Doctor Name Persistence, Table Compaction, Edit Mode Icons
 
 ## Changes
 
-### File: `src/pages/patient/MyDoctors.tsx`
+### 1. Add padding between Cancel and Send Request buttons
+**File:** `src/components/patient/InviteDoctorDialog.tsx`
+- Line 329 DialogFooter: add `gap-3` class and stack buttons vertically on mobile with `flex-col-reverse sm:flex-row`
 
-1. **Reduce specialty badge font** — Change `text-xs` to `text-[10px]` on all Badge elements (lines 137-138, 237-238)
+### 2. Fix doctor name not persisting after selection
+**File:** `src/components/patient/InviteDoctorDialog.tsx`
+- The `useEffect` on `nameSearch` (line 82) re-triggers a search when `handleSelectDoctor` sets the name, which can clear the selection
+- Add a `selectedDoctorId` state. When a doctor is selected, set it. In the search `useEffect`, skip searching if `selectedDoctorId` is set. Clear `selectedDoctorId` when the user manually types (onChange)
 
-2. **Remove Phone column** — Remove the Phone `<TableHead>` and `<TableCell>` from both the search results table (lines 217, 243) and the connected doctors table (lines 284, 142)
+### 3. Compact search results table on mobile
+**File:** `src/pages/patient/MyDoctors.tsx`
+- Make search results table fit without horizontal scroll:
+  - Reduce Avatar size on mobile from `h-9 w-9` to `h-7 w-7`
+  - Use `text-xs` for doctor name on mobile
+  - Make the Action column narrower with `w-[40px]`
+  - Add `table-fixed` and appropriate column widths so invite icon is always visible
+  - Consider hiding the Specialty column on very small screens or making the badge more compact
 
-3. **Move practice number under doctor name** — In the Provider cell, add `PR#: {practice_number}` in small muted text below the doctor's name. Remove the separate Practice # column from both tables (lines 218, 244, 285, 143)
+### 4. Add Cancel and Save icons in edit mode headers
+**File:** `src/components/patients/PatientDetailsEditor.tsx`
+- In the edit mode section (line 1978), replace the plain heading with a flex row containing:
+  - The heading text
+  - A Save (Check) icon button that triggers `performSave()` manually then `setIsEditing(false)`
+  - A Cancel (X) icon button that calls the existing `resetForm()` function (which resets form data and sets `isEditing` to false)
+- Apply to both Personal Information (line 1978) and Medical Information edit mode headings
 
-4. **Update DoctorTableRow component** — Same changes: remove phone cell, remove practice # cell, add practice # under name
-
-### File: `src/components/patient/InviteDoctorDialog.tsx`
-
-5. **Simplify invite button** — Line 233-236: Remove "Invite Healthcare Provider" text, keep only `UserPlus` icon (which already has the person+plus design). Make button `size="icon"` or `size="sm"` with just the icon.
+## Files Modified
 
 | File | Changes |
 |------|---------|
-| `src/pages/patient/MyDoctors.tsx` | Smaller badge font, remove phone/practice columns, show PR# under name |
-| `src/components/patient/InviteDoctorDialog.tsx` | Icon-only invite button |
+| `src/components/patient/InviteDoctorDialog.tsx` | Button padding, fix name persistence with selectedDoctorId guard |
+| `src/pages/patient/MyDoctors.tsx` | Compact table layout so invite icon fits without scrolling |
+| `src/components/patients/PatientDetailsEditor.tsx` | Add Save (Check) and Cancel (X) icons to edit mode headers |
 
