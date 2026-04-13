@@ -463,10 +463,27 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
     try {
-      const { error } = await signIn(email, password);
+      const { data, error } = await signIn(email, password);
       if (error) throw error;
       toast({ title: "Welcome back!", description: "Successfully signed in" });
-      navigate("/dashboard");
+      
+      // Check role to navigate directly to the correct page
+      const userId = data?.user?.id;
+      if (userId) {
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId)
+          .single();
+        
+        if (roleData?.role === 'patient') {
+          navigate('/patient/details');
+        } else {
+          navigate('/dashboard');
+        }
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } finally {

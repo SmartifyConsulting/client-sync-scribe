@@ -145,7 +145,7 @@ export default function Landing() {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="mb-8"
             >
-              <img src={holarcLogo} alt="Holarc Health" className="h-32 sm:h-40 w-auto mx-auto drop-shadow-lg" />
+              <img src={holarcLogo} alt="Holarc Health" className="h-32 sm:h-40 w-auto mx-auto" />
             </motion.div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6">
