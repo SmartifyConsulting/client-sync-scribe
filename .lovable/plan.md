@@ -1,40 +1,36 @@
 
 
-# Add Icons, Round Tables, Patient List Spacing, and Restore Sidebar
+# Replace Sidebar with Horizontal Tabs, Chronic Badge Icon-Only on Mobile
 
 ## Summary
-Five changes: add icons to Digital Signature and Voice Narration headers in My Practice, add DoctorRoundTables to the dashboard, increase patient list column spacing on mobile, and restore the left sidebar navigation for web/tablet views.
+Remove left sidebar on web/tablet, replace with horizontal tab navigation below dashboard cards. Also reduce the chronic badge to icon-only on mobile with a tooltip.
 
 ## Changes
 
-### 1. Add icons to Digital Signature and Voice Narration accordion triggers
-**File:** `src/pages/MyPractice.tsx`
-- Digital Signature trigger: add `PenTool` icon inline, matching pattern of other accordion headers
-- Voice Narration trigger: add `Volume2` icon inline
-
-### 2. Add DoctorRoundTables to Dashboard
-**File:** `src/pages/Dashboard.tsx`
-- Import `DoctorRoundTables` from `@/components/doctor/DoctorRoundTables`
-- Mobile layout: place below RecentActivity with a "My Round Tables" heading
-- Desktop/tablet layout: place below CompactTodoList in the right column
-
-### 3. Shift patient list columns further right on mobile
-**File:** `src/pages/Patients.tsx`
-- Increase padding on Last Seen and Since columns from `px-1` to `px-3` on mobile
-
-### 4. Restore left sidebar for web and tablet views
+### 1. Remove sidebar from AppLayout
 **File:** `src/components/layout/AppLayout.tsx`
-- Re-import `Sidebar` from `./Sidebar`
-- Add `<div className="hidden md:block"><Sidebar /></div>` back
-- Add `md:ml-[210px]` to the main content wrapper and footer so content is offset on screens >= 768px
-- Sidebar remains hidden on mobile (bottom nav is used there instead)
+- Remove `<Sidebar />` block and `md:ml-[210px]` offset
+
+### 2. Add horizontal tab navigation to Dashboard (md+ screens)
+**File:** `src/pages/Dashboard.tsx`
+- Add a `Tabs` component visible only on `md+` screens, placed below the stats cards
+- Five tabs: **Today** (default), **Patients**, **Practice**, **Admin**, **Rewards**
+- Each tab renders its corresponding page component inline (`Patients`, `MyPractice`, `Admin`, `DoctorRewards`)
+- Today tab shows the existing dashboard body (briefing, to-do, recent activity, round tables)
+- Mobile layout remains unchanged (bottom nav handles navigation)
+
+### 3. Chronic badge: icon-only on mobile with tooltip
+**File:** `src/pages/Patients.tsx`
+- Wrap the chronic badge in a `Tooltip` component
+- On mobile: show only the `Pill` icon (hide the "Chronic" text via `hidden md:inline`)
+- On desktop: show the full "Chronic" text alongside the icon as before
+- Tooltip text: "Chronic Patient" — appears on click/tap of the icon
 
 ## Files Modified
 
 | File | Changes |
 |------|---------|
-| `src/pages/MyPractice.tsx` | Add PenTool and Volume2 icons to accordion triggers |
-| `src/pages/Dashboard.tsx` | Add DoctorRoundTables below Recent Activity (mobile) and below To-Do (desktop) |
-| `src/pages/Patients.tsx` | Increase mobile column padding from px-1 to px-3 |
-| `src/components/layout/AppLayout.tsx` | Restore Sidebar for md+ screens with ml offset |
+| `src/components/layout/AppLayout.tsx` | Remove sidebar and ml offset |
+| `src/pages/Dashboard.tsx` | Add horizontal Tabs (Today/Patients/Practice/Admin/Rewards) for md+ screens |
+| `src/pages/Patients.tsx` | Chronic badge icon-only on mobile with tooltip |
 
