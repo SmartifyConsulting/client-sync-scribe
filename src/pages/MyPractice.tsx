@@ -946,7 +946,7 @@ export default function MyPractice() {
     return (
       <div className="space-y-4 animate-fade-in">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Round Table</h1>
+          <h1 className="text-2xl font-bold text-foreground">Round Tables</h1>
           <p className="text-muted-foreground text-[12px]">View round table discussions you've contributed to</p>
         </div>
         <DoctorRoundTables />
