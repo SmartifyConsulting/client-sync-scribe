@@ -1981,7 +1981,7 @@ export function PatientDetailsEditor({
                 <p className="text-xs text-muted-foreground">View and manage personal details</p>
               </div>
               <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => { resetForm(); }}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={handleCancel}>
                   <X className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-green-600" onClick={() => { performSave(formData, surgeries); setIsEditing(false); }}>
@@ -2360,7 +2360,7 @@ export function PatientDetailsEditor({
                 <p className="text-xs text-muted-foreground">View and manage medical records</p>
               </div>
               <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => { resetForm(); }}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={handleCancel}>
                   <X className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-green-600" onClick={() => { performSave(formData, surgeries); setIsEditing(false); }}>
