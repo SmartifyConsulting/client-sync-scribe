@@ -58,6 +58,7 @@ const getSpecialtyColor = (specialty: string): string => {
 };
 
 export default function PatientDashboard() {
+  const isMobile = useIsMobile();
   const { user } = useAuth();
   const { profile } = useProfile();
   const queryClient = useQueryClient();
