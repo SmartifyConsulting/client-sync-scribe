@@ -809,22 +809,22 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
             <table className="w-full">
                <thead>
                 <tr className="bg-primary">
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="px-2 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Patient
                   </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="hidden md:table-cell px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Contact
                   </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="px-2 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Last Seen
                   </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="px-2 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Since
                   </th>
-                  <th className="px-3 py-2.5 text-center text-xs font-medium text-primary-foreground">
+                  <th className="px-2 md:px-3 py-2.5 text-center text-xs font-medium text-primary-foreground">
                     Status
                   </th>
-                  <th className="px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">
+                  <th className="px-2 md:px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">
                     Actions
                   </th>
                 </tr>
@@ -834,7 +834,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                 {mePatient && (
                   <>
                     <tr className="group transition-colors bg-gray-100 hover:bg-gray-200/60 dark:bg-gray-800/20 dark:hover:bg-gray-800/30">
-                      <td className="px-4 py-2.5">
+                      <td className="px-2 md:px-4 py-2.5">
                         <Link to={`/patients/${mePatient.id}`} className="flex items-center gap-2.5">
                           <div className="flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs bg-[#E01837] text-white">
                             ME
@@ -850,7 +850,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                           </span>
                         </Link>
                       </td>
-                      <td className="px-4 py-2.5">
+                      <td className="hidden md:table-cell px-4 py-2.5">
                         <div className="space-y-0.5">
                           {mePatient.email && (
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -867,13 +867,13 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-2.5 text-xs text-muted-foreground">
+                      <td className="px-2 md:px-4 py-2.5 text-xs text-muted-foreground">
                         {mePatient.last_visit ? new Date(mePatient.last_visit).toLocaleDateString() : <span className="text-muted-foreground/50">—</span>}
                       </td>
-                      <td className="px-4 py-2.5 text-xs text-muted-foreground">
+                      <td className="px-2 md:px-4 py-2.5 text-xs text-muted-foreground">
                         {new Date(mePatient.created_at).toLocaleDateString()}
                       </td>
-                      <td className="px-3 py-2.5 text-center">
+                      <td className="px-2 md:px-3 py-2.5 text-center">
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>

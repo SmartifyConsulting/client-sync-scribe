@@ -438,7 +438,7 @@ export function TodaysBriefing() {
           <div className="text-center">
             <h3 className="text-lg font-semibold text-primary-foreground">{briefingTitle}</h3>
             <p className="text-sm text-primary-foreground/80">
-              {formattedSelectedDate} • {appointments.length} appointment{appointments.length !== 1 ? 's' : ''}
+              {formattedSelectedDate} • {appointments.filter(a => new Date(a.startTime) < new Date()).length} of {appointments.length} appointment{appointments.length !== 1 ? 's' : ''} completed
             </p>
           </div>
           <Button
