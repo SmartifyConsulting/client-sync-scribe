@@ -2,23 +2,23 @@ import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
-  Calendar,
-  Settings,
+  Users,
   Mic,
   Briefcase,
   HeartPulse,
   Handshake,
   FolderOpen,
   Gift,
+  User,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 
 const doctorNavItems = [
-  { icon: LayoutDashboard, label: "Home", to: "/dashboard" },
-  { icon: Calendar, label: "Calendar", to: "/calendar" },
+  { icon: Users, label: "Patients", to: "/patients" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
-  { icon: Briefcase, label: "Holarprac", to: "/practice" },
-  { icon: Settings, label: "Settings", to: "/settings" },
+  { icon: Briefcase, label: "Practice", to: "/practice" },
+  { icon: Gift, label: "Rewards", to: "/doctor/rewards" },
+  { icon: User, label: "Profile", to: "/profile" },
 ];
 
 const patientSections = [
