@@ -9,6 +9,8 @@ import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { DoctorAccessRequests } from "@/components/doctor/DoctorAccessRequests";
 import { DoctorRoundTables } from "@/components/doctor/DoctorRoundTables";
 import { useProfile } from "@/hooks/useProfile";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { lazy, Suspense } from "react";
 
 import { useUserRole } from "@/hooks/useUserRole";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,6 +20,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+
+// Lazy load tab page components for desktop
+const Patients = lazy(() => import("@/pages/Patients"));
+const MyPractice = lazy(() => import("@/pages/MyPractice"));
+const Admin = lazy(() => import("@/pages/Admin"));
+const DoctorRewards = lazy(() => import("@/pages/doctor/DoctorRewards"));
 
 export default function Dashboard() {
   const { profile, loading: profileLoading } = useProfile();
@@ -303,34 +311,75 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid gap-3 md:gap-6 grid-cols-1 lg:grid-cols-5">
-        <div className="lg:col-span-3 space-y-6">
-          <TodaysBriefing />
-          <div className="hidden lg:block">
-            <RecentActivity />
-          </div>
-        </div>
-        <div className="lg:col-span-2 space-y-6">
-          {isDoctor && <CompactTodoList />}
-          {isDoctor && (
-            <div className="hidden lg:block">
-              <section>
-                <h2 className="text-lg font-semibold mb-3 text-foreground">My Round Tables</h2>
-                <DoctorRoundTables />
-              </section>
+      {/* Desktop/Tablet: Horizontal tab navigation */}
+      <div className="hidden md:block">
+        <Tabs defaultValue="today" className="w-full">
+          <TabsList className="bg-primary w-full justify-start rounded-lg p-1 gap-1">
+            <TabsTrigger value="today" className="text-primary-foreground data-[state=active]:bg-background data-[state=active]:text-foreground text-sm">Today</TabsTrigger>
+            <TabsTrigger value="patients" className="text-primary-foreground data-[state=active]:bg-background data-[state=active]:text-foreground text-sm">Patients</TabsTrigger>
+            <TabsTrigger value="practice" className="text-primary-foreground data-[state=active]:bg-background data-[state=active]:text-foreground text-sm">Practice</TabsTrigger>
+            <TabsTrigger value="admin" className="text-primary-foreground data-[state=active]:bg-background data-[state=active]:text-foreground text-sm">Admin</TabsTrigger>
+            {isDoctor && (
+              <TabsTrigger value="rewards" className="text-primary-foreground data-[state=active]:bg-background data-[state=active]:text-foreground text-sm">Rewards</TabsTrigger>
+            )}
+          </TabsList>
+
+          <TabsContent value="today">
+            <div className="grid gap-6 grid-cols-1 lg:grid-cols-5 mt-4">
+              <div className="lg:col-span-3 space-y-6">
+                <TodaysBriefing />
+                <RecentActivity />
+              </div>
+              <div className="lg:col-span-2 space-y-6">
+                {isDoctor && <CompactTodoList />}
+                {isDoctor && (
+                  <section>
+                    <h2 className="text-lg font-semibold mb-3 text-foreground">My Round Tables</h2>
+                    <DoctorRoundTables />
+                  </section>
+                )}
+              </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="patients">
+            <Suspense fallback={<div className="py-8 text-center text-muted-foreground">Loading...</div>}>
+              <Patients hideHeader />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="practice">
+            <Suspense fallback={<div className="py-8 text-center text-muted-foreground">Loading...</div>}>
+              <MyPractice />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="admin">
+            <Suspense fallback={<div className="py-8 text-center text-muted-foreground">Loading...</div>}>
+              <Admin />
+            </Suspense>
+          </TabsContent>
+
+          {isDoctor && (
+            <TabsContent value="rewards">
+              <Suspense fallback={<div className="py-8 text-center text-muted-foreground">Loading...</div>}>
+                <DoctorRewards />
+              </Suspense>
+            </TabsContent>
           )}
-          <div className="lg:hidden">
-            <RecentActivity />
-          </div>
+        </Tabs>
+      </div>
+
+      {/* Mobile: Original layout (bottom nav handles page switching) */}
+      <div className="md:hidden">
+        <div className="grid gap-3 grid-cols-1">
+          <TodaysBriefing />
+          <RecentActivity />
           {isDoctor && (
-            <div className="lg:hidden">
-              <section>
-                <h2 className="text-lg font-semibold mb-3 text-foreground">My Round Tables</h2>
-                <DoctorRoundTables />
-              </section>
-            </div>
+            <section>
+              <h2 className="text-lg font-semibold mb-3 text-foreground">My Round Tables</h2>
+              <DoctorRoundTables />
+            </section>
           )}
         </div>
       </div>

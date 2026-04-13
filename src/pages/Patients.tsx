@@ -921,9 +921,16 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                                 return `${lastName}, ${firstNames}`;
                               })()}
                               {patient.is_chronic && (
-                                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-terracotta/10 px-1.5 py-0.5 text-[10px] font-bold text-terracotta">
-                                  <Pill className="h-2.5 w-2.5" />Chronic
-                                </span>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-terracotta/10 px-1.5 py-0.5 text-[10px] font-bold text-terracotta cursor-default">
+                                        <Pill className="h-2.5 w-2.5" /><span className="hidden md:inline">Chronic</span>
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent>Chronic Patient</TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                               )}
                             </span>
                             <div className={cn("h-2 w-2 rounded-full flex-shrink-0", patient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
