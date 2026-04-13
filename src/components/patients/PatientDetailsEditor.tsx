@@ -1337,7 +1337,22 @@ export function PatientDetailsEditor({
           </TabsList>
         )}
 
-        {/* Sub-tab row for My Admin */}
+        {/* Sub-tab row for My Healthcare */}
+        {activeParentTab === "care" && isSelfService && (
+          <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+            <TabsTrigger value="doctors" className="text-xs whitespace-nowrap">
+              My H/Care Providers
+            </TabsTrigger>
+            <TabsTrigger value="sessions" className="text-xs whitespace-nowrap">
+              My Sessions
+            </TabsTrigger>
+            <TabsTrigger value="roundtable" className="text-xs whitespace-nowrap">
+              My Round Table
+            </TabsTrigger>
+          </TabsList>
+        )}
+
+        {/* Sub-tab row for My Desk */}
         {activeParentTab === "admin" && isSelfService && (
           <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
             <TabsTrigger value="calendar" className="text-xs whitespace-nowrap">
@@ -1355,11 +1370,57 @@ export function PatientDetailsEditor({
     );
   };
 
+  // Compact profile banner for non-Home mobile sections
+  const CompactBanner = () => {
+    if (!isSelfService || !isMobile || section === "home") return null;
+    const initials = patient.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "?";
+    const upcomingAppointments = bannerAppointments;
+    return (
+      <div className={sectionFrame + " mb-4"}>
+        <div className="flex items-center gap-3">
+          {/* Avatar */}
+          <Avatar className="h-14 w-14 border-2 border-primary shrink-0">
+            {avatarUrl ? <AvatarImage src={avatarUrl} alt={patient.name} /> : null}
+            <AvatarFallback className="bg-primary/10 text-primary text-base font-semibold">{initials}</AvatarFallback>
+          </Avatar>
+          {/* Vula counter + logo */}
+          <div className="flex-1 min-w-0 flex items-center gap-2">
+            <div className="flex flex-col">
+              <span className="text-[10px] text-muted-foreground">You have earned</span>
+              <span className="text-xl font-bold text-primary"><AnimatedCounter target={lollipopCount} /></span>
+            </div>
+            <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-7 w-auto object-contain" />
+          </div>
+        </div>
+        {/* Bottom row: calendar/mic + appointments */}
+        <div className="flex items-center gap-3 mt-2 pt-2 border-t border-border">
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => { setActiveTab("calendar"); navigate("/patient/details?section=admin"); }}>
+              <Calendar className="h-3.5 w-3.5" />
+            </Button>
+            <Button size="icon" className="h-7 w-7" onClick={() => { setActiveTab("tasks"); navigate("/patient/details?section=admin"); }}>
+              <Mic className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {upcomingAppointments.length > 0
+              ? `${upcomingAppointments.length} upcoming appointment${upcomingAppointments.length > 1 ? "s" : ""}`
+              : "No upcoming appointments."}
+          </p>
+        </div>
+      </div>
+    );
+  };
+
   // ==================== VIEW MODE ====================
   if (!isEditing) {
+    const showFullBanner = !isMobile || section === "home";
+    const showCompactBanner = isMobile && section !== "home";
+    const showTabs = !isMobile || (section !== "home");
     return (
       <div className="space-y-0">
-        <ProfileBanner />
+        {showFullBanner && <ProfileBanner />}
+        {showCompactBanner && <CompactBanner />}
         <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             {renderTabsList()}
