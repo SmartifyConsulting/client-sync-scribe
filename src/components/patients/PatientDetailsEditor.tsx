@@ -1849,6 +1849,7 @@ export function PatientDetailsEditor({
             )}
           </Tabs>
         </div>
+        )}
       </div>
     );
   }
