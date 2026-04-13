@@ -1185,17 +1185,17 @@ export function PatientDetailsEditor({
           </button>
           {isSelfService && (
             <TabsTrigger value="doctors" className={triggerClass}>
-              Care Team
+              My Care Team
             </TabsTrigger>
           )}
           {isSelfService && (
             <TabsTrigger value="sessions" className={triggerClass}>
-              Sessions
+              My Sessions
             </TabsTrigger>
           )}
           {isSelfService && (
             <TabsTrigger value="roundtable" className={triggerClass}>
-              Round Table
+              My Round Table
             </TabsTrigger>
           )}
           {/* My Admin parent trigger */}
