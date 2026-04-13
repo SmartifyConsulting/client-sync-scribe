@@ -1355,11 +1355,30 @@ export default function Sessions() {
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
-        ) : sessions.filter(s => s.status !== 'in_progress').length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">No sessions recorded yet.</p>
-        ) : (
+        ) : (() => {
+          const filteredSessions = sessions.filter(s => {
+            if (s.status === 'in_progress') return false;
+            if (sessionSearch) {
+              const patientName = (s.patient?.name || '').toLowerCase();
+              const title = (s.title || '').toLowerCase();
+              const q = sessionSearch.toLowerCase();
+              if (!patientName.includes(q) && !title.includes(q)) return false;
+            }
+            if (sessionDateFrom) {
+              const sessionDate = new Date(s.started_at).toISOString().split('T')[0];
+              if (sessionDate < sessionDateFrom) return false;
+            }
+            if (sessionDateTo) {
+              const sessionDate = new Date(s.started_at).toISOString().split('T')[0];
+              if (sessionDate > sessionDateTo) return false;
+            }
+            return true;
+          });
+          return filteredSessions.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">No sessions match your search.</p>
+          ) : (
           <div className="space-y-1.5">
-            {sessions.filter(s => s.status !== 'in_progress').map((session) => (
+            {filteredSessions.map((session) => (
               <div
                 key={session.id}
                 className="flex items-center justify-between p-2 rounded-lg border border-border bg-background hover:bg-accent/50 transition-colors"
