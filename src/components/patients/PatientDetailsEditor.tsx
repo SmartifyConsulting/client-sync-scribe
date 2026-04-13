@@ -336,6 +336,28 @@ export function PatientDetailsEditor({
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
+  // Fetch upcoming appointments for banner
+  const { data: bannerAppointments = [] } = useQuery({
+    queryKey: ["banner-appointments", patient.id],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("appointment_requests")
+        .select("*, profiles:doctor_id(full_name, specialty)")
+        .eq("patient_user_id", user.id)
+        .in("status", ["approved", "pending"])
+        .order("requested_start", { ascending: true })
+        .limit(3);
+      if (error) { console.error(error); return []; }
+      return (data || []).filter((a: any) => {
+        const start = a.proposed_start || a.requested_start;
+        return start && isAfter(parseISO(start), new Date());
+      });
+    },
+    enabled: isSelfService,
+  });
+
   // Controlled tab state for dynamic navigation
   const getInitialTab = () => {
     if (isMobile && isSelfService && section && SECTION_TABS[section]) {
