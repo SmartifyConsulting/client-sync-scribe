@@ -53,6 +53,7 @@ import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format, parseISO, isFuture, isAfter } from "date-fns";
+import vulaVouchersLogo from "@/assets/vula-vouchers-logo.png";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Mic, Clock } from "lucide-react";
 import {
@@ -308,7 +309,7 @@ function AnimatedCounter({ target }: { target: number }) {
 }
 
 const SECTION_TABS: Record<string, string[]> = {
-  home: ["personal", "medical"],
+  home: [],
   health: ["personal", "medical"],
   care: ["doctors", "sessions", "roundtable"],
   admin: ["calendar", "tasks", "documents"],
@@ -360,7 +361,7 @@ export function PatientDetailsEditor({
 
   // Controlled tab state for dynamic navigation
   const getInitialTab = () => {
-    if (isMobile && isSelfService && section && SECTION_TABS[section]) {
+    if (isMobile && isSelfService && section && SECTION_TABS[section]?.length) {
       return SECTION_TABS[section][0];
     }
     return "personal";
@@ -368,7 +369,7 @@ export function PatientDetailsEditor({
   const [activeTab, setActiveTab] = useState(getInitialTab);
 
   useEffect(() => {
-    if (isMobile && isSelfService && section && SECTION_TABS[section]) {
+    if (isMobile && isSelfService && section && SECTION_TABS[section]?.length) {
       setActiveTab(SECTION_TABS[section][0]);
     }
   }, [section, isMobile, isSelfService]);
@@ -1123,9 +1124,8 @@ export function PatientDetailsEditor({
         {!rewardsLoading && lollipopCount !== undefined && (
           <div className="mt-3 border-t border-border pt-3">
             <div className="flex items-center rounded-xl border border-border overflow-hidden">
-              <div className="flex-1 flex flex-col items-center justify-center py-3 px-4 bg-primary/5">
-                <img src="/vula-symbol.png" alt="Vula" className="h-6 w-6 mb-1" />
-                <span className="text-[10px] font-bold tracking-wider text-primary uppercase">Vula Vouchers</span>
+              <div className="flex-1 flex items-center justify-center py-3 px-4 bg-primary/5">
+                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-8 w-auto object-contain" />
               </div>
               <div className="w-[1px] self-stretch bg-border" />
               <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
@@ -1356,10 +1356,14 @@ export function PatientDetailsEditor({
   };
 
   // ==================== VIEW MODE ====================
+  const isHomeSection = isMobile && isSelfService && section === "home";
+  const showBanner = !isMobile || !isSelfService || section === "home";
+
   if (!isEditing) {
     return (
       <div className="space-y-0">
-        <ProfileBanner />
+        {showBanner && <ProfileBanner />}
+        {!isHomeSection && (
         <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             {renderTabsList()}
@@ -1846,6 +1850,7 @@ export function PatientDetailsEditor({
             )}
           </Tabs>
         </div>
+        )}
       </div>
     );
   }

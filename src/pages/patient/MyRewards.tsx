@@ -39,6 +39,7 @@ import { ActivityProofCapture } from "@/components/rewards/ActivityProofCapture"
 import { MedicationAdherenceTab } from "@/components/rewards/MedicationAdherenceTab";
 import { useToast } from "@/hooks/use-toast";
 import vulaSymbol from "@/assets/vula-symbol.png";
+import vulaVouchersLogo from "@/assets/vula-vouchers-logo.png";
 
 const MILESTONES = [
   { count: 5, label: "First Steps", icon: "🌟", color: "text-yellow-500" },
@@ -433,7 +434,7 @@ export default function MyRewards() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Gift className="h-5 w-5 text-emerald-500" />
+                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-6 w-auto object-contain" />
                 Recent Rewards
               </CardTitle>
             </CardHeader>
