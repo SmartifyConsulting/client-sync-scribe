@@ -203,15 +203,15 @@ export default function PatientCalendar() {
 
   const renderWeekView = () => (
     <Card>
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-2 p-3 md:p-6 md:pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">
+          <CardTitle className="text-base md:text-lg">
             {format(currentWeekStart, "MMMM yyyy")}
           </CardTitle>
           <div className="flex gap-1">
-            <Button variant="outline" size="sm" className="text-xs px-2" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))}>Prev</Button>
-            <Button variant="outline" size="sm" className="text-xs px-2" onClick={() => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}>Today</Button>
-            <Button variant="outline" size="sm" className="text-xs px-2" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))}>Next</Button>
+            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))}>Prev</Button>
+            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}>Today</Button>
+            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))}>Next</Button>
           </div>
         </div>
       </CardHeader>
@@ -225,12 +225,12 @@ export default function PatientCalendar() {
                 key={day.toISOString()}
                 onClick={() => setSelectedDate(day)}
                 className={cn(
-                  "flex flex-col items-center p-3 rounded-lg transition-colors",
+                  "flex flex-col items-center p-2 md:p-3 rounded-lg transition-colors",
                   isSelected ? "bg-primary text-primary-foreground" : isToday(day) ? "bg-primary/10 text-primary" : "hover:bg-muted"
                 )}
               >
-                <span className="text-xs font-medium">{format(day, "EEE")}</span>
-                <span className="text-lg font-semibold">{format(day, "d")}</span>
+                <span className="text-[10px] md:text-xs font-medium">{format(day, "EEE")}</span>
+                <span className="text-base md:text-lg font-semibold">{format(day, "d")}</span>
                 {dayAppointments.length > 0 && (
                   <div className={cn("mt-1 h-1.5 w-1.5 rounded-full", isSelected ? "bg-primary-foreground" : "bg-primary")} />
                 )}
@@ -244,25 +244,25 @@ export default function PatientCalendar() {
 
   const renderMonthView = () => (
     <Card>
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-2 p-3 md:p-6 md:pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">{format(currentMonth, "MMMM yyyy")}</CardTitle>
+          <CardTitle className="text-base md:text-lg">{format(currentMonth, "MMMM yyyy")}</CardTitle>
           <div className="flex gap-1">
-            <Button variant="outline" size="sm" className="text-xs px-2" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>Prev</Button>
-            <Button variant="outline" size="sm" className="text-xs px-2" onClick={() => setCurrentMonth(new Date())}>Today</Button>
-            <Button variant="outline" size="sm" className="text-xs px-2" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>Next</Button>
+            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>Prev</Button>
+            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentMonth(new Date())}>Today</Button>
+            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>Next</Button>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-7 mb-2">
+        <div className="grid grid-cols-7 mb-1 md:mb-2">
           {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
-            <div key={d} className="py-2 text-center text-sm font-medium text-muted-foreground">{d}</div>
+            <div key={d} className="py-1 md:py-2 text-center text-xs md:text-sm font-medium text-muted-foreground">{d}</div>
           ))}
         </div>
         <div className="grid grid-cols-7 gap-0 md:gap-1">
           {Array.from({ length: (firstDayOfMonth + 6) % 7 }).map((_, i) => (
-            <div key={`empty-${i}`} className="aspect-square p-1" />
+            <div key={`empty-${i}`} className="aspect-[1/0.85] md:aspect-square p-0.5 md:p-1" />
           ))}
           {Array.from({ length: daysInCurrentMonth }).map((_, i) => {
             const day = i + 1;
@@ -275,12 +275,12 @@ export default function PatientCalendar() {
                 key={day}
                 onClick={() => setSelectedDate(dayDate)}
                 className={cn(
-                  "aspect-square p-1 rounded-lg transition-colors flex flex-col items-center justify-start",
+                  "aspect-[1/0.85] md:aspect-square p-0.5 md:p-1 rounded-lg transition-colors flex flex-col items-center justify-start",
                   isSelected ? "bg-primary/20 ring-1 ring-primary" : isTodayDay ? "bg-primary/10" : "hover:bg-muted"
                 )}
               >
                 <span className={cn(
-                  "flex h-7 w-7 items-center justify-center rounded-full text-sm",
+                  "flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-full text-xs md:text-sm",
                   isTodayDay && "bg-primary text-primary-foreground font-semibold"
                 )}>
                   {day}

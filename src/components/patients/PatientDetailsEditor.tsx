@@ -1133,12 +1133,11 @@ export function PatientDetailsEditor({
           <div className="mt-3 border-t border-border pt-3">
             <div className="flex items-center rounded-xl border border-border overflow-hidden">
               <div className="flex-1 flex flex-col items-center justify-center py-3 px-4 bg-primary/5">
-                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-8 w-auto object-contain" />
+                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-10 w-auto object-contain" />
               </div>
               <div className="w-[1px] self-stretch bg-border" />
               <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
-                <span className="text-[10px] text-muted-foreground">You have earned</span>
-                <span className="text-2xl font-bold text-primary">
+                <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
                   <AnimatedCounter target={lollipopCount} />
                 </span>
               </div>
@@ -1234,7 +1233,7 @@ export function PatientDetailsEditor({
           )}
           {show("doctors") && (
             <TabsTrigger value="doctors" className={triggerClass}>
-              My Healthcare Providers
+              {isMobile ? "My H/Care Team" : "My Healthcare Providers"}
             </TabsTrigger>
           )}
           {show("sessions") && (
@@ -1335,7 +1334,7 @@ export function PatientDetailsEditor({
 
         {/* Sub-tab row for My Profile */}
         {activeParentTab === "profile" && (
-          <TabsList className="bg-primary/15 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+          <TabsList className="bg-primary/25 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
             <TabsTrigger value="personal" className="text-xs whitespace-nowrap">
               Personal Information
             </TabsTrigger>
@@ -1347,7 +1346,7 @@ export function PatientDetailsEditor({
 
         {/* Sub-tab row for My Healthcare */}
         {activeParentTab === "care" && isSelfService && (
-          <TabsList className="bg-primary/15 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+          <TabsList className="bg-primary/25 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
             <TabsTrigger value="doctors" className="text-xs whitespace-nowrap">
               My Healthcare Providers
             </TabsTrigger>
@@ -1362,7 +1361,7 @@ export function PatientDetailsEditor({
 
         {/* Sub-tab row for My Desk */}
         {activeParentTab === "admin" && isSelfService && (
-          <TabsList className="bg-primary/15 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+          <TabsList className="bg-primary/25 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
             <TabsTrigger value="calendar" className="text-xs whitespace-nowrap">
               My Calendar
             </TabsTrigger>
@@ -1400,7 +1399,7 @@ export function PatientDetailsEditor({
           {/* Vula counter + logo */}
           <div className="flex-1 min-w-0 flex items-center gap-2">
             <div className="flex flex-col">
-              <span className="text-xl font-bold text-primary">
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
                 <AnimatedCounter target={lollipopCount} />
               </span>
             </div>
@@ -1457,9 +1456,14 @@ export function PatientDetailsEditor({
 
             {/* === PERSONAL INFORMATION TAB === */}
             <TabsContent value="personal" className="space-y-4 mt-4">
-              <div className="mb-1">
-                <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
-                <p className="text-xs text-muted-foreground">View and manage personal details</p>
+              <div className="mb-1 flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
+                  <p className="text-xs text-muted-foreground">View and manage personal details</p>
+                </div>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
               </div>
 
               <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
@@ -1572,9 +1576,14 @@ export function PatientDetailsEditor({
 
             {/* === MEDICAL INFORMATION TAB — TWO COLUMNS === */}
             <TabsContent value="medical" className="mt-4">
-              <div className="mb-3">
-                <h2 className="text-lg font-semibold text-foreground">Medical Information</h2>
-                <p className="text-xs text-muted-foreground">View and manage medical records</p>
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">Medical Information</h2>
+                  <p className="text-xs text-muted-foreground">View and manage medical records</p>
+                </div>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="space-y-3">
@@ -1900,7 +1909,7 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="doctors" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">My Healthcare Providers</h2>
+                  <h2 className="text-lg font-semibold text-foreground">{isMobile ? "My H/Care Team" : "My Healthcare Providers"}</h2>
                   <p className="text-xs text-muted-foreground">Healthcare providers with access to your profile</p>
                 </div>
                 <Suspense
