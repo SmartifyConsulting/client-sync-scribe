@@ -1,54 +1,45 @@
 
 
-# Multi-Fix: Signup Fields, Share App, Password Eye, Edit Button, Mobile Tab Filtering
+# Mobile Dashboard Cleanup: Remove Cards & Relocate Quick Actions
+
+## Summary
+On mobile only, hide the AI Health Summary, Earn More Vulas, Recent Claims, and Documentation cards from the patient dashboard. Move the Calendar and Record Task buttons directly under the "Welcome back" greeting.
 
 ## Changes
 
-### 1. Split Full Name into First Name + Last Name on signup
-**File:** `src/pages/Auth.tsx`
-- Replace the single `fullName` state with `firstName` and `lastName` states
-- Update both doctor (step 0, line 538-543) and patient (step 0, line 709-714) signup forms to show two fields: "First Name(s)" and "Last Name"
-- Update all references: `handleFinalSubmit` constructs `fullName = firstName + " " + lastName` for profile/patient inserts
-- Update draft save/load to use firstName/lastName
-- Update `handleNext` validation to check both fields
+### File: `src/pages/patient/PatientDashboard.tsx`
 
-### 2. Add password visibility toggle (eye icon)
-**File:** `src/pages/Auth.tsx`
-- Add `showPassword` state
-- On every password `<Input>` (login form line 872, doctor signup line 556, patient signup line 727), change `type` to `showPassword ? "text" : "password"` and add an Eye/EyeOff toggle button inside the relative wrapper
-- Import `Eye, EyeOff` from lucide-react
+1. **Import `useIsMobile`** hook at the top
+2. **Add `const isMobile = useIsMobile()`** in the component
+3. **Restructure the Welcome Header (lines 288-312)**:
+   - Keep the greeting on the left
+   - On mobile: move Calendar + Record Task buttons below the greeting (as a new row under the welcome text), instead of to the right
+   - On desktop: keep them on the right as-is
+4. **Wrap the following sections with `{!isMobile && (...)}`**:
+   - Row 1 AI Health Summary card (lines 343-365) — hide only the AI summary card, keep Upcoming Appointments
+   - Row 2 "Earn More Vulas" card (lines 413-439) — hide only that card, keep Vulas Balance
+   - Row 3 entire section (lines 442-496) — hide Recent Claims + Documentation cards
 
-### 3. Restore Share App in avatar popover
-**File:** `src/components/layout/TopBarIcons.tsx`
-- Import `ShareAppDialog` and `Share2` icon
-- Add a "Share App" menu item in the avatar PopoverContent, placed between "Settings" and "Sign Out" links
-- Use `ShareAppDialog` with a custom trigger styled like the other popover items
+## Technical Detail
 
-### 4. Add inline edit pencil on Personal Information heading (view mode)
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- In the view mode Personal Information tab (line 1281-1284), add a `Pencil` icon button inline with the "Personal Information" heading that triggers `setIsEditing(true)`
-- On desktop/tablet: show as a small button with "Edit" text
-- On mobile: show just the pencil icon
-- Same for Medical Information heading
+The welcome header will change from a single flex row to a stacked layout on mobile:
+```
+// Mobile: stack greeting + buttons vertically
+<div>
+  <div className="flex items-center gap-4">
+    {/* icon + greeting */}
+  </div>
+  <div className="flex gap-2 mt-3">
+    {/* Calendar + Record Task buttons */}
+  </div>
+</div>
 
-### 5. Fix mobile bottom nav default to "home" and tab filtering
-**File:** `src/components/layout/BottomNav.tsx`
-- Line 76: Change default from `"profile"` to `"home"` so when user first loads `/patient/details` without a section param, Home is highlighted and Dashboard tab shows
+// Desktop: keep side-by-side layout as-is
+```
 
-**File:** `src/pages/patient/MyDetails.tsx`
-- Line 13: Change default from `"profile"` to `"home"` so section defaults to home
-
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- Line 339-343 (`getInitialTab`): The mapping already handles `home` → `dashboard`. Verify SECTION_TABS has correct mappings. Currently `health: ["personal", "medical"]` — this correctly maps the "Profile" bottom nav (section="health") to personal/medical tabs
-- The issue is that `section` prop defaults to `"profile"` in MyDetails which doesn't exist in SECTION_TABS. Fixing the default to `"home"` in MyDetails.tsx resolves this.
-
-## Files Modified
+For the grid sections, the AI Health Summary and Earn More Vulas cards will be conditionally rendered, while their sibling cards (Upcoming Appointments, Vulas Balance) will expand to full width on mobile via conditional grid classes.
 
 | File | Changes |
 |------|---------|
-| `src/pages/Auth.tsx` | Split fullName into firstName/lastName, add password eye toggle |
-| `src/components/layout/TopBarIcons.tsx` | Add Share App item in avatar popover |
-| `src/components/patients/PatientDetailsEditor.tsx` | Add inline edit pencil on section headings |
-| `src/components/layout/BottomNav.tsx` | Default section to "home" |
-| `src/pages/patient/MyDetails.tsx` | Default section to "home" |
+| `src/pages/patient/PatientDashboard.tsx` | Add `useIsMobile`, hide 4 cards on mobile, move quick action buttons under greeting |
 
