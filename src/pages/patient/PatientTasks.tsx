@@ -67,6 +67,14 @@ export default function PatientTasks() {
   const pendingTodos = todos.filter(t => t.status === "pending");
   const completedTodos = todos.filter(t => t.status === "completed");
 
+  // --- Task input state (must be before early returns) ---
+  const [taskText, setTaskText] = useState("");
+  const [isRecordingTask, setIsRecordingTask] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [addingTask, setAddingTask] = useState(false);
+  const taskRecorderRef = useRef<MediaRecorder | null>(null);
+  const taskChunksRef = useRef<Blob[]>([]);
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -74,14 +82,6 @@ export default function PatientTasks() {
       </div>
     );
   }
-
-  // --- Task input state ---
-  const [taskText, setTaskText] = useState("");
-  const [isRecordingTask, setIsRecordingTask] = useState(false);
-  const [isTranscribing, setIsTranscribing] = useState(false);
-  const [addingTask, setAddingTask] = useState(false);
-  const taskRecorderRef = useRef<MediaRecorder | null>(null);
-  const taskChunksRef = useRef<Blob[]>([]);
 
   const startTaskRecording = useCallback(async () => {
     try {
