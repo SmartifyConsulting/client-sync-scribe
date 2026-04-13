@@ -1736,7 +1736,7 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="doctors" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">My Care Team</h2>
+                  <h2 className="text-lg font-semibold text-foreground">My Healthcare Providers</h2>
                   <p className="text-xs text-muted-foreground">Healthcare providers with access to your profile</p>
                 </div>
                 <Suspense
