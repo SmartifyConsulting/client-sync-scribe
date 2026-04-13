@@ -1070,6 +1070,44 @@ export function PatientDetailsEditor({
     );
   };
 
+  // Compact banner for non-Home mobile sections
+  const CompactBanner = () => {
+    if (!isSelfService) return null;
+    const initials =
+      patient.name
+        ?.split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2) || "?";
+    return (
+      <div className={sectionFrame + " mb-2 py-2 px-3"}>
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10 border-2 border-primary shrink-0">
+            {avatarUrl ? <AvatarImage src={avatarUrl} alt={patient.name} /> : null}
+            <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">{initials}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-semibold text-foreground truncate">{patient.name}</h3>
+          </div>
+          {!rewardsLoading && lollipopCount !== undefined && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              <img src="/lovable-uploads/dc31f04c-3ee6-44de-9a05-7e0e84bfb213.png" alt="Vula Vouchers" className="h-5 object-contain" />
+              <span className="text-base font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                <AnimatedCounter target={lollipopCount} />
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // Conditional banner logic
+  const isHomeSection = isMobile && isSelfService && section === "home";
+  const showFullBanner = !isMobile || !isSelfService || section === "home";
+  const showCompactBanner = isMobile && isSelfService && section !== "home" && section !== "rewards";
+
   // Per-record share handler for NOK contacts
   const handleShareRecord = (type: "nok", record: { id: string; name: string; phone: string; email: string }) => {
     const shareUrl = `${window.location.origin}/patient/${patient.id}`;
@@ -1271,7 +1309,9 @@ export function PatientDetailsEditor({
   if (!isEditing) {
     return (
       <div className="space-y-0">
-        <ProfileBanner />
+        {showFullBanner && <ProfileBanner />}
+        {showCompactBanner && <CompactBanner />}
+        {!isHomeSection && (
         <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             {renderTabsList()}
@@ -1772,6 +1812,7 @@ export function PatientDetailsEditor({
             )}
           </Tabs>
         </div>
+        )}
       </div>
     );
   }
@@ -1779,7 +1820,9 @@ export function PatientDetailsEditor({
   // ==================== EDIT MODE ====================
   return (
     <div className="space-y-0">
-      <ProfileBanner />
+      {showFullBanner && <ProfileBanner />}
+      {showCompactBanner && <CompactBanner />}
+      {!isHomeSection && (
       <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           {renderTabsList()}
