@@ -1231,7 +1231,7 @@ export function PatientDetailsEditor({
           )}
           {show("sessions") && (
             <TabsTrigger value="sessions" className={triggerClass}>
-              Sessions
+              My Sessions
             </TabsTrigger>
           )}
           {show("calendar") && (
