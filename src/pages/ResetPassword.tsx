@@ -38,6 +38,7 @@ export default function ResetPassword() {
     // Also check if session already exists (token may have been processed before mount)
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
+        recoveryVerifiedRef.current = true;
         setAuthReady(true);
         setInitialLoading(false);
       }
@@ -45,7 +46,7 @@ export default function ResetPassword() {
 
     // Safety timeout — if nothing fires in 5s, link is expired
     timeoutId = setTimeout(() => {
-      if (!recoveryVerifiedRef.current && !authReady) {
+      if (!recoveryVerifiedRef.current) {
         setInitialLoading(false);
         toast({
           title: "Invalid or expired link",
