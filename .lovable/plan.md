@@ -1,45 +1,63 @@
 
 
-# Mobile Dashboard Cleanup: Remove Cards & Relocate Quick Actions
+# Merge Dashboard Into Profile Banner — All Views
 
 ## Summary
-On mobile only, hide the AI Health Summary, Earn More Vulas, Recent Claims, and Documentation cards from the patient dashboard. Move the Calendar and Record Task buttons directly under the "Welcome back" greeting.
+Eliminate the dedicated "Dashboard" tab by embedding its key content (upcoming appointments, Vulas count, Calendar icon, Record Task button) directly into the ProfileBanner section that appears above all tabs. This applies to mobile, tablet, and web views.
 
 ## Changes
 
-### File: `src/pages/patient/PatientDashboard.tsx`
+### 1. Expand ProfileBanner with dashboard content
+**File:** `src/components/patients/PatientDetailsEditor.tsx`
 
-1. **Import `useIsMobile`** hook at the top
-2. **Add `const isMobile = useIsMobile()`** in the component
-3. **Restructure the Welcome Header (lines 288-312)**:
-   - Keep the greeting on the left
-   - On mobile: move Calendar + Record Task buttons below the greeting (as a new row under the welcome text), instead of to the right
-   - On desktop: keep them on the right as-is
-4. **Wrap the following sections with `{!isMobile && (...)}`**:
-   - Row 1 AI Health Summary card (lines 343-365) — hide only the AI summary card, keep Upcoming Appointments
-   - Row 2 "Earn More Vulas" card (lines 413-439) — hide only that card, keep Vulas Balance
-   - Row 3 entire section (lines 442-496) — hide Recent Claims + Documentation cards
+The `ProfileBanner` component (line 1008-1071) currently shows greeting + avatar + email + Vulas counter. Expand it to also include:
 
-## Technical Detail
+- **Calendar + Record Task buttons** — placed next to / below the greeting (responsive layout)
+- **Upcoming Appointments mini-list** — a compact card showing next appointments fetched from `appointments` table, displayed below the greeting row
+- **Vulas count** — already present, keep as-is
 
-The welcome header will change from a single flex row to a stacked layout on mobile:
-```
-// Mobile: stack greeting + buttons vertically
-<div>
-  <div className="flex items-center gap-4">
-    {/* icon + greeting */}
-  </div>
-  <div className="flex gap-2 mt-3">
-    {/* Calendar + Record Task buttons */}
-  </div>
-</div>
+The banner will need to fetch upcoming appointments data internally (query `appointments` table for the patient's upcoming slots via `doctor_patient_access`). Import `Calendar`, `Mic`, `Clock` from lucide-react, `Link` from react-router-dom, `useQuery` from tanstack, `supabase` client, and `format`/`parseISO`/`isFuture` from date-fns.
 
-// Desktop: keep side-by-side layout as-is
+Layout structure:
+```text
+┌─────────────────────────────────────────────────┐
+│ [Avatar]  Welcome back              [Calendar] │
+│           Patient Name              [Record]   │
+│           email@holarc.health                  │
+│           You have earned X Vulas              │
+│                                                │
+│  ┌─ Upcoming Appointments ──────────────────┐  │
+│  │ Dr. Name — Apr 15, 2:00 PM  [Specialty]  │  │
+│  │ Dr. Name — Apr 18, 10:00 AM [Specialty]  │  │
+│  └──────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────┘
 ```
 
-For the grid sections, the AI Health Summary and Earn More Vulas cards will be conditionally rendered, while their sibling cards (Upcoming Appointments, Vulas Balance) will expand to full width on mobile via conditional grid classes.
+### 2. Remove "Dashboard" tab from tab navigation
+**File:** `src/components/patients/PatientDetailsEditor.tsx`
+
+- Remove `"dashboard"` from `SECTION_TABS.home` (line 309) — change to empty array or remove the `home` key
+- Remove the Dashboard `TabsTrigger` from both mobile (line 1117-1120) and desktop (line 1170-1173) tab lists
+- Remove the Dashboard `TabsContent` from both view mode (line 1656-1669) and edit mode (line 3148-3160)
+- Remove the lazy import of `PatientDashboardLazy` if no longer needed
+
+### 3. Update mobile bottom nav default
+**File:** `src/components/layout/BottomNav.tsx` and `src/pages/patient/MyDetails.tsx`
+
+- Since there's no more "dashboard" tab, the `home` section should default to `"personal"` (the first tab of the profile group)
+- Update `SECTION_TABS` mapping: `home: ["personal", "medical"]` (same as `health`)
+- Or remove the `home` section entirely and default to `health`
+
+### 4. Remove or keep PatientDashboard.tsx
+**File:** `src/pages/patient/PatientDashboard.tsx`
+
+This file can remain for now (it may be referenced elsewhere), but it will no longer be rendered inside the tab. The appointment-fetching logic will be duplicated in a lightweight form inside ProfileBanner.
+
+## Files Modified
 
 | File | Changes |
 |------|---------|
-| `src/pages/patient/PatientDashboard.tsx` | Add `useIsMobile`, hide 4 cards on mobile, move quick action buttons under greeting |
+| `src/components/patients/PatientDetailsEditor.tsx` | Expand ProfileBanner with appointments + action buttons, remove Dashboard tab from navigation and content |
+| `src/components/layout/BottomNav.tsx` | Update default section mapping since dashboard tab is gone |
+| `src/pages/patient/MyDetails.tsx` | Update default section to match new tab structure |
 
