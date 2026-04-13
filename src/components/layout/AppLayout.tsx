@@ -1,5 +1,4 @@
 import { Outlet, useLocation } from "react-router-dom";
-import { Sidebar } from "./Sidebar";
 import { BottomNav } from "./BottomNav";
 import { MobileHeader } from "./MobileHeader";
 import { PageTransition } from "./PageTransition";
@@ -33,13 +32,8 @@ export function AppLayout() {
       {/* Mobile header - hidden on desktop */}
       <MobileHeader />
       
-      {/* Desktop sidebar - hidden on mobile */}
-      <div className="hidden md:block">
-        <Sidebar />
-      </div>
-      
-      {/* Main content - responsive margins */}
-      <main className="flex-1 md:ml-[210px] pb-24 md:pb-0">
+      {/* Main content */}
+      <main className="flex-1 pb-24 md:pb-0">
         {/* Persistent top-right icons on desktop */}
         <div className="hidden md:flex justify-end px-8 pt-4">
           <TopBarIcons />
