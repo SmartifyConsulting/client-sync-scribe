@@ -48,13 +48,7 @@ import { useTemplates } from "@/hooks/useTemplates";
 import { useDocuments } from "@/hooks/useDocuments";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
 // DrawingPad hidden for later phase
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function PatientProfile() {
   const { id } = useParams<{ id: string }>();
@@ -73,9 +67,9 @@ export default function PatientProfile() {
   useEffect(() => {
     if (!user?.id) return;
     supabase
-      .from('profiles')
-      .select('mailbox_id, mailbox_alias')
-      .eq('id', user.id)
+      .from("profiles")
+      .select("mailbox_id, mailbox_alias")
+      .eq("id", user.id)
       .single()
       .then(({ data }) => {
         if (data) {
@@ -88,20 +82,23 @@ export default function PatientProfile() {
   // Log profile view for engagement tracking
   useEffect(() => {
     if (!user?.id || !id) return;
-    supabase.from('profile_view_log' as any).insert({
-      viewer_id: user.id,
-      patient_id: id,
-    }).then(() => {
-      console.log('Profile view logged');
-    });
+    supabase
+      .from("profile_view_log" as any)
+      .insert({
+        viewer_id: user.id,
+        patient_id: id,
+      })
+      .then(() => {
+        console.log("Profile view logged");
+      });
   }, [user?.id, id]);
 
   const displayEmail = mailboxAlias
-     ? `${mailboxAlias}@holarc.com`
-     : mailboxId
-       ? `docs-${mailboxId.slice(0, 8)}@inbox.holarc.health`
-      : '';
-  
+    ? `${mailboxAlias}@holarc.com`
+    : mailboxId
+      ? `docs-${mailboxId.slice(0, 8)}@inbox.holarc.health`
+      : "";
+
   const [additionalNotes, setAdditionalNotes] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
   const [canViewAllSessions, setCanViewAllSessions] = useState(true);
@@ -113,21 +110,23 @@ export default function PatientProfile() {
   // Check if current doctor has access to all sessions
   useEffect(() => {
     const checkPermissions = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setCurrentUserId(user?.id || null);
-      
+
       const patientUserId = (patient as any)?.patient_user_id;
       if (!patientUserId || !user) {
         setCanViewAllSessions(true); // Owner sees all
         return;
       }
-      
+
       // Check if this doctor has session_summaries permission from the patient
       const { data: accessRecords } = await supabase
-        .from('doctor_patient_access')
-        .select('permissions')
-        .eq('patient_user_id', patientUserId)
-        .eq('is_active', true);
+        .from("doctor_patient_access")
+        .select("permissions")
+        .eq("patient_user_id", patientUserId)
+        .eq("is_active", true);
 
       if (!accessRecords || accessRecords.length === 0) {
         setCanViewAllSessions(true); // If no access records, assume owner
@@ -135,10 +134,8 @@ export default function PatientProfile() {
       }
 
       // Check if any doctor has session_summaries permission (meaning patient shares across doctors)
-      const hasSharedSessions = accessRecords.some(record => 
-        record.permissions.includes('session_summaries')
-      );
-      
+      const hasSharedSessions = accessRecords.some((record) => record.permissions.includes("session_summaries"));
+
       setCanViewAllSessions(hasSharedSessions);
     };
 
@@ -198,10 +195,20 @@ export default function PatientProfile() {
     );
   }
 
-  const initials = patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2);
+  const initials = patient.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2);
   // Only show completed sessions that have actual transcripts
-  const completedSessions = sessions.filter(s => s.status === 'completed' && s.transcript && s.transcript.trim().length > 0 && s.transcript !== 'No transcript available for this session.');
-  const inProgressSessions = sessions.filter(s => s.status === 'in_progress');
+  const completedSessions = sessions.filter(
+    (s) =>
+      s.status === "completed" &&
+      s.transcript &&
+      s.transcript.trim().length > 0 &&
+      s.transcript !== "No transcript available for this session.",
+  );
+  const inProgressSessions = sessions.filter((s) => s.status === "in_progress");
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -267,74 +274,97 @@ export default function PatientProfile() {
 
       {/* Stats Cards - hide when doctor views their own patient record */}
       {(patient as any).patient_user_id !== currentUserId && (
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
-        <div className="rounded-xl bg-card p-4 shadow-sm border border-border/50">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-muted-foreground">Total Sessions</p>
-            <FileText className="h-4 w-4 text-primary" />
-          </div>
-          <p className="mt-2 text-2xl font-bold text-foreground">
-            {completedSessions.length}
-          </p>
-        </div>
-        <div className="rounded-xl bg-card p-4 shadow-sm border border-border/50">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-muted-foreground">Status</p>
-            <div className={`h-2.5 w-2.5 rounded-full ${patient.status === 'active' ? 'bg-green-500' : 'bg-muted-foreground'}`} />
-          </div>
-          <p className="mt-2 text-2xl font-bold text-foreground capitalize">
-            {patient.status}
-          </p>
-        </div>
-        <div className="rounded-xl bg-card p-4 shadow-sm border border-border/50">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-muted-foreground">Last Seen On</p>
-            <Clock className="h-4 w-4 text-primary" />
-          </div>
-          <p className="mt-2 text-2xl font-bold text-foreground">
-            {patient.last_visit 
-              ? format(new Date(patient.last_visit), "MMM d, yyyy")
-              : <span className="text-muted-foreground text-base font-medium">No visits</span>
-            }
-          </p>
-        </div>
-        <div className="rounded-xl bg-card p-4 shadow-sm border border-border/50">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-muted-foreground">Patient Since</p>
-            <Calendar className="h-4 w-4 text-primary" />
-          </div>
-          <p className="mt-2 text-2xl font-bold text-foreground">
-            {format(new Date(patient.created_at), "MMM yyyy")}
-          </p>
-        </div>
-        {/* Vula Rewards */}
-        <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-4 shadow-sm border border-emerald-200 dark:border-emerald-800/30">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-muted-foreground">Vulas</p>
-            <div className="h-8 w-8 rounded-full bg-white shadow-sm flex items-center justify-center">
-              <img src={vulaSymbol} alt="Vulas" className="h-6 w-6 object-contain" />
+        <div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
+          <div className="rounded-xl bg-card p-4 shadow-sm border border-border/50">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-muted-foreground">Total Sessions</p>
+              <FileText className="h-4 w-4 text-primary" />
             </div>
+            <p className="mt-2 text-2xl font-bold text-foreground">{completedSessions.length}</p>
           </div>
-          <p className="mt-2 text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-            {lollipopCount}
-          </p>
+          <div className="rounded-xl bg-card p-4 shadow-sm border border-border/50">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-muted-foreground">Status</p>
+              <div
+                className={`h-2.5 w-2.5 rounded-full ${patient.status === "active" ? "bg-green-500" : "bg-muted-foreground"}`}
+              />
+            </div>
+            <p className="mt-2 text-2xl font-bold text-foreground capitalize">{patient.status}</p>
+          </div>
+          <div className="rounded-xl bg-card p-4 shadow-sm border border-border/50">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-muted-foreground">Last Seen On</p>
+              <Clock className="h-4 w-4 text-primary" />
+            </div>
+            <p className="mt-2 text-2xl font-bold text-foreground">
+              {patient.last_visit ? (
+                format(new Date(patient.last_visit), "MMM d, yyyy")
+              ) : (
+                <span className="text-muted-foreground text-base font-medium">No visits</span>
+              )}
+            </p>
+          </div>
+          <div className="rounded-xl bg-card p-4 shadow-sm border border-border/50">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-muted-foreground">Patient Since</p>
+              <Calendar className="h-4 w-4 text-primary" />
+            </div>
+            <p className="mt-2 text-2xl font-bold text-foreground">
+              {format(new Date(patient.created_at), "MMM yyyy")}
+            </p>
+          </div>
+          {/* Vula Rewards */}
+          <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-4 shadow-sm border border-emerald-200 dark:border-emerald-800/30">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-muted-foreground">Vulas</p>
+              <div className="h-8 w-8 rounded-full bg-white shadow-sm flex items-center justify-center">
+                <img src={vulaSymbol} alt="Vulas" className="h-6 w-6 object-contain" />
+              </div>
+            </div>
+            <p className="mt-2 text-2xl font-bold text-emerald-600 dark:text-emerald-400">{lollipopCount}</p>
+          </div>
         </div>
-      </div>
       )}
 
       {/* Tabs */}
       <Tabs defaultValue="details" className="space-y-6">
         <TabsList className="bg-primary p-1.5 rounded-xl h-auto flex-wrap">
-          <TabsTrigger value="details" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Details</TabsTrigger>
-          <TabsTrigger value="overview" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Overview</TabsTrigger>
-          <TabsTrigger value="sessions" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Session History</TabsTrigger>
-          <TabsTrigger value="doctors" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Doctors</TabsTrigger>
-          <TabsTrigger value="documents" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">Documents</TabsTrigger>
-          <TabsTrigger value="roundtable" className="rounded-lg px-4 py-2.5 gap-1.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+          <TabsTrigger
+            value="details"
+            className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Details
+          </TabsTrigger>
+          <TabsTrigger
+            value="overview"
+            className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Overview
+          </TabsTrigger>
+          <TabsTrigger
+            value="sessions"
+            className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Session History
+          </TabsTrigger>
+          <TabsTrigger
+            value="doctors"
+            className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            H/Care Providers
+          </TabsTrigger>
+          <TabsTrigger
+            value="documents"
+            className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Documents
+          </TabsTrigger>
+          <TabsTrigger
+            value="roundtable"
+            className="rounded-lg px-4 py-2.5 gap-1.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
             Round Table
-            {unreadRoundTableCount > 0 && (
-              <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
-            )}
+            {unreadRoundTableCount > 0 && <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />}
           </TabsTrigger>
         </TabsList>
 
@@ -393,11 +423,13 @@ export default function PatientProfile() {
               {completedSessions.length > 0 && (
                 <div className="space-y-3">
                   {inProgressSessions.length > 0 && (
-                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8">Completed</h3>
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mt-8">
+                      Completed
+                    </h3>
                   )}
-                  <SessionHistoryTable 
-                    sessions={completedSessions} 
-                    patientId={patient.id} 
+                  <SessionHistoryTable
+                    sessions={completedSessions}
+                    patientId={patient.id}
                     patientName={patient.name}
                     allergies={patient.allergies}
                   />
@@ -405,9 +437,7 @@ export default function PatientProfile() {
               )}
 
               {completedSessions.length === 0 && inProgressSessions.length > 0 && (
-                <p className="text-sm text-muted-foreground text-center py-6">
-                  No completed sessions yet.
-                </p>
+                <p className="text-sm text-muted-foreground text-center py-6">No completed sessions yet.</p>
               )}
             </>
           )}
@@ -459,27 +489,64 @@ export default function PatientProfile() {
                   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                   const recorder = new MediaRecorder(stream);
                   const chunks: Blob[] = [];
-                  recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+                  recorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) chunks.push(e.data);
+                  };
                   recorder.onstop = async () => {
-                    stream.getTracks().forEach(t => t.stop());
+                    stream.getTracks().forEach((t) => t.stop());
                     const blob = new Blob(chunks, { type: "audio/webm" });
-                    if (blob.size > 5 * 1024 * 1024) { toast({ title: "File too large", description: "Audio recording exceeds 5MB limit", variant: "destructive" }); return; }
+                    if (blob.size > 5 * 1024 * 1024) {
+                      toast({
+                        title: "File too large",
+                        description: "Audio recording exceeds 5MB limit",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
                     const fileName = `${patient.id}/${Date.now()}.webm`;
-                    const { error: uploadError } = await supabase.storage.from("patient-media").upload(fileName, blob, { contentType: "audio/webm" });
-                    if (uploadError) { toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" }); return; }
-                    const { data: { publicUrl } } = supabase.storage.from("patient-media").getPublicUrl(fileName);
-                    const { data: { user } } = await supabase.auth.getUser();
+                    const { error: uploadError } = await supabase.storage
+                      .from("patient-media")
+                      .upload(fileName, blob, { contentType: "audio/webm" });
+                    if (uploadError) {
+                      toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
+                      return;
+                    }
+                    const {
+                      data: { publicUrl },
+                    } = supabase.storage.from("patient-media").getPublicUrl(fileName);
+                    const {
+                      data: { user },
+                    } = await supabase.auth.getUser();
                     if (!user) return;
-                    await supabase.from("documents").insert({ name: `Audio Recording ${format(new Date(), "dd MMM yyyy HH:mm")}`, content: "[AUDIO Recording]", user_id: user.id, patient_id: patient.id, patient_name: patient.name, media_url: publicUrl, media_type: "audio" });
+                    await supabase
+                      .from("documents")
+                      .insert({
+                        name: `Audio Recording ${format(new Date(), "dd MMM yyyy HH:mm")}`,
+                        content: "[AUDIO Recording]",
+                        user_id: user.id,
+                        patient_id: patient.id,
+                        patient_name: patient.name,
+                        media_url: publicUrl,
+                        media_type: "audio",
+                      });
                     toast({ title: "Audio saved" });
                     fetchDocuments();
                   };
                   recorder.start();
-                  toast({ title: "🎙️ Recording...", description: "Click the microphone again or wait — recording for 60s max." });
-                  setTimeout(() => { if (recorder.state === "recording") recorder.stop(); }, 60000);
+                  toast({
+                    title: "🎙️ Recording...",
+                    description: "Click the microphone again or wait — recording for 60s max.",
+                  });
+                  setTimeout(() => {
+                    if (recorder.state === "recording") recorder.stop();
+                  }, 60000);
                   // Store recorder to stop on next click — simplified: auto-stop after 60s
                 } catch {
-                  toast({ title: "Permission denied", description: "Microphone access is required", variant: "destructive" });
+                  toast({
+                    title: "Permission denied",
+                    description: "Microphone access is required",
+                    variant: "destructive",
+                  });
                 }
               }}
             >
@@ -492,29 +559,66 @@ export default function PatientProfile() {
               title="Record Video"
               onClick={async () => {
                 try {
-                  const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: { facingMode: "environment" } });
+                  const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: { facingMode: "environment" },
+                  });
                   const recorder = new MediaRecorder(stream);
                   const chunks: Blob[] = [];
-                  recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+                  recorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) chunks.push(e.data);
+                  };
                   recorder.onstop = async () => {
-                    stream.getTracks().forEach(t => t.stop());
+                    stream.getTracks().forEach((t) => t.stop());
                     const blob = new Blob(chunks, { type: "video/webm" });
-                    if (blob.size > 5 * 1024 * 1024) { toast({ title: "File too large", description: "Video recording exceeds 5MB limit", variant: "destructive" }); return; }
+                    if (blob.size > 5 * 1024 * 1024) {
+                      toast({
+                        title: "File too large",
+                        description: "Video recording exceeds 5MB limit",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
                     const fileName = `${patient.id}/${Date.now()}.webm`;
-                    const { error: uploadError } = await supabase.storage.from("patient-media").upload(fileName, blob, { contentType: "video/webm" });
-                    if (uploadError) { toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" }); return; }
-                    const { data: { publicUrl } } = supabase.storage.from("patient-media").getPublicUrl(fileName);
-                    const { data: { user } } = await supabase.auth.getUser();
+                    const { error: uploadError } = await supabase.storage
+                      .from("patient-media")
+                      .upload(fileName, blob, { contentType: "video/webm" });
+                    if (uploadError) {
+                      toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
+                      return;
+                    }
+                    const {
+                      data: { publicUrl },
+                    } = supabase.storage.from("patient-media").getPublicUrl(fileName);
+                    const {
+                      data: { user },
+                    } = await supabase.auth.getUser();
                     if (!user) return;
-                    await supabase.from("documents").insert({ name: `Video Recording ${format(new Date(), "dd MMM yyyy HH:mm")}`, content: "[VIDEO Recording]", user_id: user.id, patient_id: patient.id, patient_name: patient.name, media_url: publicUrl, media_type: "video" });
+                    await supabase
+                      .from("documents")
+                      .insert({
+                        name: `Video Recording ${format(new Date(), "dd MMM yyyy HH:mm")}`,
+                        content: "[VIDEO Recording]",
+                        user_id: user.id,
+                        patient_id: patient.id,
+                        patient_name: patient.name,
+                        media_url: publicUrl,
+                        media_type: "video",
+                      });
                     toast({ title: "Video saved" });
                     fetchDocuments();
                   };
                   recorder.start();
                   toast({ title: "🎥 Recording video...", description: "Auto-stops after 5 minutes." });
-                  setTimeout(() => { if (recorder.state === "recording") recorder.stop(); }, 300000);
+                  setTimeout(() => {
+                    if (recorder.state === "recording") recorder.stop();
+                  }, 300000);
                 } catch {
-                  toast({ title: "Permission denied", description: "Camera access is required", variant: "destructive" });
+                  toast({
+                    title: "Permission denied",
+                    description: "Camera access is required",
+                    variant: "destructive",
+                  });
                 }
               }}
             >
@@ -526,22 +630,33 @@ export default function PatientProfile() {
               className="h-12 w-12 rounded-xl"
               title="Upload File"
               onClick={() => {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = 'audio/*,video/*,image/*,.pdf,.doc,.docx';
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = "audio/*,video/*,image/*,.pdf,.doc,.docx";
                 input.onchange = async (e) => {
                   const file = (e.target as HTMLInputElement).files?.[0];
                   if (!file) return;
-                  if ((file.type.startsWith("audio/") || file.type.startsWith("video/")) && file.size > 5 * 1024 * 1024) {
-                    toast({ title: "File too large", description: "Audio/video files must be under 5MB", variant: "destructive" });
+                  if (
+                    (file.type.startsWith("audio/") || file.type.startsWith("video/")) &&
+                    file.size > 5 * 1024 * 1024
+                  ) {
+                    toast({
+                      title: "File too large",
+                      description: "Audio/video files must be under 5MB",
+                      variant: "destructive",
+                    });
                     return;
                   }
                   try {
                     const fileName = `${patient.id}/${Date.now()}-${file.name}`;
                     const { error: uploadError } = await supabase.storage.from("patient-media").upload(fileName, file);
                     if (uploadError) throw uploadError;
-                    const { data: { publicUrl } } = supabase.storage.from("patient-media").getPublicUrl(fileName);
-                    const { data: { user } } = await supabase.auth.getUser();
+                    const {
+                      data: { publicUrl },
+                    } = supabase.storage.from("patient-media").getPublicUrl(fileName);
+                    const {
+                      data: { user },
+                    } = await supabase.auth.getUser();
                     if (!user) throw new Error("Not authenticated");
                     await supabase.from("documents").insert({
                       name: file.name,
@@ -550,7 +665,11 @@ export default function PatientProfile() {
                       patient_id: patient.id,
                       patient_name: patient.name,
                       media_url: publicUrl,
-                      media_type: file.type.startsWith("video") ? "video" : file.type.startsWith("audio") ? "audio" : "file",
+                      media_type: file.type.startsWith("video")
+                        ? "video"
+                        : file.type.startsWith("audio")
+                          ? "audio"
+                          : "file",
                     });
                     toast({ title: "File uploaded", description: `${file.name} saved to documents` });
                     fetchDocuments();
@@ -584,7 +703,7 @@ export default function PatientProfile() {
           </div>
           <div className="rounded-2xl bg-card shadow-card overflow-hidden">
             {(() => {
-              const patientDocuments = documents.filter(doc => doc.patient_id === patient.id);
+              const patientDocuments = documents.filter((doc) => doc.patient_id === patient.id);
               if (documentsLoading) {
                 return (
                   <div className="p-10 text-center">
@@ -610,7 +729,10 @@ export default function PatientProfile() {
                       key={doc.id}
                       className="flex items-center gap-4 p-5 hover:bg-muted/30 transition-all duration-200 cursor-pointer"
                     >
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10" onClick={() => navigate(`/documents?view=${doc.id}`)}>
+                      <div
+                        className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10"
+                        onClick={() => navigate(`/documents?view=${doc.id}`)}
+                      >
                         <FileText className="h-6 w-6 text-primary" />
                       </div>
                       <div className="flex-1" onClick={() => navigate(`/documents?view=${doc.id}`)}>
@@ -634,19 +756,36 @@ export default function PatientProfile() {
                           "h-8 w-8 rounded-full flex items-center justify-center transition-colors",
                           (doc as any).email_sent_at
                             ? "text-muted-foreground cursor-default"
-                            : "text-green-600 hover:text-green-700 hover:bg-green-50"
+                            : "text-green-600 hover:text-green-700 hover:bg-green-50",
                         )}
                         disabled={!!(doc as any).email_sent_at}
                         onClick={async (e) => {
                           e.stopPropagation();
                           if ((doc as any).email_sent_at) return;
                           try {
-                            const { data: patient } = await supabase.from('patients').select('email, pharmacy_email').eq('id', doc.patient_id!).maybeSingle();
-                            const email = doc.template_name?.toLowerCase().includes('prescription') ? patient?.pharmacy_email || patient?.email : patient?.email;
-                            if (email) await supabase.functions.invoke('send-document-email', { body: { documentId: doc.id, recipientEmail: email } });
-                            await (supabase.from('documents').update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any).eq('id', doc.id);
+                            const { data: patient } = await supabase
+                              .from("patients")
+                              .select("email, pharmacy_email")
+                              .eq("id", doc.patient_id!)
+                              .maybeSingle();
+                            const email = doc.template_name?.toLowerCase().includes("prescription")
+                              ? patient?.pharmacy_email || patient?.email
+                              : patient?.email;
+                            if (email)
+                              await supabase.functions.invoke("send-document-email", {
+                                body: { documentId: doc.id, recipientEmail: email },
+                              });
+                            await (
+                              supabase
+                                .from("documents")
+                                .update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any
+                            ).eq("id", doc.id);
                             // Refresh docs
-                            const { data: updatedDocs } = await supabase.from('documents').select('*').eq('patient_id', doc.patient_id!).order('created_at', { ascending: false });
+                            const { data: updatedDocs } = await supabase
+                              .from("documents")
+                              .select("*")
+                              .eq("patient_id", doc.patient_id!)
+                              .order("created_at", { ascending: false });
                             if (updatedDocs) fetchDocuments();
                           } catch {}
                         }}
@@ -670,15 +809,14 @@ export default function PatientProfile() {
         {/* Round Table Tab */}
         <TabsContent value="roundtable">
           <div className="rounded-2xl bg-card p-6 shadow-card">
-            <RoundTable 
-              patientId={patient.id} 
+            <RoundTable
+              patientId={patient.id}
               patientName={patient.name}
               onUnreadCountChange={setUnreadRoundTableCount}
               hideHeader
             />
           </div>
         </TabsContent>
-
       </Tabs>
 
       {/* Template Selector Dialog */}
@@ -694,7 +832,7 @@ export default function PatientProfile() {
           ) : templates.length === 0 ? (
             <div className="py-8 text-center">
               <p className="text-muted-foreground">No templates available.</p>
-              <Button className="mt-4" onClick={() => navigate('/documents')}>
+              <Button className="mt-4" onClick={() => navigate("/documents")}>
                 Create Templates
               </Button>
             </div>
@@ -715,9 +853,7 @@ export default function PatientProfile() {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-foreground">{template.name}</p>
                     {template.description && (
-                      <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">
-                        {template.description}
-                      </p>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">{template.description}</p>
                     )}
                   </div>
                 </button>
@@ -746,11 +882,7 @@ export default function PatientProfile() {
 
       {/* Image Comparison Dialog */}
       {patient && (
-        <ImageComparisonDialog
-          open={showCompareDialog}
-          onOpenChange={setShowCompareDialog}
-          patientId={patient.id}
-        />
+        <ImageComparisonDialog open={showCompareDialog} onOpenChange={setShowCompareDialog} patientId={patient.id} />
       )}
     </div>
   );
