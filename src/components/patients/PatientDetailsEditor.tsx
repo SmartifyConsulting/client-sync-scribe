@@ -1372,12 +1372,84 @@ export function PatientDetailsEditor({
 
   // ==================== VIEW MODE ====================
   const isHomeSection = isMobile && isSelfService && section === "home";
-  const showBanner = !isMobile || !isSelfService || section === "home";
+  const showFullBanner = !isMobile || !isSelfService || section === "home";
+  const showCompactBanner = isMobile && isSelfService && section && section !== "home" && section !== "rewards";
+
+  // Compact banner for non-Home mobile sections
+  const CompactBanner = () => {
+    const initials = patient.name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+
+    return (
+      <div className="rounded-xl border border-primary bg-card p-3 mb-2 space-y-2">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-12 w-12 border-2 border-primary shrink-0">
+            {avatarUrl ? <AvatarImage src={avatarUrl} alt={patient.name} /> : null}
+            <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">{initials}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0 flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-6 w-auto object-contain shrink-0" />
+              <div className="flex items-baseline gap-1">
+                <span className="text-xs text-muted-foreground">Earned:</span>
+                <span className="text-lg font-bold text-primary">
+                  <AnimatedCounter target={lollipopCount} />
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => {
+                  setActiveTab("calendar");
+                  if (isMobile && isSelfService) navigate("/patient/details?section=admin");
+                }}
+              >
+                <Calendar className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => {
+                  setActiveTab("tasks");
+                  if (isMobile && isSelfService) navigate("/patient/details?section=admin");
+                }}
+              >
+                <Mic className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground border-t border-border pt-2">
+          <Clock className="h-3 w-3 shrink-0" />
+          {upcomingAppointments.length > 0 ? (
+            <span>
+              Next: {(() => {
+                const appt = upcomingAppointments[0] as any;
+                const start = appt.proposed_start || appt.requested_start;
+                const doctorProfile = appt.profiles as any;
+                return `${doctorProfile?.full_name || "Doctor"} — ${format(parseISO(start), "MMM d, h:mm a")}`;
+              })()}
+            </span>
+          ) : (
+            <span>No upcoming appointments.</span>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   if (!isEditing) {
     return (
       <div className="space-y-0">
-        {showBanner && <ProfileBanner />}
+        {showFullBanner && <ProfileBanner />}
+        {showCompactBanner && <CompactBanner />}
         {!isHomeSection && (
         <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
