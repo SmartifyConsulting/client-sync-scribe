@@ -1,54 +1,47 @@
 
 
-# Redesign ProfileBanner to Match Attached Layout (Mobile)
+# Split Home & Profile Tabs + Vula Vouchers Logo Update
 
-## What Changes
+## Summary
+Re-introduce a "Home" icon in the mobile bottom nav that shows only the ProfileBanner (dashboard content). The "Profile" tab shows only the Personal/Medical Information tabs. Also replace the small Vula symbol icon with the uploaded horizontal Vula Vouchers logo in both the profile banner and the My Rewards "Recent Rewards" section.
 
-The current banner has avatar + greeting/email on the same row with Calendar/Record Task buttons cramped to the right. The design shows a cleaner vertical stack layout:
+## Changes
 
-1. **Row 1**: Avatar (left) + "Welcome back, Name" + email (right of avatar) — no buttons on this row
-2. **Row 2**: Calendar icon + "Upcoming Appointments" heading + appointment list (or "No upcoming appointments.")
-3. **Row 3**: Vula Vouchers logo/branding (left) + "You have earned / 1,523" counter (right) — separated by a vertical divider
-4. **Row 4**: Calendar button (outline) + Record Task button (filled) — full width, side by side at the bottom
+### 1. Copy uploaded logo to project assets
+- Copy `user-uploads://VulaVouchersHorizontalLogo.png` to `src/assets/vula-vouchers-logo.png`
 
-## File: `src/components/patients/PatientDetailsEditor.tsx`
+### 2. Add "Home" back to mobile bottom nav
+**File:** `src/components/layout/BottomNav.tsx`
+- Add a Home item back to `patientSections` array: `{ icon: LayoutDashboard, label: "Home", section: "home" }`
+- Place it first, before Profile
 
-### ProfileBanner restructure (lines 1044-1158)
+### 3. Update SECTION_TABS to separate Home from Profile
+**File:** `src/components/patients/PatientDetailsEditor.tsx`
+- Change `SECTION_TABS` so `home` maps to an empty array `[]` (no clinical tabs shown — only the banner)
+- Keep `health` (Profile) mapping to `["personal", "medical"]`
 
-Replace the current layout with:
+### 4. Conditionally hide tabs on Home section (mobile)
+**File:** `src/components/patients/PatientDetailsEditor.tsx`
+- When `section === "home"` on mobile, hide the tab bar and all tab content — show only the ProfileBanner
+- When `section === "health"` (Profile), show Personal/Medical tabs as normal, and hide the ProfileBanner to avoid duplication
 
-```
-┌──────────────────────────────────────────┐
-│ (Avatar)  Welcome back,                 │
-│           Georgia                        │
-│           georgia.adams@holarc.health    │
-├──────────────────────────────────────────┤
-│ 📅 Upcoming Appointments                │
-│    No upcoming appointments.             │
-│    (or list of appointments)             │
-├──────────────────────────────────────────┤
-│  VULA        │  You have                │
-│  VOUCHERS    │  earned                  │
-│  (logo)      │  1,523                   │
-├──────────────────────────────────────────┤
-│  [Calendar]     [Record Task]            │
-└──────────────────────────────────────────┘
-```
+### 5. Replace Vula symbol with horizontal logo in ProfileBanner
+**File:** `src/components/patients/PatientDetailsEditor.tsx`
+- Import the new logo: `import vulaVouchersLogo from "@/assets/vula-vouchers-logo.png"`
+- In the Vula Vouchers row (line 1125-1138), replace the small icon + text with the horizontal logo image, sized appropriately (e.g., `h-10` auto width)
 
-**On mobile only** (`isMobile`):
-- Move Calendar + Record Task buttons from the greeting row to a dedicated bottom row with equal-width buttons
-- Show the Vula section as a two-column layout with divider: Vula branding left, counter right
-- Show "Upcoming Appointments" as its own section with the calendar icon, always visible (show "No upcoming appointments." when empty)
+### 6. Replace Vula symbol in My Rewards "Recent Rewards" section
+**File:** `src/pages/patient/MyRewards.tsx`
+- Import the horizontal logo
+- Replace the Gift icon or vula-symbol in the "Recent Rewards" card header with the new horizontal logo
 
-**On desktop/tablet**: Keep current compact layout (or apply same redesign — the design is clean enough for all views)
-
-### Specific changes:
-1. Remove Calendar/Record Task buttons from the greeting row (line 1086-1109)
-2. Make the "Upcoming Appointments" section always visible (remove the `length > 0` conditional on line 1126), show "No upcoming appointments." when empty
-3. Restructure the Vulas section into a two-column layout with "VULA VOUCHERS" branding on the left and the counter on the right, separated by a border
-4. Add a new bottom row with Calendar + Record Task buttons spanning full width
+## Files Modified
 
 | File | Changes |
 |------|---------|
-| `src/components/patients/PatientDetailsEditor.tsx` | Restructure ProfileBanner layout to match design mockup |
+| `src/assets/vula-vouchers-logo.png` | New file — uploaded logo |
+| `src/components/layout/BottomNav.tsx` | Re-add Home item to patient nav |
+| `src/components/patients/PatientDetailsEditor.tsx` | Separate Home/Profile views, replace Vula logo |
+| `src/pages/patient/MyDetails.tsx` | Default section stays `"health"` for non-mobile |
+| `src/pages/patient/MyRewards.tsx` | Replace icon in Recent Rewards with horizontal logo |
 
