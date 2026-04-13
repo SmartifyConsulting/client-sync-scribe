@@ -22,10 +22,11 @@ const doctorNavItems = [
 ];
 
 const patientSections = [
-  { icon: HeartPulse, label: "Profile", section: "health" },
-  { icon: Handshake, label: "Care", section: "care" },
-  { icon: FolderOpen, label: "Admin", section: "admin" },
-  { icon: Gift, label: "Rewards", section: "rewards" },
+  { icon: LayoutDashboard, label: "Home", section: "home" },
+  { icon: HeartPulse, label: "My Profile", section: "health" },
+  { icon: Handshake, label: "My Healthcare", section: "care" },
+  { icon: FolderOpen, label: "My Desk", section: "admin" },
+  { icon: Gift, label: "My Vulas", section: "rewards" },
 ];
 
 export function BottomNav() {
