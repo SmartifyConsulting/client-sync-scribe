@@ -865,13 +865,13 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                           )}
                         </div>
                       </td>
-                      <td className="px-1 md:px-4 py-2.5 text-xs text-muted-foreground">
+                      <td className="px-3 md:px-4 py-2.5 text-xs text-muted-foreground">
                         {mePatient.last_visit ? new Date(mePatient.last_visit).toLocaleDateString() : <span className="text-muted-foreground/50">—</span>}
                       </td>
-                      <td className="px-1 md:px-4 py-2.5 text-xs text-muted-foreground">
+                      <td className="px-3 md:px-4 py-2.5 text-xs text-muted-foreground">
                         {new Date(mePatient.created_at).toLocaleDateString()}
                       </td>
-                      <td className="px-1 md:px-4 py-2.5 text-right">
+                      <td className="px-3 md:px-4 py-2.5 text-right">
                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => navigate(`/patients/${mePatient.id}`)}>
                           <Edit3 className="h-3.5 w-3.5" />
                         </Button>
@@ -948,16 +948,16 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                             )}
                           </div>
                         </td>
-                        <td className="px-1 md:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                        <td className="px-3 md:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
                           {patient.last_visit 
                             ? new Date(patient.last_visit).toLocaleDateString() 
                             : <span className="text-muted-foreground/50">—</span>
                           }
                         </td>
-                        <td className="px-1 md:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                        <td className="px-3 md:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
                           {new Date(patient.created_at).toLocaleDateString()}
                         </td>
-                        <td className="px-1 md:px-4 py-2.5 text-right">
+                        <td className="px-3 md:px-4 py-2.5 text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-7 w-7">
