@@ -269,14 +269,6 @@ export default function Dashboard() {
           href="/patients"
         />
         <StatsCard
-          title="Appointments Today"
-          value={8}
-          change="2 completed"
-          trend="neutral"
-          icon={Calendar}
-          href="/calendar"
-        />
-        <StatsCard
           title="This Week"
           value={24}
           change="+8% from last week"
@@ -314,10 +306,15 @@ export default function Dashboard() {
       <div className="grid gap-3 md:gap-6 grid-cols-1 lg:grid-cols-5">
         <div className="lg:col-span-3 space-y-6">
           <TodaysBriefing />
-          <RecentActivity />
+          <div className="hidden lg:block">
+            <RecentActivity />
+          </div>
         </div>
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-6">
           {isDoctor && <CompactTodoList />}
+          <div className="lg:hidden">
+            <RecentActivity />
+          </div>
         </div>
       </div>
     </div>

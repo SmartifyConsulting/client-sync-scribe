@@ -250,64 +250,61 @@ export function DoctorAccessRequests() {
     return null;
   }
 
+  const getInitials = (name: string | null) => {
+    if (!name) return "?";
+    return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+  };
+
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            Patient Access Requests
-          </CardTitle>
-          <CardDescription>
-            Patients requesting you to access their health information
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {requests.map((request) => (
-              <div
-                key={request.id}
-                className="flex items-center gap-4 p-4 rounded-lg border border-border bg-amber-50/50 dark:bg-amber-900/10"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <User className="h-5 w-5 text-primary" />
+      <div className="space-y-3">
+        {requests.map((request) => {
+          const patientName = request.patient_profile?.full_name || "Unknown Patient";
+          return (
+            <div
+              key={request.id}
+              className="rounded-2xl border border-border bg-card shadow-sm p-4 space-y-3"
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm">
+                  {getInitials(patientName)}
                 </div>
-                <div className="flex-1">
-                  <p className="font-medium">
-                    {request.patient_profile?.full_name || "Unknown Patient"}
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm text-foreground">{patientName}</p>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    {patientName} has invited you on {patientName.split(" ")[0]}'s panel of healthcare providers and has provided access to their health information.
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    Requests access to their health information
+                  <p className="text-[10px] text-muted-foreground/70 mt-2">
+                    {format(new Date(request.created_at), "d MMM yyyy 'at' h:mm a")}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    Sent {format(new Date(request.created_at), "MMM d, yyyy 'at' h:mm a")}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeclineRequest(request)}
-                  >
-                    <UserX className="h-4 w-4 mr-1" />
-                    Decline
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setAcceptingRequest(request);
-                      setSelectedPermissions(["patient_info", "calendar", "session_summaries", "prescription_history"]);
-                    }}
-                  >
-                    <UserCheck className="h-4 w-4 mr-1" />
-                    Accept
-                  </Button>
                 </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              <div className="flex gap-2 pt-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 rounded-xl text-xs"
+                  onClick={() => handleDeclineRequest(request)}
+                >
+                  <XCircle className="h-3.5 w-3.5 mr-1.5" />
+                  Decline
+                </Button>
+                <Button
+                  size="sm"
+                  className="flex-1 rounded-xl text-xs"
+                  onClick={() => {
+                    setAcceptingRequest(request);
+                    setSelectedPermissions(["patient_info", "calendar", "session_summaries", "prescription_history"]);
+                  }}
+                >
+                  <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+                  Accept
+                </Button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
       {/* Accept Dialog with Permission Selection */}
       <Dialog open={!!acceptingRequest} onOpenChange={() => setAcceptingRequest(null)}>

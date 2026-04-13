@@ -18,8 +18,8 @@ const doctorNavItems = [
   { icon: Users, label: "Patients", to: "/patients" },
   { icon: Mic, label: "Sessions", to: "/sessions" },
   { icon: Briefcase, label: "Practice", to: "/practice" },
-  { icon: Gift, label: "Rewards", to: "/doctor/rewards" },
   { icon: Shield, label: "Admin", to: "/admin" },
+  { icon: Gift, label: "Rewards", to: "/doctor/rewards" },
 ];
 
 const patientSections = [
