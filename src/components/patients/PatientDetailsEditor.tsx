@@ -1967,7 +1967,7 @@ export function PatientDetailsEditor({
           {!saving && !hasChanges && isEditing && (
             <div className="flex justify-end mt-2">
               <span className="flex items-center gap-1.5 text-xs text-green-600">
-                <Check className="h-3 w-3" />
+                <Save className="h-3 w-3" />
                 Saved
               </span>
             </div>
