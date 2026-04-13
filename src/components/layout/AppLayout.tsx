@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
 import { MobileHeader } from "./MobileHeader";
+import { Sidebar } from "./Sidebar";
 import { PageTransition } from "./PageTransition";
 import { Footer } from "./Footer";
 import { TopBarIcons } from "./TopBarIcons";

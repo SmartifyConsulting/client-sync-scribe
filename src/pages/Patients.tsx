@@ -815,13 +815,13 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   <th className="hidden md:table-cell px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Contact
                   </th>
-                  <th className="px-1 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="px-3 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Last Seen
                   </th>
-                  <th className="px-1 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="px-3 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Since
                   </th>
-                  <th className="px-1 md:px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">
+                  <th className="px-3 md:px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">
                     Actions
                   </th>
                 </tr>
