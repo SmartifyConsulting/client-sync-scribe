@@ -38,6 +38,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Toggle } from "@/components/ui/toggle";
 import { Separator } from "@/components/ui/separator";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -1458,7 +1459,6 @@ export default function MyPractice() {
                 <Label className="text-sm font-semibold">Digital Signature</Label>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-2">
-            <Label className="text-sm font-semibold">Digital Signature</Label>
             <div className="flex items-center gap-2 flex-wrap">
               <Select
                 value={sigFormData.signature_font}
