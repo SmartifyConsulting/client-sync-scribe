@@ -1,63 +1,54 @@
 
 
-# Merge Dashboard Into Profile Banner — All Views
+# Redesign ProfileBanner to Match Attached Layout (Mobile)
 
-## Summary
-Eliminate the dedicated "Dashboard" tab by embedding its key content (upcoming appointments, Vulas count, Calendar icon, Record Task button) directly into the ProfileBanner section that appears above all tabs. This applies to mobile, tablet, and web views.
+## What Changes
 
-## Changes
+The current banner has avatar + greeting/email on the same row with Calendar/Record Task buttons cramped to the right. The design shows a cleaner vertical stack layout:
 
-### 1. Expand ProfileBanner with dashboard content
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
+1. **Row 1**: Avatar (left) + "Welcome back, Name" + email (right of avatar) — no buttons on this row
+2. **Row 2**: Calendar icon + "Upcoming Appointments" heading + appointment list (or "No upcoming appointments.")
+3. **Row 3**: Vula Vouchers logo/branding (left) + "You have earned / 1,523" counter (right) — separated by a vertical divider
+4. **Row 4**: Calendar button (outline) + Record Task button (filled) — full width, side by side at the bottom
 
-The `ProfileBanner` component (line 1008-1071) currently shows greeting + avatar + email + Vulas counter. Expand it to also include:
+## File: `src/components/patients/PatientDetailsEditor.tsx`
 
-- **Calendar + Record Task buttons** — placed next to / below the greeting (responsive layout)
-- **Upcoming Appointments mini-list** — a compact card showing next appointments fetched from `appointments` table, displayed below the greeting row
-- **Vulas count** — already present, keep as-is
+### ProfileBanner restructure (lines 1044-1158)
 
-The banner will need to fetch upcoming appointments data internally (query `appointments` table for the patient's upcoming slots via `doctor_patient_access`). Import `Calendar`, `Mic`, `Clock` from lucide-react, `Link` from react-router-dom, `useQuery` from tanstack, `supabase` client, and `format`/`parseISO`/`isFuture` from date-fns.
+Replace the current layout with:
 
-Layout structure:
-```text
-┌─────────────────────────────────────────────────┐
-│ [Avatar]  Welcome back              [Calendar] │
-│           Patient Name              [Record]   │
-│           email@holarc.health                  │
-│           You have earned X Vulas              │
-│                                                │
-│  ┌─ Upcoming Appointments ──────────────────┐  │
-│  │ Dr. Name — Apr 15, 2:00 PM  [Specialty]  │  │
-│  │ Dr. Name — Apr 18, 10:00 AM [Specialty]  │  │
-│  └──────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────┘
+```
+┌──────────────────────────────────────────┐
+│ (Avatar)  Welcome back,                 │
+│           Georgia                        │
+│           georgia.adams@holarc.health    │
+├──────────────────────────────────────────┤
+│ 📅 Upcoming Appointments                │
+│    No upcoming appointments.             │
+│    (or list of appointments)             │
+├──────────────────────────────────────────┤
+│  VULA        │  You have                │
+│  VOUCHERS    │  earned                  │
+│  (logo)      │  1,523                   │
+├──────────────────────────────────────────┤
+│  [Calendar]     [Record Task]            │
+└──────────────────────────────────────────┘
 ```
 
-### 2. Remove "Dashboard" tab from tab navigation
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
+**On mobile only** (`isMobile`):
+- Move Calendar + Record Task buttons from the greeting row to a dedicated bottom row with equal-width buttons
+- Show the Vula section as a two-column layout with divider: Vula branding left, counter right
+- Show "Upcoming Appointments" as its own section with the calendar icon, always visible (show "No upcoming appointments." when empty)
 
-- Remove `"dashboard"` from `SECTION_TABS.home` (line 309) — change to empty array or remove the `home` key
-- Remove the Dashboard `TabsTrigger` from both mobile (line 1117-1120) and desktop (line 1170-1173) tab lists
-- Remove the Dashboard `TabsContent` from both view mode (line 1656-1669) and edit mode (line 3148-3160)
-- Remove the lazy import of `PatientDashboardLazy` if no longer needed
+**On desktop/tablet**: Keep current compact layout (or apply same redesign — the design is clean enough for all views)
 
-### 3. Update mobile bottom nav default
-**File:** `src/components/layout/BottomNav.tsx` and `src/pages/patient/MyDetails.tsx`
-
-- Since there's no more "dashboard" tab, the `home` section should default to `"personal"` (the first tab of the profile group)
-- Update `SECTION_TABS` mapping: `home: ["personal", "medical"]` (same as `health`)
-- Or remove the `home` section entirely and default to `health`
-
-### 4. Remove or keep PatientDashboard.tsx
-**File:** `src/pages/patient/PatientDashboard.tsx`
-
-This file can remain for now (it may be referenced elsewhere), but it will no longer be rendered inside the tab. The appointment-fetching logic will be duplicated in a lightweight form inside ProfileBanner.
-
-## Files Modified
+### Specific changes:
+1. Remove Calendar/Record Task buttons from the greeting row (line 1086-1109)
+2. Make the "Upcoming Appointments" section always visible (remove the `length > 0` conditional on line 1126), show "No upcoming appointments." when empty
+3. Restructure the Vulas section into a two-column layout with "VULA VOUCHERS" branding on the left and the counter on the right, separated by a border
+4. Add a new bottom row with Calendar + Record Task buttons spanning full width
 
 | File | Changes |
 |------|---------|
-| `src/components/patients/PatientDetailsEditor.tsx` | Expand ProfileBanner with appointments + action buttons, remove Dashboard tab from navigation and content |
-| `src/components/layout/BottomNav.tsx` | Update default section mapping since dashboard tab is gone |
-| `src/pages/patient/MyDetails.tsx` | Update default section to match new tab structure |
+| `src/components/patients/PatientDetailsEditor.tsx` | Restructure ProfileBanner layout to match design mockup |
 
