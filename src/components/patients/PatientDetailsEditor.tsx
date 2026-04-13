@@ -341,7 +341,9 @@ export function PatientDetailsEditor({
   const { data: bannerAppointments = [] } = useQuery({
     queryKey: ["banner-appointments", patient.id],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return [];
       const { data, error } = await supabase
         .from("appointment_requests")
@@ -350,7 +352,10 @@ export function PatientDetailsEditor({
         .in("status", ["approved", "pending"])
         .order("requested_start", { ascending: true })
         .limit(3);
-      if (error) { console.error(error); return []; }
+      if (error) {
+        console.error(error);
+        return [];
+      }
       return (data || []).filter((a: any) => {
         const start = a.proposed_start || a.requested_start;
         return start && isAfter(parseISO(start), new Date());
@@ -1097,7 +1102,10 @@ export function PatientDetailsEditor({
                 const start = appt.proposed_start || appt.requested_start;
                 const doctorProfile = appt.profiles as any;
                 return (
-                  <div key={appt.id} className="flex items-center justify-between text-xs bg-muted/50 rounded-md px-2.5 py-1.5">
+                  <div
+                    key={appt.id}
+                    className="flex items-center justify-between text-xs bg-muted/50 rounded-md px-2.5 py-1.5"
+                  >
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="font-medium text-foreground truncate">
                         {doctorProfile?.full_name || "Doctor"}
@@ -1373,7 +1381,13 @@ export function PatientDetailsEditor({
   // Compact profile banner for non-Home mobile sections
   const CompactBanner = () => {
     if (!isSelfService || !isMobile || section === "home") return null;
-    const initials = patient.name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "?";
+    const initials =
+      patient.name
+        ?.split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2) || "?";
     const upcomingAppointments = bannerAppointments;
     return (
       <div className={sectionFrame + " mb-4"}>
@@ -1386,7 +1400,9 @@ export function PatientDetailsEditor({
           {/* Vula counter + logo */}
           <div className="flex-1 min-w-0 flex items-center gap-2">
             <div className="flex flex-col">
-              <span className="text-xl font-bold text-primary"><AnimatedCounter target={lollipopCount} /></span>
+              <span className="text-xl font-bold text-primary">
+                <AnimatedCounter target={lollipopCount} />
+              </span>
             </div>
             <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-7 w-auto object-contain" />
           </div>
@@ -1394,10 +1410,25 @@ export function PatientDetailsEditor({
         {/* Bottom row: calendar/mic + appointments */}
         <div className="flex items-center gap-3 mt-2 pt-2 border-t border-border">
           <div className="flex items-center gap-1.5 shrink-0">
-            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => { setActiveTab("calendar"); navigate("/patient/details?section=admin"); }}>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => {
+                setActiveTab("calendar");
+                navigate("/patient/details?section=admin");
+              }}
+            >
               <Calendar className="h-3.5 w-3.5" />
             </Button>
-            <Button size="icon" className="h-7 w-7" onClick={() => { setActiveTab("tasks"); navigate("/patient/details?section=admin"); }}>
+            <Button
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => {
+                setActiveTab("tasks");
+                navigate("/patient/details?section=admin");
+              }}
+            >
               <Mic className="h-3.5 w-3.5" />
             </Button>
           </div>
@@ -1415,7 +1446,7 @@ export function PatientDetailsEditor({
   if (!isEditing) {
     const showFullBanner = !isMobile || section === "home";
     const showCompactBanner = isMobile && section !== "home";
-    const showTabs = !isMobile || (section !== "home");
+    const showTabs = !isMobile || section !== "home";
     return (
       <div className="space-y-0">
         {showFullBanner && <ProfileBanner />}
@@ -1800,7 +1831,6 @@ export function PatientDetailsEditor({
                 </div>
               </div>
             </TabsContent>
-
 
             {/* === TASKS TAB === */}
             {isSelfService && (
@@ -3278,7 +3308,6 @@ export function PatientDetailsEditor({
               </div>
             </div>
           </TabsContent>
-
 
           {/* === Tasks tab (edit mode) === */}
           {isSelfService && (
