@@ -62,6 +62,7 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
   const [isLoading, setIsLoading] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [sendingInvite, setSendingInvite] = useState(false);
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
   const { profile } = useProfile();
@@ -130,7 +131,6 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
     return () => clearTimeout(timer);
   }, [nameSearch]);
 
-  const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
 
   const handleSelectDoctor = (doctor: DoctorSuggestion) => {
     setSelectedDoctorId(doctor.id);
