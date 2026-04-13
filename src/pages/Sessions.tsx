@@ -1311,6 +1311,36 @@ export default function Sessions() {
           </div>
         </div>
 
+        {/* Search and Filter */}
+        <div className="flex flex-col sm:flex-row gap-2 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search by patient name..."
+              value={sessionSearch}
+              onChange={(e) => setSessionSearch(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="date"
+              value={sessionDateFrom}
+              onChange={(e) => setSessionDateFrom(e.target.value)}
+              className="px-2 py-1.5 text-xs rounded-lg border border-border bg-background"
+              placeholder="From"
+            />
+            <input
+              type="date"
+              value={sessionDateTo}
+              onChange={(e) => setSessionDateTo(e.target.value)}
+              className="px-2 py-1.5 text-xs rounded-lg border border-border bg-background"
+              placeholder="To"
+            />
+          </div>
+        </div>
+
         <Alert className="mb-4 border-amber-500/30 bg-amber-500/5">
           <AlertCircle className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-xs text-amber-700">

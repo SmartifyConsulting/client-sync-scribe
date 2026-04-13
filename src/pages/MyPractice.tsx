@@ -973,7 +973,7 @@ export default function MyPractice() {
           )}
           {savedStatus === "saved" && (
             <>
-              <Check className="h-3.5 w-3.5 text-success" />
+              <Save className="h-3.5 w-3.5 text-success" />
               <span className="text-success">Saved</span>
             </>
           )}
