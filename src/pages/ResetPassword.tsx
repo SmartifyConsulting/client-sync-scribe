@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import holarcLogo from "@/assets/holarc-logo-clear-2.png";
 import { Lock, Loader2, CheckCircle } from "lucide-react";
@@ -16,12 +16,37 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [authReady, setAuthReady] = useState(false);
+  const recoveryVerifiedRef = useRef(false);
 
   useEffect(() => {
-    // Check if we have a valid session from the reset link
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        recoveryVerifiedRef.current = true;
+        setAuthReady(true);
+        setInitialLoading(false);
+      } else if (event === 'SIGNED_IN' && !recoveryVerifiedRef.current && session) {
+        // Fallback: some Supabase versions emit SIGNED_IN for recovery
+        setAuthReady(true);
+        setInitialLoading(false);
+      }
+    });
+
+    // Also check if session already exists (token may have been processed before mount)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setAuthReady(true);
+        setInitialLoading(false);
+      }
+    });
+
+    // Safety timeout — if nothing fires in 5s, link is expired
+    timeoutId = setTimeout(() => {
+      if (!recoveryVerifiedRef.current && !authReady) {
+        setInitialLoading(false);
         toast({
           title: "Invalid or expired link",
           description: "Please request a new password reset link",
@@ -29,12 +54,19 @@ export default function ResetPassword() {
         });
         navigate("/forgot-password");
       }
+    }, 5000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeoutId);
     };
-    checkSession();
-  }, [navigate, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!authReady) return;
 
     if (password !== confirmPassword) {
       toast({
@@ -58,7 +90,6 @@ export default function ResetPassword() {
 
     try {
       const { error } = await supabase.auth.updateUser({ password });
-
       if (error) throw error;
 
       setSuccess(true);
@@ -67,10 +98,28 @@ export default function ResetPassword() {
         description: "Your password has been successfully reset",
       });
 
-      // Redirect to dashboard after 2 seconds
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 2000);
+      // Clean URL hash to prevent re-trigger
+      window.history.replaceState(null, "", window.location.pathname);
+
+      // Redirect by role
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .single();
+
+        setTimeout(() => {
+          if (roleData?.role === 'patient') {
+            navigate("/patient/details");
+          } else {
+            navigate("/dashboard");
+          }
+        }, 2000);
+      } else {
+        setTimeout(() => navigate("/auth"), 2000);
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -95,7 +144,12 @@ export default function ResetPassword() {
           </div>
 
           <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-            {success ? (
+            {initialLoading ? (
+              <div className="text-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+                <p className="text-muted-foreground">Verifying your reset link...</p>
+              </div>
+            ) : success ? (
               <div className="text-center py-4">
                 <div className="flex justify-center mb-4">
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
@@ -103,9 +157,7 @@ export default function ResetPassword() {
                   </div>
                 </div>
                 <h2 className="text-lg font-semibold text-foreground mb-2">Password Reset Successful</h2>
-                <p className="text-muted-foreground">
-                  Redirecting you to the dashboard...
-                </p>
+                <p className="text-muted-foreground">Redirecting you...</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -143,7 +195,7 @@ export default function ResetPassword() {
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full" disabled={loading || !authReady}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Reset Password
                 </Button>
