@@ -15,7 +15,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { useMyRewards, useMyStreaks } from "@/hooks/usePatientRewards";
-import vulaSymbol from "@/assets/vula-symbol.png";
+import vulaVouchersLogo from "@/assets/vula-vouchers-logo.png";
 
 const MILESTONES = [
   { count: 5, label: "First Steps", icon: "🌟", color: "text-yellow-500" },
