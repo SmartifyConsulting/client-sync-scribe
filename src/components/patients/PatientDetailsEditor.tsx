@@ -1690,7 +1690,7 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="sessions" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">My Sessions</h2>
+                  <h2 className="text-lg font-semibold text-foreground">Sessions</h2>
                   <p className="text-xs text-muted-foreground">History of your consultations</p>
                 </div>
                 <Suspense
@@ -3182,7 +3182,7 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="sessions" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">My Sessions</h2>
+                <h2 className="text-lg font-semibold text-foreground">Sessions</h2>
                 <p className="text-xs text-muted-foreground">History of your consultations</p>
               </div>
               <Suspense
