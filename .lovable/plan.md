@@ -1,31 +1,54 @@
 
 
-# Restore Compact Banner & Home/Profile Section Separation
+# Redesign ProfileBanner to Match Attached Layout (Mobile)
 
-## Problem
-The previous changes that separated Home vs Profile on mobile — including the `CompactBanner` component, `showFullBanner`/`showCompactBanner` conditionals, and `isHomeSection` logic — have been lost. Currently `ProfileBanner` renders unconditionally on all sections.
+## What Changes
 
-## Changes
+The current banner has avatar + greeting/email on the same row with Calendar/Record Task buttons cramped to the right. The design shows a cleaner vertical stack layout:
 
-### File: `src/components/patients/PatientDetailsEditor.tsx`
+1. **Row 1**: Avatar (left) + "Welcome back, Name" + email (right of avatar) — no buttons on this row
+2. **Row 2**: Calendar icon + "Upcoming Appointments" heading + appointment list (or "No upcoming appointments.")
+3. **Row 3**: Vula Vouchers logo/branding (left) + "You have earned / 1,523" counter (right) — separated by a vertical divider
+4. **Row 4**: Calendar button (outline) + Record Task button (filled) — full width, side by side at the bottom
 
-1. **Re-add conditional logic** before the return statements (both view and edit mode):
-   - `isHomeSection = isMobile && isSelfService && section === "home"` — true when on mobile Home tab
-   - `showFullBanner = !isMobile || !isSelfService || section === "home"` — full banner on Home/desktop
-   - `showCompactBanner = isMobile && isSelfService && section !== "home" && section !== "rewards"` — compact banner on other mobile sections
+## File: `src/components/patients/PatientDetailsEditor.tsx`
 
-2. **Re-add CompactBanner sub-component** — a slim single-row card:
-   - Left: small avatar (h-10 w-10)
-   - Center: Vula Vouchers horizontal logo + animated lollipop count (no "Earned:" prefix)
-   - Bottom row: Calendar icon + Mic icon + next appointment or "No upcoming appointments" text
+### ProfileBanner restructure (lines 1044-1158)
 
-3. **Update both return blocks** (view mode ~line 1272, edit mode ~line 1780):
-   - Replace `<ProfileBanner />` with conditional rendering:
-     - `{showFullBanner && <ProfileBanner />}`
-     - `{showCompactBanner && <CompactBanner />}`
-   - Wrap the `<Tabs>` block in `{!isHomeSection && (...)}` so Home section only shows the banner
+Replace the current layout with:
+
+```
+┌──────────────────────────────────────────┐
+│ (Avatar)  Welcome back,                 │
+│           Georgia                        │
+│           georgia.adams@holarc.health    │
+├──────────────────────────────────────────┤
+│ 📅 Upcoming Appointments                │
+│    No upcoming appointments.             │
+│    (or list of appointments)             │
+├──────────────────────────────────────────┤
+│  VULA        │  You have                │
+│  VOUCHERS    │  earned                  │
+│  (logo)      │  1,523                   │
+├──────────────────────────────────────────┤
+│  [Calendar]     [Record Task]            │
+└──────────────────────────────────────────┘
+```
+
+**On mobile only** (`isMobile`):
+- Move Calendar + Record Task buttons from the greeting row to a dedicated bottom row with equal-width buttons
+- Show the Vula section as a two-column layout with divider: Vula branding left, counter right
+- Show "Upcoming Appointments" as its own section with the calendar icon, always visible (show "No upcoming appointments." when empty)
+
+**On desktop/tablet**: Keep current compact layout (or apply same redesign — the design is clean enough for all views)
+
+### Specific changes:
+1. Remove Calendar/Record Task buttons from the greeting row (line 1086-1109)
+2. Make the "Upcoming Appointments" section always visible (remove the `length > 0` conditional on line 1126), show "No upcoming appointments." when empty
+3. Restructure the Vulas section into a two-column layout with "VULA VOUCHERS" branding on the left and the counter on the right, separated by a border
+4. Add a new bottom row with Calendar + Record Task buttons spanning full width
 
 | File | Changes |
 |------|---------|
-| `src/components/patients/PatientDetailsEditor.tsx` | Re-add CompactBanner component, restore conditional banner/tabs logic for Home vs Profile mobile separation |
+| `src/components/patients/PatientDetailsEditor.tsx` | Restructure ProfileBanner layout to match design mockup |
 

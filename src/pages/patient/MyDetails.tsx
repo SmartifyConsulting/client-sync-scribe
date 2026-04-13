@@ -10,7 +10,7 @@ import { useMyRewards } from "@/hooks/usePatientRewards";
 
 export default function MyDetails() {
   const [searchParams] = useSearchParams();
-  const section = searchParams.get("section") || "home";
+  const section = searchParams.get("section") || "health";
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string>("");
