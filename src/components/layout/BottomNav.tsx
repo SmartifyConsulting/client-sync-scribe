@@ -22,7 +22,6 @@ const doctorNavItems = [
 ];
 
 const patientSections = [
-  { icon: LayoutDashboard, label: "Home", section: "home" },
   { icon: HeartPulse, label: "Profile", section: "health" },
   { icon: Handshake, label: "Care", section: "care" },
   { icon: FolderOpen, label: "Admin", section: "admin" },
