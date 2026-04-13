@@ -341,30 +341,32 @@ export default function PatientDashboard() {
       )}
 
       {/* Row 1: AI Health Summary + Upcoming Appointments */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border-primary/10">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm">
-              <Sparkles className="h-4 w-4 text-primary" />
-              AI Health Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {aiSummaryLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-3 w-full" />
-                <Skeleton className="h-3 w-4/5" />
-                <Skeleton className="h-3 w-3/5" />
-              </div>
-            ) : aiSummary?.summary ? (
-              <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-4">
-                {cleanSummary(aiSummary.summary)}
-              </p>
-            ) : (
-              <p className="text-[11px] text-muted-foreground italic">No health summary available yet. Visit your doctor to build your health profile.</p>
-            )}
-          </CardContent>
-        </Card>
+      <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
+        {!isMobile && (
+          <Card className="border-primary/10">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <Sparkles className="h-4 w-4 text-primary" />
+                AI Health Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {aiSummaryLoading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-4/5" />
+                  <Skeleton className="h-3 w-3/5" />
+                </div>
+              ) : aiSummary?.summary ? (
+                <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-4">
+                  {cleanSummary(aiSummary.summary)}
+                </p>
+              ) : (
+                <p className="text-[11px] text-muted-foreground italic">No health summary available yet. Visit your doctor to build your health profile.</p>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="border-primary/10">
           <CardHeader className="pb-2">
