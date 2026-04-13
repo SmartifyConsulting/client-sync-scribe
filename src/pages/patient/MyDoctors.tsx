@@ -212,50 +212,55 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                    No healthcare providers found matching your search.
                  </p>
               ) : (
-                <Table>
-                  <TableHeader>
-                     <TableRow>
-                       <TableHead>Provider</TableHead>
-                       <TableHead>Specialty</TableHead>
-                       <TableHead>Action</TableHead>
-                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {searchResults.map((doctor) => (
-                       <TableRow key={doctor.id}>
-                         <TableCell>
-                           <div className="flex items-center gap-3">
-                             <Avatar className="h-9 w-9">
-                               <AvatarImage src={doctor.avatar_url || undefined} />
-                               <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                                 {doctor.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
-                               </AvatarFallback>
-                             </Avatar>
-                             <div className="flex flex-col">
-                               <span className="font-medium text-foreground">{doctor.full_name || "Unknown"}</span>
-                               {doctor.practice_number && (
-                                 <span className="text-[10px] text-muted-foreground">PR#: {doctor.practice_number}</span>
-                               )}
-                             </div>
-                           </div>
-                         </TableCell>
-                         <TableCell>
-                           {doctor.specialty && (
-                             <Badge className={`text-[10px] font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
-                               {doctor.specialty}
-                             </Badge>
-                           )}
-                         </TableCell>
-                         <TableCell>
-                          <InviteDoctorDialog
-                            prefillPracticeNumber={doctor.practice_number || ""}
-                            prefillRegistrationNumber={doctor.doctor_number || ""}
-                          />
-                        </TableCell>
+                 <Table className="table-fixed w-full">
+                   <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-auto">Provider</TableHead>
+                        <TableHead className="hidden sm:table-cell w-[120px]">Specialty</TableHead>
+                        <TableHead className="w-[50px]">Action</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                   </TableHeader>
+                   <TableBody>
+                     {searchResults.map((doctor) => (
+                        <TableRow key={doctor.id}>
+                          <TableCell className="p-2">
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-7 w-7 shrink-0">
+                                <AvatarImage src={doctor.avatar_url || undefined} />
+                                <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
+                                  {doctor.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex flex-col min-w-0">
+                                <span className="font-medium text-foreground text-xs truncate">{doctor.full_name || "Unknown"}</span>
+                                {doctor.practice_number && (
+                                  <span className="text-[10px] text-muted-foreground">PR#: {doctor.practice_number}</span>
+                                )}
+                                {doctor.specialty && (
+                                  <Badge className={`text-[9px] font-medium border-0 w-fit sm:hidden ${getSpecialtyColor(doctor.specialty)}`}>
+                                    {doctor.specialty}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden sm:table-cell p-2">
+                            {doctor.specialty && (
+                              <Badge className={`text-[10px] font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
+                                {doctor.specialty}
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="p-2">
+                           <InviteDoctorDialog
+                             prefillPracticeNumber={doctor.practice_number || ""}
+                             prefillRegistrationNumber={doctor.doctor_number || ""}
+                           />
+                         </TableCell>
+                       </TableRow>
+                     ))}
+                   </TableBody>
+                 </Table>
               )}
             </div>
           )}

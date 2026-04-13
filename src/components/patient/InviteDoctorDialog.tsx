@@ -75,9 +75,11 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
 
   // Debounced doctor name search
   useEffect(() => {
-    if (nameSearch.length < 2) {
-      setSuggestions([]);
-      setShowSuggestions(false);
+    if (nameSearch.length < 2 || selectedDoctorId) {
+      if (nameSearch.length < 2) {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
       return;
     }
     const timer = setTimeout(async () => {
@@ -128,7 +130,10 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
     return () => clearTimeout(timer);
   }, [nameSearch]);
 
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
+
   const handleSelectDoctor = (doctor: DoctorSuggestion) => {
+    setSelectedDoctorId(doctor.id);
     setNameSearch(doctor.full_name || "");
     setPracticeNumber(doctor.practice_number || "");
     setRegistrationNumber(doctor.doctor_number || "");
@@ -255,7 +260,7 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
                 id="doctorSearch"
                 placeholder="Type doctor name..."
                 value={nameSearch}
-                onChange={(e) => setNameSearch(e.target.value)}
+                onChange={(e) => { setSelectedDoctorId(null); setNameSearch(e.target.value); }}
                 onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
                 className="pl-10"
               />
@@ -326,9 +331,9 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={isLoading}>
+        <DialogFooter className="flex-col-reverse sm:flex-row gap-3 mt-4">
+          <Button variant="outline" onClick={() => setOpen(false)} className="w-full sm:w-auto">Cancel</Button>
+          <Button onClick={handleSubmit} disabled={isLoading} className="w-full sm:w-auto">
             {isLoading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Sending...</>) : "Send Request"}
           </Button>
         </DialogFooter>

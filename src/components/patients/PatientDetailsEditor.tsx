@@ -1973,11 +1973,21 @@ export function PatientDetailsEditor({
             </div>
           )}
 
-          {/* === PERSONAL TAB (EDIT) === */}
+           {/* === PERSONAL TAB (EDIT) === */}
           <TabsContent value="personal" className="space-y-4 mt-4">
-            <div className="mb-1">
-              <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
-              <p className="text-xs text-muted-foreground">View and manage personal details</p>
+            <div className="mb-1 flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
+                <p className="text-xs text-muted-foreground">View and manage personal details</p>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => { resetForm(); }}>
+                  <X className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-green-600" onClick={() => { performSave(formData, surgeries); setIsEditing(false); }}>
+                  <Check className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
 
             <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
@@ -2344,9 +2354,19 @@ export function PatientDetailsEditor({
 
           {/* === MEDICAL TAB (EDIT) === */}
           <TabsContent value="medical" className="mt-4">
-            <div className="mb-3">
-              <h2 className="text-lg font-semibold text-foreground">Medical Information</h2>
-              <p className="text-xs text-muted-foreground">View and manage medical records</p>
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">Medical Information</h2>
+                <p className="text-xs text-muted-foreground">View and manage medical records</p>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => { resetForm(); }}>
+                  <X className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-green-600" onClick={() => { performSave(formData, surgeries); setIsEditing(false); }}>
+                  <Check className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="space-y-3">
