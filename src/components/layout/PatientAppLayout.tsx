@@ -1,6 +1,6 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Calendar, Clock, LogOut, User, Bell } from "lucide-react";
+import { Calendar, Clock, LogOut, User, Bell, Share2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { AnimatePresence } from "framer-motion";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { SubscriptionGateModal } from "@/components/auth/SubscriptionGateModal";
 import { AlertCircle } from "lucide-react";
+import { ShareAppDialog } from "@/components/ShareAppDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -230,6 +231,11 @@ export function PatientAppLayout() {
                 >
                   <User className="h-3.5 w-3.5" /> Settings
                 </button>
+                <ShareAppDialog trigger={
+                  <button className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors w-full">
+                    <Share2 className="h-3.5 w-3.5" /> Share App
+                  </button>
+                } />
                 <button
                   onClick={handleSignOut}
                   className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-destructive/10 text-destructive transition-colors w-full"
