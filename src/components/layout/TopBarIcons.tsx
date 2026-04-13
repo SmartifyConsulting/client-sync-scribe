@@ -1,5 +1,5 @@
-import { Bell, Mic, User, Settings, LogOut, Award, Share2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Bell, Mic, User, Settings, LogOut, Award, Share2, Stethoscope, HeartPulse } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,12 +9,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { ShareAppDialog } from "@/components/ShareAppDialog";
 import { useUserRole } from "@/hooks/useUserRole";
+import { cn } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function TopBarIcons() {
   const { profile } = useProfile();
   const { isDoctor } = useUserRole();
   const queryClient = useQueryClient();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isOnPatientRoute = location.pathname.startsWith("/patient/");
 
   const { data: unreadNotifCount = 0 } = useQuery({
     queryKey: ["unread-notifications-topbar"],
@@ -158,10 +162,43 @@ export function TopBarIcons() {
           </button>
         </PopoverTrigger>
         <PopoverContent className="w-48 p-1.5" align="end">
-          <div className="px-2 py-1.5 border-b border-border mb-1">
-            <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
-            <p className="text-[10px] text-muted-foreground capitalize">{isDoctor ? "Doctor" : "Patient"}</p>
-          </div>
+          {/* Profile switcher */}
+          {isDoctor && (
+            <div className="border-b border-border mb-1">
+              <button
+                onClick={() => { if (isOnPatientRoute) return; }}
+                className={cn(
+                  "flex items-center gap-2 px-2 py-1.5 w-full rounded-md transition-colors",
+                  !isOnPatientRoute ? "bg-primary/10" : "hover:bg-accent"
+                )}
+              >
+                <Stethoscope className="h-3.5 w-3.5 text-primary" />
+                <div className="text-left">
+                  <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
+                  <p className="text-[10px] text-muted-foreground">Doctor</p>
+                </div>
+              </button>
+              <button
+                onClick={() => navigate("/patient/details")}
+                className={cn(
+                  "flex items-center gap-2 px-2 py-1.5 w-full rounded-md transition-colors",
+                  isOnPatientRoute ? "bg-primary/10" : "hover:bg-accent"
+                )}
+              >
+                <HeartPulse className="h-3.5 w-3.5 text-primary" />
+                <div className="text-left">
+                  <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
+                  <p className="text-[10px] text-muted-foreground">Patient</p>
+                </div>
+              </button>
+            </div>
+          )}
+          {!isDoctor && (
+            <div className="px-2 py-1.5 border-b border-border mb-1">
+              <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
+              <p className="text-[10px] text-muted-foreground capitalize">Patient</p>
+            </div>
+          )}
           <Link to="/settings" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
             <Settings className="h-3.5 w-3.5" /> Settings
           </Link>
