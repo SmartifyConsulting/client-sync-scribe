@@ -383,7 +383,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
             </p>
           </div>
         )}
-        <div className="flex gap-2 ml-auto">
+        <div className="flex gap-2 ml-auto justify-center flex-wrap">
           
           <PatientImportDialog 
             trigger={
@@ -839,7 +839,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                           <div className="flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs bg-[#E01837] text-white">
                             ME
                           </div>
-                          <span className="font-medium text-sm text-foreground group-hover:text-[#E01837] dark:group-hover:text-red-400 transition-colors whitespace-nowrap">
+                          <span className="font-medium text-xs md:text-sm text-foreground group-hover:text-[#E01837] dark:group-hover:text-red-400 transition-colors whitespace-nowrap">
                             {mePatient.name.includes(',') ? mePatient.name : (() => {
                               const parts = mePatient.name.trim().split(/\s+/);
                               if (parts.length <= 1) return mePatient.name;
@@ -924,7 +924,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                             )}>
                               {patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                             </div>
-                            <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors whitespace-nowrap">
+                            <span className="font-medium text-xs md:text-sm text-foreground group-hover:text-primary transition-colors whitespace-nowrap">
                               {patient.name.includes(',') ? patient.name : (() => {
                                 const parts = patient.name.trim().split(/\s+/);
                                 if (parts.length <= 1) return patient.name;

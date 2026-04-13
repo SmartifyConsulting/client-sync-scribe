@@ -160,6 +160,9 @@ export default function Sessions() {
   const [selectedRecordings, setSelectedRecordings] = useState<Set<string>>(new Set());
   const [isDownloading, setIsDownloading] = useState(false);
   const [playingSessionId, setPlayingSessionId] = useState<string | null>(null);
+  const [sessionSearch, setSessionSearch] = useState("");
+  const [sessionDateFrom, setSessionDateFrom] = useState("");
+  const [sessionDateTo, setSessionDateTo] = useState("");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   const currentPatient = patients.find(p => p.id === patientId);
@@ -1311,6 +1314,36 @@ export default function Sessions() {
           </div>
         </div>
 
+        {/* Search and Filter */}
+        <div className="flex flex-col sm:flex-row gap-2 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search by patient name..."
+              value={sessionSearch}
+              onChange={(e) => setSessionSearch(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="date"
+              value={sessionDateFrom}
+              onChange={(e) => setSessionDateFrom(e.target.value)}
+              className="px-2 py-1.5 text-xs rounded-lg border border-border bg-background"
+              placeholder="From"
+            />
+            <input
+              type="date"
+              value={sessionDateTo}
+              onChange={(e) => setSessionDateTo(e.target.value)}
+              className="px-2 py-1.5 text-xs rounded-lg border border-border bg-background"
+              placeholder="To"
+            />
+          </div>
+        </div>
+
         <Alert className="mb-4 border-amber-500/30 bg-amber-500/5">
           <AlertCircle className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-xs text-amber-700">
@@ -1322,11 +1355,30 @@ export default function Sessions() {
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
-        ) : sessions.filter(s => s.status !== 'in_progress').length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">No sessions recorded yet.</p>
-        ) : (
+        ) : (() => {
+          const filteredSessions = sessions.filter(s => {
+            if (s.status === 'in_progress') return false;
+            if (sessionSearch) {
+              const patientName = (s.patient?.name || '').toLowerCase();
+              const title = (s.title || '').toLowerCase();
+              const q = sessionSearch.toLowerCase();
+              if (!patientName.includes(q) && !title.includes(q)) return false;
+            }
+            if (sessionDateFrom) {
+              const sessionDate = new Date(s.started_at).toISOString().split('T')[0];
+              if (sessionDate < sessionDateFrom) return false;
+            }
+            if (sessionDateTo) {
+              const sessionDate = new Date(s.started_at).toISOString().split('T')[0];
+              if (sessionDate > sessionDateTo) return false;
+            }
+            return true;
+          });
+          return filteredSessions.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">No sessions match your search.</p>
+          ) : (
           <div className="space-y-1.5">
-            {sessions.filter(s => s.status !== 'in_progress').map((session) => (
+            {filteredSessions.map((session) => (
               <div
                 key={session.id}
                 className="flex items-center justify-between p-2 rounded-lg border border-border bg-background hover:bg-accent/50 transition-colors"
@@ -1414,7 +1466,8 @@ export default function Sessions() {
               </div>
             ))}
           </div>
-        )}
+          );
+        })()}
       </div>
       {/* Prescription Editor Modal */}
       {showPrescriptionEditor && currentPatient && patientId && (

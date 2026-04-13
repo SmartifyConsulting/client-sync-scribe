@@ -274,54 +274,54 @@ export default function PatientProfile() {
 
       {/* Stats Cards - hide when doctor views their own patient record */}
       {(patient as any).patient_user_id !== currentUserId && (
-        <div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
-          <div className="rounded-xl bg-card p-4 shadow-sm border border-border/50">
+        <div className="grid gap-2 grid-cols-3 lg:grid-cols-5">
+          <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-muted-foreground">Total Sessions</p>
-              <FileText className="h-4 w-4 text-primary" />
+              <p className="text-[10px] font-medium text-muted-foreground">Total Sessions</p>
+              <FileText className="h-3 w-3 text-primary" />
             </div>
-            <p className="mt-2 text-2xl font-bold text-foreground">{completedSessions.length}</p>
+            <p className="mt-1 text-sm font-bold text-foreground">{completedSessions.length}</p>
           </div>
-          <div className="rounded-xl bg-card p-4 shadow-sm border border-border/50">
+          <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-muted-foreground">Status</p>
+              <p className="text-[10px] font-medium text-muted-foreground">Status</p>
               <div
-                className={`h-2.5 w-2.5 rounded-full ${patient.status === "active" ? "bg-green-500" : "bg-muted-foreground"}`}
+                className={`h-2 w-2 rounded-full ${patient.status === "active" ? "bg-green-500" : "bg-muted-foreground"}`}
               />
             </div>
-            <p className="mt-2 text-2xl font-bold text-foreground capitalize">{patient.status}</p>
+            <p className="mt-1 text-sm font-bold text-foreground capitalize">{patient.status}</p>
           </div>
-          <div className="rounded-xl bg-card p-4 shadow-sm border border-border/50">
+          <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-muted-foreground">Last Seen On</p>
-              <Clock className="h-4 w-4 text-primary" />
+              <p className="text-[10px] font-medium text-muted-foreground">Last Seen</p>
+              <Clock className="h-3 w-3 text-primary" />
             </div>
-            <p className="mt-2 text-2xl font-bold text-foreground">
+            <p className="mt-1 text-sm font-bold text-foreground">
               {patient.last_visit ? (
-                format(new Date(patient.last_visit), "MMM d, yyyy")
+                format(new Date(patient.last_visit), "MMM d")
               ) : (
-                <span className="text-muted-foreground text-base font-medium">No visits</span>
+                <span className="text-muted-foreground text-xs font-medium">—</span>
               )}
             </p>
           </div>
-          <div className="rounded-xl bg-card p-4 shadow-sm border border-border/50">
+          <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-muted-foreground">Patient Since</p>
-              <Calendar className="h-4 w-4 text-primary" />
+              <p className="text-[10px] font-medium text-muted-foreground">Since</p>
+              <Calendar className="h-3 w-3 text-primary" />
             </div>
-            <p className="mt-2 text-2xl font-bold text-foreground">
-              {format(new Date(patient.created_at), "MMM yyyy")}
+            <p className="mt-1 text-sm font-bold text-foreground">
+              {format(new Date(patient.created_at), "MMM yy")}
             </p>
           </div>
           {/* Vula Rewards */}
-          <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-4 shadow-sm border border-emerald-200 dark:border-emerald-800/30">
+          <div className="rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-2 shadow-sm border border-emerald-200 dark:border-emerald-800/30">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-muted-foreground">Vulas</p>
-              <div className="h-8 w-8 rounded-full bg-white shadow-sm flex items-center justify-center">
-                <img src={vulaSymbol} alt="Vulas" className="h-6 w-6 object-contain" />
+              <p className="text-[10px] font-medium text-muted-foreground">Vulas</p>
+              <div className="h-4 w-4 rounded-full bg-white shadow-sm flex items-center justify-center">
+                <img src={vulaSymbol} alt="Vulas" className="h-3 w-3 object-contain" />
               </div>
             </div>
-            <p className="mt-2 text-2xl font-bold text-emerald-600 dark:text-emerald-400">{lollipopCount}</p>
+            <p className="mt-1 text-sm font-bold text-emerald-600 dark:text-emerald-400">{lollipopCount}</p>
           </div>
         </div>
       )}
