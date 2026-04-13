@@ -25,6 +25,7 @@ import {
   Stethoscope,
   Users2,
   Volume2,
+  PenTool,
 } from "lucide-react";
 import ReferralDoctors from "@/pages/ReferralDoctors";
 import Patients from "@/pages/Patients";
@@ -1437,7 +1438,10 @@ export default function MyPractice() {
           {/* Digital Signature Accordion */}
             <AccordionItem value="signature" className="rounded-xl border border-primary bg-card shadow-sm">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
-                <Label className="text-sm font-semibold">Digital Signature</Label>
+                <div className="flex items-center gap-2">
+                  <PenTool className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-semibold text-foreground">Digital Signature</h3>
+                </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
@@ -1548,7 +1552,10 @@ export default function MyPractice() {
           {/* Voice Narration Settings Accordion */}
             <AccordionItem value="voice" className="rounded-xl border border-primary bg-card shadow-sm">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
-                <Label className="text-sm font-semibold">Voice Narration Settings</Label>
+                <div className="flex items-center gap-2">
+                  <Volume2 className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-semibold text-foreground">Voice Narration Settings</h3>
+                </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-2">
             <p className="text-xs text-muted-foreground">Choose the voice used for your daily briefing narration.</p>
