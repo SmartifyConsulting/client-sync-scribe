@@ -1273,22 +1273,20 @@ export function PatientDetailsEditor({
           >
             My Profile
           </button>
+          {/* My Healthcare parent trigger */}
           {isSelfService && (
-            <TabsTrigger value="doctors" className={triggerClass}>
-              My Care Team
-            </TabsTrigger>
+            <button
+              type="button"
+              onClick={() => handleParentTabClick("care", CARE_TABS)}
+              className={cn(
+                "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-xs font-medium transition-all",
+                activeParentTab === "care" ? "bg-white text-black shadow-sm" : "text-white hover:bg-white/10",
+              )}
+            >
+              My Healthcare
+            </button>
           )}
-          {isSelfService && (
-            <TabsTrigger value="sessions" className={triggerClass}>
-              My Sessions
-            </TabsTrigger>
-          )}
-          {isSelfService && (
-            <TabsTrigger value="roundtable" className={triggerClass}>
-              My Round Table
-            </TabsTrigger>
-          )}
-          {/* My Admin parent trigger */}
+          {/* My Desk parent trigger */}
           {isSelfService && (
             <button
               type="button"
@@ -1298,7 +1296,7 @@ export function PatientDetailsEditor({
                 activeParentTab === "admin" ? "bg-white text-black shadow-sm" : "text-white hover:bg-white/10",
               )}
             >
-              My Admin
+              My Desk
             </button>
           )}
           {isSelfService && isDoctor && (
@@ -1322,7 +1320,7 @@ export function PatientDetailsEditor({
                 navigate("/patient/rewards");
               }}
             >
-              My Rewards
+              My Vulas
             </TabsTrigger>
           )}
         </TabsList>
@@ -1339,7 +1337,22 @@ export function PatientDetailsEditor({
           </TabsList>
         )}
 
-        {/* Sub-tab row for My Admin */}
+        {/* Sub-tab row for My Healthcare */}
+        {activeParentTab === "care" && isSelfService && (
+          <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+            <TabsTrigger value="doctors" className="text-xs whitespace-nowrap">
+              My H/Care Providers
+            </TabsTrigger>
+            <TabsTrigger value="sessions" className="text-xs whitespace-nowrap">
+              My Sessions
+            </TabsTrigger>
+            <TabsTrigger value="roundtable" className="text-xs whitespace-nowrap">
+              My Round Table
+            </TabsTrigger>
+          </TabsList>
+        )}
+
+        {/* Sub-tab row for My Desk */}
         {activeParentTab === "admin" && isSelfService && (
           <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
             <TabsTrigger value="calendar" className="text-xs whitespace-nowrap">
