@@ -52,10 +52,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format, parseISO, isFuture, isAfter } from "date-fns";
-import vulaVouchersLogo from "@/assets/vula-vouchers-logo.png";
-import { useQuery } from "@tanstack/react-query";
-import { Calendar, Mic, Clock } from "lucide-react";
+import { format } from "date-fns";
 import {
   Patient,
   Surgery,
@@ -309,7 +306,7 @@ function AnimatedCounter({ target }: { target: number }) {
 }
 
 const SECTION_TABS: Record<string, string[]> = {
-  home: [],
+  home: ["dashboard"],
   health: ["personal", "medical"],
   care: ["doctors", "sessions", "roundtable"],
   admin: ["calendar", "tasks", "documents"],
@@ -337,31 +334,9 @@ export function PatientDetailsEditor({
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch upcoming appointments for banner
-  const { data: bannerAppointments = [] } = useQuery({
-    queryKey: ["banner-appointments", patient.id],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
-      const { data, error } = await supabase
-        .from("appointment_requests")
-        .select("*, profiles:doctor_id(full_name, specialty)")
-        .eq("patient_user_id", user.id)
-        .in("status", ["approved", "pending"])
-        .order("requested_start", { ascending: true })
-        .limit(3);
-      if (error) { console.error(error); return []; }
-      return (data || []).filter((a: any) => {
-        const start = a.proposed_start || a.requested_start;
-        return start && isAfter(parseISO(start), new Date());
-      });
-    },
-    enabled: isSelfService,
-  });
-
   // Controlled tab state for dynamic navigation
   const getInitialTab = () => {
-    if (isMobile && isSelfService && section && SECTION_TABS[section]?.length) {
+    if (isMobile && isSelfService && section && SECTION_TABS[section]) {
       return SECTION_TABS[section][0];
     }
     return "personal";
@@ -369,7 +344,7 @@ export function PatientDetailsEditor({
   const [activeTab, setActiveTab] = useState(getInitialTab);
 
   useEffect(() => {
-    if (isMobile && isSelfService && section && SECTION_TABS[section]?.length) {
+    if (isMobile && isSelfService && section && SECTION_TABS[section]) {
       setActiveTab(SECTION_TABS[section][0]);
     }
   }, [section, isMobile, isSelfService]);
@@ -1039,15 +1014,11 @@ export function PatientDetailsEditor({
         .join("")
         .toUpperCase()
         .slice(0, 2) || "?";
-
-    const upcomingAppointments = bannerAppointments;
-
     return (
       <div className={sectionFrame + " mb-4"}>
-        {/* Row 1: Avatar + Greeting */}
-        <div className="flex items-start gap-4">
+        <div className="flex items-center gap-4">
           <div
-            className="flex flex-col items-center gap-1 cursor-pointer shrink-0"
+            className="flex flex-col items-center gap-1 cursor-pointer"
             onClick={() => avatarInputRef.current?.click()}
           >
             <div className="relative">
@@ -1068,8 +1039,8 @@ export function PatientDetailsEditor({
             {!avatarUrl && <span className="text-[10px] text-muted-foreground">Tap to add photo</span>}
             <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-muted-foreground">Welcome back,</p>
+          <div>
+            <p className="text-sm font-semibold text-muted-foreground">Welcome back</p>
             <h3 className="text-sm font-semibold text-foreground">{patient.name}</h3>
             <p className="text-xs text-muted-foreground">
               {(() => {
@@ -1082,87 +1053,18 @@ export function PatientDetailsEditor({
                 return `${first}.${last}@holarc.health`;
               })()}
             </p>
-          </div>
-        </div>
-
-        {/* Row 2: Upcoming Appointments */}
-        <div className="mt-3 border-t border-border pt-3">
-          <div className="flex items-center gap-1.5 mb-2">
-            <Calendar className="h-3.5 w-3.5 text-primary" />
-            <span className="text-xs font-semibold text-foreground">Upcoming Appointments</span>
-          </div>
-          {upcomingAppointments.length > 0 ? (
-            <div className="space-y-1.5">
-              {upcomingAppointments.map((appt: any) => {
-                const start = appt.proposed_start || appt.requested_start;
-                const doctorProfile = appt.profiles as any;
-                return (
-                  <div key={appt.id} className="flex items-center justify-between text-xs bg-muted/50 rounded-md px-2.5 py-1.5">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="font-medium text-foreground truncate">
-                        {doctorProfile?.full_name || "Doctor"}
-                      </span>
-                      {doctorProfile?.specialty && (
-                        <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 shrink-0">
-                          {doctorProfile.specialty}
-                        </Badge>
-                      )}
-                    </div>
-                    <span className="text-muted-foreground shrink-0 ml-2">
-                      {format(parseISO(start), "MMM d, h:mm a")}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-xs text-muted-foreground">No upcoming appointments.</p>
-          )}
-        </div>
-
-        {/* Row 3: Vula Vouchers */}
-        {!rewardsLoading && lollipopCount !== undefined && (
-          <div className="mt-3 border-t border-border pt-3">
-            <div className="flex items-center rounded-xl border border-border overflow-hidden">
-              <div className="flex-1 flex items-center justify-center py-3 px-4 bg-primary/5">
-                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-8 w-auto object-contain" />
+            {!rewardsLoading && lollipopCount !== undefined && (
+              <div className="mt-2">
+                <p className="text-[10px] text-muted-foreground">You have earned</p>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                    <AnimatedCounter target={lollipopCount} />
+                  </span>
+                  <span className="text-xs font-semibold text-muted-foreground">Vulas</span>
+                </div>
               </div>
-              <div className="w-[1px] self-stretch bg-border" />
-              <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
-                <span className="text-[10px] text-muted-foreground">You have earned</span>
-                <span className="text-2xl font-bold text-primary">
-                  <AnimatedCounter target={lollipopCount} />
-                </span>
-              </div>
-            </div>
+            )}
           </div>
-        )}
-
-        {/* Row 4: Action Buttons */}
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full h-9 text-xs gap-1.5"
-            onClick={() => {
-              setActiveTab("calendar");
-              if (isMobile && isSelfService) navigate("/patient/details?section=admin");
-            }}
-          >
-            <Calendar className="h-3.5 w-3.5" />
-            Calendar
-          </Button>
-          <Button
-            size="sm"
-            className="w-full h-9 text-xs gap-1.5"
-            onClick={() => {
-              setActiveTab("tasks");
-              if (isMobile && isSelfService) navigate("/patient/details?section=admin");
-            }}
-          >
-            <CheckSquare className="h-3.5 w-3.5" />
-            Record Task
-          </Button>
         </div>
       </div>
     );
@@ -1212,6 +1114,11 @@ export function PatientDetailsEditor({
     if (isMobile && isSelfService && section) {
       return (
         <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+          {show("dashboard") && (
+            <TabsTrigger value="dashboard" className={triggerClass}>
+              Dashboard
+            </TabsTrigger>
+          )}
           {show("personal") && (
             <TabsTrigger value="personal" className={triggerClass}>
               Personal Information
@@ -1260,6 +1167,11 @@ export function PatientDetailsEditor({
     return (
       <div className="space-y-1">
         <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+          {isSelfService && (
+            <TabsTrigger value="dashboard" className={triggerClass}>
+              Dashboard
+            </TabsTrigger>
+          )}
           {/* My Profile parent trigger */}
           <button
             type="button"
@@ -1356,14 +1268,10 @@ export function PatientDetailsEditor({
   };
 
   // ==================== VIEW MODE ====================
-  const isHomeSection = isMobile && isSelfService && section === "home";
-  const showBanner = !isMobile || !isSelfService || section === "home";
-
   if (!isEditing) {
     return (
       <div className="space-y-0">
-        {showBanner && <ProfileBanner />}
-        {!isHomeSection && (
+        <ProfileBanner />
         <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             {renderTabsList()}
@@ -1745,6 +1653,20 @@ export function PatientDetailsEditor({
               </div>
             </TabsContent>
 
+            {/* === DASHBOARD TAB === */}
+            {isSelfService && (
+              <TabsContent value="dashboard" className="mt-4">
+                <Suspense
+                  fallback={
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    </div>
+                  }
+                >
+                  <PatientDashboardLazy />
+                </Suspense>
+              </TabsContent>
+            )}
 
             {/* === TASKS TAB === */}
             {isSelfService && (
@@ -1768,7 +1690,7 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="sessions" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">Sessions</h2>
+                  <h2 className="text-lg font-semibold text-foreground">My Sessions</h2>
                   <p className="text-xs text-muted-foreground">History of your consultations</p>
                 </div>
                 <Suspense
@@ -1850,7 +1772,6 @@ export function PatientDetailsEditor({
             )}
           </Tabs>
         </div>
-        )}
       </div>
     );
   }
@@ -3224,6 +3145,20 @@ export function PatientDetailsEditor({
             </div>
           </TabsContent>
 
+          {/* === Dashboard tab (edit mode) === */}
+          {isSelfService && (
+            <TabsContent value="dashboard" className="mt-4">
+              <Suspense
+                fallback={
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                }
+              >
+                <PatientDashboardLazy />
+              </Suspense>
+            </TabsContent>
+          )}
 
           {/* === Tasks tab (edit mode) === */}
           {isSelfService && (
@@ -3247,7 +3182,7 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="sessions" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Sessions</h2>
+                <h2 className="text-lg font-semibold text-foreground">My Sessions</h2>
                 <p className="text-xs text-muted-foreground">History of your consultations</p>
               </div>
               <Suspense
