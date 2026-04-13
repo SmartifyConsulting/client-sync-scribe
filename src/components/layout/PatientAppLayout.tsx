@@ -231,6 +231,11 @@ export function PatientAppLayout() {
                 >
                   <User className="h-3.5 w-3.5" /> Settings
                 </button>
+                <ShareAppDialog trigger={
+                  <button className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors w-full">
+                    <Share2 className="h-3.5 w-3.5" /> Share App
+                  </button>
+                } />
                 <button
                   onClick={handleSignOut}
                   className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-destructive/10 text-destructive transition-colors w-full"
