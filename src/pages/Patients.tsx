@@ -385,7 +385,10 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           </div>
         )}
         <div className="flex gap-2 ml-auto justify-center flex-wrap">
-          
+          <Button variant="outline" className="gap-2 lg:hidden" onClick={() => navigate("/dashboard")}>
+            <Users className="h-4 w-4" />
+            Round Tables
+          </Button>
           <PatientImportDialog 
             trigger={
               <Button variant="outline" className="gap-2">
@@ -399,7 +402,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
-                Add New Patient
+                Patient
               </Button>
             </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh]">
