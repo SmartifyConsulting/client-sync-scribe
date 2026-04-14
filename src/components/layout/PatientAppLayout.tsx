@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { PageTransition } from "./PageTransition";
 import { BottomNav } from "./BottomNav";
+import { Footer } from "./Footer";
 import { Sidebar } from "./Sidebar";
 import { AnimatePresence } from "framer-motion";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
