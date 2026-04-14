@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar as CalendarIcon, MapPin, Video, Play, Trash2, Link, Unlink, Loader2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar as CalendarIcon, MapPin, Video, Play, Trash2, Pencil, Link, Unlink, Loader2, X } from "lucide-react";
 import googleCalLogo from "@/assets/google-calendar-logo.png";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AppointmentRequestsPanel } from "@/components/appointments/AppointmentRequestsPanel";
@@ -161,7 +161,7 @@ export default function CalendarView() {
             title: apt.title,
             time: format(new Date(apt.start_time), "h:mm a"),
             day: new Date(apt.start_time).getDate(),
-            type: apt.type === "followup" ? "followup" : apt.type === "internal" ? "internal" : "session",
+            type: apt.type || "session",
             patientId: apt.patient_id || undefined,
             notes: apt.description || undefined,
             location: apt.location || undefined,
@@ -252,11 +252,14 @@ export default function CalendarView() {
   };
 
   const getEventTypeLabel = (type: string) => {
+    // Check service colors first for custom service names
+    const match = serviceColors.find(sc => sc.service_name.toLowerCase() === type.toLowerCase());
+    if (match) return match.service_name;
     switch (type) {
       case "session": return "Patient Session";
       case "followup": return "Follow-up";
       case "internal": return "Internal Meeting";
-      default: return type;
+      default: return type.charAt(0).toUpperCase() + type.slice(1);
     }
   };
 
@@ -288,15 +291,15 @@ export default function CalendarView() {
               </Button>
             ) : (
               <Button 
-                variant="outline" 
+                variant="ghost" 
                 onClick={connect} 
                 disabled={isConnecting}
-                className="gap-2 h-10"
+                className="gap-2 h-10 px-2"
               >
                 {isConnecting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <img src={googleCalLogo} alt="Google Calendar" className="h-6 w-auto" />
+                  <img src={googleCalLogo} alt="Google Calendar" className="h-10 w-auto" />
                 )}
               </Button>
             )
@@ -305,7 +308,7 @@ export default function CalendarView() {
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
-                New Appointment
+                Book
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -556,12 +559,11 @@ export default function CalendarView() {
                               <div
                                 key={event.id}
                                 onClick={() => handleEventClick(event)}
-                                className={cn(
-                                  "flex items-center gap-1 truncate rounded px-1 py-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity",
-                                  event.type === "session" && "bg-primary/20 text-primary",
-                                  event.type === "internal" && "bg-muted text-muted-foreground",
-                                  event.type === "followup" && "bg-warning/20 text-warning"
-                                )}
+                                className="flex items-center gap-1 truncate rounded px-1 py-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity"
+                                style={{
+                                  backgroundColor: getTypeColor(event.type) ? `${getTypeColor(event.type)}22` : undefined,
+                                  color: getTypeColor(event.type) || undefined,
+                                }}
                               >
                                 {initials ? (
                                   <TooltipProvider>
@@ -687,11 +689,14 @@ export default function CalendarView() {
                     <p className="font-medium text-foreground">{event.title}</p>
                     <p className="text-sm text-muted-foreground">{event.time}</p>
                   </div>
-                  <span className={cn(
-                    "rounded-full px-2 py-0.5 text-xs font-medium",
-                    getEventTypeColor(event.type)
-                  )}>
-                    {event.type}
+                  <span
+                    className="rounded-full px-2 py-0.5 text-xs font-medium"
+                    style={{
+                      backgroundColor: getTypeColor(event.type) ? `${getTypeColor(event.type)}1A` : undefined,
+                      color: getTypeColor(event.type) || undefined,
+                    }}
+                  >
+                    {getEventTypeLabel(event.type)}
                   </span>
                 </div>
                 );
@@ -711,169 +716,179 @@ export default function CalendarView() {
         if (!open) setIsEditMode(false);
       }}>
         <DialogContent className="bg-card">
-          <DialogHeader>
-            <DialogTitle>{isEditMode ? "Edit Appointment" : selectedEvent?.title}</DialogTitle>
-            <DialogDescription>{isEditMode ? "Modify the appointment details" : getEventTypeLabel(selectedEvent?.type || "")}</DialogDescription>
-          </DialogHeader>
           {selectedEvent && editedEvent && (
-            <div className="space-y-4 pt-4">
+            <>
               {isEditMode ? (
                 <>
-                  <div>
-                    <label className="text-sm font-medium text-foreground">Title</label>
-                    <Input
-                      value={editedEvent.title}
-                      onChange={(e) => setEditedEvent({ ...editedEvent, title: e.target.value })}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <DialogHeader>
+                    <DialogTitle>Edit Appointment</DialogTitle>
+                    <DialogDescription>Modify the appointment details</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-4">
                     <div>
-                      <label className="text-sm font-medium text-foreground">Time</label>
+                      <label className="text-sm font-medium text-foreground">Title</label>
                       <Input
-                        value={editedEvent.time}
-                        onChange={(e) => setEditedEvent({ ...editedEvent, time: e.target.value })}
-                        placeholder="e.g., 9:00 AM"
+                        value={editedEvent.title}
+                        onChange={(e) => setEditedEvent({ ...editedEvent, title: e.target.value })}
                       />
                     </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-foreground">Time</label>
+                        <Input
+                          value={editedEvent.time}
+                          onChange={(e) => setEditedEvent({ ...editedEvent, time: e.target.value })}
+                          placeholder="e.g., 9:00 AM"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-foreground">Day</label>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={31}
+                          value={editedEvent.day}
+                          onChange={(e) => setEditedEvent({ ...editedEvent, day: parseInt(e.target.value) || 1 })}
+                        />
+                      </div>
+                    </div>
                     <div>
-                      <label className="text-sm font-medium text-foreground">Day</label>
+                      <label className="text-sm font-medium text-foreground">Type</label>
+                      <Select
+                        value={editedEvent.type}
+                        onValueChange={(value: string) => setEditedEvent({ ...editedEvent, type: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {serviceColors.length > 0 ? (
+                            serviceColors.map((sc) => (
+                              <SelectItem key={sc.service_name} value={sc.service_name}>{sc.service_name}</SelectItem>
+                            ))
+                          ) : (
+                            <>
+                              <SelectItem value="session">Session</SelectItem>
+                              <SelectItem value="followup">Follow-up</SelectItem>
+                              <SelectItem value="internal">Internal Meeting</SelectItem>
+                            </>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-foreground">Location</label>
+                      <Select
+                        value={editedEvent.location || ""}
+                        onValueChange={(value) => setEditedEvent({ ...editedEvent, location: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select location" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Video Call">Video Call</SelectItem>
+                          <SelectItem value="In Person">In Person</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-foreground">Notes</label>
                       <Input
-                        type="number"
-                        min={1}
-                        max={31}
-                        value={editedEvent.day}
-                        onChange={(e) => setEditedEvent({ ...editedEvent, day: parseInt(e.target.value) || 1 })}
+                        value={editedEvent.notes || ""}
+                        onChange={(e) => setEditedEvent({ ...editedEvent, notes: e.target.value })}
+                        placeholder="Optional notes..."
                       />
                     </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-foreground">Type</label>
-                    <Select
-                      value={editedEvent.type}
-                      onValueChange={(value: string) => setEditedEvent({ ...editedEvent, type: value as any })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {serviceColors.length > 0 ? (
-                          serviceColors.map((sc) => (
-                            <SelectItem key={sc.service_name} value={sc.service_name}>{sc.service_name}</SelectItem>
-                          ))
-                        ) : (
-                          <>
-                            <SelectItem value="session">Session</SelectItem>
-                            <SelectItem value="followup">Follow-up</SelectItem>
-                            <SelectItem value="internal">Internal Meeting</SelectItem>
-                          </>
-                        )}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-foreground">Location</label>
-                    <Select
-                      value={editedEvent.location || ""}
-                      onValueChange={(value) => setEditedEvent({ ...editedEvent, location: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select location" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Video Call">Video Call</SelectItem>
-                        <SelectItem value="In Person">In Person</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-foreground">Notes</label>
-                    <Input
-                      value={editedEvent.notes || ""}
-                      onChange={(e) => setEditedEvent({ ...editedEvent, notes: e.target.value })}
-                      placeholder="Optional notes..."
-                    />
-                  </div>
-                  <div className="flex gap-2 pt-2">
-                    <Button variant="outline" className="flex-1" onClick={handleCancelEdit}>
-                      Cancel
-                    </Button>
-                    <Button className="flex-1" onClick={handleSaveEvent}>
-                      Save Changes
-                    </Button>
+                    <div className="flex gap-2 pt-2">
+                      <Button variant="outline" className="flex-1" onClick={handleCancelEdit}>
+                        Cancel
+                      </Button>
+                      <Button className="flex-1" onClick={handleSaveEvent}>
+                        Save Changes
+                      </Button>
+                    </div>
                   </div>
                 </>
               ) : (
                 <>
-                  {selectedEvent.patientId && (() => {
-                    const patient = patients.find(p => p.id === selectedEvent.patientId);
-                    return patient ? (
+                  <DialogHeader>
+                    <DialogTitle>{getEventTypeLabel(selectedEvent.type)}</DialogTitle>
+                    <DialogDescription className="space-y-1">
+                      {selectedEvent.patientId && (() => {
+                        const patient = patients.find(p => p.id === selectedEvent.patientId);
+                        return patient ? (
+                          <button
+                            onClick={() => {
+                              setIsEventDetailOpen(false);
+                              navigate(`/patients/${selectedEvent.patientId}`);
+                            }}
+                            className="text-primary hover:underline font-medium block"
+                          >
+                            {patient.name}
+                          </button>
+                        ) : null;
+                      })()}
+                      <span className="block text-muted-foreground text-xs">
+                        {selectedDate.toLocaleDateString("en-US", { month: "long" })} {selectedEvent.day}, {selectedDate.getFullYear()} · {selectedEvent.time}
+                      </span>
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div className="space-y-3 pt-2">
+                    {selectedEvent.location && (
                       <div className="flex items-center gap-3 text-sm">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-foreground font-medium">{patient.name}</span>
+                        {selectedEvent.location === "Video Call" ? (
+                          <Video className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <MapPin className="h-4 w-4 text-muted-foreground" />
+                        )}
+                        <span className="text-foreground">{selectedEvent.location}</span>
                       </div>
-                    ) : null;
-                  })()}
-                  <div className="flex items-center gap-3 text-sm">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-foreground">{selectedEvent.time}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-3 text-sm">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-foreground">
-                      {selectedDate.toLocaleDateString("en-US", { month: "long" })} {selectedEvent.day}, {selectedDate.getFullYear()}
-                    </span>
-                  </div>
+                    )}
 
-                  {selectedEvent.location && (
-                    <div className="flex items-center gap-3 text-sm">
-                      {selectedEvent.location === "Video Call" ? (
-                        <Video className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                      )}
-                      <span className="text-foreground">{selectedEvent.location}</span>
-                    </div>
-                  )}
+                    {selectedEvent.notes && (
+                      <div className="rounded-lg bg-muted/30 p-3">
+                        <p className="text-xs font-medium text-muted-foreground uppercase mb-1">Notes</p>
+                        <p className="text-sm text-foreground">{selectedEvent.notes}</p>
+                      </div>
+                    )}
 
-                  {selectedEvent.notes && (
-                    <div className="rounded-lg bg-muted/30 p-3">
-                      <p className="text-xs font-medium text-muted-foreground uppercase mb-1">Notes</p>
-                      <p className="text-sm text-foreground">{selectedEvent.notes}</p>
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-2 pt-2">
-                    <Button variant="outline" className="text-xs" onClick={() => setIsEditMode(true)}>
-                      Edit
-                    </Button>
-                    <Button variant="destructive" className="text-xs" onClick={handleDeleteEvent}>
-                      <Trash2 className="h-3.5 w-3.5 mr-1" />
-                      Delete
-                    </Button>
-                    {selectedEvent.type !== "internal" && selectedEvent.patientId && (
-                      <>
-                        <Button 
-                          variant="outline" 
-                          className="text-xs"
-                          onClick={() => {
-                            setIsEventDetailOpen(false);
-                            navigate(`/patients/${selectedEvent.patientId}`);
-                          }}
-                        >
-                          <User className="h-3.5 w-3.5 mr-1" />
-                          View Patient
+                    {/* Mobile: icon-only buttons */}
+                    <div className="flex md:hidden gap-3 justify-center pt-4">
+                      <Button variant="outline" size="icon" className="h-11 w-11" onClick={() => setIsEditMode(true)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="destructive" size="icon" className="h-11 w-11" onClick={handleDeleteEvent}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                      {selectedEvent.type !== "internal" && selectedEvent.patientId && (
+                        <Button size="icon" className="h-11 w-11 bg-green-600 hover:bg-green-700 text-white" onClick={handleStartSession}>
+                          <Play className="h-4 w-4" />
                         </Button>
-                        <Button className="text-xs" onClick={handleStartSession}>
+                      )}
+                    </div>
+
+                    {/* Desktop: full text buttons */}
+                    <div className="hidden md:grid grid-cols-3 gap-2 pt-4">
+                      <Button variant="outline" onClick={() => setIsEditMode(true)}>
+                        <Pencil className="h-3.5 w-3.5 mr-1" />
+                        Edit
+                      </Button>
+                      <Button variant="destructive" onClick={handleDeleteEvent}>
+                        <Trash2 className="h-3.5 w-3.5 mr-1" />
+                        Delete
+                      </Button>
+                      {selectedEvent.type !== "internal" && selectedEvent.patientId && (
+                        <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={handleStartSession}>
                           <Play className="h-3.5 w-3.5 mr-1" />
                           Start Session
                         </Button>
-                      </>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </>
               )}
-            </div>
+            </>
           )}
         </DialogContent>
       </Dialog>

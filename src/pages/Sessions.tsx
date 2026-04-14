@@ -819,7 +819,7 @@ export default function Sessions() {
             </div>
 
           {/* Compact Recording Panel - Sidebar */}
-          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-2 lg:order-2">
+          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1 lg:order-2">
             {/* Patient Info */}
             <div className="flex items-center gap-3 p-4 border-b">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
