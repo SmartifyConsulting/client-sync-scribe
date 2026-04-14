@@ -13,7 +13,7 @@ import {
 import { useUserRole } from "@/hooks/useUserRole";
 
 const doctorNavItems = [
-  { icon: LayoutDashboard, label: "Home", to: "/dashboard" },
+  { icon: LayoutDashboard, label: "Home", to: "/doctor-dashboard" },
   { icon: Users, label: "Patients", to: "/patients" },
   { icon: Briefcase, label: "Practice", to: "/practice" },
   { icon: UserCog, label: "Admin", to: "/admin" },
