@@ -338,7 +338,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
               <TableBody>
                 {doctors.map((access) =>
                   access.doctor ? (
-                    <DoctorTableRow key={access.id} doctor={access.doctor} permissions={access.permissions} />
+                    <DoctorTableRow key={access.id} access={access} doctor={access.doctor} permissions={access.permissions} />
                   ) : null
                 )}
               </TableBody>
