@@ -89,7 +89,8 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
             doctor_practice_number: practiceNumber.trim(),
             doctor_registration_number: registrationNumber.trim(),
             status: "pending",
-          });
+            patient_name: profile?.full_name || null,
+          } as any);
         if (insertError) throw insertError;
       }
 

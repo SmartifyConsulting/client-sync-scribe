@@ -259,7 +259,7 @@ export function DoctorAccessRequests() {
     <>
       <div className="space-y-3">
         {requests.map((request) => {
-          const patientName = request.patient_profile?.full_name || "Unknown Patient";
+          const patientName = (request as any).patient_name || request.patient_profile?.full_name || "Unknown Patient";
           return (
             <div
               key={request.id}

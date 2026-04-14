@@ -130,9 +130,9 @@ const sectionFrame = "rounded-xl border border-primary bg-card p-4 shadow-sm";
 
 // Reusable collapsible section header with neutral background and black text
 const SectionHeader = ({ icon: Icon, label, extra }: { icon: any; label: string; extra?: React.ReactNode }) => (
-  <CollapsibleTrigger className="flex w-full items-center justify-between bg-[#F5F4F1] rounded-lg px-3 py-2 group">
-    <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5 text-left">
-      <Icon className="h-3.5 w-3.5" /> {label}
+  <CollapsibleTrigger className="flex w-full items-center justify-between rounded-xl border border-primary bg-card shadow-sm px-4 py-3 group">
+    <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-2 text-left">
+      <Icon className="h-4 w-4 text-primary" /> {label}
     </h3>
     <div className="flex items-center gap-2">
       {extra}
@@ -1133,7 +1133,7 @@ export function PatientDetailsEditor({
           <div className="mt-3 border-t border-border pt-3">
             <div className="flex items-center rounded-xl border border-border overflow-hidden">
               <div className="flex-1 flex flex-col items-center justify-center py-3 px-4 bg-primary/5">
-                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-10 w-auto object-contain" />
+                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-16 w-auto object-contain" />
               </div>
               <div className="w-[1px] self-stretch bg-border" />
               <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">

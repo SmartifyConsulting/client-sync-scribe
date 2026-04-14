@@ -127,14 +127,28 @@ export default function DoctorRewards() {
       <div className="grid grid-cols-2 gap-4">
         <Card className="border-border">
           <CardContent className="pt-6">
-            <p className="text-xs text-muted-foreground">Doctor Vulas</p>
-            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{doctorVulas} <span className="text-base"><img src={vulaVouchersLogo} alt="Vula" className="h-5 w-auto object-contain inline-block" /></span></p>
+            <div className="flex items-center">
+              <div className="w-[60%]">
+                <p className="text-xs text-muted-foreground">Doctor Vulas</p>
+                <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{doctorVulas}</p>
+              </div>
+              <div className="w-[40%] flex items-center justify-center">
+                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="w-full h-auto object-contain" />
+              </div>
+            </div>
           </CardContent>
         </Card>
         <Card className="border-border">
           <CardContent className="pt-6">
-            <p className="text-xs text-muted-foreground">Patient Vulas</p>
-            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{patientVulas} <span className="text-base"><img src={vulaVouchersLogo} alt="Vula" className="h-5 w-auto object-contain inline-block" /></span></p>
+            <div className="flex items-center">
+              <div className="w-[60%]">
+                <p className="text-xs text-muted-foreground">Patient Vulas</p>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{patientVulas}</p>
+              </div>
+              <div className="w-[40%] flex items-center justify-center">
+                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="w-full h-auto object-contain" />
+              </div>
+            </div>
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-yellow-300 to-lime-400 dark:from-yellow-600/40 dark:to-lime-700/30 border-yellow-400 dark:border-yellow-600/40">
