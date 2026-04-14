@@ -1,6 +1,6 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Calendar, Clock, LogOut, User, Bell, Share2, Stethoscope, HeartPulse } from "lucide-react";
+import { Calendar, Clock, LogOut, User, Bell, Share2, Stethoscope, HeartPulse, Calendar as CalendarIcon2 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -169,8 +169,14 @@ export function PatientAppLayout() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Calendar quick-access */}
+            <button
+              onClick={() => navigate("/patient/calendar")}
+              className="relative h-11 w-11 rounded-full bg-destructive flex items-center justify-center hover:bg-destructive/80 transition-colors"
+            >
+              <Calendar className="h-4 w-4 text-white" />
+            </button>
 
-            {/* Bell */}
             <Popover>
               <PopoverTrigger asChild>
                 <button className="relative h-11 w-11 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors">

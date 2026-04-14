@@ -1,4 +1,4 @@
-import { Bell, Mic, User, Settings, LogOut, Award, Share2, Stethoscope, HeartPulse } from "lucide-react";
+import { Bell, Mic, User, Settings, LogOut, Award, Share2, Stethoscope, HeartPulse, Calendar as CalendarIcon } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -88,6 +88,20 @@ export function TopBarIcons() {
 
   return (
     <div className="flex items-center gap-2">
+      {/* Calendar quick-access */}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Link to={isOnPatientRoute ? "/patient/calendar" : "/calendar"}>
+              <div className="h-9 w-9 rounded-full bg-destructive flex items-center justify-center hover:bg-destructive/80 transition-colors">
+                <CalendarIcon className="h-4 w-4 text-white" />
+              </div>
+            </Link>
+          </TooltipTrigger>
+          <TooltipContent>Calendar</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
       {/* Mic */}
       <TooltipProvider>
         <Tooltip>
@@ -166,7 +180,7 @@ export function TopBarIcons() {
           {isDoctor && (
             <div className="border-b border-border mb-1">
               <button
-                onClick={() => { if (isOnPatientRoute) return; }}
+                onClick={() => { if (isOnPatientRoute) navigate("/doctor-dashboard"); }}
                 className={cn(
                   "flex items-center gap-2 px-2 py-1.5 w-full rounded-md transition-colors",
                   !isOnPatientRoute ? "bg-primary/10" : "hover:bg-accent"

@@ -60,7 +60,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const loading = roleLoading;
   const { profile } = useProfile();
   const location = useLocation();
-  const navItems = isAdmin ? adminNavItems : isPatient ? patientNavItems : doctorNavItems;
+  const isOnPatientRoute = location.pathname.startsWith("/patient/");
+  const navItems = isAdmin ? adminNavItems : (isPatient || isOnPatientRoute) ? patientNavItems : doctorNavItems;
 
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ["unread-notifications-count"],

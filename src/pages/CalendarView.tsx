@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar as CalendarIcon, MapPin, Video, Play, Trash2, Link, Unlink, Loader2, X } from "lucide-react";
+import googleCalLogo from "@/assets/google-calendar-logo.png";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AppointmentRequestsPanel } from "@/components/appointments/AppointmentRequestsPanel";
 import { Button } from "@/components/ui/button";
@@ -290,14 +291,13 @@ export default function CalendarView() {
                 variant="outline" 
                 onClick={connect} 
                 disabled={isConnecting}
-                className="gap-2"
+                className="gap-2 h-10"
               >
                 {isConnecting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Link className="h-4 w-4" />
+                  <img src={googleCalLogo} alt="Google Calendar" className="h-6 w-auto" />
                 )}
-                {isConnecting ? "Connecting..." : "Connect Google Calendar"}
               </Button>
             )
           )}
@@ -420,13 +420,13 @@ export default function CalendarView() {
           </DialogContent>
         </Dialog>
         </div>
-        <div className="flex rounded-lg border border-border overflow-hidden">
+        <div className="flex rounded-lg border border-border overflow-hidden shrink-0">
           {(["week", "month", "year"] as CalendarViewMode[]).map((view) => (
             <button
               key={view}
               onClick={() => setCalendarView(view)}
               className={cn(
-                "px-3 py-1.5 text-sm font-medium transition-colors capitalize",
+                "px-2 py-1 text-[11px] md:px-3 md:py-1.5 md:text-sm font-medium transition-colors capitalize shrink-0",
                 calendarView === view
                   ? "bg-primary text-primary-foreground"
                   : "hover:bg-muted text-muted-foreground"
@@ -843,28 +843,29 @@ export default function CalendarView() {
                     </div>
                   )}
 
-                  <div className="flex gap-2 pt-2">
-                    <Button variant="outline" className="flex-1" onClick={() => setIsEditMode(true)}>
+                  <div className="grid grid-cols-2 gap-2 pt-2">
+                    <Button variant="outline" className="text-xs" onClick={() => setIsEditMode(true)}>
                       Edit
                     </Button>
-                    <Button variant="destructive" size="icon" onClick={handleDeleteEvent}>
-                      <Trash2 className="h-4 w-4" />
+                    <Button variant="destructive" className="text-xs" onClick={handleDeleteEvent}>
+                      <Trash2 className="h-3.5 w-3.5 mr-1" />
+                      Delete
                     </Button>
                     {selectedEvent.type !== "internal" && selectedEvent.patientId && (
                       <>
                         <Button 
                           variant="outline" 
-                          className="flex-1"
+                          className="text-xs"
                           onClick={() => {
                             setIsEventDetailOpen(false);
                             navigate(`/patients/${selectedEvent.patientId}`);
                           }}
                         >
-                          <User className="h-4 w-4 mr-2" />
+                          <User className="h-3.5 w-3.5 mr-1" />
                           View Patient
                         </Button>
-                        <Button className="flex-1" onClick={handleStartSession}>
-                          <Play className="h-4 w-4 mr-2" />
+                        <Button className="text-xs" onClick={handleStartSession}>
+                          <Play className="h-3.5 w-3.5 mr-1" />
                           Start Session
                         </Button>
                       </>

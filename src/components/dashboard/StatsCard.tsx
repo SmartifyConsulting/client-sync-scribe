@@ -33,7 +33,7 @@ export function StatsCard({
         className
       )}
     >
-      <div className="flex items-start justify-between">
+      <div className="flex items-center justify-between">
         <div className="space-y-1">
           <p className="text-[10px] md:text-xs font-medium text-muted-foreground truncate">{title}</p>
           <p className="text-base md:text-xl font-bold text-foreground tracking-tight truncate">{value}</p>
@@ -56,7 +56,7 @@ export function StatsCard({
           iconSize === "large" ? "h-12 w-12 md:h-14 md:w-14" : "h-7 w-7 md:h-9 md:w-9"
         )}>
           {imageUrl ? (
-            <img src={imageUrl} alt={title} className="h-10 w-10 md:h-14 md:w-14 object-contain" />
+            <img src={imageUrl} alt={title} className="h-[40px] w-auto md:h-[50px] object-contain" />
           ) : (
             <Icon className={iconSize === "large" ? "h-5 w-5 md:h-6 md:w-6 text-primary" : "h-4 w-4 md:h-5 md:w-5 text-primary"} />
           )}
