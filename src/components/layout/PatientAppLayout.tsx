@@ -21,6 +21,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO, addDays } from "date-fns";
 import holarcLogo from "@/assets/holarc-logo-clear-2.png";
+import { TopBarIcons } from "./TopBarIcons";
 
 export function PatientAppLayout() {
   const location = useLocation();
@@ -275,7 +276,10 @@ export function PatientAppLayout() {
 
       {/* Main content */}
       <main className="flex-1 pb-20 md:pb-0 md:ml-[210px]">
-        <div className="px-4 py-6 md:px-8 md:pt-6 md:pb-8 max-w-7xl mx-auto">
+        <div className="hidden md:flex justify-end px-8 pt-4">
+          <TopBarIcons />
+        </div>
+        <div className="px-4 py-6 md:px-8 md:pt-2 md:pb-8 max-w-7xl mx-auto">
           <AnimatePresence mode="wait">
             <PageTransition key={location.pathname}>
               <Outlet />
