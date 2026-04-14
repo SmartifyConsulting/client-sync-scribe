@@ -1,50 +1,38 @@
 
 
-# Dashboard, Briefing, Admin & Practice Refinements
+# Briefing Narration, Recent Activity, Sidebar & Vula Card Fixes
 
 ## Summary
-Five changes: remove collapsible wrappers from To-Do and Round Tables on web/tablet, move narration segment label above play controls, remove doctor/patient Vula detail from dashboard card, remove Pricing tab from Admin (doctor view), add Pricing Admin accordion to My Practice.
+Four fixes: ensure narration auto-plays with a visible play button, fix Recent Activity header styling, rename sidebar label, reduce Vula card subtitle font.
 
 ## Changes
 
-### 1. Remove accordion/collapsible from To-Do and Round Tables on web/tablet
-**File:** `src/pages/Dashboard.tsx`
-- For the `lg:block` instances of CompactTodoList and DoctorRoundTables (lines 310-331), render them directly without `Collapsible` wrappers
-- Keep the mobile (`lg:hidden`) instances as collapsible (collapsed by default) — actually per user request, remove accordion from those too. Render both To-Do and Round Tables as plain cards on all viewports
-
-**File:** `src/components/dashboard/CompactTodoList.tsx`
-- Remove the `Collapsible`/`CollapsibleTrigger`/`CollapsibleContent` wrapper. Render the card with a static primary header (always open)
-
-### 2. Move narration segment description above play controls
+### 1. Fix briefing narration auto-play and play button visibility
 **File:** `src/components/dashboard/TodaysBriefing.tsx`
-- Move the segment indicator text (`3/4 — Michael Chen`) from inline with play buttons (line 494) to a separate line above the controls row
-- Display it as a small centered label above the play/pause/skip buttons when playing
 
-### 3. Remove doctor/patient Vula breakdown from dashboard card
-**File:** `src/pages/Dashboard.tsx`
-- Change the Vula Vouchers StatsCard `change` prop from `Doctor: ${doctorVulas} · Patient: ${patientVulas}` to a simple label like `"View details"` or remove the subtitle entirely
-- Keep the combined total as the value; users drill into `/doctor/rewards` for the breakdown
+The narrate button exists but the issue is that after audio URLs are generated and `playSegment(0, audioUrls)` is called, the `segmentAudioUrls` state hasn't updated yet (React batching). The `playSegment` function uses the passed `urls` parameter directly which should work, but the `onended` handler references `segmentAudioUrls` state which may be stale.
 
-### 4. Remove Pricing tab from Admin for doctors
-**File:** `src/pages/Admin.tsx`
-- Remove the "Pricing" TabsTrigger and TabsContent
-- This leaves Calendar, To-Do, Invoices, Templates in Admin
-- (System admins access pricing via their own admin route)
+Fix: Ensure `playSegment` is called after state is set by using a `useEffect` that watches `segmentAudioUrls` — when URLs are populated and `isNarrating` just turned false, auto-play segment 0. Also ensure the Narrate button is always visible when not playing (it currently is, but verify no conditional hiding).
 
-### 5. Add Pricing Admin accordion under Practice Information in My Practice
-**File:** `src/pages/MyPractice.tsx`
-- Import `PricingAdmin` from `@/pages/admin/PricingAdmin`
-- Add a new `AccordionItem value="pricing"` after the Practice Details accordion (after line 1436)
-- Use `DollarSign` icon (already imported) with label "Pricing Administration"
-- Render `<PricingAdmin />` inside the accordion content
+### 2. Fix Recent Activity header — remove rectangle appearance
+**File:** `src/components/dashboard/RecentActivity.tsx`
+
+The `CollapsibleTrigger` with `rounded-t-xl bg-primary` creates a visible rectangular bar. When collapsed, the bottom corners aren't rounded, making it look like a rectangle floating. Fix by adding `rounded-xl` when collapsed (use `data-[state=closed]:rounded-xl data-[state=open]:rounded-t-xl` on the trigger, and ensure the outer container only applies `rounded-xl` to the wrapper). Alternatively, apply `rounded-b-xl` to the trigger when closed by conditionally styling the parent div.
+
+### 3. Rename "My Holarprac" to "My Practice"
+**File:** `src/components/layout/Sidebar.tsx`
+- Line 34: Change `label: "My Holarprac"` to `label: "My Practice"`
+
+### 4. Reduce "View details" font on Vula Vouchers card
+**File:** `src/components/dashboard/StatsCard.tsx`
+- The `change` text currently uses `text-[9px] md:text-xs`. Reduce to `text-[8px] md:text-[10px]` so the Vula card height matches the Doctor Rating card.
 
 ## Files Modified
 
 | File | Changes |
 |------|---------|
-| `src/pages/Dashboard.tsx` | Remove collapsibles from To-Do and Round Tables; remove Vula breakdown detail |
-| `src/components/dashboard/CompactTodoList.tsx` | Remove Collapsible wrapper, render always-open card |
-| `src/components/dashboard/TodaysBriefing.tsx` | Move segment label above play controls |
-| `src/pages/Admin.tsx` | Remove Pricing tab |
-| `src/pages/MyPractice.tsx` | Add Pricing Admin accordion under Practice Information |
+| `src/components/dashboard/TodaysBriefing.tsx` | Fix auto-play with useEffect on segmentAudioUrls |
+| `src/components/dashboard/RecentActivity.tsx` | Fix header rounded corners when collapsed |
+| `src/components/layout/Sidebar.tsx` | Rename "My Holarprac" → "My Practice" |
+| `src/components/dashboard/StatsCard.tsx` | Reduce change text font size |
 
