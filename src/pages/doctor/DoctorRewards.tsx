@@ -128,11 +128,11 @@ export default function DoctorRewards() {
         <Card className="border-border">
           <CardContent className="pt-6">
             <div className="flex items-center">
-              <div className="w-[60%]">
+              <div className="w-[76%]">
                 <p className="text-xs text-muted-foreground">Doctor Vulas</p>
                 <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{doctorVulas}</p>
               </div>
-              <div className="w-[40%] flex items-center justify-center">
+              <div className="w-[24%] flex items-center justify-center">
                 <img src={vulaVouchersLogo} alt="Vula Vouchers" className="w-full h-auto object-contain" />
               </div>
             </div>
@@ -141,11 +141,11 @@ export default function DoctorRewards() {
         <Card className="border-border">
           <CardContent className="pt-6">
             <div className="flex items-center">
-              <div className="w-[60%]">
+              <div className="w-[76%]">
                 <p className="text-xs text-muted-foreground">Patient Vulas</p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{patientVulas}</p>
               </div>
-              <div className="w-[40%] flex items-center justify-center">
+              <div className="w-[24%] flex items-center justify-center">
                 <img src={vulaVouchersLogo} alt="Vula Vouchers" className="w-full h-auto object-contain" />
               </div>
             </div>
