@@ -1,49 +1,58 @@
 
 
-# Plan: Unified Login, Logo Fix, Patient Avatar, Button Layout, Replace Pricing with Services
+# Plan: Introduce The Style Manifest
 
-## 1. Unified Login — Already implemented
-The Auth.tsx already has role selection during signup (doctor/patient) and role-based redirects after login. No changes needed.
+## What This Is
 
-## 2. Fix Holarc logo aspect ratio on mobile
-**File:** `src/components/layout/MobileHeader.tsx`
+Codify the Style Manifest as a living reference document and apply an audit pass across the two layout shells and key shared components to fix current violations.
 
-The logo uses `h-[50px] w-auto` which can distort. Add `object-contain` to preserve aspect ratio:
-```
-<img src={holarcLogo} alt="Holarc Health" className="h-[50px] w-auto object-contain" />
-```
+## 1. Create the Style Manifest reference file
 
-Also fix the PatientAppLayout mobile header logo (line 132) — already has `object-contain`, just verify sizing is consistent.
+**File:** `src/STYLE_MANIFEST.md` (new)
 
-## 3. Add profile avatar (TopBarIcons) to patient tablet/web view
-**File:** `src/components/layout/PatientAppLayout.tsx`
+Store the full manifest text as a project-level reference so every future change can be checked against it. This has no runtime impact — it's a developer guideline.
 
-The doctor's `AppLayout` has a persistent `TopBarIcons` component on desktop (lines 50-52). The patient's `PatientAppLayout` is missing this. Add the same block inside `<main>`:
-```tsx
-<div className="hidden md:flex justify-end px-8 pt-4">
-  <TopBarIcons />
-</div>
-```
+## 2. Harmonize Doctor & Patient layout shells
 
-## 4. Arrange Patients page buttons in 2x2 grid on mobile
-**File:** `src/pages/Patients.tsx` (lines 397-421)
+**Files:** `src/components/layout/AppLayout.tsx`, `src/components/layout/PatientAppLayout.tsx`
 
-Change the button container from `flex gap-2 flex-wrap` to a 2-column grid on mobile:
-```
-className="grid grid-cols-2 md:flex gap-2 ml-auto"
-```
-This gives a 2x2 grid on mobile, and inline flex on tablet/desktop.
+Current inconsistencies to fix:
 
-## 5. Remove Pricing Administration from My Practice, replace with Service Offerings & Pricing
-**File:** `src/pages/MyPractice.tsx`
+| Issue | Doctor (`AppLayout`) | Patient (`PatientAppLayout`) |
+|-------|---------------------|------------------------------|
+| Main content padding | `px-4 py-6 md:px-8` | Same ✓ |
+| `max-w-7xl` centering | Present but missing `mx-auto` | Has `mx-auto` ✓ |
+| Bottom padding (mobile) | `pb-24` | `pb-20` |
+| Footer | Has `<Footer />` | Missing |
+| `overflow-hidden` on root | Missing | Missing |
 
-- **Remove** the "Pricing Administration" accordion (lines 1439-1450) which embeds `<PricingAdmin />`
-- **Replace** it with a "Service Offerings & Pricing" accordion that embeds the existing service pricing UI (currently in the `TabsContent value="pricing"` section, lines 1698-1880)
-- The accordion will use the same teal-border style, with a `DollarSign` icon and label "Service Offerings & Pricing"
-- Remove the standalone `TabsContent value="pricing"` tab since it's now in the Practice accordion
-- Remove `PricingAdmin` import (line 31)
+**Changes:**
+- **AppLayout**: Add `mx-auto` to content container (line 53) for centering parity. Add `overflow-hidden` to root div.
+- **PatientAppLayout**: Change `pb-20` → `pb-24` for consistent bottom-nav clearance. Add `overflow-hidden` to root div. Add `<Footer />` on desktop (hidden on mobile, same pattern as doctor).
 
-This keeps the doctor's service/pricing management in My Practice while removing the admin-only Pricing Administration component.
+## 3. Audit & fix text overflow protection
+
+**Files:** Both layout shells + `src/components/dashboard/StatsCard.tsx`, `src/components/patients/PatientOverview.tsx`
+
+Add `truncate` or `line-clamp-2` to patient/doctor names and long text fields that currently have no overflow protection. Add `overflow-hidden` to card containers where missing.
+
+## 4. Ensure consistent touch targets on mobile
+
+**Files:** `src/components/layout/BottomNav.tsx`, `src/components/layout/PatientAppLayout.tsx`
+
+Audit all interactive elements (buttons, links) and ensure minimum `h-11` (44px) touch targets. The current bell/avatar buttons in PatientAppLayout use `h-9 w-9` (36px) — increase to `h-11 w-11`.
+
+## 5. Replace fixed sidebar width references with a CSS variable
+
+**Files:** `AppLayout.tsx`, `PatientAppLayout.tsx`, `Footer.tsx`
+
+Currently `md:ml-[210px]` is hardcoded in multiple places. Create a Tailwind theme extension `--sidebar-width: 210px` and use `md:ml-[var(--sidebar-width)]` — or simply define a shared constant. This avoids magic numbers and makes future sidebar width changes a single edit.
+
+## 6. Gap-over-margins audit
+
+**Files:** `src/pages/Patients.tsx`, `src/pages/Dashboard.tsx`, `src/pages/Sessions.tsx`
+
+Scan for `mr-`, `ml-`, `mt-`, `mb-` used between sibling repeating elements and replace with parent `gap-{n}` where the manifest's Flexbox Rule applies.
 
 ---
 
@@ -51,8 +60,14 @@ This keeps the doctor's service/pricing management in My Practice while removing
 
 | File | Changes |
 |------|---------|
-| `src/components/layout/MobileHeader.tsx` | Add `object-contain` to logo |
-| `src/components/layout/PatientAppLayout.tsx` | Add `TopBarIcons` on desktop |
-| `src/pages/Patients.tsx` | 2x2 grid for buttons on mobile |
-| `src/pages/MyPractice.tsx` | Replace Pricing Admin accordion with Service Offerings accordion; remove pricing tab |
+| `src/STYLE_MANIFEST.md` | New — reference document |
+| `src/components/layout/AppLayout.tsx` | Add `mx-auto`, `overflow-hidden` |
+| `src/components/layout/PatientAppLayout.tsx` | `pb-24`, `overflow-hidden`, add Footer, touch target fix |
+| `src/components/layout/BottomNav.tsx` | Touch target audit |
+| `src/components/dashboard/StatsCard.tsx` | `truncate` on text |
+| `src/components/patients/PatientOverview.tsx` | `truncate`/`line-clamp` on names |
+| `src/pages/Patients.tsx` | Gap-over-margins cleanup |
+| `src/pages/Dashboard.tsx` | Gap-over-margins cleanup |
+| `src/pages/Sessions.tsx` | Gap-over-margins cleanup |
+| `tailwind.config.ts` | Add `--sidebar-width` variable |
 
