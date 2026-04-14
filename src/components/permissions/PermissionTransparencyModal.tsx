@@ -2,23 +2,8 @@ import { useState } from "react";
 import {
   CheckCircle,
   XCircle,
-  FileText,
-  User,
-  Sparkles,
-  ClipboardList,
-  Mic,
-  Brain,
-  PenTool,
-  Receipt,
-  FileEdit,
-  FileBadge,
   AlertTriangle,
   Heart,
-  Image,
-  Video,
-  TestTube,
-  ScanLine,
-  Hospital,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -31,17 +16,15 @@ import { Button } from "@/components/ui/button";
 
 interface PermissionItem {
   label: string;
-  icon: React.ComponentType<any>;
   subItems?: string[];
 }
 
 const sharedItems: PermissionItem[] = [
-  { label: "AI Session Summaries", icon: Sparkles },
-  { label: "Patient Information", icon: User },
-  { label: "Patient Medical Overview", icon: ClipboardList },
+  { label: "AI Session Summaries" },
+  { label: "Patient Information" },
+  { label: "Patient Medical Overview" },
   {
     label: "Documents",
-    icon: FileText,
     subItems: [
       "Prescriptions",
       "Hospital Admissions",
@@ -54,13 +37,13 @@ const sharedItems: PermissionItem[] = [
 ];
 
 const privateItems: PermissionItem[] = [
-  { label: "Full Transcriptions", icon: FileText },
-  { label: "Raw Audio Recordings", icon: Mic },
-  { label: "AI Diagnostics", icon: Brain },
-  { label: "Clinical Drawings/Sketches", icon: PenTool },
-  { label: "Invoices & Billing Data", icon: Receipt },
-  { label: "Doctor Referrals", icon: FileEdit },
-  { label: "Medical Certificates", icon: FileBadge },
+  { label: "Full Transcriptions" },
+  { label: "Raw Audio Recordings" },
+  { label: "AI Diagnostics" },
+  { label: "Clinical Drawings/Sketches" },
+  { label: "Invoices & Billing Data" },
+  { label: "Doctor Referrals" },
+  { label: "Medical Certificates" },
 ];
 
 interface PermissionTransparencyModalProps {
@@ -87,59 +70,37 @@ export function PermissionTransparencyModal({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Column 1: Shared Items */}
         <div>
-          <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
             <CheckCircle className="h-4 w-4 text-green-600" />
             Shared with Care Team
           </h4>
-          <div className="space-y-2">
-            {sharedItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div key={item.label}>
-                  <div className="flex items-center gap-3 rounded-lg border border-green-500/30 bg-green-500/5 px-3 py-2.5">
-                    <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
-                    <Icon className="h-4 w-4 text-foreground shrink-0" />
-                    <span className="text-sm font-medium text-foreground">{item.label}</span>
-                  </div>
-                  {item.subItems && (
-                    <div className="ml-11 mt-1 flex flex-wrap gap-1.5">
-                      {item.subItems.map((sub) => (
-                        <span
-                          key={sub}
-                          className="text-xs rounded-full bg-green-500/10 text-green-700 dark:text-green-400 px-2 py-0.5"
-                        >
-                          {sub}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          <ul className="list-disc list-inside space-y-1 text-sm text-foreground">
+            {sharedItems.map((item) => (
+              <li key={item.label}>
+                {item.label}
+                {item.subItems && (
+                  <ul className="list-disc list-inside ml-4 mt-0.5 space-y-0.5 text-muted-foreground">
+                    {item.subItems.map((sub) => (
+                      <li key={sub}>{sub}</li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
         </div>
 
         {/* Column 2: Private Items */}
         <div>
-          <h4 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2">
             <XCircle className="h-4 w-4 text-destructive" />
             Private — Not Shared
           </h4>
-          <div className="space-y-2">
-            {privateItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={item.label}
-                  className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 px-3 py-2.5 opacity-60"
-                >
-                  <XCircle className="h-4 w-4 text-destructive shrink-0" />
-                  <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span className="text-sm text-muted-foreground">{item.label}</span>
-                </div>
-              );
-            })}
-          </div>
+          <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+            {privateItems.map((item) => (
+              <li key={item.label}>{item.label}</li>
+            ))}
+          </ul>
         </div>
       </div>
 

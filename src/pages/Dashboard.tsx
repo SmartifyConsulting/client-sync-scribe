@@ -1,5 +1,5 @@
 import { Users, Calendar, TrendingUp, Award, Star } from "lucide-react";
-import vulaSymbol from "@/assets/vula-symbol.png";
+import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v3.png";
 import { CompactTodoList } from "@/components/dashboard/CompactTodoList";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -296,7 +296,7 @@ export default function Dashboard() {
             change="View details"
             trend="up"
             icon={Award}
-            imageUrl={vulaSymbol}
+            imageUrl={vulaVouchersLogo}
             iconSize="large"
             href="/doctor/rewards"
           />
