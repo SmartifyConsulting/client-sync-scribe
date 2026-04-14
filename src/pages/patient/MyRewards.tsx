@@ -86,7 +86,8 @@ export default function MyRewards() {
   const { streaks, loading: streaksLoading } = useMyStreaks();
   const [activeTab, setActiveTab] = useState("overview");
   const [showTransferDialog, setShowTransferDialog] = useState(false);
-  const [transferAppId, setTransferAppId] = useState("");
+  const [transferFromAppId, setTransferFromAppId] = useState("");
+  const [transferToAppId, setTransferToAppId] = useState("");
   const [transferAmount, setTransferAmount] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
