@@ -1,7 +1,7 @@
-import { Users, Calendar, TrendingUp, Award, Star } from "lucide-react";
+import { Users, Calendar, TrendingUp, Award, Star, MessageSquare, Search } from "lucide-react";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v3.png";
 import { CompactTodoList } from "@/components/dashboard/CompactTodoList";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { TodaysBriefing } from "@/components/dashboard/TodaysBriefing";
@@ -15,6 +15,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -24,6 +25,8 @@ export default function Dashboard() {
   const { profile, loading: profileLoading } = useProfile();
   const { isDoctor, loading: roleLoading } = useUserRole();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [rtSearch, setRtSearch] = useState("");
 
   // Query for unread notifications count (invitations + document receipts only)
   const { data: unreadNotifCount = 0 } = useQuery({
