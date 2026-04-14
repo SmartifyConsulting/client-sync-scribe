@@ -1,55 +1,54 @@
 
 
-# Patient Layout, Sub-tabs, Greeting, Vula Count, Permission Headings, Doctor Badge, Green Border & Side-by-Side Doctor Numbers
+# Fix: Patient Name Not Showing on Doctor's Invitation Cards
 
-## Summary
-Nine changes: add sidebar nav for patient tablet view, make sub-tab headings black, move Vula count to patient name row on web, use doctor-style greeting, match Private heading format to Shared heading, show doctor specialty badge in invite modal, green border on doctor banner, and display Practice Number and Registration Number side by side on web and tablet views.
+## Root Cause
 
-## Changes
+Two issues combine to always show "Unknown Patient":
 
-### 1. Add sidebar navigation for patient on tablet/web (md+)
-**File:** `src/components/layout/PatientAppLayout.tsx`
-- Import and render `Sidebar` on `md:` screens (matching `AppLayout`)
-- Add `md:ml-[210px]` to the main content area
+1. **`patient_name` column is null for all existing rows** — the column was added to `doctor_access_requests` after existing invitations were created, so older rows have no name stored.
 
-### 2. Make sub-tab headings black font colour
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- Add `text-foreground` to all sub-tab `TabsTrigger` elements
+2. **RLS blocks the profile fallback lookup** — when the doctor tries to fetch the patient's profile (lines 92-97 in `DoctorAccessRequests.tsx`), RLS only allows users to view their own profile or doctor-role profiles. There is no policy letting a doctor read a patient's profile via a pending access request. So the fallback also returns nothing.
 
-### 3. Move Vula Vouchers count to same row as patient name (web view)
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- Restructure `ProfileBanner` so on `md:` the Vula count appears inline right of patient name
+## Fix
 
-### 4. Use doctor-style time-based greeting for patient
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
-- Replace "Welcome back," with "Good morning/afternoon/evening, {name}" and date subtitle
+### 1. Add RLS policy so doctors can read patient profiles for pending requests
+**Migration**: Add a SELECT policy on `profiles` allowing a doctor to read a patient's profile if there is a matching `doctor_access_requests` row linking them.
 
-### 5. Make "Private — Not Shared" heading match "Shared with Care Team" format
-**File:** `src/components/permissions/PermissionTransparencyModal.tsx`
-- Change Private heading from `text-muted-foreground` to `text-foreground`
+```sql
+CREATE POLICY "Doctors can view requesting patient profiles"
+ON public.profiles
+FOR SELECT
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM public.doctor_access_requests dar
+    JOIN public.profiles dp ON dp.practice_number = dar.doctor_practice_number
+      AND dp.doctor_number = dar.doctor_registration_number
+    WHERE dar.patient_user_id = profiles.id
+      AND dp.id = auth.uid()
+  )
+);
+```
 
-### 6. Show doctor specialty badge under name in invite modal
-**File:** `src/components/patient/InviteDoctorDialog.tsx`
-- Add `prefillSpecialty?: string` prop; render `<Badge variant="secondary">` with specialty
+### 2. Backfill existing null `patient_name` values
+**Migration**: Update existing rows where `patient_name` is null by joining to `profiles`.
 
-**File:** `src/pages/patient/MyDoctors.tsx`
-- Pass `prefillSpecialty={doctor.specialty}` to `InviteDoctorDialog`
+```sql
+UPDATE public.doctor_access_requests dar
+SET patient_name = p.full_name
+FROM public.profiles p
+WHERE dar.patient_user_id = p.id
+  AND dar.patient_name IS NULL;
+```
 
-### 7. Green border on doctor info banner in invite modal
-**File:** `src/components/patient/InviteDoctorDialog.tsx`
-- Change `border-border bg-muted/30` to `border-green-500 bg-green-50/30`
-
-### 8. Practice Number and Registration Number side by side on web/tablet
-**File:** `src/components/patient/InviteDoctorDialog.tsx`
-- Wrap the two input fields in a `grid grid-cols-1 md:grid-cols-2 gap-4` container so they sit side by side on tablet and web, stacked on mobile
+### 3. No code changes needed
+The existing code in `DoctorAccessRequests.tsx` already handles both paths correctly — it checks `patient_name` from the row first, then falls back to the profile lookup. Once the RLS policy is in place and existing data is backfilled, both paths will work.
 
 ## Files Modified
 
-| File | Changes |
-|------|---------|
-| `src/components/layout/PatientAppLayout.tsx` | Add Sidebar for md+ screens |
-| `src/components/patients/PatientDetailsEditor.tsx` | Black sub-tabs; Vula count on name row; doctor-style greeting |
-| `src/components/permissions/PermissionTransparencyModal.tsx` | Private heading matches Shared heading format |
-| `src/components/patient/InviteDoctorDialog.tsx` | Specialty badge; green border; side-by-side number fields |
-| `src/pages/patient/MyDoctors.tsx` | Pass specialty to InviteDoctorDialog |
+| Change | Type |
+|--------|------|
+| RLS policy on `profiles` for requesting patients | DB migration |
+| Backfill `patient_name` in `doctor_access_requests` | DB migration |
 
