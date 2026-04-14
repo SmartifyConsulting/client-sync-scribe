@@ -207,8 +207,28 @@ export default function Dashboard() {
     },
     refetchInterval: 60000,
   });
-  
-  // Format display name based on role - compute once to avoid flicker
+
+  // Query for patients list (for round table starter)
+  const { data: patientsList = [] } = useQuery({
+    queryKey: ["patients-list-dashboard"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("patients")
+        .select("id, name")
+        .eq("user_id", user.id)
+        .order("name");
+      if (error) return [];
+      return data || [];
+    },
+    enabled: isDoctor,
+  });
+
+  const filteredPatients = rtSearch.trim()
+    ? patientsList.filter((p: any) => p.name.toLowerCase().includes(rtSearch.toLowerCase()))
+    : patientsList;
+
   const displayName = (() => {
     if (profileLoading || roleLoading) return '';
     if (!profile?.full_name) return isDoctor ? 'Doctor' : '';
