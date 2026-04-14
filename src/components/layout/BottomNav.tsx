@@ -37,7 +37,7 @@ export function BottomNav() {
   if (!isPatient) {
     // Doctor nav - route-based
     return (
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg safe-area-pb md:hidden font-size-preserve">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg safe-area-pb font-size-preserve">
         <div className="flex items-center justify-around px-2 py-2">
           {doctorNavItems.map((item) => {
             const isActive = location.pathname.startsWith(item.to);
@@ -77,7 +77,7 @@ export function BottomNav() {
   const isOnRewards = location.pathname === "/patient/rewards";
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg safe-area-pb md:hidden font-size-preserve">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg safe-area-pb font-size-preserve">
       <div className="flex items-center justify-around px-2 py-2">
         {patientSections.map((item) => {
           const isActive =
