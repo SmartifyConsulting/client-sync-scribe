@@ -54,7 +54,7 @@
     --accent-foreground: 172 66% 30%;
 
     /* Status colors */
-    --destructive: 0 84% 60%;
+    --destructive: 356 67% 42%;
     --destructive-foreground: 0 0% 100%;
 
     --success: 152 69% 45%;
@@ -64,10 +64,10 @@
     --warning-foreground: 0 0% 100%;
 
     /* Holarc red accent (from logo heart) — #E01837 */
-    --terracotta: 351 81% 49%;
+    --terracotta: 356 67% 42%;
     --terracotta-foreground: 0 0% 100%;
-    --terracotta-light: 351 81% 59%;
-    --terracotta-dark: 351 81% 39%;
+    --terracotta-light: 356 67% 52%;
+    --terracotta-dark: 356 67% 32%;
 
     /* Borders - very subtle */
     --border: 220 13% 91%;
@@ -121,7 +121,7 @@
     --accent: 172 40% 15%;
     --accent-foreground: 172 60% 70%;
 
-    --destructive: 0 72% 55%;
+    --destructive: 356 67% 50%;
     --destructive-foreground: 0 0% 100%;
 
     --success: 152 55% 50%;
@@ -130,11 +130,11 @@
     --warning: 38 80% 55%;
     --warning-foreground: 0 0% 100%;
 
-    /* Holarc red accent (from logo heart) — #E01837 */
-    --terracotta: 351 75% 57%;
+    /* Holarc red accent — #C0252F */
+    --terracotta: 356 67% 50%;
     --terracotta-foreground: 0 0% 100%;
-    --terracotta-light: 351 75% 67%;
-    --terracotta-dark: 351 75% 47%;
+    --terracotta-light: 356 67% 60%;
+    --terracotta-dark: 356 67% 40%;
 
     --border: 0 0% 18%;
     --input: 0 0% 18%;

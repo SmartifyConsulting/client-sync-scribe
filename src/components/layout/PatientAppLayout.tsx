@@ -172,7 +172,7 @@ export function PatientAppLayout() {
             {/* Calendar quick-access */}
             <button
               onClick={() => navigate("/patient/calendar")}
-              className="relative h-11 w-11 rounded-full bg-destructive flex items-center justify-center hover:bg-destructive/80 transition-colors"
+              className="relative h-11 w-11 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors"
             >
               <Calendar className="h-4 w-4 text-white" />
             </button>

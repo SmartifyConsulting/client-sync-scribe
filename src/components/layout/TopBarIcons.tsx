@@ -93,7 +93,7 @@ export function TopBarIcons() {
         <Tooltip>
           <TooltipTrigger asChild>
             <Link to={isOnPatientRoute ? "/patient/calendar" : "/calendar"}>
-              <div className="h-9 w-9 rounded-full bg-destructive flex items-center justify-center hover:bg-destructive/80 transition-colors">
+              <div className="h-9 w-9 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors">
                 <CalendarIcon className="h-4 w-4 text-white" />
               </div>
             </Link>
@@ -180,7 +180,7 @@ export function TopBarIcons() {
           {isDoctor && (
             <div className="border-b border-border mb-1">
               <button
-                onClick={() => { if (isOnPatientRoute) navigate("/doctor-dashboard"); }}
+                onClick={() => { if (isOnPatientRoute) navigate("/dashboard"); }}
                 className={cn(
                   "flex items-center gap-2 px-2 py-1.5 w-full rounded-md transition-colors",
                   !isOnPatientRoute ? "bg-primary/10" : "hover:bg-accent"
