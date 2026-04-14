@@ -43,7 +43,7 @@ export function PrivacyBadge() {
             </p>
             <div className="space-y-1">
               {privateItems.map((item) => (
-                <p key={item.label} className="text-xs text-muted-foreground/60 pl-4">
+                <p key={item.label} className="text-xs text-foreground pl-4">
                   {item.label}
                 </p>
               ))}

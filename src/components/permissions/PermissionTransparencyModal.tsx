@@ -95,7 +95,7 @@ export function PermissionTransparencyModal({
             <XCircle className="h-4 w-4 text-destructive" />
             Private — Not Shared
           </h4>
-          <ul className="list-disc list-inside space-y-1 text-xs text-muted-foreground">
+          <ul className="list-disc list-inside space-y-1 text-xs text-foreground">
             {privateItems.map((item) => (
               <li key={item.label}>{item.label}</li>
             ))}
