@@ -487,14 +487,15 @@ export function TodaysBriefing() {
             <ChevronRight className="h-3.5 w-3.5 md:h-5 md:w-5" />
           </Button>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col items-center gap-1">
           {isPlaying ? (
-            <div className="flex items-center gap-1">
+            <div className="flex flex-col items-center gap-1">
               {segments.length > 1 && (
-                <span className="text-[8px] md:text-[10px] text-primary-foreground/80 mr-1 whitespace-nowrap">
+                <span className="text-[9px] md:text-[11px] text-primary-foreground/80 whitespace-nowrap">
                   {currentSegmentIndex + 1}/{segments.length} — {segments[currentSegmentIndex]?.label}
                 </span>
               )}
+              <div className="flex items-center gap-1">
               <Button
                 size="sm"
                 onClick={handleSkipBack}
@@ -536,6 +537,7 @@ export function TodaysBriefing() {
                 <VolumeX className="h-2.5 w-2.5 md:h-3 md:w-3" />
                 <span className="hidden md:inline">Stop</span>
               </Button>
+              </div>
             </div>
           ) : (
             <Button

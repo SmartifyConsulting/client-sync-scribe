@@ -1,7 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DoctorInvoices from "@/pages/doctor/Invoices";
 import Documents from "@/pages/Documents";
-import PricingAdmin from "@/pages/admin/PricingAdmin";
 import CalendarView from "@/pages/CalendarView";
 import TodoList from "@/pages/TodoList";
 
@@ -24,7 +23,7 @@ export default function Admin() {
             To-Do
           </TabsTrigger>
           <TabsTrigger
-            value="pricing"
+            value="invoices"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs"
           >
             Pricing
