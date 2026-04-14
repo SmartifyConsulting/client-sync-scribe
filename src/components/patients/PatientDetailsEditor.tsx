@@ -1087,7 +1087,7 @@ export function PatientDetailsEditor({
           </div>
           {/* Vula Vouchers inline on web */}
           {!rewardsLoading && lollipopCount !== undefined && (
-            <div className="hidden md:flex items-center gap-3">
+            <div className="hidden md:flex items-center justify-center gap-3">
               <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-9 w-auto object-contain" />
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
                 <AnimatedCounter target={lollipopCount} />
@@ -1137,13 +1137,17 @@ export function PatientDetailsEditor({
         {/* Row 3: Vula Vouchers - mobile only (shown inline on web) */}
         {!rewardsLoading && lollipopCount !== undefined && (
           <div className="mt-3 border-t border-border pt-3 md:hidden">
-            <div className="flex items-center rounded-xl border border-border overflow-hidden">
-              <div className="flex-1 flex flex-col items-center justify-center py-3 px-4 bg-primary/5">
-                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-16 w-auto object-contain" />
-              </div>
-              <div className="w-[1px] self-stretch bg-border" />
-              <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
-                <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-foreground whitespace-nowrap">
+                {(() => {
+                  const hour = new Date().getHours();
+                  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+                  return `${greeting}, ${patient.name.split(' ')[0]}`;
+                })()}
+              </span>
+              <div className="flex items-center gap-2">
+                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-10 w-auto object-contain" />
+                <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
                   <AnimatedCounter target={lollipopCount} />
                 </span>
               </div>

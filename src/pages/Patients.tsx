@@ -395,14 +395,18 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           </div>
         )}
         <div className="flex gap-2 ml-auto justify-center flex-wrap">
-          <Button variant="outline" className="gap-2 lg:hidden" onClick={() => navigate("/dashboard")}>
-            <Users className="h-4 w-4" />
+          <Button variant="outline" className="gap-1.5 h-8 md:h-9 text-[10px] md:text-xs" onClick={() => navigate("/dashboard")}>
+            <Users className="h-3.5 w-3.5 md:h-4 md:w-4" />
             Round Tables
+          </Button>
+          <Button variant="outline" className="gap-1.5 h-8 md:h-9 text-[10px] md:text-xs" onClick={() => navigate("/sessions")}>
+            <Calendar className="h-3.5 w-3.5 md:h-4 md:w-4" />
+            All Sessions
           </Button>
           <PatientImportDialog 
             trigger={
-              <Button variant="outline" className="gap-2">
-                <Upload className="h-4 w-4" />
+              <Button variant="outline" className="gap-1.5 h-8 md:h-9 text-[10px] md:text-xs">
+                <Upload className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 Import
               </Button>
             }
@@ -410,8 +414,8 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           />
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
+              <Button className="gap-1.5 h-8 md:h-9 text-[10px] md:text-xs">
+                <Plus className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 Patient
               </Button>
             </DialogTrigger>
