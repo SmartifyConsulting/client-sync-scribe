@@ -33,7 +33,7 @@ const doctorNavItems: NavItem[] = [
   { icon: Users, label: "My Patients", to: "/patients" },
   { icon: Settings2, label: "My Practice", to: "/practice" },
   { icon: UserCog, label: "My Admin", to: "/admin" },
-  { icon: Gift, label: "My Vulas", to: "/doctor/rewards" },
+  { icon: Gift, label: "My Rewards", to: "/doctor/rewards" },
 ];
 
 const patientNavItems: NavItem[] = [
@@ -41,7 +41,7 @@ const patientNavItems: NavItem[] = [
   { icon: User, label: "My Holarchive", to: "/patient/details" },
   { icon: Calendar, label: "My Calendar", to: "/patient/calendar" },
   { icon: CheckSquare, label: "To-Do List", to: "/patient/tasks" },
-  { icon: Gift, label: "My Vulas", to: "/patient/rewards" },
+  { icon: Gift, label: "My Rewards", to: "/patient/rewards" },
 ];
 
 const adminNavItems: NavItem[] = [
