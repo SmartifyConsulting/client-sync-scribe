@@ -28,7 +28,7 @@ export function StatsCard({
   const content = (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-primary bg-card p-2 md:p-3 transition-all duration-300 shadow-card hover:shadow-card-hover",
+        "group relative overflow-hidden rounded-2xl border border-primary bg-card p-2 md:p-3 transition-all duration-300 shadow-card hover:shadow-card-hover min-h-[80px] md:min-h-[100px]",
         href && "cursor-pointer",
         className
       )}

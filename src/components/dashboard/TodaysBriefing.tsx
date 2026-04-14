@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Play, Pause, Pill, Users, MessageCircle, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Play, Pause, Pill, Users, MessageCircle, ChevronLeft, ChevronRight, ChevronDown, SkipBack, SkipForward } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,6 +42,9 @@ export function TodaysBriefing() {
   const [isPaused, setIsPaused] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [segmentAudioUrls, setSegmentAudioUrls] = useState<string[]>([]);
+  const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
+  const [segments, setSegments] = useState<{ label: string; text: string }[]>([]);
 
   useEffect(() => {
     fetchAppointmentsForDate(selectedDate);
@@ -259,55 +262,82 @@ export function TodaysBriefing() {
     }
   };
 
-  const generateBriefingText = () => {
+  const generateBriefingSegments = (): { label: string; text: string }[] => {
     if (appointments.length === 0) {
-      return "Good morning. You have no appointments scheduled for today.";
+      return [{ label: "Intro", text: "Good morning. You have no appointments scheduled for today." }];
     }
 
-    let briefing = `Good morning. You have ${appointments.length} appointment${appointments.length > 1 ? 's' : ''} scheduled for today. `;
+    const segs: { label: string; text: string }[] = [];
+
+    // Intro segment
+    segs.push({
+      label: "Intro",
+      text: `Good morning. You have ${appointments.length} appointment${appointments.length > 1 ? 's' : ''} scheduled for today.`,
+    });
 
     appointments.forEach((apt, index) => {
-      briefing += `At ${apt.formattedTime}, you have ${apt.patientName}. `;
+      let text = `At ${apt.formattedTime}, you have ${apt.patientName}. `;
       
       if (apt.allergies) {
-        briefing += `Please note: this patient has allergies to ${apt.allergies}. `;
+        text += `Please note: this patient has allergies to ${apt.allergies}. `;
       }
       
       if (apt.lastSessionSummary) {
-        briefing += `From your last session: ${apt.lastSessionSummary} `;
+        text += `From your last session: ${apt.lastSessionSummary} `;
       } else {
-        briefing += `This appears to be a new patient or their first recorded session. `;
+        text += `This appears to be a new patient or their first recorded session. `;
       }
 
       if (apt.lastPrescription) {
-        briefing += `Their most recent prescription was ${apt.lastPrescription}. `;
+        text += `Their most recent prescription was ${apt.lastPrescription}. `;
       }
 
       if (apt.linkedDoctors.length > 0) {
         const doctorList = apt.linkedDoctors.map(d => 
           d.specialty ? `${d.name} (${d.specialty})` : d.name
         ).join(', ');
-        briefing += `Other doctors on this patient's profile include: ${doctorList}. `;
+        text += `Other doctors on this patient's profile include: ${doctorList}. `;
       }
 
       if (apt.unreadRoundTableNotes.length > 0) {
-        briefing += `There ${apt.unreadRoundTableNotes.length === 1 ? 'is' : 'are'} ${apt.unreadRoundTableNotes.length} unread Round Table note${apt.unreadRoundTableNotes.length > 1 ? 's' : ''} for this patient. `;
-        apt.unreadRoundTableNotes.forEach((note, noteIndex) => {
-          briefing += `${note.doctorName} wrote: ${note.content} `;
+        text += `There ${apt.unreadRoundTableNotes.length === 1 ? 'is' : 'are'} ${apt.unreadRoundTableNotes.length} unread Round Table note${apt.unreadRoundTableNotes.length > 1 ? 's' : ''} for this patient. `;
+        apt.unreadRoundTableNotes.forEach((note) => {
+          text += `${note.doctorName} wrote: ${note.content} `;
         });
       }
       
-      if (index < appointments.length - 1) {
-        briefing += "Next, ";
+      if (index === appointments.length - 1) {
+        text += "That concludes your briefing for today.";
       }
+
+      segs.push({ label: apt.patientName, text });
     });
 
-    briefing += "That concludes your briefing for today.";
-    return briefing;
+    return segs;
+  };
+
+  const playSegment = (index: number, urls: string[]) => {
+    if (!audioRef.current || index < 0 || index >= urls.length) return;
+    setCurrentSegmentIndex(index);
+    audioRef.current.src = urls[index];
+    audioRef.current.play();
+    setIsPlaying(true);
+    setIsPaused(false);
+  };
+
+  const handleSkipForward = () => {
+    if (currentSegmentIndex < segmentAudioUrls.length - 1) {
+      playSegment(currentSegmentIndex + 1, segmentAudioUrls);
+    }
+  };
+
+  const handleSkipBack = () => {
+    if (currentSegmentIndex > 0) {
+      playSegment(currentSegmentIndex - 1, segmentAudioUrls);
+    }
   };
 
   const handleNarrate = async () => {
-    // If playing, stop completely
     if (isPlaying && !isPaused && audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
@@ -319,9 +349,9 @@ export function TodaysBriefing() {
     setIsNarrating(true);
     
     try {
-      const briefingText = generateBriefingText();
+      const segs = generateBriefingSegments();
+      setSegments(segs);
       
-      // Use streaming fetch for faster playback start
       const { data: profileData } = await supabase
         .from('profiles')
         .select('narration_voice')
@@ -332,35 +362,31 @@ export function TodaysBriefing() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) throw new Error('Not authenticated');
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`,
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          },
-          body: JSON.stringify({ text: briefingText, voice: selectedVoice }),
-        }
+      // Generate audio for all segments in parallel
+      const audioUrls = await Promise.all(
+        segs.map(async (seg) => {
+          const response = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.access_token}`,
+                'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+              },
+              body: JSON.stringify({ text: seg.text, voice: selectedVoice }),
+            }
+          );
+          if (!response.ok) throw new Error('Failed to generate speech');
+          const blob = await response.blob();
+          return URL.createObjectURL(blob);
+        })
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate speech');
-      }
-
-      // Collect response as blob and play directly (MP3 is universally supported)
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      if (audioRef.current) {
-        audioRef.current.src = audioUrl;
-        await audioRef.current.play();
-        setIsPlaying(true);
-        setIsPaused(false);
-        setIsNarrating(false);
-      }
+      setSegmentAudioUrls(audioUrls);
+      setCurrentSegmentIndex(0);
+      setIsNarrating(false);
+      playSegment(0, audioUrls);
     } catch (error: any) {
       console.error('Error narrating briefing:', error);
       toast({
@@ -396,8 +422,17 @@ export function TodaysBriefing() {
   useEffect(() => {
     audioRef.current = new Audio();
     audioRef.current.onended = () => {
-      setIsPlaying(false);
-      setIsPaused(false);
+      // Auto-advance to next segment
+      setCurrentSegmentIndex((prev) => {
+        const next = prev + 1;
+        if (next < segmentAudioUrls.length) {
+          setTimeout(() => playSegment(next, segmentAudioUrls), 300);
+          return prev; // playSegment will set it
+        }
+        setIsPlaying(false);
+        setIsPaused(false);
+        return prev;
+      });
     };
     
     return () => {
@@ -406,7 +441,7 @@ export function TodaysBriefing() {
         audioRef.current = null;
       }
     };
-  }, []);
+  }, [segmentAudioUrls]);
 
   if (loading) {
     return (
@@ -453,32 +488,51 @@ export function TodaysBriefing() {
         <div className="flex items-center gap-2">
           {isPlaying ? (
             <div className="flex items-center gap-1">
+              {segments.length > 1 && (
+                <span className="text-[9px] md:text-xs text-primary-foreground/80 mr-1 whitespace-nowrap">
+                  {currentSegmentIndex + 1}/{segments.length} — {segments[currentSegmentIndex]?.label}
+                </span>
+              )}
               <Button
-                variant="outline"
+                size="sm"
+                onClick={handleSkipBack}
+                disabled={currentSegmentIndex === 0}
+                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-[10px] md:text-xs h-7 px-2 md:h-9 md:px-3 gap-1"
+              >
+                <SkipBack className="h-3 w-3 md:h-4 md:w-4" />
+              </Button>
+              <Button
                 size="sm"
                 onClick={handlePauseResume}
-                className="gap-2"
+                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-[10px] md:text-xs h-7 px-2 md:h-9 md:px-3 gap-1"
               >
                 {isPaused ? (
                   <>
-                    <Play className="h-4 w-4" />
-                    Resume
+                    <Play className="h-3 w-3 md:h-4 md:w-4" />
+                    <span className="hidden md:inline">Resume</span>
                   </>
                 ) : (
                   <>
-                    <Pause className="h-4 w-4" />
-                    Pause
+                    <Pause className="h-3 w-3 md:h-4 md:w-4" />
+                    <span className="hidden md:inline">Pause</span>
                   </>
                 )}
               </Button>
               <Button
-                variant="outline"
+                size="sm"
+                onClick={handleSkipForward}
+                disabled={currentSegmentIndex >= segmentAudioUrls.length - 1}
+                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-[10px] md:text-xs h-7 px-2 md:h-9 md:px-3 gap-1"
+              >
+                <SkipForward className="h-3 w-3 md:h-4 md:w-4" />
+              </Button>
+              <Button
                 size="sm"
                 onClick={handleStop}
-                className="gap-2"
+                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-[10px] md:text-xs h-7 px-2 md:h-9 md:px-3 gap-1"
               >
-                <VolumeX className="h-4 w-4" />
-                Stop
+                <VolumeX className="h-3 w-3 md:h-4 md:w-4" />
+                <span className="hidden md:inline">Stop</span>
               </Button>
             </div>
           ) : (
@@ -487,16 +541,17 @@ export function TodaysBriefing() {
               size="sm"
               onClick={handleNarrate}
               disabled={isNarrating}
-              className="gap-2 bg-white text-primary border border-white/50 hover:bg-accent hover:text-primary"
+              className="gap-1 bg-white text-primary border border-white/50 hover:bg-accent hover:text-primary text-[10px] md:text-xs h-7 px-2 md:h-9 md:px-3"
             >
               {isNarrating ? (
                  <>
-                   <Loader2 className="h-4 w-4 animate-spin" />
-                   Preparing audio...
+                   <Loader2 className="h-3 w-3 md:h-4 md:w-4 animate-spin" />
+                   <span className="hidden md:inline">Preparing...</span>
+                   <span className="md:hidden">...</span>
                  </>
               ) : (
                 <>
-                  <Volume2 className="h-4 w-4" />
+                  <Volume2 className="h-3 w-3 md:h-4 md:w-4" />
                   Narrate
                 </>
               )}
