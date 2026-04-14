@@ -246,9 +246,8 @@ export default function Dashboard() {
       {/* Header with Profile */}
       <div className="flex items-start justify-between pb-2">
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">
-            {greeting}{displayName ? ',' : ''}
-            {displayName && <span className="block">{displayName}</span>}
+          <h1 className="text-xl md:text-2xl font-bold text-foreground tracking-tight whitespace-nowrap">
+            {greeting}{displayName ? `, ${displayName}` : ''}
           </h1>
           <p className="mt-2 text-muted-foreground text-[12px]">
             Here's what's happening with your practice today, {formattedDate}
@@ -291,7 +290,7 @@ export default function Dashboard() {
         )}
         {isDoctor && (
           <StatsCard
-            title="Total Vulas"
+            title="Vula Vouchers"
             value={doctorVulas + patientVulas}
             change={`Doctor: ${doctorVulas} · Patient: ${patientVulas}`}
             trend="up"
