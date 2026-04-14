@@ -279,10 +279,24 @@ export default function MyRewards() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Partner App</Label>
-              <Select value={transferAppId} onValueChange={setTransferAppId}>
+              <Label>From</Label>
+              <Select value={transferFromAppId} onValueChange={setTransferFromAppId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select an app" />
+                  <SelectValue placeholder="Select source app" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="wallet">My Vula Wallet</SelectItem>
+                  {partnerApps.map((app) => (
+                    <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>To</Label>
+              <Select value={transferToAppId} onValueChange={setTransferToAppId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select destination app" />
                 </SelectTrigger>
                 <SelectContent>
                   {partnerApps.map((app) => (
@@ -307,8 +321,8 @@ export default function MyRewards() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowTransferDialog(false)}>Cancel</Button>
             <Button
-              onClick={() => transferMutation.mutate({ appId: transferAppId, amount: parseInt(transferAmount) || 0 })}
-              disabled={!transferAppId || !transferAmount || parseInt(transferAmount) <= 0 || parseInt(transferAmount) > lollipopCount || transferMutation.isPending}
+              onClick={() => transferMutation.mutate({ appId: transferToAppId, amount: parseInt(transferAmount) || 0 })}
+              disabled={!transferToAppId || !transferAmount || parseInt(transferAmount) <= 0 || parseInt(transferAmount) > lollipopCount || transferMutation.isPending}
             >
               {transferMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
               Transfer
