@@ -75,3 +75,6 @@ verify_jwt = false
 
 [functions.compare-medical-images]
 verify_jwt = false
+
+[functions.translate-text]
+verify_jwt = false

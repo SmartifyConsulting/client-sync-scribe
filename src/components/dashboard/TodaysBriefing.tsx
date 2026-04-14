@@ -350,21 +350,55 @@ export function TodaysBriefing() {
     
     try {
       const segs = generateBriefingSegments();
-      setSegments(segs);
       
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('narration_voice')
+        .select('narration_voice, preferred_language')
         .eq('id', (await supabase.auth.getUser()).data.user?.id || '')
         .single();
       const selectedVoice = (profileData as any)?.narration_voice || 'shimmer';
+      const preferredLang = (profileData as any)?.preferred_language || 'English';
+
+      // Translate segments if language is not English
+      let finalSegs = segs;
+      if (preferredLang && preferredLang !== 'English' && preferredLang !== 'en') {
+        try {
+          const { data: { session: authSession } } = await supabase.auth.getSession();
+          const translatedSegs = await Promise.all(
+            segs.map(async (seg) => {
+              const resp = await fetch(
+                `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/translate-text`,
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authSession?.access_token}`,
+                    'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                  },
+                  body: JSON.stringify({ text: seg.text, targetLanguage: preferredLang }),
+                }
+              );
+              if (resp.ok) {
+                const result = await resp.json();
+                return { ...seg, text: result.translatedText || seg.text };
+              }
+              return seg;
+            })
+          );
+          finalSegs = translatedSegs;
+        } catch (translationErr) {
+          console.error('Translation failed, using English:', translationErr);
+        }
+      }
+
+      setSegments(finalSegs);
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) throw new Error('Not authenticated');
 
       // Generate audio for all segments in parallel
       const audioUrls = await Promise.all(
-        segs.map(async (seg) => {
+        finalSegs.map(async (seg) => {
           const response = await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`,
             {

@@ -1190,7 +1190,7 @@ export default function Sessions() {
                         setIsTranslatingDiagnosis(true);
                         try {
                           const { data, error } = await supabase.functions.invoke('summarize-session', {
-                            body: { content: aiDiagnosis, action: 'translate', targetLanguage: 'English' }
+                            body: { content: aiDiagnosis, action: 'translate', targetLanguage: doctorLanguage }
                           });
                           if (!error && data?.summary) {
                             setTranslatedDiagnosis(data.summary);
@@ -1201,7 +1201,7 @@ export default function Sessions() {
                       }}
                     >
                       {isTranslatingDiagnosis ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
-                      {showTranslated ? 'Show Original' : 'Translate to English'}
+                      {showTranslated ? 'Show Original' : `Translate to ${doctorLanguage}`}
                     </Button>
                   )}
                   <Button
