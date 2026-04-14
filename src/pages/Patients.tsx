@@ -774,7 +774,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
 
       {/* Alphabet Jump Bar */}
       {sortedPatients.length > 0 && (
-        <div className="flex w-full gap-0.5 overflow-x-auto pb-1">
+        <div className="hidden md:flex w-full gap-0.5 overflow-x-auto pb-1">
           <button
             onClick={() => setSelectedLetter(null)}
             className={cn(
