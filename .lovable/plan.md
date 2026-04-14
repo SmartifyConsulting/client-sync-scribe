@@ -1,39 +1,46 @@
 
 
-# Darken Inactive Items, Accordion Sections, Smaller Document Rows
+# Narration Skip, Button Styling, Collapsed Defaults, Card Heights, and Round Tables as Card
 
 ## Summary
-Three changes: make deactivated/inactive medications and symptoms more visible with darker styling, wrap Conditions/Diagnoses, Medications, Symptoms, and Allergies in collapsible accordions in the Overview tab, and reduce document row font size by 35% across all views.
+Five groups of changes: segment-based narration with skip controls, restored button styling for mobile, default-collapsed overview sections, equalized dashboard card heights, and restyled "My Round Tables" as a card matching "Recent Activity" — collapsed by default.
 
 ## Changes
 
-### 1. Darken deactivated Medications and Symptoms in Overview
-**File:** `src/components/patients/PatientOverview.tsx`
-- Currently inactive items use `text-muted-foreground/50` (50% opacity) which is too faint
-- Change to `text-muted-foreground` (no opacity reduction) for the text, and use `line-through` decoration to visually distinguish inactive from active
-- Apply to: Medications (lines 707-708), Symptoms (lines 744-745), and Conditions (lines 667-668)
-- Also darken the inactive dot indicators from `bg-muted-foreground/40` to `bg-muted-foreground/60`
+### 1. Segment-based narration with skip controls
+**File:** `src/components/dashboard/TodaysBriefing.tsx`
+- Replace single-audio narration with per-appointment segments
+- Add skip-forward and skip-back buttons
+- Show segment indicator (e.g., "2 of 4 — Patient Name")
+- Auto-advance to next segment on completion
 
-### 2. Make Conditions/Diagnoses, Medications, Symptoms, and Allergies collapsible
-**File:** `src/components/patients/PatientOverview.tsx`
-- Wrap each of the four sections (Allergies, Conditions/Diagnoses, Medications, Symptoms) in a `Collapsible` component with `defaultOpen={true}`
-- Convert each section header into a `CollapsibleTrigger` with a chevron icon
-- Wrap the list content in `CollapsibleContent`
-- Import `Collapsible`, `CollapsibleTrigger`, `CollapsibleContent` from `@/components/ui/collapsible`
+### 2. Restore Pause/Stop button styling — white text, mobile-friendly
+**File:** `src/components/dashboard/TodaysBriefing.tsx`
+- Pause and Stop buttons: `bg-white/20 text-white border-white/30 hover:bg-white/30`
+- Mobile sizing: `text-[10px] h-7 px-2` scaling up to `md:text-xs md:h-9 md:px-3`
+- Icon sizes: `h-3 w-3 md:h-4 md:w-4`
 
-### 3. Reduce Document row font size by 35%
-**File:** `src/pages/PatientProfile.tsx`
-- Document name (`font-semibold`): change from default to `text-[10px]`
-- Document date (`text-sm`): change to `text-[9px]`
-- Template badge (`text-xs`): change to `text-[8px]`
-- DRAFT badge: already `text-[10px]`, change to `text-[7px]`
-- Reduce icon container and icon sizes proportionally (h-12/w-12 → h-8/w-8, h-6/w-6 → h-4/w-4)
-- Reduce row padding from `p-5` to `p-3`
+### 3. Default all collapsible sections to collapsed
+**File:** `src/components/patients/PatientOverview.tsx`
+- Change `defaultOpen={true}` to `defaultOpen={false}` on all four sections: Allergies, Conditions/Diagnoses, Medications, Symptoms
+
+### 4. Equalize dashboard stats card heights
+**File:** `src/components/dashboard/StatsCard.tsx`
+- Add `min-h-[80px] md:min-h-[100px]` to the card wrapper so all cards render at the same height
+
+### 5. Restyle "My Round Tables" as a card matching "Recent Activity", collapsed by default
+**File:** `src/pages/Dashboard.tsx`
+- Wrap `DoctorRoundTables` in a card container styled identically to `RecentActivity`: `rounded-xl border border-primary bg-card shadow-sm` with a green header bar (`rounded-t-xl bg-primary px-4 py-3`) showing "My Round Tables" in white text
+- Wrap the entire card in a `Collapsible` with `defaultOpen={false}` and a `ChevronDown` toggle on the header
+- Apply to both mobile and desktop instances of the round tables section
+- Remove the standalone `<h2>` heading since the card header replaces it
 
 ## Files Modified
 
 | File | Changes |
 |------|---------|
-| `src/components/patients/PatientOverview.tsx` | Darken inactive item styling, wrap 4 sections in collapsibles |
-| `src/pages/PatientProfile.tsx` | Reduce document row font/icon/padding sizes by ~35% |
+| `src/components/dashboard/TodaysBriefing.tsx` | Segment narration, skip controls, white button text, mobile button sizing |
+| `src/components/patients/PatientOverview.tsx` | Change all 4 collapsible sections to `defaultOpen={false}` |
+| `src/components/dashboard/StatsCard.tsx` | Add consistent min-height across all cards |
+| `src/pages/Dashboard.tsx` | Wrap Round Tables in styled card with collapsed-by-default accordion |
 
