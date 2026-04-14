@@ -102,21 +102,26 @@ export default function ResetPassword() {
       // Clean URL hash to prevent re-trigger
       window.history.replaceState(null, "", window.location.pathname);
 
-      // Redirect by role
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .single();
+        const [{ data: profileData }, { data: roleRows }] = await Promise.all([
+          supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", session.user.id)
+            .maybeSingle(),
+          supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", session.user.id),
+        ]);
+
+        const resolvedRole =
+          profileData?.role ??
+          ((roleRows ?? []).some((row) => row.role === "patient") ? "patient" : null);
 
         setTimeout(() => {
-          if (roleData?.role === 'patient') {
-            navigate("/patient/details");
-          } else {
-            navigate("/dashboard");
-          }
+          navigate(resolvedRole === "patient" ? "/patient/details" : "/dashboard");
         }, 2000);
       } else {
         setTimeout(() => navigate("/auth"), 2000);
