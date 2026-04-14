@@ -29,7 +29,8 @@ export default function DoctorRewards() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [showTransferDialog, setShowTransferDialog] = useState(false);
-  const [transferAppId, setTransferAppId] = useState("");
+  const [transferFromAppId, setTransferFromAppId] = useState("");
+  const [transferToAppId, setTransferToAppId] = useState("");
   const [transferAmount, setTransferAmount] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
   const queryClient = useQueryClient();

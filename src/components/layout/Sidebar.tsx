@@ -4,26 +4,14 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Users,
-  Calendar,
-  FileText,
   Settings,
   Settings2,
-  Mic,
   LogOut,
-  CheckSquare,
-  Pill,
-  Receipt,
   Loader2,
-  MessageSquare,
-  Bell,
-  User,
   LucideIcon,
   DollarSign,
-  Users2,
   Gift,
-  Camera,
-  UserPlus,
-  Award,
+  UserCog,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
