@@ -3,7 +3,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getSignedAudioUrl } from "@/utils/audioUrl";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { format } from "date-fns";
+import { format, startOfWeek, endOfWeek, subWeeks, isWithinInterval, parseISO } from "date-fns";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   Mic,
   Play,
