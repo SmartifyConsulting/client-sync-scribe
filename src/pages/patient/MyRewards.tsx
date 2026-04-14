@@ -455,7 +455,7 @@ export default function MyRewards() {
             <CardContent>
               {rewards.length === 0 ? (
                 <div className="text-center py-8">
-                  <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-16 w-auto object-contain mx-auto mb-4" />
+                  <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-13 w-auto object-contain mx-auto mb-4" />
                   <p className="text-muted-foreground">No rewards yet. Start your health journey!</p>
                 </div>
               ) : (
@@ -463,7 +463,7 @@ export default function MyRewards() {
                   {rewards.slice(0, 5).map((reward) => (
                     <div key={reward.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                       <div className="flex items-center gap-3">
-                        <img src={vulaVouchersLogo} alt="Vula" className="h-7 w-7 object-contain" />
+                        <img src={vulaVouchersLogo} alt="Vula" className="h-6 w-6 object-contain" />
                         <div>
                           <p className="font-medium">{reward.visit_category}</p>
                           <p className="text-sm text-muted-foreground">
@@ -762,7 +762,7 @@ export default function MyRewards() {
             <CardContent>
               {rewards.length === 0 ? (
                 <div className="text-center py-8">
-                  <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-12 w-auto object-contain mx-auto mb-4" />
+                  <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-10 w-auto object-contain mx-auto mb-4" />
                   <p className="text-muted-foreground">No rewards yet</p>
                 </div>
               ) : (
