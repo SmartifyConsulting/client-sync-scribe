@@ -20,11 +20,11 @@ interface PermissionItem {
 }
 
 const sharedItems: PermissionItem[] = [
-  { label: "AI Session Summaries" },
-  { label: "Patient Information" },
-  { label: "Patient Medical Overview" },
+  { label: "Your AI Session Summaries" },
+  { label: "Your Patient Information" },
+  { label: "Your Patient Medical Overview" },
   {
-    label: "Documents",
+    label: "Your Documents",
     subItems: [
       "Prescriptions",
       "Hospital Admissions",
@@ -42,7 +42,6 @@ const privateItems: PermissionItem[] = [
   { label: "AI Diagnostics" },
   { label: "Clinical Drawings/Sketches" },
   { label: "Invoices & Billing Data" },
-  { label: "Doctor Referrals" },
   { label: "Medical Certificates" },
 ];
 
@@ -74,7 +73,7 @@ export function PermissionTransparencyModal({
             <CheckCircle className="h-4 w-4 text-green-600" />
             Shared with Care Team
           </h4>
-          <ul className="list-disc list-inside space-y-1 text-sm text-foreground">
+          <ul className="list-disc list-inside space-y-1 text-xs text-foreground">
             {sharedItems.map((item) => (
               <li key={item.label}>
                 {item.label}
@@ -96,7 +95,7 @@ export function PermissionTransparencyModal({
             <XCircle className="h-4 w-4 text-destructive" />
             Private — Not Shared
           </h4>
-          <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+          <ul className="list-disc list-inside space-y-1 text-xs text-muted-foreground">
             {privateItems.map((item) => (
               <li key={item.label}>{item.label}</li>
             ))}

@@ -250,6 +250,8 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                            <InviteDoctorDialog
                              prefillPracticeNumber={doctor.practice_number || ""}
                              prefillRegistrationNumber={doctor.doctor_number || ""}
+                             prefillDoctorName={doctor.full_name || ""}
+                             prefillAvatarUrl={doctor.avatar_url || ""}
                            />
                          </TableCell>
                        </TableRow>

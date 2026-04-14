@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserPlus, Loader2, Stethoscope } from "lucide-react";
 import { PermissionTransparencyModal } from "@/components/permissions/PermissionTransparencyModal";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
@@ -23,9 +24,11 @@ type AccessPermission = "patient_info" | "calendar" | "session_summaries" | "pre
 interface InviteDoctorDialogProps {
   prefillPracticeNumber?: string;
   prefillRegistrationNumber?: string;
+  prefillDoctorName?: string;
+  prefillAvatarUrl?: string;
 }
 
-export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationNumber }: InviteDoctorDialogProps = {}) {
+export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationNumber, prefillDoctorName, prefillAvatarUrl }: InviteDoctorDialogProps = {}) {
   const [open, setOpen] = useState(false);
   const [practiceNumber, setPracticeNumber] = useState(prefillPracticeNumber || "");
   const [registrationNumber, setRegistrationNumber] = useState(prefillRegistrationNumber || "");
@@ -148,6 +151,22 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
         </DialogHeader>
         
         <div className="grid gap-3 py-2">
+          {/* Selected Doctor Info */}
+          {prefillDoctorName && (
+            <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/30">
+              <Avatar className="h-10 w-10">
+                {prefillAvatarUrl && <AvatarImage src={prefillAvatarUrl} alt={prefillDoctorName} />}
+                <AvatarFallback className="text-xs font-semibold">
+                  {prefillDoctorName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="text-sm font-semibold text-foreground">{prefillDoctorName}</p>
+                <p className="text-[10px] text-muted-foreground">Selected healthcare provider</p>
+              </div>
+            </div>
+          )}
+
           {/* Doctor Details */}
           <div className="space-y-4">
             <div className="space-y-2">

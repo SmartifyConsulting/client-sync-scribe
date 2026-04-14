@@ -1133,7 +1133,7 @@ export function PatientDetailsEditor({
           <div className="mt-3 border-t border-border pt-3">
             <div className="flex items-center rounded-xl border border-border overflow-hidden">
               <div className="flex-1 flex flex-col items-center justify-center py-3 px-4 bg-primary/5">
-                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-16 w-auto object-contain" />
+                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-20 w-auto object-contain" />
               </div>
               <div className="w-[1px] self-stretch bg-border" />
               <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
@@ -1743,7 +1743,7 @@ export function PatientDetailsEditor({
 
                   {/* Organ Donor — collapsible with inline Yes/No */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                    <CollapsibleTrigger className="flex w-full items-center justify-between bg-[#F5F4F1] rounded-lg px-3 py-2 group">
+                    <CollapsibleTrigger className="flex w-full items-center justify-between bg-card rounded-lg px-3 py-2 group">
                       <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5 text-left">
                         <Heart className="h-3.5 w-3.5" /> Organ Donor
                       </h3>
@@ -3011,7 +3011,7 @@ export function PatientDetailsEditor({
 
                 {/* Organ Donor — collapsible with inline Yes/No */}
                 <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-                  <CollapsibleTrigger className="flex w-full items-center justify-between bg-[#F5F4F1] rounded-lg px-3 py-2 group">
+                  <CollapsibleTrigger className="flex w-full items-center justify-between bg-card rounded-lg px-3 py-2 group">
                     <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5 text-left">
                       <Heart className="h-3.5 w-3.5" /> Organ Donor
                     </h3>
