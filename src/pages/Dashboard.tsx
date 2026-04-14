@@ -274,7 +274,8 @@ export default function Dashboard() {
             {greeting}{displayName ? `, ${displayName}` : ''}
           </h1>
           <p className="mt-2 text-muted-foreground text-[12px]">
-            Here's what's happening with your practice today, {formattedDate}
+            Here's what's happening with your practice today
+            <span className="block md:inline">, {formattedDate}</span>
           </p>
         </div>
       </div>

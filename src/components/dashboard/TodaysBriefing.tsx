@@ -36,6 +36,8 @@ interface AppointmentWithHistory {
 export function TodaysBriefing() {
   const { toast } = useToast();
   const [appointments, setAppointments] = useState<AppointmentWithHistory[]>([]);
+  const [translatedAppointments, setTranslatedAppointments] = useState<AppointmentWithHistory[] | null>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isNarrating, setIsNarrating] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -45,6 +47,7 @@ export function TodaysBriefing() {
   const [segmentAudioUrls, setSegmentAudioUrls] = useState<string[]>([]);
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
   const [segments, setSegments] = useState<{ label: string; text: string }[]>([]);
+  const [translatedLabels, setTranslatedLabels] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchAppointmentsForDate(selectedDate);
