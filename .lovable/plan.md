@@ -1,48 +1,49 @@
 
 
-# Dashboard & Patient List Mobile/Tablet Refinements
+# Bottom Nav for All Viewports + Vula Logo Fixes + Tab Consolidation
 
 ## Summary
-Six changes: hide alphabet bar on mobile, collapse Recent Activity and To-Do List by default, reduce Today's Briefing fonts, show appointment count under date on T/W, shrink briefing headings and play controls on all views.
+Four groups of changes: show bottom nav on tablet/web, replace incorrect Vula logos with the uploaded Vula Vouchers logo, fix logo aspect ratios in reward cards, and merge the "Vula Partner Apps" tab into the "Transfers" tab for both Doctor and Patient views.
 
 ## Changes
 
-### 1. Hide horizontal alphabet bar on mobile
-**File:** `src/pages/Patients.tsx`
-- Add `hidden md:flex` to the alphabet jump bar container (line 777) so it only shows on tablet and desktop
+### 1. Show bottom navigation on tablet and web views
+**File:** `src/components/layout/BottomNav.tsx`
+- Remove the `md:hidden` class from both doctor and patient nav containers so the bottom nav renders on all viewports
+- Keep the same styling and behavior across all screen sizes
 
-### 2. Collapse Recent Activity by default
-**File:** `src/components/dashboard/RecentActivity.tsx`
-- Wrap the component content in a `Collapsible defaultOpen={false}` with a primary-colored header trigger (matching the existing card pattern)
+### 2. Copy uploaded Vula Vouchers logo into project assets
+- Copy `user-uploads://VulaLogo-2.png` to `src/assets/vula-vouchers-logo-v2.png`
+- This is the correct vertical "VULA VOUCHERS" logo the user wants used
 
-### 3. Collapse To-Do List by default
-**File:** `src/components/dashboard/CompactTodoList.tsx`
-- Wrap the component in a `Collapsible defaultOpen={false}` with primary-colored header trigger
+### 3. Fix logo aspect ratios and replace logos in Doctor Rewards
+**File:** `src/pages/doctor/DoctorRewards.tsx`
+- Import the new `vula-vouchers-logo-v2.png`
+- In the "Doctor Vulas" and "Patient Vulas" cards (lines 142, 148): replace `h-4 w-4` inline logos with properly sized logos that preserve aspect ratio (use `h-5 w-auto object-contain`)
+- In "Recent Rewards" list (line 211): make the logo the same size as Patient rewards (`h-7 w-7 object-contain` — already correct, verify consistency)
+- In the Combined card (line 134): ensure `object-contain` is used
+- Remove the separate "Vula Partner Apps" tab trigger (line 177) and merge partner apps content into the "Transfers" tab content — show partner apps grid at top, transfer history below (same pattern as Patient MyRewards already has)
 
-### 4. Reduce Today's Briefing font sizes on mobile
-**File:** `src/components/dashboard/TodaysBriefing.tsx`
-- Title (line 474): change `text-lg` to `text-xs md:text-lg`
-- Subtitle (line 475-477): change `text-sm` to `text-[10px] md:text-sm`
+### 4. Fix logo aspect ratios and consolidate tabs in Patient Rewards
+**File:** `src/pages/patient/MyRewards.tsx`
+- Import the new `vula-vouchers-logo-v2.png`
+- The Patient rewards "Transfers" tab already shows partner apps at top + transfer history below (lines 643-735) — this is correct
+- Remove the now-redundant separate "Vula Partner Apps" tab if one exists (check tab triggers)
+- Ensure all inline Vula logo references use `object-contain` and consistent sizing (`h-5 w-auto` for inline, `h-7 w-7` for list items)
+- Replace the `Ⓜ` symbol references with the actual logo image where appropriate
 
-### 5. Show appointment count under date on Tablet and Web
-**File:** `src/components/dashboard/TodaysBriefing.tsx`
-- Split the subtitle into two lines on `md:` screens: date on first line, "X of Y appointments completed" on second line
-- On mobile keep it single line (already compact from change 4)
-
-### 6. Shrink play controls across all viewports
-**File:** `src/components/dashboard/TodaysBriefing.tsx`
-- Reduce all play control buttons: `h-6 px-1.5` on mobile, `md:h-7 md:px-2` on tablet/desktop (down from current h-7/h-9)
-- Reduce icons to `h-2.5 w-2.5 md:h-3 md:w-3` (down from h-3/h-4)
-- Reduce segment indicator text to `text-[8px] md:text-[10px]`
-- Reduce nav arrows (ChevronLeft/Right) to `h-6 w-6 md:h-8 md:w-8`
-- Narrate button: same compact sizing `h-6 px-1.5 md:h-7 md:px-2`
+### 5. Consolidate Doctor Rewards Transfers + Vula Partner Apps tabs
+**File:** `src/pages/doctor/DoctorRewards.tsx`
+- Remove the "Vula Partner Apps" TabsTrigger (line 177)
+- Remove the "vula-apps" TabsContent (lines 354-413)
+- Move the partner apps grid into the top of the "transfers" TabsContent (lines 327-352), showing partner apps first, then transfer history below — matching the Patient layout
 
 ## Files Modified
 
 | File | Changes |
 |------|---------|
-| `src/pages/Patients.tsx` | Hide alphabet bar on mobile |
-| `src/components/dashboard/RecentActivity.tsx` | Wrap in collapsible, collapsed by default |
-| `src/components/dashboard/CompactTodoList.tsx` | Wrap in collapsible, collapsed by default |
-| `src/components/dashboard/TodaysBriefing.tsx` | Smaller fonts, split date/count, shrink all play controls |
+| `src/components/layout/BottomNav.tsx` | Remove `md:hidden` to show bottom nav on all viewports |
+| `src/pages/doctor/DoctorRewards.tsx` | Fix logo aspect ratios, use new logo, merge Vula Partner Apps into Transfers tab |
+| `src/pages/patient/MyRewards.tsx` | Fix logo aspect ratios, use new logo, ensure tabs are consolidated |
+| `src/assets/vula-vouchers-logo-v2.png` | New file — uploaded Vula Vouchers logo |
 
