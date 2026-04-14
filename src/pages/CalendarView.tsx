@@ -482,7 +482,7 @@ export default function CalendarView() {
                           <div className="mt-2 space-y-1 w-full">
                             {dayEvents.slice(0, 2).map((event) => (
                               <div key={event.id} className="text-[10px] truncate text-center opacity-80">
-                                {event.time}
+                                {event.time} {(() => { const p = patients.find(pt => pt.id === event.patientId); if (!p) return ''; const parts = p.name.split(' '); return parts.map(w => w[0]).join('').toUpperCase(); })()}
                               </div>
                             ))}
                             {dayEvents.length > 2 && <div className="text-[10px] text-center opacity-60">+{dayEvents.length - 2}</div>}
@@ -710,7 +710,7 @@ export default function CalendarView() {
         setIsEventDetailOpen(open);
         if (!open) setIsEditMode(false);
       }}>
-        <DialogContent>
+        <DialogContent className="bg-card">
           <DialogHeader>
             <DialogTitle>{isEditMode ? "Edit Appointment" : selectedEvent?.title}</DialogTitle>
             <DialogDescription>{isEditMode ? "Modify the appointment details" : getEventTypeLabel(selectedEvent?.type || "")}</DialogDescription>
@@ -804,6 +804,15 @@ export default function CalendarView() {
                 </>
               ) : (
                 <>
+                  {selectedEvent.patientId && (() => {
+                    const patient = patients.find(p => p.id === selectedEvent.patientId);
+                    return patient ? (
+                      <div className="flex items-center gap-3 text-sm">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-foreground font-medium">{patient.name}</span>
+                      </div>
+                    ) : null;
+                  })()}
                   <div className="flex items-center gap-3 text-sm">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span className="text-foreground">{selectedEvent.time}</span>
