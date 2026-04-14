@@ -266,7 +266,8 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
     }
   };
 
-  const tomorrow = addDays(new Date(), 1);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -381,7 +382,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
                 mode="single"
                 selected={selectedDate}
                 onSelect={handleSelectDate}
-                disabled={(date) => isBefore(date, tomorrow) || date.getDay() === 0}
+                disabled={(date) => isBefore(date, today) || date.getDay() === 0}
                 className={cn("p-3 pointer-events-auto rounded-md border")}
               />
             </div>
