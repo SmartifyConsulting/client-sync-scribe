@@ -1,56 +1,44 @@
 
 
-# Plan: Calendar Modal Fix, Vula Logo Alignment, Patients Page Buttons, Session Grouping
+# Plan: Fix Doctor Search Message & Language-Aware Narration/Translation
 
-## 1. Fix Calendar Appointment Modal
-**File:** `src/pages/CalendarView.tsx`
+## 1. Fix "No healthcare providers found" false negative
 
-### Week view entries: show time + patient initials in small font
-- Lines 482-488: Update week view day events to show patient initials alongside time (matching month view style), using `text-[10px]` font
-- Look up patient name from `patients` list using `event.patientId`, compute initials
+**File:** `src/pages/patient/MyDoctors.tsx` (lines 76-97, 185-188)
 
-### Modal: solid background + patient name
-- Line 713: Add `className="bg-card"` to `DialogContent` to remove transparency
-- Lines 806-835: Add a patient name row (with User icon) between the time and date rows, looking up `patients.find(p => p.id === selectedEvent.patientId)?.name`
+**Root cause:** When a patient searches for "Dea", the query finds "Dean Allie" but line 91 filters out already-connected doctors. The filtered result is empty, so the UI shows "No healthcare providers found" — which is misleading since the doctor was found but is already connected.
 
-### "View Patient" → patient profile
-- Already correct at line 851: navigates to `/patients/${selectedEvent.patientId}`
+**Fix:** Track how many results came back before filtering vs after. Show a distinct message when results were found but all are already connected:
+- `searchResults.length === 0` AND pre-filter count > 0 → "All matching providers are already on your profile."
+- `searchResults.length === 0` AND pre-filter count === 0 → "No healthcare providers found matching your search."
 
-### "Start Session" auto-selects patient
-- Already navigates to `/sessions?patient=${selectedEvent.patientId}` (line 249 area)
-- Verify `Sessions.tsx` reads `urlPatientId` and sets `selectedPatientId` — already wired up
+Add a `totalFound` state variable set alongside `searchResults`.
 
----
+## 2. Auto-translate briefing text based on primary language
 
-## 2. Vula Vouchers Logo Alignment
+**File:** `src/components/dashboard/TodaysBriefing.tsx` (lines 265-317, 340-398)
 
-### Tablet view: middle-align the Vula logo
-**File:** `src/components/patients/PatientDetailsEditor.tsx` (lines 1088-1096)
-- The `hidden md:flex` Vula section on web/tablet: change from `items-center gap-3` to `items-center justify-center gap-3` to center-align the logo
+Currently `generateBriefingSegments()` produces English-only text. The narration function (`narrate-briefing`) just reads whatever text it receives — OpenAI TTS can pronounce any language, but the text itself is always English.
 
-### Mobile view: right-align the Vula logo + add greeting
-**File:** `src/components/patients/PatientDetailsEditor.tsx` (lines 1137-1152)
-- Change the mobile Vula row layout: right-align the logo within the flex container
-- Add the patient's first-name greeting text to the left of the Vula display
+**Fix:**
+1. In `handleNarrate`, fetch the doctor's `preferred_language` from profiles
+2. If the language is not `"en"`, call the Lovable AI gateway edge function (or a new translation step) to translate each segment's text before sending to TTS
+3. Use the existing `narrate-briefing` edge function as-is (OpenAI TTS handles multilingual text natively)
+4. Also translate the displayed segment text in the UI so the on-screen text matches the narration
 
----
+**Implementation:** Add a translation step using the `summarize-session` or a lightweight AI call to translate `segments[].text` into the user's `preferred_language` before narration. Use the Lovable AI gateway model (`google/gemini-2.5-flash`) via an edge function for translation.
 
-## 3. Add "Round Tables" and "All Sessions" Buttons to Patients Page
-**File:** `src/pages/Patients.tsx` (lines 397-417)
+## 3. Create a translate-text edge function
 
-Currently has: Round Tables (mobile only via `lg:hidden`), Import, + Patient
+**File:** `supabase/functions/translate-text/index.ts` (new)
 
-Changes:
-- Remove `lg:hidden` from Round Tables button so it shows on all layouts
-- Add an "All Sessions" button that navigates to `/sessions`, visible on all layouts
-- Ensure all buttons use responsive sizing: `text-[10px] md:text-xs` and `h-8 md:h-9` to fit properly across mobile/tablet/desktop
+A simple edge function that accepts `{ text: string, targetLanguage: string }` and returns `{ translatedText: string }` using the Lovable AI gateway. This will be reusable for briefing narration and any future translation needs.
 
----
+## 4. Auto-translate session summaries when language changes
 
-## 4. Session Grouping (already implemented — verify)
-**File:** `src/pages/Sessions.tsx` (lines 1378-1402)
+**File:** `src/pages/Sessions.tsx`
 
-Session grouping into This Week / Last Week / Monthly buckets with Accordion is already implemented from the previous approved plan. No additional changes needed.
+The session detail view already has a "Translate to English" button for non-English summaries. Ensure the reverse also works — when a doctor's primary language is non-English, the AI diagnosis/summary text should offer translation to their preferred language (not just English). Update the translate button logic to use the doctor's `preferred_language` as the target.
 
 ---
 
@@ -58,7 +46,8 @@ Session grouping into This Week / Last Week / Monthly buckets with Accordion is 
 
 | File | Changes |
 |------|---------|
-| `src/pages/CalendarView.tsx` | Week view initials, solid modal bg, patient name row |
-| `src/components/patients/PatientDetailsEditor.tsx` | Tablet Vula center-align, mobile Vula right-align + greeting |
-| `src/pages/Patients.tsx` | Add "All Sessions" button, show "Round Tables" on all views, responsive sizing |
+| `src/pages/patient/MyDoctors.tsx` | Distinguish "already connected" from "not found" in search results |
+| `src/components/dashboard/TodaysBriefing.tsx` | Translate briefing segments to preferred language before narration |
+| `supabase/functions/translate-text/index.ts` | New edge function for AI-powered text translation |
+| `src/pages/Sessions.tsx` | Update translate button to target preferred language (not just English) |
 
