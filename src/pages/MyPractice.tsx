@@ -1435,6 +1435,19 @@ export default function MyPractice() {
               </AccordionContent>
             </AccordionItem>
 
+          {/* Pricing Administration Accordion */}
+            <AccordionItem value="pricing" className="rounded-xl border border-primary bg-card shadow-sm">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-semibold">Pricing Administration</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4">
+                <PricingAdmin />
+              </AccordionContent>
+            </AccordionItem>
+
           {/* Digital Signature Accordion */}
             <AccordionItem value="signature" className="rounded-xl border border-primary bg-card shadow-sm">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
