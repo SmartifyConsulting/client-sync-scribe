@@ -32,7 +32,7 @@ const doctorNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Home", to: "/dashboard" },
   { icon: Users, label: "My Patients", to: "/patients" },
   { icon: Settings2, label: "My Practice", to: "/practice" },
-  { icon: UserCog, label: "Admin", to: "/admin" },
+  { icon: UserCog, label: "My Admin", to: "/admin" },
   { icon: Gift, label: "My Vulas", to: "/doctor/rewards" },
 ];
 
@@ -104,13 +104,17 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             </div>
           ) : (
             navItems.map((item) => {
-              const hasQuery = item.to.includes('?');
-              const itemPath = hasQuery ? item.to.split('?')[0] : item.to;
-              const itemSearch = hasQuery ? item.to.split('?')[1] : '';
+              const hasQuery = item.to.includes("?");
+              const itemPath = hasQuery ? item.to.split("?")[0] : item.to;
+              const itemSearch = hasQuery ? item.to.split("?")[1] : "";
 
               const isItemActive = hasQuery
                 ? location.pathname === itemPath && location.search === `?${itemSearch}`
-                : location.pathname === itemPath && (!location.search || !navItems.some(n => n.to.includes(`${itemPath}?`) && location.search === `?${n.to.split('?')[1]}`));
+                : location.pathname === itemPath &&
+                  (!location.search ||
+                    !navItems.some(
+                      (n) => n.to.includes(`${itemPath}?`) && location.search === `?${n.to.split("?")[1]}`,
+                    ));
 
               return (
                 <NavLink
@@ -143,9 +147,17 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         <div className="border-t border-sidebar-border mt-auto bg-sidebar-accent/30">
           <div className="flex items-center gap-3 px-4 pt-3 pb-2">
             <Avatar className="h-8 w-8 border-2 border-primary">
-              <AvatarImage key={profile?.avatar_url} src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} />
+              <AvatarImage
+                key={profile?.avatar_url}
+                src={profile?.avatar_url || undefined}
+                alt={profile?.full_name || "User"}
+              />
               <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                {profile?.full_name?.split(" ").map(n => n[0]).join("").toUpperCase() || "U"}
+                {profile?.full_name
+                  ?.split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
