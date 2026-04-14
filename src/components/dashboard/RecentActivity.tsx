@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { FileText, CheckCircle, MessageSquare, Clock } from "lucide-react";
+import { FileText, CheckCircle, MessageSquare, Clock, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Activity {
@@ -104,50 +105,55 @@ export function RecentActivity() {
   }
 
   return (
-    <div className="rounded-xl border border-primary bg-card shadow-sm">
-      <div className="rounded-t-xl bg-primary px-4 py-3">
-        <h3 className="text-sm font-semibold text-primary-foreground">Recent Activity</h3>
-      </div>
-      <div className="p-3 space-y-2">
-        {activities.map((activity) => {
-          const Icon = activityIcons[activity.type];
-          return (
-            <div
-              key={activity.id}
-              className="flex items-center gap-2 animate-fade-in"
-            >
-              <div
-                className={cn(
-                  "flex h-7 w-7 items-center justify-center rounded-md shrink-0",
-                  activityColors[activity.type]
-                )}
-              >
-                <Icon className="h-3.5 w-3.5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-foreground truncate">
-                  {activity.title}
-                </p>
-                {activity.patientId && activity.patientName ? (
-                  <Link
-                    to={`/patients/${activity.patientId}`}
-                    className="text-xs text-primary hover:underline truncate block"
+    <Collapsible defaultOpen={false}>
+      <div className="rounded-xl border border-primary bg-card shadow-sm">
+        <CollapsibleTrigger className="w-full rounded-t-xl bg-primary px-4 py-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-primary-foreground">Recent Activity</h3>
+          <ChevronDown className="h-4 w-4 text-primary-foreground transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="p-3 space-y-2">
+            {activities.map((activity) => {
+              const Icon = activityIcons[activity.type];
+              return (
+                <div
+                  key={activity.id}
+                  className="flex items-center gap-2 animate-fade-in"
+                >
+                  <div
+                    className={cn(
+                      "flex h-7 w-7 items-center justify-center rounded-md shrink-0",
+                      activityColors[activity.type]
+                    )}
                   >
-                    {activity.patientName}
-                  </Link>
-                ) : (
-                  <p className="text-xs text-muted-foreground truncate">
-                    {activity.description}
-                  </p>
-                )}
-              </div>
-              <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                {activity.time}
-              </span>
-            </div>
-          );
-        })}
+                    <Icon className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-foreground truncate">
+                      {activity.title}
+                    </p>
+                    {activity.patientId && activity.patientName ? (
+                      <Link
+                        to={`/patients/${activity.patientId}`}
+                        className="text-xs text-primary hover:underline truncate block"
+                      >
+                        {activity.patientName}
+                      </Link>
+                    ) : (
+                      <p className="text-xs text-muted-foreground truncate">
+                        {activity.description}
+                      </p>
+                    )}
+                  </div>
+                  <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                    {activity.time}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </CollapsibleContent>
       </div>
-    </div>
+    </Collapsible>
   );
 }

@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   Mic,
@@ -300,31 +302,36 @@ export function CompactTodoList() {
   const completedCount = todos.filter((t) => t.completed).length;
 
   return (
-    <div className="rounded-xl border border-primary bg-card shadow-sm font-size-preserve">
-      {/* Header */}
-      <div className="rounded-t-xl bg-primary px-4 py-3 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-primary-foreground">To-Do List</h3>
-        <button
-          onClick={isRecording ? stopRecording : startRecording}
-          disabled={isProcessing || isAiProcessing}
-          className={cn(
-            "h-7 w-7 rounded-full flex items-center justify-center transition-colors",
-            isRecording
-              ? "bg-destructive hover:bg-destructive/90"
-              : "bg-terracotta hover:bg-terracotta-dark"
-          )}
-        >
-          {isProcessing || isAiProcessing ? (
-            <Loader2 className="h-3.5 w-3.5 text-white animate-spin" />
-          ) : isRecording ? (
-            <MicOff className="h-3.5 w-3.5 text-white" />
-          ) : (
-            <Mic className="h-3.5 w-3.5 text-white stroke-white fill-none" />
-          )}
-        </button>
-      </div>
+    <Collapsible defaultOpen={false}>
+      <div className="rounded-xl border border-primary bg-card shadow-sm font-size-preserve">
+        {/* Header */}
+        <CollapsibleTrigger className="w-full rounded-t-xl bg-primary px-4 py-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-primary-foreground">To-Do List</h3>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={(e) => { e.stopPropagation(); isRecording ? stopRecording() : startRecording(); }}
+              disabled={isProcessing || isAiProcessing}
+              className={cn(
+                "h-7 w-7 rounded-full flex items-center justify-center transition-colors",
+                isRecording
+                  ? "bg-destructive hover:bg-destructive/90"
+                  : "bg-terracotta hover:bg-terracotta-dark"
+              )}
+            >
+              {isProcessing || isAiProcessing ? (
+                <Loader2 className="h-3.5 w-3.5 text-white animate-spin" />
+              ) : isRecording ? (
+                <MicOff className="h-3.5 w-3.5 text-white" />
+              ) : (
+                <Mic className="h-3.5 w-3.5 text-white stroke-white fill-none" />
+              )}
+            </button>
+            <ChevronDown className="h-4 w-4 text-primary-foreground transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+          </div>
+        </CollapsibleTrigger>
 
-      <div className="p-3 space-y-2">
+        <CollapsibleContent>
+          <div className="p-3 space-y-2">
         {/* Inline add */}
         <div className="flex gap-1.5">
           <Input
@@ -459,7 +466,9 @@ export function CompactTodoList() {
             ))
           )}
         </div>
+        </div>
+      </CollapsibleContent>
       </div>
-    </div>
+    </Collapsible>
   );
 }
