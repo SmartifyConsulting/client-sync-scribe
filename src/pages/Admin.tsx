@@ -26,12 +26,6 @@ export default function Admin() {
             value="invoices"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs"
           >
-            Pricing
-          </TabsTrigger>
-          <TabsTrigger
-            value="invoices"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs"
-          >
             Invoices
           </TabsTrigger>
           <TabsTrigger
@@ -48,10 +42,6 @@ export default function Admin() {
 
         <TabsContent value="todo" className="mt-4">
           <TodoList />
-        </TabsContent>
-
-        <TabsContent value="pricing" className="mt-4">
-          <PricingAdmin />
         </TabsContent>
 
         <TabsContent value="invoices" className="mt-4">
