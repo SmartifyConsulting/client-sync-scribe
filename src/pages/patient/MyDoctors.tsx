@@ -37,6 +37,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<DoctorProfile[]>([]);
+  const [totalFound, setTotalFound] = useState(0);
   const [hasSearched, setHasSearched] = useState(false);
   const [uninviteTarget, setUninviteTarget] = useState<DoctorAccess | null>(null);
   const [uninviteLoading, setUninviteLoading] = useState(false);
@@ -87,8 +88,10 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
 
       if (error) throw error;
 
+      const allResults = data || [];
+      setTotalFound(allResults.length);
       const connectedIds = doctors?.map((d) => d.doctor_id) || [];
-      setSearchResults((data || []).filter((d) => !connectedIds.includes(d.id)));
+      setSearchResults(allResults.filter((d) => !connectedIds.includes(d.id)));
     } catch (err) {
       console.error("Search error:", err);
     } finally {
@@ -100,6 +103,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
   useEffect(() => {
     if (searchQuery.trim().length < 2) {
       setSearchResults([]);
+      setTotalFound(0);
       setHasSearched(false);
       return;
     }
@@ -253,7 +257,9 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
             <div className="mt-4">
               {searchResults.length === 0 ? (
                  <p className="text-sm text-muted-foreground text-center py-4">
-                   No healthcare providers found matching your search.
+                   {totalFound > 0
+                     ? "All matching providers are already on your profile."
+                     : "No healthcare providers found matching your search."}
                  </p>
               ) : (
                  <Table className="table-fixed w-full">
