@@ -15,7 +15,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { useMyRewards, useMyStreaks } from "@/hooks/usePatientRewards";
-import vulaVouchersLogo from "@/assets/vula-vouchers-logo.png";
+import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v2.png";
 
 const MILESTONES = [
   { count: 5, label: "First Steps", icon: "🌟", color: "text-yellow-500" },
@@ -139,13 +139,13 @@ export default function DoctorRewards() {
         <Card className="border-border">
           <CardContent className="pt-6">
             <p className="text-xs text-muted-foreground">Doctor Vulas</p>
-            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{doctorVulas} <span className="text-base"><img src={vulaVouchersLogo} alt="Vula" className="h-4 w-4 inline-block" /></span></p>
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{doctorVulas} <span className="text-base"><img src={vulaVouchersLogo} alt="Vula" className="h-5 w-auto object-contain inline-block" /></span></p>
           </CardContent>
         </Card>
         <Card className="border-border">
           <CardContent className="pt-6">
             <p className="text-xs text-muted-foreground">Patient Vulas</p>
-            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{patientVulas} <span className="text-base"><img src={vulaVouchersLogo} alt="Vula" className="h-4 w-4 inline-block" /></span></p>
+            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{patientVulas} <span className="text-base"><img src={vulaVouchersLogo} alt="Vula" className="h-5 w-auto object-contain inline-block" /></span></p>
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-sky-400 to-cyan-500 dark:from-sky-700/40 dark:to-cyan-800/30 border-sky-400 dark:border-sky-600/40">
@@ -174,7 +174,6 @@ export default function DoctorRewards() {
           <TabsTrigger value="streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Streaks</TabsTrigger>
           <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">History</TabsTrigger>
           <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Transfers</TabsTrigger>
-          <TabsTrigger value="vula-apps" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Vula Partner Apps</TabsTrigger>
          </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -325,6 +324,43 @@ export default function DoctorRewards() {
         </TabsContent>
 
         <TabsContent value="transfers" className="space-y-6">
+          {/* Partner Apps at top */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Gift className="h-5 w-5 text-primary" />Vula Partner Apps</CardTitle>
+              <CardDescription>Apps and services that accept Vulas as currency</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {partnerApps.length === 0 ? (
+                <p className="text-center text-muted-foreground text-sm py-4">No partner apps available yet.</p>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {partnerApps.map((app: any) => (
+                    <div key={app.id} className="p-4 rounded-xl border border-border hover:border-primary/30 hover:shadow-md transition-all">
+                      <div className="flex items-center gap-3">
+                        {app.logo_url ? (
+                          <img src={app.logo_url} alt={app.name} className="h-10 w-10 rounded-lg object-contain" />
+                        ) : (
+                          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Gift className="h-5 w-5 text-primary" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-foreground">{app.name}</p>
+                          {app.creator && <p className="text-xs text-muted-foreground">by {app.creator}</p>}
+                        </div>
+                      </div>
+                      <Button size="sm" className="w-full mt-3 gap-1 text-xs" onClick={() => { setTransferAppId(app.id); setShowTransferDialog(true); }}>
+                        <Send className="h-3 w-3" /> Transfer Vulas
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Transfer History */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><ArrowRightLeft className="h-5 w-5 text-blue-500" />Transfer History</CardTitle>
@@ -341,72 +377,11 @@ export default function DoctorRewards() {
                       <TableRow key={t.id}>
                         <TableCell>{format(new Date(t.created_at), "MMM d, yyyy")}</TableCell>
                         <TableCell><Badge variant="secondary">{t.moola_partner_apps?.name || "Partner App"}</Badge></TableCell>
-                        <TableCell className="text-right"><span className="text-blue-600 font-semibold">-{t.amount} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-4 inline-block" /></span></TableCell>
+                        <TableCell className="text-right"><span className="text-blue-600 font-semibold">-{t.amount} <img src={vulaVouchersLogo} alt="Vula" className="h-5 w-auto object-contain inline-block" /></span></TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="vula-apps" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Gift className="h-5 w-5 text-primary" />Vula Partner Apps</CardTitle>
-              <CardDescription>Apps and services that accept Vulas as currency</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {partnerApps.length === 0 ? (
-                <div className="text-center py-8">
-                  <Gift className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No partner apps available yet. Check back soon!</p>
-                </div>
-              ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {partnerApps.map((app: any) => (
-                    <div key={app.id} className="p-4 rounded-xl border border-border hover:border-primary/30 hover:shadow-md transition-all">
-                      <div className="flex items-center gap-3">
-                        {app.logo_url ? (
-                          <img src={app.logo_url} alt={app.name} className="h-10 w-10 rounded-lg object-contain" />
-                        ) : (
-                          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                            <Gift className="h-5 w-5 text-primary" />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-foreground">{app.name}</p>
-                          {app.creator && (
-                            <p className="text-xs text-muted-foreground">by {app.creator}</p>
-                          )}
-                          <div className="flex items-center gap-2 mt-1 flex-wrap">
-                            <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0 text-[10px]">Active</Badge>
-                            {app.signup_url && (
-                              <a href={app.signup_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary underline hover:text-primary/80">
-                                Sign up
-                              </a>
-                            )}
-                          </div>
-                          {(app.google_play_url || app.app_store_url) && (
-                            <div className="flex items-center gap-2 mt-2 flex-wrap">
-                              {app.google_play_url && (
-                                <a href={app.google_play_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md bg-muted hover:bg-muted/80 text-foreground transition-colors">
-                                  ▶ Google Play
-                                </a>
-                              )}
-                              {app.app_store_url && (
-                                <a href={app.app_store_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md bg-muted hover:bg-muted/80 text-foreground transition-colors">
-                                   App Store
-                                </a>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               )}
             </CardContent>
           </Card>

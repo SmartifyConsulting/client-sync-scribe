@@ -38,7 +38,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ActivityProofCapture } from "@/components/rewards/ActivityProofCapture";
 import { MedicationAdherenceTab } from "@/components/rewards/MedicationAdherenceTab";
 import { useToast } from "@/hooks/use-toast";
-import vulaVouchersLogo from "@/assets/vula-vouchers-logo.png";
+import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v2.png";
 
 const MILESTONES = [
   { count: 5, label: "First Steps", icon: "🌟", color: "text-yellow-500" },
@@ -272,7 +272,7 @@ export default function MyRewards() {
           <DialogHeader>
             <DialogTitle>Transfer Vulas</DialogTitle>
             <DialogDescription>
-              Send your Vulas to a linked partner app. Available balance: {lollipopCount} Ⓜ
+              Send your Vulas to a linked partner app. Available balance: {lollipopCount} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-auto object-contain inline-block" />
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -299,7 +299,7 @@ export default function MyRewards() {
                 value={transferAmount}
                 onChange={(e) => setTransferAmount(e.target.value)}
               />
-              <p className="text-xs text-muted-foreground">Max: {lollipopCount} Ⓜ</p>
+              <p className="text-xs text-muted-foreground">Max: {lollipopCount} <img src={vulaVouchersLogo} alt="Vula" className="h-3 w-auto object-contain inline-block" /></p>
             </div>
           </div>
           <DialogFooter>
@@ -456,7 +456,7 @@ export default function MyRewards() {
                         </div>
                       </div>
                       <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-                        +{reward.lollipops_count} Ⓜ
+                        +{reward.lollipops_count} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-auto object-contain inline-block ml-1" />
                       </Badge>
                     </div>
                   ))}
@@ -500,7 +500,7 @@ export default function MyRewards() {
                         <div className="flex items-center gap-2 mt-2 flex-wrap">
                           <Badge variant={getPriorityColor(task.priority) as any} className="text-xs">{task.priority}</Badge>
                           {task.task_type === "activity" && <Badge className="bg-primary/10 text-primary text-xs gap-1"><Video className="h-3 w-3" /> Activity</Badge>}
-                          {task.moolas_reward > 0 && <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 text-xs">+{task.moolas_reward} Ⓜ</Badge>}
+                          {task.moolas_reward > 0 && <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 text-xs">+{task.moolas_reward} <img src={vulaVouchersLogo} alt="Vula" className="h-3 w-auto object-contain inline-block ml-0.5" /></Badge>}
                           {task.due_date && <span className="text-xs text-muted-foreground">Due: {format(new Date(task.due_date), "dd MMM yyyy")}</span>}
                           {task.proof_url && <Badge variant="outline" className="text-xs text-green-600">✓ Proof submitted</Badge>}
                         </div>
@@ -629,7 +629,7 @@ export default function MyRewards() {
                         </div>
                         
                         <div className="mt-2 text-xs text-muted-foreground">
-                          Earns: {streak.lollipops_awarded} Ⓜ per completion
+                          Earns: {streak.lollipops_awarded} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-auto object-contain inline-block" /> per completion
                         </div>
                       </div>
                     );
@@ -722,7 +722,7 @@ export default function MyRewards() {
                         </TableCell>
                         <TableCell className="text-right">
                           <span className="text-blue-600 font-semibold">
-                            -{transfer.amount} Ⓜ
+                            -{transfer.amount} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-auto object-contain inline-block ml-0.5" />
                           </span>
                         </TableCell>
                       </TableRow>
@@ -746,7 +746,7 @@ export default function MyRewards() {
             <CardContent>
               {rewards.length === 0 ? (
                 <div className="text-center py-8">
-                  <span className="text-5xl mb-4 block font-bold text-emerald-600">Ⓜ</span>
+                  <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-12 w-auto object-contain mx-auto mb-4" />
                   <p className="text-muted-foreground">No rewards yet</p>
                 </div>
               ) : (
@@ -770,7 +770,7 @@ export default function MyRewards() {
                         </TableCell>
                         <TableCell className="text-right">
                           <span className={`font-semibold ${reward.lollipops_count < 0 ? "text-blue-600" : "text-emerald-600"}`}>
-                            {reward.lollipops_count > 0 ? "+" : ""}{reward.lollipops_count} Ⓜ
+                            {reward.lollipops_count > 0 ? "+" : ""}{reward.lollipops_count} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-auto object-contain inline-block ml-0.5" />
                           </span>
                         </TableCell>
                       </TableRow>
