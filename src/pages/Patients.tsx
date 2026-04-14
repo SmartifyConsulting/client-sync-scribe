@@ -293,6 +293,16 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
   const availableLetters = Object.keys(groupedPatients).sort();
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
+  const [expandedLetters, setExpandedLetters] = useState<Set<string>>(new Set());
+
+  const toggleLetterGroup = (letter: string) => {
+    setExpandedLetters(prev => {
+      const next = new Set(prev);
+      if (next.has(letter)) next.delete(letter);
+      else next.add(letter);
+      return next;
+    });
+  };
 
   const clearFilters = () => {
     setStatusFilter("all");
