@@ -250,7 +250,7 @@ export default function MyRewards() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="h-8 w-8">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/patient/details")} className="h-8 w-8">
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
@@ -340,8 +340,8 @@ export default function MyRewards() {
                 <p className="text-[10px] md:text-sm font-medium text-blue-100">Vula Vouchers</p>
                 <p className="text-2xl md:text-4xl font-bold text-white">{lollipopCount}</p>
               </div>
-              <div className="h-10 w-10 md:h-14 md:w-14 rounded-full bg-white shadow-sm flex items-center justify-center">
-                <img src={vulaVouchersLogo} alt="Vulas" className="h-7 w-7 md:h-10 md:w-10 object-contain" />
+              <div className="h-8 w-8 md:h-11 md:w-11 rounded-full bg-white shadow-sm flex items-center justify-center">
+                <img src={vulaVouchersLogo} alt="Vulas" className="h-6 w-6 md:h-8 md:w-8 object-contain" />
               </div>
             </div>
           </CardContent>
@@ -455,7 +455,7 @@ export default function MyRewards() {
             <CardContent>
               {rewards.length === 0 ? (
                 <div className="text-center py-8">
-                  <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-16 w-auto object-contain mx-auto mb-4" />
+                  <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-13 w-auto object-contain mx-auto mb-4" />
                   <p className="text-muted-foreground">No rewards yet. Start your health journey!</p>
                 </div>
               ) : (
@@ -463,7 +463,7 @@ export default function MyRewards() {
                   {rewards.slice(0, 5).map((reward) => (
                     <div key={reward.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                       <div className="flex items-center gap-3">
-                        <img src={vulaVouchersLogo} alt="Vula" className="h-7 w-7 object-contain" />
+                        <img src={vulaVouchersLogo} alt="Vula" className="h-6 w-6 object-contain" />
                         <div>
                           <p className="font-medium">{reward.visit_category}</p>
                           <p className="text-sm text-muted-foreground">
@@ -762,7 +762,7 @@ export default function MyRewards() {
             <CardContent>
               {rewards.length === 0 ? (
                 <div className="text-center py-8">
-                  <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-12 w-auto object-contain mx-auto mb-4" />
+                  <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-10 w-auto object-contain mx-auto mb-4" />
                   <p className="text-muted-foreground">No rewards yet</p>
                 </div>
               ) : (

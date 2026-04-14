@@ -29,7 +29,7 @@ interface NavItem {
 }
 
 const doctorNavItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Home", to: "/dashboard" },
+  { icon: LayoutDashboard, label: "Home", to: "/doctor-dashboard" },
   { icon: Users, label: "My Patients", to: "/patients" },
   { icon: Settings2, label: "My Practice", to: "/practice" },
   { icon: UserCog, label: "My Admin", to: "/admin" },
@@ -37,7 +37,7 @@ const doctorNavItems: NavItem[] = [
 ];
 
 const patientNavItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Home", to: "/dashboard" },
+  { icon: LayoutDashboard, label: "Home", to: "/patient/details" },
   { icon: User, label: "My Holarchive", to: "/patient/details" },
   { icon: Calendar, label: "My Calendar", to: "/patient/calendar" },
   { icon: CheckSquare, label: "To-Do List", to: "/patient/tasks" },
@@ -45,7 +45,7 @@ const patientNavItems: NavItem[] = [
 ];
 
 const adminNavItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Home", to: "/dashboard" },
+  { icon: LayoutDashboard, label: "Home", to: "/doctor-dashboard" },
   { icon: Users, label: "Users", to: "/admin/users" },
   { icon: DollarSign, label: "Pricing", to: "/admin/pricing" },
   { icon: Gift, label: "Rewards", to: "/admin/gamification" },

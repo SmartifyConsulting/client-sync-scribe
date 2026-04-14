@@ -889,7 +889,10 @@ export default function Auth() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    <button type="button" onClick={() => navigate("/forgot-password")} className="text-xs text-muted-foreground hover:text-primary hover:underline">Forgot your password?</button>
+                  </div>
                 <div className="relative">
                     <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" required minLength={6} />
@@ -902,9 +905,6 @@ export default function Auth() {
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Sign In
                 </Button>
               </form>
-              <div className="mt-4 text-center">
-                <button type="button" onClick={() => navigate("/forgot-password")} className="text-sm text-muted-foreground hover:text-primary hover:underline">Forgot your password?</button>
-              </div>
               <div className="mt-4 text-center">
                 <button type="button" onClick={() => { setIsLogin(false); setCurrentStep(0); }} className="text-sm text-primary hover:underline">Don't have an account? Sign up</button>
               </div>

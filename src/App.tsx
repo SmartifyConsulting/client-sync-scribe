@@ -77,12 +77,12 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function RoleBasedDashboard() {
+function RoleBasedRedirect() {
   const { isPatient, loading } = useUserRole();
   
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
+      <div className="flex h-screen items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     );
@@ -92,7 +92,7 @@ function RoleBasedDashboard() {
     return <Navigate to="/patient/details" replace />;
   }
 
-  return <Dashboard />;
+  return <Navigate to="/doctor-dashboard" replace />;
 }
 
 const App = () => (
@@ -141,8 +141,8 @@ const App = () => (
               </ProtectedRoute>
             }
           >
-            {/* Role-based dashboard */}
-            <Route path="/dashboard" element={<RoleBasedDashboard />} />
+            {/* Doctor dashboard */}
+            <Route path="/doctor-dashboard" element={<Dashboard />} />
             
             {/* Doctor routes */}
             <Route path="/patients" element={<Patients />} />
@@ -170,6 +170,10 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<Profile />} />
           </Route>
+          
+          {/* Role-based redirect for /dashboard */}
+          <Route path="/dashboard" element={<ProtectedRoute><RoleBasedRedirect /></ProtectedRoute>} />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

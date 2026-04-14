@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { 
   User, 
@@ -39,6 +40,7 @@ interface AccessRequest {
   created_at: string;
   patient_profile?: {
     full_name: string | null;
+    avatar_url: string | null;
   };
 }
 
@@ -92,7 +94,7 @@ export function DoctorAccessRequests() {
       for (const request of data || []) {
         const { data: patientProfile } = await supabase
           .from("profiles")
-          .select("full_name")
+          .select("full_name, avatar_url")
           .eq("id", request.patient_user_id)
           .single();
 
@@ -181,6 +183,15 @@ export function DoctorAccessRequests() {
         }
       }
 
+      // Send notification to patient about acceptance
+      await supabase.from("notifications").insert({
+        user_id: acceptingRequest.patient_user_id,
+        type: "access_accepted",
+        title: "Invitation Accepted",
+        description: `Dr. ${profile?.full_name || "Your doctor"} has accepted your invitation.`,
+        is_read: false,
+      });
+
       toast({
         title: "Access granted",
         description: `You now have access to ${acceptingRequest.patient_profile?.full_name || "this patient"}'s information. They have been added to your patient list.`,
@@ -208,6 +219,15 @@ export function DoctorAccessRequests() {
         .eq("id", request.id);
 
       if (error) throw error;
+
+      // Send notification to patient about decline
+      await supabase.from("notifications").insert({
+        user_id: request.patient_user_id,
+        type: "access_declined",
+        title: "Invitation Declined",
+        description: `A doctor has declined your invitation.`,
+        is_read: false,
+      });
 
       toast({
         title: "Request declined",
@@ -266,9 +286,10 @@ export function DoctorAccessRequests() {
               className="rounded-2xl border-2 border-green-500 bg-card shadow-sm p-4 space-y-3"
             >
               <div className="flex items-start gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm">
-                  {getInitials(patientName)}
-                </div>
+                <Avatar className="h-12 w-12 shrink-0">
+                  <AvatarImage src={request.patient_profile?.avatar_url || undefined} alt={patientName} />
+                  <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">{getInitials(patientName)}</AvatarFallback>
+                </Avatar>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm text-foreground">{patientName}</p>
                   <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
