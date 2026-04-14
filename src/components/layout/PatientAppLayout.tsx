@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { PageTransition } from "./PageTransition";
 import { BottomNav } from "./BottomNav";
+import { Sidebar } from "./Sidebar";
 import { AnimatePresence } from "framer-motion";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { SubscriptionGateModal } from "@/components/auth/SubscriptionGateModal";
@@ -110,6 +111,10 @@ export function PatientAppLayout() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* Sidebar for tablet/web */}
+      <div className="hidden md:block">
+        <Sidebar />
+      </div>
       {!loading && isBlocked && !isSettingsPage && <SubscriptionGateModal />}
 
       {!loading && !isBlocked && daysRemaining !== null && daysRemaining <= 7 && (
@@ -119,8 +124,8 @@ export function PatientAppLayout() {
         </div>
       )}
 
-      {/* Top Bar */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+      {/* Top Bar - only on mobile */}
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border md:hidden">
         <div className="px-4 md:px-8 py-3 flex items-center justify-between max-w-7xl mx-auto w-full">
           {/* Left: Logo */}
           <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
@@ -269,7 +274,7 @@ export function PatientAppLayout() {
       </header>
 
       {/* Main content */}
-      <main className="flex-1 pb-20 md:pb-0">
+      <main className="flex-1 pb-20 md:pb-0 md:ml-[210px]">
         <div className="px-4 py-6 md:px-8 md:pt-6 md:pb-8 max-w-7xl mx-auto">
           <AnimatePresence mode="wait">
             <PageTransition key={location.pathname}>

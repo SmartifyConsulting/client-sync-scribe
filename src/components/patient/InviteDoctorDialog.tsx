@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserPlus, Loader2, Stethoscope } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { PermissionTransparencyModal } from "@/components/permissions/PermissionTransparencyModal";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,9 +27,10 @@ interface InviteDoctorDialogProps {
   prefillRegistrationNumber?: string;
   prefillDoctorName?: string;
   prefillAvatarUrl?: string;
+  prefillSpecialty?: string;
 }
 
-export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationNumber, prefillDoctorName, prefillAvatarUrl }: InviteDoctorDialogProps = {}) {
+export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationNumber, prefillDoctorName, prefillAvatarUrl, prefillSpecialty }: InviteDoctorDialogProps = {}) {
   const [open, setOpen] = useState(false);
   const [practiceNumber, setPracticeNumber] = useState(prefillPracticeNumber || "");
   const [registrationNumber, setRegistrationNumber] = useState(prefillRegistrationNumber || "");
@@ -153,7 +155,7 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
         <div className="grid gap-3 py-2">
           {/* Selected Doctor Info */}
           {prefillDoctorName && (
-            <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/30">
+            <div className="flex items-center gap-3 p-3 rounded-lg border border-green-500 bg-green-50/30">
               <Avatar className="h-10 w-10">
                 {prefillAvatarUrl && <AvatarImage src={prefillAvatarUrl} alt={prefillDoctorName} />}
                 <AvatarFallback className="text-xs font-semibold">
@@ -162,13 +164,16 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
               </Avatar>
               <div>
                 <p className="text-sm font-semibold text-foreground">{prefillDoctorName}</p>
-                <p className="text-[10px] text-muted-foreground">Selected healthcare provider</p>
+                {prefillSpecialty && (
+                  <Badge variant="secondary" className="text-[10px] mt-0.5">{prefillSpecialty}</Badge>
+                )}
+                {!prefillSpecialty && <p className="text-[10px] text-muted-foreground">Selected healthcare provider</p>}
               </div>
             </div>
           )}
 
           {/* Doctor Details */}
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="practiceNumber">Practice Number</Label>
               <Input id="practiceNumber" placeholder="e.g., PR123456" value={practiceNumber} onChange={(e) => setPracticeNumber(e.target.value)} />
