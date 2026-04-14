@@ -346,6 +346,25 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
           </CardContent>
         </Card>
       )}
+
+      {/* Uninvite Confirmation Dialog */}
+      <Dialog open={!!uninviteTarget} onOpenChange={() => setUninviteTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove Healthcare Provider</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove {uninviteTarget?.doctor?.full_name || "this doctor"} from your healthcare providers? They will lose access to your health information.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setUninviteTarget(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleUninvite} disabled={uninviteLoading}>
+              {uninviteLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <UserMinus className="h-4 w-4 mr-2" />}
+              Remove
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
