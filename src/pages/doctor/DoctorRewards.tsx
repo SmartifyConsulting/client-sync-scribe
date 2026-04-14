@@ -101,7 +101,8 @@ export default function DoctorRewards() {
     queryClient.invalidateQueries({ queryKey: ["patient-vulas-profile"] });
     queryClient.invalidateQueries({ queryKey: ["doctor-vulas-profile"] });
     setShowTransferDialog(false);
-    setTransferAppId("");
+    setTransferFromAppId("");
+    setTransferToAppId("");
     setTransferAmount("");
   };
 
@@ -351,7 +352,7 @@ export default function DoctorRewards() {
                           {app.creator && <p className="text-xs text-muted-foreground">by {app.creator}</p>}
                         </div>
                       </div>
-                      <Button size="sm" className="w-full mt-3 gap-1 text-xs" onClick={() => { setTransferAppId(app.id); setShowTransferDialog(true); }}>
+                      <Button size="sm" className="w-full mt-3 gap-1 text-xs" onClick={() => { setTransferToAppId(app.id); setShowTransferDialog(true); }}>
                         <Send className="h-3 w-3" /> Transfer Vulas
                       </Button>
                     </div>
@@ -392,14 +393,26 @@ export default function DoctorRewards() {
        {/* Transfer Dialog */}
       {showTransferDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-card rounded-xl border border-border p-6 w-full max-w-md shadow-lg space-y-4">
+         <div className="bg-card rounded-xl border border-border p-6 w-full max-w-md shadow-lg space-y-4">
             <h3 className="text-lg font-semibold">Transfer Vulas</h3>
             <p className="text-sm text-muted-foreground">Available balance: {totalVulas} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-4 inline-block" /></p>
             <div className="space-y-2">
-              <Label>Partner App</Label>
-              <Select value={transferAppId} onValueChange={setTransferAppId}>
-                <SelectTrigger><SelectValue placeholder="Select an app" /></SelectTrigger>
-                <SelectContent>{partnerApps.map((app: any) => <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>)}</SelectContent>
+              <Label>From</Label>
+              <Select value={transferFromAppId} onValueChange={setTransferFromAppId}>
+                <SelectTrigger><SelectValue placeholder="Select source app" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="wallet">My Vula Wallet</SelectItem>
+                  {partnerApps.map((app: any) => <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>To</Label>
+              <Select value={transferToAppId} onValueChange={setTransferToAppId}>
+                <SelectTrigger><SelectValue placeholder="Select destination app" /></SelectTrigger>
+                <SelectContent>
+                  {partnerApps.map((app: any) => <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>)}
+                </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
@@ -408,7 +421,7 @@ export default function DoctorRewards() {
             </div>
             <div className="flex gap-2 justify-end">
               <Button variant="outline" onClick={() => setShowTransferDialog(false)}>Cancel</Button>
-              <Button onClick={handleTransfer} disabled={!transferAppId || !transferAmount || parseInt(transferAmount) <= 0 || parseInt(transferAmount) > totalVulas}>
+              <Button onClick={handleTransfer} disabled={!transferToAppId || !transferAmount || parseInt(transferAmount) <= 0 || parseInt(transferAmount) > totalVulas}>
                 <Send className="h-4 w-4 mr-2" /> Transfer
               </Button>
             </div>
