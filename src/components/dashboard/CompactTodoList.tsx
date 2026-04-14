@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   Mic,
