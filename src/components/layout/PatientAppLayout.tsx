@@ -111,7 +111,7 @@ export function PatientAppLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col overflow-hidden">
       {/* Sidebar for tablet/web */}
       <div className="hidden md:block">
         <Sidebar />
@@ -172,7 +172,7 @@ export function PatientAppLayout() {
             {/* Bell */}
             <Popover>
               <PopoverTrigger asChild>
-                <button className="relative h-9 w-9 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors">
+                <button className="relative h-11 w-11 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors">
                   <Bell className="h-4 w-4 text-white stroke-white fill-none" />
                   {unreadNotifCount > 0 && (
                     <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[8px] font-bold text-white">
@@ -214,7 +214,7 @@ export function PatientAppLayout() {
             <Popover>
               <PopoverTrigger asChild>
                 <button className="rounded-xl p-1 hover:bg-accent transition-colors">
-                  <Avatar className="h-9 w-9 border-2 border-primary">
+                  <Avatar className="h-11 w-11 border-2 border-primary">
                     <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} className="object-cover" />
                     <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
                       {getInitials()}
@@ -275,7 +275,7 @@ export function PatientAppLayout() {
       </header>
 
       {/* Main content */}
-      <main className="flex-1 pb-20 md:pb-0 md:ml-[210px]">
+      <main className="flex-1 pb-24 md:pb-0 md:ml-[var(--sidebar-width)]">
         <div className="hidden md:flex justify-end px-8 pt-4">
           <TopBarIcons />
         </div>
@@ -287,6 +287,11 @@ export function PatientAppLayout() {
           </AnimatePresence>
         </div>
       </main>
+
+      {/* Footer - hidden on mobile due to bottom nav */}
+      <div className="hidden md:block md:ml-[var(--sidebar-width)]">
+        <Footer />
+      </div>
 
       <BottomNav />
     </div>

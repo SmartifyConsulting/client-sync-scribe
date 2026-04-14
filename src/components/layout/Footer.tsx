@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 export function Footer() {
+  // Uses --sidebar-width CSS variable via parent ml offset
   const currentYear = new Date().getFullYear();
 
   return (
