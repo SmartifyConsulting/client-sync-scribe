@@ -1,44 +1,39 @@
 
 
-# Plan: Fix Doctor Search Message & Language-Aware Narration/Translation
+# Plan: Translate Briefing Display Text & Wrap Date on Mobile
 
-## 1. Fix "No healthcare providers found" false negative
+## 1. Translate Today's Briefing displayed text to preferred language
 
-**File:** `src/pages/patient/MyDoctors.tsx` (lines 76-97, 185-188)
+**File:** `src/components/dashboard/TodaysBriefing.tsx`
 
-**Root cause:** When a patient searches for "Dea", the query finds "Dean Allie" but line 91 filters out already-connected doctors. The filtered result is empty, so the UI shows "No healthcare providers found" — which is misleading since the doctor was found but is already connected.
+Currently, the briefing card displays content in English (labels like "Last session:", allergy info, prescription text, round table notes, etc.). Translation only happens when the user clicks "Narrate". The displayed text should also be translated based on the doctor's `preferred_language`.
 
-**Fix:** Track how many results came back before filtering vs after. Show a distinct message when results were found but all are already connected:
-- `searchResults.length === 0` AND pre-filter count > 0 → "All matching providers are already on your profile."
-- `searchResults.length === 0` AND pre-filter count === 0 → "No healthcare providers found matching your search."
+**Changes:**
+- Add state for translated appointment data (`translatedAppointments`)
+- On component mount (or when appointments load), fetch the user's `preferred_language`
+- If non-English, call the `translate-text` edge function to translate the key display strings: `lastSessionSummary`, `allergies`, `lastPrescription`, linked doctor specialties, and round table note content
+- Use the translated versions in the rendered JSX
+- Show a subtle loading indicator while translating
+- The "No appointments" and "No previous session notes" static strings should also be translated
 
-Add a `totalFound` state variable set alongside `searchResults`.
+## 2. Wrap date to next line on mobile in dashboard greeting
 
-## 2. Auto-translate briefing text based on primary language
+**File:** `src/pages/Dashboard.tsx` (line 276-278)
 
-**File:** `src/components/dashboard/TodaysBriefing.tsx` (lines 265-317, 340-398)
+Currently:
+```
+Here's what's happening with your practice today, 14 April 2026
+```
+All on one line. On mobile (390px) this is too long.
 
-Currently `generateBriefingSegments()` produces English-only text. The narration function (`narrate-briefing`) just reads whatever text it receives — OpenAI TTS can pronounce any language, but the text itself is always English.
-
-**Fix:**
-1. In `handleNarrate`, fetch the doctor's `preferred_language` from profiles
-2. If the language is not `"en"`, call the Lovable AI gateway edge function (or a new translation step) to translate each segment's text before sending to TTS
-3. Use the existing `narrate-briefing` edge function as-is (OpenAI TTS handles multilingual text natively)
-4. Also translate the displayed segment text in the UI so the on-screen text matches the narration
-
-**Implementation:** Add a translation step using the `summarize-session` or a lightweight AI call to translate `segments[].text` into the user's `preferred_language` before narration. Use the Lovable AI gateway model (`google/gemini-2.5-flash`) via an edge function for translation.
-
-## 3. Create a translate-text edge function
-
-**File:** `supabase/functions/translate-text/index.ts` (new)
-
-A simple edge function that accepts `{ text: string, targetLanguage: string }` and returns `{ translatedText: string }` using the Lovable AI gateway. This will be reusable for briefing narration and any future translation needs.
-
-## 4. Auto-translate session summaries when language changes
-
-**File:** `src/pages/Sessions.tsx`
-
-The session detail view already has a "Translate to English" button for non-English summaries. Ensure the reverse also works — when a doctor's primary language is non-English, the AI diagnosis/summary text should offer translation to their preferred language (not just English). Update the translate button logic to use the doctor's `preferred_language` as the target.
+**Fix:** Split into two elements — the sentence on one line, the date on the next line for mobile only:
+```html
+<p class="...">
+  Here's what's happening with your practice today
+  <span class="block md:inline">, {formattedDate}</span>
+</p>
+```
+Using `block md:inline` makes the date wrap to the next line on mobile but stay inline on tablet/desktop.
 
 ---
 
@@ -46,8 +41,6 @@ The session detail view already has a "Translate to English" button for non-Engl
 
 | File | Changes |
 |------|---------|
-| `src/pages/patient/MyDoctors.tsx` | Distinguish "already connected" from "not found" in search results |
-| `src/components/dashboard/TodaysBriefing.tsx` | Translate briefing segments to preferred language before narration |
-| `supabase/functions/translate-text/index.ts` | New edge function for AI-powered text translation |
-| `src/pages/Sessions.tsx` | Update translate button to target preferred language (not just English) |
+| `src/components/dashboard/TodaysBriefing.tsx` | Auto-translate displayed briefing content to preferred language |
+| `src/pages/Dashboard.tsx` | Wrap date to next line on mobile greeting subtext |
 
