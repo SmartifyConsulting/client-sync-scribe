@@ -315,19 +315,14 @@ export default function Dashboard() {
           {isDoctor && <CompactTodoList />}
           {isDoctor && (
             <div className="hidden lg:block">
-              <Collapsible defaultOpen={false}>
-                <div className="rounded-xl border border-primary bg-card shadow-sm">
-                  <CollapsibleTrigger className="w-full rounded-t-xl bg-primary px-4 py-3 flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-primary-foreground">My Round Tables</h3>
-                    <ChevronDown className="h-4 w-4 text-primary-foreground transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <div className="p-3">
-                      <DoctorRoundTables />
-                    </div>
-                  </CollapsibleContent>
+              <div className="rounded-xl border border-primary bg-card shadow-sm">
+                <div className="w-full rounded-t-xl bg-primary px-4 py-3">
+                  <h3 className="text-sm font-semibold text-primary-foreground">My Round Tables</h3>
                 </div>
-              </Collapsible>
+                <div className="p-3">
+                  <DoctorRoundTables />
+                </div>
+              </div>
             </div>
           )}
           <div className="lg:hidden">
@@ -335,19 +330,14 @@ export default function Dashboard() {
           </div>
           {isDoctor && (
             <div className="lg:hidden">
-              <Collapsible defaultOpen={false}>
-                <div className="rounded-xl border border-primary bg-card shadow-sm">
-                  <CollapsibleTrigger className="w-full rounded-t-xl bg-primary px-4 py-3 flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-primary-foreground">My Round Tables</h3>
-                    <ChevronDown className="h-4 w-4 text-primary-foreground transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <div className="p-3">
-                      <DoctorRoundTables />
-                    </div>
-                  </CollapsibleContent>
+              <div className="rounded-xl border border-primary bg-card shadow-sm">
+                <div className="w-full rounded-t-xl bg-primary px-4 py-3">
+                  <h3 className="text-sm font-semibold text-primary-foreground">My Round Tables</h3>
                 </div>
-              </Collapsible>
+                <div className="p-3">
+                  <DoctorRoundTables />
+                </div>
+              </div>
             </div>
           )}
         </div>
