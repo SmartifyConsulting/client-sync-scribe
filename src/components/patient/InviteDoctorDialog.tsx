@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,8 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { UserPlus, Loader2, Stethoscope, Search, Mail, Send } from "lucide-react";
+import { UserPlus, Loader2, Stethoscope } from "lucide-react";
 import { PermissionTransparencyModal } from "@/components/permissions/PermissionTransparencyModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
@@ -20,28 +19,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
 type AccessPermission = "patient_info" | "calendar" | "session_summaries" | "prescription_history";
-
-interface PermissionOption {
-  id: AccessPermission;
-  label: string;
-  description: string;
-}
-
-const permissionOptions: PermissionOption[] = [
-  { id: "patient_info", label: "Patient Information", description: "View your personal and medical details" },
-  { id: "calendar", label: "Calendar", description: "View and manage your appointments" },
-  { id: "session_summaries", label: "Session Summaries", description: "View summaries from your consultations" },
-  { id: "prescription_history", label: "Documentation", description: "View your documents and records" },
-];
-
-interface DoctorSuggestion {
-  id: string;
-  full_name: string | null;
-  specialty: string | null;
-  practice_number: string | null;
-  doctor_number: string | null;
-  cpd_points: number;
-}
 
 interface InviteDoctorDialogProps {
   prefillPracticeNumber?: string;
@@ -52,17 +29,10 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
   const [open, setOpen] = useState(false);
   const [practiceNumber, setPracticeNumber] = useState(prefillPracticeNumber || "");
   const [registrationNumber, setRegistrationNumber] = useState(prefillRegistrationNumber || "");
-  const [nameSearch, setNameSearch] = useState("");
-  const [suggestions, setSuggestions] = useState<DoctorSuggestion[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [searchingDoctors, setSearchingDoctors] = useState(false);
   const [selectedPermissions, setSelectedPermissions] = useState<AccessPermission[]>([
     "patient_info", "calendar", "session_summaries", "prescription_history",
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [sendingInvite, setSendingInvite] = useState(false);
-  const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
   const { profile } = useProfile();
@@ -73,101 +43,6 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
       if (prefillRegistrationNumber) setRegistrationNumber(prefillRegistrationNumber);
     }
   }, [open, prefillPracticeNumber, prefillRegistrationNumber]);
-
-  // Debounced doctor name search
-  useEffect(() => {
-    if (nameSearch.length < 2 || selectedDoctorId) {
-      if (nameSearch.length < 2) {
-        setSuggestions([]);
-        setShowSuggestions(false);
-      }
-      return;
-    }
-    const timer = setTimeout(async () => {
-      setSearchingDoctors(true);
-      try {
-        // Search profiles with doctor role
-        const { data: doctorRoles } = await supabase
-          .from("user_roles")
-          .select("user_id")
-          .eq("role", "doctor");
-        
-        const doctorIds = (doctorRoles || []).map(r => r.user_id);
-        if (doctorIds.length === 0) {
-          setSuggestions([]);
-          setShowSuggestions(false);
-          setSearchingDoctors(false);
-          return;
-        }
-
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id, full_name, specialty, practice_number, doctor_number")
-          .ilike("full_name", `%${nameSearch}%`)
-          .in("id", doctorIds)
-          .limit(5);
-
-        // Fetch CPD points for each doctor
-        const doctorProfileIds = (profiles || []).map(p => p.id);
-        let cpdMap: Record<string, number> = {};
-        if (doctorProfileIds.length > 0) {
-          const { data: cpdData } = await supabase
-            .from("cpd_certificates")
-            .select("user_id, cpd_points")
-            .in("user_id", doctorProfileIds);
-          if (cpdData) {
-            cpdData.forEach(c => { cpdMap[c.user_id] = (cpdMap[c.user_id] || 0) + (c.cpd_points || 0); });
-          }
-        }
-
-        setSuggestions((profiles || []).map(p => ({ ...p, cpd_points: cpdMap[p.id] || 0 })));
-        setShowSuggestions(true);
-      } catch (e) {
-        console.error("Doctor search error:", e);
-      } finally {
-        setSearchingDoctors(false);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [nameSearch]);
-
-
-  const handleSelectDoctor = (doctor: DoctorSuggestion) => {
-    setSelectedDoctorId(doctor.id);
-    setNameSearch(doctor.full_name || "");
-    setPracticeNumber(doctor.practice_number || "");
-    setRegistrationNumber(doctor.doctor_number || "");
-    setShowSuggestions(false);
-  };
-
-  const handleSendDoctorInvite = async () => {
-    if (!inviteEmail.trim()) {
-      toast({ title: "Email required", description: "Please enter the doctor's email.", variant: "destructive" });
-      return;
-    }
-    setSendingInvite(true);
-    try {
-      const { error } = await supabase.functions.invoke("send-user-invitation", {
-        body: {
-          recipientEmail: inviteEmail.trim(),
-          senderName: profile?.full_name || "A patient",
-          message: `${profile?.full_name || "A patient"} has invited you to join Holarc Health. Sign up to connect and manage patient care.`,
-        },
-      });
-      if (error) throw error;
-      toast({ title: "Invitation sent", description: `An invitation has been sent to ${inviteEmail}.` });
-      setInviteEmail("");
-    } catch (error: any) {
-      toast({ title: "Failed to send invitation", description: error.message || "Please try again.", variant: "destructive" });
-    } finally {
-      setSendingInvite(false);
-    }
-  };
-  const handlePermissionToggle = (permission: AccessPermission) => {
-    setSelectedPermissions((prev) =>
-      prev.includes(permission) ? prev.filter((p) => p !== permission) : [...prev, permission]
-    );
-  };
 
   const handleSubmit = async () => {
     if (!practiceNumber.trim() || !registrationNumber.trim()) {
@@ -218,10 +93,31 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
         if (insertError) throw insertError;
       }
 
+      // Create notification for the doctor
+      try {
+        const { data: doctorProfile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("practice_number", practiceNumber.trim())
+          .eq("doctor_number", registrationNumber.trim())
+          .maybeSingle();
+
+        if (doctorProfile) {
+          await supabase.from("notifications").insert({
+            user_id: doctorProfile.id,
+            type: "access_request",
+            title: "Patient Invitation",
+            description: `${profile?.full_name || "A patient"} has invited you to their panel of healthcare providers.`,
+            is_read: false,
+          });
+        }
+      } catch (notifErr) {
+        console.error("Failed to create notification:", notifErr);
+      }
+
       toast({ title: "Request sent", description: "Your access request has been sent to the doctor." });
       setPracticeNumber("");
       setRegistrationNumber("");
-      setNameSearch("");
       setSelectedPermissions(["patient_info", "calendar", "session_summaries", "prescription_history"]);
       setOpen(false);
     } catch (error: any) {
@@ -246,71 +142,11 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
             Invite a Healthcare Provider
           </DialogTitle>
           <DialogDescription>
-            Search for a doctor by name or enter their practice and registration numbers.
+            Enter the doctor's practice and registration numbers to send an invitation.
           </DialogDescription>
         </DialogHeader>
         
         <div className="grid gap-3 py-2">
-          {/* Doctor Name Search */}
-          <div className="space-y-2 relative">
-            <Label htmlFor="doctorSearch">Search by Name</Label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                id="doctorSearch"
-                placeholder="Type doctor name..."
-                value={nameSearch}
-                onChange={(e) => { setSelectedDoctorId(null); setNameSearch(e.target.value); }}
-                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                className="pl-10"
-              />
-              {searchingDoctors && <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />}
-            </div>
-            {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-xl shadow-lg max-h-48 overflow-y-auto">
-                {suggestions.map((doc) => (
-                  <button
-                    key={doc.id}
-                    className="w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors border-b border-border/50 last:border-0"
-                    onClick={() => handleSelectDoctor(doc)}
-                  >
-                    <p className="font-medium text-foreground text-sm">{doc.full_name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {doc.specialty && `${doc.specialty} · `}
-                      {doc.practice_number && `PR: ${doc.practice_number}`}
-                      {doc.cpd_points > 0 && ` · ${doc.cpd_points} CPD Points`}
-                    </p>
-                  </button>
-                ))}
-              </div>
-            )}
-            {/* Invite fallback when doctor not found */}
-            {nameSearch.length >= 3 && !searchingDoctors && suggestions.length === 0 && (
-              <div className="mt-3 rounded-lg border border-dashed border-border p-4 space-y-3 bg-muted/30">
-                <p className="text-sm text-muted-foreground">Doctor not found on Holarc? Send an invitation via email</p>
-                <div className="flex gap-2">
-                  <Input
-                    type="email"
-                    placeholder="doctor@example.com"
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button
-                    type="button"
-                    size="sm"
-                    disabled={!inviteEmail || sendingInvite}
-                    onClick={handleSendDoctorInvite}
-                    className="gap-1"
-                  >
-                    {sendingInvite ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
-                    Invite
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* Doctor Details */}
           <div className="space-y-4">
             <div className="space-y-2">

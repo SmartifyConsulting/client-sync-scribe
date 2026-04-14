@@ -263,7 +263,7 @@ export function DoctorAccessRequests() {
           return (
             <div
               key={request.id}
-              className="rounded-2xl border border-border bg-card shadow-sm p-4 space-y-3"
+              className="rounded-2xl border-2 border-green-500 bg-card shadow-sm p-4 space-y-3"
             >
               <div className="flex items-start gap-3">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm">

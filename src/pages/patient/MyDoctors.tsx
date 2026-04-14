@@ -168,26 +168,26 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-       {!hideHeader ? (
+    <div className="space-y-3">
+      {!hideHeader && (
+        <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
-               <Stethoscope className="h-4 w-4 text-primary" />
-               <h3 className="text-sm font-semibold text-foreground">My Healthcare Providers</h3>
-             </div>
-             <p className="text-xs text-muted-foreground mt-1">
-               Healthcare providers with access to your profile
-             </p>
-           </div>
-         ) : <div />}
-      </div>
+              <Stethoscope className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">My Healthcare Providers</h3>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Healthcare providers with access to your profile
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Doctor Search */}
       <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Find a Healthcare Provider on Holarc</CardTitle>
-          <CardDescription>Search by full name, practice number, or registration number</CardDescription>
+        <CardHeader className="pb-1 pt-3 px-4">
+          <CardTitle className="text-sm">Find a Healthcare Provider on Holarc</CardTitle>
+          <CardDescription className="text-xs">Search by full name, practice number, or registration number</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex gap-2">
@@ -215,9 +215,9 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                  <Table className="table-fixed w-full">
                    <TableHeader>
                       <TableRow>
-                        <TableHead className="w-auto">Provider</TableHead>
-                        <TableHead className="hidden sm:table-cell w-[120px]">Specialty</TableHead>
-                        <TableHead className="w-[50px]">Action</TableHead>
+                        <TableHead className="w-[45%]">Provider</TableHead>
+                        <TableHead className="w-[35%]">Specialty</TableHead>
+                        <TableHead className="w-[20%]">Action</TableHead>
                       </TableRow>
                    </TableHeader>
                    <TableBody>
@@ -236,15 +236,10 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                                 {doctor.practice_number && (
                                   <span className="text-[10px] text-muted-foreground">PR#: {doctor.practice_number}</span>
                                 )}
-                                {doctor.specialty && (
-                                  <Badge className={`text-[9px] font-medium border-0 w-fit sm:hidden ${getSpecialtyColor(doctor.specialty)}`}>
-                                    {doctor.specialty}
-                                  </Badge>
-                                )}
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell className="hidden sm:table-cell p-2">
+                          <TableCell className="p-2">
                             {doctor.specialty && (
                               <Badge className={`text-[10px] font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
                                 {doctor.specialty}
@@ -285,12 +280,12 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
       ) : (
         <Card>
           <CardContent className="p-0">
-            <Table>
+             <Table className="table-fixed w-full">
               <TableHeader>
                  <TableRow>
-                    <TableHead>Provider</TableHead>
-                    <TableHead>Specialty</TableHead>
-                    <TableHead className="w-[50px]">Access</TableHead>
+                    <TableHead className="w-[45%]">Provider</TableHead>
+                    <TableHead className="w-[35%]">Specialty</TableHead>
+                    <TableHead className="w-[20%]">Access</TableHead>
                  </TableRow>
               </TableHeader>
               <TableBody>
