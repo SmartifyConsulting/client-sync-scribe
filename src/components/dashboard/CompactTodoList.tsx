@@ -464,8 +464,6 @@ export function CompactTodoList() {
           )}
         </div>
         </div>
-      </CollapsibleContent>
       </div>
-    </Collapsible>
   );
 }
