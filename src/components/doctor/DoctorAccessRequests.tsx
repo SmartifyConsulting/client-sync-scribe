@@ -39,6 +39,7 @@ interface AccessRequest {
   created_at: string;
   patient_profile?: {
     full_name: string | null;
+    avatar_url: string | null;
   };
 }
 

@@ -29,10 +29,12 @@ const patientSections = [
 ];
 
 export function BottomNav() {
-  const { isPatient } = useUserRole();
+  const { isPatient, loading } = useUserRole();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+
+  if (loading) return null;
 
   if (!isPatient) {
     // Doctor nav - route-based
