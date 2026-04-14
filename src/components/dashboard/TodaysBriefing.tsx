@@ -707,13 +707,20 @@ export function TodaysBriefing() {
         </div>
       </div>
 
+      {isTranslating && (
+        <div className="px-4 py-2 flex items-center gap-2 text-xs text-muted-foreground border-b border-border">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          Translating briefing...
+        </div>
+      )}
+
       {appointments.length === 0 ? (
         <div className="p-8 text-center text-muted-foreground">
-          No appointments scheduled for today.
+          {translatedLabels['No appointments scheduled for today.'] || 'No appointments scheduled for today.'}
         </div>
       ) : (
         <div className="divide-y divide-border">
-          {appointments.map((apt, index) => (
+          {(translatedAppointments || appointments).map((apt, index) => (
             <Collapsible key={apt.id} defaultOpen={index === 0}>
               <div className="p-3" style={{ animationDelay: `${index * 100}ms` }}>
                 <CollapsibleTrigger className="w-full">
