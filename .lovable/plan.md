@@ -1,52 +1,55 @@
 
 
-# Vula Logo Sizing, Organ Donor Shading, Permission List Fixes & Doctor Info in Invite Modal
+# Patient Layout, Sub-tabs, Greeting, Vula Count, Permission Headings, Doctor Badge, Green Border & Side-by-Side Doctor Numbers
 
 ## Summary
-Seven targeted changes: reduce rewards logos by 40%, increase patient banner logo by 30%, remove Organ Donor header shading, fix Private list font size to match Shared list, add "Your" prefix to shared items, remove Doctor Referrals from private list, and show selected doctor's name and avatar at the top of the Invite modal.
+Nine changes: add sidebar nav for patient tablet view, make sub-tab headings black, move Vula count to patient name row on web, use doctor-style greeting, match Private heading format to Shared heading, show doctor specialty badge in invite modal, green border on doctor banner, and display Practice Number and Registration Number side by side on web and tablet views.
 
 ## Changes
 
-### 1. Reduce Vula Vouchers logos in Doctor's My Rewards by 40%
-**File:** `src/pages/doctor/DoctorRewards.tsx`
-- Change logo container from `w-[40%]` to `w-[24%]` and text container from `w-[60%]` to `w-[76%]`
+### 1. Add sidebar navigation for patient on tablet/web (md+)
+**File:** `src/components/layout/PatientAppLayout.tsx`
+- Import and render `Sidebar` on `md:` screens (matching `AppLayout`)
+- Add `md:ml-[210px]` to the main content area
 
-### 2. Increase Vula Vouchers logo in My Holarchive mobile banner by 30%
+### 2. Make sub-tab headings black font colour
 **File:** `src/components/patients/PatientDetailsEditor.tsx`
-- Change `h-16` to `h-20` on the mobile banner logo
+- Add `text-foreground` to all sub-tab `TabsTrigger` elements
 
-### 3. Remove Organ Donor section header shading
+### 3. Move Vula Vouchers count to same row as patient name (web view)
 **File:** `src/components/patients/PatientDetailsEditor.tsx`
-- Change `bg-[#F5F4F1]` to `bg-card` in both Organ Donor `CollapsibleTrigger` elements
+- Restructure `ProfileBanner` so on `md:` the Vula count appears inline right of patient name
 
-### 4. Match font sizes across Permission Transparency lists
+### 4. Use doctor-style time-based greeting for patient
+**File:** `src/components/patients/PatientDetailsEditor.tsx`
+- Replace "Welcome back," with "Good morning/afternoon/evening, {name}" and date subtitle
+
+### 5. Make "Private — Not Shared" heading match "Shared with Care Team" format
 **File:** `src/components/permissions/PermissionTransparencyModal.tsx`
-- Change both Shared and Private lists to `text-xs` to match the Holistic Health Sharing body text
+- Change Private heading from `text-muted-foreground` to `text-foreground`
 
-### 5. Add "Your" prefix to main shared items
-**File:** `src/components/permissions/PermissionTransparencyModal.tsx`
-- Change labels to "Your AI Session Summaries", "Your Patient Information", "Your Patient Medical Overview", "Your Documents"
-
-### 6. Remove "Doctor Referrals" from private items
-**File:** `src/components/permissions/PermissionTransparencyModal.tsx`
-- Remove the Doctor Referrals entry from `privateItems` array
-
-### 7. Show selected doctor's name and avatar in Invite modal
-**File:** `src/pages/patient/MyDoctors.tsx`
-- Pass `prefillDoctorName={doctor.full_name}` and `prefillAvatarUrl={doctor.avatar_url}` to `InviteDoctorDialog`
-
+### 6. Show doctor specialty badge under name in invite modal
 **File:** `src/components/patient/InviteDoctorDialog.tsx`
-- Add `prefillDoctorName` and `prefillAvatarUrl` props to the interface
-- Above the Practice Number field, render a doctor info banner when `prefillDoctorName` is provided: show the Avatar (using the existing `Avatar`/`AvatarImage`/`AvatarFallback` components) alongside the doctor's full name
-- If no avatar URL is available, show initials fallback
+- Add `prefillSpecialty?: string` prop; render `<Badge variant="secondary">` with specialty
+
+**File:** `src/pages/patient/MyDoctors.tsx`
+- Pass `prefillSpecialty={doctor.specialty}` to `InviteDoctorDialog`
+
+### 7. Green border on doctor info banner in invite modal
+**File:** `src/components/patient/InviteDoctorDialog.tsx`
+- Change `border-border bg-muted/30` to `border-green-500 bg-green-50/30`
+
+### 8. Practice Number and Registration Number side by side on web/tablet
+**File:** `src/components/patient/InviteDoctorDialog.tsx`
+- Wrap the two input fields in a `grid grid-cols-1 md:grid-cols-2 gap-4` container so they sit side by side on tablet and web, stacked on mobile
 
 ## Files Modified
 
 | File | Changes |
 |------|---------|
-| `src/pages/doctor/DoctorRewards.tsx` | Reduce logo container width |
-| `src/components/patients/PatientDetailsEditor.tsx` | Increase banner logo; remove Organ Donor shading |
-| `src/components/permissions/PermissionTransparencyModal.tsx` | Font size fix; "Your" prefix; remove Doctor Referrals |
-| `src/components/patient/InviteDoctorDialog.tsx` | Accept and display doctor name + avatar |
-| `src/pages/patient/MyDoctors.tsx` | Pass doctor name and avatar to InviteDoctorDialog |
+| `src/components/layout/PatientAppLayout.tsx` | Add Sidebar for md+ screens |
+| `src/components/patients/PatientDetailsEditor.tsx` | Black sub-tabs; Vula count on name row; doctor-style greeting |
+| `src/components/permissions/PermissionTransparencyModal.tsx` | Private heading matches Shared heading format |
+| `src/components/patient/InviteDoctorDialog.tsx` | Specialty badge; green border; side-by-side number fields |
+| `src/pages/patient/MyDoctors.tsx` | Pass specialty to InviteDoctorDialog |
 
