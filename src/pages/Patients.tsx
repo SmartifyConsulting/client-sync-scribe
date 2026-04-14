@@ -813,19 +813,19 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
             <table className="w-full">
               <thead>
                 <tr className="bg-primary">
-                  <th className="px-2 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="px-2 lg:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Patient
                   </th>
-                  <th className="hidden md:table-cell px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="hidden lg:table-cell px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Contact
                   </th>
-                  <th className="px-3 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="px-3 lg:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Last Seen
                   </th>
-                  <th className="px-3 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="hidden lg:table-cell px-3 lg:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Since
                   </th>
-                  <th className="px-3 md:px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">
+                  <th className="px-3 lg:px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">
                     Actions
                   </th>
                 </tr>
