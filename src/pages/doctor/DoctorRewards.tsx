@@ -29,7 +29,8 @@ export default function DoctorRewards() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [showTransferDialog, setShowTransferDialog] = useState(false);
-  const [transferAppId, setTransferAppId] = useState("");
+  const [transferFromAppId, setTransferFromAppId] = useState("");
+  const [transferToAppId, setTransferToAppId] = useState("");
   const [transferAmount, setTransferAmount] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
   const queryClient = useQueryClient();
@@ -88,7 +89,7 @@ export default function DoctorRewards() {
     if (amount <= 0 || amount > totalVulas) { toast({ title: "Invalid amount", variant: "destructive" }); return; }
     const { data: patient } = await supabase.from("patients").select("id").eq("patient_user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
     if (!patient) { toast({ title: "No patient record found", variant: "destructive" }); return; }
-    const { error: transferError } = await supabase.from("moola_transfers").insert({ user_id: user.id, partner_app_id: transferAppId, amount });
+    const { error: transferError } = await supabase.from("moola_transfers").insert({ user_id: user.id, partner_app_id: transferToAppId, amount });
     if (transferError) { toast({ title: "Transfer failed", variant: "destructive" }); return; }
     const { error: deductError } = await supabase.from("patient_rewards").insert({
       patient_id: patient.id, awarded_by: user.id, lollipops_count: -amount,
@@ -100,7 +101,8 @@ export default function DoctorRewards() {
     queryClient.invalidateQueries({ queryKey: ["patient-vulas-profile"] });
     queryClient.invalidateQueries({ queryKey: ["doctor-vulas-profile"] });
     setShowTransferDialog(false);
-    setTransferAppId("");
+    setTransferFromAppId("");
+    setTransferToAppId("");
     setTransferAmount("");
   };
 
@@ -121,8 +123,20 @@ export default function DoctorRewards() {
         )}
       </div>
 
-      {/* Balance Cards */}
-      <div className="grid gap-4 sm:grid-cols-4">
+      {/* Balance Cards - 2x2 grid: Doctor/Patient top, Combined/Transferred bottom */}
+      <div className="grid grid-cols-2 gap-4">
+        <Card className="border-border">
+          <CardContent className="pt-6">
+            <p className="text-xs text-muted-foreground">Doctor Vulas</p>
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{doctorVulas} <span className="text-base"><img src={vulaVouchersLogo} alt="Vula" className="h-5 w-auto object-contain inline-block" /></span></p>
+          </CardContent>
+        </Card>
+        <Card className="border-border">
+          <CardContent className="pt-6">
+            <p className="text-xs text-muted-foreground">Patient Vulas</p>
+            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{patientVulas} <span className="text-base"><img src={vulaVouchersLogo} alt="Vula" className="h-5 w-auto object-contain inline-block" /></span></p>
+          </CardContent>
+        </Card>
         <Card className="bg-gradient-to-br from-yellow-300 to-lime-400 dark:from-yellow-600/40 dark:to-lime-700/30 border-yellow-400 dark:border-yellow-600/40">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -134,18 +148,6 @@ export default function DoctorRewards() {
                 <img src={vulaVouchersLogo} alt="Vulas" className="h-9 w-9 object-contain" />
               </div>
             </div>
-          </CardContent>
-        </Card>
-        <Card className="border-border">
-          <CardContent className="pt-6">
-            <p className="text-xs text-muted-foreground">Doctor Vulas</p>
-            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{doctorVulas} <span className="text-base"><img src={vulaVouchersLogo} alt="Vula" className="h-5 w-auto object-contain inline-block" /></span></p>
-          </CardContent>
-        </Card>
-        <Card className="border-border">
-          <CardContent className="pt-6">
-            <p className="text-xs text-muted-foreground">Patient Vulas</p>
-            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{patientVulas} <span className="text-base"><img src={vulaVouchersLogo} alt="Vula" className="h-5 w-auto object-contain inline-block" /></span></p>
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-sky-400 to-cyan-500 dark:from-sky-700/40 dark:to-cyan-800/30 border-sky-400 dark:border-sky-600/40">
@@ -350,7 +352,7 @@ export default function DoctorRewards() {
                           {app.creator && <p className="text-xs text-muted-foreground">by {app.creator}</p>}
                         </div>
                       </div>
-                      <Button size="sm" className="w-full mt-3 gap-1 text-xs" onClick={() => { setTransferAppId(app.id); setShowTransferDialog(true); }}>
+                      <Button size="sm" className="w-full mt-3 gap-1 text-xs" onClick={() => { setTransferToAppId(app.id); setShowTransferDialog(true); }}>
                         <Send className="h-3 w-3" /> Transfer Vulas
                       </Button>
                     </div>
@@ -391,14 +393,26 @@ export default function DoctorRewards() {
        {/* Transfer Dialog */}
       {showTransferDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-card rounded-xl border border-border p-6 w-full max-w-md shadow-lg space-y-4">
+         <div className="bg-card rounded-xl border border-border p-6 w-full max-w-md shadow-lg space-y-4">
             <h3 className="text-lg font-semibold">Transfer Vulas</h3>
             <p className="text-sm text-muted-foreground">Available balance: {totalVulas} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-4 inline-block" /></p>
             <div className="space-y-2">
-              <Label>Partner App</Label>
-              <Select value={transferAppId} onValueChange={setTransferAppId}>
-                <SelectTrigger><SelectValue placeholder="Select an app" /></SelectTrigger>
-                <SelectContent>{partnerApps.map((app: any) => <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>)}</SelectContent>
+              <Label>From</Label>
+              <Select value={transferFromAppId} onValueChange={setTransferFromAppId}>
+                <SelectTrigger><SelectValue placeholder="Select source app" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="wallet">My Vula Wallet</SelectItem>
+                  {partnerApps.map((app: any) => <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>To</Label>
+              <Select value={transferToAppId} onValueChange={setTransferToAppId}>
+                <SelectTrigger><SelectValue placeholder="Select destination app" /></SelectTrigger>
+                <SelectContent>
+                  {partnerApps.map((app: any) => <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>)}
+                </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
@@ -407,7 +421,7 @@ export default function DoctorRewards() {
             </div>
             <div className="flex gap-2 justify-end">
               <Button variant="outline" onClick={() => setShowTransferDialog(false)}>Cancel</Button>
-              <Button onClick={handleTransfer} disabled={!transferAppId || !transferAmount || parseInt(transferAmount) <= 0 || parseInt(transferAmount) > totalVulas}>
+              <Button onClick={handleTransfer} disabled={!transferToAppId || !transferAmount || parseInt(transferAmount) <= 0 || parseInt(transferAmount) > totalVulas}>
                 <Send className="h-4 w-4 mr-2" /> Transfer
               </Button>
             </div>

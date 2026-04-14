@@ -86,7 +86,8 @@ export default function MyRewards() {
   const { streaks, loading: streaksLoading } = useMyStreaks();
   const [activeTab, setActiveTab] = useState("overview");
   const [showTransferDialog, setShowTransferDialog] = useState(false);
-  const [transferAppId, setTransferAppId] = useState("");
+  const [transferFromAppId, setTransferFromAppId] = useState("");
+  const [transferToAppId, setTransferToAppId] = useState("");
   const [transferAmount, setTransferAmount] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -199,7 +200,8 @@ export default function MyRewards() {
       queryClient.invalidateQueries({ queryKey: ["moola-transfers"] });
       queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
       setShowTransferDialog(false);
-      setTransferAppId("");
+      setTransferFromAppId("");
+      setTransferToAppId("");
       setTransferAmount("");
     },
     onError: (err: Error) => {
@@ -277,10 +279,24 @@ export default function MyRewards() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Partner App</Label>
-              <Select value={transferAppId} onValueChange={setTransferAppId}>
+              <Label>From</Label>
+              <Select value={transferFromAppId} onValueChange={setTransferFromAppId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select an app" />
+                  <SelectValue placeholder="Select source app" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="wallet">My Vula Wallet</SelectItem>
+                  {partnerApps.map((app) => (
+                    <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>To</Label>
+              <Select value={transferToAppId} onValueChange={setTransferToAppId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select destination app" />
                 </SelectTrigger>
                 <SelectContent>
                   {partnerApps.map((app) => (
@@ -305,8 +321,8 @@ export default function MyRewards() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowTransferDialog(false)}>Cancel</Button>
             <Button
-              onClick={() => transferMutation.mutate({ appId: transferAppId, amount: parseInt(transferAmount) || 0 })}
-              disabled={!transferAppId || !transferAmount || parseInt(transferAmount) <= 0 || parseInt(transferAmount) > lollipopCount || transferMutation.isPending}
+              onClick={() => transferMutation.mutate({ appId: transferToAppId, amount: parseInt(transferAmount) || 0 })}
+              disabled={!transferToAppId || !transferAmount || parseInt(transferAmount) <= 0 || parseInt(transferAmount) > lollipopCount || transferMutation.isPending}
             >
               {transferMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
               Transfer
@@ -670,7 +686,7 @@ export default function MyRewards() {
                           {app.creator && <p className="text-xs text-muted-foreground">by {app.creator}</p>}
                         </div>
                       </div>
-                      <Button size="sm" className="w-full mt-3 gap-1 text-xs" onClick={() => { setTransferAppId(app.id); setShowTransferDialog(true); }}>
+                      <Button size="sm" className="w-full mt-3 gap-1 text-xs" onClick={() => { setTransferToAppId(app.id); setShowTransferDialog(true); }}>
                         <Send className="h-3 w-3" /> Transfer Vulas
                       </Button>
                     </div>

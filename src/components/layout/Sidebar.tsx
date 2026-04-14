@@ -5,25 +5,16 @@ import {
   LayoutDashboard,
   Users,
   Calendar,
-  FileText,
   Settings,
   Settings2,
-  Mic,
   LogOut,
   CheckSquare,
-  Pill,
-  Receipt,
   Loader2,
-  MessageSquare,
-  Bell,
   User,
   LucideIcon,
   DollarSign,
-  Users2,
   Gift,
-  Camera,
-  UserPlus,
-  Award,
+  UserCog,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
@@ -39,13 +30,9 @@ interface NavItem {
 
 const doctorNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard" },
-  { icon: User, label: "My Holarchive", to: "/profile" },
-  { icon: Settings2, label: "My Holarprac", to: "/practice" },
   { icon: Users, label: "My Patients", to: "/patients" },
-  { icon: Users2, label: "My Round Tables", to: "/practice?tab=roundtables" },
-  { icon: Calendar, label: "Calendar", to: "/calendar" },
-  { icon: Mic, label: "Sessions", to: "/sessions" },
-  { icon: CheckSquare, label: "To-Do List", to: "/todos" },
+  { icon: Settings2, label: "My Holarprac", to: "/practice" },
+  { icon: UserCog, label: "Admin", to: "/admin" },
   { icon: Gift, label: "My Vulas", to: "/doctor/rewards" },
 ];
 
