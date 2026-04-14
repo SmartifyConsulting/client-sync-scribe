@@ -200,7 +200,8 @@ export default function MyRewards() {
       queryClient.invalidateQueries({ queryKey: ["moola-transfers"] });
       queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
       setShowTransferDialog(false);
-      setTransferAppId("");
+      setTransferFromAppId("");
+      setTransferToAppId("");
       setTransferAmount("");
     },
     onError: (err: Error) => {
@@ -671,7 +672,7 @@ export default function MyRewards() {
                           {app.creator && <p className="text-xs text-muted-foreground">by {app.creator}</p>}
                         </div>
                       </div>
-                      <Button size="sm" className="w-full mt-3 gap-1 text-xs" onClick={() => { setTransferAppId(app.id); setShowTransferDialog(true); }}>
+                      <Button size="sm" className="w-full mt-3 gap-1 text-xs" onClick={() => { setTransferToAppId(app.id); setShowTransferDialog(true); }}>
                         <Send className="h-3 w-3" /> Transfer Vulas
                       </Button>
                     </div>
