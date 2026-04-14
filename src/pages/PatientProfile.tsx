@@ -721,33 +721,33 @@ export default function PatientProfile() {
                   {patientDocuments.map((doc) => (
                     <div
                       key={doc.id}
-                      className="flex items-center gap-4 p-5 hover:bg-muted/30 transition-all duration-200 cursor-pointer"
+                      className="flex items-center gap-3 p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer"
                     >
                       <div
-                        className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10"
                         onClick={() => navigate(`/documents?view=${doc.id}`)}
                       >
-                        <FileText className="h-6 w-6 text-primary" />
+                        <FileText className="h-4 w-4 text-primary" />
                       </div>
                       <div className="flex-1" onClick={() => navigate(`/documents?view=${doc.id}`)}>
-                        <p className="font-semibold text-foreground">{doc.name}</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-[10px] font-semibold text-foreground leading-tight">{doc.name}</p>
+                        <p className="text-[9px] text-muted-foreground">
                           {format(new Date(doc.created_at), "MMM d, yyyy")}
                         </p>
                       </div>
                       {(doc as any).is_draft && !(doc as any).email_sent_at && (
-                        <span className="rounded-full bg-warning/10 px-2 py-0.5 text-[10px] font-medium text-warning border border-warning/30">
+                        <span className="rounded-full bg-warning/10 px-1.5 py-0.5 text-[7px] font-medium text-warning border border-warning/30">
                           DRAFT
                         </span>
                       )}
                       {doc.template_name && (
-                        <span className="rounded-full bg-muted/70 px-3 py-1.5 text-xs font-medium text-muted-foreground">
+                        <span className="rounded-full bg-muted/70 px-2 py-1 text-[8px] font-medium text-muted-foreground">
                           {doc.template_name}
                         </span>
                       )}
                       <button
                         className={cn(
-                          "h-8 w-8 rounded-full flex items-center justify-center transition-colors",
+                          "h-6 w-6 rounded-full flex items-center justify-center transition-colors",
                           (doc as any).email_sent_at
                             ? "text-muted-foreground cursor-default"
                             : "text-green-600 hover:text-green-700 hover:bg-green-50",
@@ -774,7 +774,6 @@ export default function PatientProfile() {
                                 .from("documents")
                                 .update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any
                             ).eq("id", doc.id);
-                            // Refresh docs
                             const { data: updatedDocs } = await supabase
                               .from("documents")
                               .select("*")
@@ -784,7 +783,7 @@ export default function PatientProfile() {
                           } catch {}
                         }}
                       >
-                        <Send className="h-4 w-4" />
+                        <Send className="h-3 w-3" />
                       </button>
                     </div>
                   ))}
