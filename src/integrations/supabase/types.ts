@@ -2102,6 +2102,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      doctor_has_access_request_from: {
+        Args: { patient_id: string }
+        Returns: boolean
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
