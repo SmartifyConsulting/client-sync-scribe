@@ -2,8 +2,9 @@ import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock, X, CalendarIcon, Upload, Pill, Send, Share2 } from "lucide-react";
+import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock, X, CalendarIcon, Upload, Pill, Send, Share2, ChevronDown, Users } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -292,6 +293,16 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
   const availableLetters = Object.keys(groupedPatients).sort();
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
+  const [expandedLetters, setExpandedLetters] = useState<Set<string>>(new Set());
+
+  const toggleLetterGroup = (letter: string) => {
+    setExpandedLetters(prev => {
+      const next = new Set(prev);
+      if (next.has(letter)) next.delete(letter);
+      else next.add(letter);
+      return next;
+    });
+  };
 
   const clearFilters = () => {
     setStatusFilter("all");
@@ -384,7 +395,10 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           </div>
         )}
         <div className="flex gap-2 ml-auto justify-center flex-wrap">
-          
+          <Button variant="outline" className="gap-2 lg:hidden" onClick={() => navigate("/dashboard")}>
+            <Users className="h-4 w-4" />
+            Round Tables
+          </Button>
           <PatientImportDialog 
             trigger={
               <Button variant="outline" className="gap-2">
@@ -398,7 +412,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
-                Add New Patient
+                Patient
               </Button>
             </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh]">
@@ -809,19 +823,19 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
             <table className="w-full">
               <thead>
                 <tr className="bg-primary">
-                  <th className="px-2 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="px-2 lg:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Patient
                   </th>
-                  <th className="hidden md:table-cell px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="hidden lg:table-cell px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Contact
                   </th>
-                  <th className="px-3 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="px-3 lg:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Last Seen
                   </th>
-                  <th className="px-3 md:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="hidden lg:table-cell px-3 lg:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
                     Since
                   </th>
-                  <th className="px-3 md:px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">
+                  <th className="px-3 lg:px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">
                     Actions
                   </th>
                 </tr>
@@ -831,12 +845,13 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                 {mePatient && (
                   <>
                     <tr className="group transition-colors bg-gray-100 hover:bg-gray-200/60 dark:bg-gray-800/20 dark:hover:bg-gray-800/30">
-                      <td className="px-2 md:px-4 py-2.5">
+                      <td className="px-2 lg:px-4 py-2.5">
                         <Link to={`/patients/${mePatient.id}`} className="flex items-center gap-2.5">
                           <div className="flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs bg-[#E01837] text-white">
                             ME
                           </div>
-                          <span className="font-medium text-xs md:text-sm text-foreground group-hover:text-[#E01837] dark:group-hover:text-red-400 transition-colors whitespace-nowrap">
+                          <div className={cn("h-2 w-2 rounded-full flex-shrink-0", mePatient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
+                          <span className="font-medium text-xs text-foreground group-hover:text-[#E01837] dark:group-hover:text-red-400 transition-colors whitespace-nowrap">
                             {mePatient.name.includes(',') ? mePatient.name : (() => {
                               const parts = mePatient.name.trim().split(/\s+/);
                               if (parts.length <= 1) return mePatient.name;
@@ -845,10 +860,9 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                               return `${lastName}, ${firstNames}`;
                             })()}
                           </span>
-                          <div className={cn("h-2 w-2 rounded-full flex-shrink-0", mePatient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
                         </Link>
                       </td>
-                      <td className="hidden md:table-cell px-4 py-2.5">
+                      <td className="hidden lg:table-cell px-4 py-2.5">
                         <div className="space-y-0.5">
                           {mePatient.email && (
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -865,13 +879,13 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                           )}
                         </div>
                       </td>
-                      <td className="px-3 md:px-4 py-2.5 text-xs text-muted-foreground">
+                      <td className="px-3 lg:px-4 py-2.5 text-xs text-muted-foreground">
                         {mePatient.last_visit ? new Date(mePatient.last_visit).toLocaleDateString() : <span className="text-muted-foreground/50">—</span>}
                       </td>
-                      <td className="px-3 md:px-4 py-2.5 text-xs text-muted-foreground">
+                      <td className="hidden lg:table-cell px-3 lg:px-4 py-2.5 text-xs text-muted-foreground">
                         {new Date(mePatient.created_at).toLocaleDateString()}
                       </td>
-                      <td className="px-3 md:px-4 py-2.5 text-right">
+                      <td className="px-3 lg:px-4 py-2.5 text-right">
                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => navigate(`/patients/${mePatient.id}`)}>
                           <Edit3 className="h-3.5 w-3.5" />
                         </Button>
@@ -881,19 +895,27 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                 )}
                 {(selectedLetter ? availableLetters.filter(l => l === selectedLetter) : availableLetters.sort()).map((letter) => (
                   <React.Fragment key={letter}>
-                    <tr id={`patient-group-${letter}`}>
+                    <tr
+                      id={`patient-group-${letter}`}
+                      className="cursor-pointer hover:bg-muted/30"
+                      onClick={() => toggleLetterGroup(letter)}
+                    >
                       <td colSpan={5} className="px-4 py-1">
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(351,81%,49%)] text-white text-xs font-bold">
-                          {letter}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(351,81%,49%)] text-white text-xs font-bold">
+                            {letter}
+                          </span>
+                          <span className="text-xs text-muted-foreground">({groupedPatients[letter].length})</span>
+                          <ChevronDown className={cn("h-3.5 w-3.5 text-muted-foreground ml-auto transition-transform", expandedLetters.has(letter) && "rotate-180")} />
+                        </div>
                       </td>
                     </tr>
-                    {groupedPatients[letter].map((patient) => (
+                    {expandedLetters.has(letter) && groupedPatients[letter].map((patient) => (
                       <tr
                         key={patient.id}
                         className="group transition-colors hover:bg-muted/30"
                       >
-                        <td className="px-2 md:px-4 py-2.5">
+                        <td className="px-2 lg:px-4 py-2.5">
                           <Link
                             to={`/patients/${patient.id}`}
                             className="flex items-center gap-2.5"
@@ -912,7 +934,20 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                             )}>
                               {patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                             </div>
-                            <span className="font-medium text-xs md:text-sm text-foreground group-hover:text-primary transition-colors whitespace-nowrap">
+                            <div className={cn("h-2 w-2 rounded-full flex-shrink-0", patient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
+                            {patient.is_chronic && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="inline-flex items-center rounded-full bg-terracotta/10 px-1.5 py-0.5 text-[10px] font-bold text-terracotta">
+                                      <Pill className="h-2.5 w-2.5" />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Chronic Patient</TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                            <span className="font-medium text-xs text-foreground group-hover:text-primary transition-colors whitespace-nowrap">
                               {patient.name.includes(',') ? patient.name : (() => {
                                 const parts = patient.name.trim().split(/\s+/);
                                 if (parts.length <= 1) return patient.name;
@@ -920,16 +955,10 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                                 const firstNames = parts.slice(0, -1).join(" ");
                                 return `${lastName}, ${firstNames}`;
                               })()}
-                              {patient.is_chronic && (
-                                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-terracotta/10 px-1.5 py-0.5 text-[10px] font-bold text-terracotta">
-                                  <Pill className="h-2.5 w-2.5" />Chronic
-                                </span>
-                              )}
                             </span>
-                            <div className={cn("h-2 w-2 rounded-full flex-shrink-0", patient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
                           </Link>
                         </td>
-                        <td className="hidden md:table-cell px-4 py-2.5">
+                        <td className="hidden lg:table-cell px-4 py-2.5">
                           <div className="space-y-0.5">
                             {patient.email && (
                               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -948,16 +977,16 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                             )}
                           </div>
                         </td>
-                        <td className="px-3 md:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                        <td className="px-3 lg:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
                           {patient.last_visit 
                             ? new Date(patient.last_visit).toLocaleDateString() 
                             : <span className="text-muted-foreground/50">—</span>
                           }
                         </td>
-                        <td className="px-3 md:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                        <td className="hidden lg:table-cell px-3 lg:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
                           {new Date(patient.created_at).toLocaleDateString()}
                         </td>
-                        <td className="px-3 md:px-4 py-2.5 text-right">
+                        <td className="px-3 lg:px-4 py-2.5 text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-7 w-7">

@@ -215,7 +215,7 @@ export default function PatientProfile() {
       {/* Back Button */}
       <Link
         to="/patients"
-        className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
+        className="inline-flex items-center gap-2 text-base font-medium text-muted-foreground hover:text-foreground transition-colors group"
       >
         <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
         Back to Patients
@@ -233,7 +233,7 @@ export default function PatientProfile() {
                 {patient.name}
                 <div className={cn("h-2.5 w-2.5 rounded-full flex-shrink-0", patient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
               </h1>
-              <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mt-1">
+              <div className="flex flex-wrap items-center gap-3 text-base text-muted-foreground mt-1">
                 {patient.email && (
                   <span className="flex items-center gap-1.5">
                     <Mail className="h-3.5 w-3.5 text-primary/70" />

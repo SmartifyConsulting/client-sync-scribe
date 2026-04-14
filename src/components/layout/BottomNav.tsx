@@ -8,7 +8,7 @@ import {
   Handshake,
   FolderOpen,
   Gift,
-  Shield,
+  UserCog,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 
@@ -16,7 +16,7 @@ const doctorNavItems = [
   { icon: LayoutDashboard, label: "Home", to: "/dashboard" },
   { icon: Users, label: "Patients", to: "/patients" },
   { icon: Briefcase, label: "Practice", to: "/practice" },
-  { icon: Shield, label: "Admin", to: "/admin" },
+  { icon: UserCog, label: "Admin", to: "/admin" },
   { icon: Gift, label: "Rewards", to: "/doctor/rewards" },
 ];
 
