@@ -884,113 +884,132 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   </>
                 )}
                 {(selectedLetter ? availableLetters.filter(l => l === selectedLetter) : availableLetters.sort()).map((letter) => (
-                  <React.Fragment key={letter}>
-                    <tr id={`patient-group-${letter}`}>
-                      <td colSpan={5} className="px-4 py-1">
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(351,81%,49%)] text-white text-xs font-bold">
-                          {letter}
-                        </span>
-                      </td>
-                    </tr>
-                    {groupedPatients[letter].map((patient) => (
-                      <tr
-                        key={patient.id}
-                        className="group transition-colors hover:bg-muted/30"
-                      >
-                        <td className="px-2 md:px-4 py-2.5">
-                          <Link
-                            to={`/patients/${patient.id}`}
-                            className="flex items-center gap-2.5"
-                          >
-                            <div className={cn(
-                              "flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs",
-                              (() => {
-                                const letterIdx = availableLetters.indexOf(letter);
-                                const avatarColors = [
-                                  "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300",
-                                  "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-                                  "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
-                                ];
-                                return avatarColors[letterIdx % 3];
-                              })()
-                            )}>
-                              {patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                  <Collapsible key={letter} defaultOpen={false} asChild>
+                    <React.Fragment>
+                      <CollapsibleTrigger asChild>
+                        <tr id={`patient-group-${letter}`} className="cursor-pointer hover:bg-muted/30">
+                          <td colSpan={5} className="px-4 py-1">
+                            <div className="flex items-center gap-2">
+                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(351,81%,49%)] text-white text-xs font-bold">
+                                {letter}
+                              </span>
+                              <span className="text-xs text-muted-foreground">({groupedPatients[letter].length})</span>
+                              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground ml-auto transition-transform [[data-state=open]_&]:rotate-180" />
                             </div>
-                            <span className="font-medium text-xs md:text-sm text-foreground group-hover:text-primary transition-colors whitespace-nowrap">
-                              {patient.name.includes(',') ? patient.name : (() => {
-                                const parts = patient.name.trim().split(/\s+/);
-                                if (parts.length <= 1) return patient.name;
-                                const lastName = parts[parts.length - 1];
-                                const firstNames = parts.slice(0, -1).join(" ");
-                                return `${lastName}, ${firstNames}`;
-                              })()}
-                              {patient.is_chronic && (
-                                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-terracotta/10 px-1.5 py-0.5 text-[10px] font-bold text-terracotta">
-                                  <Pill className="h-2.5 w-2.5" />Chronic
-                                </span>
-                              )}
-                            </span>
-                            <div className={cn("h-2 w-2 rounded-full flex-shrink-0", patient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
-                          </Link>
-                        </td>
-                        <td className="hidden md:table-cell px-4 py-2.5">
-                          <div className="space-y-0.5">
-                            {patient.email && (
-                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <Mail className="h-3 w-3" />
-                                <span className="truncate max-w-[160px]">{patient.email}</span>
-                              </div>
-                            )}
-                            {patient.phone && (
-                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <Phone className="h-3 w-3" />
-                                {patient.phone}
-                              </div>
-                            )}
-                            {!patient.email && !patient.phone && (
-                              <span className="text-xs text-muted-foreground">—</span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-3 md:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
-                          {patient.last_visit 
-                            ? new Date(patient.last_visit).toLocaleDateString() 
-                            : <span className="text-muted-foreground/50">—</span>
-                          }
-                        </td>
-                        <td className="px-3 md:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
-                          {new Date(patient.created_at).toLocaleDateString()}
-                        </td>
-                        <td className="px-3 md:px-4 py-2.5 text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-7 w-7">
-                                <MoreVertical className="h-3.5 w-3.5" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleStartSession(patient.id)}>
-                                <Clock className="mr-2 h-4 w-4" />
-                                Start Session
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => navigate(`/patients/${patient.id}`)}>
-                                <Edit3 className="mr-2 h-4 w-4" />
-                                View Profile
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                onClick={() => handleDeletePatient(patient.id, patient.name)}
-                                className="text-destructive focus:text-destructive"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete Patient
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </td>
-                      </tr>
-                    ))}
-                  </React.Fragment>
+                          </td>
+                        </tr>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent asChild>
+                        <tbody>
+                          {groupedPatients[letter].map((patient) => (
+                            <tr
+                              key={patient.id}
+                              className="group transition-colors hover:bg-muted/30"
+                            >
+                              <td className="px-2 lg:px-4 py-2.5">
+                                <Link
+                                  to={`/patients/${patient.id}`}
+                                  className="flex items-center gap-2.5"
+                                >
+                                  <div className={cn(
+                                    "flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs",
+                                    (() => {
+                                      const letterIdx = availableLetters.indexOf(letter);
+                                      const avatarColors = [
+                                        "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300",
+                                        "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+                                        "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
+                                      ];
+                                      return avatarColors[letterIdx % 3];
+                                    })()
+                                  )}>
+                                    {patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                                  </div>
+                                  <div className={cn("h-2 w-2 rounded-full flex-shrink-0", patient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
+                                  {patient.is_chronic && (
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <span className="inline-flex items-center rounded-full bg-terracotta/10 px-1.5 py-0.5 text-[10px] font-bold text-terracotta">
+                                            <Pill className="h-2.5 w-2.5" />
+                                          </span>
+                                        </TooltipTrigger>
+                                        <TooltipContent>Chronic Patient</TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                  )}
+                                  <span className="font-medium text-xs text-foreground group-hover:text-primary transition-colors whitespace-nowrap">
+                                    {patient.name.includes(',') ? patient.name : (() => {
+                                      const parts = patient.name.trim().split(/\s+/);
+                                      if (parts.length <= 1) return patient.name;
+                                      const lastName = parts[parts.length - 1];
+                                      const firstNames = parts.slice(0, -1).join(" ");
+                                      return `${lastName}, ${firstNames}`;
+                                    })()}
+                                  </span>
+                                </Link>
+                              </td>
+                              <td className="hidden lg:table-cell px-4 py-2.5">
+                                <div className="space-y-0.5">
+                                  {patient.email && (
+                                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                      <Mail className="h-3 w-3" />
+                                      <span className="truncate max-w-[160px]">{patient.email}</span>
+                                    </div>
+                                  )}
+                                  {patient.phone && (
+                                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                      <Phone className="h-3 w-3" />
+                                      {patient.phone}
+                                    </div>
+                                  )}
+                                  {!patient.email && !patient.phone && (
+                                    <span className="text-xs text-muted-foreground">—</span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="px-3 lg:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                                {patient.last_visit 
+                                  ? new Date(patient.last_visit).toLocaleDateString() 
+                                  : <span className="text-muted-foreground/50">—</span>
+                                }
+                              </td>
+                              <td className="hidden lg:table-cell px-3 lg:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                                {new Date(patient.created_at).toLocaleDateString()}
+                              </td>
+                              <td className="px-3 lg:px-4 py-2.5 text-right">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7">
+                                      <MoreVertical className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => handleStartSession(patient.id)}>
+                                      <Clock className="mr-2 h-4 w-4" />
+                                      Start Session
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => navigate(`/patients/${patient.id}`)}>
+                                      <Edit3 className="mr-2 h-4 w-4" />
+                                      View Profile
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem 
+                                      onClick={() => handleDeletePatient(patient.id, patient.name)}
+                                      className="text-destructive focus:text-destructive"
+                                    >
+                                      <Trash2 className="mr-2 h-4 w-4" />
+                                      Delete Patient
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </CollapsibleContent>
+                    </React.Fragment>
+                  </Collapsible>
                 ))}
               </tbody>
             </table>
