@@ -1,45 +1,64 @@
 
 
-# Updated Plan: 13 Changes
+# Plan: Calendar Modal Fix, Vula Logo Alignment, Patients Page Buttons, Session Grouping
 
-All previous 12 items remain unchanged. Adding:
+## 1. Fix Calendar Appointment Modal
+**File:** `src/pages/CalendarView.tsx`
 
-### 13. Group sessions by time period in All Sessions list
+### Week view entries: show time + patient initials in small font
+- Lines 482-488: Update week view day events to show patient initials alongside time (matching month view style), using `text-[10px]` font
+- Look up patient name from `patients` list using `event.patientId`, compute initials
 
-**File:** `src/pages/Sessions.tsx` (lines 1380-1468)
+### Modal: solid background + patient name
+- Line 713: Add `className="bg-card"` to `DialogContent` to remove transparency
+- Lines 806-835: Add a patient name row (with User icon) between the time and date rows, looking up `patients.find(p => p.id === selectedEvent.patientId)?.name`
 
-Currently the filtered sessions render as a flat list. Replace with grouped, collapsible sections using the existing Accordion component.
+### "View Patient" → patient profile
+- Already correct at line 851: navigates to `/patients/${selectedEvent.patientId}`
 
-**Grouping logic:**
-- **This Week** — sessions from Monday of the current week to today. Always expanded, not collapsible.
-- **Last Week** — sessions from the previous Monday to Sunday. Collapsed by default.
-- **Monthly groups** — all older sessions grouped by `format(date, 'MMMM yyyy')` (e.g. "March 2026"). Collapsed by default.
-
-**Implementation:**
-1. Import `startOfWeek`, `endOfWeek`, `subWeeks`, `isWithinInterval` from `date-fns` and the `Accordion`/`AccordionItem`/`AccordionTrigger`/`AccordionContent` components
-2. After filtering, sort sessions descending by `started_at`, then partition into the three group types
-3. Render "This Week" as a plain open section (no accordion, just a heading + session list)
-4. Render "Last Week" and each month as `AccordionItem` entries (collapsed by default via `type="multiple"` with no default value)
-5. Each group header shows the period label and session count badge
-6. Session row markup stays identical
+### "Start Session" auto-selects patient
+- Already navigates to `/sessions?patient=${selectedEvent.patientId}` (line 249 area)
+- Verify `Sessions.tsx` reads `urlPatientId` and sets `selectedPatientId` — already wired up
 
 ---
 
-## Full Change List
+## 2. Vula Vouchers Logo Alignment
 
-| # | Change | File(s) |
-|---|--------|---------|
-| 1 | Fix "Unknown Patient" in appointment requests | `AppointmentRequestsPanel.tsx` |
-| 2 | Reduce Vula logos 20% (except My Rewards mobile) | `PatientDetailsEditor.tsx`, `DoctorRewards.tsx`, `StatsCard.tsx` |
-| 3 | Increase Vula logos 50% on My Rewards mobile | `MyRewards.tsx` |
-| 4 | Remove "View details" from Vula card on web | `Dashboard.tsx` |
-| 5 | Remove circular clipping on mobile Vula logo | `StatsCard.tsx` |
-| 6 | Fix tab order: skip "Forgot password" | `Auth.tsx` |
-| 7 | Allow uninviting a doctor | `MyDoctors.tsx` |
-| 8 | Fix patient profile pic on invitation cards | `InviteDoctorDialog.tsx`, `DoctorAccessRequests.tsx`, DB migration |
-| 9 | Notifications for invite/accept/decline | `DoctorAccessRequests.tsx`, `Dashboard.tsx` |
-| 10 | Round table from doctor home screen | `Dashboard.tsx` |
-| 11 | Allow same-day appointment booking | `BookAppointmentDialog.tsx` |
-| 12 | Patient greeting uses first name only | `PatientDetailsEditor.tsx` |
-| 13 | Group sessions by week/month with collapsible sections | `Sessions.tsx` |
+### Tablet view: middle-align the Vula logo
+**File:** `src/components/patients/PatientDetailsEditor.tsx` (lines 1088-1096)
+- The `hidden md:flex` Vula section on web/tablet: change from `items-center gap-3` to `items-center justify-center gap-3` to center-align the logo
+
+### Mobile view: right-align the Vula logo + add greeting
+**File:** `src/components/patients/PatientDetailsEditor.tsx` (lines 1137-1152)
+- Change the mobile Vula row layout: right-align the logo within the flex container
+- Add the patient's first-name greeting text to the left of the Vula display
+
+---
+
+## 3. Add "Round Tables" and "All Sessions" Buttons to Patients Page
+**File:** `src/pages/Patients.tsx` (lines 397-417)
+
+Currently has: Round Tables (mobile only via `lg:hidden`), Import, + Patient
+
+Changes:
+- Remove `lg:hidden` from Round Tables button so it shows on all layouts
+- Add an "All Sessions" button that navigates to `/sessions`, visible on all layouts
+- Ensure all buttons use responsive sizing: `text-[10px] md:text-xs` and `h-8 md:h-9` to fit properly across mobile/tablet/desktop
+
+---
+
+## 4. Session Grouping (already implemented — verify)
+**File:** `src/pages/Sessions.tsx` (lines 1378-1402)
+
+Session grouping into This Week / Last Week / Monthly buckets with Accordion is already implemented from the previous approved plan. No additional changes needed.
+
+---
+
+## Files Modified
+
+| File | Changes |
+|------|---------|
+| `src/pages/CalendarView.tsx` | Week view initials, solid modal bg, patient name row |
+| `src/components/patients/PatientDetailsEditor.tsx` | Tablet Vula center-align, mobile Vula right-align + greeting |
+| `src/pages/Patients.tsx` | Add "All Sessions" button, show "Round Tables" on all views, responsive sizing |
 
