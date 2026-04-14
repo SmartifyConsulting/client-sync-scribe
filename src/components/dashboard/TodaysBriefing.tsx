@@ -766,14 +766,14 @@ export function TodaysBriefing() {
                   {apt.allergies && (
                     <div className="flex items-center gap-1 text-xs text-destructive">
                       <AlertCircle className="h-3 w-3" />
-                      <span>Allergies: {apt.allergies}</span>
+                      <span>{translatedLabels['Allergies'] || 'Allergies'}: {apt.allergies}</span>
                     </div>
                   )}
 
                   {apt.lastSessionSummary ? (
                     <div className="bg-muted/50 rounded-lg p-2">
                       <p className="text-xs text-muted-foreground">
-                        <span className="font-medium text-foreground">Last session: </span>
+                        <span className="font-medium text-foreground">{translatedLabels['Last session'] || 'Last session'}: </span>
                         {apt.lastSessionSummary.length > 150 
                           ? apt.lastSessionSummary.substring(0, 150) + '...' 
                           : apt.lastSessionSummary}
@@ -781,7 +781,7 @@ export function TodaysBriefing() {
                     </div>
                   ) : (
                     <p className="text-xs text-muted-foreground italic">
-                      No previous session notes
+                      {translatedLabels['No previous session notes'] || 'No previous session notes'}
                     </p>
                   )}
 
@@ -808,7 +808,7 @@ export function TodaysBriefing() {
                       <div className="flex items-center gap-1.5 text-xs">
                         <MessageCircle className="h-3 w-3 text-amber-600" />
                         <span className="font-medium text-amber-600">
-                          {apt.unreadRoundTableNotes.length} unread note{apt.unreadRoundTableNotes.length > 1 ? 's' : ''}
+                          {apt.unreadRoundTableNotes.length} {apt.unreadRoundTableNotes.length > 1 ? (translatedLabels['unread notes'] || 'unread notes') : (translatedLabels['unread note'] || 'unread note')}
                         </span>
                       </div>
                       {apt.unreadRoundTableNotes.slice(0, 1).map((note, noteIndex) => (
