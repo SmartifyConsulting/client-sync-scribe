@@ -1,19 +1,27 @@
 
 
-# Updated Plan: 12 Changes
+# Updated Plan: 13 Changes
 
-All previous 11 items remain unchanged. Adding:
+All previous 12 items remain unchanged. Adding:
 
-### 12. Greeting shows first name for patients, surname for doctors
+### 13. Group sessions by time period in All Sessions list
 
-**File:** `src/components/patients/PatientDetailsEditor.tsx` (line 1081)
+**File:** `src/pages/Sessions.tsx` (lines 1380-1468)
 
-Currently: `${greeting}, ${patient.name}` — shows full name.
-Fix: `${greeting}, ${patient.name.split(' ')[0]}` — extract and show only the first name.
+Currently the filtered sessions render as a flat list. Replace with grouped, collapsible sections using the existing Accordion component.
 
-**File:** `src/pages/Dashboard.tsx` (lines 232-243)
+**Grouping logic:**
+- **This Week** — sessions from Monday of the current week to today. Always expanded, not collapsible.
+- **Last Week** — sessions from the previous Monday to Sunday. Collapsed by default.
+- **Monthly groups** — all older sessions grouped by `format(date, 'MMMM yyyy')` (e.g. "March 2026"). Collapsed by default.
 
-Already correct — doctors get `Dr. Surname`, non-doctors get first name. No change needed here.
+**Implementation:**
+1. Import `startOfWeek`, `endOfWeek`, `subWeeks`, `isWithinInterval` from `date-fns` and the `Accordion`/`AccordionItem`/`AccordionTrigger`/`AccordionContent` components
+2. After filtering, sort sessions descending by `started_at`, then partition into the three group types
+3. Render "This Week" as a plain open section (no accordion, just a heading + session list)
+4. Render "Last Week" and each month as `AccordionItem` entries (collapsed by default via `type="multiple"` with no default value)
+5. Each group header shows the period label and session count badge
+6. Session row markup stays identical
 
 ---
 
@@ -33,4 +41,5 @@ Already correct — doctors get `Dr. Surname`, non-doctors get first name. No ch
 | 10 | Round table from doctor home screen | `Dashboard.tsx` |
 | 11 | Allow same-day appointment booking | `BookAppointmentDialog.tsx` |
 | 12 | Patient greeting uses first name only | `PatientDetailsEditor.tsx` |
+| 13 | Group sessions by week/month with collapsible sections | `Sessions.tsx` |
 
