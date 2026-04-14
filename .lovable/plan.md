@@ -1,64 +1,50 @@
 
 
-# Rewards Card Layout + Transfer UX + Sidebar/Nav Restructuring
+# Dashboard, Briefing, Admin & Practice Refinements
 
 ## Summary
-Five groups of changes: rearrange reward cards in a 2x2 grid on mobile, add a transfer button with from/to app dropdowns in the Transfers section, remove bottom nav on W/T, restructure the sidebar navigation for doctors.
+Five changes: remove collapsible wrappers from To-Do and Round Tables on web/tablet, move narration segment label above play controls, remove doctor/patient Vula detail from dashboard card, remove Pricing tab from Admin (doctor view), add Pricing Admin accordion to My Practice.
 
 ## Changes
 
-### 1. Reward cards: 2x2 grid on mobile with Doctor/Patient on top
-**Files:** `src/pages/doctor/DoctorRewards.tsx`, `src/pages/patient/MyRewards.tsx`
+### 1. Remove accordion/collapsible from To-Do and Round Tables on web/tablet
+**File:** `src/pages/Dashboard.tsx`
+- For the `lg:block` instances of CompactTodoList and DoctorRoundTables (lines 310-331), render them directly without `Collapsible` wrappers
+- Keep the mobile (`lg:hidden`) instances as collapsible (collapsed by default) — actually per user request, remove accordion from those too. Render both To-Do and Round Tables as plain cards on all viewports
 
-**Doctor Rewards:** Reorder the 4 cards so Doctor Vulas and Patient Vulas are first (top row), Combined and Transferred are second (bottom row). Change grid from `sm:grid-cols-4` to `grid-cols-2` so it's always 2x2.
+**File:** `src/components/dashboard/CompactTodoList.tsx`
+- Remove the `Collapsible`/`CollapsibleTrigger`/`CollapsibleContent` wrapper. Render the card with a static primary header (always open)
 
-**Patient Rewards:** Already uses `grid-cols-2 md:grid-cols-4`. Keep `grid-cols-2` for mobile. On larger screens keep 4-column. No reorder needed (already correct).
+### 2. Move narration segment description above play controls
+**File:** `src/components/dashboard/TodaysBriefing.tsx`
+- Move the segment indicator text (`3/4 — Michael Chen`) from inline with play buttons (line 494) to a separate line above the controls row
+- Display it as a small centered label above the play/pause/skip buttons when playing
 
-### 2. Transfer button with From/To app dropdowns
-**Files:** `src/pages/doctor/DoctorRewards.tsx`, `src/pages/patient/MyRewards.tsx`
+### 3. Remove doctor/patient Vula breakdown from dashboard card
+**File:** `src/pages/Dashboard.tsx`
+- Change the Vula Vouchers StatsCard `change` prop from `Doctor: ${doctorVulas} · Patient: ${patientVulas}` to a simple label like `"View details"` or remove the subtitle entirely
+- Keep the combined total as the value; users drill into `/doctor/rewards` for the breakdown
 
-In the Transfers tab content, add a prominent "Transfer Vulas" button/section. Update the transfer dialog to include:
-- **From** dropdown: lists partner apps the user can transfer from
-- **To** dropdown: lists partner apps the user can transfer to
-- Amount field (already exists)
+### 4. Remove Pricing tab from Admin for doctors
+**File:** `src/pages/Admin.tsx`
+- Remove the "Pricing" TabsTrigger and TabsContent
+- This leaves Calendar, To-Do, Invoices, Templates in Admin
+- (System admins access pricing via their own admin route)
 
-This replaces the current single "Partner App" dropdown with a two-dropdown from/to pattern.
-
-### 3. Remove bottom nav on Web and Tablet (keep mobile only)
-**File:** `src/components/layout/BottomNav.tsx`
-- Add `md:hidden` back to the nav container for both doctor and patient navs, so bottom nav only shows on mobile
-
-**File:** `src/components/layout/AppLayout.tsx`
-- Restore `pb-24 md:pb-0` on main content (already correct)
-
-### 4. Restructure doctor sidebar navigation
-**File:** `src/components/layout/Sidebar.tsx`
-
-Update `doctorNavItems` to:
-```
-Dashboard  → /dashboard
-My Patients → /patients
-My Holarprac → /practice
-Admin → /admin
-My Vulas → /doctor/rewards
-```
-
-Changes:
-- Remove "My Holarchive" (`/profile`)
-- Move "My Patients" above "My Holarprac"
-- Remove "My Round Tables", "Calendar", "Sessions", "To-Do List" (Calendar/To-Do are in Admin page already)
-- Add "Admin" item with `UserCog` icon pointing to `/admin`
-- Keep "My Vulas" at bottom
-
-### 5. Admin page already has Calendar, To-Do, Pricing, Invoices, Templates
-**File:** `src/pages/Admin.tsx` — no changes needed, already contains all five sub-tabs.
+### 5. Add Pricing Admin accordion under Practice Information in My Practice
+**File:** `src/pages/MyPractice.tsx`
+- Import `PricingAdmin` from `@/pages/admin/PricingAdmin`
+- Add a new `AccordionItem value="pricing"` after the Practice Details accordion (after line 1436)
+- Use `DollarSign` icon (already imported) with label "Pricing Administration"
+- Render `<PricingAdmin />` inside the accordion content
 
 ## Files Modified
 
 | File | Changes |
 |------|---------|
-| `src/pages/doctor/DoctorRewards.tsx` | Reorder cards to 2x2 (Doctor/Patient top, Combined/Transferred bottom); update transfer dialog with from/to dropdowns |
-| `src/pages/patient/MyRewards.tsx` | Add transfer button in Transfers section; update transfer dialog with from/to dropdowns |
-| `src/components/layout/BottomNav.tsx` | Add `md:hidden` to hide bottom nav on tablet/web |
-| `src/components/layout/Sidebar.tsx` | Remove Holarchive, Round Tables, Calendar, Sessions, To-Do; reorder Patients before Holarprac; add Admin item |
+| `src/pages/Dashboard.tsx` | Remove collapsibles from To-Do and Round Tables; remove Vula breakdown detail |
+| `src/components/dashboard/CompactTodoList.tsx` | Remove Collapsible wrapper, render always-open card |
+| `src/components/dashboard/TodaysBriefing.tsx` | Move segment label above play controls |
+| `src/pages/Admin.tsx` | Remove Pricing tab |
+| `src/pages/MyPractice.tsx` | Add Pricing Admin accordion under Practice Information |
 
