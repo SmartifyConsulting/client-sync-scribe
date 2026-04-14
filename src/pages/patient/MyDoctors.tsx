@@ -122,7 +122,35 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
 
   const formatPermission = (p: string) => p.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
 
-  const DoctorTableRow = ({ doctor, permissions }: { doctor: DoctorProfile; permissions?: string[] }) => {
+  const handleUninvite = async () => {
+    if (!uninviteTarget) return;
+    setUninviteLoading(true);
+    try {
+      await supabase
+        .from("doctor_patient_access")
+        .update({ is_active: false, revoked_at: new Date().toISOString() } as any)
+        .eq("id", uninviteTarget.id);
+
+      // Notify the doctor
+      await supabase.from("notifications").insert({
+        user_id: uninviteTarget.doctor_id,
+        type: "access_revoked",
+        title: "Patient Removed Access",
+        description: "A patient has removed you from their healthcare providers.",
+        is_read: false,
+      });
+
+      toast({ title: "Doctor removed", description: "Access has been revoked." });
+      queryClient.invalidateQueries({ queryKey: ["patient-doctors"] });
+      setUninviteTarget(null);
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setUninviteLoading(false);
+    }
+  };
+
+  const DoctorTableRow = ({ access, doctor, permissions }: { access: DoctorAccess; doctor: DoctorProfile; permissions?: string[] }) => {
     const filteredPermissions = permissions?.filter(p => p !== 'patient_info' && p !== 'patient_information') || [];
 
     return (
@@ -151,23 +179,33 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
           )}
         </TableCell>
         <TableCell>
-          {filteredPermissions.length > 0 && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Lock className="h-4 w-4 text-primary cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent side="left" className="max-w-[200px]">
-                  <p className="text-xs font-semibold mb-1">Access granted:</p>
-                  <ul className="text-xs space-y-0.5">
-                    {filteredPermissions.map(p => (
-                      <li key={p}>• {formatPermission(p)}</li>
-                    ))}
-                  </ul>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+          <div className="flex items-center gap-2">
+            {filteredPermissions.length > 0 && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Lock className="h-4 w-4 text-primary cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="max-w-[200px]">
+                    <p className="text-xs font-semibold mb-1">Access granted:</p>
+                    <ul className="text-xs space-y-0.5">
+                      {filteredPermissions.map(p => (
+                        <li key={p}>• {formatPermission(p)}</li>
+                      ))}
+                    </ul>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={() => setUninviteTarget(access)}
+            >
+              <UserMinus className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </TableCell>
       </TableRow>
     );
