@@ -628,7 +628,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
 
       {/* Allergies & Conditions */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Collapsible defaultOpen={true} className="rounded-xl border border-red-500/30 bg-red-500/5 p-5">
+        <Collapsible defaultOpen={false} className="rounded-xl border border-red-500/30 bg-red-500/5 p-5">
           <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
             <ChevronDown className="h-4 w-4 text-red-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
             <AlertTriangle className="h-4 w-4 text-red-600" />
@@ -655,7 +655,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
           </CollapsibleContent>
         </Collapsible>
 
-        <Collapsible defaultOpen={true} className="rounded-xl border border-primary bg-card p-5">
+        <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card p-5">
           <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
             <ChevronDown className="h-4 w-4 text-blue-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
             <HeartPulse className="h-4 w-4 text-blue-600" />
@@ -697,7 +697,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
 
       {/* Medications and Symptoms */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Collapsible defaultOpen={true} className="rounded-xl border border-primary bg-card p-5">
+        <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card p-5">
           <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
             <ChevronDown className="h-4 w-4 text-green-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
             <Pill className="h-4 w-4 text-green-600" />
@@ -736,7 +736,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
           </CollapsibleContent>
         </Collapsible>
 
-        <Collapsible defaultOpen={true} className="rounded-xl border border-primary bg-card p-5">
+        <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card p-5">
           <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
             <ChevronDown className="h-4 w-4 text-amber-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
             <Activity className="h-4 w-4 text-amber-600" />
