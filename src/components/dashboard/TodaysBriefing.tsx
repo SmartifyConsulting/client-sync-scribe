@@ -36,6 +36,8 @@ interface AppointmentWithHistory {
 export function TodaysBriefing() {
   const { toast } = useToast();
   const [appointments, setAppointments] = useState<AppointmentWithHistory[]>([]);
+  const [translatedAppointments, setTranslatedAppointments] = useState<AppointmentWithHistory[] | null>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isNarrating, setIsNarrating] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -45,10 +47,113 @@ export function TodaysBriefing() {
   const [segmentAudioUrls, setSegmentAudioUrls] = useState<string[]>([]);
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
   const [segments, setSegments] = useState<{ label: string; text: string }[]>([]);
+  const [translatedLabels, setTranslatedLabels] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchAppointmentsForDate(selectedDate);
   }, [selectedDate]);
+
+  // Auto-translate briefing content when appointments load
+  useEffect(() => {
+    if (appointments.length === 0) return;
+    const translateBriefingContent = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('preferred_language')
+          .eq('id', user.id)
+          .single();
+        const lang = (profileData as any)?.preferred_language || 'English';
+        if (lang === 'English' || lang === 'en') {
+          setTranslatedAppointments(null);
+          setTranslatedLabels({});
+          return;
+        }
+
+        setIsTranslating(true);
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) return;
+
+        const translateText = async (text: string): Promise<string> => {
+          try {
+            const resp = await fetch(
+              `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/translate-text`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${session.access_token}`,
+                  'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                },
+                body: JSON.stringify({ text, targetLanguage: lang }),
+              }
+            );
+            if (resp.ok) {
+              const result = await resp.json();
+              return result.translatedText || text;
+            }
+          } catch (e) {
+            console.error('Translation error:', e);
+          }
+          return text;
+        };
+
+        // Translate static labels
+        const labelsToTranslate = [
+          'Allergies', 'Last session', 'No previous session notes',
+          'No appointments scheduled for today.', 'unread note', 'unread notes'
+        ];
+        const translatedLabelResults = await Promise.all(
+          labelsToTranslate.map(l => translateText(l))
+        );
+        const labelMap: Record<string, string> = {};
+        labelsToTranslate.forEach((key, i) => {
+          labelMap[key] = translatedLabelResults[i];
+        });
+        setTranslatedLabels(labelMap);
+
+        // Translate appointment content
+        const translated = await Promise.all(
+          appointments.map(async (apt) => {
+            const [summary, allergies, prescription, ...doctorSpecs] = await Promise.all([
+              apt.lastSessionSummary ? translateText(apt.lastSessionSummary) : Promise.resolve(null),
+              apt.allergies ? translateText(apt.allergies) : Promise.resolve(null),
+              apt.lastPrescription ? translateText(apt.lastPrescription) : Promise.resolve(null),
+              ...apt.linkedDoctors.map(d => d.specialty ? translateText(d.specialty) : Promise.resolve(null)),
+            ]);
+
+            const translatedNotes = await Promise.all(
+              apt.unreadRoundTableNotes.map(async (note) => ({
+                ...note,
+                content: await translateText(note.content),
+              }))
+            );
+
+            return {
+              ...apt,
+              lastSessionSummary: summary,
+              allergies,
+              lastPrescription: prescription,
+              linkedDoctors: apt.linkedDoctors.map((d, i) => ({
+                ...d,
+                specialty: doctorSpecs[i] || d.specialty,
+              })),
+              unreadRoundTableNotes: translatedNotes,
+            };
+          })
+        );
+
+        setTranslatedAppointments(translated);
+      } catch (err) {
+        console.error('Briefing translation failed:', err);
+      } finally {
+        setIsTranslating(false);
+      }
+    };
+    translateBriefingContent();
+  }, [appointments]);
 
   const isToday = isSameDay(selectedDate, new Date());
 
@@ -602,13 +707,20 @@ export function TodaysBriefing() {
         </div>
       </div>
 
+      {isTranslating && (
+        <div className="px-4 py-2 flex items-center gap-2 text-xs text-muted-foreground border-b border-border">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          Translating briefing...
+        </div>
+      )}
+
       {appointments.length === 0 ? (
         <div className="p-8 text-center text-muted-foreground">
-          No appointments scheduled for today.
+          {translatedLabels['No appointments scheduled for today.'] || 'No appointments scheduled for today.'}
         </div>
       ) : (
         <div className="divide-y divide-border">
-          {appointments.map((apt, index) => (
+          {(translatedAppointments || appointments).map((apt, index) => (
             <Collapsible key={apt.id} defaultOpen={index === 0}>
               <div className="p-3" style={{ animationDelay: `${index * 100}ms` }}>
                 <CollapsibleTrigger className="w-full">
@@ -654,14 +766,14 @@ export function TodaysBriefing() {
                   {apt.allergies && (
                     <div className="flex items-center gap-1 text-xs text-destructive">
                       <AlertCircle className="h-3 w-3" />
-                      <span>Allergies: {apt.allergies}</span>
+                      <span>{translatedLabels['Allergies'] || 'Allergies'}: {apt.allergies}</span>
                     </div>
                   )}
 
                   {apt.lastSessionSummary ? (
                     <div className="bg-muted/50 rounded-lg p-2">
                       <p className="text-xs text-muted-foreground">
-                        <span className="font-medium text-foreground">Last session: </span>
+                        <span className="font-medium text-foreground">{translatedLabels['Last session'] || 'Last session'}: </span>
                         {apt.lastSessionSummary.length > 150 
                           ? apt.lastSessionSummary.substring(0, 150) + '...' 
                           : apt.lastSessionSummary}
@@ -669,7 +781,7 @@ export function TodaysBriefing() {
                     </div>
                   ) : (
                     <p className="text-xs text-muted-foreground italic">
-                      No previous session notes
+                      {translatedLabels['No previous session notes'] || 'No previous session notes'}
                     </p>
                   )}
 
@@ -696,7 +808,7 @@ export function TodaysBriefing() {
                       <div className="flex items-center gap-1.5 text-xs">
                         <MessageCircle className="h-3 w-3 text-amber-600" />
                         <span className="font-medium text-amber-600">
-                          {apt.unreadRoundTableNotes.length} unread note{apt.unreadRoundTableNotes.length > 1 ? 's' : ''}
+                          {apt.unreadRoundTableNotes.length} {apt.unreadRoundTableNotes.length > 1 ? (translatedLabels['unread notes'] || 'unread notes') : (translatedLabels['unread note'] || 'unread note')}
                         </span>
                       </div>
                       {apt.unreadRoundTableNotes.slice(0, 1).map((note, noteIndex) => (
