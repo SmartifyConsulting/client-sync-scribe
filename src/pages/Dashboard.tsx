@@ -1,4 +1,4 @@
-import { Users, Calendar, TrendingUp, Award, Star, ChevronDown } from "lucide-react";
+import { Users, Calendar, TrendingUp, Award, Star } from "lucide-react";
 import vulaSymbol from "@/assets/vula-symbol.png";
 import { CompactTodoList } from "@/components/dashboard/CompactTodoList";
 import { Link } from "react-router-dom";
@@ -9,7 +9,7 @@ import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { DoctorAccessRequests } from "@/components/doctor/DoctorAccessRequests";
 import { DoctorRoundTables } from "@/components/doctor/DoctorRoundTables";
 import { useProfile } from "@/hooks/useProfile";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
 
 import { useUserRole } from "@/hooks/useUserRole";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -293,7 +293,7 @@ export default function Dashboard() {
           <StatsCard
             title="Vula Vouchers"
             value={doctorVulas + patientVulas}
-            change={`Doctor: ${doctorVulas} · Patient: ${patientVulas}`}
+            change="View details"
             trend="up"
             icon={Award}
             imageUrl={vulaSymbol}

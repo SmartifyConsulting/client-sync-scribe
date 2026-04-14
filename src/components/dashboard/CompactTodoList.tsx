@@ -327,8 +327,7 @@ export function CompactTodoList() {
           </div>
         </div>
 
-        <div>
-          <div className="p-3 space-y-2">
+        <div className="p-3 space-y-2">
         {/* Inline add */}
         <div className="flex gap-1.5">
           <Input
@@ -463,7 +462,7 @@ export function CompactTodoList() {
             ))
           )}
         </div>
-        </div>
       </div>
+    </div>
   );
 }
