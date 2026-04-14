@@ -238,6 +238,7 @@ export type Database = {
           doctor_practice_number: string
           doctor_registration_number: string
           id: string
+          patient_name: string | null
           patient_user_id: string
           status: Database["public"]["Enums"]["invitation_status"]
           updated_at: string
@@ -247,6 +248,7 @@ export type Database = {
           doctor_practice_number: string
           doctor_registration_number: string
           id?: string
+          patient_name?: string | null
           patient_user_id: string
           status?: Database["public"]["Enums"]["invitation_status"]
           updated_at?: string
@@ -256,6 +258,7 @@ export type Database = {
           doctor_practice_number?: string
           doctor_registration_number?: string
           id?: string
+          patient_name?: string | null
           patient_user_id?: string
           status?: Database["public"]["Enums"]["invitation_status"]
           updated_at?: string
