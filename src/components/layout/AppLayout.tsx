@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
 import { MobileHeader } from "./MobileHeader";
 import { Sidebar } from "./Sidebar";
@@ -7,15 +7,21 @@ import { Footer } from "./Footer";
 import { TopBarIcons } from "./TopBarIcons";
 import { AnimatePresence } from "framer-motion";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
+import { useUserRole } from "@/hooks/useUserRole";
 import { SubscriptionGateModal } from "@/components/auth/SubscriptionGateModal";
 import { AlertCircle } from "lucide-react";
 
 export function AppLayout() {
   const location = useLocation();
   const { isBlocked, daysRemaining, loading } = useSubscriptionGate();
+  const { isPatient, loading: roleLoading } = useUserRole();
 
   // Allow access to settings page even when blocked (so they can subscribe)
   const isSettingsPage = location.pathname.startsWith("/settings");
+
+  if (!roleLoading && isPatient) {
+    return <Navigate to="/patient/details" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

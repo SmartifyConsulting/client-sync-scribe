@@ -472,22 +472,33 @@ export default function Auth() {
       if (error) throw error;
       toast({ title: "Welcome back!", description: "Successfully signed in" });
       
-      // Check role to navigate directly to the correct page
       const userId = data?.user?.id;
       if (userId) {
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', userId)
-          .single();
-        
-        if (roleData?.role === 'patient') {
-          navigate('/patient/details');
-        } else {
-          navigate('/dashboard');
-        }
+        const [{ data: profileData }, { data: roleRows }] = await Promise.all([
+          supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", userId)
+            .maybeSingle(),
+          supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", userId),
+        ]);
+
+        const resolvedRole =
+          profileData?.role ??
+          ((roleRows ?? []).some((row) => row.role === "patient")
+            ? "patient"
+            : (roleRows ?? []).some((row) => row.role === "doctor")
+              ? "doctor"
+              : (roleRows ?? []).some((row) => row.role === "admin")
+                ? "admin"
+                : null);
+
+        navigate(resolvedRole === "patient" ? "/patient/details" : "/dashboard");
       } else {
-        navigate('/dashboard');
+        navigate("/dashboard");
       }
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
