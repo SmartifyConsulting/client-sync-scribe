@@ -339,10 +339,36 @@ export default function Dashboard() {
           {isDoctor && (
             <div className="hidden lg:block">
               <div className="rounded-xl border border-primary bg-card shadow-sm">
-                <div className="w-full rounded-t-xl bg-primary px-4 py-3">
+                <div className="w-full rounded-t-xl bg-primary px-4 py-3 flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-primary-foreground">My Round Tables</h3>
+                  <MessageSquare className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <div className="p-3">
+                <div className="p-3 space-y-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Search patient to start round table..."
+                      className="pl-9 h-8 text-xs"
+                      value={rtSearch}
+                      onChange={(e) => setRtSearch(e.target.value)}
+                    />
+                  </div>
+                  {rtSearch.trim() && filteredPatients.length > 0 && (
+                    <div className="max-h-32 overflow-y-auto space-y-1">
+                      {filteredPatients.slice(0, 5).map((p: any) => (
+                        <button
+                          key={p.id}
+                          onClick={() => { navigate(`/patients/${p.id}?tab=roundtable`); setRtSearch(""); }}
+                          className="w-full text-left px-3 py-2 rounded-lg hover:bg-muted text-xs font-medium text-foreground transition-colors"
+                        >
+                          {p.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {rtSearch.trim() && filteredPatients.length === 0 && (
+                    <p className="text-xs text-muted-foreground text-center py-2">No patients found</p>
+                  )}
                   <DoctorRoundTables />
                 </div>
               </div>
@@ -354,10 +380,36 @@ export default function Dashboard() {
           {isDoctor && (
             <div className="lg:hidden">
               <div className="rounded-xl border border-primary bg-card shadow-sm">
-                <div className="w-full rounded-t-xl bg-primary px-4 py-3">
+                <div className="w-full rounded-t-xl bg-primary px-4 py-3 flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-primary-foreground">My Round Tables</h3>
+                  <MessageSquare className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <div className="p-3">
+                <div className="p-3 space-y-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Search patient to start round table..."
+                      className="pl-9 h-8 text-xs"
+                      value={rtSearch}
+                      onChange={(e) => setRtSearch(e.target.value)}
+                    />
+                  </div>
+                  {rtSearch.trim() && filteredPatients.length > 0 && (
+                    <div className="max-h-32 overflow-y-auto space-y-1">
+                      {filteredPatients.slice(0, 5).map((p: any) => (
+                        <button
+                          key={p.id}
+                          onClick={() => { navigate(`/patients/${p.id}?tab=roundtable`); setRtSearch(""); }}
+                          className="w-full text-left px-3 py-2 rounded-lg hover:bg-muted text-xs font-medium text-foreground transition-colors"
+                        >
+                          {p.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {rtSearch.trim() && filteredPatients.length === 0 && (
+                    <p className="text-xs text-muted-foreground text-center py-2">No patients found</p>
+                  )}
                   <DoctorRoundTables />
                 </div>
               </div>
