@@ -38,6 +38,10 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<DoctorProfile[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const [uninviteTarget, setUninviteTarget] = useState<DoctorAccess | null>(null);
+  const [uninviteLoading, setUninviteLoading] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: doctors, isLoading } = useQuery({
     queryKey: ["patient-doctors"],
