@@ -419,27 +419,31 @@ export function TodaysBriefing() {
     }
   };
 
+  // Create Audio element once
   useEffect(() => {
     audioRef.current = new Audio();
-    audioRef.current.onended = () => {
-      // Auto-advance to next segment
-      setCurrentSegmentIndex((prev) => {
-        const next = prev + 1;
-        if (next < segmentAudioUrls.length) {
-          setTimeout(() => playSegment(next, segmentAudioUrls), 300);
-          return prev; // playSegment will set it
-        }
-        setIsPlaying(false);
-        setIsPaused(false);
-        return prev;
-      });
-    };
-    
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
       }
+    };
+  }, []);
+
+  // Update onended handler when segmentAudioUrls changes
+  useEffect(() => {
+    if (!audioRef.current) return;
+    audioRef.current.onended = () => {
+      setCurrentSegmentIndex((prev) => {
+        const next = prev + 1;
+        if (next < segmentAudioUrls.length) {
+          setTimeout(() => playSegment(next, segmentAudioUrls), 300);
+          return prev;
+        }
+        setIsPlaying(false);
+        setIsPaused(false);
+        return prev;
+      });
     };
   }, [segmentAudioUrls]);
 

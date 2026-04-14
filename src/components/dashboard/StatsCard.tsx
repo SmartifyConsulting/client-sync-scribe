@@ -40,7 +40,7 @@ export function StatsCard({
           {change && (
             <p
               className={cn(
-                "text-[9px] md:text-xs font-medium",
+                "text-[8px] md:text-[10px] font-medium",
                 trend === "up" && "text-success",
                 trend === "down" && "text-destructive",
                 trend === "neutral" && "text-muted-foreground"
