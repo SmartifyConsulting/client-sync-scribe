@@ -252,6 +252,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                              prefillRegistrationNumber={doctor.doctor_number || ""}
                              prefillDoctorName={doctor.full_name || ""}
                              prefillAvatarUrl={doctor.avatar_url || ""}
+                             prefillSpecialty={doctor.specialty || ""}
                            />
                          </TableCell>
                        </TableRow>

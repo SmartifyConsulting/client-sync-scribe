@@ -91,7 +91,7 @@ export function PermissionTransparencyModal({
 
         {/* Column 2: Private Items */}
         <div>
-          <h4 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
             <XCircle className="h-4 w-4 text-destructive" />
             Private — Not Shared
           </h4>

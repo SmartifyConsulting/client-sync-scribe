@@ -1074,20 +1074,26 @@ export function PatientDetailsEditor({
             <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-muted-foreground">Welcome back,</p>
-            <h3 className="text-sm font-semibold text-foreground">{patient.name}</h3>
-            <p className="text-xs text-muted-foreground">
+            <h3 className="text-xl md:text-2xl font-bold text-foreground tracking-tight whitespace-nowrap">
               {(() => {
-                const first = (patient.first_name || splitName(patient.name).first || "user")
-                  .toLowerCase()
-                  .replace(/\s+/g, "");
-                const last = (patient.last_name || splitName(patient.name).last || "patient")
-                  .toLowerCase()
-                  .replace(/\s+/g, "");
-                return `${first}.${last}@holarc.health`;
+                const hour = new Date().getHours();
+                const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+                return `${greeting}, ${patient.name}`;
               })()}
+            </h3>
+            <p className="text-muted-foreground text-[12px]">
+              Here's what's happening today, {format(new Date(), "EEEE, MMMM d, yyyy")}
             </p>
           </div>
+          {/* Vula Vouchers inline on web */}
+          {!rewardsLoading && lollipopCount !== undefined && (
+            <div className="hidden md:flex items-center gap-3">
+              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-14 w-auto object-contain" />
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
+                <AnimatedCounter target={lollipopCount} />
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Row 2: Upcoming Appointments */}
@@ -1128,9 +1134,9 @@ export function PatientDetailsEditor({
           )}
         </div>
 
-        {/* Row 3: Vula Vouchers */}
+        {/* Row 3: Vula Vouchers - mobile only (shown inline on web) */}
         {!rewardsLoading && lollipopCount !== undefined && (
-          <div className="mt-3 border-t border-border pt-3">
+          <div className="mt-3 border-t border-border pt-3 md:hidden">
             <div className="flex items-center rounded-xl border border-border overflow-hidden">
               <div className="flex-1 flex flex-col items-center justify-center py-3 px-4 bg-primary/5">
                 <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-20 w-auto object-contain" />
@@ -1335,10 +1341,10 @@ export function PatientDetailsEditor({
         {/* Sub-tab row for My Profile */}
         {activeParentTab === "profile" && (
           <TabsList className="bg-primary/25 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-            <TabsTrigger value="personal" className="text-xs whitespace-nowrap">
+            <TabsTrigger value="personal" className="text-xs whitespace-nowrap text-foreground">
               Personal Information
             </TabsTrigger>
-            <TabsTrigger value="medical" className="text-xs whitespace-nowrap">
+            <TabsTrigger value="medical" className="text-xs whitespace-nowrap text-foreground">
               Medical Information
             </TabsTrigger>
           </TabsList>
@@ -1347,13 +1353,13 @@ export function PatientDetailsEditor({
         {/* Sub-tab row for My Healthcare */}
         {activeParentTab === "care" && isSelfService && (
           <TabsList className="bg-primary/25 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-            <TabsTrigger value="doctors" className="text-xs whitespace-nowrap">
+            <TabsTrigger value="doctors" className="text-xs whitespace-nowrap text-foreground">
               My Healthcare Providers
             </TabsTrigger>
-            <TabsTrigger value="sessions" className="text-xs whitespace-nowrap">
+            <TabsTrigger value="sessions" className="text-xs whitespace-nowrap text-foreground">
               My Sessions
             </TabsTrigger>
-            <TabsTrigger value="roundtable" className="text-xs whitespace-nowrap">
+            <TabsTrigger value="roundtable" className="text-xs whitespace-nowrap text-foreground">
               My Round Table
             </TabsTrigger>
           </TabsList>
@@ -1362,13 +1368,13 @@ export function PatientDetailsEditor({
         {/* Sub-tab row for My Desk */}
         {activeParentTab === "admin" && isSelfService && (
           <TabsList className="bg-primary/25 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-            <TabsTrigger value="calendar" className="text-xs whitespace-nowrap">
+            <TabsTrigger value="calendar" className="text-xs whitespace-nowrap text-foreground">
               My Calendar
             </TabsTrigger>
-            <TabsTrigger value="tasks" className="text-xs whitespace-nowrap">
+            <TabsTrigger value="tasks" className="text-xs whitespace-nowrap text-foreground">
               My Tasks
             </TabsTrigger>
-            <TabsTrigger value="documents" className="text-xs whitespace-nowrap">
+            <TabsTrigger value="documents" className="text-xs whitespace-nowrap text-foreground">
               My Documents
             </TabsTrigger>
           </TabsList>
