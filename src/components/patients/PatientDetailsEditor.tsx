@@ -1275,16 +1275,35 @@ export function PatientDetailsEditor({
       );
     }
 
-    // Desktop/Tablet for self-service: use same flat tab rendering as mobile (sidebar handles nav)
+    // Desktop/Tablet for self-service: flat tab rendering (sidebar handles section nav)
     if (isSelfService) {
       return (
         <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-          {visibleTabs.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value} className={triggerClass}>
-              {tab.label}
-            </TabsTrigger>
-          ))}
-          {isSelfService && isDoctor && (
+          <TabsTrigger value="personal" className={triggerClass}>
+            Personal Information
+          </TabsTrigger>
+          <TabsTrigger value="medical" className={triggerClass}>
+            Medical Information
+          </TabsTrigger>
+          <TabsTrigger value="doctors" className={triggerClass}>
+            My Healthcare Providers
+          </TabsTrigger>
+          <TabsTrigger value="sessions" className={triggerClass}>
+            My Sessions
+          </TabsTrigger>
+          <TabsTrigger value="calendar" className={triggerClass}>
+            My Calendar
+          </TabsTrigger>
+          <TabsTrigger value="tasks" className={triggerClass}>
+            My Tasks
+          </TabsTrigger>
+          <TabsTrigger value="documents" className={triggerClass}>
+            My Documents
+          </TabsTrigger>
+          <TabsTrigger value="roundtable" className={triggerClass}>
+            My Round Table
+          </TabsTrigger>
+          {isDoctor && (
             <TabsTrigger
               value="practice"
               className={triggerClass}
@@ -1296,23 +1315,16 @@ export function PatientDetailsEditor({
               My Practice
             </TabsTrigger>
           )}
-          {isSelfService && (
-            <TabsTrigger
-              value="rewards"
-              className={triggerClass}
-              onClick={(e) => {
-                e.preventDefault();
-                navigate("/patient/rewards");
-              }}
-            >
-              My Rewards
-            </TabsTrigger>
-          )}
-          {isSelfService && hasRoundTable && (
-            <TabsTrigger value="roundtable" className={triggerClass}>
-              My Round Table
-            </TabsTrigger>
-          )}
+          <TabsTrigger
+            value="rewards"
+            className={triggerClass}
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/patient/rewards");
+            }}
+          >
+            My Rewards
+          </TabsTrigger>
         </TabsList>
       );
     }
