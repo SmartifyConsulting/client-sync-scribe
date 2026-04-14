@@ -23,6 +23,9 @@
 
 @layer base {
   :root {
+    /* Layout */
+    --sidebar-width: 210px;
+
     /* Pure, clean backgrounds */
     --background: 0 0% 100%;
     --foreground: 0 0% 12%;

@@ -24,7 +24,7 @@ export function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col overflow-hidden">
       {/* Subscription gate modal */}
       {!loading && isBlocked && !isSettingsPage && <SubscriptionGateModal />}
 
@@ -45,12 +45,12 @@ export function AppLayout() {
       <MobileHeader />
       
       {/* Main content */}
-      <main className="flex-1 pb-24 md:pb-0 md:ml-[210px]">
+      <main className="flex-1 pb-24 md:pb-0 md:ml-[var(--sidebar-width)]">
         {/* Persistent top-right icons on desktop */}
         <div className="hidden md:flex justify-end px-8 pt-4">
           <TopBarIcons />
         </div>
-        <div className="px-4 py-6 md:px-8 md:pt-2 md:pb-8 max-w-7xl">
+        <div className="px-4 py-6 md:px-8 md:pt-2 md:pb-8 max-w-7xl mx-auto">
           <AnimatePresence mode="wait">
             <PageTransition key={location.pathname}>
               <Outlet />
@@ -60,7 +60,7 @@ export function AppLayout() {
       </main>
 
       {/* Footer - hidden on mobile due to bottom nav */}
-      <div className="hidden md:block md:ml-[210px]">
+      <div className="hidden md:block md:ml-[var(--sidebar-width)]">
         <Footer />
       </div>
 

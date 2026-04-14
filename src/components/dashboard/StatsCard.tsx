@@ -35,8 +35,8 @@ export function StatsCard({
     >
       <div className="flex items-start justify-between">
         <div className="space-y-1">
-          <p className="text-[10px] md:text-xs font-medium text-muted-foreground">{title}</p>
-          <p className="text-base md:text-xl font-bold text-foreground tracking-tight">{value}</p>
+          <p className="text-[10px] md:text-xs font-medium text-muted-foreground truncate">{title}</p>
+          <p className="text-base md:text-xl font-bold text-foreground tracking-tight truncate">{value}</p>
           {change && (
             <p
               className={cn(
