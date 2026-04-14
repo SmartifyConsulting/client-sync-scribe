@@ -238,6 +238,7 @@ export type Database = {
           doctor_practice_number: string
           doctor_registration_number: string
           id: string
+          patient_avatar_url: string | null
           patient_name: string | null
           patient_user_id: string
           status: Database["public"]["Enums"]["invitation_status"]
@@ -248,6 +249,7 @@ export type Database = {
           doctor_practice_number: string
           doctor_registration_number: string
           id?: string
+          patient_avatar_url?: string | null
           patient_name?: string | null
           patient_user_id: string
           status?: Database["public"]["Enums"]["invitation_status"]
@@ -258,6 +260,7 @@ export type Database = {
           doctor_practice_number?: string
           doctor_registration_number?: string
           id?: string
+          patient_avatar_url?: string | null
           patient_name?: string | null
           patient_user_id?: string
           status?: Database["public"]["Enums"]["invitation_status"]

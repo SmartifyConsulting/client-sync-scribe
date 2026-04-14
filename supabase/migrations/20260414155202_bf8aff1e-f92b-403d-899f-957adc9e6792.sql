@@ -1,0 +1,1 @@
+ALTER TABLE public.doctor_access_requests ADD COLUMN IF NOT EXISTS patient_avatar_url text;
