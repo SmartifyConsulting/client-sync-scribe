@@ -1,143 +1,107 @@
 
 
-# Plan: Multi-Item UI Fixes — Dashboard, Calendar, Profile Switching, Navigation
+# Plan: Calendar Color Codes, Red Color Unification, Appointment Modal Redesign & Session Fix
 
-This is a large batch of fixes spanning 10+ files. Organized by area.
+## 1. Unify all red colors to #C0252F
 
----
+**File:** `src/index.css`
 
-## 1. Vula Vouchers logo sizing on Doctor Home (StatsCard)
+`#C0252F` in HSL is approximately `356 67% 42%`. Update:
+- `--terracotta` (light mode): `356 67% 42%` (currently `351 81% 49%`)
+- `--terracotta-light`: `356 67% 52%`
+- `--terracotta-dark`: `356 67% 32%`
+- `--destructive` (light mode): `356 67% 42%` (currently `0 84% 60%`)
+- Same updates for dark mode variants
 
-**File:** `src/components/dashboard/StatsCard.tsx`
+This makes calendar icon, mic, bell, destructive buttons, and logo accents all use `#C0252F`.
 
-The Vula logo in the StatsCard should be 50% of the card height. Currently the card has `min-h-[80px] md:min-h-[100px]`. The logo image is `h-10 w-10 md:h-14 md:w-14`. Change to `h-[40px] w-auto md:h-[50px]` (50% of min-h). Also center-align the logo vertically within the card (it already is via `flex items-start` — change to `items-center`).
+## 2. Calendar icon color — use terracotta instead of destructive
 
-## 2. Patients page: 2x2 button grid on tablet too
+**File:** `src/components/layout/TopBarIcons.tsx` (line 96)
+Change `bg-destructive` → `bg-terracotta` and `hover:bg-destructive/80` → `hover:bg-terracotta-dark` so all three icons (calendar, mic, bell) use the same terracotta color.
 
-**File:** `src/pages/Patients.tsx` (line 397)
+**File:** `src/components/layout/PatientAppLayout.tsx` (line 175)
+Same change for mobile header calendar icon.
 
-Currently `grid grid-cols-2 md:flex`. Change to `grid grid-cols-2` for all views (remove `md:flex`), keeping `gap-2`. The `+ Patient` button is already there for all views — no change needed.
+## 3. Google Calendar icon — remove border, enlarge 60%
 
-## 3. Dashboard greeting comma fix
+**File:** `src/pages/CalendarView.tsx` (line 290-301)
+- Remove `variant="outline"` → use `variant="ghost"` (removes border)
+- Change logo `className="h-6 w-auto"` → `className="h-10 w-auto"` (60% increase)
 
-**File:** `src/pages/Dashboard.tsx` (lines 276-278)
+## 4. Rename "+ New Appointment" to "+ Book"
 
-Currently: `Here's what's happening with your practice today` + `<span class="block md:inline">, {formattedDate}</span>`
+**File:** `src/pages/CalendarView.tsx` (line 306-309)
+Change button text from `New Appointment` to `Book`.
 
-The comma should end "today" line, not start the date line. Change to:
-```
-Here's what's happening with your practice today,
-<span class="block md:inline"> {formattedDate}</span>
-```
+**File:** `src/pages/patient/PatientCalendar.tsx`
+Verify the patient calendar also has a `+ Book` button (it already has BookAppointmentDialog, just rename label if needed).
 
-## 4. Vula Vouchers logo in patient profile banner — middle align & size increase
+## 5. Show appointment color codes on calendar entries
 
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
+**File:** `src/pages/CalendarView.tsx`
 
-- **Web/tablet (line 1091):** Change `h-9` → `h-12` (30% increase). Add vertical centering with the "Here's what's happening..." text by using `items-center` on the parent flex.
-- **Mobile (line 1149):** Change `h-10` → `h-17` (70% increase → use `h-[68px]`).
-- **My Holarchive banner (line 1091):** Ensure middle-align with the greeting text by adjusting flex alignment.
-- **Line 1149 (mobile Vula):** increase to 80% → `h-[72px]`.
+Currently `getTypeColor()` returns a color from `serviceColors` but only uses it for initials badges (line 570). The calendar entry background still uses hardcoded type classes (`bg-primary/20`, `bg-warning/20`).
 
-## 5. Dashboard stats cards — distribute evenly
+Fix: When `getTypeColor(event.type)` returns a service color, use it as inline `style={{ backgroundColor }}` with opacity instead of the hardcoded classes. Apply to:
+- Month view entries (line 559-564)
+- Week view entries (line 484)
+- Today's Schedule type badge (line 690-694)
 
-**File:** `src/pages/Dashboard.tsx` (line 287)
-
-Currently `grid-cols-2 lg:grid-cols-5`. The cards should distribute evenly. The 5-column grid on desktop is correct but the 2-col on mobile can leave uneven last row. Keep as-is since 5 cards in 2-col is inherently uneven — no better alternative without removing a card.
-
-## 6. Red calendar icon in TopBarIcons
-
-**File:** `src/components/layout/TopBarIcons.tsx`
-
-Add a red Calendar icon button (linking to `/calendar`) to the LEFT of the Mic icon:
+Also fix event type mapping (line 164): currently maps all non-followup, non-internal to "session". Instead, preserve the actual `apt.type` value so service-specific colors work:
 ```tsx
-<Link to="/calendar">
-  <div className="h-9 w-9 rounded-full bg-destructive flex items-center justify-center hover:bg-destructive/80 transition-colors">
-    <CalendarIcon className="h-4 w-4 text-white" />
-  </div>
-</Link>
+type: apt.type || "session",
 ```
-Also add this same icon in `PatientAppLayout.tsx` mobile header (before the Bell icon).
 
-## 7. Calendar view pill selector — fix on tablet/mobile
+## 6. Fix missing "End Recording" on mobile session view
 
-**File:** `src/pages/CalendarView.tsx` (lines 423-438)
+**File:** `src/pages/Sessions.tsx` (lines 787-946)
 
-- Make the week/month/year pills not truncated on tablet: add `shrink-0` and reduce padding on mobile: `px-2 py-1 text-xs md:px-3 md:py-1.5 md:text-sm`.
-- Align all header buttons cleanly using `flex flex-wrap gap-2 items-center`.
-- On mobile, make the pills smaller with `text-[11px] px-2 py-1`.
+The recording panel is in the second column (`order-2`) of the grid layout. On mobile (`grid-cols-1`), it renders AFTER the notes tab which takes up significant height. The "End Session" button at the bottom may be pushed off-screen.
 
-## 8. Replace "Connect Google Calendar" button with Google Calendar logo
+Fix: On mobile, move the recording panel to appear FIRST (before notes) by changing `order-2 lg:order-2` to `order-1 lg:order-2` on the recording panel div (line 822), and the notes panel from `order-2 lg:order-1` to `order-2 lg:order-1` (already correct — line 790 says `order-2 lg:order-1`). Wait — currently the recording panel IS `order-2 lg:order-2` and notes is `order-2 lg:order-1`. Fix: recording panel should be `order-1 lg:order-2` so it shows first on mobile.
 
-**File:** `src/pages/CalendarView.tsx` (lines 282-302)
+## 7. Redesign appointment detail modal
 
-Copy the uploaded `GoogleCal.png` to `src/assets/google-calendar-logo.png`. Replace the text button with an image button showing the logo. On all views:
+**File:** `src/pages/CalendarView.tsx` (lines 708-879)
+
+Replace the current modal with a redesigned version:
+
+**Header:** Appointment type as heading (e.g., "General Consultation"), patient full name as a clickable link (navigates to `/patients/{patientId}`), and date/time below.
+
+**Actions:**
+- **Mobile:** Three icon-only buttons in a row — Pencil (edit), Trash (delete), Green Play (start session)
+- **Tablet/Desktop:** Full text buttons — "Edit", "Delete" (destructive), "Start Session" (green)
+
 ```tsx
-<Button variant="outline" onClick={connect} disabled={isConnecting} className="gap-2 h-10">
-  {isConnecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <img src={googleCalLogo} alt="Google Calendar" className="h-6 w-auto" />}
-</Button>
+<DialogHeader>
+  <DialogTitle>{getEventTypeLabel(selectedEvent.type)}</DialogTitle>
+  <DialogDescription>
+    <Link to={`/patients/${selectedEvent.patientId}`} className="text-primary hover:underline font-medium">
+      {patientName}
+    </Link>
+    <span className="block text-muted-foreground">
+      {month} {day}, {year} · {time}
+    </span>
+  </DialogDescription>
+</DialogHeader>
+
+{/* Mobile: icon buttons */}
+<div className="flex md:hidden gap-3 justify-center pt-4">
+  <Button variant="outline" size="icon" onClick={edit}><Pencil /></Button>
+  <Button variant="destructive" size="icon" onClick={delete}><Trash2 /></Button>
+  <Button size="icon" className="bg-green-600 hover:bg-green-700"><Play /></Button>
+</div>
+
+{/* Desktop: text buttons */}
+<div className="hidden md:grid grid-cols-3 gap-2 pt-4">
+  <Button variant="outline">Edit</Button>
+  <Button variant="destructive">Delete</Button>
+  <Button className="bg-green-600 hover:bg-green-700">Start Session</Button>
+</div>
 ```
 
-## 9. Privacy badge — make "Private — Not Shared" items text black
-
-**Files:** `src/components/permissions/PrivacyBadge.tsx` (line 46), `src/components/permissions/PermissionTransparencyModal.tsx` (line 98)
-
-Change `text-muted-foreground/60` → `text-foreground` on the private items list, matching the "Shared with Care Team" items styling.
-
-## 10. Prevent doctors from adding themselves as patients
-
-**File:** `src/pages/Patients.tsx` (lines 94-130)
-
-In the patient search suggestions, filter out the current user's profile from results:
-```tsx
-const filtered = (profiles || []).filter(p => p.id !== user?.id);
-```
-This prevents doctors from selecting themselves as patients.
-
-## 11. Profile switching — Doctor button does nothing (TopBarIcons)
-
-**File:** `src/components/layout/TopBarIcons.tsx` (line 169)
-
-The Doctor button currently has: `onClick={() => { if (isOnPatientRoute) return; }}` — this does nothing useful. Fix:
-```tsx
-onClick={() => { if (isOnPatientRoute) navigate("/dashboard"); }}
-```
-
-## 12. Navigation menus don't switch when doctor switches profiles
-
-**File:** `src/components/layout/BottomNav.tsx`
-
-The BottomNav uses `isPatient` from `useUserRole()` which is database-role based. A doctor switching to patient view still has role='doctor'. Fix by checking the current route:
-```tsx
-const isOnPatientRoute = location.pathname.startsWith("/patient/");
-const showPatientNav = isPatient || isOnPatientRoute;
-```
-Use `showPatientNav` instead of `isPatient` to decide which nav to render.
-
-**File:** `src/components/layout/Sidebar.tsx`
-
-Same fix — detect if on patient route and show patient nav items:
-```tsx
-const isOnPatientRoute = location.pathname.startsWith("/patient/");
-const navItems = isAdmin ? adminNavItems : (isPatient || isOnPatientRoute) ? patientNavItems : doctorNavItems;
-```
-
-## 13. My Holarchive — remove parent "My Profile" tab bar on tablet/web
-
-**File:** `src/components/patients/PatientDetailsEditor.tsx` (lines 1275-1387)
-
-The tablet/web view shows the parent tab bar (My Profile / My Healthcare / My Desk). The user wants this removed for patients on tablet/web to match mobile. The desktop `renderTabsList` function renders this two-tier tab system. Instead, for self-service patients, use the mobile-style flat tab rendering (section-based) on all views. Only show the two-tier parent tabs for doctor-viewed patient records.
-
-Change: When `isSelfService` is true, always use the mobile-style section-based rendering (the sidebar handles navigation on desktop). Remove the parent tab bar for self-service views entirely — the sidebar already provides navigation between Home, My Holarchive, My Calendar, etc.
-
-## 14. Calendar appointment detail modal — fix overlapping
-
-**File:** `src/pages/CalendarView.tsx` (lines 708-878)
-
-The modal has overlapping buttons. Fix the button layout in the non-edit view (lines 846-871):
-- Change `flex gap-2` to `grid grid-cols-2 gap-2` for the action buttons
-- Make the delete button span appropriately
-- Ensure buttons don't overflow on mobile with `text-xs` and proper sizing
+Notes and location info remain between header and action buttons.
 
 ---
 
@@ -145,15 +109,10 @@ The modal has overlapping buttons. Fix the button layout in the non-edit view (l
 
 | File | Changes |
 |------|---------|
-| `src/components/dashboard/StatsCard.tsx` | Logo 50% card height, center-align |
-| `src/pages/Patients.tsx` | 2x2 grid all views, prevent self-add |
-| `src/pages/Dashboard.tsx` | Comma placement fix |
-| `src/components/patients/PatientDetailsEditor.tsx` | Vula logo sizing, remove parent tab bar for self-service |
-| `src/components/layout/TopBarIcons.tsx` | Red calendar icon, fix doctor switch button |
-| `src/components/layout/PatientAppLayout.tsx` | Red calendar icon in mobile header |
-| `src/pages/CalendarView.tsx` | Pill selector fix, Google Calendar logo, modal button fix |
-| `src/components/permissions/PrivacyBadge.tsx` | Black text for private items |
-| `src/components/permissions/PermissionTransparencyModal.tsx` | Black text for private items |
-| `src/components/layout/BottomNav.tsx` | Route-aware nav switching |
-| `src/components/layout/Sidebar.tsx` | Route-aware nav switching |
+| `src/index.css` | Unify terracotta + destructive to #C0252F |
+| `src/components/layout/TopBarIcons.tsx` | Calendar icon uses terracotta |
+| `src/components/layout/PatientAppLayout.tsx` | Calendar icon uses terracotta |
+| `src/pages/CalendarView.tsx` | Color-coded entries, Google Cal logo border/size, rename +Book, redesign modal, preserve event type |
+| `src/pages/Sessions.tsx` | Fix recording panel order on mobile |
+| `src/pages/patient/PatientCalendar.tsx` | Rename button to +Book if needed |
 
