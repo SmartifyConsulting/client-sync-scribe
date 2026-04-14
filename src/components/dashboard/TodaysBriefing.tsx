@@ -53,6 +53,108 @@ export function TodaysBriefing() {
     fetchAppointmentsForDate(selectedDate);
   }, [selectedDate]);
 
+  // Auto-translate briefing content when appointments load
+  useEffect(() => {
+    if (appointments.length === 0) return;
+    const translateBriefingContent = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('preferred_language')
+          .eq('id', user.id)
+          .single();
+        const lang = (profileData as any)?.preferred_language || 'English';
+        if (lang === 'English' || lang === 'en') {
+          setTranslatedAppointments(null);
+          setTranslatedLabels({});
+          return;
+        }
+
+        setIsTranslating(true);
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) return;
+
+        const translateText = async (text: string): Promise<string> => {
+          try {
+            const resp = await fetch(
+              `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/translate-text`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${session.access_token}`,
+                  'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                },
+                body: JSON.stringify({ text, targetLanguage: lang }),
+              }
+            );
+            if (resp.ok) {
+              const result = await resp.json();
+              return result.translatedText || text;
+            }
+          } catch (e) {
+            console.error('Translation error:', e);
+          }
+          return text;
+        };
+
+        // Translate static labels
+        const labelsToTranslate = [
+          'Allergies', 'Last session', 'No previous session notes',
+          'No appointments scheduled for today.', 'unread note', 'unread notes'
+        ];
+        const translatedLabelResults = await Promise.all(
+          labelsToTranslate.map(l => translateText(l))
+        );
+        const labelMap: Record<string, string> = {};
+        labelsToTranslate.forEach((key, i) => {
+          labelMap[key] = translatedLabelResults[i];
+        });
+        setTranslatedLabels(labelMap);
+
+        // Translate appointment content
+        const translated = await Promise.all(
+          appointments.map(async (apt) => {
+            const [summary, allergies, prescription, ...doctorSpecs] = await Promise.all([
+              apt.lastSessionSummary ? translateText(apt.lastSessionSummary) : Promise.resolve(null),
+              apt.allergies ? translateText(apt.allergies) : Promise.resolve(null),
+              apt.lastPrescription ? translateText(apt.lastPrescription) : Promise.resolve(null),
+              ...apt.linkedDoctors.map(d => d.specialty ? translateText(d.specialty) : Promise.resolve(null)),
+            ]);
+
+            const translatedNotes = await Promise.all(
+              apt.unreadRoundTableNotes.map(async (note) => ({
+                ...note,
+                content: await translateText(note.content),
+              }))
+            );
+
+            return {
+              ...apt,
+              lastSessionSummary: summary,
+              allergies,
+              lastPrescription: prescription,
+              linkedDoctors: apt.linkedDoctors.map((d, i) => ({
+                ...d,
+                specialty: doctorSpecs[i] || d.specialty,
+              })),
+              unreadRoundTableNotes: translatedNotes,
+            };
+          })
+        );
+
+        setTranslatedAppointments(translated);
+      } catch (err) {
+        console.error('Briefing translation failed:', err);
+      } finally {
+        setIsTranslating(false);
+      }
+    };
+    translateBriefingContent();
+  }, [appointments]);
+
   const isToday = isSameDay(selectedDate, new Date());
 
   const fetchAppointmentsForDate = async (date: Date) => {
