@@ -1,52 +1,39 @@
 
 
-# Add Icons, Round Tables, Patient List Spacing, Restore Sidebar, Rename Vulas Card, Fix Greeting
+# Darken Inactive Items, Accordion Sections, Smaller Document Rows
 
 ## Summary
-Six changes: add icons to Digital Signature and Voice Narration headers in My Practice, add DoctorRoundTables to the dashboard, increase patient list column spacing on mobile, restore the left sidebar for web/tablet views, rename "Total Vulas" to "Vula Vouchers", and keep the greeting on a single line.
+Three changes: make deactivated/inactive medications and symptoms more visible with darker styling, wrap Conditions/Diagnoses, Medications, Symptoms, and Allergies in collapsible accordions in the Overview tab, and reduce document row font size by 35% across all views.
 
 ## Changes
 
-### 1. Add icons to Digital Signature and Voice Narration accordion triggers
-**File:** `src/pages/MyPractice.tsx`
-- Digital Signature trigger: add `PenTool` icon inline, matching pattern of other accordion headers
-- Voice Narration trigger: add `Volume2` icon inline
+### 1. Darken deactivated Medications and Symptoms in Overview
+**File:** `src/components/patients/PatientOverview.tsx`
+- Currently inactive items use `text-muted-foreground/50` (50% opacity) which is too faint
+- Change to `text-muted-foreground` (no opacity reduction) for the text, and use `line-through` decoration to visually distinguish inactive from active
+- Apply to: Medications (lines 707-708), Symptoms (lines 744-745), and Conditions (lines 667-668)
+- Also darken the inactive dot indicators from `bg-muted-foreground/40` to `bg-muted-foreground/60`
 
-### 2. Add DoctorRoundTables to Dashboard
-**File:** `src/pages/Dashboard.tsx`
-- Mobile layout: place below RecentActivity with a "My Round Tables" heading
-- Desktop/tablet layout: place below CompactTodoList in the right column
+### 2. Make Conditions/Diagnoses, Medications, Symptoms, and Allergies collapsible
+**File:** `src/components/patients/PatientOverview.tsx`
+- Wrap each of the four sections (Allergies, Conditions/Diagnoses, Medications, Symptoms) in a `Collapsible` component with `defaultOpen={true}`
+- Convert each section header into a `CollapsibleTrigger` with a chevron icon
+- Wrap the list content in `CollapsibleContent`
+- Import `Collapsible`, `CollapsibleTrigger`, `CollapsibleContent` from `@/components/ui/collapsible`
 
-### 3. Shift patient list columns further right on mobile
-**File:** `src/pages/Patients.tsx`
-- Increase padding on Last Seen and Since columns from `px-1` to `px-3` on mobile
-
-### 4. Restore left sidebar for web and tablet views
-**File:** `src/components/layout/AppLayout.tsx`
-- Re-import `Sidebar` and render it for `md+` screens
-- Add `md:ml-[210px]` offset to main content and footer
-
-### 5. Rename "Total Vulas" to "Vula Vouchers"
-**Files:** `src/pages/Dashboard.tsx`, `src/pages/patient/MyRewards.tsx`, `src/components/gamification/LollipopReport.tsx`
-- Change all instances of `"Total Vulas"` to `"Vula Vouchers"` across the doctor dashboard stats card, patient rewards page, and lollipop report
-
-### 6. Keep greeting and name on one line
-**File:** `src/pages/Dashboard.tsx`
-- Remove the `<span className="block">` wrapper around `displayName` so the greeting renders as a single line (e.g., "Good morning, Dr. Surname") instead of wrapping the name onto a second line
-- Add `whitespace-nowrap` to prevent wrapping on narrow screens
-
-Also check and fix any similar greeting pattern in the patient dashboard:
-**File:** `src/pages/patient/PatientDashboard.tsx` (if applicable)
+### 3. Reduce Document row font size by 35%
+**File:** `src/pages/PatientProfile.tsx`
+- Document name (`font-semibold`): change from default to `text-[10px]`
+- Document date (`text-sm`): change to `text-[9px]`
+- Template badge (`text-xs`): change to `text-[8px]`
+- DRAFT badge: already `text-[10px]`, change to `text-[7px]`
+- Reduce icon container and icon sizes proportionally (h-12/w-12 → h-8/w-8, h-6/w-6 → h-4/w-4)
+- Reduce row padding from `p-5` to `p-3`
 
 ## Files Modified
 
 | File | Changes |
 |------|---------|
-| `src/pages/MyPractice.tsx` | Add PenTool and Volume2 icons to accordion triggers |
-| `src/pages/Dashboard.tsx` | Add DoctorRoundTables, rename "Total Vulas" to "Vula Vouchers", single-line greeting |
-| `src/pages/patient/MyRewards.tsx` | Rename "Total Vulas" to "Vula Vouchers" |
-| `src/components/gamification/LollipopReport.tsx` | Rename "Total Vulas" to "Vula Vouchers" |
-| `src/pages/patient/PatientDashboard.tsx` | Single-line greeting if applicable |
-| `src/pages/Patients.tsx` | Increase mobile column padding from px-1 to px-3 |
-| `src/components/layout/AppLayout.tsx` | Restore Sidebar for md+ screens with ml offset |
+| `src/components/patients/PatientOverview.tsx` | Darken inactive item styling, wrap 4 sections in collapsibles |
+| `src/pages/PatientProfile.tsx` | Reduce document row font/icon/padding sizes by ~35% |
 
