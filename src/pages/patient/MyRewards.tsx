@@ -340,8 +340,8 @@ export default function MyRewards() {
                 <p className="text-[10px] md:text-sm font-medium text-blue-100">Vula Vouchers</p>
                 <p className="text-2xl md:text-4xl font-bold text-white">{lollipopCount}</p>
               </div>
-              <div className="h-10 w-10 md:h-14 md:w-14 rounded-full bg-white shadow-sm flex items-center justify-center">
-                <img src={vulaVouchersLogo} alt="Vulas" className="h-7 w-7 md:h-10 md:w-10 object-contain" />
+              <div className="h-8 w-8 md:h-11 md:w-11 rounded-full bg-white shadow-sm flex items-center justify-center">
+                <img src={vulaVouchersLogo} alt="Vulas" className="h-6 w-6 md:h-8 md:w-8 object-contain" />
               </div>
             </div>
           </CardContent>

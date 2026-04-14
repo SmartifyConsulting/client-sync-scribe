@@ -1088,7 +1088,7 @@ export function PatientDetailsEditor({
           {/* Vula Vouchers inline on web */}
           {!rewardsLoading && lollipopCount !== undefined && (
             <div className="hidden md:flex items-center gap-3">
-              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-14 w-auto object-contain" />
+              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-11 w-auto object-contain" />
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
                 <AnimatedCounter target={lollipopCount} />
               </span>
@@ -1139,7 +1139,7 @@ export function PatientDetailsEditor({
           <div className="mt-3 border-t border-border pt-3 md:hidden">
             <div className="flex items-center rounded-xl border border-border overflow-hidden">
               <div className="flex-1 flex flex-col items-center justify-center py-3 px-4 bg-primary/5">
-                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-20 w-auto object-contain" />
+                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-16 w-auto object-contain" />
               </div>
               <div className="w-[1px] self-stretch bg-border" />
               <div className="flex-1 flex flex-col items-center justify-center py-3 px-4">
@@ -1409,7 +1409,7 @@ export function PatientDetailsEditor({
                 <AnimatedCounter target={lollipopCount} />
               </span>
             </div>
-            <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-7 w-auto object-contain" />
+            <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-6 w-auto object-contain" />
           </div>
         </div>
         {/* Bottom row: calendar/mic + appointments */}
