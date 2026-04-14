@@ -1088,7 +1088,7 @@ export function PatientDetailsEditor({
           {/* Vula Vouchers inline on web */}
           {!rewardsLoading && lollipopCount !== undefined && (
             <div className="hidden md:flex items-center justify-center gap-3">
-              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-9 w-auto object-contain" />
+              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-12 w-auto object-contain" />
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
                 <AnimatedCounter target={lollipopCount} />
               </span>
@@ -1146,7 +1146,7 @@ export function PatientDetailsEditor({
                 })()}
               </span>
               <div className="flex items-center gap-2">
-                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-10 w-auto object-contain" />
+                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-[72px] w-auto object-contain" />
                 <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
                   <AnimatedCounter target={lollipopCount} />
                 </span>
@@ -1275,47 +1275,15 @@ export function PatientDetailsEditor({
       );
     }
 
-    // Desktop/Tablet: grouped tabs
-    return (
-      <div className="space-y-1">
+    // Desktop/Tablet for self-service: use same flat tab rendering as mobile (sidebar handles nav)
+    if (isSelfService) {
+      return (
         <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-          {/* My Profile parent trigger */}
-          <button
-            type="button"
-            onClick={() => handleParentTabClick("profile", PROFILE_TABS)}
-            className={cn(
-              "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-xs font-medium transition-all",
-              activeParentTab === "profile" ? "bg-white text-black shadow-sm" : "text-white hover:bg-white/10",
-            )}
-          >
-            My Profile
-          </button>
-          {/* My Healthcare parent trigger */}
-          {isSelfService && (
-            <button
-              type="button"
-              onClick={() => handleParentTabClick("care", CARE_TABS)}
-              className={cn(
-                "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-xs font-medium transition-all",
-                activeParentTab === "care" ? "bg-white text-black shadow-sm" : "text-white hover:bg-white/10",
-              )}
-            >
-              My Healthcare
-            </button>
-          )}
-          {/* My Desk parent trigger */}
-          {isSelfService && (
-            <button
-              type="button"
-              onClick={() => handleParentTabClick("admin", ADMIN_TABS)}
-              className={cn(
-                "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-xs font-medium transition-all",
-                activeParentTab === "admin" ? "bg-white text-black shadow-sm" : "text-white hover:bg-white/10",
-              )}
-            >
-              My Desk
-            </button>
-          )}
+          {visibleTabs.map((tab) => (
+            <TabsTrigger key={tab.value} value={tab.value} className={triggerClass}>
+              {tab.label}
+            </TabsTrigger>
+          ))}
           {isSelfService && isDoctor && (
             <TabsTrigger
               value="practice"
@@ -1340,6 +1308,30 @@ export function PatientDetailsEditor({
               My Rewards
             </TabsTrigger>
           )}
+          {isSelfService && hasRoundTable && (
+            <TabsTrigger value="roundtable" className={triggerClass}>
+              My Round Table
+            </TabsTrigger>
+          )}
+        </TabsList>
+      );
+    }
+
+    // Desktop/Tablet for doctor-viewed patient: grouped tabs
+    return (
+      <div className="space-y-1">
+        <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+          {/* My Profile parent trigger */}
+          <button
+            type="button"
+            onClick={() => handleParentTabClick("profile", PROFILE_TABS)}
+            className={cn(
+              "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-xs font-medium transition-all",
+              activeParentTab === "profile" ? "bg-white text-black shadow-sm" : "text-white hover:bg-white/10",
+            )}
+          >
+            My Profile
+          </button>
         </TabsList>
 
         {/* Sub-tab row for My Profile */}
@@ -1350,36 +1342,6 @@ export function PatientDetailsEditor({
             </TabsTrigger>
             <TabsTrigger value="medical" className="text-xs whitespace-nowrap text-foreground">
               Medical Information
-            </TabsTrigger>
-          </TabsList>
-        )}
-
-        {/* Sub-tab row for My Healthcare */}
-        {activeParentTab === "care" && isSelfService && (
-          <TabsList className="bg-primary/25 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-            <TabsTrigger value="doctors" className="text-xs whitespace-nowrap text-foreground">
-              My Healthcare Providers
-            </TabsTrigger>
-            <TabsTrigger value="sessions" className="text-xs whitespace-nowrap text-foreground">
-              My Sessions
-            </TabsTrigger>
-            <TabsTrigger value="roundtable" className="text-xs whitespace-nowrap text-foreground">
-              My Round Table
-            </TabsTrigger>
-          </TabsList>
-        )}
-
-        {/* Sub-tab row for My Desk */}
-        {activeParentTab === "admin" && isSelfService && (
-          <TabsList className="bg-primary/25 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-            <TabsTrigger value="calendar" className="text-xs whitespace-nowrap text-foreground">
-              My Calendar
-            </TabsTrigger>
-            <TabsTrigger value="tasks" className="text-xs whitespace-nowrap text-foreground">
-              My Tasks
-            </TabsTrigger>
-            <TabsTrigger value="documents" className="text-xs whitespace-nowrap text-foreground">
-              My Documents
             </TabsTrigger>
           </TabsList>
         )}
