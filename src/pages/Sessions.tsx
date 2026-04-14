@@ -1375,100 +1375,173 @@ export default function Sessions() {
             }
             return true;
           });
-          return filteredSessions.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">No sessions match your search.</p>
-          ) : (
-          <div className="space-y-1.5">
-            {filteredSessions.map((session) => (
-              <div
-                key={session.id}
-                className="flex items-center justify-between p-2 rounded-lg border border-border bg-background hover:bg-accent/50 transition-colors"
-              >
-                {(() => {
-                  const daysSinceCreation = Math.floor((Date.now() - new Date(session.created_at).getTime()) / (1000 * 60 * 60 * 24));
-                  const isExpired = daysSinceCreation > 7;
-                  return (
-                    <div className="mr-3" onClick={(e) => e.stopPropagation()}>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>
-                              <Checkbox
-                                checked={selectedRecordings.has(session.id)}
-                                disabled={isExpired}
-                                className={isExpired ? "opacity-40" : ""}
-                                onCheckedChange={(checked) => {
-                                  setSelectedRecordings(prev => {
-                                    const next = new Set(prev);
-                                    if (checked) next.add(session.id);
-                                    else next.delete(session.id);
-                                    return next;
-                                  });
-                                }}
-                              />
-                            </span>
-                          </TooltipTrigger>
-                          {isExpired && <TooltipContent>Recording expired</TooltipContent>}
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  );
-                })()}
-                <div className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/sessions/${session.id}`)}>
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0">
-                    <User className="h-4 w-4 text-primary" />
+          const now = new Date();
+          const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+          const lastWeekStart = startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
+          const lastWeekEnd = endOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
+
+          const thisWeekSessions = filteredSessions.filter(s => {
+            const d = parseISO(s.started_at);
+            return d >= weekStart && d <= now;
+          });
+          const lastWeekSessions = filteredSessions.filter(s => {
+            const d = parseISO(s.started_at);
+            return isWithinInterval(d, { start: lastWeekStart, end: lastWeekEnd });
+          });
+          const olderSessions = filteredSessions.filter(s => {
+            const d = parseISO(s.started_at);
+            return d < lastWeekStart;
+          });
+
+          // Group older sessions by month
+          const monthGroups: Record<string, typeof olderSessions> = {};
+          olderSessions.forEach(s => {
+            const key = format(parseISO(s.started_at), 'MMMM yyyy');
+            if (!monthGroups[key]) monthGroups[key] = [];
+            monthGroups[key].push(s);
+          });
+
+          const renderSessionRow = (session: typeof filteredSessions[0]) => (
+            <div
+              key={session.id}
+              className="flex items-center justify-between p-2 rounded-lg border border-border bg-background hover:bg-accent/50 transition-colors"
+            >
+              {(() => {
+                const daysSinceCreation = Math.floor((Date.now() - new Date(session.created_at).getTime()) / (1000 * 60 * 60 * 24));
+                const isExpired = daysSinceCreation > 7;
+                return (
+                  <div className="mr-3" onClick={(e) => e.stopPropagation()}>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <Checkbox
+                              checked={selectedRecordings.has(session.id)}
+                              disabled={isExpired}
+                              className={isExpired ? "opacity-40" : ""}
+                              onCheckedChange={(checked) => {
+                                setSelectedRecordings(prev => {
+                                  const next = new Set(prev);
+                                  if (checked) next.add(session.id);
+                                  else next.delete(session.id);
+                                  return next;
+                                });
+                              }}
+                            />
+                          </span>
+                        </TooltipTrigger>
+                        {isExpired && <TooltipContent>Recording expired</TooltipContent>}
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{session.title || 'Untitled Session'}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {session.patient?.name || 'Unknown Patient'} • {format(new Date(session.started_at), 'MMM d, yyyy h:mm a')}
-                    </p>
-                  </div>
+                );
+              })()}
+              <div className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/sessions/${session.id}`)}>
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                  <User className="h-4 w-4 text-primary" />
                 </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  {session.audio_url && (
-                    <button
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        if (playingSessionId === session.id) {
-                          audioRef.current?.pause();
-                          audioRef.current = null;
-                          setPlayingSessionId(null);
-                        } else {
-                          audioRef.current?.pause();
-                          const signedUrl = await getSignedAudioUrl(session.audio_url!);
-                          if (!signedUrl) return;
-                          const audio = new Audio(signedUrl);
-                          audio.onended = () => setPlayingSessionId(null);
-                          audio.play();
-                          audioRef.current = audio;
-                          setPlayingSessionId(session.id);
-                        }
-                      }}
-                      className="text-primary hover:text-primary/80 transition-colors"
-                      title={playingSessionId === session.id ? "Stop recording" : "Play recording"}
-                    >
-                      {playingSessionId === session.id ? (
-                        <VolumeX className="h-4 w-4" />
-                      ) : (
-                        <Volume2 className="h-4 w-4" />
-                      )}
-                    </button>
-                  )}
-                  {session.duration_minutes && (
-                    <span className="text-sm text-muted-foreground">
-                      {session.duration_minutes} min
-                    </span>
-                  )}
-                  <Badge variant={session.status === 'completed' ? 'default' : session.status === 'in_progress' ? 'secondary' : 'outline'}>
-                    {session.status === 'completed' ? 'Completed' : session.status === 'in_progress' ? 'In Progress' : 'Cancelled'}
-                  </Badge>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{session.title || 'Untitled Session'}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {session.patient?.name || 'Unknown Patient'} • {format(new Date(session.started_at), 'MMM d, yyyy h:mm a')}
+                  </p>
                 </div>
               </div>
-            ))}
+              <div className="flex items-center gap-3 shrink-0">
+                {session.audio_url && (
+                  <button
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      if (playingSessionId === session.id) {
+                        audioRef.current?.pause();
+                        audioRef.current = null;
+                        setPlayingSessionId(null);
+                      } else {
+                        audioRef.current?.pause();
+                        const signedUrl = await getSignedAudioUrl(session.audio_url!);
+                        if (!signedUrl) return;
+                        const audio = new Audio(signedUrl);
+                        audio.onended = () => setPlayingSessionId(null);
+                        audio.play();
+                        audioRef.current = audio;
+                        setPlayingSessionId(session.id);
+                      }
+                    }}
+                    className="text-primary hover:text-primary/80 transition-colors"
+                    title={playingSessionId === session.id ? "Stop recording" : "Play recording"}
+                  >
+                    {playingSessionId === session.id ? (
+                      <VolumeX className="h-4 w-4" />
+                    ) : (
+                      <Volume2 className="h-4 w-4" />
+                    )}
+                  </button>
+                )}
+                {session.duration_minutes && (
+                  <span className="text-sm text-muted-foreground">
+                    {session.duration_minutes} min
+                  </span>
+                )}
+                <Badge variant={session.status === 'completed' ? 'default' : session.status === 'in_progress' ? 'secondary' : 'outline'}>
+                  {session.status === 'completed' ? 'Completed' : session.status === 'in_progress' ? 'In Progress' : 'Cancelled'}
+                </Badge>
+              </div>
+            </div>
+          );
+
+          return (
+          <div className="space-y-4">
+            {/* This Week - always expanded, not collapsible */}
+            {thisWeekSessions.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                  This Week <Badge variant="secondary" className="text-xs">{thisWeekSessions.length}</Badge>
+                </h3>
+                <div className="space-y-1.5">
+                  {thisWeekSessions.map(renderSessionRow)}
+                </div>
+              </div>
+            )}
+
+            {/* Last Week & Monthly groups - collapsible, default collapsed */}
+            {(lastWeekSessions.length > 0 || Object.keys(monthGroups).length > 0) && (
+              <Accordion type="multiple">
+                {lastWeekSessions.length > 0 && (
+                  <AccordionItem value="last-week">
+                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">
+                      <span className="flex items-center gap-2">
+                        Last Week <Badge variant="secondary" className="text-xs">{lastWeekSessions.length}</Badge>
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-1.5">
+                        {lastWeekSessions.map(renderSessionRow)}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                )}
+                {Object.entries(monthGroups).map(([month, sessions]) => (
+                  <AccordionItem key={month} value={month}>
+                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">
+                      <span className="flex items-center gap-2">
+                        {month} <Badge variant="secondary" className="text-xs">{sessions.length}</Badge>
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-1.5">
+                        {sessions.map(renderSessionRow)}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            )}
+
+            {thisWeekSessions.length === 0 && lastWeekSessions.length === 0 && Object.keys(monthGroups).length === 0 && (
+              <p className="text-muted-foreground text-center py-8">No sessions match your search.</p>
+            )}
           </div>
           );
-        })()}
       </div>
       {/* Prescription Editor Modal */}
       {showPrescriptionEditor && currentPatient && patientId && (
