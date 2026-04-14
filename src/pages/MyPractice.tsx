@@ -28,6 +28,7 @@ import {
   PenTool,
 } from "lucide-react";
 import ReferralDoctors from "@/pages/ReferralDoctors";
+import PricingAdmin from "@/pages/admin/PricingAdmin";
 import Patients from "@/pages/Patients";
 import DoctorInvoices from "@/pages/doctor/Invoices";
 import Documents from "@/pages/Documents";
