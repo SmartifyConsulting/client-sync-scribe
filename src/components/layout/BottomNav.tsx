@@ -36,7 +36,10 @@ export function BottomNav() {
 
   if (loading) return null;
 
-  if (!isPatient) {
+  const isOnPatientRoute = location.pathname.startsWith("/patient/");
+  const showPatientNav = isPatient || isOnPatientRoute;
+
+  if (!showPatientNav) {
     // Doctor nav - route-based
     return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg safe-area-pb font-size-preserve md:hidden">
