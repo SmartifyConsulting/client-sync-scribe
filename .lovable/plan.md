@@ -1,59 +1,77 @@
 
 
-# MyDoctors Compaction, InviteDoctor Cleanup, Permission Layout, Notification & Invitation Styling
+# Sidebar Rename, Permission Lists, Patient Name Fix, Section Headers, Vula Logo Updates & Rewards Logo Sizing
 
 ## Summary
-Seven changes: reduce spacing in MyDoctors page, compact search results table, remove name search from invite modal, make Permission Transparency two-column layout, create notification on patient invite, green-border invitation cards with full patient name, all across M/T/W.
+Seven groups of changes: rename "Dashboard" to "Home" in sidebar, simplify Permission Transparency to plain bullet lists, fix "Unknown Patient" on doctor invitation cards, standardize section headers app-wide, replace Vula symbol with uploaded logo on dashboard card, increase patient banner logo by 60%, and make Doctor/Patient Vulas cards use horizontal Vula Vouchers logo at 40% card width.
 
 ## Changes
 
-### 1. Eliminate padding below headings in MyDoctors
-**File:** `src/pages/patient/MyDoctors.tsx`
-- Change `space-y-6` on root div to `space-y-3`
-- Remove `CardHeader` padding: change `pb-3` to `pb-1` on the search card header
-- Remove `CardDescription` or reduce margin
+### 1. Rename "Dashboard" to "Home" in sidebar
+**File:** `src/components/layout/Sidebar.tsx`
+- Change `label: "Dashboard"` to `label: "Home"` in all three nav arrays
 
-### 2. Compact search results table — even column distribution
-**File:** `src/pages/patient/MyDoctors.tsx`
-- For search results table, change column widths to distribute evenly: Provider gets flex space, Specialty visible on all viewports (remove `hidden sm:table-cell`), Action column stays narrow
-- Reduce row padding and avatar sizes for tighter fit
-- Same treatment for the connected doctors table below
-
-### 3. Remove "Search by Name" from InviteDoctorDialog
-**File:** `src/components/patient/InviteDoctorDialog.tsx`
-- Remove the entire "Search by Name" section (lines 254-312): the label, input, suggestions dropdown, and invite-by-email fallback
-- Remove related state: `nameSearch`, `suggestions`, `showSuggestions`, `searchingDoctors`, `inviteEmail`, `sendingInvite`, `selectedDoctorId`
-- Remove the debounced search `useEffect` for name search
-- Keep practice number and registration number fields
-
-### 4. Two-column layout for Permission Transparency (Shared | Private)
+### 2. Simplify Permission Transparency to plain bullet lists
 **File:** `src/components/permissions/PermissionTransparencyModal.tsx`
-- Change the content wrapper from vertical `space-y-5` to a two-column grid: `grid grid-cols-1 md:grid-cols-2 gap-4`
-- Column 1: "Shared with Care Team" section
-- Column 2: "Private — Not Shared" section
-- Keep the holistic nudge and warning below spanning full width
-- Widen the dialog to `sm:max-w-[700px]` to accommodate two columns
+- Replace framed card-style items with simple `<ul>` bulleted lists
+- Remove icons, borders, colored backgrounds from individual items
+- Keep section headings; use consistent `text-sm` font
 
-### 5. Create notification when patient sends invite to doctor
-**File:** `src/components/patient/InviteDoctorDialog.tsx`
-- After inserting/updating the `doctor_access_requests` record, look up the doctor's user ID by practice number
-- Insert a notification row: `{ user_id: doctorUserId, type: 'access_request', title: 'Patient Invitation', description: '{patientName} has invited you...', is_read: false }`
-- This triggers the bell icon count via the existing realtime subscription
+### 3. Fix "Unknown Patient" on doctor invitation cards
+**Database migration:** Add `patient_name` text column (nullable) to `doctor_access_requests`
 
-### 6. Green border on doctor invitation cards + show full patient name
-**File:** `src/components/doctor/DoctorAccessRequests.tsx`
-- Change card border from `border-border` to `border-green-500` (green border)
-- The patient name is already fetched and displayed — ensure it shows the full name prominently (it already does via `patient_profile?.full_name`)
+**File:** `src/components/patient/InviteDoctorDialog.tsx` — Store `patient_name` when inserting request; add notification for doctor
 
-### 7. Responsive consistency
-All changes apply to all viewport layouts (mobile, tablet, web) since we use responsive grid classes.
+**File:** `src/components/doctor/DoctorAccessRequests.tsx` — Display `request.patient_name` as primary, green border on cards
+
+### 4. Standardize section headers to MyPractice accordion style
+**File:** `src/components/patients/PatientDetailsEditor.tsx`
+- Update `SectionHeader` component: `bg-card` with `text-primary` icons
+- Update inline Organ Donor triggers to match
+
+### 5. Replace Vula symbol with uploaded VulaLogo-3.png on dashboard card
+- Copy uploaded `VulaLogo-3.png` to `src/assets/vula-vouchers-logo-v3.png`
+- **File:** `src/pages/Dashboard.tsx` — Import and use `vula-vouchers-logo-v3.png` as `imageUrl` on StatsCard
+
+### 6. Increase horizontal Vula Vouchers logo in patient profile banner by 60%
+**File:** `src/components/patients/PatientDetailsEditor.tsx`
+- Change `h-10` to `h-16` on the mobile banner Vula Vouchers logo
+
+### 7. Use horizontal Vula Vouchers logo at 40% width in Doctor Vulas & Patient Vulas cards
+**File:** `src/pages/doctor/DoctorRewards.tsx`
+- In the Doctor Vulas card (line 131) and Patient Vulas card (line 137): replace the small inline `h-5` logo with a layout where the horizontal logo occupies 40% of the card width
+- Change each card's `CardContent` to a flex row: left side (60%) shows label + count, right side (40%) shows the horizontal `vulaVouchersLogo` with `w-full h-auto object-contain`
+- Apply same treatment in the patient rewards page
+
+**File:** `src/pages/patient/MyRewards.tsx`
+- Apply matching 40% logo width layout to any Doctor/Patient Vulas balance cards
+
+## Technical Detail
+For the 40% logo layout, each balance card becomes:
+```
+<div className="flex items-center">
+  <div className="w-[60%]">
+    <p className="text-xs text-muted-foreground">Doctor Vulas</p>
+    <p className="text-2xl font-bold">{doctorVulas}</p>
+  </div>
+  <div className="w-[40%] flex items-center justify-center">
+    <img src={vulaVouchersLogo} className="w-full h-auto object-contain" />
+  </div>
+</div>
+```
 
 ## Files Modified
 
 | File | Changes |
 |------|---------|
-| `src/pages/patient/MyDoctors.tsx` | Reduce spacing, compact tables, even column distribution |
-| `src/components/patient/InviteDoctorDialog.tsx` | Remove name search section, add notification insert on submit |
-| `src/components/permissions/PermissionTransparencyModal.tsx` | Two-column grid layout (shared | private) |
-| `src/components/doctor/DoctorAccessRequests.tsx` | Green border on invitation cards |
+| `src/components/layout/Sidebar.tsx` | Rename "Dashboard" → "Home" |
+| `src/components/permissions/PermissionTransparencyModal.tsx` | Plain bullet lists |
+| `src/components/patient/InviteDoctorDialog.tsx` | Store patient_name, add notification |
+| `src/components/doctor/DoctorAccessRequests.tsx` | Use stored patient_name, green border |
+| `src/components/patients/PatientDetailsEditor.tsx` | Standardize SectionHeader; increase banner logo to h-16 |
+| `src/pages/Dashboard.tsx` | Replace vula-symbol with uploaded VulaLogo-3.png |
+| `src/pages/doctor/DoctorRewards.tsx` | Horizontal logo at 40% width in balance cards |
+| `src/pages/patient/MyRewards.tsx` | Matching 40% logo layout |
+| `src/assets/vula-vouchers-logo-v3.png` | New asset (copied from upload) |
+| DB migration | Add `patient_name` to `doctor_access_requests` |
 
