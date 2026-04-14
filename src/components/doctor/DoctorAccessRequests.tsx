@@ -93,7 +93,7 @@ export function DoctorAccessRequests() {
       for (const request of data || []) {
         const { data: patientProfile } = await supabase
           .from("profiles")
-          .select("full_name")
+          .select("full_name, avatar_url")
           .eq("id", request.patient_user_id)
           .single();
 
