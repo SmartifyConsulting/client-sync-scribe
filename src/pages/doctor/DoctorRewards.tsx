@@ -89,7 +89,7 @@ export default function DoctorRewards() {
     if (amount <= 0 || amount > totalVulas) { toast({ title: "Invalid amount", variant: "destructive" }); return; }
     const { data: patient } = await supabase.from("patients").select("id").eq("patient_user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
     if (!patient) { toast({ title: "No patient record found", variant: "destructive" }); return; }
-    const { error: transferError } = await supabase.from("moola_transfers").insert({ user_id: user.id, partner_app_id: transferAppId, amount });
+    const { error: transferError } = await supabase.from("moola_transfers").insert({ user_id: user.id, partner_app_id: transferToAppId, amount });
     if (transferError) { toast({ title: "Transfer failed", variant: "destructive" }); return; }
     const { error: deductError } = await supabase.from("patient_rewards").insert({
       patient_id: patient.id, awarded_by: user.id, lollipops_count: -amount,

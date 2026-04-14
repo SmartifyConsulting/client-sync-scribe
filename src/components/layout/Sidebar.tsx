@@ -4,10 +4,13 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Users,
+  Calendar,
   Settings,
   Settings2,
   LogOut,
+  CheckSquare,
   Loader2,
+  User,
   LucideIcon,
   DollarSign,
   Gift,
