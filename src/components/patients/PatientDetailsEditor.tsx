@@ -1078,7 +1078,7 @@ export function PatientDetailsEditor({
               {(() => {
                 const hour = new Date().getHours();
                 const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-                return `${greeting}, ${patient.name}`;
+                return `${greeting}, ${patient.name.split(' ')[0]}`;
               })()}
             </h3>
             <p className="text-muted-foreground text-[12px]">
@@ -1088,7 +1088,7 @@ export function PatientDetailsEditor({
           {/* Vula Vouchers inline on web */}
           {!rewardsLoading && lollipopCount !== undefined && (
             <div className="hidden md:flex items-center gap-3">
-              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-11 w-auto object-contain" />
+              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-9 w-auto object-contain" />
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
                 <AnimatedCounter target={lollipopCount} />
               </span>

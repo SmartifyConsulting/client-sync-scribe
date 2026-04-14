@@ -73,14 +73,21 @@ export function AppointmentRequestsPanel() {
 
       // Enrich with patient names
       const patientIds = [...new Set(reqs.map((r) => r.patient_id))];
+      const patientUserIds = [...new Set(reqs.map((r) => r.patient_user_id))];
       const serviceIds = [...new Set(reqs.filter((r) => r.service_id).map((r) => r.service_id!))];
 
       let patientMap: Record<string, string> = {};
+      let profileMap: Record<string, string> = {};
       let serviceMap: Record<string, string> = {};
 
       if (patientIds.length) {
         const { data: patients } = await supabase.from("patients").select("id, name").in("id", patientIds);
         (patients || []).forEach((p) => { patientMap[p.id] = p.name; });
+      }
+      // Fallback: fetch from profiles using patient_user_id
+      if (patientUserIds.length) {
+        const { data: profiles } = await supabase.from("profiles").select("id, full_name").in("id", patientUserIds);
+        (profiles || []).forEach((p) => { if (p.full_name) profileMap[p.id] = p.full_name; });
       }
       if (serviceIds.length) {
         const { data: services } = await supabase.from("service_prices").select("id, service_name").in("id", serviceIds);
@@ -90,7 +97,7 @@ export function AppointmentRequestsPanel() {
       setRequests(
         reqs.map((r) => ({
           ...r,
-          patient_name: patientMap[r.patient_id] || "Unknown Patient",
+          patient_name: patientMap[r.patient_id] || profileMap[r.patient_user_id] || "Unknown Patient",
           service_name: r.service_id ? serviceMap[r.service_id] : undefined,
         }))
       );

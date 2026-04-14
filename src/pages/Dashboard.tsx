@@ -40,7 +40,7 @@ export default function Dashboard() {
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id)
         .eq("is_read", false)
-        .in("type", ["invitation", "document", "document_received", "connection_request", "reward", "streak"]);
+        .in("type", ["invitation", "document", "document_received", "connection_request", "reward", "streak", "access_accepted", "access_declined", "access_request", "appointment_request"]);
 
       if (error) return 0;
       return count || 0;
@@ -316,7 +316,7 @@ export default function Dashboard() {
           <StatsCard
             title="Vula Vouchers"
             value={doctorVulas + patientVulas}
-            change="View details"
+            change={undefined}
             trend="up"
             icon={Award}
             imageUrl={vulaVouchersLogo}

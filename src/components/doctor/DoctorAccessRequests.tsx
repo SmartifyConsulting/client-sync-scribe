@@ -100,7 +100,10 @@ export function DoctorAccessRequests() {
 
         requestsWithProfiles.push({
           ...request,
-          patient_profile: patientProfile || undefined,
+          patient_profile: {
+            full_name: patientProfile?.full_name || (request as any).patient_name || null,
+            avatar_url: patientProfile?.avatar_url || (request as any).patient_avatar_url || null,
+          },
         });
       }
 

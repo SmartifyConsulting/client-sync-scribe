@@ -51,12 +51,12 @@ export function StatsCard({
           )}
         </div>
         <div className={cn(
-          "flex items-center justify-center transition-all duration-300 group-hover:scale-105 overflow-hidden rounded-xl",
-          imageUrl ? "" : "bg-primary/10 group-hover:bg-primary/15",
-          iconSize === "large" ? "h-14 w-14 md:h-20 md:w-20" : "h-7 w-7 md:h-9 md:w-9"
+          "flex items-center justify-center transition-all duration-300 group-hover:scale-105 overflow-hidden",
+          imageUrl ? "" : "bg-primary/10 group-hover:bg-primary/15 rounded-xl",
+          iconSize === "large" ? "h-12 w-12 md:h-14 md:w-14" : "h-7 w-7 md:h-9 md:w-9"
         )}>
           {imageUrl ? (
-            <img src={imageUrl} alt={title} className="h-16 w-16 md:h-24 md:w-24 object-contain" />
+            <img src={imageUrl} alt={title} className="h-10 w-10 md:h-14 md:w-14 object-contain" />
           ) : (
             <Icon className={iconSize === "large" ? "h-5 w-5 md:h-6 md:w-6 text-primary" : "h-4 w-4 md:h-5 md:w-5 text-primary"} />
           )}
