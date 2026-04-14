@@ -31,7 +31,7 @@ interface NavItem {
 const doctorNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard" },
   { icon: Users, label: "My Patients", to: "/patients" },
-  { icon: Settings2, label: "My Holarprac", to: "/practice" },
+  { icon: Settings2, label: "My Practice", to: "/practice" },
   { icon: UserCog, label: "Admin", to: "/admin" },
   { icon: Gift, label: "My Vulas", to: "/doctor/rewards" },
 ];
