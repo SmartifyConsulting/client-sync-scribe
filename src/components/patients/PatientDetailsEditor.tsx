@@ -311,7 +311,8 @@ function AnimatedCounter({ target }: { target: number }) {
 const SECTION_TABS: Record<string, string[]> = {
   home: [],
   health: ["personal", "medical"],
-  care: ["doctors", "sessions", "roundtable"],
+  care: ["doctors", "sessions", "hospital_visits", "roundtable"],
+  admissions: ["admissions"],
   admin: ["calendar", "tasks", "documents"],
 };
 
@@ -1203,7 +1204,7 @@ export function PatientDetailsEditor({
 
   // Parent tab groups for desktop/tablet
   const PROFILE_TABS = ["personal", "medical"];
-  const CARE_TABS = ["doctors", "sessions", "roundtable"];
+  const CARE_TABS = ["doctors", "sessions", "hospital_visits", "roundtable"];
   const ADMIN_TABS = ["calendar", "tasks", "documents"];
 
   const handleParentTabClick = (parent: string, tabs: string[]) => {
@@ -1243,12 +1244,17 @@ export function PatientDetailsEditor({
           )}
           {show("doctors") && (
             <TabsTrigger value="doctors" className={triggerClass}>
-              {isMobile ? "My H/Care Team" : "My Healthcare Providers"}
+              {isMobile ? "My Holarchy" : "My Holarchy"}
             </TabsTrigger>
           )}
           {show("sessions") && (
             <TabsTrigger value="sessions" className={triggerClass}>
-              My Sessions
+              Sessions
+            </TabsTrigger>
+          )}
+          {show("hospital_visits") && (
+            <TabsTrigger value="hospital_visits" className={triggerClass}>
+              Hospital Visits
             </TabsTrigger>
           )}
           {show("calendar") && (
@@ -1268,7 +1274,12 @@ export function PatientDetailsEditor({
           )}
           {show("roundtable") && (
             <TabsTrigger value="roundtable" className={triggerClass}>
-              My Round Table
+              Round Table
+            </TabsTrigger>
+          )}
+          {show("admissions") && (
+            <TabsTrigger value="admissions" className={triggerClass}>
+              Admissions
             </TabsTrigger>
           )}
         </TabsList>
@@ -1286,10 +1297,13 @@ export function PatientDetailsEditor({
             Medical Information
           </TabsTrigger>
           <TabsTrigger value="doctors" className={triggerClass}>
-            My Healthcare Providers
+            My Holarchy
           </TabsTrigger>
           <TabsTrigger value="sessions" className={triggerClass}>
-            My Sessions
+            Sessions
+          </TabsTrigger>
+          <TabsTrigger value="hospital_visits" className={triggerClass}>
+            Hospital Visits
           </TabsTrigger>
           <TabsTrigger value="calendar" className={triggerClass}>
             My Calendar
@@ -1301,7 +1315,10 @@ export function PatientDetailsEditor({
             My Documents
           </TabsTrigger>
           <TabsTrigger value="roundtable" className={triggerClass}>
-            My Round Table
+            Round Table
+          </TabsTrigger>
+          <TabsTrigger value="admissions" className={triggerClass}>
+            Admissions
           </TabsTrigger>
           {isDoctor && (
             <TabsTrigger
@@ -1315,16 +1332,6 @@ export function PatientDetailsEditor({
               My Practice
             </TabsTrigger>
           )}
-          <TabsTrigger
-            value="rewards"
-            className={triggerClass}
-            onClick={(e) => {
-              e.preventDefault();
-              navigate("/patient/rewards");
-            }}
-          >
-            My Rewards
-          </TabsTrigger>
         </TabsList>
       );
     }
