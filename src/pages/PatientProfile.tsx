@@ -43,6 +43,7 @@ import { DoctorsOnProfile } from "@/components/patients/DoctorsOnProfile";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { RequestConnectionButton } from "@/components/patients/RequestConnectionButton";
 import { RoundTable } from "@/components/patients/RoundTable";
+import { AdmissionsView } from "@/components/admissions/AdmissionsView";
 import { LollipopDisplay } from "@/components/gamification/LollipopDisplay"; // Vula display
 import { useTemplates } from "@/hooks/useTemplates";
 import { useDocuments } from "@/hooks/useDocuments";
@@ -308,14 +309,16 @@ export default function PatientProfile() {
             </p>
           </div>
           {/* Vula Rewards */}
-          <div className="rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-2 shadow-sm border border-emerald-200 dark:border-emerald-800/30">
-            <div className="flex items-center justify-between">
+          <div className="rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-2 shadow-sm border border-emerald-200 dark:border-emerald-800/30 flex items-center justify-between gap-2">
+            <div className="flex flex-col min-w-0">
               <p className="text-[10px] font-medium text-muted-foreground">Vulas</p>
-              <div className="h-4 w-4 rounded-full bg-white shadow-sm flex items-center justify-center">
-                <img src={vulaSymbol} alt="Vulas" className="h-3 w-3 object-contain" />
-              </div>
+              <p className="mt-1 text-sm font-bold text-emerald-600 dark:text-emerald-400">{lollipopCount}</p>
             </div>
-            <p className="mt-1 text-sm font-bold text-emerald-600 dark:text-emerald-400">{lollipopCount}</p>
+            <img
+              src={vulaSymbol}
+              alt="Vulas"
+              className="h-7 w-7 md:h-8 md:w-8 object-contain shrink-0"
+            />
           </div>
         </div>
       )}
@@ -340,6 +343,12 @@ export default function PatientProfile() {
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
             Session History
+          </TabsTrigger>
+          <TabsTrigger
+            value="admissions"
+            className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Admissions
           </TabsTrigger>
           <TabsTrigger
             value="doctors"
@@ -435,6 +444,15 @@ export default function PatientProfile() {
               )}
             </>
           )}
+        </TabsContent>
+
+        <TabsContent value="admissions" className="space-y-4">
+          <AdmissionsView
+            patientId={patient.id}
+            patientHeight={(patient as any).height_cm}
+            patientWeight={(patient as any).weight_kg}
+            canEdit={true}
+          />
         </TabsContent>
 
         {/* Doctors Tab */}
