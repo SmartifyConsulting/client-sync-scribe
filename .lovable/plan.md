@@ -1,75 +1,70 @@
 
 
-# Plan: Holarc Sales Deck — Mock-up Screenshots (proceeding with sensible defaults)
+# Plan: Show Headers & Footers on Patient Documents
 
-Picking up from the clarifying questions with practical defaults so we can ship the deck.
+## Why headers/footers are missing today
 
-## Decisions
+The patient `My Documents` page (`src/pages/patient/PatientDocuments.tsx`) **never renders the document body at all** — the document cards only expose a *Send* button (and an *AI* button for images). There is no preview dialog, so the saved letterhead never has a chance to appear.
 
-1. **Test account** → use the **currently logged-in doctor account** in the preview (the user is already on `/patients/...` so a doctor session is active). I'll seed Sarah Mitchell under that doctor's `user_id` rather than the non-existent `developer@smartify.co.za`.
-2. **Patient shots** → I'll capture shots **6–10 (practice management) and the 5 doctor clinical shots** from the current doctor session first. For the **4 patient mobile shots**, I'll seed Sarah's patient record with a `patient_user_id` pointing to one of the existing patient accounts in the DB (or skip those 4 if no patient session is available, and deliver 10 doctor shots — confirming in the README which were captured).
-3. **DB writes** → seed a **focused, tagged dataset** (every row gets `mock_seed = 'holarc-deck-v1'` in a notes/metadata column where the schema allows, so cleanup is one query later).
+The doctor page (`src/pages/Documents.tsx` lines 965–1037) does show header/footer because it opens a preview `Dialog` and resolves the letterhead by matching `documents.template_name` → `templates.header_footer_template_id` → `header_footer_templates` row.
 
-## Execution
+A second, deeper issue: header/footer templates are owned by the **doctor** (`user_id` scoped), so even if we copy the doctor's preview code verbatim into the patient page, the patient's `useHeaderFooterTemplates()` hook returns *the patient's* (empty) list and the lookup fails. We need to fetch the header/footer that belongs to the document's author.
 
-### Step 1 — Inspect schema & current doctor
-- Query `profiles`, `patients`, `appointments`, `invoices`, `hospital_admissions`, `todo_items`, `sessions`, `practice_partners`, etc. to confirm column names before seeding.
-- Identify the active doctor's `user_id` (most-recent doctor profile in `user_roles`) and any existing patient user accounts.
+## Changes
 
-### Step 2 — Seed via `psql`
-Insert tagged mock data scoped to the active doctor:
-- Patient `Sarah Mitchell` (DOB 1982, T2DM + HTN, Cape Town address)
-- 1 hospital admission (Mediclinic, 2 nights, chest pain workup) + 3 vitals + 2 active meds (Metformin 500mg BD, Amlodipine 5mg OD) + 2 labs (HbA1c 7.8%, eGFR 88) + 1 imaging (CXR clear)
-- 6 upcoming appointments across the week (mixed patients & types) for Calendar
-- 8 to-do items (mix of doctor-created and AI-suggested) for To-Do
-- 5 invoices (3 paid, 2 outstanding) over 2 months for Invoices
-- Practice settings if missing: signature font, currency ZAR, billable services list
-- 2 practice partners (receptionist Jane, nurse Thandi)
-- 3 recent sessions for Sarah with AI summaries
-- Round Table thread on Sarah
-- 47 Vulas + 14-day adherence streak
+### 1. New hook: `useDocumentHeaderFooter(document)`
+File: `src/hooks/useDocumentHeaderFooter.ts` (new)
 
-### Step 3 — Capture screenshots
-**Doctor desktop (1440×900)** — using the active doctor session:
-1. `/dashboard` — Today's Briefing
-2. `/patients` — alphabetised list with Sarah
-3. `/patients/{sarah-id}` — overview tab
-4. `/patients/{sarah-id}` — Admissions tab
-5. `/sessions/{recent-session-id}` — session detail
-6. `/admin` (Calendar tab default)
-7. `/admin` → To-Do tab
-8. `/admin` → Invoices tab
-9. `/admin` → Templates tab
-10. `/my-practice` or `/settings` — practice settings
+Given a document row, fetch the matching header/footer for **the document's author** (`documents.user_id`), not the current user:
+1. Query `templates` where `user_id = document.user_id` AND `name = document.template_name` → get `header_footer_template_id`.
+2. Query `header_footer_templates` by that id (fall back to that doctor's `is_default = true` row if none linked).
+3. Return `{ headerFooter, isLoading }`.
 
-**Patient mobile (390×844)** — only if a patient session is available; otherwise skip and note in README:
-11. `/patient/details?section=health` — My Profile
-12. `/patient/details?section=care` — My Holarchive
-13. `/patient/rewards` — Vulas
-14. `/patient/tasks` — My Tasks
+Both queries are read-only and already covered by existing RLS (header/footer templates and templates are readable by the patient when the patient has a record under that doctor — verify; if RLS blocks it, add a policy in step 4).
 
-### Step 4 — Frame via the `product-shot` skill
-Copy `knowledge://skill/product-shot/scripts/generate.py` → `/tmp/`, then wrap each PNG:
-- Clinical (1–5) → `ocean` / `midnight`
-- Practice mgmt (6–10) → `aurora` / `arctic`
-- Patient (11–14) → `peach` / `lavender`
+### 2. Add a Preview button + Preview Dialog to `PatientDocuments.tsx`
+- Add an **Eye** icon button next to the existing Send button on each `documents`-source card (skip for `prescriptions` / `invoices` rows, which have no `content`/template).
+- Add a `previewDoc` state and a `<Dialog>` that mirrors the doctor preview structure (lines 965–1037 of `Documents.tsx`):
+  - Header section (rendered via the same 3-cell `<table>` layout used in `DocumentPreview.tsx` / `documentExport.ts`)
+  - Document body via `renderFormattedContent()` (reuse the helper — extract to `src/utils/documentFormatting.ts` so both pages import it)
+  - Footer section (same 3-cell table)
+  - Close + Download PDF buttons
+- Use `useDocumentHeaderFooter(previewDoc)` inside the dialog to fetch the doctor-owned letterhead.
 
-### Step 5 — QA
-After each framed PNG renders, view it and check for: cropped UI, login overlay artefacts, blank states, contrast issues, frame defects. Re-shoot any failures.
+### 3. Extract shared formatter
+Move `normalizeHeadingMarkup` + `renderFormattedContent` from `Documents.tsx` and `DocumentPreview.tsx` into `src/utils/documentFormatting.ts` and import from both, plus the new patient preview. Avoids a third copy.
 
-### Step 6 — Deliverables → `/mnt/documents/`
+### 4. RLS check for header/footer templates
+Verify patients can `SELECT` a header/footer template owned by their doctor. If the current policy is `user_id = auth.uid()` only, add a policy:
 
-| Artifact | File |
+```sql
+CREATE POLICY "Patients can read header/footer templates of their providers"
+ON public.header_footer_templates FOR SELECT TO authenticated
+USING (
+  user_id IN (
+    SELECT DISTINCT d.user_id FROM public.documents d
+    JOIN public.patients p ON p.id = d.patient_id
+    WHERE p.patient_user_id = auth.uid()
+  )
+);
+```
+
+Same pattern for `templates` if needed for the name→id lookup.
+
+## Out of scope
+
+- No changes to how documents are saved (header/footer continue to be resolved at render time, not baked into `content`).
+- No layout/UI redesign of the patient document list — only adds one Eye button + a dialog.
+- Doctor-side rendering is unchanged.
+
+## Files touched
+
+| File | Change |
 |---|---|
-| Up to 14 framed PNGs | `holarc-01-doctor-dashboard.png` … `holarc-14-*.png` |
-| Contact sheet (3-col grid grouped by perspective) | `holarc-contact-sheet.png` |
-| Narrative README — pitch beats, dedicated Practice Management section | `holarc-screenshots-README.md` |
-| Seed SQL for reproducibility / cleanup | `holarc-seed.sql` |
-
-## Constraints
-
-- Sarah Mitchell is fabricated — no real patient data
-- No app code changes
-- All seeded rows tagged `mock_seed = 'holarc-deck-v1'` where the schema allows; README documents the cleanup query
-- If browser automation can't authenticate as a patient, the deck ships with the 10 doctor-side shots and the 4 patient shots are listed as "pending — needs patient session"
+| `src/utils/documentFormatting.ts` | **new** — shared `renderFormattedContent` |
+| `src/hooks/useDocumentHeaderFooter.ts` | **new** — author-scoped letterhead lookup |
+| `src/pages/patient/PatientDocuments.tsx` | add Preview button + Preview Dialog |
+| `src/pages/Documents.tsx` | swap local helpers for shared util |
+| `src/components/sessions/DocumentPreview.tsx` | swap local helpers for shared util |
+| `supabase/migrations/<ts>_patient_letterhead_read.sql` | RLS policies (only if verification confirms they're missing) |
 
