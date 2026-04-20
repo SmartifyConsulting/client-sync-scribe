@@ -8,71 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { printDocument } from "@/utils/documentExport";
 import { HeaderFooterTemplate } from "@/hooks/useHeaderFooterTemplates";
-
-const normalizeHeadingMarkup = (content: string): string => {
-  const normalized = content.replace(/\r\n/g, "\n");
-  const lines = normalized.split("\n");
-  const out: string[] = [];
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const nextLine = lines[i + 1];
-    const lineAfterNext = lines[i + 2];
-
-    if (nextLine && (/^=+$/.test(nextLine.trim()) || /^-+$/.test(nextLine.trim()))) {
-      out.push(`<u><b>${line}</b></u>`);
-      i++;
-      continue;
-    }
-
-    if (nextLine?.trim() === '' && lineAfterNext && (/^=+$/.test(lineAfterNext.trim()) || /^-+$/.test(lineAfterNext.trim()))) {
-      out.push(`<u><b>${line}</b></u>`);
-      i += 2;
-      continue;
-    }
-
-    out.push(line);
-  }
-
-  return out.join("\n");
-};
-
-const renderFormattedContent = (content: string): string => {
-  const withHeadings = normalizeHeadingMarkup(content);
-
-  const safeTags: string[] = [];
-  const safeTagPattern = /<\/?(h[1-4]|p|div|br|hr|blockquote|b|i|u|strong|em|span|sub|sup|table|thead|tbody|tr|td|th|ul|ol|li)(\s[^>]*)?\/?>/gi;
-  const imgPattern = /<img\s[^>]*\/?>/gi;
-
-  let processed = withHeadings;
-
-  processed = processed.replace(imgPattern, (match) => {
-    const idx = safeTags.length;
-    safeTags.push(match);
-    return `__SAFE_TAG_${idx}__`;
-  });
-
-  processed = processed.replace(safeTagPattern, (match) => {
-    const idx = safeTags.length;
-    safeTags.push(match);
-    return `__SAFE_TAG_${idx}__`;
-  });
-
-  processed = processed
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-
-  for (let i = 0; i < safeTags.length; i++) {
-    processed = processed.replace(`__SAFE_TAG_${i}__`, safeTags[i]);
-  }
-
-  const hasBlockTags = /<(h[1-4]|p|div|table|ul|ol|br|hr)/i.test(processed);
-  if (!hasBlockTags) {
-    processed = processed.replace(/\n/g, "<br/>");
-  }
-
-  return processed;
-};
+import { renderFormattedContent } from "@/utils/documentFormatting";
 
 function renderHeaderFooterSection(section: { left: { text: string; alignment: string; imageUrl?: string }; center: { text: string; alignment: string; imageUrl?: string }; right: { text: string; alignment: string; imageUrl?: string } }, fontFamily?: string) {
   const hasContent = section.left?.text || section.center?.text || section.right?.text || section.left?.imageUrl || section.center?.imageUrl || section.right?.imageUrl;
