@@ -28,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTemplates, Template } from "@/hooks/useTemplates";
 import { useHeaderFooterTemplates, HeaderFooterTemplate } from "@/hooks/useHeaderFooterTemplates";
 import { useDocuments, Document } from "@/hooks/useDocuments";
+import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
 import { exportToPDF } from "@/utils/documentExport";
 import { renderFormattedContent } from "@/utils/documentFormatting";
