@@ -97,7 +97,7 @@ export function TopBarIcons() {
           <TooltipTrigger asChild>
             <button
               onClick={() => setReportOpen(true)}
-              className="h-9 w-9 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors"
+              className="h-9 w-9 rounded-full bg-green-600 flex items-center justify-center hover:bg-green-700 transition-colors"
             >
               <Bug className="h-4 w-4 text-white" />
             </button>
