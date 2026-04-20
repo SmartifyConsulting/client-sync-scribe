@@ -1,76 +1,75 @@
 
 
-# Plan: Holarc Sales Deck — Mock-up Screenshots (Clinical + Practice Management)
+# Plan: Holarc Sales Deck — Mock-up Screenshots (proceeding with sensible defaults)
 
-A one-off artifact task. Capture key Holarc screens across **Doctor (clinical)**, **Doctor (practice management)**, and **Patient** perspectives, wrap each in a macOS-style window frame on a tasteful gradient, and deliver a polished sales-deck-ready set.
+Picking up from the clarifying questions with practical defaults so we can ship the deck.
 
-## The story
+## Decisions
 
-**Patient:** Sarah Mitchell, 42, Type 2 Diabetes + mild hypertension. Recently admitted overnight at Mediclinic Cape Town for chest pain (cardiac ruled out).
-**Doctor:** Dr. Lisa Anderson (`developer@smartify.co.za`) — GP running a small private practice. Coordinates with Dr. James Anderson (`director@smartify.co.za`) via Round Table.
+1. **Test account** → use the **currently logged-in doctor account** in the preview (the user is already on `/patients/...` so a doctor session is active). I'll seed Sarah Mitchell under that doctor's `user_id` rather than the non-existent `developer@smartify.co.za`.
+2. **Patient shots** → I'll capture shots **6–10 (practice management) and the 5 doctor clinical shots** from the current doctor session first. For the **4 patient mobile shots**, I'll seed Sarah's patient record with a `patient_user_id` pointing to one of the existing patient accounts in the DB (or skip those 4 if no patient session is available, and deliver 10 doctor shots — confirming in the README which were captured).
+3. **DB writes** → seed a **focused, tagged dataset** (every row gets `mock_seed = 'holarc-deck-v1'` in a notes/metadata column where the schema allows, so cleanup is one query later).
 
-This story showcases the **full clinical loop AND the business-of-medicine loop**: scheduling, billing, templates, partners, and admin operations.
+## Execution
 
-## Screens to capture (14 total)
+### Step 1 — Inspect schema & current doctor
+- Query `profiles`, `patients`, `appointments`, `invoices`, `hospital_admissions`, `todo_items`, `sessions`, `practice_partners`, etc. to confirm column names before seeding.
+- Identify the active doctor's `user_id` (most-recent doctor profile in `user_roles`) and any existing patient user accounts.
 
-### Doctor — Clinical (5, desktop 1440×900)
-1. **Doctor Dashboard** — Today's Briefing, stats, upcoming appointments, recent activity
-2. **Patient List** — alphabetised roster with Sarah visible
-3. **Sarah's Patient Profile** — overview tab: vitals, Vula badge, conditions
-4. **Hospital Admissions tab** — Mediclinic admission with vitals, meds, labs, imaging
-5. **Session Detail** — completed session with AI summary + action points
+### Step 2 — Seed via `psql`
+Insert tagged mock data scoped to the active doctor:
+- Patient `Sarah Mitchell` (DOB 1982, T2DM + HTN, Cape Town address)
+- 1 hospital admission (Mediclinic, 2 nights, chest pain workup) + 3 vitals + 2 active meds (Metformin 500mg BD, Amlodipine 5mg OD) + 2 labs (HbA1c 7.8%, eGFR 88) + 1 imaging (CXR clear)
+- 6 upcoming appointments across the week (mixed patients & types) for Calendar
+- 8 to-do items (mix of doctor-created and AI-suggested) for To-Do
+- 5 invoices (3 paid, 2 outstanding) over 2 months for Invoices
+- Practice settings if missing: signature font, currency ZAR, billable services list
+- 2 practice partners (receptionist Jane, nurse Thandi)
+- 3 recent sessions for Sarah with AI summaries
+- Round Table thread on Sarah
+- 47 Vulas + 14-day adherence streak
 
-### Doctor — Practice Management (5, desktop 1440×900) ← **NEW FOCUS**
-6. **Admin Hub → Calendar** — week view, colour-coded appointments, Google Calendar sync visible
-7. **Admin Hub → To-Do** — practice tasks list with dictation mic + AI-suggested items
-8. **Admin Hub → Invoices** — invoice list with paid/outstanding totals, currency config
-9. **Admin Hub → Templates** — letterhead + 6 default document templates with logo
-10. **My Practice / Settings** — practice details, signature font picker, billing config, partners
+### Step 3 — Capture screenshots
+**Doctor desktop (1440×900)** — using the active doctor session:
+1. `/dashboard` — Today's Briefing
+2. `/patients` — alphabetised list with Sarah
+3. `/patients/{sarah-id}` — overview tab
+4. `/patients/{sarah-id}` — Admissions tab
+5. `/sessions/{recent-session-id}` — session detail
+6. `/admin` (Calendar tab default)
+7. `/admin` → To-Do tab
+8. `/admin` → Invoices tab
+9. `/admin` → Templates tab
+10. `/my-practice` or `/settings` — practice settings
 
-### Patient (4, mobile 390×844, Sarah's account)
-11. **My Profile** — personal/clinical landing
-12. **My Holarchive (Holarchy)** — care team avatars (Lisa, James, etc.)
-13. **My Rewards** — Vula count, adherence streak
-14. **My Sessions / Hospital Visits** — Mediclinic stay timeline
+**Patient mobile (390×844)** — only if a patient session is available; otherwise skip and note in README:
+11. `/patient/details?section=health` — My Profile
+12. `/patient/details?section=care` — My Holarchive
+13. `/patient/rewards` — Vulas
+14. `/patient/tasks` — My Tasks
 
-## Approach
+### Step 4 — Frame via the `product-shot` skill
+Copy `knowledge://skill/product-shot/scripts/generate.py` → `/tmp/`, then wrap each PNG:
+- Clinical (1–5) → `ocean` / `midnight`
+- Practice mgmt (6–10) → `aurora` / `arctic`
+- Patient (11–14) → `peach` / `lavender`
 
-**Step 1 — Seed realistic data via `psql`** (scoped to test accounts, tagged for cleanup):
-- `Sarah Mitchell` patient record + linked patient user
-- 1 Mediclinic admission + 3 vitals + 2 active meds + 2 labs + 1 imaging
-- 6 upcoming appointments (mix of patients, colour-coded types) for the calendar shot
-- 8 to-do items (doctor + AI-suggested) for the To-Do shot
-- 5 invoices (3 paid, 2 outstanding) across 2 months for the Invoices shot
-- Practice settings: logo, signature font, currency = ZAR, billable services
-- 2 practice partners (receptionist + nurse) for the Settings shot
-- 3 recent sessions w/ AI summaries
-- Round Table thread: Lisa ↔ James about Sarah
-- 47 Vulas + adherence history for Sarah
+### Step 5 — QA
+After each framed PNG renders, view it and check for: cropped UI, login overlay artefacts, blank states, contrast issues, frame defects. Re-shoot any failures.
 
-**Step 2 — Capture screenshots** via browser tools:
-- Login as `developer@smartify.co.za` for shots 1–10 (desktop 1440×900)
-- Login as Sarah for shots 11–14 (mobile 390×844)
-
-**Step 3 — Frame each shot** using the `product-shot` skill:
-- **Clinical (1–5)** → `ocean` / `midnight` (clinical trust, deep teal/navy)
-- **Practice mgmt (6–10)** → `aurora` / `arctic` (operational, fresh, business-credible)
-- **Patient (11–14)** → `peach` / `lavender` / `candy` (warm, human)
-
-**Step 4 — QA each PNG** by re-reading it; check for cropped UI, login overlays, blank states, contrast issues. Re-shoot failures.
-
-## Deliverables → `/mnt/documents/`
+### Step 6 — Deliverables → `/mnt/documents/`
 
 | Artifact | File |
 |---|---|
-| 14 framed product shots | `holarc-01-doctor-dashboard.png` … `holarc-14-patient-hospital-visits.png` |
-| Contact sheet (3 columns, grouped by perspective) | `holarc-contact-sheet.png` |
-| Narrative README mapping each shot → pitch beat, with a dedicated **"Practice Management"** section highlighting #6–#10 | `holarc-screenshots-README.md` |
+| Up to 14 framed PNGs | `holarc-01-doctor-dashboard.png` … `holarc-14-*.png` |
+| Contact sheet (3-col grid grouped by perspective) | `holarc-contact-sheet.png` |
+| Narrative README — pitch beats, dedicated Practice Management section | `holarc-screenshots-README.md` |
 | Seed SQL for reproducibility / cleanup | `holarc-seed.sql` |
 
 ## Constraints
 
 - Sarah Mitchell is fabricated — no real patient data
-- No app code changes — screenshots + DB seed only
-- All seeded rows tagged `mock_seed: holarc-deck-v1` where the schema allows
-- Inserts scoped to the two test accounts only
+- No app code changes
+- All seeded rows tagged `mock_seed = 'holarc-deck-v1'` where the schema allows; README documents the cleanup query
+- If browser automation can't authenticate as a patient, the deck ships with the 10 doctor-side shots and the 4 patient shots are listed as "pending — needs patient session"
 
