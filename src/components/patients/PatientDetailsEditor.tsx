@@ -1244,12 +1244,17 @@ export function PatientDetailsEditor({
           )}
           {show("doctors") && (
             <TabsTrigger value="doctors" className={triggerClass}>
-              {isMobile ? "My H/Care Team" : "My Healthcare Providers"}
+              {isMobile ? "My Holarchy" : "My Holarchy"}
             </TabsTrigger>
           )}
           {show("sessions") && (
             <TabsTrigger value="sessions" className={triggerClass}>
-              My Sessions
+              Sessions
+            </TabsTrigger>
+          )}
+          {show("hospital_visits") && (
+            <TabsTrigger value="hospital_visits" className={triggerClass}>
+              Hospital Visits
             </TabsTrigger>
           )}
           {show("calendar") && (
@@ -1269,7 +1274,12 @@ export function PatientDetailsEditor({
           )}
           {show("roundtable") && (
             <TabsTrigger value="roundtable" className={triggerClass}>
-              My Round Table
+              Round Table
+            </TabsTrigger>
+          )}
+          {show("admissions") && (
+            <TabsTrigger value="admissions" className={triggerClass}>
+              Admissions
             </TabsTrigger>
           )}
         </TabsList>
