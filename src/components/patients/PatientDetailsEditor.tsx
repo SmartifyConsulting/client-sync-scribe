@@ -74,7 +74,6 @@ const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
 const MyDoctors = lazy(() => import("@/pages/patient/MyDoctors"));
 const PatientRoundTable = lazy(() => import("@/pages/patient/PatientRoundTable"));
 const PatientCalendarLazy = lazy(() => import("@/pages/patient/PatientCalendar"));
-const AdmissionsView = lazy(() => import("@/components/admissions/AdmissionsView").then(m => ({ default: m.AdmissionsView })));
 
 const SettingsContentLazy = lazy(() =>
   import("@/components/settings/SettingsContent").then((m) => ({ default: m.SettingsContent })),
@@ -1080,7 +1079,7 @@ export function PatientDetailsEditor({
               {(() => {
                 const hour = new Date().getHours();
                 const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-                return `${greeting}, ${patient.name.split(' ')[0]}`;
+                return `${greeting}, ${patient.name.split(" ")[0]}`;
               })()}
             </h3>
             <p className="text-muted-foreground text-[12px]">
@@ -1144,7 +1143,7 @@ export function PatientDetailsEditor({
                 {(() => {
                   const hour = new Date().getHours();
                   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-                  return `${greeting}, ${patient.name.split(' ')[0]}`;
+                  return `${greeting}, ${patient.name.split(" ")[0]}`;
                 })()}
               </span>
               <div className="flex items-center gap-2">
@@ -1901,7 +1900,9 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="doctors" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">{isMobile ? "My H/Care Team" : "My Healthcare Providers"}</h2>
+                  <h2 className="text-lg font-semibold text-foreground">
+                    {isMobile ? "My Holarchy" : "My Healthcare Providers"}
+                  </h2>
                   <p className="text-xs text-muted-foreground">Healthcare providers with access to your profile</p>
                 </div>
                 <Suspense
@@ -1919,7 +1920,7 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="roundtable" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">Round Table</h2>
+                  <h2 className="text-lg font-semibold text-foreground">My Round Table</h2>
                   <p className="text-xs text-muted-foreground">
                     Notes shared by your healthcare providers about your care
                   </p>
@@ -1935,26 +1936,6 @@ export function PatientDetailsEditor({
                 </Suspense>
               </TabsContent>
             )}
-
-            <TabsContent value="hospital_visits" className="mt-4">
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Hospital Visits</h2>
-                <p className="text-xs text-muted-foreground">Timeline of hospital admissions and clinical details</p>
-              </div>
-              <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-                <AdmissionsView patientId={patient.id} patientHeight={patient.height_cm} patientWeight={patient.weight_kg} canEdit={false} />
-              </Suspense>
-            </TabsContent>
-
-            <TabsContent value="admissions" className="mt-4">
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Admissions</h2>
-                <p className="text-xs text-muted-foreground">Capture vitals, medications, lab results and imaging</p>
-              </div>
-              <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-                <AdmissionsView patientId={patient.id} patientHeight={patient.height_cm} patientWeight={patient.weight_kg} canEdit={true} />
-              </Suspense>
-            </TabsContent>
           </Tabs>
         </div>
       </div>
@@ -1985,7 +1966,7 @@ export function PatientDetailsEditor({
             </div>
           )}
 
-           {/* === PERSONAL TAB (EDIT) === */}
+          {/* === PERSONAL TAB (EDIT) === */}
           <TabsContent value="personal" className="space-y-4 mt-4">
             <div className="mb-1 flex items-center justify-between">
               <div>
@@ -1996,7 +1977,15 @@ export function PatientDetailsEditor({
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={handleCancel}>
                   <X className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-green-600" onClick={() => { performSave(formData, surgeries); setIsEditing(false); }}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-green-600"
+                  onClick={() => {
+                    performSave(formData, surgeries);
+                    setIsEditing(false);
+                  }}
+                >
                   <Save className="h-4 w-4" />
                 </Button>
               </div>
@@ -2375,7 +2364,15 @@ export function PatientDetailsEditor({
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={handleCancel}>
                   <X className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-green-600" onClick={() => { performSave(formData, surgeries); setIsEditing(false); }}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-green-600"
+                  onClick={() => {
+                    performSave(formData, surgeries);
+                    setIsEditing(false);
+                  }}
+                >
                   <Save className="h-4 w-4" />
                 </Button>
               </div>
@@ -3438,7 +3435,7 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="roundtable" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Round Table</h2>
+                <h2 className="text-lg font-semibold text-foreground">My Round Table</h2>
                 <p className="text-xs text-muted-foreground">
                   Notes shared by your healthcare providers about your care
                 </p>
@@ -3454,26 +3451,6 @@ export function PatientDetailsEditor({
               </Suspense>
             </TabsContent>
           )}
-
-          <TabsContent value="hospital_visits" className="mt-4">
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold text-foreground">Hospital Visits</h2>
-              <p className="text-xs text-muted-foreground">Timeline of hospital admissions and clinical details</p>
-            </div>
-            <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-              <AdmissionsView patientId={patient.id} patientHeight={patient.height_cm} patientWeight={patient.weight_kg} canEdit={false} />
-            </Suspense>
-          </TabsContent>
-
-          <TabsContent value="admissions" className="mt-4">
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold text-foreground">Admissions</h2>
-              <p className="text-xs text-muted-foreground">Capture vitals, medications, lab results and imaging</p>
-            </div>
-            <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
-              <AdmissionsView patientId={patient.id} patientHeight={patient.height_cm} patientWeight={patient.weight_kg} canEdit={true} />
-            </Suspense>
-          </TabsContent>
         </Tabs>
       </div>
     </div>
