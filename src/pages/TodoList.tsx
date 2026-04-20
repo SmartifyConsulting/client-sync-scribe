@@ -109,10 +109,12 @@ export default function TodoList() {
   const [filter, setFilter] = useState<"all" | "active" | "completed">("active");
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set());
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
-  const [previewDoc, setPreviewDoc] = useState<{ content: string; title: string; logoUrl?: string; fontFamily?: string } | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<{ content: string; title: string; logoUrl?: string; fontFamily?: string; userId?: string; templateName?: string } | null>(null);
   const [loadingPreview, setLoadingPreview] = useState<string | null>(null);
 
-  const { headerFooter } = useTemplateWithHeaderFooter("General");
+  const { headerFooter } = useDocumentHeaderFooter(
+    previewDoc ? { user_id: previewDoc.userId, template_name: previewDoc.templateName } : null
+  );
 
   const handlePreviewDoc = async (todo: TodoItem) => {
     if (!todo.document_id) return;
