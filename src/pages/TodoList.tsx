@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { format, isToday, isYesterday } from "date-fns";
 import { DocumentPreview } from "@/components/sessions/DocumentPreview";
-import { useTemplateWithHeaderFooter } from "@/hooks/useTemplateWithHeaderFooter";
+import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
 
 interface TodoItem {
