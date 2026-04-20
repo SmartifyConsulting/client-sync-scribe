@@ -79,6 +79,8 @@ interface UnifiedDocument {
   aiAnalyzedAt?: string | null;
   emailSentAt?: string | null;
   patientId?: string | null;
+  userId?: string | null;
+  templateName?: string | null;
 }
 
 const DOC_TYPE_CONFIG: Record<
@@ -207,6 +209,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
   const [analysisDialog, setAnalysisDialog] = useState<UnifiedDocument | null>(null);
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
   const [showCompareDialog, setShowCompareDialog] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState<UnifiedDocument | null>(null);
 
   useEffect(() => {
     if (user) fetchAll();
@@ -233,7 +236,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
     const [docsRes, rxRes, invRes] = await Promise.all([
       supabase
         .from("documents")
-        .select("id, name, content, template_name, created_at, media_type, media_url, ai_analysis, ai_analyzed_at, email_sent_at, patient_id")
+        .select("id, name, content, template_name, created_at, media_type, media_url, ai_analysis, ai_analyzed_at, email_sent_at, patient_id, user_id")
         .in("patient_id", ids)
         .order("created_at", { ascending: false }),
       supabase
@@ -265,6 +268,8 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
         aiAnalyzedAt: (doc as any).ai_analyzed_at,
         emailSentAt: (doc as any).email_sent_at,
         patientId: (doc as any).patient_id,
+        userId: (doc as any).user_id,
+        templateName: doc.template_name,
       });
     }
 
