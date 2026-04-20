@@ -1254,7 +1254,7 @@ export function PatientDetailsEditor({
           )}
           {show("hospital_visits") && (
             <TabsTrigger value="hospital_visits" className={triggerClass}>
-              Hospital Visits
+              Admissions
             </TabsTrigger>
           )}
           {show("calendar") && (
@@ -1303,7 +1303,7 @@ export function PatientDetailsEditor({
             Sessions
           </TabsTrigger>
           <TabsTrigger value="hospital_visits" className={triggerClass}>
-            Hospital Visits
+            Admissions
           </TabsTrigger>
           <TabsTrigger value="calendar" className={triggerClass}>
             My Calendar
