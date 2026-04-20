@@ -42,6 +42,7 @@ interface DocumentPreviewProps {
   fontFamily?: string;
   headerFooter?: HeaderFooterTemplate | null;
   onClose: () => void;
+  closeLabel?: string;
 }
 
 export function DocumentPreview({
@@ -52,6 +53,7 @@ export function DocumentPreview({
   fontFamily,
   headerFooter,
   onClose,
+  closeLabel = "Close",
 }: DocumentPreviewProps) {
   const { toast } = useToast();
   const [showEmailDialog, setShowEmailDialog] = useState(false);
@@ -173,7 +175,7 @@ export function DocumentPreview({
         {/* Footer with Actions */}
         <div className="flex items-center justify-between border-t border-border p-4">
           <Button variant="outline" onClick={onClose}>
-            Back to Form
+            {closeLabel}
           </Button>
           <div className="flex gap-3">
             <Button 
