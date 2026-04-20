@@ -41,6 +41,24 @@ export const normalizeHeadingMarkup = (content: string): string => {
   return out.join("\n");
 };
 
+import DOMPurify from "dompurify";
+
+/**
+ * Strip dangerous attributes (event handlers, javascript: URLs) from a tag string.
+ */
+const sanitizeTagAttributes = (tag: string): string => {
+  // Remove all on* event handler attributes (onerror, onclick, etc.)
+  let cleaned = tag.replace(/\s+on\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+  // Remove javascript:, data:text/html, vbscript: URIs in href/src/etc.
+  cleaned = cleaned.replace(
+    /\s+(href|src|action|formaction|xlink:href)\s*=\s*("|')\s*(javascript|vbscript|data:text\/html)[^"']*\2/gi,
+    "",
+  );
+  // Remove style attributes (can carry expression()/url(javascript:))
+  cleaned = cleaned.replace(/\s+style\s*=\s*("[^"]*"|'[^']*')/gi, "");
+  return cleaned;
+};
+
 export const renderFormattedContent = (content: string): string => {
   if (!content) return "";
   const withHeadings = normalizeHeadingMarkup(content);
@@ -52,17 +70,17 @@ export const renderFormattedContent = (content: string): string => {
 
   let processed = withHeadings;
 
-  // Stash <img …> first
+  // Stash <img …> first (with attributes scrubbed)
   processed = processed.replace(imgPattern, (match) => {
     const idx = safeTags.length;
-    safeTags.push(match);
+    safeTags.push(sanitizeTagAttributes(match));
     return `__SAFE_TAG_${idx}__`;
   });
 
-  // Then the rest of the safe tags
+  // Then the rest of the safe tags (also scrubbed)
   processed = processed.replace(safeTagPattern, (match) => {
     const idx = safeTags.length;
-    safeTags.push(match);
+    safeTags.push(sanitizeTagAttributes(match));
     return `__SAFE_TAG_${idx}__`;
   });
 
@@ -80,5 +98,15 @@ export const renderFormattedContent = (content: string): string => {
     processed = processed.replace(/\n/g, "<br/>");
   }
 
-  return processed;
+  // Final defense-in-depth pass through DOMPurify to strip anything that slipped past.
+  return DOMPurify.sanitize(processed, {
+    ALLOWED_TAGS: [
+      "h1", "h2", "h3", "h4", "p", "div", "br", "hr", "blockquote",
+      "b", "i", "u", "strong", "em", "span", "sub", "sup",
+      "table", "thead", "tbody", "tr", "td", "th",
+      "ul", "ol", "li", "img",
+    ],
+    ALLOWED_ATTR: ["src", "alt", "width", "height", "colspan", "rowspan", "align"],
+    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|data:image\/)/i,
+  });
 };
