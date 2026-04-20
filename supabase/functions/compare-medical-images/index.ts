@@ -16,7 +16,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.86.0");
+    const { createClient } = await import("npm:@supabase/supabase-js@2");
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_ANON_KEY')!,
