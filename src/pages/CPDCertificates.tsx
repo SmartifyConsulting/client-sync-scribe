@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { getSignedUrl } from "@/utils/storageUrls";
 import { format } from "date-fns";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -61,8 +62,17 @@ export default function CPDCertificates() {
       toast({ title: "Upload Error", description: error.message, variant: "destructive" });
       return null;
     }
-    const { data: urlData } = supabase.storage.from("cpd-certificates").getPublicUrl(filePath);
-    return urlData.publicUrl;
+    // Bucket is private — store the path; signed URLs are generated on demand.
+    return filePath;
+  };
+
+  const openCertificate = async (pathOrUrl: string) => {
+    const url = await getSignedUrl("cpd-certificates", pathOrUrl);
+    if (!url) {
+      toast({ title: "Unable to open file", variant: "destructive" });
+      return;
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const handleSave = async () => {
@@ -208,9 +218,13 @@ export default function CPDCertificates() {
                   </TableCell>
                   <TableCell>
                     {cert.certificate_url ? (
-                      <a href={cert.certificate_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
+                      <button
+                        type="button"
+                        onClick={() => openCertificate(cert.certificate_url!)}
+                        className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                      >
                         <ExternalLink className="h-3.5 w-3.5" /> View
-                      </a>
+                      </button>
                     ) : (
                       <span className="text-muted-foreground text-sm">-</span>
                     )}
