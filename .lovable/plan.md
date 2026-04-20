@@ -1,57 +1,51 @@
 
 
-# Plan: Add "Admissions" tab to doctor's PatientProfile + enlarge Vula icon
+# Plan: Restore Patient Nav Layout & Fix Holarchive Heading
 
-## 1. Add "Admissions" tab next to "Session History"
+## 1. Bottom Nav — `src/components/layout/BottomNav.tsx`
 
-**File:** `src/pages/PatientProfile.tsx`
+Replace `patientSections` with the original 5-item layout (no Admissions):
 
-- Import the existing `AdmissionsView` component:
-  ```tsx
-  import { AdmissionsView } from "@/components/admissions/AdmissionsView";
-  ```
-- In the `<TabsList>` (after the `sessions` `TabsTrigger`, line 343), add:
-  ```tsx
-  <TabsTrigger value="admissions" className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
-    Admissions
-  </TabsTrigger>
-  ```
-- After the `sessions` `<TabsContent>` block, add:
-  ```tsx
-  <TabsContent value="admissions" className="space-y-4">
-    <AdmissionsView
-      patientId={patient.id}
-      patientHeight={(patient as any).height_cm}
-      patientWeight={(patient as any).weight_kg}
-      canEdit={true}
-    />
-  </TabsContent>
-  ```
-  (Doctors viewing this page have edit affordances — `canEdit={true}` enables Add Vitals/Medication/Lab/Imaging buttons.)
-
-## 2. Enlarge Vula icon to 50% of card height, center-vertical, right-aligned
-
-**File:** `src/pages/PatientProfile.tsx` (lines 311–319)
-
-The Vula stat card is a small p-2 stat tile. Restructure so the Vula symbol sits on the right side of the card, vertically centered, at ~50% of card height (cards in this row are roughly h-14 → icon ≈ `h-7 w-7`).
-
-Replace the current Vula card markup with a two-column flex layout:
-
-```tsx
-<div className="rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-2 shadow-sm border border-emerald-200 dark:border-emerald-800/30 flex items-center justify-between gap-2">
-  <div className="flex flex-col min-w-0">
-    <p className="text-[10px] font-medium text-muted-foreground">Vulas</p>
-    <p className="mt-1 text-sm font-bold text-emerald-600 dark:text-emerald-400">{lollipopCount}</p>
-  </div>
-  <img
-    src={vulaSymbol}
-    alt="Vulas"
-    className="h-7 w-7 md:h-8 md:w-8 object-contain shrink-0"
-  />
-</div>
+```ts
+const patientSections = [
+  { icon: LayoutDashboard, label: "Home", section: "home" },
+  { icon: HeartPulse, label: "My Profile", section: "health" },
+  { icon: Handshake, label: "Holarchy", section: "care" },
+  { icon: FolderOpen, label: "My Desk", section: "admin" },
+  { icon: Gift, label: "My Rewards", section: "rewards" },
+];
 ```
 
-This makes the icon ~50% of the card's vertical height, vertically centered (`items-center`), and right-aligned (`justify-between` pushes it to the right edge), matching the user's screenshot intent.
+- Removes the `Admissions` (Hospital) slot
+- Renames `Holarchive` → `My Profile`
+- Restores `My Desk` and `My Rewards` to the final two slots
+
+## 2. Sidebar — `src/components/layout/Sidebar.tsx`
+
+In `patientNavItems`:
+- Re-add `My Rewards` entry (icon: Gift, to: `/patient/rewards`)
+- Rename the "Holarchive" link label to `My Profile` (keep `?section=health`)
+- Ensure the "Holarchy" entry exists pointing to `?section=care`
+
+## 3. Avatar Popover — `src/components/layout/TopBarIcons.tsx`
+
+Remove the `My Rewards` link that was previously inserted above `Settings` in the avatar popover (for both patient and doctor flows — keep only the doctor `My Rewards` link if it existed pre-change; for patients remove it entirely since it's back on the bottom nav).
+
+## 4. Holarchive screen heading — `src/components/patients/PatientDetailsEditor.tsx`
+
+Currently the page heading stays as "My Holarchive" regardless of section. Update the heading logic so the title reflects which bottom-nav section is active:
+
+| `?section=` | Heading shown |
+|---|---|
+| `home` | My Home |
+| `health` | My Profile |
+| `care` | **My Holarchive** ← (per the user's request) |
+| `admin` | My Desk |
+| `rewards` | My Rewards |
+
+The user's specific ask: when **Holarchy** is clicked from the nav bar, the heading should become **My Holarchive** (instead of staying static). Implement a `sectionHeading` derived from the `section` query param and render that in the page header.
+
+Also confirm the `SECTION_TABS` mapping no longer references `admissions` or `hospital_visits` for the bottom-nav routing (the Hospital Visits tab itself can remain inside the `care` section as previously added — only the nav slot is removed).
 
 ---
 
@@ -59,5 +53,8 @@ This makes the icon ~50% of the card's vertical height, vertically centered (`it
 
 | File | Changes |
 |------|---------|
-| `src/pages/PatientProfile.tsx` | Add Admissions tab + content; resize/reposition Vula icon in stats card |
+| `src/components/layout/BottomNav.tsx` | Restore original 5-item nav (Home, My Profile, Holarchy, My Desk, My Rewards) |
+| `src/components/layout/Sidebar.tsx` | Rename Holarchive→My Profile; re-add My Rewards |
+| `src/components/layout/TopBarIcons.tsx` | Remove patient My Rewards link from avatar popover |
+| `src/components/patients/PatientDetailsEditor.tsx` | Dynamic page heading per section; "Holarchy" section shows "My Holarchive" |
 
