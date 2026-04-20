@@ -42,6 +42,7 @@ interface DocumentPreviewProps {
   fontFamily?: string;
   headerFooter?: HeaderFooterTemplate | null;
   onClose: () => void;
+  closeLabel?: string;
 }
 
 export function DocumentPreview({
@@ -52,6 +53,7 @@ export function DocumentPreview({
   fontFamily,
   headerFooter,
   onClose,
+  closeLabel = "Close",
 }: DocumentPreviewProps) {
   const { toast } = useToast();
   const [showEmailDialog, setShowEmailDialog] = useState(false);
