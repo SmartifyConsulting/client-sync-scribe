@@ -1204,7 +1204,7 @@ export function PatientDetailsEditor({
 
   // Parent tab groups for desktop/tablet
   const PROFILE_TABS = ["personal", "medical"];
-  const CARE_TABS = ["doctors", "sessions", "roundtable"];
+  const CARE_TABS = ["doctors", "sessions", "hospital_visits", "roundtable"];
   const ADMIN_TABS = ["calendar", "tasks", "documents"];
 
   const handleParentTabClick = (parent: string, tabs: string[]) => {
