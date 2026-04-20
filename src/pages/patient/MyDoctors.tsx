@@ -81,10 +81,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
 
     try {
       const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name, specialty, practice_address, mobile_number, avatar_url, practice_number, doctor_number")
-        .eq("role", "doctor")
-        .or(`full_name.ilike.%${query}%,practice_number.eq.${query},doctor_number.eq.${query}`);
+        .rpc("search_doctor_profiles", { _query: query });
 
       if (error) throw error;
 
