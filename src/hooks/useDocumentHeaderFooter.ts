@@ -49,7 +49,7 @@ export function useDocumentHeaderFooter(document: DocumentLike | null | undefine
         if (hf) return hf as unknown as HeaderFooterTemplate;
       }
 
-      // Fallback: author's default letterhead
+      // Fallback 1: author's default letterhead
       const { data: defaultHf } = await supabase
         .from("header_footer_templates")
         .select("*")
@@ -57,7 +57,20 @@ export function useDocumentHeaderFooter(document: DocumentLike | null | undefine
         .eq("is_default", true)
         .maybeSingle();
 
-      return (defaultHf as unknown as HeaderFooterTemplate) ?? null;
+      if (defaultHf) return defaultHf as unknown as HeaderFooterTemplate;
+
+      // Fallback 2 (last resort): any letterhead owned by the author.
+      // Guarantees doctors with a single (un-flagged) letterhead still get it applied.
+      const { data: anyHf } = await supabase
+        .from("header_footer_templates")
+        .select("*")
+        .eq("user_id", authorId)
+        .order("is_default", { ascending: false })
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      return (anyHf as unknown as HeaderFooterTemplate) ?? null;
     },
   });
 

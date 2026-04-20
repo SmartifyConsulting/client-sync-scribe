@@ -542,6 +542,19 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                   <div onClick={() => handleSelectTemplate(template)}>
                     <h3 className="font-medium text-foreground mb-1">{template.name}</h3>
                     <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{template.description}</p>
+                    {(() => {
+                      const linkedHf = headerFooterTemplates.find(
+                        (hf) => hf.id === template.header_footer_template_id,
+                      );
+                      return (
+                        <p className="text-[11px] text-muted-foreground mb-2">
+                          Letterhead:{" "}
+                          <span className="font-medium text-foreground">
+                            {linkedHf?.name ?? "Default"}
+                          </span>
+                        </p>
+                      );
+                    })()}
                     <span className="text-xs text-muted-foreground">{template.lastModified}</span>
                   </div>
                 </div>
