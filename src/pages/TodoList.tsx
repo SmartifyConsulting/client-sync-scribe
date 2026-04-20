@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { format, isToday, isYesterday } from "date-fns";
 import { DocumentPreview } from "@/components/sessions/DocumentPreview";
-import { useTemplateWithHeaderFooter } from "@/hooks/useTemplateWithHeaderFooter";
+import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
 
 interface TodoItem {
@@ -109,10 +109,12 @@ export default function TodoList() {
   const [filter, setFilter] = useState<"all" | "active" | "completed">("active");
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set());
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
-  const [previewDoc, setPreviewDoc] = useState<{ content: string; title: string; logoUrl?: string; fontFamily?: string } | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<{ content: string; title: string; logoUrl?: string; fontFamily?: string; userId?: string; templateName?: string } | null>(null);
   const [loadingPreview, setLoadingPreview] = useState<string | null>(null);
 
-  const { headerFooter } = useTemplateWithHeaderFooter("General");
+  const { headerFooter } = useDocumentHeaderFooter(
+    previewDoc ? { user_id: previewDoc.userId, template_name: previewDoc.templateName } : null
+  );
 
   const handlePreviewDoc = async (todo: TodoItem) => {
     if (!todo.document_id) return;
@@ -139,7 +141,8 @@ export default function TodoList() {
         content,
         title: doc.template_name || doc.name || 'Document',
         logoUrl: profile?.logo_url || undefined,
-        fontFamily: headerFooter?.font_family || undefined,
+        userId: doc.user_id,
+        templateName: doc.template_name,
       });
     } catch (err) {
       toast({ title: 'Preview failed', variant: 'destructive' });
@@ -614,7 +617,7 @@ export default function TodoList() {
           title={previewDoc.title}
           content={previewDoc.content}
           logoUrl={previewDoc.logoUrl}
-          fontFamily={previewDoc.fontFamily}
+          fontFamily={previewDoc.fontFamily ?? headerFooter?.font_family}
           headerFooter={headerFooter}
           onClose={() => setPreviewDoc(null)}
         />
