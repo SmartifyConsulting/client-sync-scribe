@@ -28,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTemplates, Template } from "@/hooks/useTemplates";
 import { useHeaderFooterTemplates, HeaderFooterTemplate } from "@/hooks/useHeaderFooterTemplates";
 import { useDocuments, Document } from "@/hooks/useDocuments";
+import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
 import { exportToPDF } from "@/utils/documentExport";
 import { renderFormattedContent } from "@/utils/documentFormatting";
@@ -943,64 +944,10 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
           {previewDocument && (
             <div className="space-y-4">
               <div className="border border-border rounded-lg p-6 bg-white">
-                {/* Header from matched template */}
-                {(() => {
-                  const matchedTemplate = templates.find(
-                    (t) => t.name === previewDocument.template_name
-                  );
-                  const linkedHF = matchedTemplate
-                    ? headerFooterTemplates.find((hf) => hf.id === matchedTemplate.header_footer_template_id)
-                    : headerFooterTemplates.find((hf) => hf.is_default);
-                  if (linkedHF) {
-                    const header = linkedHF.header as {
-                      left?: { text: string; alignment: string; imageUrl?: string };
-                      center?: { text: string; alignment: string; imageUrl?: string };
-                      right?: { text: string; alignment: string; imageUrl?: string };
-                    };
-                    return (
-                      <div className="pb-4 border-b border-border mb-4">
-                        <div className="grid grid-cols-3 gap-4">
-                          <div>{header?.left && renderHFSectionPreview(header.left)}</div>
-                          <div>{header?.center && renderHFSectionPreview(header.center)}</div>
-                          <div>{header?.right && renderHFSectionPreview(header.right)}</div>
-                        </div>
-                      </div>
-                    );
-                  }
-                  return null;
-                })()}
-
-                <div
-                  className="whitespace-pre-wrap text-sm text-foreground min-h-[100px]"
-                  dangerouslySetInnerHTML={{ __html: renderFormattedContent(previewDocument.content) }}
+                <DocumentPreviewBody
+                  document={previewDocument}
+                  renderSection={renderHFSectionPreview}
                 />
-
-                {/* Footer from matched template */}
-                {(() => {
-                  const matchedTemplate = templates.find(
-                    (t) => t.name === previewDocument.template_name
-                  );
-                  const linkedHF = matchedTemplate
-                    ? headerFooterTemplates.find((hf) => hf.id === matchedTemplate.header_footer_template_id)
-                    : headerFooterTemplates.find((hf) => hf.is_default);
-                  if (linkedHF) {
-                    const footer = linkedHF.footer as {
-                      left?: { text: string; alignment: string; imageUrl?: string };
-                      center?: { text: string; alignment: string; imageUrl?: string };
-                      right?: { text: string; alignment: string; imageUrl?: string };
-                    };
-                    return (
-                      <div className="pt-4 border-t border-border mt-4">
-                        <div className="grid grid-cols-3 gap-4">
-                          <div>{footer?.left && renderHFSectionPreview(footer.left)}</div>
-                          <div>{footer?.center && renderHFSectionPreview(footer.center)}</div>
-                          <div>{footer?.right && renderHFSectionPreview(footer.right)}</div>
-                        </div>
-                      </div>
-                    );
-                  }
-                  return null;
-                })()}
               </div>
 
               <div className="flex gap-3 pt-4 border-t border-border">
@@ -1182,5 +1129,69 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+interface HFCell {
+  text: string;
+  alignment: string;
+  imageUrl?: string;
+}
+
+function DocumentPreviewBody({
+  document,
+  renderSection,
+}: {
+  document: Document;
+  renderSection: (section: HFCell) => JSX.Element;
+}) {
+  const { headerFooter } = useDocumentHeaderFooter(document);
+  if (!headerFooter) {
+    return (
+      <div
+        className="whitespace-pre-wrap text-sm text-foreground min-h-[100px]"
+        dangerouslySetInnerHTML={{ __html: renderFormattedContent(document.content) }}
+      />
+    );
+  }
+
+  const header = headerFooter.header as {
+    left?: HFCell;
+    center?: HFCell;
+    right?: HFCell;
+  } | null;
+  const footer = headerFooter.footer as {
+    left?: HFCell;
+    center?: HFCell;
+    right?: HFCell;
+  } | null;
+
+  return (
+    <>
+      {header && (
+        <div className="pb-4 border-b border-border mb-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div>{header.left && renderSection(header.left)}</div>
+            <div>{header.center && renderSection(header.center)}</div>
+            <div>{header.right && renderSection(header.right)}</div>
+          </div>
+        </div>
+      )}
+
+      <div
+        className="whitespace-pre-wrap text-sm text-foreground min-h-[100px]"
+        dangerouslySetInnerHTML={{ __html: renderFormattedContent(document.content) }}
+      />
+
+      {footer && (
+        <div className="pt-4 border-t border-border mt-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div>{footer.left && renderSection(footer.left)}</div>
+            <div>{footer.center && renderSection(footer.center)}</div>
+            <div>{footer.right && renderSection(footer.right)}</div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
