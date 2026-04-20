@@ -1,88 +1,38 @@
 
 
-# Plan: Stop To-Do Preview Redirect + Add "Report Bug/Fix" for All Users
+# Plan: Clarify the To-Do document preview close behavior
 
-Two changes in one pass.
+## What's actually happening
 
----
+The To-Do list preview already opens `<DocumentPreview>` as an **overlay** and closes via `onClose={() => setPreviewDoc(null)}` — there is no `navigate(...)` call. The X icon (top-right) and the bottom-left button both just dismiss the modal in place.
 
-## Part 1 — Stop the To-Do list "Edit document" button from navigating away
+The confusion is the **bottom button label**: it currently reads **"Back to Form"**, which is correct when the modal is opened from inside an editor (e.g. PrescriptionEditor) but misleading when opened from the To-Do list or Patient Documents — there's no form to go back to, so it looks like it might navigate to Templates.
 
-### Why
-On the To-Do list, the second icon next to a document task currently runs:
-```ts
-navigate(`/documents?view=${todo.document_id}`)
-```
-which jumps to the Patient Documents page (where Templates lives as a tab) and auto-opens the preview there. That's the "navigation to Templates" you're seeing.
+## Fix
 
-### Fix
-In `src/pages/TodoList.tsx`:
-- **Remove** the redundant `FileText` "Edit document" button at line 576–578. The Eye / Preview button right beside it already opens the same document in an in-page modal via `<DocumentPreview>` — no navigation needed.
-- (Approve & Save and Edit/Delete buttons stay unchanged.)
+Make the close-button label context-aware in `src/components/sessions/DocumentPreview.tsx`:
 
-That's the entire change for Part 1. No new routes, no extra dialogs.
+1. Add an optional prop `closeLabel?: string` (default `"Close"`).
+2. Render the bottom-left button as `{closeLabel}` instead of the hard-coded `"Back to Form"`.
+3. In editor callers (PrescriptionEditor, InvoiceEditor, MedicalCertificateEditor, ReferralLetterEditor, GeneralLetterEditor, HospitalAdmissionEditor), pass `closeLabel="Back to Form"` to keep their existing wording.
+4. Leave the To-Do (`TodoList.tsx`) and Documents (`Documents.tsx`) callers untouched so they get the new default `"Close"`.
 
----
-
-## Part 2 — Bring the "Report Bug/Fix" feature from **Jamit** into Holarc
-
-Port the bottom-sheet feature so **both patients and doctors** can log bugs, fixes, and nice-to-haves while testing.
-
-### Database (new migration)
-
-Create `public.bug_reports`:
-
-| column | type | notes |
-|---|---|---|
-| `id` | uuid PK, default `gen_random_uuid()` | |
-| `created_at` | timestamptz, default `now()` | |
-| `user_id` | uuid NOT NULL | reporter |
-| `display_name` | text | snapshot of reporter name |
-| `type` | text NOT NULL default `'bug'` | `bug` / `fix` / `nice_to_have` |
-| `title` | text NOT NULL | short summary |
-| `description` | text | optional details |
-| `created_via` | text NOT NULL default `'typed'` | `typed` / `voice` (future) |
-| `status` | text NOT NULL default `'open'` | `open` / `done` |
-
-RLS:
-- **SELECT**: `auth.uid() = user_id OR has_role(auth.uid(), 'admin')` — every user sees their own; admins see all.
-- **INSERT**: `auth.uid() = user_id`.
-- **UPDATE**: same as SELECT (so reporter or admin can mark done).
-- No DELETE.
-
-### New component: `src/components/feedback/ReportFixSheet.tsx`
-
-Adapted from Jamit's `ReportFixSheet`, simplified for Holarc:
-- Bottom `Sheet` (mobile-first, 80vh) with a header *"Report Fix"* + Beta badge.
-- **Type selector**: 3 small toggle buttons — Bug / Fix / Nice-to-have (with `Bug`, `Wrench`, `Sparkles` lucide icons + colored left border on cards).
-- **Text input + Send button** to submit a typed report (Enter submits, 300-char limit).
-- **Outstanding list** below: searchable list of `status='open'` reports the current user can see, with type icon, title, description, reporter + date, and a green check button to mark as done.
-- No voice recorder in v1 (Holarc already has its own recording stack; we can add later if wanted).
-- No screenshot upload in v1 (keeps the migration minimal — column can be added later if needed).
-- Uses Holarc's existing primitives: `Sheet`, `Button`, `Input`, `Badge`, `useAuth`, `useProfile`, `useToast`, `supabase` client.
-
-### Trigger placement (visible to both roles)
-
-Add a single icon button (lucide `Bug`) into:
-- **`src/components/layout/TopBarIcons.tsx`** — desktop top-right icon row (already shown for both roles).
-- **`src/components/layout/MobileHeader.tsx`** — mobile header icons.
-
-Tapping the icon opens `<ReportFixSheet>` (state lives in each header). One implementation, both roles, both layouts.
-
-### Out of scope for now
-- Voice-dictated reports (would need a new edge function — defer).
-- Screenshot uploads (defer; can add `screenshot_url` column + storage bucket later).
-- Admin moderation page (admins already see all rows via RLS; they can mark done from the same sheet).
-
----
+The X icon in the top-right already dismisses cleanly — no change needed there.
 
 ## Files touched
 
 | File | Change |
 |---|---|
-| `src/pages/TodoList.tsx` | Remove the "Edit document" `FileText` button that navigated to `/documents?view=` |
-| `supabase/migrations/<ts>_bug_reports.sql` | Create `bug_reports` table + RLS policies |
-| `src/components/feedback/ReportFixSheet.tsx` | **new** — typed bug/fix/nice-to-have reporter + outstanding list |
-| `src/components/layout/TopBarIcons.tsx` | Add `Bug` icon trigger + mount sheet |
-| `src/components/layout/MobileHeader.tsx` | Add `Bug` icon trigger + mount sheet |
+| `src/components/sessions/DocumentPreview.tsx` | Add `closeLabel` prop (default `"Close"`); replace hard-coded `"Back to Form"` |
+| `src/components/sessions/PrescriptionEditor.tsx` | Pass `closeLabel="Back to Form"` |
+| `src/components/sessions/InvoiceEditor.tsx` | Pass `closeLabel="Back to Form"` |
+| `src/components/sessions/MedicalCertificateEditor.tsx` | Pass `closeLabel="Back to Form"` |
+| `src/components/sessions/ReferralLetterEditor.tsx` | Pass `closeLabel="Back to Form"` |
+| `src/components/sessions/GeneralLetterEditor.tsx` | Pass `closeLabel="Back to Form"` |
+| `src/components/sessions/HospitalAdmissionEditor.tsx` | Pass `closeLabel="Back to Form"` |
+
+## Out of scope
+
+- No routing changes (none needed — the modal already overlays in place).
+- No visual redesign, no schema, no RLS.
 
