@@ -617,7 +617,7 @@ export default function TodoList() {
           title={previewDoc.title}
           content={previewDoc.content}
           logoUrl={previewDoc.logoUrl}
-          fontFamily={previewDoc.fontFamily}
+          fontFamily={previewDoc.fontFamily ?? headerFooter?.font_family}
           headerFooter={headerFooter}
           onClose={() => setPreviewDoc(null)}
         />
