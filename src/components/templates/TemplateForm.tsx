@@ -48,6 +48,19 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
   const [selectedHeaderFooterId, setSelectedHeaderFooterId] = useState<string>(
     initialData?.headerFooterTemplateId || ""
   );
+
+  // Auto-default to the user's `is_default` letterhead (or first available) when
+  // none is linked yet. This way doctors with multiple letterheads still get
+  // a sensible pre-selection rather than "None".
+  useEffect(() => {
+    if (selectedHeaderFooterId) return;
+    if (initialData?.headerFooterTemplateId) return;
+    if (headerFooterTemplates.length === 0) return;
+    const preferred =
+      headerFooterTemplates.find((t) => (t as any).is_default) ??
+      headerFooterTemplates[0];
+    if (preferred) setSelectedHeaderFooterId(preferred.id);
+  }, [headerFooterTemplates, initialData?.headerFooterTemplateId, selectedHeaderFooterId]);
   
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
