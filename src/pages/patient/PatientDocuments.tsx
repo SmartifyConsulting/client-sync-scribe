@@ -862,6 +862,17 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
+                    {doc.source === "documents" && doc.content && !doc.mediaUrl && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-primary hover:text-primary/80"
+                        onClick={() => setPreviewDoc(doc)}
+                        title="Preview document"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
                     {doc.source === "documents" && (
                       <Button
                         variant="ghost"
