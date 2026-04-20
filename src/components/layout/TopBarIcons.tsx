@@ -213,6 +213,9 @@ export function TopBarIcons() {
               <p className="text-[10px] text-muted-foreground capitalize">Patient</p>
             </div>
           )}
+          <Link to={isDoctor && !isOnPatientRoute ? "/doctor/rewards" : "/patient/rewards"} className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
+            <Gift className="h-3.5 w-3.5" /> My Rewards
+          </Link>
           <Link to="/settings" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
             <Settings className="h-3.5 w-3.5" /> Settings
           </Link>
