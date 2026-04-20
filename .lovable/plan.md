@@ -1,24 +1,35 @@
 
 
-# Plan: Restore Landing nav logo aspect ratio
+# Plan: Single "Login" button on Landing nav (mobile fit)
 
 ## Problem
-On `holarchealth.com` (Landing page), the top-left logo renders distorted/clipped. In `src/pages/Landing.tsx` the nav logo is:
-
-```tsx
-<img src={holarcLogo} alt="Holarc Health" className="h-[68px] w-auto" />
-```
-
-Inside a `nav` whose row is `h-16` (64px). A 68px-tall image inside a 64px row gets vertically squeezed/clipped by the flex container, producing the warped sliver visible in the screenshot. There is also no `object-contain`, so any constraint distorts it.
+The Landing nav shows three buttons — `Doctors Login`, `Patients Login`, and `Get Started` — alongside the logo. On a 390px mobile viewport this overflows, squeezing the logo. The role split is unnecessary at the nav level since `/auth` already handles role selection on the destination page.
 
 ## Fix
 
-| File | Change |
-|---|---|
-| `src/pages/Landing.tsx` | Change the nav `<img>` to `className="h-10 w-auto object-contain"` (40px, comfortably inside the 64px nav row) so the logo keeps its natural aspect ratio. Hero logo (`h-32 sm:h-40`) is unchanged — it already renders correctly. |
+**File:** `src/pages/Landing.tsx` (nav block, lines ~111–129)
+
+Replace the two role-specific login buttons with a single `Login` button:
+
+```tsx
+<div className="flex items-center gap-2 sm:gap-3">
+  <Button
+    variant="ghost"
+    onClick={() => navigate("/auth?mode=login")}
+    className="text-muted-foreground hover:text-foreground"
+  >
+    Login
+  </Button>
+  <Button onClick={() => setShowRoleDialog(true)} className="btn-pill">
+    Get Started
+  </Button>
+</div>
+```
+
+Result: nav becomes `[logo] … [Login] [Get Started]` — fits comfortably at 390px and the logo keeps its full width.
 
 ## Out of scope
-- No changes to `MobileHeader` (already uses `h-[50px] w-auto object-contain` and renders correctly inside the app shell, not the marketing landing page).
-- No changes to the logo asset itself.
-- No layout, color, or copy changes.
+- No change to `/auth` page logic (it already handles login without a role param).
+- No change to the role-selection dialog used by "Get Started" for signup.
+- No change to `MobileHeader` (in-app shell, not the marketing landing page).
 
