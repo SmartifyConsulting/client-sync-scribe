@@ -311,7 +311,8 @@ function AnimatedCounter({ target }: { target: number }) {
 const SECTION_TABS: Record<string, string[]> = {
   home: [],
   health: ["personal", "medical"],
-  care: ["doctors", "sessions", "roundtable"],
+  care: ["doctors", "sessions", "hospital_visits", "roundtable"],
+  admissions: ["admissions"],
   admin: ["calendar", "tasks", "documents"],
 };
 
