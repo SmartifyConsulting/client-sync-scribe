@@ -107,13 +107,13 @@ export function HealthPhotoCapture({ patientId, onPhotoSaved }: HealthPhotoCaptu
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('health-photos')
-        .getPublicUrl(fileName);
+      // Bucket is private — store the path; UI mints signed URLs on demand.
+      // The validator receives the photo as a data URL so it never needs public access.
+      const photoPath = fileName;
 
-      // Validate with AI
+      // Validate with AI (pass image inline as data URL)
       const { data: validationData, error: validationError } = await supabase.functions.invoke('validate-health-photo', {
-        body: { photoUrl: publicUrl, category: selectedCategory, patientId }
+        body: { photoDataUrl: capturedImage, category: selectedCategory, patientId }
       });
 
       if (validationError) throw validationError;
@@ -126,6 +126,8 @@ export function HealthPhotoCapture({ patientId, onPhotoSaved }: HealthPhotoCaptu
           description: `You've already submitted a ${selectedCategory.replace('_', ' ')} photo today. Try again tomorrow!`,
           variant: "destructive",
         });
+        // Clean up unused upload
+        await supabase.storage.from('health-photos').remove([photoPath]);
         return;
       }
 
@@ -136,16 +138,16 @@ export function HealthPhotoCapture({ patientId, onPhotoSaved }: HealthPhotoCaptu
           variant: "destructive",
         });
         // Delete the uploaded photo since it wasn't validated
-        await supabase.storage.from('health-photos').remove([fileName]);
+        await supabase.storage.from('health-photos').remove([photoPath]);
         return;
       }
 
-      // Save to database
+      // Save to database — store the storage path, not a public URL.
       const { error: saveError } = await supabase
         .from('health_photos')
         .insert({
           patient_id: patientId,
-          photo_url: publicUrl,
+          photo_url: photoPath,
           category: selectedCategory,
           ai_validation_result: validationData.validation,
           is_validated: true,

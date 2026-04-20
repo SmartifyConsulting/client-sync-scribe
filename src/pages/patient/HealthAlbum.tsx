@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { HealthPhotoCapture } from "@/components/health/HealthPhotoCapture";
+import { extractStoragePath, getSignedUrl } from "@/utils/storageUrls";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -83,8 +84,15 @@ export default function HealthAlbum() {
         variant: "destructive",
       });
     } else {
-      setPhotos(data || []);
-      
+      // Bucket is private — sign each photo URL for display.
+      const signed = await Promise.all(
+        (data || []).map(async (p: any) => {
+          const signedUrl = await getSignedUrl('health-photos', p.photo_url);
+          return { ...p, photo_url: signedUrl || p.photo_url };
+        })
+      );
+      setPhotos(signed);
+
       // Calculate stats
       const newStats = {
         total: data?.length || 0,
@@ -100,12 +108,14 @@ export default function HealthAlbum() {
 
   const deletePhoto = async (photo: HealthPhoto) => {
     try {
-      // Extract file path from URL
-      const urlParts = photo.photo_url.split('/');
-      const fileName = urlParts.slice(-2).join('/');
+      // photo.photo_url has been signed for display — derive the underlying
+      // storage path from the signed URL, falling back to the value itself.
+      const path = extractStoragePath('health-photos', photo.photo_url);
 
-      // Delete from storage
-      await supabase.storage.from('health-photos').remove([fileName]);
+      // Delete from storage (best effort)
+      if (path) {
+        await supabase.storage.from('health-photos').remove([path]);
+      }
 
       // Delete from database
       const { error } = await supabase
