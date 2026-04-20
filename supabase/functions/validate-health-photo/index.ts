@@ -23,9 +23,10 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const { photoUrl, category, patientId } = await req.json();
-    
-    if (!photoUrl || !category || !patientId) {
+    const { photoUrl, photoDataUrl, category, patientId } = await req.json();
+    const imageForAi = photoDataUrl || photoUrl;
+
+    if (!imageForAi || !category || !patientId) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -83,7 +84,7 @@ Only return the JSON, no other text.`;
             role: 'user',
             content: [
               { type: 'text', text: fullPrompt },
-              { type: 'image_url', image_url: { url: photoUrl } }
+              { type: 'image_url', image_url: { url: imageForAi } }
             ]
           }
         ],
