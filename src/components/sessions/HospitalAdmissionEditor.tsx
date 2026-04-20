@@ -430,8 +430,8 @@ export function HospitalAdmissionEditor({
         document_id: docRow?.id || null,
         hospital: hospital || null,
         admission_date: admissionDate ? admissionDate.toISOString() : new Date().toISOString(),
-        diagnosis: diagnosis || null,
-        procedure_description: procedure || null,
+        diagnosis: codeSystems.flatMap(cs => cs.entries.filter(e => e.description).map(e => `${cs.name}: ${e.code} ${e.description}`)).join(" | ") || null,
+        procedure_description: procedureDescription || null,
         status: "admitted",
       });
       if (admErr) console.error("Failed to create admission record:", admErr);
