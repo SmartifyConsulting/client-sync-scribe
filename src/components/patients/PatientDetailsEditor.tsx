@@ -74,6 +74,7 @@ const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
 const MyDoctors = lazy(() => import("@/pages/patient/MyDoctors"));
 const PatientRoundTable = lazy(() => import("@/pages/patient/PatientRoundTable"));
 const PatientCalendarLazy = lazy(() => import("@/pages/patient/PatientCalendar"));
+const AdmissionsView = lazy(() => import("@/components/admissions/AdmissionsView").then(m => ({ default: m.AdmissionsView })));
 
 const SettingsContentLazy = lazy(() =>
   import("@/components/settings/SettingsContent").then((m) => ({ default: m.SettingsContent })),
@@ -1918,7 +1919,7 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="roundtable" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">My Round Table</h2>
+                  <h2 className="text-lg font-semibold text-foreground">Round Table</h2>
                   <p className="text-xs text-muted-foreground">
                     Notes shared by your healthcare providers about your care
                   </p>
@@ -1934,6 +1935,26 @@ export function PatientDetailsEditor({
                 </Suspense>
               </TabsContent>
             )}
+
+            <TabsContent value="hospital_visits" className="mt-4">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold text-foreground">Hospital Visits</h2>
+                <p className="text-xs text-muted-foreground">Timeline of hospital admissions and clinical details</p>
+              </div>
+              <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                <AdmissionsView patientId={patient.id} patientHeight={patient.height_cm} patientWeight={patient.weight_kg} canEdit={false} />
+              </Suspense>
+            </TabsContent>
+
+            <TabsContent value="admissions" className="mt-4">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold text-foreground">Admissions</h2>
+                <p className="text-xs text-muted-foreground">Capture vitals, medications, lab results and imaging</p>
+              </div>
+              <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                <AdmissionsView patientId={patient.id} patientHeight={patient.height_cm} patientWeight={patient.weight_kg} canEdit={true} />
+              </Suspense>
+            </TabsContent>
           </Tabs>
         </div>
       </div>
@@ -3417,7 +3438,7 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="roundtable" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">My Round Table</h2>
+                <h2 className="text-lg font-semibold text-foreground">Round Table</h2>
                 <p className="text-xs text-muted-foreground">
                   Notes shared by your healthcare providers about your care
                 </p>
@@ -3433,6 +3454,26 @@ export function PatientDetailsEditor({
               </Suspense>
             </TabsContent>
           )}
+
+          <TabsContent value="hospital_visits" className="mt-4">
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-foreground">Hospital Visits</h2>
+              <p className="text-xs text-muted-foreground">Timeline of hospital admissions and clinical details</p>
+            </div>
+            <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+              <AdmissionsView patientId={patient.id} patientHeight={patient.height_cm} patientWeight={patient.weight_kg} canEdit={false} />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="admissions" className="mt-4">
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-foreground">Admissions</h2>
+              <p className="text-xs text-muted-foreground">Capture vitals, medications, lab results and imaging</p>
+            </div>
+            <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+              <AdmissionsView patientId={patient.id} patientHeight={patient.height_cm} patientWeight={patient.weight_kg} canEdit={true} />
+            </Suspense>
+          </TabsContent>
         </Tabs>
       </div>
     </div>

@@ -412,16 +412,29 @@ export function HospitalAdmissionEditor({
 
       const content = generateContent();
 
-      const { error } = await supabase.from("documents").insert({
+      const { data: docRow, error } = await supabase.from("documents").insert({
         name: `Hospital Admission Form - ${patientName} - ${admissionDate ? format(admissionDate, "dd/MM/yyyy") : new Date().toLocaleDateString()}`,
         content,
         patient_id: patientId,
         patient_name: patientName,
         template_name: "Hospital Admission Form",
         user_id: user.id,
-      });
+      }).select().single();
 
       if (error) throw error;
+
+      // Auto-create hospital admission record linked to this document
+      const { error: admErr } = await supabase.from("hospital_admissions").insert({
+        patient_id: patientId,
+        doctor_id: user.id,
+        document_id: docRow?.id || null,
+        hospital: hospital || null,
+        admission_date: admissionDate ? admissionDate.toISOString() : new Date().toISOString(),
+        diagnosis: codeSystems.flatMap(cs => cs.entries.filter(e => e.description).map(e => `${cs.name}: ${e.code} ${e.description}`)).join(" | ") || null,
+        procedure_description: procedureDescription || null,
+        status: "admitted",
+      });
+      if (admErr) console.error("Failed to create admission record:", admErr);
 
       onSave({ content });
       toast({ title: "Hospital Admission Form Saved", description: "The form has been saved successfully." });
