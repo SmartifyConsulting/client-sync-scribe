@@ -108,20 +108,13 @@ export default function Landing() {
             <div className="flex items-center gap-3">
               <img src={holarcLogo} alt="Holarc Health" className="h-10 w-auto object-contain" />
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Button
                 variant="ghost"
-                onClick={() => navigate("/auth?mode=login&role=doctor")}
+                onClick={() => navigate("/auth?mode=login")}
                 className="text-muted-foreground hover:text-foreground"
               >
-                Doctors Login
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => navigate("/auth?mode=login&role=patient")}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                Patients Login
+                Login
               </Button>
               <Button onClick={() => setShowRoleDialog(true)} className="btn-pill">
                 Get Started
