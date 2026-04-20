@@ -141,7 +141,8 @@ export default function TodoList() {
         content,
         title: doc.template_name || doc.name || 'Document',
         logoUrl: profile?.logo_url || undefined,
-        fontFamily: headerFooter?.font_family || undefined,
+        userId: doc.user_id,
+        templateName: doc.template_name,
       });
     } catch (err) {
       toast({ title: 'Preview failed', variant: 'destructive' });
