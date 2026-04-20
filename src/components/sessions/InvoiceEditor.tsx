@@ -265,6 +265,7 @@ Total: ${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`;
         fontFamily={headerFooter?.font_family || undefined}
         headerFooter={headerFooter}
         onClose={() => setShowPreview(false)}
+        closeLabel="Back to Form"
       />
     );
   }

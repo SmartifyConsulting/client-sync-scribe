@@ -457,6 +457,7 @@ export function HospitalAdmissionEditor({
         fontFamily={headerFooter?.font_family || undefined}
         headerFooter={headerFooter}
         onClose={() => setShowPreview(false)}
+        closeLabel="Back to Form"
       />
     );
   }
