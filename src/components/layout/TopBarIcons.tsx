@@ -91,6 +91,22 @@ export function TopBarIcons() {
 
   return (
     <div className="flex items-center gap-2">
+      {/* Bug/Fix Report */}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => setReportOpen(true)}
+              className="h-9 w-9 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors"
+            >
+              <Bug className="h-4 w-4 text-white" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>Report Bug/Fix</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+      <ReportFixSheet open={reportOpen} onOpenChange={setReportOpen} />
+
       {/* Calendar quick-access */}
       <TooltipProvider>
         <Tooltip>
