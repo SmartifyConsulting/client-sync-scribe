@@ -1,60 +1,76 @@
 
 
-# Plan: Restore Patient Nav Layout & Fix Holarchive Heading
+# Plan: Holarc Sales Deck — Mock-up Screenshots (Clinical + Practice Management)
 
-## 1. Bottom Nav — `src/components/layout/BottomNav.tsx`
+A one-off artifact task. Capture key Holarc screens across **Doctor (clinical)**, **Doctor (practice management)**, and **Patient** perspectives, wrap each in a macOS-style window frame on a tasteful gradient, and deliver a polished sales-deck-ready set.
 
-Replace `patientSections` with the original 5-item layout (no Admissions):
+## The story
 
-```ts
-const patientSections = [
-  { icon: LayoutDashboard, label: "Home", section: "home" },
-  { icon: HeartPulse, label: "My Profile", section: "health" },
-  { icon: Handshake, label: "Holarchy", section: "care" },
-  { icon: FolderOpen, label: "My Desk", section: "admin" },
-  { icon: Gift, label: "My Rewards", section: "rewards" },
-];
-```
+**Patient:** Sarah Mitchell, 42, Type 2 Diabetes + mild hypertension. Recently admitted overnight at Mediclinic Cape Town for chest pain (cardiac ruled out).
+**Doctor:** Dr. Lisa Anderson (`developer@smartify.co.za`) — GP running a small private practice. Coordinates with Dr. James Anderson (`director@smartify.co.za`) via Round Table.
 
-- Removes the `Admissions` (Hospital) slot
-- Renames `Holarchive` → `My Profile`
-- Restores `My Desk` and `My Rewards` to the final two slots
+This story showcases the **full clinical loop AND the business-of-medicine loop**: scheduling, billing, templates, partners, and admin operations.
 
-## 2. Sidebar — `src/components/layout/Sidebar.tsx`
+## Screens to capture (14 total)
 
-In `patientNavItems`:
-- Re-add `My Rewards` entry (icon: Gift, to: `/patient/rewards`)
-- Rename the "Holarchive" link label to `My Profile` (keep `?section=health`)
-- Ensure the "Holarchy" entry exists pointing to `?section=care`
+### Doctor — Clinical (5, desktop 1440×900)
+1. **Doctor Dashboard** — Today's Briefing, stats, upcoming appointments, recent activity
+2. **Patient List** — alphabetised roster with Sarah visible
+3. **Sarah's Patient Profile** — overview tab: vitals, Vula badge, conditions
+4. **Hospital Admissions tab** — Mediclinic admission with vitals, meds, labs, imaging
+5. **Session Detail** — completed session with AI summary + action points
 
-## 3. Avatar Popover — `src/components/layout/TopBarIcons.tsx`
+### Doctor — Practice Management (5, desktop 1440×900) ← **NEW FOCUS**
+6. **Admin Hub → Calendar** — week view, colour-coded appointments, Google Calendar sync visible
+7. **Admin Hub → To-Do** — practice tasks list with dictation mic + AI-suggested items
+8. **Admin Hub → Invoices** — invoice list with paid/outstanding totals, currency config
+9. **Admin Hub → Templates** — letterhead + 6 default document templates with logo
+10. **My Practice / Settings** — practice details, signature font picker, billing config, partners
 
-Remove the `My Rewards` link that was previously inserted above `Settings` in the avatar popover (for both patient and doctor flows — keep only the doctor `My Rewards` link if it existed pre-change; for patients remove it entirely since it's back on the bottom nav).
+### Patient (4, mobile 390×844, Sarah's account)
+11. **My Profile** — personal/clinical landing
+12. **My Holarchive (Holarchy)** — care team avatars (Lisa, James, etc.)
+13. **My Rewards** — Vula count, adherence streak
+14. **My Sessions / Hospital Visits** — Mediclinic stay timeline
 
-## 4. Holarchive screen heading — `src/components/patients/PatientDetailsEditor.tsx`
+## Approach
 
-Currently the page heading stays as "My Holarchive" regardless of section. Update the heading logic so the title reflects which bottom-nav section is active:
+**Step 1 — Seed realistic data via `psql`** (scoped to test accounts, tagged for cleanup):
+- `Sarah Mitchell` patient record + linked patient user
+- 1 Mediclinic admission + 3 vitals + 2 active meds + 2 labs + 1 imaging
+- 6 upcoming appointments (mix of patients, colour-coded types) for the calendar shot
+- 8 to-do items (doctor + AI-suggested) for the To-Do shot
+- 5 invoices (3 paid, 2 outstanding) across 2 months for the Invoices shot
+- Practice settings: logo, signature font, currency = ZAR, billable services
+- 2 practice partners (receptionist + nurse) for the Settings shot
+- 3 recent sessions w/ AI summaries
+- Round Table thread: Lisa ↔ James about Sarah
+- 47 Vulas + adherence history for Sarah
 
-| `?section=` | Heading shown |
+**Step 2 — Capture screenshots** via browser tools:
+- Login as `developer@smartify.co.za` for shots 1–10 (desktop 1440×900)
+- Login as Sarah for shots 11–14 (mobile 390×844)
+
+**Step 3 — Frame each shot** using the `product-shot` skill:
+- **Clinical (1–5)** → `ocean` / `midnight` (clinical trust, deep teal/navy)
+- **Practice mgmt (6–10)** → `aurora` / `arctic` (operational, fresh, business-credible)
+- **Patient (11–14)** → `peach` / `lavender` / `candy` (warm, human)
+
+**Step 4 — QA each PNG** by re-reading it; check for cropped UI, login overlays, blank states, contrast issues. Re-shoot failures.
+
+## Deliverables → `/mnt/documents/`
+
+| Artifact | File |
 |---|---|
-| `home` | My Home |
-| `health` | My Profile |
-| `care` | **My Holarchive** ← (per the user's request) |
-| `admin` | My Desk |
-| `rewards` | My Rewards |
+| 14 framed product shots | `holarc-01-doctor-dashboard.png` … `holarc-14-patient-hospital-visits.png` |
+| Contact sheet (3 columns, grouped by perspective) | `holarc-contact-sheet.png` |
+| Narrative README mapping each shot → pitch beat, with a dedicated **"Practice Management"** section highlighting #6–#10 | `holarc-screenshots-README.md` |
+| Seed SQL for reproducibility / cleanup | `holarc-seed.sql` |
 
-The user's specific ask: when **Holarchy** is clicked from the nav bar, the heading should become **My Holarchive** (instead of staying static). Implement a `sectionHeading` derived from the `section` query param and render that in the page header.
+## Constraints
 
-Also confirm the `SECTION_TABS` mapping no longer references `admissions` or `hospital_visits` for the bottom-nav routing (the Hospital Visits tab itself can remain inside the `care` section as previously added — only the nav slot is removed).
-
----
-
-## Files Modified
-
-| File | Changes |
-|------|---------|
-| `src/components/layout/BottomNav.tsx` | Restore original 5-item nav (Home, My Profile, Holarchy, My Desk, My Rewards) |
-| `src/components/layout/Sidebar.tsx` | Rename Holarchive→My Profile; re-add My Rewards |
-| `src/components/layout/TopBarIcons.tsx` | Remove patient My Rewards link from avatar popover |
-| `src/components/patients/PatientDetailsEditor.tsx` | Dynamic page heading per section; "Holarchy" section shows "My Holarchive" |
+- Sarah Mitchell is fabricated — no real patient data
+- No app code changes — screenshots + DB seed only
+- All seeded rows tagged `mock_seed: holarc-deck-v1` where the schema allows
+- Inserts scoped to the two test accounts only
 
