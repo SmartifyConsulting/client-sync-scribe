@@ -23,6 +23,7 @@ import {
   X,
   RotateCw,
   GitCompare,
+  Eye,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -48,6 +49,8 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ImageComparisonDialog } from "@/components/documents/ImageComparisonDialog";
+import { renderFormattedContent } from "@/utils/documentFormatting";
+import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 
 const STORAGE_LIMIT_MB = 100;
 
