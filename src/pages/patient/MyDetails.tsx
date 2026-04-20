@@ -86,11 +86,20 @@ export default function MyDetails() {
     );
   }
 
+  const sectionHeading: Record<string, { title: string; subtitle: string }> = {
+    home: { title: "My Home", subtitle: "Your daily snapshot and quick actions" },
+    health: { title: "My Profile", subtitle: "View and update your personal and medical information" },
+    care: { title: "My Holarchive", subtitle: "Your healthcare team, sessions and coordination" },
+    admin: { title: "My Desk", subtitle: "Calendar, tasks and documents" },
+    rewards: { title: "My Rewards", subtitle: "Track your Vulas and adherence streaks" },
+  };
+  const heading = sectionHeading[section] || sectionHeading.health;
+
   return (
     <div className="space-y-4 p-4 md:p-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">My Holarchive</h1>
-        <p className="text-muted-foreground text-[12px]">View and update your personal and medical information</p>
+        <h1 className="text-2xl font-bold text-foreground">{heading.title}</h1>
+        <p className="text-muted-foreground text-[12px]">{heading.subtitle}</p>
       </div>
 
       <PatientDetailsEditor patient={patient} onSave={handleSave} isSelfService userEmail={userEmail} lollipopCount={lollipopCount} rewardsLoading={rewardsLoading} section={section} />

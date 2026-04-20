@@ -5,7 +5,6 @@ import {
   HeartPulse,
   Handshake,
   FolderOpen,
-  Hospital,
   Users,
   Briefcase,
   UserCog,
@@ -23,10 +22,10 @@ const doctorNavItems = [
 
 const patientSections = [
   { icon: LayoutDashboard, label: "Home", section: "home" },
-  { icon: HeartPulse, label: "Holarchive", section: "health" },
+  { icon: HeartPulse, label: "My Profile", section: "health" },
   { icon: Handshake, label: "Holarchy", section: "care" },
-  { icon: Hospital, label: "Admissions", section: "admissions" },
   { icon: FolderOpen, label: "My Desk", section: "admin" },
+  { icon: Gift, label: "My Rewards", section: "rewards" },
 ];
 
 export function BottomNav() {
