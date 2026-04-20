@@ -2447,6 +2447,19 @@ export type Database = {
         }
         Returns: boolean
       }
+      search_doctor_profiles: {
+        Args: { _query: string }
+        Returns: {
+          avatar_url: string
+          doctor_number: string
+          full_name: string
+          id: string
+          mobile_number: string
+          practice_address: string
+          practice_number: string
+          specialty: string
+        }[]
+      }
     }
     Enums: {
       access_permission:
