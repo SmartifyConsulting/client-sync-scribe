@@ -21,11 +21,11 @@ const doctorNavItems = [
 ];
 
 const patientSections = [
-  { icon: LayoutDashboard, label: "Home", section: "home" },
-  { icon: HeartPulse, label: "My Profile", section: "health" },
-  { icon: Handshake, label: "Holarchy", section: "care" },
-  { icon: FolderOpen, label: "My Desk", section: "admin" },
-  { icon: Gift, label: "My Rewards", section: "rewards" },
+  { icon: LayoutDashboard, label: "Home", section: "home", to: "/patient/details?section=home" },
+  { icon: HeartPulse, label: "My Profile", section: "health", to: "/patient/details?section=health" },
+  { icon: Handshake, label: "Holarchy", section: "care", to: "/patient/details?section=care" },
+  { icon: FolderOpen, label: "My Desk", section: "admin", to: "/patient/details?section=admin" },
+  { icon: Gift, label: "My Rewards", section: "rewards", to: "/patient/rewards" },
 ];
 
 export function BottomNav() {
@@ -79,11 +79,13 @@ export function BottomNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg safe-area-pb font-size-preserve md:hidden">
       <div className="flex items-center justify-around px-2 py-2">
         {patientSections.map((item) => {
-          const isActive = isOnDetails && currentSection === item.section;
+          const isActive = item.section === "rewards"
+            ? location.pathname === "/patient/rewards"
+            : isOnDetails && currentSection === item.section;
           return (
             <button
               key={item.section}
-              onClick={() => navigate(`/patient/details?section=${item.section}`)}
+              onClick={() => navigate(item.to)}
               className={cn(
                 "flex flex-1 flex-col items-center gap-0.5 px-1 py-2 rounded-xl transition-all duration-200 min-w-0",
                 isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
