@@ -23,6 +23,7 @@ import {
   X,
   RotateCw,
   GitCompare,
+  Eye,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -48,6 +49,8 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ImageComparisonDialog } from "@/components/documents/ImageComparisonDialog";
+import { renderFormattedContent } from "@/utils/documentFormatting";
+import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 
 const STORAGE_LIMIT_MB = 100;
 
@@ -76,6 +79,8 @@ interface UnifiedDocument {
   aiAnalyzedAt?: string | null;
   emailSentAt?: string | null;
   patientId?: string | null;
+  userId?: string | null;
+  templateName?: string | null;
 }
 
 const DOC_TYPE_CONFIG: Record<
@@ -204,6 +209,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
   const [analysisDialog, setAnalysisDialog] = useState<UnifiedDocument | null>(null);
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
   const [showCompareDialog, setShowCompareDialog] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState<UnifiedDocument | null>(null);
 
   useEffect(() => {
     if (user) fetchAll();
@@ -230,7 +236,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
     const [docsRes, rxRes, invRes] = await Promise.all([
       supabase
         .from("documents")
-        .select("id, name, content, template_name, created_at, media_type, media_url, ai_analysis, ai_analyzed_at, email_sent_at, patient_id")
+        .select("id, name, content, template_name, created_at, media_type, media_url, ai_analysis, ai_analyzed_at, email_sent_at, patient_id, user_id")
         .in("patient_id", ids)
         .order("created_at", { ascending: false }),
       supabase
@@ -262,6 +268,8 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
         aiAnalyzedAt: (doc as any).ai_analyzed_at,
         emailSentAt: (doc as any).email_sent_at,
         patientId: (doc as any).patient_id,
+        userId: (doc as any).user_id,
+        templateName: doc.template_name,
       });
     }
 
@@ -854,6 +862,17 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
+                    {doc.source === "documents" && doc.content && !doc.mediaUrl && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-primary hover:text-primary/80"
+                        onClick={() => setPreviewDoc(doc)}
+                        title="Preview document"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
                     {doc.source === "documents" && (
                       <Button
                         variant="ghost"
@@ -977,11 +996,104 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
         </DialogContent>
       </Dialog>
 
+      <DocumentPreviewDialog
+        doc={previewDoc}
+        onClose={() => setPreviewDoc(null)}
+      />
+
       <ImageComparisonDialog
         open={showCompareDialog}
         onOpenChange={setShowCompareDialog}
         patientId={patientIds[0]}
       />
     </div>
+  );
+}
+
+// ---------- Preview Dialog with provider letterhead ----------
+
+interface HFCell {
+  text: string;
+  alignment: string;
+  imageUrl?: string;
+}
+
+function renderHFCell(cell: HFCell | undefined) {
+  if (!cell) return null;
+  return (
+    <div style={{ textAlign: (cell.alignment as any) || "left" }}>
+      {cell.imageUrl && (
+        <img src={cell.imageUrl} alt="" className="max-h-12 inline-block mb-1 object-contain" />
+      )}
+      {cell.text && (
+        <div
+          className="whitespace-pre-wrap text-xs text-black"
+          dangerouslySetInnerHTML={{ __html: renderFormattedContent(cell.text) }}
+        />
+      )}
+    </div>
+  );
+}
+
+function DocumentPreviewDialog({
+  doc,
+  onClose,
+}: {
+  doc: UnifiedDocument | null;
+  onClose: () => void;
+}) {
+  const { headerFooter, isLoading } = useDocumentHeaderFooter(
+    doc ? { id: doc.id, user_id: doc.userId, template_name: doc.templateName } : null
+  );
+
+  const header = (headerFooter?.header as any) || null;
+  const footer = (headerFooter?.footer as any) || null;
+  const fontFamily = headerFooter?.font_family || undefined;
+
+  return (
+    <Dialog open={!!doc} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{doc?.name}</DialogTitle>
+          <DialogDescription>
+            {doc?.date && `Created: ${format(new Date(doc.date), "dd MMM yyyy")}`}
+          </DialogDescription>
+        </DialogHeader>
+        {doc && (
+          <div className="border border-border rounded-lg p-6 bg-white" style={{ fontFamily }}>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              header && (
+                <div className="pb-4 border-b border-gray-200 mb-4">
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>{renderHFCell(header.left)}</div>
+                    <div>{renderHFCell(header.center)}</div>
+                    <div>{renderHFCell(header.right)}</div>
+                  </div>
+                </div>
+              )
+            )}
+
+            <div
+              className="whitespace-pre-wrap text-sm text-black min-h-[100px]"
+              dangerouslySetInnerHTML={{ __html: renderFormattedContent(doc.content || "") }}
+            />
+
+            {footer && (
+              <div className="pt-4 border-t border-gray-200 mt-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div>{renderHFCell(footer.left)}</div>
+                  <div>{renderHFCell(footer.center)}</div>
+                  <div>{renderHFCell(footer.right)}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
