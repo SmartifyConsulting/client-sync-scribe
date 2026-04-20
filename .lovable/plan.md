@@ -1,118 +1,141 @@
+# Plan: Patient Holarchive Renaming, Nav Reorganization & Hospital Admissions Tracking
 
+## 1. Rename labels across patient navigation & holarchive
 
-# Plan: Calendar Color Codes, Red Color Unification, Appointment Modal Redesign & Session Fix
+### A. Bottom Nav (mobile) — `src/components/layout/BottomNav.tsx`
 
-## 1. Unify all red colors to #C0252F
+Update `patientSections`:
 
-**File:** `src/index.css`
+- `My Profile` → `Holarchive` (icon: HeartPulse)
+- `My Healthcare` → `Holarchy` (icon: Handshake)
+- Move `My Desk` icon (FolderOpen) into the slot where `My Rewards` was
+- Where `My Desk` was, add new `Admissions` item (icon: Hospital, section: `admissions`)
+- **Remove** `My Rewards` from bottom nav (moved to avatar popover)
 
-`#C0252F` in HSL is approximately `356 67% 42%`. Update:
-- `--terracotta` (light mode): `356 67% 42%` (currently `351 81% 49%`)
-- `--terracotta-light`: `356 67% 52%`
-- `--terracotta-dark`: `356 67% 32%`
-- `--destructive` (light mode): `356 67% 42%` (currently `0 84% 60%`)
-- Same updates for dark mode variants
+Final order: `Home | Holarchive | Holarchy | Admissions | My Desk`
 
-This makes calendar icon, mic, bell, destructive buttons, and logo accents all use `#C0252F`.
+### B. Sidebar (desktop) — `src/components/layout/Sidebar.tsx`
 
-## 2. Calendar icon color — use terracotta instead of destructive
+Same renames in `patientNavItems`. Remove `My Rewards`. Keep `My Holarchive` link or rename per the new vocabulary.
 
-**File:** `src/components/layout/TopBarIcons.tsx` (line 96)
-Change `bg-destructive` → `bg-terracotta` and `hover:bg-destructive/80` → `hover:bg-terracotta-dark` so all three icons (calendar, mic, bell) use the same terracotta color.
+### C. Holarchive tabs — `src/components/patients/PatientDetailsEditor.tsx`
 
-**File:** `src/components/layout/PatientAppLayout.tsx` (line 175)
-Same change for mobile header calendar icon.
+- `My H/Care Team` (line 1246) → `Holarchy`
+- `My Sessions` (lines 1251, 1292, 1850) → `Sessions`
+- `My Round Table` (lines 1271, 1304, 1914) → `Round Table`
+- Add new tab **Hospital Visits** (`value="hospital_visits"`) immediately after Sessions in both mobile-flat and desktop-flat tab lists.
+- Update `SECTION_TABS` mapping (line 311):
+  - `care: ["doctors", "sessions", "hospital_visits", "roundtable"]`
+  - Add new: `admissions: ["admissions"]` (used by the new bottom-nav `Admissions` slot)
 
-## 3. Google Calendar icon — remove border, enlarge 60%
+## 2. Move "My Rewards" to avatar popover — `src/components/layout/TopBarIcons.tsx`
 
-**File:** `src/pages/CalendarView.tsx` (line 290-301)
-- Remove `variant="outline"` → use `variant="ghost"` (removes border)
-- Change logo `className="h-6 w-auto"` → `className="h-10 w-auto"` (60% increase)
+Insert a `My Rewards` link **above** the Settings link in the avatar popover (both doctor and patient flows). Use the `Gift` icon, navigates to `/patient/rewards` for patients and `/doctor/rewards` for doctors.
 
-## 4. Rename "+ New Appointment" to "+ Book"
+## 3. New "Hospital Visits" tab content (read-only timeline)
 
-**File:** `src/pages/CalendarView.tsx` (line 306-309)
-Change button text from `New Appointment` to `Book`.
+Inside `PatientDetailsEditor.tsx`, add a new `<TabsContent value="hospital_visits">` block. Each admission renders a card showing:
 
-**File:** `src/pages/patient/PatientCalendar.tsx`
-Verify the patient calendar also has a `+ Book` button (it already has BookAppointmentDialog, just rename label if needed).
+- Hospital name, admission date, admitting doctor
+- Diagnosis (ICD-10) summary
+- **Attached PDF**: link to the auto-saved Hospital Admission document
+- Expandable sub-sections (accordion): **Vitals**, **Active Medications**, **Lab Results**, **Imaging**
 
-## 5. Show appointment color codes on calendar entries
+Data source: query `documents` table where `patient_id = patient.id` AND `name ILIKE 'Hospital Admission Form%'`, ordered by `created_at DESC`. Each document = one admission entry. The PDF/scan attachment comes from the existing `media_url` field on `documents`.
 
-**File:** `src/pages/CalendarView.tsx`
+## 4. New "Admissions" bottom-nav section (clinical detail capture)
 
-Currently `getTypeColor()` returns a color from `serviceColors` but only uses it for initials badges (line 570). The calendar entry background still uses hardcoded type classes (`bg-primary/20`, `bg-warning/20`).
+This is the new `admissions` section accessible from the bottom nav. It renders the **same Hospital Visits view** as the holarchive tab but with **edit affordances** when the viewer is a doctor or nurse (has `doctor_patient_access`):
 
-Fix: When `getTypeColor(event.type)` returns a service color, use it as inline `style={{ backgroundColor }}` with opacity instead of the hardcoded classes. Apply to:
-- Month view entries (line 559-564)
-- Week view entries (line 484)
-- Today's Schedule type badge (line 690-694)
+- **+ Add Vitals** button → modal capturing Heart Rate, Blood Pressure, SpO₂, Temperature, BMI (height/weight auto-pulled from patient record)
+- **+ Add Medication** button → medication name, dosage, frequency
+- **+ Add Lab Result** button → test name, result value, units, reference range, attach PDF
+- **+ Add Imaging** button → modality (X-ray/MRI/CT), body region, link to PACS or upload PDF summary
 
-Also fix event type mapping (line 164): currently maps all non-followup, non-internal to "session". Instead, preserve the actual `apt.type` value so service-specific colors work:
-```tsx
-type: apt.type || "session",
+## 5. Database — new tables for admission clinical data
+
+Three new tables linked to a parent `hospital_admissions` row:
+
+```text
+hospital_admissions
+  id uuid pk
+  patient_id uuid (FK patients.id)
+  doctor_id uuid (creating doctor)
+  document_id uuid (FK documents.id — the auto-generated PDF form)
+  hospital text
+  admission_date date
+  discharge_date date nullable
+  diagnosis text
+  procedure_description text
+  status text default 'admitted'
+  created_at, updated_at
+
+admission_vitals
+  id, admission_id (FK), recorded_by uuid, recorded_at,
+  heart_rate int, bp_systolic int, bp_diastolic int,
+  spo2 numeric, temperature_c numeric, bmi numeric,
+  height_cm numeric, weight_kg numeric, notes text
+
+admission_medications
+  id, admission_id, name, dosage, frequency, started_at, stopped_at, notes
+
+admission_lab_results
+  id, admission_id, test_name, result_value, units,
+  reference_range, result_date, attachment_url, notes
+
+admission_imaging
+  id, admission_id, modality, body_region, performed_at,
+  pacs_link, attachment_url, summary
 ```
 
-## 6. Fix missing "End Recording" on mobile session view
+**RLS** (mirrors existing pattern):
 
-**File:** `src/pages/Sessions.tsx` (lines 787-946)
+- Patients: SELECT where admission's patient belongs to them (`patient_user_id = auth.uid()`)
+- Doctors: ALL where they have `doctor_patient_access` to the patient OR are the `doctor_id` on the admission
+- Same nested patient-access checks for the four child tables via the parent admission
 
-The recording panel is in the second column (`order-2`) of the grid layout. On mobile (`grid-cols-1`), it renders AFTER the notes tab which takes up significant height. The "End Session" button at the bottom may be pushed off-screen.
+## 6. Auto-create admission record from HospitalAdmissionEditor
 
-Fix: On mobile, move the recording panel to appear FIRST (before notes) by changing `order-2 lg:order-2` to `order-1 lg:order-2` on the recording panel div (line 822), and the notes panel from `order-2 lg:order-1` to `order-2 lg:order-1` (already correct — line 790 says `order-2 lg:order-1`). Wait — currently the recording panel IS `order-2 lg:order-2` and notes is `order-2 lg:order-1`. Fix: recording panel should be `order-1 lg:order-2` so it shows first on mobile.
+**File:** `src/components/sessions/HospitalAdmissionEditor.tsx` (line 415, `handleSave`)
 
-## 7. Redesign appointment detail modal
+After the `documents.insert(...)` succeeds, also insert into `hospital_admissions`:
 
-**File:** `src/pages/CalendarView.tsx` (lines 708-879)
+```ts
+const { data: docRow } = await supabase.from("documents").insert({...}).select().single();
 
-Replace the current modal with a redesigned version:
-
-**Header:** Appointment type as heading (e.g., "General Consultation"), patient full name as a clickable link (navigates to `/patients/{patientId}`), and date/time below.
-
-**Actions:**
-- **Mobile:** Three icon-only buttons in a row — Pencil (edit), Trash (delete), Green Play (start session)
-- **Tablet/Desktop:** Full text buttons — "Edit", "Delete" (destructive), "Start Session" (green)
-
-```tsx
-<DialogHeader>
-  <DialogTitle>{getEventTypeLabel(selectedEvent.type)}</DialogTitle>
-  <DialogDescription>
-    <Link to={`/patients/${selectedEvent.patientId}`} className="text-primary hover:underline font-medium">
-      {patientName}
-    </Link>
-    <span className="block text-muted-foreground">
-      {month} {day}, {year} · {time}
-    </span>
-  </DialogDescription>
-</DialogHeader>
-
-{/* Mobile: icon buttons */}
-<div className="flex md:hidden gap-3 justify-center pt-4">
-  <Button variant="outline" size="icon" onClick={edit}><Pencil /></Button>
-  <Button variant="destructive" size="icon" onClick={delete}><Trash2 /></Button>
-  <Button size="icon" className="bg-green-600 hover:bg-green-700"><Play /></Button>
-</div>
-
-{/* Desktop: text buttons */}
-<div className="hidden md:grid grid-cols-3 gap-2 pt-4">
-  <Button variant="outline">Edit</Button>
-  <Button variant="destructive">Delete</Button>
-  <Button className="bg-green-600 hover:bg-green-700">Start Session</Button>
-</div>
+await supabase.from("hospital_admissions").insert({
+  patient_id: patientId,
+  doctor_id: user.id,
+  document_id: docRow.id,
+  hospital,
+  admission_date: admissionDate,
+  diagnosis: extractedDiagnosis,
+  procedure_description: procedureDescription,
+});
 ```
 
-Notes and location info remain between header and action buttons.
+This guarantees: **every admission form created by a doctor → one new entry on the patient's Hospital Visits / Admissions screen, with the PDF auto-attached.**
+
+## 7. PDF auto-attachment
+
+The existing `documents` row already stores the rendered admission form content. The Hospital Visits card displays a **View PDF** button that opens the document via the existing document preview/export flow. If a scanned/uploaded PDF supersedes the generated one, doctors can attach it via the existing `media_url` field on the document — no new logic needed.
 
 ---
 
-## Files Modified
+## Files Modified / Created
 
-| File | Changes |
-|------|---------|
-| `src/index.css` | Unify terracotta + destructive to #C0252F |
-| `src/components/layout/TopBarIcons.tsx` | Calendar icon uses terracotta |
-| `src/components/layout/PatientAppLayout.tsx` | Calendar icon uses terracotta |
-| `src/pages/CalendarView.tsx` | Color-coded entries, Google Cal logo border/size, rename +Book, redesign modal, preserve event type |
-| `src/pages/Sessions.tsx` | Fix recording panel order on mobile |
-| `src/pages/patient/PatientCalendar.tsx` | Rename button to +Book if needed |
 
+| File                                                      | Changes                                                                                   |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `src/components/layout/BottomNav.tsx`                     | Rename + reorder + add Admissions section                                                 |
+| `src/components/layout/Sidebar.tsx`                       | Same renames; remove My Rewards                                                           |
+| `src/components/layout/TopBarIcons.tsx`                   | Add My Rewards above Settings in avatar popover                                           |
+| `src/components/patients/PatientDetailsEditor.tsx`        | Tab renames, new Hospital Visits tab, new Admissions section content, SECTION_TABS update |
+| `src/components/sessions/HospitalAdmissionEditor.tsx`     | Insert into `hospital_admissions` after document save                                     |
+| `src/components/admissions/AdmissionsView.tsx` (new)      | Timeline of admissions + accordion children + add-buttons                                 |
+| `src/components/admissions/AddVitalsDialog.tsx` (new)     | Vitals capture modal                                                                      |
+| `src/components/admissions/AddMedicationDialog.tsx` (new) | Medication capture modal                                                                  |
+| `src/components/admissions/AddLabResultDialog.tsx` (new)  | Lab result capture modal                                                                  |
+| `src/components/admissions/AddImagingDialog.tsx` (new)    | Imaging capture modal                                                                     |
+| `src/hooks/useHospitalAdmissions.ts` (new)                | React Query hooks for admissions + children                                               |
+| Database migration                                        | 4 new tables + RLS policies                                                               |
