@@ -38,9 +38,10 @@ const doctorNavItems: NavItem[] = [
 
 const patientNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Home", to: "/patient/details?section=home" },
-  { icon: User, label: "Holarchive", to: "/patient/details?section=health" },
+  { icon: User, label: "My Profile", to: "/patient/details?section=health" },
   { icon: Calendar, label: "My Calendar", to: "/patient/calendar" },
   { icon: CheckSquare, label: "To-Do List", to: "/patient/tasks" },
+  { icon: Gift, label: "My Rewards", to: "/patient/rewards" },
 ];
 
 const adminNavItems: NavItem[] = [
