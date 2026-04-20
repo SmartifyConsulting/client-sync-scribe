@@ -14,6 +14,218 @@ export type Database = {
   }
   public: {
     Tables: {
+      admission_imaging: {
+        Row: {
+          admission_id: string
+          attachment_url: string | null
+          body_region: string | null
+          created_at: string
+          id: string
+          modality: string
+          pacs_link: string | null
+          performed_at: string
+          recorded_by: string
+          summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          admission_id: string
+          attachment_url?: string | null
+          body_region?: string | null
+          created_at?: string
+          id?: string
+          modality: string
+          pacs_link?: string | null
+          performed_at?: string
+          recorded_by: string
+          summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admission_id?: string
+          attachment_url?: string | null
+          body_region?: string | null
+          created_at?: string
+          id?: string
+          modality?: string
+          pacs_link?: string | null
+          performed_at?: string
+          recorded_by?: string
+          summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_imaging_admission_id_fkey"
+            columns: ["admission_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_admissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admission_lab_results: {
+        Row: {
+          admission_id: string
+          attachment_url: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          recorded_by: string
+          reference_range: string | null
+          result_date: string
+          result_value: string | null
+          test_name: string
+          units: string | null
+          updated_at: string
+        }
+        Insert: {
+          admission_id: string
+          attachment_url?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          recorded_by: string
+          reference_range?: string | null
+          result_date?: string
+          result_value?: string | null
+          test_name: string
+          units?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admission_id?: string
+          attachment_url?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          recorded_by?: string
+          reference_range?: string | null
+          result_date?: string
+          result_value?: string | null
+          test_name?: string
+          units?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_lab_results_admission_id_fkey"
+            columns: ["admission_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_admissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admission_medications: {
+        Row: {
+          admission_id: string
+          created_at: string
+          dosage: string | null
+          frequency: string | null
+          id: string
+          name: string
+          notes: string | null
+          recorded_by: string
+          started_at: string | null
+          stopped_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          admission_id: string
+          created_at?: string
+          dosage?: string | null
+          frequency?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          recorded_by: string
+          started_at?: string | null
+          stopped_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admission_id?: string
+          created_at?: string
+          dosage?: string | null
+          frequency?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          recorded_by?: string
+          started_at?: string | null
+          stopped_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_medications_admission_id_fkey"
+            columns: ["admission_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_admissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admission_vitals: {
+        Row: {
+          admission_id: string
+          bmi: number | null
+          bp_diastolic: number | null
+          bp_systolic: number | null
+          created_at: string
+          heart_rate: number | null
+          height_cm: number | null
+          id: string
+          notes: string | null
+          recorded_at: string
+          recorded_by: string
+          spo2: number | null
+          temperature_c: number | null
+          weight_kg: number | null
+        }
+        Insert: {
+          admission_id: string
+          bmi?: number | null
+          bp_diastolic?: number | null
+          bp_systolic?: number | null
+          created_at?: string
+          heart_rate?: number | null
+          height_cm?: number | null
+          id?: string
+          notes?: string | null
+          recorded_at?: string
+          recorded_by: string
+          spo2?: number | null
+          temperature_c?: number | null
+          weight_kg?: number | null
+        }
+        Update: {
+          admission_id?: string
+          bmi?: number | null
+          bp_diastolic?: number | null
+          bp_systolic?: number | null
+          created_at?: string
+          heart_rate?: number | null
+          height_cm?: number | null
+          id?: string
+          notes?: string | null
+          recorded_at?: string
+          recorded_by?: string
+          spo2?: number | null
+          temperature_c?: number | null
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_vitals_admission_id_fkey"
+            columns: ["admission_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_admissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointment_requests: {
         Row: {
           created_at: string | null
@@ -589,6 +801,66 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "health_photos_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hospital_admissions: {
+        Row: {
+          admission_date: string
+          created_at: string
+          diagnosis: string | null
+          discharge_date: string | null
+          doctor_id: string
+          document_id: string | null
+          hospital: string | null
+          id: string
+          patient_id: string
+          procedure_description: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admission_date?: string
+          created_at?: string
+          diagnosis?: string | null
+          discharge_date?: string | null
+          doctor_id: string
+          document_id?: string | null
+          hospital?: string | null
+          id?: string
+          patient_id: string
+          procedure_description?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admission_date?: string
+          created_at?: string
+          diagnosis?: string | null
+          discharge_date?: string | null
+          doctor_id?: string
+          document_id?: string | null
+          hospital?: string | null
+          id?: string
+          patient_id?: string
+          procedure_description?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hospital_admissions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hospital_admissions_patient_id_fkey"
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
@@ -2105,6 +2377,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_admission: {
+        Args: { _admission_id: string }
+        Returns: boolean
+      }
+      can_edit_admission: { Args: { _admission_id: string }; Returns: boolean }
       doctor_has_access_request_from: {
         Args: { patient_id: string }
         Returns: boolean
