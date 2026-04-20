@@ -1297,10 +1297,13 @@ export function PatientDetailsEditor({
             Medical Information
           </TabsTrigger>
           <TabsTrigger value="doctors" className={triggerClass}>
-            My Healthcare Providers
+            My Holarchy
           </TabsTrigger>
           <TabsTrigger value="sessions" className={triggerClass}>
-            My Sessions
+            Sessions
+          </TabsTrigger>
+          <TabsTrigger value="hospital_visits" className={triggerClass}>
+            Hospital Visits
           </TabsTrigger>
           <TabsTrigger value="calendar" className={triggerClass}>
             My Calendar
@@ -1312,7 +1315,10 @@ export function PatientDetailsEditor({
             My Documents
           </TabsTrigger>
           <TabsTrigger value="roundtable" className={triggerClass}>
-            My Round Table
+            Round Table
+          </TabsTrigger>
+          <TabsTrigger value="admissions" className={triggerClass}>
+            Admissions
           </TabsTrigger>
           {isDoctor && (
             <TabsTrigger
@@ -1326,16 +1332,6 @@ export function PatientDetailsEditor({
               My Practice
             </TabsTrigger>
           )}
-          <TabsTrigger
-            value="rewards"
-            className={triggerClass}
-            onClick={(e) => {
-              e.preventDefault();
-              navigate("/patient/rewards");
-            }}
-          >
-            My Rewards
-          </TabsTrigger>
         </TabsList>
       );
     }
