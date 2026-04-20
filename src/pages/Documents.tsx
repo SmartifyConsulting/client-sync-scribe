@@ -1131,3 +1131,67 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
     </div>
   );
 }
+
+interface HFCell {
+  text: string;
+  alignment: string;
+  imageUrl?: string;
+}
+
+function DocumentPreviewBody({
+  document,
+  renderSection,
+}: {
+  document: Document;
+  renderSection: (section: HFCell) => JSX.Element;
+}) {
+  const { headerFooter } = useDocumentHeaderFooter(document);
+  if (!headerFooter) {
+    return (
+      <div
+        className="whitespace-pre-wrap text-sm text-foreground min-h-[100px]"
+        dangerouslySetInnerHTML={{ __html: renderFormattedContent(document.content) }}
+      />
+    );
+  }
+
+  const header = headerFooter.header as {
+    left?: HFCell;
+    center?: HFCell;
+    right?: HFCell;
+  } | null;
+  const footer = headerFooter.footer as {
+    left?: HFCell;
+    center?: HFCell;
+    right?: HFCell;
+  } | null;
+
+  return (
+    <>
+      {header && (
+        <div className="pb-4 border-b border-border mb-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div>{header.left && renderSection(header.left)}</div>
+            <div>{header.center && renderSection(header.center)}</div>
+            <div>{header.right && renderSection(header.right)}</div>
+          </div>
+        </div>
+      )}
+
+      <div
+        className="whitespace-pre-wrap text-sm text-foreground min-h-[100px]"
+        dangerouslySetInnerHTML={{ __html: renderFormattedContent(document.content) }}
+      />
+
+      {footer && (
+        <div className="pt-4 border-t border-border mt-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div>{footer.left && renderSection(footer.left)}</div>
+            <div>{footer.center && renderSection(footer.center)}</div>
+            <div>{footer.right && renderSection(footer.right)}</div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
