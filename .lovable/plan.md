@@ -1,70 +1,44 @@
 
 
-# Plan: Patient web/tablet nav consolidation, mobile greeting de-dupe, logo sizing
+# Plan: Vulas explainer copy refresh + home page logo sizing
 
-## 1. Web/Tablet sidebar — merge "My Calendar" + "To-Do List" into "My Desk"
+## 1. Update the Vulas explainer dialog
 
-**File:** `src/components/layout/Sidebar.tsx` (lines 39–45, `patientNavItems`)
+**File:** `src/components/rewards/VulaExplainerDialog.tsx`
 
-Replace the two separate entries with a single `My Desk` link that opens the existing admin section (which already groups Calendar + Tasks + Documents):
+- **Remove the hero illustration** (`vula-explainer.png`) currently rendered at the top of the gradient hero.
+- **Replace** it with the official **Vula Vouchers logo** (`@/assets/vula-vouchers-logo-v2.png` — the same file already used on the rewards screens) so the launch dialog matches the rest of the rewards UI.
+- **Rewrite the body copy** to the new text (no bullet rows, no "Sparkles/TrendingUp" icons — just clean paragraphs):
+  > Vula means rain in isiZulu and isiXhosa — something you can't always predict, but always need.
+  >
+  > Vulas reward real-world actions — caring, helping, sharing, contributing, and following through.
+  >
+  > It's how we show up for each other.
+  >
+  > The way we earn and exchange value is changing.
+  >
+  > Vulas are a simple way to start building value that grows with you.
+- **Add a tagline strip** above the CTA: *"Earn them. Use them. Keep them."* (centered, small, bold, gradient text matching the blue→teal brand).
+- Keep the existing **"Earn Vulas"** gradient CTA button at the bottom and the close (×) control.
+- Drop the now-unused `Sparkles` and `TrendingUp` lucide imports and the `vula-explainer.png` import.
 
-```tsx
-const patientNavItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Home",       to: "/patient/details?section=home" },
-  { icon: User,            label: "My Profile", to: "/patient/details?section=health" },
-  { icon: FolderOpen,      label: "My Desk",    to: "/patient/details?section=admin" },
-  { icon: Gift,            label: "My Rewards", to: "/patient/rewards" },
-];
-```
+## 2. Patient Home — Vula logo sizing
 
-(Add `FolderOpen` to the lucide imports; drop unused `Calendar` / `CheckSquare` imports.)
+**File:** `src/components/patients/PatientDetailsEditor.tsx`
 
-This reuses the existing `admin` section already wired in `SECTION_TABS` (`["calendar", "tasks", "documents"]` — `PatientDetailsEditor.tsx:316`) and matches the mobile bottom nav, which already uses "My Desk" for the same destination. No routing changes needed; no duplicate work for tasks/calendar pages — they remain accessible as tabs inside My Desk.
-
-Mobile bottom nav is unchanged (already correct: 5 items including My Desk).
-
-## 2. Mobile patient Home — remove duplicate "Good evening, Sara"
-
-**File:** `src/components/patients/PatientDetailsEditor.tsx` (lines 1138–1157)
-
-The mobile Home banner currently renders the greeting **twice**: once at the top (lines 1078–1084) and again inside the mobile-only Vula Vouchers row (lines 1142–1148).
-
-Fix: in the mobile Vula row, drop the greeting span and keep only the Vula logo + count, right-aligned. The existing top greeting (line 1078) stays as the single source of truth.
-
-```tsx
-{/* Row 3: Vula Vouchers - mobile only */}
-{!rewardsLoading && lollipopCount !== undefined && (
-  <div className="mt-3 border-t border-border pt-3 md:hidden">
-    <div className="flex items-center justify-end gap-2">
-      <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-[72px] w-auto object-contain" />
-      <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
-        <AnimatedCounter target={lollipopCount} />
-      </span>
-    </div>
-  </div>
-)}
-```
-
-## 3. Logo sizing — fit inside mobile + tablet/web frames
-
-The logos currently overflow / look oversized:
-
-- **Mobile header** (`src/components/layout/PatientAppLayout.tsx:134`): `h-[62px]` — too tall for the 56–64px header bar; reduce to `h-10` (40px) with `object-contain`.
-- **Doctor mobile header** (`src/components/layout/MobileHeader.tsx`): currently `h-[50px]` — reduce to `h-10` for parity.
-- **Sidebar (tablet/web)** (`src/components/layout/Sidebar.tsx:97`): `h-[62px]` inside an `h-20` (80px) row — reduce to `h-12` (48px) `object-contain` so it sits comfortably inside the 80px header without stretching the 210px-wide sidebar frame.
-
-All three changes preserve aspect ratio via `w-auto object-contain` (already present) — only the height drops.
+- **Mobile (line 1142):** reduce the inline Vula Vouchers logo by ~40% — change `h-[72px]` → `h-[44px]` so it sits proportionally next to the count without dominating the row.
+- **Tablet/web (lines 1089–1097):** the logo currently sits in `items-center justify-center` inside the top flex row, which aligns it with the avatar. Adjust so it aligns with the **middle of the "Here's what's happening today" subtitle** (the second line of the greeting block):
+  - Change the wrapper from `hidden md:flex items-center justify-center gap-3` → `hidden md:flex items-end gap-3 pb-1` and keep `h-12` on the logo.
+  - The `items-end` + small bottom padding lines the logo's vertical center up with the lower subtitle line rather than the bold greeting above it.
 
 ## Files touched
 | File | Change |
 |---|---|
-| `src/components/layout/Sidebar.tsx` | Merge Calendar + Tasks → "My Desk"; logo `h-[62px]` → `h-12` |
-| `src/components/layout/PatientAppLayout.tsx` | Mobile header logo `h-[62px]` → `h-10` |
-| `src/components/layout/MobileHeader.tsx` | Doctor mobile header logo `h-[50px]` → `h-10` |
-| `src/components/patients/PatientDetailsEditor.tsx` | Remove duplicate greeting in mobile Vula row (lines 1142–1148) |
+| `src/components/rewards/VulaExplainerDialog.tsx` | Swap hero image for `vula-vouchers-logo-v2.png`, replace body copy with the new 5-paragraph text, add "Earn them. Use them. Keep them." tagline above CTA, remove unused icons/import |
+| `src/components/patients/PatientDetailsEditor.tsx` | Mobile Vula logo `h-[72px]` → `h-[44px]`; tablet/web Vula wrapper switched to `items-end pb-1` so logo aligns with the subtitle line |
 
 ## Out of scope
-- Doctor sidebar items (already 5, no calendar/tasks duplication).
-- Web/tablet greeting (only one instance, no change needed).
-- Bottom nav (already shows "My Desk").
+- Rewards-page header logos (already correctly sized).
+- The `vula-explainer.png` asset stays on disk (no deletion) in case it's reused later.
+- No changes to the localStorage first-launch logic — dialog still auto-opens once and is reopenable from the header.
 
