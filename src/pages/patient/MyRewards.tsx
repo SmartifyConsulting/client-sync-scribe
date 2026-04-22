@@ -530,57 +530,7 @@ export default function MyRewards() {
             </CardContent>
           </Card>
 
-          {/* Assigned Tasks - merged into overview */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <CheckSquare className="h-5 w-5 text-primary" />
-                    Assigned Tasks
-                    {tasks.filter(t => t.status !== "completed").length > 0 && (
-                      <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
-                        {tasks.filter(t => t.status !== "completed").length}
-                      </Badge>
-                    )}
-                  </CardTitle>
-                  <CardDescription>Complete activities to earn Vulas!</CardDescription>
-                </div>
-                <ActivityProofCapture tasks={pendingActivityTasks} onProofSubmitted={refetchTasks} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              {tasksLoading ? (
-                <div className="flex items-center justify-center py-4"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-              ) : tasks.length === 0 ? (
-                <p className="text-center text-muted-foreground text-sm py-4">No tasks assigned yet.</p>
-              ) : (
-                <div className="space-y-3">
-                  {tasks.map((task) => (
-                    <div key={task.id} className={`flex items-start gap-3 p-3 rounded-lg border ${task.status === "completed" ? "opacity-60 bg-muted/30" : "bg-background"}`}>
-                      {getStatusIcon(task.status)}
-                      <div className="flex-1 min-w-0">
-                        <p className={`font-medium text-foreground ${task.status === "completed" ? "line-through" : ""}`}>{task.title}</p>
-                        {task.description && <p className="text-sm text-muted-foreground mt-1">{task.description}</p>}
-                        <div className="flex items-center gap-2 mt-2 flex-wrap">
-                          <Badge variant={getPriorityColor(task.priority) as any} className="text-xs">{task.priority}</Badge>
-                          {task.task_type === "activity" && <Badge className="bg-primary/10 text-primary text-xs gap-1"><Video className="h-3 w-3" /> Activity</Badge>}
-                          {task.moolas_reward > 0 && <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 text-xs">+{task.moolas_reward} <img src={vulaVouchersLogo} alt="Vula" className="h-5 md:h-3 w-auto object-contain inline-block ml-0.5" /></Badge>}
-                          {task.due_date && <span className="text-xs text-muted-foreground">Due: {format(new Date(task.due_date), "dd MMM yyyy")}</span>}
-                          {task.proof_url && <Badge variant="outline" className="text-xs text-green-600">✓ Proof submitted</Badge>}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-
-
-        <TabsContent value="milestones" className="space-y-6">
+          {/* Wins (Milestones) merged into Overview */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -629,7 +579,7 @@ export default function MyRewards() {
             </CardContent>
           </Card>
 
-          {/* Streaks merged under Wins */}
+          {/* Streaks merged into Overview */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -702,7 +652,80 @@ export default function MyRewards() {
               )}
             </CardContent>
           </Card>
+
+          {/* Vula History (replaces Assigned Tasks) */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <History className="h-5 w-5 text-primary" />
+                Vula History
+              </CardTitle>
+              <CardDescription>Earnings and transfers, grouped by week and month</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {historyGroups.every((g) => g.items.length === 0) ? (
+                <p className="text-center text-muted-foreground text-sm py-6">No Vula activity yet.</p>
+              ) : (
+                <Accordion type="multiple" defaultValue={["this-week"]} className="w-full">
+                  {historyGroups
+                    .filter((g) => g.items.length > 0)
+                    .map((group) => (
+                      <AccordionItem key={group.key} value={group.key}>
+                        <AccordionTrigger>
+                          <div className="flex items-center justify-between w-full pr-2">
+                            <span className="font-medium">{group.label}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {group.items.length} {group.items.length === 1 ? "entry" : "entries"}
+                            </span>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-2">
+                            {group.items.map((it) => (
+                              <div
+                                key={it.id}
+                                className="flex items-center justify-between p-3 rounded-lg bg-muted/40"
+                              >
+                                <div className="flex items-center gap-3 min-w-0">
+                                  {it.kind === "earn" ? (
+                                    <img src={vulaVouchersLogo} alt="Vula" className="h-6 w-6 object-contain shrink-0" />
+                                  ) : (
+                                    <ArrowRightLeft className="h-5 w-5 text-blue-500 shrink-0" />
+                                  )}
+                                  <div className="min-w-0">
+                                    <p className="font-medium truncate">{it.label}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {format(it.date, "MMM d, yyyy")}
+                                    </p>
+                                  </div>
+                                </div>
+                                <Badge
+                                  variant="secondary"
+                                  className={
+                                    it.amount >= 0
+                                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+                                      : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                                  }
+                                >
+                                  {it.amount >= 0 ? `+${it.amount}` : it.amount}{" "}
+                                  <img
+                                    src={vulaVouchersLogo}
+                                    alt="Vula"
+                                    className="h-3 w-auto object-contain inline-block ml-1"
+                                  />
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                </Accordion>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
+
 
         <TabsContent value="transfers" className="space-y-6">
           {/* Partner Apps - at top */}
