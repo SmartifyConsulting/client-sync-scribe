@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Pill, Video, Flame, Check, Clock, AlertCircle, Loader2, Square, X } from "lucide-react";
+import { Pill, Video, Flame, Check, Clock, AlertCircle, Loader2, Square, Camera, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { format, subDays, differenceInCalendarDays } from "date-fns";
+import { format, subDays } from "date-fns";
+import { SuccessCelebration } from "./SuccessCelebration";
+
+type Stage = "pill_check" | "ingestion";
+
+interface PillCheckResult {
+  isPillVisible: boolean;
+  isMatch: boolean;
+  matchReason: string;
+  observedDescription?: string;
+}
 
 interface Prescription {
   id: string;
@@ -35,17 +45,25 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [recordingPrescriptionId, setRecordingPrescriptionId] = useState<string | null>(null);
+  const [stage, setStage] = useState<Stage>("pill_check");
+  const [pillCheckResult, setPillCheckResult] = useState<PillCheckResult | null>(null);
+  const [isCheckingPill, setIsCheckingPill] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [countdown, setCountdown] = useState(30);
+  const [celebration, setCelebration] = useState<{ open: boolean; vulasEarned: number; streak: number; medicationName: string }>({
+    open: false, vulasEarned: 0, streak: 0, medicationName: "",
+  });
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const today = format(new Date(), "yyyy-MM-dd");
+
+
 
   // Fetch active prescriptions for this chronic patient
   const { data: prescriptions = [], isLoading: prescriptionsLoading } = useQuery({
@@ -276,6 +294,65 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
     });
   };
 
+  // STAGE 1 — Capture a single still and verify the pill matches the prescription
+  const capturePillImage = async () => {
+    if (!stream || !videoRef.current || !recordingPrescriptionId) return;
+    setIsCheckingPill(true);
+    try {
+      const video = videoRef.current;
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas context unavailable");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const blob: Blob = await new Promise((res, rej) =>
+        canvas.toBlob((b) => (b ? res(b) : rej(new Error("toBlob failed"))), "image/jpeg", 0.85)
+      );
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const ts = Date.now();
+      const filePath = `medication-proof/${user.id}/${ts}-pill.jpg`;
+      const { error: upErr } = await supabase.storage
+        .from("patient-media")
+        .upload(filePath, blob, { contentType: "image/jpeg" });
+      if (upErr) throw upErr;
+      const { data: urlData } = supabase.storage.from("patient-media").getPublicUrl(filePath);
+
+      const { data, error: fnError } = await supabase.functions.invoke("validate-medication-video", {
+        body: { mode: "pill_check", imageUrl: urlData.publicUrl, prescriptionId: recordingPrescriptionId },
+      });
+      if (fnError) throw fnError;
+
+      // Best-effort cleanup of the pill image
+      supabase.storage.from("patient-media").remove([filePath]).catch(() => {});
+
+      const result: PillCheckResult = {
+        isPillVisible: !!data?.isPillVisible,
+        isMatch: !!data?.isMatch,
+        matchReason: data?.matchReason || "",
+        observedDescription: data?.observedDescription,
+      };
+      setPillCheckResult(result);
+    } catch (e: any) {
+      console.error("pill check error", e);
+      toast({ title: "Pill check failed", description: e.message || "Could not analyse the image.", variant: "destructive" });
+    } finally {
+      setIsCheckingPill(false);
+    }
+  };
+
+  const proceedToIngestion = () => {
+    setPillCheckResult(null);
+    setStage("ingestion");
+  };
+
+  const retryPillCheck = () => {
+    setPillCheckResult(null);
+  };
+
   const handleSubmitProof = async () => {
     if (!recordedBlob || !recordingPrescriptionId) return;
 
@@ -311,6 +388,7 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
       const filePaths = uploads.map((u) => u.path);
 
       // 3. Call AI validation edge function
+      const rxName = prescriptions.find((p) => p.id === recordingPrescriptionId)?.medication || "";
       const { data, error: fnError } = await supabase.functions.invoke(
         "validate-medication-video",
         {
@@ -323,10 +401,11 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
       const validation = data?.validation;
 
       if (validation?.isValid) {
-        toast({ title: "✅ Medication verified!", description: `AI confirmed ingestion. +5 Vulas earned!` });
+        const earnedStreak = data?.streak ?? 0;
         handleCloseRecording();
         queryClient.invalidateQueries({ queryKey: ["medication-adherence", patientId] });
         queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
+        setCelebration({ open: true, vulasEarned: data?.molesAwarded ?? 5, streak: earnedStreak, medicationName: rxName });
       } else if (data?.fallback) {
         // AI service unavailable — evidence saved for doctor review
         toast({
@@ -359,7 +438,11 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
     setRecordedBlob(null);
     setIsRecording(false);
     setCountdown(30);
+    setStage("pill_check");
+    setPillCheckResult(null);
+    setIsCheckingPill(false);
   };
+
 
   if (prescriptionsLoading || adherenceLoading) {
     return (
@@ -469,19 +552,25 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
         );
       })}
 
-      {/* Recording Dialog */}
+      {/* Recording Dialog — two stages: pill_check, then ingestion */}
       <Dialog open={!!recordingPrescriptionId} onOpenChange={(open) => { if (!open) handleCloseRecording(); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Video className="h-5 w-5 text-primary" />
-              Record Medication Proof
+              {stage === "pill_check" ? (
+                <><Camera className="h-5 w-5 text-primary" /> Step 1: Show your pill</>
+              ) : (
+                <><Video className="h-5 w-5 text-primary" /> Step 2: Take your medication</>
+              )}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Film yourself taking your medication. Max 30 seconds.
+              {stage === "pill_check"
+                ? "Hold your pill close to the camera so we can confirm it matches your prescription."
+                : "Film yourself taking your medication. Max 30 seconds."}
             </p>
+
             <div className="relative rounded-lg overflow-hidden bg-black aspect-video">
               {recordedBlob ? (
                 <video src={URL.createObjectURL(recordedBlob)} controls className="w-full h-full object-cover" />
@@ -494,32 +583,111 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
                 </div>
               )}
             </div>
-            <div className="flex gap-2 justify-center">
-              {!recordedBlob ? (
-                !isRecording ? (
-                  <Button onClick={startRecording} disabled={!stream} className="gap-2">
-                    <Video className="h-4 w-4" /> Start Recording
-                  </Button>
+
+            {/* STAGE 1 — Pill capture */}
+            {stage === "pill_check" && (
+              <>
+                {pillCheckResult && (
+                  <div
+                    className={
+                      "rounded-lg border p-3 text-sm " +
+                      (!pillCheckResult.isPillVisible
+                        ? "border-destructive/40 bg-destructive/10 text-destructive"
+                        : pillCheckResult.isMatch
+                        ? "border-green-500/40 bg-green-500/10 text-green-700 dark:text-green-400"
+                        : "border-yellow-500/40 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400")
+                    }
+                  >
+                    <div className="flex items-start gap-2">
+                      {!pillCheckResult.isPillVisible ? (
+                        <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                      ) : pillCheckResult.isMatch ? (
+                        <Check className="h-4 w-4 mt-0.5 shrink-0" />
+                      ) : (
+                        <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                      )}
+                      <div>
+                        <p className="font-medium">
+                          {!pillCheckResult.isPillVisible
+                            ? "No pill detected"
+                            : pillCheckResult.isMatch
+                            ? "Looks right — proceed to take it"
+                            : "Couldn't confirm exact pill — proceeding"}
+                        </p>
+                        <p className="opacity-80 mt-0.5">{pillCheckResult.matchReason}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-2 justify-center">
+                  {!pillCheckResult ? (
+                    <>
+                      <Button variant="outline" onClick={handleCloseRecording} disabled={isCheckingPill}>
+                        Cancel
+                      </Button>
+                      <Button onClick={capturePillImage} disabled={!stream || isCheckingPill} className="gap-2">
+                        {isCheckingPill ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+                        Capture Pill
+                      </Button>
+                    </>
+                  ) : !pillCheckResult.isPillVisible ? (
+                    <>
+                      <Button variant="outline" onClick={handleCloseRecording}>Cancel</Button>
+                      <Button onClick={retryPillCheck} className="gap-2">
+                        <RefreshCw className="h-4 w-4" /> Try again
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="outline" onClick={retryPillCheck}>Retake pill photo</Button>
+                      <Button onClick={proceedToIngestion} className="gap-2">
+                        <Video className="h-4 w-4" /> Proceed
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* STAGE 2 — Ingestion recording */}
+            {stage === "ingestion" && (
+              <div className="flex gap-2 justify-center">
+                {!recordedBlob ? (
+                  !isRecording ? (
+                    <Button onClick={startRecording} disabled={!stream} className="gap-2">
+                      <Video className="h-4 w-4" /> Start Recording
+                    </Button>
+                  ) : (
+                    <Button onClick={stopRecording} variant="destructive" className="gap-2">
+                      <Square className="h-4 w-4" /> Stop
+                    </Button>
+                  )
                 ) : (
-                  <Button onClick={stopRecording} variant="destructive" className="gap-2">
-                    <Square className="h-4 w-4" /> Stop
-                  </Button>
-                )
-              ) : (
-                <>
-                  <Button variant="outline" onClick={handleCloseRecording} disabled={isUploading}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleSubmitProof} disabled={isUploading} className="gap-2">
-                    {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                    Submit Proof
-                  </Button>
-                </>
-              )}
-            </div>
+                  <>
+                    <Button variant="outline" onClick={handleCloseRecording} disabled={isUploading}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSubmitProof} disabled={isUploading} className="gap-2">
+                      {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                      Submit Proof
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Success celebration */}
+      <SuccessCelebration
+        open={celebration.open}
+        onClose={() => setCelebration((c) => ({ ...c, open: false }))}
+        vulasEarned={celebration.vulasEarned}
+        streak={celebration.streak}
+        medicationName={celebration.medicationName}
+      />
     </div>
   );
 }
