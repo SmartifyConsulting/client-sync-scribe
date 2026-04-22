@@ -572,13 +572,29 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
                 </div>
 
                 {todayStatus === "pending" && (
-                  <Button
-                    onClick={() => setRecordingPrescriptionId(rx.id)}
-                    className="gap-2 shrink-0"
-                  >
-                    <Video className="h-4 w-4" />
-                    Take Medication
-                  </Button>
+                  needsBaseline(rx.id) ? (
+                    <Button
+                      onClick={() => setBaselineCapture({ open: true, rxId: rx.id, medication: rx.medication, dosage: rx.dosage })}
+                      variant="outline"
+                      className="gap-2 shrink-0"
+                    >
+                      <Camera className="h-4 w-4" />
+                      Set up baseline
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => setRecordingPrescriptionId(rx.id)}
+                      className="gap-2 shrink-0"
+                    >
+                      <Video className="h-4 w-4" />
+                      Take Medication
+                    </Button>
+                  )
+                )}
+                {todayStatus === "provisional" && (
+                  <Badge variant="secondary" className="shrink-0 bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30">
+                    <Sparkles className="h-3 w-3 mr-1" /> Provisional
+                  </Badge>
                 )}
                 {todayStatus === "pending_review" && (
                   <Badge variant="secondary" className="shrink-0">
