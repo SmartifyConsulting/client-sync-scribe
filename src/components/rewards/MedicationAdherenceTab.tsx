@@ -45,17 +45,26 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [recordingPrescriptionId, setRecordingPrescriptionId] = useState<string | null>(null);
+  const [stage, setStage] = useState<Stage>("pill_check");
+  const [pillCheckResult, setPillCheckResult] = useState<PillCheckResult | null>(null);
+  const [isCheckingPill, setIsCheckingPill] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [countdown, setCountdown] = useState(30);
+  const [celebration, setCelebration] = useState<{ open: boolean; vulasEarned: number; streak: number; medicationName: string }>({
+    open: false, vulasEarned: 0, streak: 0, medicationName: "",
+  });
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const today = format(new Date(), "yyyy-MM-dd");
+
+  const currentPrescription = recordingPrescriptionId
+    ? null // resolved below from prescriptions list
 
   // Fetch active prescriptions for this chronic patient
   const { data: prescriptions = [], isLoading: prescriptionsLoading } = useQuery({
