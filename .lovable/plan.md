@@ -1,137 +1,96 @@
 
 
-# Plan: Patient admission uploads, fix missing camera, Vula popup compaction, Rewards tab cleanup
+# Plan: Duplicate close icon, Rewards restructure, no-retake medication, fix AI validation 400
 
-## 1. Fix missing camera on Shannon Kennedy's chronic-meds tab
+## 1. Remove the duplicate `×` from the Vula explainer dialog
 
-**Root cause:** Shannon has 3 patient records under the same auth user. `MyRewards.tsx` (line 117) picks **the newest** one (`order created_at desc`, `limit 1`) — that's "Sarah Mitchell", which is flagged chronic but has **0 active prescriptions**. The 3 active prescriptions live on the older "Shannon Kennedy" record. So `MedicationAdherenceTab` renders the empty state ("No active chronic prescriptions found") and no camera ever appears.
+**`src/components/rewards/VulaExplainerDialog.tsx`**
 
-**Fix in `src/pages/patient/MyRewards.tsx`:** Change the patient-record query to prefer the record that **actually has active chronic prescriptions**:
+Shadcn's `DialogContent` already renders a built-in close button in the top-right. The component adds a *second* custom round close button — that's the "xx" in the screenshot. Delete the custom button (lines 22–29) and the now-unused `X` import. Result: a single, standard close icon.
 
-```ts
-// Get all of this user's patient records, then pick the one with active chronic prescriptions
-const { data: patients } = await supabase
-  .from("patients")
-  .select("id, is_chronic")
-  .eq("patient_user_id", user.id);
+## 2. Restructure My Rewards tabs: merge Overview + Wins + Streaks; replace Assigned Tasks with grouped Vula history
 
-if (!patients?.length) return null;
+**`src/pages/patient/MyRewards.tsx`**
 
-const ids = patients.map(p => p.id);
-const { data: rxRows } = await supabase
-  .from("prescriptions")
-  .select("patient_id")
-  .in("patient_id", ids)
-  .eq("status", "active");
+Final tab strip: **Overview** · **Chronic Meds** (when chronic) · **Vulas**.
 
-const idWithRx = rxRows?.[0]?.patient_id;
-return patients.find(p => p.id === idWithRx)
-    ?? patients.find(p => p.is_chronic)
-    ?? patients[0];
-```
+### 2a. Merge "Wins" and "Streaks" into Overview
+- Remove the `<TabsTrigger value="milestones">` ("Wins").
+- Move both the Milestones (Wins) `<Card>` and the Health Streaks `<Card>` from `<TabsContent value="milestones">` (lines 570–692) into `<TabsContent value="overview">`, placed after "Recent Rewards" and before the new history section. Delete the now-empty `milestones` TabsContent.
+- Update fallback so legacy `"milestones"` / `"history"` / `"streaks"` route to `"overview"`.
 
-This guarantees the chronic-meds tab is wired to the patient record that actually has prescriptions, so the "Take Medication" buttons (which open the camera dialog at `MedicationAdherenceTab.tsx` line 378) appear.
+### 2b. Replace "Assigned Tasks" with "Vula History" (accordion grouped by week/month)
 
-## 2. Allow doctors **and patients** to upload admission forms
+The current "Assigned Tasks" card (lines 521–565) duplicates `My Tasks` and is removed.
 
-### 2a. Database — relax INSERT policy on `hospital_admissions`
+In its place, render a new **"Vula History"** card containing an accordion grouped chronologically:
+- Use existing `rewards` (positive earnings from `useMyRewards`) **plus** `transfers` (negative outflows already in scope) merged by date into one timeline.
+- **Grouping rules:**
+  - **This Week** — items dated within the current ISO week (Mon → Sun). Open by default.
+  - All other items grouped by **calendar month** (`MMMM yyyy`, e.g., "March 2026"). All collapsed by default.
+- Use the existing `Accordion` (`@/components/ui/accordion`) with `type="multiple"` and `defaultValue={["this-week"]}`.
+- Each row shows: icon (`Vula` logo for earn, `ArrowRightLeft` for transfer), label (`visit_category` for earnings, partner app name for transfers), date (`MMM d, yyyy`), and a coloured amount badge (`+N` green for earnings, `-N` blue for transfers).
+- Empty state: "No Vula activity yet."
 
-Current `INSERT` policy requires `auth.uid() = doctor_id` (patients are blocked). Migration:
+This card replaces the Assigned Tasks card in the Overview tab.
 
-```sql
-DROP POLICY "Doctors can insert admissions for their patients" ON hospital_admissions;
+### 2c. Drop now-unused code
+- Remove `tasks`, `tasksLoading`, `refetchTasks`, `pendingActivityTasks`, `getPriorityColor`, `getStatusIcon`, the `patient-assigned-tasks` query, the `PatientTask` interface, and the `ActivityProofCapture` import (no longer rendered on this page).
 
-CREATE POLICY "Authorized users can insert admissions"
-ON hospital_admissions FOR INSERT
-TO authenticated
-WITH CHECK (
-  auth.uid() = doctor_id  -- doctor inserting their own
-  AND (
-    -- (a) the patient themselves: doctor_id is set to their own user_id
-    EXISTS (SELECT 1 FROM patients p
-            WHERE p.id = hospital_admissions.patient_id
-              AND p.patient_user_id = auth.uid())
-    -- (b) doctor who owns the patient record
-    OR EXISTS (SELECT 1 FROM patients p
-               WHERE p.id = hospital_admissions.patient_id
-                 AND p.user_id = auth.uid())
-    -- (c) doctor with active access
-    OR EXISTS (SELECT 1 FROM patients p
-               JOIN doctor_patient_access dpa ON dpa.patient_user_id = p.patient_user_id
-               WHERE p.id = hospital_admissions.patient_id
-                 AND dpa.doctor_id = auth.uid()
-                 AND dpa.is_active = true)
-  )
-);
-```
+## 3. Disable retaking proof of medication (overdose-safety)
 
-(`doctor_id` is `NOT NULL` so for patient-uploaded admissions we set `doctor_id = auth.uid()` — same actor as the inserter; the policy clause "(a) the patient themselves" allows it.)
+**`src/components/rewards/MedicationAdherenceTab.tsx`**
 
-### 2b. New "Upload Admission Form" dialog
+Two retake paths exist; both are removed so a patient cannot record a second video for the same scheduled dose.
 
-Create **`src/components/admissions/UploadAdmissionDialog.tsx`** — modeled on `AddImagingDialog.tsx`:
+- **Failed AI validation retry (lines 264–278):** instead of clearing `recordedBlob` and restarting the camera, close the recording dialog and show a toast: *"We couldn't verify this dose. Your medication intake was logged but not auto-confirmed — please contact your doctor if this was an error."* Then mark today's `medication_adherence` row as `"failed_verification"` (new status) so the row is locked and the **Take Medication** button no longer appears for today (treat any non-`pending` status as locked: line 377 already only hides on `completed` — extend to also hide on `failed_verification` and `missed`).
+- **Manual "Retake" button after recording (lines 430–432):** delete the `<Button>Retake</Button>` entirely. Once the patient has recorded a clip, the only options are **Submit Proof** or **Cancel** (close dialog). Cancelling discards the clip but, critically, does **not** consume the dose — so a patient who fumbles can still record once. The lock kicks in only after a Submit attempt.
 
-- Fields: Hospital (text), Admission date (date, default today), Discharge date (optional date), Diagnosis (textarea), Procedure description (optional textarea), **Attachment** (file input — PDF / image, uploaded to `patient-media` bucket, max 5MB per existing limit).
-- On Save:
-  1. If a file is attached, upload to `patient-media/${user.id}/admission-${Date.now()}-${file.name}` and insert a row into `documents` (`name`, `media_url`, `patient_id`, `category = 'hospital_admission'`, `user_id = auth.uid()`) — captures the file in the patient's documents library.
-  2. Insert into `hospital_admissions` with `doctor_id = auth.uid()`, `patient_id`, `document_id` (from step 1, nullable), `hospital`, `admission_date`, `discharge_date`, `diagnosis`, `procedure_description`, `status = 'admitted'` (or `'discharged'` if discharge_date set).
-  3. Invalidate `["hospital-admissions", patientId]` so it appears immediately.
+This guarantees: one Submit attempt per scheduled dose. No retake → no possibility of double-recording → no overdose risk from repeated "take medication" interactions.
 
-### 2c. Surface the upload button in `AdmissionsView`
+## 4. Fix the edge function 500 ("AI validation failed: 400") so evidence is actually saved
 
-**`src/components/admissions/AdmissionsView.tsx`:**
+**Root cause** (confirmed in edge logs): the client uploads a `.webm` video and the edge function passes that URL straight to Gemini as `image_url`. Gemini's vision endpoint accepts only PNG/JPEG/WebP/GIF — it returns `400 Unsupported image format` on any video URL, which the function then rethrows as a 500 to the client.
 
-- Add a header row above the list with title "Hospital Admissions" and a primary `+ Upload Admission Form` button (visible whenever `canEdit` is true — both doctors and patients viewing their own record).
-- Show the same button in the empty-state card (replaces the current "Entries are created automatically…" hint with a clear CTA).
-- Wire the button to open the new `UploadAdmissionDialog`, passing `patientId`.
-- Keep the existing auto-creation flow from `HospitalAdmissionEditor.tsx` untouched — that path still works for AI-generated forms.
+Fix in **two layers**:
 
-### 2d. Ensure `canEdit` is true for the patient on their own record
+### 4a. Client-side — extract still frames before upload
 
-Verify the prop wiring at the call sites:
-- Patient self-view (`PatientDetailsEditor.tsx` Holarchy → Admissions tab) — pass `canEdit={true}` when the viewer is the patient (`patient_user_id === auth.uid()`).
-- Doctor view — already true when the doctor has access.
+In `MedicationAdherenceTab.tsx` `handleSubmitProof`:
+1. Build a hidden `<video>` from the recorded blob, decode metadata to get duration.
+2. Sample **5 frames** at evenly-spaced timestamps (10%, 30%, 50%, 70%, 90% of duration) by drawing each onto an offscreen `<canvas>` and exporting `toBlob('image/jpeg', 0.85)`.
+3. Upload each JPEG to `patient-media/medication-proof/${user.id}/${ts}-frame-${i}.jpg`.
+4. Invoke the function with `{ imageUrls: [...publicUrls], filePaths: [...paths], prescriptionId, patientId }` — matching the multi-frame contract the edge function already supports (lines 27–31 of the edge function).
+5. Skip uploading the original webm — keeps us inside the 5MB cap and removes the unsupported format from the request entirely.
 
-## 3. Vula Vouchers popup — 30% smaller and more compact
+### 4b. Edge function — never lose evidence on AI failure
 
-**`src/components/rewards/VulaExplainerDialog.tsx`:**
+Currently when the AI call fails, frames are deleted and an error is thrown — the patient sees "Edge function failed" and **no record exists**. Update `supabase/functions/validate-medication-video/index.ts`:
+1. Wrap the AI call in a try/catch. On any non-OK status (including 400 / 429 / 402) **and** on parse failure:
+   - Insert/update a `medication_adherence` row for today with `status = 'pending_review'`, `taken_at = now()`, and `proof_url` set to the **first frame's** public URL (kept, not deleted) so a doctor can review the evidence later.
+   - Skip the storage cleanup for that single first-frame file; delete the rest.
+   - Return `200 OK` with `{ ok: false, fallback: true, message: "Verification temporarily unavailable — your dose has been recorded for doctor review." }` so the client surfaces a friendly toast instead of a 500.
+2. Still award **0 Vulas** in the fallback path; only valid AI-confirmed ingestion awards +5.
+3. Keep the existing happy path (valid → award + delete frames) unchanged.
 
-- **Width**: `max-w-md` (448px) → `max-w-xs` (320px) — ~30% narrower.
-- **Padding**: outer `p-8` → `p-5`; vertical rhythm `space-y-6` → `space-y-3`.
-- **Logo**: `h-32` → `h-20`.
-- **Headline**: `text-2xl` → `text-lg`; subtitle `text-sm` → `text-xs`.
-- **Divider droplet badge**: `h-8 w-8` → `h-6 w-6`, icon `h-4 w-4` → `h-3 w-3`.
-- **Section icon badges**: `h-11 w-11` → `h-8 w-8`, icons `h-5 w-5` → `h-4 w-4`; text `text-sm` → `text-xs`; row `gap-4` → `gap-3`.
-- **Section 2**: **delete the line** "Small actions today. Bigger impact tomorrow." entirely (per request).
-- **Hairline dividers** between sections retained but tighter spacing.
-- **CTA button**: `h-12 text-base` → `h-10 text-sm`, `rounded-xl` retained.
-- **Footer tagline**: `text-sm` → `text-xs`, heart icon `h-4 w-4` → `h-3 w-3`.
+### 4c. Client toast handling
 
-Net effect: dialog drops from ~520px tall × 448px wide to roughly ~360px × 320px — about 30% smaller in both axes, content visibly tighter.
-
-## 4. My Rewards — remove History tab, merge Streaks into Wins
-
-**`src/pages/patient/MyRewards.tsx`:**
-
-- **Remove** the `<TabsTrigger value="history">` (lines 434–436) **and** the entire `<TabsContent value="history">` block (lines 776–~820). The same data is already shown as "Recent Rewards" on the Overview tab; users wanting a longer list can scroll the Overview list (still shows top 5 — leave as-is, the request only asks to remove the dedicated tab).
-- **Remove** the standalone `<TabsTrigger value="streaks">` (lines 431–433).
-- **Merge Streaks under Wins**: in the existing `<TabsContent value="milestones">` (the "Wins" tab, lines 557–605), append the Streaks card (the entire `<Card>` currently under `<TabsContent value="streaks">`, lines 608–679) below the milestones grid. Delete the now-empty `<TabsContent value="streaks">` wrapper.
-- Final tab strip becomes: **Overview**, **Chronic Meds** (when chronic), **Wins** (milestones + streaks), **Vulas** (transfers).
-- If `activeTab === "history"` or `"streaks"` is restored from prior state, fall back to `"overview"` to avoid an empty content area.
+In `handleSubmitProof`:
+- `validation?.isValid === true` → existing success toast.
+- `data?.fallback === true` → blue info toast: "Recorded for review — your doctor will verify this dose."
+- `validation?.isValid === false` (AI ran successfully but said "no") → existing destructive toast, but **do not restart the camera** (per §3); close the dialog and lock the row.
 
 ## Files touched
 
 | File | Change |
 |---|---|
-| `src/pages/patient/MyRewards.tsx` | Patient-record selection prefers record with active prescriptions; remove History tab + content; remove Streaks tab trigger; move Streaks card under "Wins" tab |
-| `src/components/admissions/UploadAdmissionDialog.tsx` (new) | Manual upload form — hospital, dates, diagnosis, procedure, file attachment; creates `documents` + `hospital_admissions` rows |
-| `src/components/admissions/AdmissionsView.tsx` | Header row + empty-state CTA "Upload Admission Form" wired to new dialog |
-| `src/components/patients/PatientDetailsEditor.tsx` | Verify/ensure `<AdmissionsView canEdit>` is true for patient self-view |
-| `src/components/rewards/VulaExplainerDialog.tsx` | ~30% smaller dialog (`max-w-xs`, tighter padding/icons/text); remove "Small actions today. Bigger impact tomorrow." |
-| Migration | DROP + recreate `hospital_admissions` INSERT policy to allow patients (`patient_user_id = auth.uid()`) to insert with `doctor_id = auth.uid()` |
+| `src/components/rewards/VulaExplainerDialog.tsx` | Remove the custom round close button + unused `X` import (shadcn dialog already renders one) |
+| `src/pages/patient/MyRewards.tsx` | Drop "Wins" tab; move Milestones + Streaks cards into Overview; replace "Assigned Tasks" card with "Vula History" accordion (This Week open, monthly groups collapsed); remove tasks query and dead code |
+| `src/components/rewards/MedicationAdherenceTab.tsx` | Delete the post-recording "Retake" button; on failed verification close dialog + lock today's row; hide "Take Medication" button when status is anything other than `pending`; client-side: extract 5 JPEG frames from the webm and POST `imageUrls` instead of `videoUrl` |
+| `supabase/functions/validate-medication-video/index.ts` | On AI failure (any non-2xx) save a `pending_review` adherence row with first-frame URL preserved and return `200 { ok: false, fallback: true }` instead of throwing 500 |
 
 ## Out of scope
-- Doctor-side admission editor (`HospitalAdmissionEditor.tsx`) — unchanged, still auto-creates admissions from session forms.
-- Cleaning up Shannon's duplicate patient records — a data hygiene task, not a code change.
-- Reorganising what counts as a "Win" beyond moving Streaks under it.
+- Doctor-side review UI for `pending_review` adherence rows (rows are persisted; building a reviewer panel is a separate task).
+- The `My Tasks` page itself (untouched — Assigned Tasks remain available there).
+- Vula transfer flow (partner-app section under the Vulas tab is unchanged).
 
