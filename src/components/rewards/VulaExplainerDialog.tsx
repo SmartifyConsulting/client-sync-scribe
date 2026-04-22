@@ -17,7 +17,7 @@ export function VulaExplainerDialog({ open, onOpenChange, onCta }: VulaExplainer
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xs p-0 overflow-hidden border-0 gap-0 bg-card">
+      <DialogContent className="max-w-xs p-0 overflow-hidden border-0 gap-0 bg-card rounded-2xl">
         <div className="relative p-5 space-y-3">
           {/* Logo */}
           <div className="flex justify-center pt-1">
