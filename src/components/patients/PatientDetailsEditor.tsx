@@ -1088,7 +1088,7 @@ export function PatientDetailsEditor({
           </div>
           {/* Vula Vouchers inline on web */}
           {!rewardsLoading && lollipopCount !== undefined && (
-            <div className="hidden md:flex items-center justify-center gap-3">
+            <div className="hidden md:flex items-end gap-3 pb-1">
               <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-12 w-auto object-contain" />
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
                 <AnimatedCounter target={lollipopCount} />
@@ -1139,7 +1139,7 @@ export function PatientDetailsEditor({
         {!rewardsLoading && lollipopCount !== undefined && (
           <div className="mt-3 border-t border-border pt-3 md:hidden">
             <div className="flex items-center justify-end gap-2">
-              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-[72px] w-auto object-contain" />
+              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-[44px] w-auto object-contain" />
               <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
                 <AnimatedCounter target={lollipopCount} />
               </span>
