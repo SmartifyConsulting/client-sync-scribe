@@ -17,36 +17,36 @@ export function VulaExplainerDialog({ open, onOpenChange, onCta }: VulaExplainer
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md p-0 overflow-hidden border-0 gap-0 bg-card">
-        <div className="relative p-8 space-y-6">
+      <DialogContent className="max-w-xs p-0 overflow-hidden border-0 gap-0 bg-card">
+        <div className="relative p-5 space-y-3">
           {/* Close button */}
           <button
             onClick={() => onOpenChange(false)}
-            className="absolute right-4 top-4 rounded-full bg-card border border-border p-1 hover:bg-muted transition-colors"
+            className="absolute right-3 top-3 rounded-full bg-card border border-border p-1 hover:bg-muted transition-colors"
             aria-label="Close"
           >
-            <X className="h-4 w-4 text-muted-foreground" />
+            <X className="h-3 w-3 text-muted-foreground" />
           </button>
 
           {/* Logo */}
-          <div className="flex justify-center pt-2">
+          <div className="flex justify-center pt-1">
             <img
               src={vulaVouchersLogo}
               alt="Vula Vouchers"
-              className="h-32 w-auto object-contain"
+              className="h-20 w-auto object-contain"
             />
           </div>
 
           {/* Headline */}
-          <div className="text-center space-y-2">
-            <h2 className="text-2xl font-bold text-foreground leading-tight">
+          <div className="text-center space-y-1">
+            <h2 className="text-lg font-bold text-foreground leading-tight">
               Vula means rain in
               <br />
               <span className="bg-gradient-to-r from-blue-500 to-teal-500 bg-clip-text text-transparent">
                 isiZulu and isiXhosa –
               </span>
             </h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               something you can't always predict, but always need.
             </p>
           </div>
@@ -54,25 +54,25 @@ export function VulaExplainerDialog({ open, onOpenChange, onCta }: VulaExplainer
           {/* Divider with droplet */}
           <div className="relative flex items-center">
             <div className="flex-grow border-t border-border" />
-            <div className="mx-3 flex h-8 w-8 items-center justify-center rounded-full bg-blue-50">
-              <Droplet className="h-4 w-4 text-blue-500 fill-blue-500" />
+            <div className="mx-2 flex h-6 w-6 items-center justify-center rounded-full bg-blue-50">
+              <Droplet className="h-3 w-3 text-blue-500 fill-blue-500" />
             </div>
             <div className="flex-grow border-t border-border" />
           </div>
 
           {/* Section 1 */}
-          <div className="flex gap-4">
-            <div className="shrink-0 flex h-11 w-11 items-center justify-center rounded-full bg-blue-50">
-              <Users className="h-5 w-5 text-blue-500" />
+          <div className="flex gap-3">
+            <div className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-blue-50">
+              <Users className="h-4 w-4 text-blue-500" />
             </div>
-            <div className="flex-1 space-y-1">
-              <p className="text-sm font-bold text-foreground leading-snug">
+            <div className="flex-1 space-y-0.5">
+              <p className="text-xs font-bold text-foreground leading-snug">
                 Vulas reward real-world actions —
               </p>
-              <p className="text-sm text-foreground/80 leading-relaxed">
+              <p className="text-xs text-foreground/80 leading-relaxed">
                 caring, helping, sharing, contributing, and following through.
               </p>
-              <p className="text-sm font-medium bg-gradient-to-r from-blue-500 to-teal-500 bg-clip-text text-transparent">
+              <p className="text-xs font-medium bg-gradient-to-r from-blue-500 to-teal-500 bg-clip-text text-transparent">
                 It's how we show up for each other.
               </p>
             </div>
@@ -81,16 +81,13 @@ export function VulaExplainerDialog({ open, onOpenChange, onCta }: VulaExplainer
           <div className="border-t border-border" />
 
           {/* Section 2 */}
-          <div className="flex gap-4">
-            <div className="shrink-0 flex h-11 w-11 items-center justify-center rounded-full bg-blue-50">
-              <TrendingUp className="h-5 w-5 text-blue-500" />
+          <div className="flex gap-3">
+            <div className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-blue-50">
+              <TrendingUp className="h-4 w-4 text-blue-500" />
             </div>
-            <div className="flex-1 space-y-1">
-              <p className="text-sm font-bold text-foreground leading-snug">
+            <div className="flex-1">
+              <p className="text-xs font-bold text-foreground leading-snug">
                 Vulas are a simple way to start building value that grows with you.
-              </p>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Small actions today. Bigger impact tomorrow.
               </p>
             </div>
           </div>
@@ -98,16 +95,15 @@ export function VulaExplainerDialog({ open, onOpenChange, onCta }: VulaExplainer
           {/* CTA */}
           <Button
             onClick={handleCta}
-            className="w-full rounded-xl bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white gap-2 shadow-md h-12 text-base font-semibold"
-            size="lg"
+            className="w-full rounded-xl bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white gap-2 shadow-md h-10 text-sm font-semibold"
           >
-            <Ticket className="h-5 w-5" />
+            <Ticket className="h-4 w-4" />
             Earn Vulas
           </Button>
 
           {/* Footer tagline */}
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <Heart className="h-4 w-4 text-blue-500 fill-blue-500" />
+          <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+            <Heart className="h-3 w-3 text-blue-500 fill-blue-500" />
             <span>Earn them. Use them. Keep them.</span>
           </div>
         </div>

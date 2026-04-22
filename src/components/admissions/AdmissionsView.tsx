@@ -12,6 +12,8 @@ import { AddVitalsDialog } from "./AddVitalsDialog";
 import { AddMedicationDialog } from "./AddMedicationDialog";
 import { AddLabResultDialog } from "./AddLabResultDialog";
 import { AddImagingDialog } from "./AddImagingDialog";
+import { UploadAdmissionDialog } from "./UploadAdmissionDialog";
+import { Upload } from "lucide-react";
 
 interface Props {
   patientId: string;
@@ -144,26 +146,43 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
 
 export function AdmissionsView({ patientId, patientHeight, patientWeight, canEdit = false }: Props) {
   const { data: admissions = [], isLoading } = useHospitalAdmissions(patientId);
+  const [showUpload, setShowUpload] = useState(false);
 
   if (isLoading) {
     return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   }
 
-  if (admissions.length === 0) {
-    return (
-      <Card className="p-8 text-center">
-        <Hospital className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-        <p className="text-sm text-muted-foreground">No hospital admissions on record.</p>
-        <p className="text-xs text-muted-foreground mt-1">Entries are created automatically when a doctor saves a Hospital Admission Form.</p>
-      </Card>
-    );
-  }
-
   return (
     <div className="space-y-3">
-      {admissions.map((a) => (
-        <AdmissionDetail key={a.id} admission={a} canEdit={canEdit} defaultHeight={patientHeight} defaultWeight={patientWeight} />
-      ))}
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="text-sm font-semibold text-foreground">Hospital Admissions</h3>
+        {canEdit && (
+          <Button size="sm" onClick={() => setShowUpload(true)} className="gap-1">
+            <Upload className="h-3 w-3" /> Upload Admission Form
+          </Button>
+        )}
+      </div>
+
+      {admissions.length === 0 ? (
+        <Card className="p-8 text-center">
+          <Hospital className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+          <p className="text-sm text-muted-foreground">No hospital admissions on record.</p>
+          <p className="text-xs text-muted-foreground mt-1 mb-4">
+            Entries are created automatically when a doctor saves a Hospital Admission Form, or you can upload one yourself.
+          </p>
+          {canEdit && (
+            <Button size="sm" onClick={() => setShowUpload(true)} className="gap-1">
+              <Upload className="h-3 w-3" /> Upload Admission Form
+            </Button>
+          )}
+        </Card>
+      ) : (
+        admissions.map((a) => (
+          <AdmissionDetail key={a.id} admission={a} canEdit={canEdit} defaultHeight={patientHeight} defaultWeight={patientWeight} />
+        ))
+      )}
+
+      <UploadAdmissionDialog open={showUpload} onOpenChange={setShowUpload} patientId={patientId} />
     </div>
   );
 }
