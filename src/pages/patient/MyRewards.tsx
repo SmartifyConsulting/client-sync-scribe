@@ -608,6 +608,130 @@ export default function MyRewards() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="wins-streaks" className="space-y-6">
+          {/* Wins (Milestones) */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-yellow-500" />
+                Wins
+              </CardTitle>
+              <CardDescription>
+                Collect Vulas to unlock milestone badges
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {MILESTONES.map((milestone) => {
+                  const unlocked = lollipopCount >= milestone.count;
+                  return (
+                    <div
+                      key={milestone.count}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        unlocked
+                          ? "border-yellow-400 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/30 dark:to-orange-950/30"
+                          : "border-muted bg-muted/20 opacity-60"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={`text-4xl ${!unlocked && "grayscale"}`}>
+                          {milestone.icon}
+                        </span>
+                        <div>
+                          <p className={`font-bold ${milestone.color}`}>
+                            {milestone.label}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {milestone.count} Vulas
+                          </p>
+                        </div>
+                      </div>
+                      {unlocked && (
+                        <Badge className="mt-3 bg-yellow-500 text-white">
+                          <Star className="h-3 w-3 mr-1" /> Unlocked!
+                        </Badge>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Streaks */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Flame className="h-5 w-5 text-orange-500" />
+                Health Streaks
+              </CardTitle>
+              <CardDescription>
+                Maintain regular health checkups to earn bonus Vulas
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {streaks.length === 0 ? (
+                <div className="text-center py-8">
+                  <Flame className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No streak data yet. Complete your first preventive visit!</p>
+                </div>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {streaks.map((streak) => {
+                    const daysUntilDue = streak.next_due_at
+                      ? differenceInDays(parseISO(streak.next_due_at), new Date())
+                      : null;
+                    const isOverdue = daysUntilDue !== null && daysUntilDue < 0;
+
+                    return (
+                      <div
+                        key={streak.id}
+                        className={`p-4 rounded-xl border ${
+                          streak.current_streak > 0
+                            ? "border-orange-300 bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-950/30 dark:to-yellow-950/30"
+                            : "border-muted bg-muted/20"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="font-bold text-foreground">{streak.streak_name}</p>
+                            <p className="text-sm text-muted-foreground">{streak.description}</p>
+                          </div>
+                          <div className="text-right">
+                            <div className="flex items-center gap-1">
+                              <Flame className={`h-5 w-5 ${streak.current_streak > 0 ? "text-orange-500" : "text-muted-foreground"}`} />
+                              <span className="text-2xl font-bold">{streak.current_streak}</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground">streak</p>
+                          </div>
+                        </div>
+
+                        <div className="mt-3 pt-3 border-t border-muted flex items-center justify-between text-sm">
+                          <div>
+                            <span className="text-muted-foreground">Longest: </span>
+                            <span className="font-medium">{streak.longest_streak}</span>
+                          </div>
+                          {daysUntilDue !== null && (
+                            <Badge variant={isOverdue ? "destructive" : "secondary"}>
+                              {isOverdue
+                                ? `${Math.abs(daysUntilDue)} days overdue`
+                                : `Due in ${daysUntilDue} days`
+                              }
+                            </Badge>
+                          )}
+                        </div>
+
+                        <div className="mt-2 text-xs text-muted-foreground">
+                          Earns: {streak.lollipops_awarded} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-auto object-contain inline-block" /> per completion
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="transfers" className="space-y-6">
           {/* Partner Apps - at top */}
