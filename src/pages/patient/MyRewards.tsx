@@ -610,9 +610,8 @@ export default function MyRewards() {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
 
-        <TabsContent value="streaks" className="space-y-6">
+          {/* Streaks merged under Wins */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -632,11 +631,11 @@ export default function MyRewards() {
               ) : (
                 <div className="grid gap-4 md:grid-cols-2">
                   {streaks.map((streak) => {
-                    const daysUntilDue = streak.next_due_at 
+                    const daysUntilDue = streak.next_due_at
                       ? differenceInDays(parseISO(streak.next_due_at), new Date())
                       : null;
                     const isOverdue = daysUntilDue !== null && daysUntilDue < 0;
-                    
+
                     return (
                       <div
                         key={streak.id}
@@ -659,7 +658,7 @@ export default function MyRewards() {
                             <p className="text-xs text-muted-foreground">streak</p>
                           </div>
                         </div>
-                        
+
                         <div className="mt-3 pt-3 border-t border-muted flex items-center justify-between text-sm">
                           <div>
                             <span className="text-muted-foreground">Longest: </span>
@@ -667,14 +666,14 @@ export default function MyRewards() {
                           </div>
                           {daysUntilDue !== null && (
                             <Badge variant={isOverdue ? "destructive" : "secondary"}>
-                              {isOverdue 
+                              {isOverdue
                                 ? `${Math.abs(daysUntilDue)} days overdue`
                                 : `Due in ${daysUntilDue} days`
                               }
                             </Badge>
                           )}
                         </div>
-                        
+
                         <div className="mt-2 text-xs text-muted-foreground">
                           Earns: {streak.lollipops_awarded} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-auto object-contain inline-block" /> per completion
                         </div>
