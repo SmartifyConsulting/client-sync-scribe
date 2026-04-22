@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Loader2, Trophy, Target, Flame, Gift, Star, Calendar, CheckSquare, Clock, AlertCircle, Video, Send, ArrowRightLeft, Pill, ArrowLeft, Info } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Loader2, Trophy, Target, Flame, Gift, Star, Video, Send, ArrowRightLeft, Pill, ArrowLeft, Info, History } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,12 +30,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { format, parseISO, differenceInDays } from "date-fns";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { format, parseISO, differenceInDays, startOfWeek, endOfWeek, isWithinInterval } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useMyRewards, useMyStreaks } from "@/hooks/usePatientRewards";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ActivityProofCapture } from "@/components/rewards/ActivityProofCapture";
 import { MedicationAdherenceTab } from "@/components/rewards/MedicationAdherenceTab";
 import { useToast } from "@/hooks/use-toast";
 import { VulaExplainerDialog } from "@/components/rewards/VulaExplainerDialog";
