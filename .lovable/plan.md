@@ -1,106 +1,107 @@
 
 
-# Plan: Reference-image pill matching, swallow check, NOK email flag, Wins/Streaks tab, Vula dialog polish
+# Plan: Video baseline + monthly confidence auto-approval (revised)
 
-## 1. Medication AI: reference image + swallow-only verification
+## 1. Baseline = a full first-dose video, not just two photos
 
-### 1a. Capture a baseline reference photo per prescription (one-time)
+Replace the 3-step photo wizard with a **single guided video capture** the first time a patient opens **Take Medication** for a chronic Rx (and again whenever the prescription's medication or dosage changes).
 
-When a patient first opens a chronic prescription's **Take Medication** flow — or whenever the prescription's `medication` or `dosage` changes — they're routed to a **Pill Baseline Capture** screen before any dose recording is allowed.
+### Capture flow in `PillBaselineCapture.tsx`
 
-**New table** `prescription_pill_references`:
-| col | type |
-|---|---|
-| `id` | uuid pk |
-| `prescription_id` | uuid → prescriptions.id (unique) |
-| `patient_id` | uuid → patients.id |
-| `reference_image_url` | text |
-| `observed_description` | text *(AI-generated colour/shape/markings)* |
-| `medication_snapshot` | text *(prescription medication at capture time)* |
-| `dosage_snapshot` | text *(prescription dosage at capture time)* |
-| `created_at` / `updated_at` | timestamptz |
+1. **Intro card** — "We'll record your first dose as a baseline. This helps us recognise your routine over time. The video is **not stored** — only a description and a snapshot of the tablet are kept."
+2. **Intake method picker** (the one we agreed earlier): Swallow whole / Chew / Crush and mix / Dissolve in liquid / Gummy.
+3. **Camera-guided recording** (up to 30s, same MediaRecorder pipeline as daily doses):
+   - Live framing guide + brightness gate before recording starts.
+   - Patient films themselves taking the dose end-to-end (showing the tablet, then ingestion).
+4. **AI processing** — extract 5 evenly-spaced frames + 1 dedicated "tablet close-up" frame (the sharpest of the first 25% of frames), upload **only those frames** to storage, then call `validate-medication-video` with `mode: "baseline_capture"` + `intakeMethod`.
 
-If `medication` or `dosage` differs from the snapshot → the existing reference is treated as stale and the patient is asked to recapture before the next dose.
+The video blob is **discarded client-side** as soon as the frames are uploaded — never written to storage. Same policy applies to all subsequent dose recordings (already the case today; we make this explicit in copy).
 
-**Camera-guided capture UX** in a new `PillBaselineCapture.tsx`:
-- Uses `getUserMedia` rear camera, `aspectRatio: 1`.
-- Overlays a **circular framing guide** (~60% of viewport).
-- Live quality feedback (every 500ms, lightweight checks on a downsampled canvas):
-  - **Brightness** — average luma. Too dark → "Move to better light." Too bright → "Reduce glare."
-  - **Sharpness** — variance of Laplacian on a centre crop. Below threshold → "Hold steady — image is blurry."
-  - **Subject size** — colour-difference blob detection inside the circle vs background. Subject too small → "Move closer." Too large → "Move further away."
-  - All clear → green ring + "Looks great — tap Capture."
-- Disable the **Capture** button until all three checks pass for ~600ms continuous.
-- After capture: show preview with **Retake** / **Use this photo** (allowed at baseline only — no dose has been logged).
-- On confirm: upload JPEG (q=0.9) to `patient-media/pill-references/${user.id}/${prescriptionId}-${ts}.jpg`, then call `validate-medication-video` with `mode: "baseline_capture"` which runs Gemini once to produce `observedDescription` and stores it on the row.
+### What gets persisted (revised `prescription_pill_references` migration)
 
-### 1b. Per-dose verification — match against the reference
+| col | type | source |
+|---|---|---|
+| `reference_image_url` | text | the tablet close-up frame |
+| `observed_description` | text | Gemini description of the tablet |
+| `intake_method` | text | patient pick |
+| `baseline_pattern_summary` | text *(new)* | Gemini summary of the full ingestion sequence — e.g. "Right hand, tablet placed on tongue, sip of water, head tilt back, ~3 second swallow." Used as a textual reference for pattern recognition. |
+| `medication_snapshot`, `dosage_snapshot`, timestamps | unchanged |
 
-Replace the existing Stage-1 box requirement.
+The `label_image_url` and `label_text_extracted` columns from the previous plan are **dropped** — no separate packaging photo. Pharmacy-relabelled bottles are common and the tablet description + ongoing pattern matching is enough.
 
-**New `mode: "pill_check"` payload**: `{ imageUrl, prescriptionId }`. The function:
-1. Loads `prescription_pill_references` for that prescription.
-2. If **no baseline** → returns `{ requiresBaseline: true }`. Client routes user to `PillBaselineCapture` and blocks dose recording.
-3. If **stale baseline** (medication/dosage changed since snapshot) → same `requiresBaseline: true` with `reason: "Medication updated — please capture a new baseline photo."`.
-4. Otherwise sends Gemini both images:
-   > "Image A is the patient's reference photo of their prescribed medication. Image B is the pill they're about to take now. Are these plausibly the same pill? Compare colour, shape, size and any visible markings. Generic unmarked tablets only need to share colour and shape."
-5. Returns `{ isMatch, confidence, matchReason }`.
-6. **Outcomes** (client):
-   - `isMatch: true` → green check, "Looks like a match — proceed." Unlocks ingestion recording.
-   - `isMatch: false` → red, "This doesn't look like your usual pill. Please double-check before taking it." Allow re-capture of *this stage only*; if the patient insists after one retry, allow proceed with a `pending_review` flag.
+The existing `mark_pill_reference_stale` trigger is extended to also null `intake_method` and `baseline_pattern_summary` when medication or dosage changes, forcing a fresh baseline video.
 
-This removes the box-photo requirement entirely; the only mandatory packaging step is the **one-time baseline** when starting (or changing) a chronic medication.
+## 2. Per-dose verification = method-aware + confidence score
 
-### 1c. Swallow-only — forbid chewing
+Every daily dose is recorded the same way as the baseline (≤30s clip, frames extracted, blob discarded). The `validate-medication-video` ingestion mode:
 
-Unchanged from previous plan: extend Stage-2 ingestion prompt with a `chewing_detected` criterion. If true → `isValid: false`, message: *"Chewing detected — many tablets must be swallowed whole. Please contact your doctor before chewing or crushing medication."* The dose locks per the existing one-attempt rule.
+1. Loads the prescription's `intake_method`, `observed_description`, and `baseline_pattern_summary`.
+2. Asks Gemini to compare the new frames against the baseline pattern + tablet description, with required/disqualifying signals tailored to the declared method:
 
-### 1d. Trigger a baseline recapture on prescription change
+   | Method | Required | Disqualifying |
+   |---|---|---|
+   | swallow | hand-to-mouth + swallow action | repeated chewing motion |
+   | chew | hand-to-mouth + chewing + swallow | swallowed whole, no chewing |
+   | crush | powder/broken tablet + spoon/liquid | whole tablet into mouth |
+   | dissolve | tablet in liquid + drinking | tablet directly into mouth |
+   | gummy | hand-to-mouth + chewing | none — chewing is correct |
 
-In `PrescriptionEditor.tsx` (or wherever active prescriptions are edited), when `medication` or `dosage` changes on an `active` chronic prescription, set `prescription_pill_references.observed_description = null` for that row (server-side via a small RPC) so the next adherence attempt forces a recapture. The patient sees a banner on the Chronic Meds tab: *"{medication} updated — capture a new reference photo before your next dose."*
+3. Returns `{ isValid, confidence (0-100), pattern_match_score (0-100), description, disqualifying_signal }`.
 
-## 2. Next of Kin — compulsory email + phone, notify on add only, "notified" badge
+### Decision tree (replaces the previous pass/fail)
 
-(Unchanged from previously approved plan §2.)
+| Outcome | Condition | Storage row |
+|---|---|---|
+| **Confirmed** | `confidence ≥ 75` AND no disqualifying signal | `status: completed`, +5 Vulas + confetti immediately |
+| **Hard fail** | any disqualifying signal at high confidence | `status: failed_verification`, locked, "contact your doctor" toast |
+| **Provisional** | `confidence` between 30 and 74 | `status: provisional`, **+5 Vulas awarded immediately** so the patient isn't punished, but the row is flagged for end-of-month reconciliation |
+| **Too low** | `confidence < 30` | `status: failed_verification`, no Vulas |
 
-- New edge function `notify-next-of-kin` sends a Resend email reassuring the recipient: *"Holarc only contacts Next of Kin when the patient adds them. We will never tell you if a patient removes you."*
-- `PatientDetailsEditor.tsx` NOK form: Email + Phone become required, with red asterisks; on successful new add, invoke the edge function and stamp `notified_at`.
-- Both view + edit lists render a green **"Notified by email"** badge when `notified_at` is set.
-- Editing or removing a NOK does **not** send any email. The Bell icon becomes a manual "Resend email" action.
+A new `medication_adherence` column `confidence_score numeric` is added to store the value. The previous `pending_review` status is replaced by `provisional`.
 
-## 3. My Rewards — separate "Wins and Streaks" tab
+## 3. Monthly auto-reconciliation — no doctor involvement
 
-(Unchanged from previously approved plan §3.)
+A new daily **`reconcile-adherence-monthly`** scheduled edge function (runs once per day, processes the previous calendar month on the 1st of each month, and also retroactively on demand):
 
-- Move the Milestones (Wins) and Health Streaks cards out of Overview into a new **Wins and Streaks** tab.
-- Tab order: **Overview** → **Chronic Meds** *(if chronic)* → **Wins and Streaks** → **Vulas**.
-- Legacy persisted tab values `milestones` / `streaks` / `history` map to `wins-streaks`.
+- For each prescription, gather all `provisional` rows from the month being reconciled.
+- Compute the **average confidence** across those rows.
+- If `avg ≥ 50` → bulk-update them to `status: completed`, set `auto_approved_at = now()`, and add a `reconciliation_note` ("Auto-approved: monthly average confidence {x}% across {n} doses").
+- If `avg < 50` → bulk-update them to `status: failed_verification`, no Vula clawback (Vulas were already paid; we don't punish retroactively — keeps trust intact). Add a soft notification to the patient: *"{n} doses last month couldn't be confirmed clearly. Try to film the moment you swallow next month."*
 
-## 4. Vula explainer dialog — rounded, line-break fix, reword
+New columns on `medication_adherence`: `auto_approved_at timestamptz`, `reconciliation_note text`.
 
-(Unchanged from previously approved plan §4.)
+Scheduling is done via the existing pg_cron pattern in Supabase (a new migration registers the daily job pointing at the function endpoint with the service-role JWT).
 
-- `<DialogContent>` gets `rounded-2xl`.
-- Headline restructured so "but always need" wraps to its own line via an explicit `<br />`.
-- Section 2 text becomes exactly: **"Vulas are a simple way to start building value for the future."**
+## 4. Patient-visible UI
+
+- **Chronic Meds tab** — each prescription row shows a small confidence ring next to today's dose, e.g. "Confidence 82% · Confirmed" or "Confidence 58% · Provisional, will be confirmed at month-end if your average stays above 50%."
+- **Wins and Streaks tab** — new compact line under each month: "{x}/{y} doses confirmed · {avg}% average confidence." If a month was auto-approved by reconciliation, badge it: **"Auto-approved"** in muted teal.
+- **Recapture banner** — when the trigger nulls the baseline, the Chronic Meds card shows: *"{medication} updated — record a new baseline video before your next dose."*
+
+## 5. Privacy copy reinforcement
+
+A small line under the camera in both `PillBaselineCapture` and the daily ingestion view:
+> *"Your video isn't saved. We only keep a short text description and a single still of the tablet."*
+
+This sets expectations and matches the implementation (frames-only upload, blob discarded).
 
 ## Files touched
 
 | File | Change |
 |---|---|
-| Migration | New `prescription_pill_references` table + RLS (patient self-access; doctor with active access can read) |
-| `supabase/functions/validate-medication-video/index.ts` | Add `mode: "baseline_capture"` (describe + store) and rewrite `mode: "pill_check"` to compare current frame against reference image; ingestion mode adds `chewing_detected` criterion |
-| `src/components/rewards/PillBaselineCapture.tsx` *(new)* | Camera-guided baseline capture with brightness / sharpness / subject-size gating |
-| `src/components/rewards/MedicationAdherenceTab.tsx` | Route to `PillBaselineCapture` when no/stale reference; per-dose flow now compares against reference (no box requirement); show "update reference" banner on prescription change |
-| `src/components/sessions/PrescriptionEditor.tsx` | On medication/dosage edit of an active chronic Rx, null out the reference's `observed_description` to force recapture |
-| `supabase/functions/notify-next-of-kin/index.ts` *(new)* | Resend email to newly-added NOK with the "we won't tell you if removed" reassurance |
-| `src/hooks/usePatients.ts` | Add `notified_at` to `NextOfKinMember` |
-| `src/components/patients/PatientDetailsEditor.tsx` | Compulsory phone/email on NOK add; invoke notify function and stamp `notified_at`; green "Notified by email" badge; Bell becomes "Resend email" |
-| `src/pages/patient/MyRewards.tsx` | Move Wins + Streaks back out into a dedicated "Wins and Streaks" tab |
-| `src/components/rewards/VulaExplainerDialog.tsx` | `rounded-2xl` corners; `<br />` wrap fix; reword Section 2 copy |
+| Migration | `prescription_pill_references`: drop `label_image_url`/`label_text_extracted` from the previously-approved set; add `intake_method` (text) + `baseline_pattern_summary` (text). Extend `mark_pill_reference_stale` trigger to also null those two. `medication_adherence`: add `confidence_score numeric`, `auto_approved_at timestamptz`, `reconciliation_note text`; allow `status: 'provisional'`. Register a daily pg_cron job calling `reconcile-adherence-monthly`. |
+| `src/components/rewards/PillBaselineCapture.tsx` | Replace 3-step wizard with: intro → intake method picker → guided video recording → frame extraction → upload frames + close-up still → call `mode: "baseline_capture"`. Discard video blob client-side. |
+| `src/components/rewards/MedicationAdherenceTab.tsx` | Show confidence ring + provisional copy on each dose row; render "video not saved" privacy line; route to baseline when `intake_method`/`baseline_pattern_summary` is null; show recapture banner on staleness. |
+| `src/pages/patient/MyRewards.tsx` (Wins and Streaks tab) | Per-month adherence summary line + "Auto-approved" badge when `auto_approved_at` rows exist. |
+| `supabase/functions/validate-medication-video/index.ts` | `baseline_capture` mode now ingests frames from the full first-dose video, returns `observed_description` (tablet) + `baseline_pattern_summary` (sequence). Ingestion mode switches required/disqualifying signals on `intake_method`, returns `confidence`, applies the new four-way decision tree (`completed` / `provisional` / `failed_verification`). Drops the previous `pending_review` path. |
+| `supabase/functions/reconcile-adherence-monthly/index.ts` *(new)* | Daily job: groups previous-month `provisional` rows per prescription, averages `confidence_score`, flips to `completed` if ≥50% else `failed_verification`; writes `auto_approved_at` and `reconciliation_note`; emits one consolidated patient notification per prescription. |
+| `supabase/config.toml` | Register `reconcile-adherence-monthly` (no `verify_jwt` change needed; in-code service-role check). |
+| `src/integrations/supabase/types.ts` | Auto-regenerated. |
 
 ## Out of scope
-- Doctor-side UI to view/approve baseline reference photos (rows are persisted; reviewer panel is a separate task).
-- Multi-pill prescriptions (combo pillboxes) — current scope is one reference per `prescription_id`.
-- Auto-detecting a new pill brand/colour change without the doctor editing the prescription text — relies on prescription edits as the trigger for recapture.
+
+- Doctor-side dashboards for `provisional` doses (no longer needed — auto-reconciliation removes them from the doctor's plate).
+- Vula clawback on failed monthly averages (intentionally not implemented — Vulas already paid stay paid).
+- Storing the actual video — explicitly forbidden by this plan.
+- Multi-pill regimens / weekly pillboxes.
 
