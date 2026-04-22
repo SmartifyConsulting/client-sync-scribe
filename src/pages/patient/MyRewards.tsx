@@ -42,6 +42,7 @@ import { useMyRewards, useMyStreaks } from "@/hooks/usePatientRewards";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MedicationAdherenceTab } from "@/components/rewards/MedicationAdherenceTab";
+import { MonthlyAdherenceSummary } from "@/components/rewards/MonthlyAdherenceSummary";
 import { useToast } from "@/hooks/use-toast";
 import { VulaExplainerDialog } from "@/components/rewards/VulaExplainerDialog";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v2.png";
