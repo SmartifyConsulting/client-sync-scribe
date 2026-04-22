@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Pill, Video, Flame, Check, Clock, AlertCircle, Loader2, Square, Camera, RefreshCw } from "lucide-react";
+import { Pill, Video, Flame, Check, Clock, AlertCircle, Loader2, Square, Camera, RefreshCw, Sparkles, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,17 @@ interface AdherenceRecord {
   status: string;
   taken_at: string | null;
   proof_url: string | null;
+  confidence_score: number | null;
+  auto_approved_at: string | null;
+}
+
+interface PillReference {
+  prescription_id: string;
+  intake_method: string | null;
+  baseline_pattern_summary: string | null;
+  observed_description: string | null;
+  reference_image_url: string | null;
+  updated_at: string;
 }
 
 interface MedicationAdherenceTabProps {
@@ -98,6 +109,28 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
       return (data || []) as AdherenceRecord[];
     },
   });
+
+  // Fetch pill references for these prescriptions
+  const { data: pillReferences = [] } = useQuery({
+    queryKey: ["pill-references", patientId, prescriptions.map((p) => p.id).join(",")],
+    queryFn: async () => {
+      if (prescriptions.length === 0) return [] as PillReference[];
+      const { data, error } = await supabase
+        .from("prescription_pill_references")
+        .select("prescription_id, intake_method, baseline_pattern_summary, observed_description, reference_image_url, updated_at")
+        .in("prescription_id", prescriptions.map((p) => p.id));
+      if (error) throw error;
+      return (data || []) as PillReference[];
+    },
+    enabled: prescriptions.length > 0,
+  });
+
+  const getReference = (rxId: string) => pillReferences.find((r) => r.prescription_id === rxId);
+  const needsBaseline = (rxId: string) => {
+    const ref = getReference(rxId);
+    return !ref || !ref.intake_method || !ref.baseline_pattern_summary || !ref.reference_image_url;
+  };
+
 
   // Auto-create today's pending records
   useEffect(() => {
@@ -410,16 +443,22 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
         queryClient.invalidateQueries({ queryKey: ["medication-adherence", patientId] });
         queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
         setCelebration({ open: true, vulasEarned: data?.molesAwarded ?? 5, streak: earnedStreak, medicationName: rxName });
-      } else if (data?.fallback) {
-        // AI service unavailable — evidence saved for doctor review
+      } else if (data?.provisional) {
         toast({
-          title: "Recorded for review",
-          description: "Verification is temporarily unavailable. Your dose has been recorded for your doctor to review.",
+          title: `Confidence ${Math.round(data.confidence ?? 0)}% — provisional`,
+          description: "Vulas added now. We'll confirm at month-end if your monthly average stays above 50%.",
+        });
+        handleCloseRecording();
+        queryClient.invalidateQueries({ queryKey: ["medication-adherence", patientId] });
+        queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
+      } else if (data?.fallback) {
+        toast({
+          title: "Recorded for end-of-month review",
+          description: "We couldn't fully verify how you took your medication. It will be reviewed automatically at month-end.",
         });
         handleCloseRecording();
         queryClient.invalidateQueries({ queryKey: ["medication-adherence", patientId] });
       } else {
-        // AI ran successfully but said "no" — lock the row, do NOT allow retake (overdose safety)
         const reason = validation?.description || "Could not confirm medication ingestion.";
         toast({
           title: "Verification failed",
@@ -429,6 +468,7 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
         handleCloseRecording();
         queryClient.invalidateQueries({ queryKey: ["medication-adherence", patientId] });
       }
+
     } catch (error: any) {
       console.error(error);
       toast({ title: "Validation failed", description: error.message || "Could not validate proof.", variant: "destructive" });
@@ -532,13 +572,29 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
                 </div>
 
                 {todayStatus === "pending" && (
-                  <Button
-                    onClick={() => setRecordingPrescriptionId(rx.id)}
-                    className="gap-2 shrink-0"
-                  >
-                    <Video className="h-4 w-4" />
-                    Take Medication
-                  </Button>
+                  needsBaseline(rx.id) ? (
+                    <Button
+                      onClick={() => setBaselineCapture({ open: true, rxId: rx.id, medication: rx.medication, dosage: rx.dosage })}
+                      variant="outline"
+                      className="gap-2 shrink-0"
+                    >
+                      <Camera className="h-4 w-4" />
+                      Set up baseline
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => setRecordingPrescriptionId(rx.id)}
+                      className="gap-2 shrink-0"
+                    >
+                      <Video className="h-4 w-4" />
+                      Take Medication
+                    </Button>
+                  )
+                )}
+                {todayStatus === "provisional" && (
+                  <Badge variant="secondary" className="shrink-0 bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30">
+                    <Sparkles className="h-3 w-3 mr-1" /> Provisional
+                  </Badge>
                 )}
                 {todayStatus === "pending_review" && (
                   <Badge variant="secondary" className="shrink-0">
