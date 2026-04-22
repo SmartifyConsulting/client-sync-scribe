@@ -443,16 +443,22 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
         queryClient.invalidateQueries({ queryKey: ["medication-adherence", patientId] });
         queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
         setCelebration({ open: true, vulasEarned: data?.molesAwarded ?? 5, streak: earnedStreak, medicationName: rxName });
-      } else if (data?.fallback) {
-        // AI service unavailable — evidence saved for doctor review
+      } else if (data?.provisional) {
         toast({
-          title: "Recorded for review",
-          description: "Verification is temporarily unavailable. Your dose has been recorded for your doctor to review.",
+          title: `Confidence ${Math.round(data.confidence ?? 0)}% — provisional`,
+          description: "Vulas added now. We'll confirm at month-end if your monthly average stays above 50%.",
+        });
+        handleCloseRecording();
+        queryClient.invalidateQueries({ queryKey: ["medication-adherence", patientId] });
+        queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
+      } else if (data?.fallback) {
+        toast({
+          title: "Recorded for end-of-month review",
+          description: "We couldn't fully verify how you took your medication. It will be reviewed automatically at month-end.",
         });
         handleCloseRecording();
         queryClient.invalidateQueries({ queryKey: ["medication-adherence", patientId] });
       } else {
-        // AI ran successfully but said "no" — lock the row, do NOT allow retake (overdose safety)
         const reason = validation?.description || "Could not confirm medication ingestion.";
         toast({
           title: "Verification failed",
@@ -462,6 +468,7 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
         handleCloseRecording();
         queryClient.invalidateQueries({ queryKey: ["medication-adherence", patientId] });
       }
+
     } catch (error: any) {
       console.error(error);
       toast({ title: "Validation failed", description: error.message || "Could not validate proof.", variant: "destructive" });
