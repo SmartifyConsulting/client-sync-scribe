@@ -309,7 +309,6 @@ function AnimatedCounter({ target }: { target: number }) {
 }
 
 const SECTION_TABS: Record<string, string[]> = {
-  home: [],
   health: ["personal", "medical"],
   care: ["doctors", "sessions", "hospital_visits", "roundtable"],
   admissions: ["admissions"],
@@ -367,7 +366,7 @@ export function PatientDetailsEditor({
 
   // Controlled tab state for dynamic navigation
   const getInitialTab = () => {
-    if (isMobile && isSelfService && section && SECTION_TABS[section]) {
+    if (isSelfService && section && SECTION_TABS[section]?.length) {
       return SECTION_TABS[section][0];
     }
     return "personal";
@@ -375,10 +374,10 @@ export function PatientDetailsEditor({
   const [activeTab, setActiveTab] = useState(getInitialTab);
 
   useEffect(() => {
-    if (isMobile && isSelfService && section && SECTION_TABS[section]) {
+    if (isSelfService && section && SECTION_TABS[section]?.length) {
       setActiveTab(SECTION_TABS[section][0]);
     }
-  }, [section, isMobile, isSelfService]);
+  }, [section, isSelfService]);
 
   // Split name helper
   const splitName = (fullName: string) => {
@@ -1425,9 +1424,9 @@ export function PatientDetailsEditor({
 
   // ==================== VIEW MODE ====================
   if (!isEditing) {
-    const showFullBanner = !isMobile || section === "home";
-    const showCompactBanner = isMobile && section !== "home";
-    const showTabs = !isMobile || section !== "home";
+    const showFullBanner = isSelfService && section === "health";
+    const showCompactBanner = false;
+    const showTabs = true;
     return (
       <div className="space-y-0">
         {showFullBanner && <ProfileBanner />}
