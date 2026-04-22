@@ -460,9 +460,6 @@ export default function MyRewards() {
               Chronic Meds
             </TabsTrigger>
           )}
-          <TabsTrigger value="milestones" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-            Wins
-          </TabsTrigger>
           <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
              Vulas
            </TabsTrigger>
