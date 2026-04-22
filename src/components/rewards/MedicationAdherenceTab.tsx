@@ -552,19 +552,25 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
         );
       })}
 
-      {/* Recording Dialog */}
+      {/* Recording Dialog — two stages: pill_check, then ingestion */}
       <Dialog open={!!recordingPrescriptionId} onOpenChange={(open) => { if (!open) handleCloseRecording(); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Video className="h-5 w-5 text-primary" />
-              Record Medication Proof
+              {stage === "pill_check" ? (
+                <><Camera className="h-5 w-5 text-primary" /> Step 1: Show your pill</>
+              ) : (
+                <><Video className="h-5 w-5 text-primary" /> Step 2: Take your medication</>
+              )}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Film yourself taking your medication. Max 30 seconds.
+              {stage === "pill_check"
+                ? "Hold your pill close to the camera so we can confirm it matches your prescription."
+                : "Film yourself taking your medication. Max 30 seconds."}
             </p>
+
             <div className="relative rounded-lg overflow-hidden bg-black aspect-video">
               {recordedBlob ? (
                 <video src={URL.createObjectURL(recordedBlob)} controls className="w-full h-full object-cover" />
@@ -577,32 +583,111 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
                 </div>
               )}
             </div>
-            <div className="flex gap-2 justify-center">
-              {!recordedBlob ? (
-                !isRecording ? (
-                  <Button onClick={startRecording} disabled={!stream} className="gap-2">
-                    <Video className="h-4 w-4" /> Start Recording
-                  </Button>
+
+            {/* STAGE 1 — Pill capture */}
+            {stage === "pill_check" && (
+              <>
+                {pillCheckResult && (
+                  <div
+                    className={
+                      "rounded-lg border p-3 text-sm " +
+                      (!pillCheckResult.isPillVisible
+                        ? "border-destructive/40 bg-destructive/10 text-destructive"
+                        : pillCheckResult.isMatch
+                        ? "border-green-500/40 bg-green-500/10 text-green-700 dark:text-green-400"
+                        : "border-yellow-500/40 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400")
+                    }
+                  >
+                    <div className="flex items-start gap-2">
+                      {!pillCheckResult.isPillVisible ? (
+                        <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                      ) : pillCheckResult.isMatch ? (
+                        <Check className="h-4 w-4 mt-0.5 shrink-0" />
+                      ) : (
+                        <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                      )}
+                      <div>
+                        <p className="font-medium">
+                          {!pillCheckResult.isPillVisible
+                            ? "No pill detected"
+                            : pillCheckResult.isMatch
+                            ? "Looks right — proceed to take it"
+                            : "Couldn't confirm exact pill — proceeding"}
+                        </p>
+                        <p className="opacity-80 mt-0.5">{pillCheckResult.matchReason}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-2 justify-center">
+                  {!pillCheckResult ? (
+                    <>
+                      <Button variant="outline" onClick={handleCloseRecording} disabled={isCheckingPill}>
+                        Cancel
+                      </Button>
+                      <Button onClick={capturePillImage} disabled={!stream || isCheckingPill} className="gap-2">
+                        {isCheckingPill ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+                        Capture Pill
+                      </Button>
+                    </>
+                  ) : !pillCheckResult.isPillVisible ? (
+                    <>
+                      <Button variant="outline" onClick={handleCloseRecording}>Cancel</Button>
+                      <Button onClick={retryPillCheck} className="gap-2">
+                        <RefreshCw className="h-4 w-4" /> Try again
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="outline" onClick={retryPillCheck}>Retake pill photo</Button>
+                      <Button onClick={proceedToIngestion} className="gap-2">
+                        <Video className="h-4 w-4" /> Proceed
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* STAGE 2 — Ingestion recording */}
+            {stage === "ingestion" && (
+              <div className="flex gap-2 justify-center">
+                {!recordedBlob ? (
+                  !isRecording ? (
+                    <Button onClick={startRecording} disabled={!stream} className="gap-2">
+                      <Video className="h-4 w-4" /> Start Recording
+                    </Button>
+                  ) : (
+                    <Button onClick={stopRecording} variant="destructive" className="gap-2">
+                      <Square className="h-4 w-4" /> Stop
+                    </Button>
+                  )
                 ) : (
-                  <Button onClick={stopRecording} variant="destructive" className="gap-2">
-                    <Square className="h-4 w-4" /> Stop
-                  </Button>
-                )
-              ) : (
-                <>
-                  <Button variant="outline" onClick={handleCloseRecording} disabled={isUploading}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleSubmitProof} disabled={isUploading} className="gap-2">
-                    {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                    Submit Proof
-                  </Button>
-                </>
-              )}
-            </div>
+                  <>
+                    <Button variant="outline" onClick={handleCloseRecording} disabled={isUploading}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSubmitProof} disabled={isUploading} className="gap-2">
+                      {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                      Submit Proof
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Success celebration */}
+      <SuccessCelebration
+        open={celebration.open}
+        onClose={() => setCelebration((c) => ({ ...c, open: false }))}
+        vulasEarned={celebration.vulasEarned}
+        streak={celebration.streak}
+        medicationName={celebration.medicationName}
+      />
     </div>
   );
 }
