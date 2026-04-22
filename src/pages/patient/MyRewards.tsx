@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Loader2, Trophy, Target, Flame, Gift, Star, Calendar, CheckSquare, Clock, AlertCircle, Video, Send, ArrowRightLeft, Pill, ArrowLeft, Info } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Loader2, Trophy, Target, Flame, Gift, Star, Video, Send, ArrowRightLeft, Pill, ArrowLeft, Info, History } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,12 +30,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { format, parseISO, differenceInDays } from "date-fns";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { format, parseISO, differenceInDays, startOfWeek, endOfWeek, isWithinInterval } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useMyRewards, useMyStreaks } from "@/hooks/usePatientRewards";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ActivityProofCapture } from "@/components/rewards/ActivityProofCapture";
 import { MedicationAdherenceTab } from "@/components/rewards/MedicationAdherenceTab";
 import { useToast } from "@/hooks/use-toast";
 import { VulaExplainerDialog } from "@/components/rewards/VulaExplainerDialog";
@@ -49,19 +54,6 @@ const MILESTONES = [
   { count: 100, label: "Health Legend", icon: "👑", color: "text-pink-500" },
 ];
 
-interface PatientTask {
-  id: string;
-  title: string;
-  description: string | null;
-  priority: string;
-  status: string;
-  due_date: string | null;
-  created_at: string;
-  task_type: string;
-  moolas_reward: number;
-  proof_url: string | null;
-  patient_id: string | null;
-}
 
 interface PartnerApp {
   id: string;
@@ -141,26 +133,7 @@ export default function MyRewards() {
     },
   });
 
-  const { data: tasks = [], isLoading: tasksLoading, refetch: refetchTasks } = useQuery({
-    queryKey: ["patient-assigned-tasks"],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
-      const { data: patients } = await supabase
-        .from("patients")
-        .select("id")
-        .eq("patient_user_id", user.id);
-      if (!patients || patients.length === 0) return [];
-      const patientIds = patients.map((p) => p.id);
-      const { data: todos, error } = await supabase
-        .from("todos")
-        .select("*")
-        .in("patient_id", patientIds)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return (todos || []) as PatientTask[];
-    },
-  });
+
 
   const { data: partnerApps = [] } = useQuery({
     queryKey: ["moola-partner-apps"],
@@ -242,6 +215,67 @@ export default function MyRewards() {
 
   const loading = rewardsLoading || streaksLoading;
 
+  // Build a unified Vula activity timeline (rewards + transfers) grouped by week/month
+  type HistoryItem = {
+    id: string;
+    date: Date;
+    label: string;
+    amount: number;
+    kind: "earn" | "transfer";
+  };
+
+  const historyGroups = useMemo(() => {
+    const items: HistoryItem[] = [];
+    rewards.forEach((r) => {
+      items.push({
+        id: `r-${r.id}`,
+        date: parseISO(r.awarded_at),
+        label: r.visit_category,
+        amount: r.lollipops_count,
+        kind: r.lollipops_count >= 0 ? "earn" : "transfer",
+      });
+    });
+    transfers.forEach((t) => {
+      items.push({
+        id: `t-${t.id}`,
+        date: parseISO(t.created_at),
+        label: t.moola_partner_apps?.name
+          ? `Transfer to ${t.moola_partner_apps.name}`
+          : "Vula Transfer",
+        amount: -Math.abs(t.amount),
+        kind: "transfer",
+      });
+    });
+    items.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+    const now = new Date();
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+    const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+
+    const groups: { key: string; label: string; items: HistoryItem[] }[] = [];
+    const monthBuckets = new Map<string, HistoryItem[]>();
+    const thisWeek: HistoryItem[] = [];
+
+    items.forEach((it) => {
+      if (isWithinInterval(it.date, { start: weekStart, end: weekEnd })) {
+        thisWeek.push(it);
+      } else {
+        const k = format(it.date, "yyyy-MM");
+        if (!monthBuckets.has(k)) monthBuckets.set(k, []);
+        monthBuckets.get(k)!.push(it);
+      }
+    });
+
+    groups.push({ key: "this-week", label: "This Week", items: thisWeek });
+    Array.from(monthBuckets.keys())
+      .sort((a, b) => b.localeCompare(a))
+      .forEach((k) => {
+        const arr = monthBuckets.get(k)!;
+        groups.push({ key: k, label: format(arr[0].date, "MMMM yyyy"), items: arr });
+      });
+    return groups;
+  }, [rewards, transfers]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -252,29 +286,11 @@ export default function MyRewards() {
 
   const currentMilestone = MILESTONES.filter(m => lollipopCount >= m.count).pop();
   const nextMilestone = MILESTONES.find(m => lollipopCount < m.count);
-  const progressToNext = nextMilestone 
-    ? Math.round((lollipopCount / nextMilestone.count) * 100) 
+  const progressToNext = nextMilestone
+    ? Math.round((lollipopCount / nextMilestone.count) * 100)
     : 100;
 
   const activeStreaks = streaks.filter(s => s.current_streak > 0);
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high": return "destructive";
-      case "medium": return "secondary";
-      default: return "outline";
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "completed": return <CheckSquare className="h-4 w-4 text-green-500" />;
-      case "pending": return <Clock className="h-4 w-4 text-muted-foreground" />;
-      default: return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
-    }
-  };
-
-  const pendingActivityTasks = tasks.filter((t) => t.task_type === "activity" && t.status !== "completed");
   const totalTransferred = transfers.reduce((sum, t) => sum + t.amount, 0);
 
   return (
@@ -444,9 +460,6 @@ export default function MyRewards() {
               Chronic Meds
             </TabsTrigger>
           )}
-          <TabsTrigger value="milestones" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-            Wins
-          </TabsTrigger>
           <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
              Vulas
            </TabsTrigger>
@@ -517,57 +530,7 @@ export default function MyRewards() {
             </CardContent>
           </Card>
 
-          {/* Assigned Tasks - merged into overview */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <CheckSquare className="h-5 w-5 text-primary" />
-                    Assigned Tasks
-                    {tasks.filter(t => t.status !== "completed").length > 0 && (
-                      <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
-                        {tasks.filter(t => t.status !== "completed").length}
-                      </Badge>
-                    )}
-                  </CardTitle>
-                  <CardDescription>Complete activities to earn Vulas!</CardDescription>
-                </div>
-                <ActivityProofCapture tasks={pendingActivityTasks} onProofSubmitted={refetchTasks} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              {tasksLoading ? (
-                <div className="flex items-center justify-center py-4"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-              ) : tasks.length === 0 ? (
-                <p className="text-center text-muted-foreground text-sm py-4">No tasks assigned yet.</p>
-              ) : (
-                <div className="space-y-3">
-                  {tasks.map((task) => (
-                    <div key={task.id} className={`flex items-start gap-3 p-3 rounded-lg border ${task.status === "completed" ? "opacity-60 bg-muted/30" : "bg-background"}`}>
-                      {getStatusIcon(task.status)}
-                      <div className="flex-1 min-w-0">
-                        <p className={`font-medium text-foreground ${task.status === "completed" ? "line-through" : ""}`}>{task.title}</p>
-                        {task.description && <p className="text-sm text-muted-foreground mt-1">{task.description}</p>}
-                        <div className="flex items-center gap-2 mt-2 flex-wrap">
-                          <Badge variant={getPriorityColor(task.priority) as any} className="text-xs">{task.priority}</Badge>
-                          {task.task_type === "activity" && <Badge className="bg-primary/10 text-primary text-xs gap-1"><Video className="h-3 w-3" /> Activity</Badge>}
-                          {task.moolas_reward > 0 && <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 text-xs">+{task.moolas_reward} <img src={vulaVouchersLogo} alt="Vula" className="h-5 md:h-3 w-auto object-contain inline-block ml-0.5" /></Badge>}
-                          {task.due_date && <span className="text-xs text-muted-foreground">Due: {format(new Date(task.due_date), "dd MMM yyyy")}</span>}
-                          {task.proof_url && <Badge variant="outline" className="text-xs text-green-600">✓ Proof submitted</Badge>}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-
-
-        <TabsContent value="milestones" className="space-y-6">
+          {/* Wins (Milestones) merged into Overview */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -616,7 +579,7 @@ export default function MyRewards() {
             </CardContent>
           </Card>
 
-          {/* Streaks merged under Wins */}
+          {/* Streaks merged into Overview */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -689,7 +652,80 @@ export default function MyRewards() {
               )}
             </CardContent>
           </Card>
+
+          {/* Vula History (replaces Assigned Tasks) */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <History className="h-5 w-5 text-primary" />
+                Vula History
+              </CardTitle>
+              <CardDescription>Earnings and transfers, grouped by week and month</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {historyGroups.every((g) => g.items.length === 0) ? (
+                <p className="text-center text-muted-foreground text-sm py-6">No Vula activity yet.</p>
+              ) : (
+                <Accordion type="multiple" defaultValue={["this-week"]} className="w-full">
+                  {historyGroups
+                    .filter((g) => g.items.length > 0)
+                    .map((group) => (
+                      <AccordionItem key={group.key} value={group.key}>
+                        <AccordionTrigger>
+                          <div className="flex items-center justify-between w-full pr-2">
+                            <span className="font-medium">{group.label}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {group.items.length} {group.items.length === 1 ? "entry" : "entries"}
+                            </span>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-2">
+                            {group.items.map((it) => (
+                              <div
+                                key={it.id}
+                                className="flex items-center justify-between p-3 rounded-lg bg-muted/40"
+                              >
+                                <div className="flex items-center gap-3 min-w-0">
+                                  {it.kind === "earn" ? (
+                                    <img src={vulaVouchersLogo} alt="Vula" className="h-6 w-6 object-contain shrink-0" />
+                                  ) : (
+                                    <ArrowRightLeft className="h-5 w-5 text-blue-500 shrink-0" />
+                                  )}
+                                  <div className="min-w-0">
+                                    <p className="font-medium truncate">{it.label}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {format(it.date, "MMM d, yyyy")}
+                                    </p>
+                                  </div>
+                                </div>
+                                <Badge
+                                  variant="secondary"
+                                  className={
+                                    it.amount >= 0
+                                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+                                      : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                                  }
+                                >
+                                  {it.amount >= 0 ? `+${it.amount}` : it.amount}{" "}
+                                  <img
+                                    src={vulaVouchersLogo}
+                                    alt="Vula"
+                                    className="h-3 w-auto object-contain inline-block ml-1"
+                                  />
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                </Accordion>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
+
 
         <TabsContent value="transfers" className="space-y-6">
           {/* Partner Apps - at top */}

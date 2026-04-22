@@ -44,6 +44,64 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    const today = new Date().toISOString().split('T')[0];
+
+    // Helpers
+    const cleanupAllFiles = async () => {
+      if (paths.length > 0) {
+        const { error } = await supabase.storage.from('patient-media').remove(paths);
+        if (error) console.error('Failed to delete frame files:', error);
+        else console.log('Deleted', paths.length, 'frame files from storage');
+      }
+    };
+
+    const cleanupExceptFirst = async () => {
+      if (paths.length > 1) {
+        const toDelete = paths.slice(1);
+        const { error } = await supabase.storage.from('patient-media').remove(toDelete);
+        if (error) console.error('Failed to delete frame files (keep first):', error);
+        else console.log('Deleted', toDelete.length, 'frames; kept first for review');
+      }
+    };
+
+    // Save a "pending_review" adherence row preserving the first frame as evidence
+    const savePendingReview = async () => {
+      try {
+        const firstFrameUrl = urls[0] || null;
+
+        // Look for an existing row for today
+        const { data: existing } = await supabase
+          .from('medication_adherence')
+          .select('id')
+          .eq('patient_id', patientId)
+          .eq('prescription_id', prescriptionId)
+          .eq('scheduled_date', today)
+          .maybeSingle();
+
+        if (existing?.id) {
+          await supabase
+            .from('medication_adherence')
+            .update({
+              status: 'pending_review',
+              taken_at: new Date().toISOString(),
+              proof_url: firstFrameUrl,
+            })
+            .eq('id', existing.id);
+        } else {
+          await supabase.from('medication_adherence').insert({
+            patient_id: patientId,
+            prescription_id: prescriptionId,
+            scheduled_date: today,
+            status: 'pending_review',
+            taken_at: new Date().toISOString(),
+            proof_url: firstFrameUrl,
+          });
+        }
+      } catch (e) {
+        console.error('savePendingReview failed:', e);
+      }
+    };
+
     // Build multi-frame sequential validation prompt
     const validationPrompt = `You are a healthcare compliance validator. You are given ${urls.length} frames extracted from a short video, in chronological order. Your task is to determine whether they show a person actively taking oral medication through the full ingestion sequence.
 
@@ -77,51 +135,54 @@ Only return the JSON, no other text.`;
       content.push({ type: 'image_url', image_url: { url } });
     });
 
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [{ role: 'user', content }],
-      }),
-    });
-
-    // Always clean up frames from storage
-    const cleanupFiles = async () => {
-      if (paths.length > 0) {
-        const { error } = await supabase.storage.from('patient-media').remove(paths);
-        if (error) console.error('Failed to delete frame files:', error);
-        else console.log('Deleted', paths.length, 'frame files from storage');
-      }
-    };
+    let aiResponse: Response;
+    try {
+      aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash',
+          messages: [{ role: 'user', content }],
+        }),
+      });
+    } catch (fetchErr) {
+      console.error('AI fetch threw:', fetchErr);
+      await savePendingReview();
+      await cleanupExceptFirst();
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          fallback: true,
+          message: 'Verification temporarily unavailable — your dose has been recorded for doctor review.',
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     if (!aiResponse.ok) {
-      await cleanupFiles();
-      if (aiResponse.status === 429) {
-        return new Response(
-          JSON.stringify({ error: 'Rate limit exceeded, please try again later.' }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      if (aiResponse.status === 402) {
-        return new Response(
-          JSON.stringify({ error: 'AI credits exhausted. Please try again later.' }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      const errorText = await aiResponse.text();
+      const errorText = await aiResponse.text().catch(() => '');
       console.error('AI validation failed:', aiResponse.status, errorText);
-      throw new Error(`AI validation failed: ${aiResponse.status}`);
+      // Save evidence for later review and return graceful fallback (200)
+      await savePendingReview();
+      await cleanupExceptFirst();
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          fallback: true,
+          message: 'Verification temporarily unavailable — your dose has been recorded for doctor review.',
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const aiData = await aiResponse.json();
     const aiContent = aiData.choices?.[0]?.message?.content || '';
     console.log('AI response:', aiContent);
 
-    let validationResult;
+    let validationResult: any;
     try {
       const jsonMatch = aiContent.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
@@ -131,21 +192,21 @@ Only return the JSON, no other text.`;
       }
     } catch (parseError) {
       console.error('Failed to parse AI response:', parseError);
-      validationResult = {
-        isValid: false, confidence: 0,
-        description: 'Could not validate video',
-        person_detected: false, medication_detected: false, ingestion_detected: false,
-        detected_elements: []
-      };
+      // Treat as fallback so the patient's evidence is still recorded
+      await savePendingReview();
+      await cleanupExceptFirst();
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          fallback: true,
+          message: 'Verification temporarily unavailable — your dose has been recorded for doctor review.',
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Delete all frame files (privacy)
-    await cleanupFiles();
-
-    // If valid, update adherence and award moolas
-    const today = new Date().toISOString().split('T')[0];
-
     if (validationResult.isValid) {
+      // Happy path — confirmed ingestion
       const { error: updateError } = await supabase
         .from('medication_adherence')
         .update({ status: 'completed', taken_at: new Date().toISOString(), proof_url: null })
@@ -184,7 +245,7 @@ Only return the JSON, no other text.`;
         const checkDate = new Date();
         for (let i = 0; i < 365; i++) {
           const dateStr = checkDate.toISOString().split('T')[0];
-          if (streakRecords.some(r => r.scheduled_date === dateStr)) {
+          if (streakRecords.some((r) => r.scheduled_date === dateStr)) {
             streak++;
             checkDate.setDate(checkDate.getDate() - 1);
           } else break;
@@ -200,10 +261,53 @@ Only return the JSON, no other text.`;
           });
         }
       }
+
+      // Valid → no need to keep frames
+      await cleanupAllFiles();
+
+      return new Response(
+        JSON.stringify({ ok: true, validation: validationResult, molesAwarded: 5 }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
+    // AI ran but said "no" — record as failed_verification, lock the row, no Vulas, keep first frame
+    try {
+      const firstFrameUrl = urls[0] || null;
+      const { data: existing } = await supabase
+        .from('medication_adherence')
+        .select('id')
+        .eq('patient_id', patientId)
+        .eq('prescription_id', prescriptionId)
+        .eq('scheduled_date', today)
+        .maybeSingle();
+
+      if (existing?.id) {
+        await supabase
+          .from('medication_adherence')
+          .update({
+            status: 'failed_verification',
+            taken_at: new Date().toISOString(),
+            proof_url: firstFrameUrl,
+          })
+          .eq('id', existing.id);
+      } else {
+        await supabase.from('medication_adherence').insert({
+          patient_id: patientId,
+          prescription_id: prescriptionId,
+          scheduled_date: today,
+          status: 'failed_verification',
+          taken_at: new Date().toISOString(),
+          proof_url: firstFrameUrl,
+        });
+      }
+    } catch (e) {
+      console.error('failed_verification update error:', e);
+    }
+    await cleanupExceptFirst();
+
     return new Response(
-      JSON.stringify({ validation: validationResult, molesAwarded: validationResult.isValid ? 5 : 0 }),
+      JSON.stringify({ ok: true, validation: validationResult, molesAwarded: 0 }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {

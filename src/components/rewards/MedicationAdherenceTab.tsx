@@ -216,9 +216,69 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
     if (timerRef.current) clearInterval(timerRef.current);
   };
 
+  // Extract N evenly-spaced JPEG frames from the recorded webm blob
+  const extractFrames = async (blob: Blob, count = 5): Promise<Blob[]> => {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(blob);
+      const video = document.createElement("video");
+      video.src = url;
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = "auto";
+      const frames: Blob[] = [];
+
+      const cleanup = () => URL.revokeObjectURL(url);
+
+      video.onloadedmetadata = async () => {
+        const duration = isFinite(video.duration) && video.duration > 0 ? video.duration : 5;
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          cleanup();
+          reject(new Error("Canvas context unavailable"));
+          return;
+        }
+
+        // Sample at 10%, 30%, 50%, 70%, 90%
+        const fractions = Array.from({ length: count }, (_, i) => 0.1 + (i * 0.8) / Math.max(count - 1, 1));
+
+        try {
+          for (const f of fractions) {
+            const t = Math.min(duration * f, Math.max(duration - 0.05, 0));
+            await new Promise<void>((res) => {
+              const onSeeked = () => {
+                video.removeEventListener("seeked", onSeeked);
+                res();
+              };
+              video.addEventListener("seeked", onSeeked);
+              video.currentTime = t;
+            });
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const frameBlob: Blob = await new Promise((res, rej) =>
+              canvas.toBlob((b) => (b ? res(b) : rej(new Error("toBlob failed"))), "image/jpeg", 0.85)
+            );
+            frames.push(frameBlob);
+          }
+          cleanup();
+          resolve(frames);
+        } catch (err) {
+          cleanup();
+          reject(err);
+        }
+      };
+
+      video.onerror = () => {
+        cleanup();
+        reject(new Error("Failed to load video for frame extraction"));
+      };
+    });
+  };
+
   const handleSubmitProof = async () => {
     if (!recordedBlob || !recordingPrescriptionId) return;
-    
+
     // Check 5MB limit
     if (recordedBlob.size > 5 * 1024 * 1024) {
       toast({ title: "File too large", description: "Recording must be under 5MB.", variant: "destructive" });
@@ -230,51 +290,61 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Upload video temporarily
-      const filePath = `medication-proof/${user.id}/${Date.now()}.webm`;
-      const { error: uploadError } = await supabase.storage
-        .from("patient-media")
-        .upload(filePath, recordedBlob, { contentType: "video/webm" });
-      if (uploadError) throw uploadError;
+      // 1. Extract still JPEG frames client-side (Gemini accepts only image formats)
+      const frames = await extractFrames(recordedBlob, 5);
+      if (frames.length === 0) throw new Error("Could not extract frames from recording");
 
-      const { data: urlData } = supabase.storage.from("patient-media").getPublicUrl(filePath);
+      // 2. Upload frames in parallel
+      const ts = Date.now();
+      const uploads = await Promise.all(
+        frames.map(async (frame, i) => {
+          const filePath = `medication-proof/${user.id}/${ts}-frame-${i}.jpg`;
+          const { error } = await supabase.storage
+            .from("patient-media")
+            .upload(filePath, frame, { contentType: "image/jpeg" });
+          if (error) throw error;
+          const { data: urlData } = supabase.storage.from("patient-media").getPublicUrl(filePath);
+          return { url: urlData.publicUrl, path: filePath };
+        })
+      );
+      const imageUrls = uploads.map((u) => u.url);
+      const filePaths = uploads.map((u) => u.path);
 
-      // Call AI validation edge function (handles adherence update, rewards, and video deletion)
-      const { data: validationData, error: fnError } = await supabase.functions.invoke(
+      // 3. Call AI validation edge function
+      const { data, error: fnError } = await supabase.functions.invoke(
         "validate-medication-video",
         {
-          body: {
-            videoUrl: urlData.publicUrl,
-            filePath,
-            prescriptionId: recordingPrescriptionId,
-            patientId,
-          },
+          body: { imageUrls, filePaths, prescriptionId: recordingPrescriptionId, patientId },
         }
       );
 
       if (fnError) throw fnError;
 
-      const validation = validationData?.validation;
+      const validation = data?.validation;
 
       if (validation?.isValid) {
         toast({ title: "✅ Medication verified!", description: `AI confirmed ingestion. +5 Vulas earned!` });
         handleCloseRecording();
         queryClient.invalidateQueries({ queryKey: ["medication-adherence", patientId] });
         queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
+      } else if (data?.fallback) {
+        // AI service unavailable — evidence saved for doctor review
+        toast({
+          title: "Recorded for review",
+          description: "Verification is temporarily unavailable. Your dose has been recorded for your doctor to review.",
+        });
+        handleCloseRecording();
+        queryClient.invalidateQueries({ queryKey: ["medication-adherence", patientId] });
       } else {
-        // Validation failed — allow retry
-        setRecordedBlob(null);
-        startCamera();
+        // AI ran successfully but said "no" — lock the row, do NOT allow retake (overdose safety)
         const reason = validation?.description || "Could not confirm medication ingestion.";
-        const missing: string[] = [];
-        if (!validation?.person_detected) missing.push("person visible");
-        if (!validation?.medication_detected) missing.push("medication visible");
-        if (!validation?.ingestion_detected) missing.push("taking the medication");
         toast({
           title: "Verification failed",
-          description: `${reason}${missing.length > 0 ? ` Missing: ${missing.join(", ")}.` : ""} Please try again.`,
+          description: `${reason} Your medication intake was logged but not auto-confirmed — please contact your doctor if this was an error.`,
           variant: "destructive",
         });
+        handleCloseRecording();
+        queryClient.invalidateQueries({ queryKey: ["medication-adherence", patientId] });
       }
     } catch (error: any) {
       console.error(error);
@@ -374,7 +444,7 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
                   </div>
                 </div>
 
-                {todayStatus !== "completed" && (
+                {todayStatus === "pending" && (
                   <Button
                     onClick={() => setRecordingPrescriptionId(rx.id)}
                     className="gap-2 shrink-0"
@@ -382,6 +452,16 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
                     <Video className="h-4 w-4" />
                     Take Medication
                   </Button>
+                )}
+                {todayStatus === "pending_review" && (
+                  <Badge variant="secondary" className="shrink-0">
+                    <Clock className="h-3 w-3 mr-1" /> Pending review
+                  </Badge>
+                )}
+                {todayStatus === "failed_verification" && (
+                  <Badge variant="destructive" className="shrink-0">
+                    <AlertCircle className="h-3 w-3 mr-1" /> Not verified
+                  </Badge>
                 )}
               </div>
             </CardContent>
@@ -427,8 +507,8 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
                 )
               ) : (
                 <>
-                  <Button variant="outline" onClick={() => { setRecordedBlob(null); startCamera(); }}>
-                    Retake
+                  <Button variant="outline" onClick={handleCloseRecording} disabled={isUploading}>
+                    Cancel
                   </Button>
                   <Button onClick={handleSubmitProof} disabled={isUploading} className="gap-2">
                     {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
