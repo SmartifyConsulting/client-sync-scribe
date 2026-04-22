@@ -32,6 +32,7 @@ export interface NextOfKinMember {
   email: string;
   relationship: string;
   shared?: boolean;
+  notified_at?: string;
 }
 
 export interface CurrentMedication {
