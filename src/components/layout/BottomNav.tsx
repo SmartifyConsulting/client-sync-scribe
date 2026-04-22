@@ -2,7 +2,7 @@ import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
-  HeartPulse,
+  User,
   Handshake,
   FolderOpen,
   Users,
@@ -21,9 +21,8 @@ const doctorNavItems = [
 ];
 
 const patientSections = [
-  { icon: LayoutDashboard, label: "Home", section: "home", to: "/patient/details?section=home" },
-  { icon: HeartPulse, label: "My Profile", section: "health", to: "/patient/details?section=health" },
-  { icon: Handshake, label: "Holarchy", section: "care", to: "/patient/details?section=care" },
+  { icon: User, label: "My Profile", section: "health", to: "/patient/details?section=health" },
+  { icon: Handshake, label: "My Holarchy", section: "care", to: "/patient/details?section=care" },
   { icon: FolderOpen, label: "My Desk", section: "admin", to: "/patient/details?section=admin" },
   { icon: Gift, label: "My Rewards", section: "rewards", to: "/patient/rewards" },
 ];
@@ -72,7 +71,7 @@ export function BottomNav() {
   }
 
   // Patient nav - section-based
-  const currentSection = searchParams.get("section") || "home";
+  const currentSection = searchParams.get("section") || "health";
   const isOnDetails = location.pathname === "/patient/details";
 
   return (
