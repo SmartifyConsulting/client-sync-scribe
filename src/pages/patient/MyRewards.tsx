@@ -231,24 +231,68 @@ export default function MyRewards() {
 
   const activeStreaks = streaks.filter(s => s.current_streak > 0);
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high": return "destructive";
-      case "medium": return "secondary";
-      default: return "outline";
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "completed": return <CheckSquare className="h-4 w-4 text-green-500" />;
-      case "pending": return <Clock className="h-4 w-4 text-muted-foreground" />;
-      default: return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
-    }
-  };
-
-  const pendingActivityTasks = tasks.filter((t) => t.task_type === "activity" && t.status !== "completed");
   const totalTransferred = transfers.reduce((sum, t) => sum + t.amount, 0);
+
+  // Build a unified Vula activity timeline (rewards + transfers) grouped by week/month
+  type HistoryItem = {
+    id: string;
+    date: Date;
+    label: string;
+    amount: number; // positive earn, negative transfer
+    kind: "earn" | "transfer";
+  };
+
+  const historyGroups = useMemo(() => {
+    const items: HistoryItem[] = [];
+    rewards.forEach((r) => {
+      items.push({
+        id: `r-${r.id}`,
+        date: parseISO(r.awarded_at),
+        label: r.visit_category,
+        amount: r.lollipops_count,
+        kind: r.lollipops_count >= 0 ? "earn" : "transfer",
+      });
+    });
+    transfers.forEach((t) => {
+      items.push({
+        id: `t-${t.id}`,
+        date: parseISO(t.created_at),
+        label: t.moola_partner_apps?.name
+          ? `Transfer to ${t.moola_partner_apps.name}`
+          : "Vula Transfer",
+        amount: -Math.abs(t.amount),
+        kind: "transfer",
+      });
+    });
+    items.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+    const now = new Date();
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+    const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+
+    const groups: { key: string; label: string; items: HistoryItem[] }[] = [];
+    const monthBuckets = new Map<string, HistoryItem[]>();
+    const thisWeek: HistoryItem[] = [];
+
+    items.forEach((it) => {
+      if (isWithinInterval(it.date, { start: weekStart, end: weekEnd })) {
+        thisWeek.push(it);
+      } else {
+        const k = format(it.date, "yyyy-MM");
+        if (!monthBuckets.has(k)) monthBuckets.set(k, []);
+        monthBuckets.get(k)!.push(it);
+      }
+    });
+
+    groups.push({ key: "this-week", label: "This Week", items: thisWeek });
+    Array.from(monthBuckets.keys())
+      .sort((a, b) => b.localeCompare(a))
+      .forEach((k) => {
+        const arr = monthBuckets.get(k)!;
+        groups.push({ key: k, label: format(arr[0].date, "MMMM yyyy"), items: arr });
+      });
+    return groups;
+  }, [rewards, transfers]);
 
   return (
     <div className="space-y-6 animate-fade-in">
