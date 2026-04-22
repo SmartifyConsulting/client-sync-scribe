@@ -507,8 +507,8 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
                 )
               ) : (
                 <>
-                  <Button variant="outline" onClick={() => { setRecordedBlob(null); startCamera(); }}>
-                    Retake
+                  <Button variant="outline" onClick={handleCloseRecording} disabled={isUploading}>
+                    Cancel
                   </Button>
                   <Button onClick={handleSubmitProof} disabled={isUploading} className="gap-2">
                     {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
