@@ -63,8 +63,7 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
 
   const today = format(new Date(), "yyyy-MM-dd");
 
-  const currentPrescription = recordingPrescriptionId
-    ? null // resolved below from prescriptions list
+
 
   // Fetch active prescriptions for this chronic patient
   const { data: prescriptions = [], isLoading: prescriptionsLoading } = useQuery({
