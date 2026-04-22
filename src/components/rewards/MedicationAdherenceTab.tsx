@@ -652,6 +652,9 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
                 ? "Hold your pill close to the camera so we can confirm it matches your prescription."
                 : "Film yourself taking your medication. Max 30 seconds."}
             </p>
+            <p className="text-[11px] text-muted-foreground italic">
+              Your video isn't saved. We only keep a short text description and a single still of the tablet.
+            </p>
 
             <div className="relative rounded-lg overflow-hidden bg-black aspect-video">
               {recordedBlob ? (
