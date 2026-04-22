@@ -37,8 +37,8 @@ const doctorNavItems: NavItem[] = [
 ];
 
 const patientNavItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Home", to: "/patient/details?section=home" },
   { icon: User, label: "My Profile", to: "/patient/details?section=health" },
+  { icon: Users, label: "My Holarchy", to: "/patient/details?section=care" },
   { icon: FolderOpen, label: "My Desk", to: "/patient/details?section=admin" },
   { icon: Gift, label: "My Rewards", to: "/patient/rewards" },
 ];

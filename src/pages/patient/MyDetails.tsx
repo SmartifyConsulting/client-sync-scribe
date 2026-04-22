@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Navigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
@@ -10,7 +10,8 @@ import { useMyRewards } from "@/hooks/usePatientRewards";
 
 export default function MyDetails() {
   const [searchParams] = useSearchParams();
-  const section = searchParams.get("section") || "health";
+  const rawSection = searchParams.get("section");
+  const section = rawSection === "home" ? "health" : rawSection || "health";
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string>("");
@@ -86,10 +87,13 @@ export default function MyDetails() {
     );
   }
 
+  if (rawSection === "home") {
+    return <Navigate to="/patient/details?section=health" replace />;
+  }
+
   const sectionHeading: Record<string, { title: string; subtitle: string }> = {
-    home: { title: "My Home", subtitle: "Your daily snapshot and quick actions" },
     health: { title: "My Profile", subtitle: "View and update your personal and medical information" },
-    care: { title: "My Holarchive", subtitle: "Your healthcare team, sessions and coordination" },
+    care: { title: "My Holarchy", subtitle: "Your healthcare team, sessions and coordination" },
     admin: { title: "My Desk", subtitle: "Calendar, tasks and documents" },
     rewards: { title: "My Rewards", subtitle: "Track your Vulas and adherence streaks" },
   };
