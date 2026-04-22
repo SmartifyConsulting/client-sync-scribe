@@ -556,6 +556,28 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
                   </div>
                   <p className="text-sm text-muted-foreground">{rx.dosage} • {rx.frequency}</p>
 
+                  {(() => {
+                    const ref = getReference(rx.id);
+                    if (!ref || needsBaseline(rx.id)) return null;
+                    const methodLabel = ref.intake_method ? `${ref.intake_method}-method` : "";
+                    const captured = ref.updated_at ? format(new Date(ref.updated_at), "MMM d, yyyy") : "";
+                    return (
+                      <p className="text-[11px] text-muted-foreground mt-1">
+                        Reference: {ref.observed_description?.split(/[,.]/)[0] || "tablet"}
+                        {methodLabel ? ` · ${methodLabel}` : ""}
+                        {captured ? ` · captured ${captured}` : ""}
+                        {" · "}
+                        <button
+                          type="button"
+                          className="underline hover:text-foreground"
+                          onClick={() => setBaselineCapture({ open: true, rxId: rx.id, medication: rx.medication, dosage: rx.dosage })}
+                        >
+                          Recapture reference
+                        </button>
+                      </p>
+                    );
+                  })()}
+
                   <div className="flex items-center gap-4 mt-3">
                     <div className="flex items-center gap-1">
                       <Flame className="h-4 w-4 text-orange-500" />
@@ -629,6 +651,9 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
               {stage === "pill_check"
                 ? "Hold your pill close to the camera so we can confirm it matches your prescription."
                 : "Film yourself taking your medication. Max 30 seconds."}
+            </p>
+            <p className="text-[11px] text-muted-foreground italic">
+              Your video isn't saved. We only keep a short text description and a single still of the tablet.
             </p>
 
             <div className="relative rounded-lg overflow-hidden bg-black aspect-video">
@@ -748,6 +773,22 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
         streak={celebration.streak}
         medicationName={celebration.medicationName}
       />
+
+      {/* Baseline capture wizard */}
+      {baselineCapture.open && (
+        <PillBaselineCapture
+          open={baselineCapture.open}
+          onClose={() => setBaselineCapture({ open: false, rxId: "", medication: "", dosage: "" })}
+          onCaptured={() => {
+            queryClient.invalidateQueries({ queryKey: ["pill-references", patientId] });
+            setBaselineCapture({ open: false, rxId: "", medication: "", dosage: "" });
+          }}
+          prescriptionId={baselineCapture.rxId}
+          patientId={patientId}
+          medicationName={baselineCapture.medication}
+          dosage={baselineCapture.dosage}
+        />
+      )}
     </div>
   );
 }
