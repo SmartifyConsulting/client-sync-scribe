@@ -14,6 +14,14 @@ import {
   Share2,
   Heart,
   ArrowRight,
+  Mic,
+  Video,
+  Gift,
+  Pill,
+  ClipboardList,
+  Sparkles,
+  Activity,
+  Hospital,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
