@@ -1,80 +1,137 @@
 
 
-# Plan: Tablet logo collision, remove duplicate Admissions, restyle Vula explainer
+# Plan: Patient admission uploads, fix missing camera, Vula popup compaction, Rewards tab cleanup
 
-## 1. Fix Vula logo overlap on tablet/web banner
+## 1. Fix missing camera on Shannon Kennedy's chronic-meds tab
 
-**File:** `src/components/patients/PatientDetailsEditor.tsx` (lines 1077–1097)
+**Root cause:** Shannon has 3 patient records under the same auth user. `MyRewards.tsx` (line 117) picks **the newest** one (`order created_at desc`, `limit 1`) — that's "Sarah Mitchell", which is flagged chronic but has **0 active prescriptions**. The 3 active prescriptions live on the older "Shannon Kennedy" record. So `MedicationAdherenceTab` renders the empty state ("No active chronic prescriptions found") and no camera ever appears.
 
-The greeting `<h3>` uses `whitespace-nowrap`, which forces "Good evening, Sarah" + the date column to push into the inline Vula logo at tablet widths (~936px content area), producing the overlap shown in the screenshot.
+**Fix in `src/pages/patient/MyRewards.tsx`:** Change the patient-record query to prefer the record that **actually has active chronic prescriptions**:
 
-Fix:
-- Remove `whitespace-nowrap` from the `<h3>` so the greeting can wrap if needed.
-- Add `shrink-0` to the inline Vula wrapper (line 1090) so it never gets squeezed by the flex middle column, and bump its left margin (`ml-auto`) so it stays clearly separated from the greeting block.
-- Reduce the inline tablet/web Vula logo from `h-12` → `h-10` so it sits proportionally next to the 80px avatar without dominating.
+```ts
+// Get all of this user's patient records, then pick the one with active chronic prescriptions
+const { data: patients } = await supabase
+  .from("patients")
+  .select("id, is_chronic")
+  .eq("patient_user_id", user.id);
 
-```tsx
-<h3 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">
-  ...
-</h3>
-...
-{!rewardsLoading && lollipopCount !== undefined && (
-  <div className="hidden md:flex shrink-0 items-end gap-2 pb-1 ml-auto">
-    <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-10 w-auto object-contain" />
-    <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
-      <AnimatedCounter target={lollipopCount} />
-    </span>
-  </div>
-)}
+if (!patients?.length) return null;
+
+const ids = patients.map(p => p.id);
+const { data: rxRows } = await supabase
+  .from("prescriptions")
+  .select("patient_id")
+  .in("patient_id", ids)
+  .eq("status", "active");
+
+const idWithRx = rxRows?.[0]?.patient_id;
+return patients.find(p => p.id === idWithRx)
+    ?? patients.find(p => p.is_chronic)
+    ?? patients[0];
 ```
 
-## 2. Remove duplicate "Admissions" tab from patient menu
+This guarantees the chronic-meds tab is wired to the patient record that actually has prescriptions, so the "Take Medication" buttons (which open the camera dialog at `MedicationAdherenceTab.tsx` line 378) appear.
 
-**File:** `src/components/patients/PatientDetailsEditor.tsx`
+## 2. Allow doctors **and patients** to upload admission forms
 
-Two issues stack to produce the duplicate:
+### 2a. Database — relax INSERT policy on `hospital_admissions`
 
-1. `SECTION_TABS` (lines 311–316) has a stray standalone `admissions: ["admissions"]` section in addition to `hospital_visits` already living inside `care` (My Holarchy).
-2. The tab strip (lines 1270–1274) renders an extra "Admissions" trigger via `show("admissions")`.
+Current `INSERT` policy requires `auth.uid() = doctor_id` (patients are blocked). Migration:
 
-Fix:
-- Delete the `admissions: ["admissions"]` line from `SECTION_TABS`. Admissions remains accessible exclusively via My Holarchy → "Admissions" tab (which is already wired through `hospital_visits` at line 1245).
-- Remove the standalone `admissions` `<TabsTrigger>` block (lines 1270–1274) and any matching `<TabsContent value="admissions">` block (verify and remove if present).
-- The `hospital_visits` tab keeps its display label "Admissions" (line 1247), so users still see the word "Admissions" in the right place — just only once, under My Holarchy.
+```sql
+DROP POLICY "Doctors can insert admissions for their patients" ON hospital_admissions;
 
-## 3. Restyle "Welcome to Vula Vouchers" dialog to match reference image
+CREATE POLICY "Authorized users can insert admissions"
+ON hospital_admissions FOR INSERT
+TO authenticated
+WITH CHECK (
+  auth.uid() = doctor_id  -- doctor inserting their own
+  AND (
+    -- (a) the patient themselves: doctor_id is set to their own user_id
+    EXISTS (SELECT 1 FROM patients p
+            WHERE p.id = hospital_admissions.patient_id
+              AND p.patient_user_id = auth.uid())
+    -- (b) doctor who owns the patient record
+    OR EXISTS (SELECT 1 FROM patients p
+               WHERE p.id = hospital_admissions.patient_id
+                 AND p.user_id = auth.uid())
+    -- (c) doctor with active access
+    OR EXISTS (SELECT 1 FROM patients p
+               JOIN doctor_patient_access dpa ON dpa.patient_user_id = p.patient_user_id
+               WHERE p.id = hospital_admissions.patient_id
+                 AND dpa.doctor_id = auth.uid()
+                 AND dpa.is_active = true)
+  )
+);
+```
 
-**File:** `src/components/rewards/VulaExplainerDialog.tsx`
+(`doctor_id` is `NOT NULL` so for patient-uploaded admissions we set `doctor_id = auth.uid()` — same actor as the inserter; the policy clause "(a) the patient themselves" allows it.)
 
-Rebuild the dialog to match the uploaded reference exactly:
+### 2b. New "Upload Admission Form" dialog
 
-- **Background:** Drop the blue gradient hero. Use a single light/white card surface (`bg-white` / `bg-card`) for the entire dialog — matches the reference's clean white background.
-- **Top:** Centered Vula Vouchers logo (existing `vula-vouchers-logo-v2.png`) at `h-32`, no surrounding gradient block. Keep the close (×) in the top-right as a subtle white circle with grey border.
-- **Headline (replaces "Welcome to Vula Vouchers"):** Two-line headline matching the image:
-  - Line 1: "Vula means rain in" — bold black
-  - Line 2: "isiZulu and isiXhosa –" — bold, blue→teal gradient text
-  - Then a centered subtitle in regular grey: "something you can't always predict, but always need."
-- **Divider:** Horizontal hairline with a centered blue water-drop icon (`Droplet` from lucide) — matches the reference's dropdown rule.
-- **Section 1 — "Vulas reward real-world actions":** Two-column row with a circular light-blue icon badge (`Users` icon) on the left and the body text on the right. Bold heading line, then "helping, sharing, contributing, and following through." Final italic-feel teal line: "It's how we show up for each other."
-- **Hairline divider.**
-- **Section 2 — "Vulas are a simple way to start building value that grows with you.":** Same two-column layout with a circular light-blue icon badge (`TrendingUp` icon). Subtext: "Small actions today. Bigger impact tomorrow."
-- **CTA Button:** Full-width gradient button (blue→teal, exact same gradient as today), with a ticket/voucher icon (`Ticket` from lucide) on the left of the label "Earn Vulas". Rounded-xl, large.
-- **Footer tagline:** Below the button, centered small line with a blue heart emoji-style icon (`Heart` from lucide, filled gradient blue) followed by "Earn them. Use them. Keep them." in regular grey text.
-- **Typography:** Use existing app sans font. Keep headlines `font-bold`, body `font-normal text-foreground/80`, gradient lines using `bg-gradient-to-r from-blue-500 to-teal-500 bg-clip-text text-transparent`.
-- **Spacing:** Generous vertical padding (`p-8`), `space-y-6` between sections to mirror the airy reference layout.
-- **Imports:** Add `Droplet`, `Users`, `TrendingUp`, `Ticket`, `Heart` from lucide. Remove the unused `CloudRain` import.
+Create **`src/components/admissions/UploadAdmissionDialog.tsx`** — modeled on `AddImagingDialog.tsx`:
 
-The dialog stays the same component (same props, same first-launch localStorage logic) — only its visual layout changes.
+- Fields: Hospital (text), Admission date (date, default today), Discharge date (optional date), Diagnosis (textarea), Procedure description (optional textarea), **Attachment** (file input — PDF / image, uploaded to `patient-media` bucket, max 5MB per existing limit).
+- On Save:
+  1. If a file is attached, upload to `patient-media/${user.id}/admission-${Date.now()}-${file.name}` and insert a row into `documents` (`name`, `media_url`, `patient_id`, `category = 'hospital_admission'`, `user_id = auth.uid()`) — captures the file in the patient's documents library.
+  2. Insert into `hospital_admissions` with `doctor_id = auth.uid()`, `patient_id`, `document_id` (from step 1, nullable), `hospital`, `admission_date`, `discharge_date`, `diagnosis`, `procedure_description`, `status = 'admitted'` (or `'discharged'` if discharge_date set).
+  3. Invalidate `["hospital-admissions", patientId]` so it appears immediately.
+
+### 2c. Surface the upload button in `AdmissionsView`
+
+**`src/components/admissions/AdmissionsView.tsx`:**
+
+- Add a header row above the list with title "Hospital Admissions" and a primary `+ Upload Admission Form` button (visible whenever `canEdit` is true — both doctors and patients viewing their own record).
+- Show the same button in the empty-state card (replaces the current "Entries are created automatically…" hint with a clear CTA).
+- Wire the button to open the new `UploadAdmissionDialog`, passing `patientId`.
+- Keep the existing auto-creation flow from `HospitalAdmissionEditor.tsx` untouched — that path still works for AI-generated forms.
+
+### 2d. Ensure `canEdit` is true for the patient on their own record
+
+Verify the prop wiring at the call sites:
+- Patient self-view (`PatientDetailsEditor.tsx` Holarchy → Admissions tab) — pass `canEdit={true}` when the viewer is the patient (`patient_user_id === auth.uid()`).
+- Doctor view — already true when the doctor has access.
+
+## 3. Vula Vouchers popup — 30% smaller and more compact
+
+**`src/components/rewards/VulaExplainerDialog.tsx`:**
+
+- **Width**: `max-w-md` (448px) → `max-w-xs` (320px) — ~30% narrower.
+- **Padding**: outer `p-8` → `p-5`; vertical rhythm `space-y-6` → `space-y-3`.
+- **Logo**: `h-32` → `h-20`.
+- **Headline**: `text-2xl` → `text-lg`; subtitle `text-sm` → `text-xs`.
+- **Divider droplet badge**: `h-8 w-8` → `h-6 w-6`, icon `h-4 w-4` → `h-3 w-3`.
+- **Section icon badges**: `h-11 w-11` → `h-8 w-8`, icons `h-5 w-5` → `h-4 w-4`; text `text-sm` → `text-xs`; row `gap-4` → `gap-3`.
+- **Section 2**: **delete the line** "Small actions today. Bigger impact tomorrow." entirely (per request).
+- **Hairline dividers** between sections retained but tighter spacing.
+- **CTA button**: `h-12 text-base` → `h-10 text-sm`, `rounded-xl` retained.
+- **Footer tagline**: `text-sm` → `text-xs`, heart icon `h-4 w-4` → `h-3 w-3`.
+
+Net effect: dialog drops from ~520px tall × 448px wide to roughly ~360px × 320px — about 30% smaller in both axes, content visibly tighter.
+
+## 4. My Rewards — remove History tab, merge Streaks into Wins
+
+**`src/pages/patient/MyRewards.tsx`:**
+
+- **Remove** the `<TabsTrigger value="history">` (lines 434–436) **and** the entire `<TabsContent value="history">` block (lines 776–~820). The same data is already shown as "Recent Rewards" on the Overview tab; users wanting a longer list can scroll the Overview list (still shows top 5 — leave as-is, the request only asks to remove the dedicated tab).
+- **Remove** the standalone `<TabsTrigger value="streaks">` (lines 431–433).
+- **Merge Streaks under Wins**: in the existing `<TabsContent value="milestones">` (the "Wins" tab, lines 557–605), append the Streaks card (the entire `<Card>` currently under `<TabsContent value="streaks">`, lines 608–679) below the milestones grid. Delete the now-empty `<TabsContent value="streaks">` wrapper.
+- Final tab strip becomes: **Overview**, **Chronic Meds** (when chronic), **Wins** (milestones + streaks), **Vulas** (transfers).
+- If `activeTab === "history"` or `"streaks"` is restored from prior state, fall back to `"overview"` to avoid an empty content area.
 
 ## Files touched
 
 | File | Change |
 |---|---|
-| `src/components/patients/PatientDetailsEditor.tsx` | Banner: drop `whitespace-nowrap` on greeting `<h3>`, make inline Vula wrapper `shrink-0 ml-auto`, logo `h-12` → `h-10`. Tabs: remove `admissions` key from `SECTION_TABS`; delete the standalone `admissions` `<TabsTrigger>` (and matching `<TabsContent>` if present) |
-| `src/components/rewards/VulaExplainerDialog.tsx` | Full visual rebuild on white background to match reference: centered Vula logo, two-line gradient headline, drop-icon divider, two icon-badge sections, gradient "Earn Vulas" CTA with ticket icon, heart-prefixed tagline footer |
+| `src/pages/patient/MyRewards.tsx` | Patient-record selection prefers record with active prescriptions; remove History tab + content; remove Streaks tab trigger; move Streaks card under "Wins" tab |
+| `src/components/admissions/UploadAdmissionDialog.tsx` (new) | Manual upload form — hospital, dates, diagnosis, procedure, file attachment; creates `documents` + `hospital_admissions` rows |
+| `src/components/admissions/AdmissionsView.tsx` | Header row + empty-state CTA "Upload Admission Form" wired to new dialog |
+| `src/components/patients/PatientDetailsEditor.tsx` | Verify/ensure `<AdmissionsView canEdit>` is true for patient self-view |
+| `src/components/rewards/VulaExplainerDialog.tsx` | ~30% smaller dialog (`max-w-xs`, tighter padding/icons/text); remove "Small actions today. Bigger impact tomorrow." |
+| Migration | DROP + recreate `hospital_admissions` INSERT policy to allow patients (`patient_user_id = auth.uid()`) to insert with `doctor_id = auth.uid()` |
 
 ## Out of scope
-- Doctor-side tabs (no Admissions tab in doctor view).
-- Vula explainer first-launch localStorage logic (unchanged).
-- Mobile-only Vula row in the banner (already correct, kept as-is).
+- Doctor-side admission editor (`HospitalAdmissionEditor.tsx`) — unchanged, still auto-creates admissions from session forms.
+- Cleaning up Shannon's duplicate patient records — a data hygiene task, not a code change.
+- Reorganising what counts as a "Win" beyond moving Streaks under it.
 
