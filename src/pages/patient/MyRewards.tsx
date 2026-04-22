@@ -658,6 +658,11 @@ export default function MyRewards() {
             </CardContent>
           </Card>
 
+          {/* Monthly Adherence Summary */}
+          {patientRecord?.is_chronic && patientRecord?.id && (
+            <MonthlyAdherenceSummary patientId={patientRecord.id} />
+          )}
+
           {/* Streaks */}
           <Card>
             <CardHeader>
