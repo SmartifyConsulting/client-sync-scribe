@@ -1,6 +1,6 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Droplet, Users, TrendingUp, Ticket, Heart, X } from "lucide-react";
+import { Droplet, Users, TrendingUp, Ticket, Heart } from "lucide-react";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v2.png";
 
 interface VulaExplainerDialogProps {
