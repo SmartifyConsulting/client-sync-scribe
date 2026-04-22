@@ -444,7 +444,7 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
                   </div>
                 </div>
 
-                {todayStatus !== "completed" && (
+                {todayStatus === "pending" && (
                   <Button
                     onClick={() => setRecordingPrescriptionId(rx.id)}
                     className="gap-2 shrink-0"
@@ -452,6 +452,16 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
                     <Video className="h-4 w-4" />
                     Take Medication
                   </Button>
+                )}
+                {todayStatus === "pending_review" && (
+                  <Badge variant="secondary" className="shrink-0">
+                    <Clock className="h-3 w-3 mr-1" /> Pending review
+                  </Badge>
+                )}
+                {todayStatus === "failed_verification" && (
+                  <Badge variant="destructive" className="shrink-0">
+                    <AlertCircle className="h-3 w-3 mr-1" /> Not verified
+                  </Badge>
                 )}
               </div>
             </CardContent>
