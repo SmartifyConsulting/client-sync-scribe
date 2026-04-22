@@ -133,26 +133,7 @@ export default function MyRewards() {
     },
   });
 
-  const { data: tasks = [], isLoading: tasksLoading, refetch: refetchTasks } = useQuery({
-    queryKey: ["patient-assigned-tasks"],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
-      const { data: patients } = await supabase
-        .from("patients")
-        .select("id")
-        .eq("patient_user_id", user.id);
-      if (!patients || patients.length === 0) return [];
-      const patientIds = patients.map((p) => p.id);
-      const { data: todos, error } = await supabase
-        .from("todos")
-        .select("*")
-        .in("patient_id", patientIds)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return (todos || []) as PatientTask[];
-    },
-  });
+
 
   const { data: partnerApps = [] } = useQuery({
     queryKey: ["moola-partner-apps"],
