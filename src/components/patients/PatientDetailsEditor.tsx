@@ -311,7 +311,6 @@ function AnimatedCounter({ target }: { target: number }) {
 const SECTION_TABS: Record<string, string[]> = {
   health: ["personal", "medical"],
   care: ["doctors", "sessions", "hospital_visits", "roundtable"],
-  admissions: ["admissions"],
   admin: ["calendar", "tasks", "documents"],
 };
 
@@ -1074,7 +1073,7 @@ export function PatientDetailsEditor({
             <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-xl md:text-2xl font-bold text-foreground tracking-tight whitespace-nowrap">
+            <h3 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">
               {(() => {
                 const hour = new Date().getHours();
                 const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
@@ -1087,8 +1086,8 @@ export function PatientDetailsEditor({
           </div>
           {/* Vula Vouchers inline on web */}
           {!rewardsLoading && lollipopCount !== undefined && (
-            <div className="hidden md:flex items-end gap-3 pb-1">
-              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-12 w-auto object-contain" />
+            <div className="hidden md:flex shrink-0 items-end gap-2 pb-1 ml-auto">
+              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-10 w-auto object-contain" />
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
                 <AnimatedCounter target={lollipopCount} />
               </span>
@@ -1265,11 +1264,6 @@ export function PatientDetailsEditor({
           {show("documents") && (
             <TabsTrigger value="documents" className={triggerClass}>
               My Documents
-            </TabsTrigger>
-          )}
-          {show("admissions") && (
-            <TabsTrigger value="admissions" className={triggerClass}>
-              Admissions
             </TabsTrigger>
           )}
         </TabsList>
