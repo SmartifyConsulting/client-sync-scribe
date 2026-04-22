@@ -773,6 +773,22 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
         streak={celebration.streak}
         medicationName={celebration.medicationName}
       />
+
+      {/* Baseline capture wizard */}
+      {baselineCapture.open && (
+        <PillBaselineCapture
+          open={baselineCapture.open}
+          onClose={() => setBaselineCapture({ open: false, rxId: "", medication: "", dosage: "" })}
+          onCaptured={() => {
+            queryClient.invalidateQueries({ queryKey: ["pill-references", patientId] });
+            setBaselineCapture({ open: false, rxId: "", medication: "", dosage: "" });
+          }}
+          prescriptionId={baselineCapture.rxId}
+          patientId={patientId}
+          medicationName={baselineCapture.medication}
+          dosage={baselineCapture.dosage}
+        />
+      )}
     </div>
   );
 }
