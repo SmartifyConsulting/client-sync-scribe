@@ -215,30 +215,12 @@ export default function MyRewards() {
 
   const loading = rewardsLoading || streaksLoading;
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  const currentMilestone = MILESTONES.filter(m => lollipopCount >= m.count).pop();
-  const nextMilestone = MILESTONES.find(m => lollipopCount < m.count);
-  const progressToNext = nextMilestone 
-    ? Math.round((lollipopCount / nextMilestone.count) * 100) 
-    : 100;
-
-  const activeStreaks = streaks.filter(s => s.current_streak > 0);
-
-  const totalTransferred = transfers.reduce((sum, t) => sum + t.amount, 0);
-
   // Build a unified Vula activity timeline (rewards + transfers) grouped by week/month
   type HistoryItem = {
     id: string;
     date: Date;
     label: string;
-    amount: number; // positive earn, negative transfer
+    amount: number;
     kind: "earn" | "transfer";
   };
 
@@ -293,6 +275,23 @@ export default function MyRewards() {
       });
     return groups;
   }, [rewards, transfers]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const currentMilestone = MILESTONES.filter(m => lollipopCount >= m.count).pop();
+  const nextMilestone = MILESTONES.find(m => lollipopCount < m.count);
+  const progressToNext = nextMilestone
+    ? Math.round((lollipopCount / nextMilestone.count) * 100)
+    : 100;
+
+  const activeStreaks = streaks.filter(s => s.current_streak > 0);
+  const totalTransferred = transfers.reduce((sum, t) => sum + t.amount, 0);
 
   return (
     <div className="space-y-6 animate-fade-in">
