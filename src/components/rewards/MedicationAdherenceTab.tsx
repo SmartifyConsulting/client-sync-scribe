@@ -110,6 +110,28 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
     },
   });
 
+  // Fetch pill references for these prescriptions
+  const { data: pillReferences = [] } = useQuery({
+    queryKey: ["pill-references", patientId, prescriptions.map((p) => p.id).join(",")],
+    queryFn: async () => {
+      if (prescriptions.length === 0) return [] as PillReference[];
+      const { data, error } = await supabase
+        .from("prescription_pill_references")
+        .select("prescription_id, intake_method, baseline_pattern_summary, observed_description, reference_image_url, updated_at")
+        .in("prescription_id", prescriptions.map((p) => p.id));
+      if (error) throw error;
+      return (data || []) as PillReference[];
+    },
+    enabled: prescriptions.length > 0,
+  });
+
+  const getReference = (rxId: string) => pillReferences.find((r) => r.prescription_id === rxId);
+  const needsBaseline = (rxId: string) => {
+    const ref = getReference(rxId);
+    return !ref || !ref.intake_method || !ref.baseline_pattern_summary || !ref.reference_image_url;
+  };
+
+
   // Auto-create today's pending records
   useEffect(() => {
     if (prescriptions.length === 0) return;
