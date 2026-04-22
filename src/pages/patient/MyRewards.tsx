@@ -783,6 +783,7 @@ export default function MyRewards() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
