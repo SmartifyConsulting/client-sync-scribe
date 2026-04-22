@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Pill, Video, Flame, Check, Clock, AlertCircle, Loader2, Square, Camera, RefreshCw } from "lucide-react";
+import { Pill, Video, Flame, Check, Clock, AlertCircle, Loader2, Square, Camera, RefreshCw, Sparkles, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,17 @@ interface AdherenceRecord {
   status: string;
   taken_at: string | null;
   proof_url: string | null;
+  confidence_score: number | null;
+  auto_approved_at: string | null;
+}
+
+interface PillReference {
+  prescription_id: string;
+  intake_method: string | null;
+  baseline_pattern_summary: string | null;
+  observed_description: string | null;
+  reference_image_url: string | null;
+  updated_at: string;
 }
 
 interface MedicationAdherenceTabProps {
