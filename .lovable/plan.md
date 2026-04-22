@@ -1,57 +1,70 @@
 
 
-# Plan: Fix transcription, add Pause, fix To-Do preview, launch Vulas explainer
+# Plan: Patient web/tablet nav consolidation, mobile greeting de-dupe, logo sizing
 
-## 1. Fix transcription (broken — root cause confirmed in logs)
+## 1. Web/Tablet sidebar — merge "My Calendar" + "To-Do List" into "My Desk"
 
-The edge function logs show: `TypeError: Invalid URL: '54fa34d8.../...webm'`. The client sends the **storage path** (e.g. `userId/sessionId_ts.webm`), and `transcribe-audio` calls `fetch(audioUrl)` on it directly — but `session-audio` is a private bucket, so the path is not a URL.
+**File:** `src/components/layout/Sidebar.tsx` (lines 39–45, `patientNavItems`)
 
-**File: `supabase/functions/transcribe-audio/index.ts`**
-- Replace the raw `fetch(audioUrl)` branch with a service-role download from the `session-audio` bucket using the storage SDK:
-  ```ts
-  const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
-  const { data: blob, error } = await admin.storage.from('session-audio').download(audioUrl);
-  ```
-- Wrap external calls (Whisper + storage download) in try/catch that returns a structured `{ error, fallback: true }` JSON instead of HTTP 500, so the client can surface a friendly message.
+Replace the two separate entries with a single `My Desk` link that opens the existing admin section (which already groups Calendar + Tasks + Documents):
 
-## 2. Add Pause / Resume to session recording
+```tsx
+const patientNavItems: NavItem[] = [
+  { icon: LayoutDashboard, label: "Home",       to: "/patient/details?section=home" },
+  { icon: User,            label: "My Profile", to: "/patient/details?section=health" },
+  { icon: FolderOpen,      label: "My Desk",    to: "/patient/details?section=admin" },
+  { icon: Gift,            label: "My Rewards", to: "/patient/rewards" },
+];
+```
 
-**File: `src/hooks/useAudioRecording.ts`**
-- Add `isPaused` state and `pauseRecording()` / `resumeRecording()` calling `mediaRecorder.pause()` / `.resume()`.
-- Pause Web Speech recognition while paused; resume on resume.
-- Export the new state + functions.
+(Add `FolderOpen` to the lucide imports; drop unused `Calendar` / `CheckSquare` imports.)
 
-**File: `src/pages/Sessions.tsx`**
-- In the recording control bar (around line 850), render a Pause/Resume button next to the Stop button while `isRecording`. Pause icon when running, Play icon when paused. Timer also pauses (gate the existing `setSessionDuration` interval on `!isPaused`).
+This reuses the existing `admin` section already wired in `SECTION_TABS` (`["calendar", "tasks", "documents"]` — `PatientDetailsEditor.tsx:316`) and matches the mobile bottom nav, which already uses "My Desk" for the same destination. No routing changes needed; no duplicate work for tasks/calendar pages — they remain accessible as tabs inside My Desk.
 
-## 3. Fix To-Do List doc preview (still navigates to Templates)
+Mobile bottom nav is unchanged (already correct: 5 items including My Desk).
 
-**File: `src/components/dashboard/CompactTodoList.tsx`** — currently the Eye and FileText buttons both call `navigate('/documents?view=...')`, which lands on the templates/documents page.
+## 2. Mobile patient Home — remove duplicate "Good evening, Sara"
 
-- Mirror the in-place modal pattern from `src/pages/TodoList.tsx`:
-  - Add `previewDoc` state + `useDocumentHeaderFooter` + `useProfile`.
-  - Add a `handlePreviewDoc(todo)` that loads the document, applies profile placeholders, and sets `previewDoc`.
-  - Render `<DocumentPreview ... onClose={() => setPreviewDoc(null)} />` at the bottom of the component.
-  - Wire the **Eye** button to `handlePreviewDoc(todo)` (modal opens, no navigation).
-  - Remove the redundant FileText button (it was a duplicate of Eye).
-- Result: clicking the eye icon on a to-do opens the document preview overlay on the home page; closing it returns the user to the home page — no route change.
+**File:** `src/components/patients/PatientDetailsEditor.tsx` (lines 1138–1157)
 
-## 4. Launch the Vulas explainer (first-time + always available)
+The mobile Home banner currently renders the greeting **twice**: once at the top (lines 1078–1084) and again inside the mobile-only Vula Vouchers row (lines 1142–1148).
 
-The user uploaded the official "VULA VOUCHERS" launch graphic with the explanatory copy. We surface this as a reusable explainer modal on both rewards screens.
+Fix: in the mobile Vula row, drop the greeting span and keep only the Vula logo + count, right-aligned. The existing top greeting (line 1078) stays as the single source of truth.
 
-**New file: `src/components/rewards/VulaExplainerDialog.tsx`**
-- A `<Dialog>` styled to match the uploaded reference: gradient blue→teal hero, "Vula means rain in isiZulu and isiXhosa" heading, two bullet sections ("Vulas reward real-world actions", "Vulas are a simple way to start building value that grows with you"), and an "Earn Vulas" CTA at the bottom.
-- Props: `open`, `onOpenChange`, optional `onCta` (defaults to closing).
+```tsx
+{/* Row 3: Vula Vouchers - mobile only */}
+{!rewardsLoading && lollipopCount !== undefined && (
+  <div className="mt-3 border-t border-border pt-3 md:hidden">
+    <div className="flex items-center justify-end gap-2">
+      <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-[72px] w-auto object-contain" />
+      <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
+        <AnimatedCounter target={lollipopCount} />
+      </span>
+    </div>
+  </div>
+)}
+```
 
-**New asset:** copy uploaded image into `src/assets/vula-explainer.png` for the hero illustration.
+## 3. Logo sizing — fit inside mobile + tablet/web frames
 
-**Files: `src/pages/doctor/DoctorRewards.tsx` and `src/pages/patient/MyRewards.tsx`**
-- Add a small "What are Vulas?" link/info button in the page header (next to the title), opening the dialog.
-- First-launch behaviour: read/write `localStorage` key `vulas_explainer_seen_v1`. If absent on mount, auto-open the dialog and set the flag on close. Users can reopen any time via the header button.
+The logos currently overflow / look oversized:
+
+- **Mobile header** (`src/components/layout/PatientAppLayout.tsx:134`): `h-[62px]` — too tall for the 56–64px header bar; reduce to `h-10` (40px) with `object-contain`.
+- **Doctor mobile header** (`src/components/layout/MobileHeader.tsx`): currently `h-[50px]` — reduce to `h-10` for parity.
+- **Sidebar (tablet/web)** (`src/components/layout/Sidebar.tsx:97`): `h-[62px]` inside an `h-20` (80px) row — reduce to `h-12` (48px) `object-contain` so it sits comfortably inside the 80px header without stretching the 210px-wide sidebar frame.
+
+All three changes preserve aspect ratio via `w-auto object-contain` (already present) — only the height drops.
+
+## Files touched
+| File | Change |
+|---|---|
+| `src/components/layout/Sidebar.tsx` | Merge Calendar + Tasks → "My Desk"; logo `h-[62px]` → `h-12` |
+| `src/components/layout/PatientAppLayout.tsx` | Mobile header logo `h-[62px]` → `h-10` |
+| `src/components/layout/MobileHeader.tsx` | Doctor mobile header logo `h-[50px]` → `h-10` |
+| `src/components/patients/PatientDetailsEditor.tsx` | Remove duplicate greeting in mobile Vula row (lines 1142–1148) |
 
 ## Out of scope
-- Refactoring `CompactTodoList`'s ad-hoc recorder (separate cleanup).
-- Vulas redemption/transfer changes.
-- Service-worker / offline support for the PWA (already deferred).
+- Doctor sidebar items (already 5, no calendar/tasks duplication).
+- Web/tablet greeting (only one instance, no change needed).
+- Bottom nav (already shows "My Desk").
 
