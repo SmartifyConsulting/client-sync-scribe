@@ -19,15 +19,6 @@ export function VulaExplainerDialog({ open, onOpenChange, onCta }: VulaExplainer
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xs p-0 overflow-hidden border-0 gap-0 bg-card">
         <div className="relative p-5 space-y-3">
-          {/* Close button */}
-          <button
-            onClick={() => onOpenChange(false)}
-            className="absolute right-3 top-3 rounded-full bg-card border border-border p-1 hover:bg-muted transition-colors"
-            aria-label="Close"
-          >
-            <X className="h-3 w-3 text-muted-foreground" />
-          </button>
-
           {/* Logo */}
           <div className="flex justify-center pt-1">
             <img
