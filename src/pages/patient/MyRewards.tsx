@@ -80,7 +80,8 @@ export default function MyRewards() {
   const [activeTab, setActiveTabRaw] = useState("overview");
   // Fallback for any persisted/legacy tab values that no longer exist
   const setActiveTab = (v: string) => {
-    if (v === "history" || v === "streaks") setActiveTabRaw("overview");
+    if (v === "history") setActiveTabRaw("overview");
+    else if (v === "streaks" || v === "milestones" || v === "wins" || v === "wins-and-streaks") setActiveTabRaw("wins-streaks");
     else setActiveTabRaw(v);
   };
   const [showTransferDialog, setShowTransferDialog] = useState(false);
@@ -460,6 +461,10 @@ export default function MyRewards() {
               Chronic Meds
             </TabsTrigger>
           )}
+          <TabsTrigger value="wins-streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+            <Trophy className="h-4 w-4 mr-1" />
+            Wins and Streaks
+          </TabsTrigger>
           <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
              Vulas
            </TabsTrigger>
