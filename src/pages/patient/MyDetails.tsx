@@ -92,7 +92,7 @@ export default function MyDetails() {
   }
 
   const sectionHeading: Record<string, { title: string; subtitle: string }> = {
-    health: { title: "My Profile", subtitle: "View and update your personal and medical information" },
+    health: { title: "My Holarchive", subtitle: "View and update your personal and medical information" },
     care: { title: "My Holarchy", subtitle: "Your healthcare team, sessions and coordination" },
     admin: { title: "My Desk", subtitle: "Calendar, tasks and documents" },
     rewards: { title: "My Rewards", subtitle: "Track your Vulas and adherence streaks" },
