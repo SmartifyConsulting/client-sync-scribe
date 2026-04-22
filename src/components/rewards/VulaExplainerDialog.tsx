@@ -17,7 +17,7 @@ export function VulaExplainerDialog({ open, onOpenChange, onCta }: VulaExplainer
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xs p-0 overflow-hidden border-0 gap-0 bg-card">
+      <DialogContent className="max-w-xs p-0 overflow-hidden border-0 gap-0 bg-card rounded-2xl">
         <div className="relative p-5 space-y-3">
           {/* Logo */}
           <div className="flex justify-center pt-1">
@@ -34,11 +34,13 @@ export function VulaExplainerDialog({ open, onOpenChange, onCta }: VulaExplainer
               Vula means rain in
               <br />
               <span className="bg-gradient-to-r from-blue-500 to-teal-500 bg-clip-text text-transparent">
-                isiZulu and isiXhosa –
+                isiZulu and isiXhosa
               </span>
             </h2>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              something you can't always predict, but always need.
+              — something you can't always predict,
+              <br />
+              but always need.
             </p>
           </div>
 
@@ -78,7 +80,7 @@ export function VulaExplainerDialog({ open, onOpenChange, onCta }: VulaExplainer
             </div>
             <div className="flex-1">
               <p className="text-xs font-bold text-foreground leading-snug">
-                Vulas are a simple way to start building value that grows with you.
+                Vulas are a simple way to start building value for the future.
               </p>
             </div>
           </div>

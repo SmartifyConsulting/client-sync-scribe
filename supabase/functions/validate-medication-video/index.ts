@@ -28,7 +28,6 @@ serve(async (req) => {
   }
 
   try {
-    // Authenticate the caller
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -48,7 +47,84 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // ============================================================
-    // PILL CHECK MODE — single image, identify & match prescription
+    // BASELINE CAPTURE — describe the patient's reference pill once
+    // ============================================================
+    if (body.mode === 'baseline_capture') {
+      const { imageUrl, prescriptionId } = body;
+      if (!imageUrl || !prescriptionId) {
+        return new Response(
+          JSON.stringify({ error: 'Missing imageUrl or prescriptionId' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const { data: rx } = await supabase
+        .from('prescriptions')
+        .select('medication, dosage, patient_id')
+        .eq('id', prescriptionId)
+        .maybeSingle();
+      if (!rx) {
+        return new Response(
+          JSON.stringify({ error: 'Prescription not found' }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const describePrompt = `You are a medication identification assistant. Describe the pill or medication shown in this reference image. Reply in JSON ONLY:
+{
+  "isPillVisible": true or false,
+  "observedDescription": "describe colour, shape, size, surface texture, and any visible markings/text/score lines (or 'none' if no pill visible)"
+}
+Only return JSON.`;
+
+      let describeResp: Response;
+      try {
+        describeResp = await callGemini(LOVABLE_API_KEY, [
+          { type: 'text', text: describePrompt },
+          { type: 'image_url', image_url: { url: imageUrl } },
+        ]);
+      } catch (e) {
+        console.error('baseline describe fetch failed:', e);
+        return new Response(
+          JSON.stringify({ ok: false, observedDescription: '' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      let observedDescription = '';
+      if (describeResp.ok) {
+        const dd = await describeResp.json();
+        const dc = dd.choices?.[0]?.message?.content || '';
+        try {
+          const m = dc.match(/\{[\s\S]*\}/);
+          if (m) {
+            const parsed = JSON.parse(m[0]);
+            observedDescription = parsed.observedDescription || '';
+          }
+        } catch (e) { console.error('baseline parse error', e); }
+      }
+
+      // Persist the row (best effort — client also upserts to be safe)
+      await supabase.from('prescription_pill_references').upsert(
+        {
+          prescription_id: prescriptionId,
+          patient_id: rx.patient_id,
+          reference_image_url: imageUrl,
+          observed_description: observedDescription || null,
+          medication_snapshot: rx.medication,
+          dosage_snapshot: rx.dosage || '',
+        },
+        { onConflict: 'prescription_id' },
+      );
+
+      return new Response(
+        JSON.stringify({ ok: true, observedDescription }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // ============================================================
+    // PILL CHECK MODE — compare current image to reference image
     // ============================================================
     if (body.mode === 'pill_check') {
       const { imageUrl, prescriptionId } = body;
@@ -59,13 +135,11 @@ serve(async (req) => {
         );
       }
 
-      // Look up the prescription
       const { data: rx } = await supabase
         .from('prescriptions')
         .select('medication, dosage')
         .eq('id', prescriptionId)
         .maybeSingle();
-
       if (!rx) {
         return new Response(
           JSON.stringify({ error: 'Prescription not found' }),
@@ -73,87 +147,76 @@ serve(async (req) => {
         );
       }
 
-      // Step 1 — describe what's in the image
-      const describePrompt = `You are a medication identification assistant. Look at this image and answer in JSON ONLY:
-{
-  "isPillVisible": true or false,
-  "observedDescription": "describe colour, shape, size, and any visible markings/text on the pill (or 'none' if no pill visible)"
-}
-A pill is a tablet, capsule, caplet, or visible liquid medicine. Only return JSON.`;
+      // Look up the baseline reference
+      const { data: ref } = await supabase
+        .from('prescription_pill_references')
+        .select('reference_image_url, observed_description, medication_snapshot, dosage_snapshot')
+        .eq('prescription_id', prescriptionId)
+        .maybeSingle();
 
-      let describeResp: Response;
-      try {
-        describeResp = await callGemini(LOVABLE_API_KEY, [
-          { type: 'text', text: describePrompt },
-          { type: 'image_url', image_url: { url: imageUrl } },
-        ]);
-      } catch (e) {
-        console.error('pill_check describe fetch failed:', e);
-        return new Response(
-          JSON.stringify({ ok: false, fallback: true, message: 'Could not analyse the pill image, please proceed.' }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      if (!describeResp.ok) {
-        const t = await describeResp.text().catch(() => '');
-        console.error('describe failed', describeResp.status, t);
-        return new Response(
-          JSON.stringify({ ok: false, fallback: true, message: 'Could not analyse the pill image, please proceed.' }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      const describeData = await describeResp.json();
-      const describeContent = describeData.choices?.[0]?.message?.content || '';
-      let described: any = { isPillVisible: false, observedDescription: 'none' };
-      try {
-        const m = describeContent.match(/\{[\s\S]*\}/);
-        if (m) described = JSON.parse(m[0]);
-      } catch (e) { console.error('describe parse error', e); }
-
-      if (!described.isPillVisible) {
+      if (!ref || !ref.reference_image_url) {
         return new Response(
           JSON.stringify({
             ok: true,
-            isPillVisible: false,
-            isMatch: false,
-            matchReason: 'No pill detected in the image. Hold it closer to the camera and try again.',
-            observedDescription: described.observedDescription || 'none',
+            requiresBaseline: true,
+            reason: 'No reference photo on file. Please capture a baseline photo of your pill first.',
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
-      // Step 2 — match against prescription
-      const matchPrompt = `Prescription: ${rx.medication} ${rx.dosage || ''}.
-Observed pill description: ${described.observedDescription}.
+      // Stale check: medication or dosage changed since baseline
+      const medChanged = (ref.medication_snapshot || '').trim().toLowerCase() !== (rx.medication || '').trim().toLowerCase();
+      const dosChanged = (ref.dosage_snapshot || '').trim().toLowerCase() !== (rx.dosage || '').trim().toLowerCase();
+      if (medChanged || dosChanged || !ref.observed_description) {
+        return new Response(
+          JSON.stringify({
+            ok: true,
+            requiresBaseline: true,
+            reason: 'Medication updated — please capture a new reference photo.',
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
 
-Could these plausibly be the same medication? Many generic medications have no markings — be lenient when shape/colour are reasonable. Reply in JSON ONLY:
+      // Compare both images
+      const matchPrompt = `Image A is the patient's REFERENCE photo of their prescribed medication (${rx.medication} ${rx.dosage || ''}).
+Image B is the pill they're about to take RIGHT NOW.
+
+Compare colour, shape, size, surface texture and any visible markings or score lines. Generic unmarked tablets only need to share colour and shape — be lenient on those. Pills with distinctive markings should match those markings.
+
+Reply in JSON ONLY:
 {
+  "isPillVisible": true or false,
   "isMatch": true or false,
+  "confidence": number 0-100,
   "matchReason": "one short sentence explaining the verdict"
 }
 Only return JSON.`;
 
       let matchResp: Response;
       try {
-        matchResp = await callGemini(LOVABLE_API_KEY, [{ type: 'text', text: matchPrompt }]);
+        matchResp = await callGemini(LOVABLE_API_KEY, [
+          { type: 'text', text: matchPrompt },
+          { type: 'text', text: 'Image A — reference:' },
+          { type: 'image_url', image_url: { url: ref.reference_image_url } },
+          { type: 'text', text: 'Image B — current pill:' },
+          { type: 'image_url', image_url: { url: imageUrl } },
+        ]);
       } catch (e) {
-        console.error('match fetch failed:', e);
+        console.error('pill_check compare fetch failed:', e);
         return new Response(
           JSON.stringify({
             ok: true,
             isPillVisible: true,
             isMatch: true,
-            matchReason: "Couldn't fully verify, but a tablet is visible — proceeding.",
-            observedDescription: described.observedDescription,
+            matchReason: "Couldn't fully verify, proceeding.",
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
-      let matched: any = { isMatch: true, matchReason: 'Proceeding without strict match.' };
+      let matched: any = { isPillVisible: true, isMatch: true, matchReason: 'Proceeding without strict match.' };
       if (matchResp.ok) {
         const md = await matchResp.json();
         const mc = md.choices?.[0]?.message?.content || '';
@@ -163,13 +226,27 @@ Only return JSON.`;
         } catch (e) { console.error('match parse error', e); }
       }
 
+      if (!matched.isPillVisible) {
+        return new Response(
+          JSON.stringify({
+            ok: true,
+            isPillVisible: false,
+            isMatch: false,
+            matchReason: 'No pill detected. Hold it closer to the camera and try again.',
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       return new Response(
         JSON.stringify({
           ok: true,
           isPillVisible: true,
-          isMatch: matched.isMatch,
-          matchReason: matched.matchReason,
-          observedDescription: described.observedDescription,
+          isMatch: !!matched.isMatch,
+          confidence: matched.confidence ?? null,
+          matchReason: matched.matchReason || (matched.isMatch
+            ? "Matches your reference pill."
+            : "This doesn't look like your usual pill — please double-check before taking it."),
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -180,7 +257,6 @@ Only return JSON.`;
     // ============================================================
     const { imageUrls, filePaths, prescriptionId, patientId } = body;
 
-    // Support both old single-image and new multi-frame format
     const urls: string[] = imageUrls || (body.videoUrl ? [body.videoUrl] : []);
     const paths: string[] = filePaths || (body.filePath ? [body.filePath] : []);
 
@@ -193,7 +269,6 @@ Only return JSON.`;
 
     const today = new Date().toISOString().split('T')[0];
 
-    // Helpers
     const cleanupAllFiles = async () => {
       if (paths.length > 0) {
         const { error } = await supabase.storage.from('patient-media').remove(paths);
@@ -234,14 +309,15 @@ Only return JSON.`;
       } catch (e) { console.error('savePendingReview failed:', e); }
     };
 
-    // Stage 1 already confirmed the pill, so we focus on person + ingestion + completion
-    const validationPrompt = `You are a healthcare compliance validator. You are given ${urls.length} frames extracted from a short video, in chronological order. The patient has already shown the correct medication in a separate prior step, so do NOT fail this verification just because the pill isn't clearly visible — focus on the ingestion behaviour.
+    // Stage 1 already confirmed the pill matches the reference. Focus on person + ingestion + completion + NO chewing.
+    const validationPrompt = `You are a healthcare compliance validator. You are given ${urls.length} frames extracted from a short video, in chronological order. The patient already confirmed the correct pill in a separate prior step, so do NOT fail this just because the pill isn't clearly visible — focus on swallowing behaviour.
 
 Analyse the SEQUENCE for ALL of these criteria:
 
 1. **Person visible**: The same person must be clearly visible across the frames.
 2. **Ingestion action**: The middle-to-late frames must show the person placing something into their mouth (hand-to-mouth gesture).
 3. **Completion**: The final frame(s) should show the person has swallowed — ideally an open, empty mouth or relaxed posture after swallowing.
+4. **Swallowed whole (no chewing)**: The patient must swallow the medication whole (typically with water or a sip). If the frames clearly show repeated jaw/chewing motion suggesting the tablet was crushed by teeth, set chewing_detected: true. Many tablets must NOT be chewed.
 
 Respond with JSON ONLY:
 {
@@ -250,10 +326,11 @@ Respond with JSON ONLY:
   "description": "brief description of what the sequence shows",
   "person_detected": true or false,
   "ingestion_detected": true or false,
+  "chewing_detected": true or false,
   "detected_elements": ["list", "of", "relevant", "elements"]
 }
 
-VALID only if person + ingestion + completion are all present. Only return JSON.`;
+VALID only if person_detected AND ingestion_detected AND completion AND NOT chewing_detected. Only return JSON.`;
 
     const content: any[] = [{ type: 'text', text: validationPrompt }];
     urls.forEach((url, i) => {
@@ -303,6 +380,12 @@ VALID only if person + ingestion + completion are all present. Only return JSON.
       );
     }
 
+    // Override isValid if AI said valid but also flagged chewing
+    if (validationResult.chewing_detected === true) {
+      validationResult.isValid = false;
+      validationResult.description = "Chewing detected — many tablets must be swallowed whole. Please contact your doctor before chewing or crushing medication.";
+    }
+
     if (validationResult.isValid) {
       const { error: updateError } = await supabase
         .from('medication_adherence')
@@ -328,7 +411,6 @@ VALID only if person + ingestion + completion are all present. Only return JSON.
         });
       }
 
-      // Check streak milestones
       let currentStreak = 0;
       const { data: streakRecords } = await supabase
         .from('medication_adherence')

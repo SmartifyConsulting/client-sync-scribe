@@ -1609,6 +1609,57 @@ export type Database = {
         }
         Relationships: []
       }
+      prescription_pill_references: {
+        Row: {
+          created_at: string
+          dosage_snapshot: string
+          id: string
+          medication_snapshot: string
+          observed_description: string | null
+          patient_id: string
+          prescription_id: string
+          reference_image_url: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dosage_snapshot: string
+          id?: string
+          medication_snapshot: string
+          observed_description?: string | null
+          patient_id: string
+          prescription_id: string
+          reference_image_url: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dosage_snapshot?: string
+          id?: string
+          medication_snapshot?: string
+          observed_description?: string | null
+          patient_id?: string
+          prescription_id?: string
+          reference_image_url?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescription_pill_references_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prescription_pill_references_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: true
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prescriptions: {
         Row: {
           created_at: string
