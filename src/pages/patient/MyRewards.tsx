@@ -783,55 +783,6 @@ export default function MyRewards() {
               )}
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="history" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-primary" />
-                Full Reward History
-              </CardTitle>
-              <CardDescription>Complete log of all Vulas earned</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {rewards.length === 0 ? (
-                <div className="text-center py-8">
-                  <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-10 w-auto object-contain mx-auto mb-4" />
-                  <p className="text-muted-foreground">No rewards yet</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Visit Type</TableHead>
-                      <TableHead className="text-right">Vulas</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {rewards.map((reward) => (
-                      <TableRow key={reward.id}>
-                        <TableCell>
-                          <div>{format(parseISO(reward.awarded_at), "MMM d, yyyy")}</div>
-                          <span className="text-xs text-muted-foreground">{format(parseISO(reward.awarded_at), "h:mm a")}</span>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className="bg-primary/10 text-primary">{reward.visit_category}</Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <span className={`font-semibold ${reward.lollipops_count < 0 ? "text-blue-600" : "text-emerald-600"}`}>
-                            {reward.lollipops_count > 0 ? "+" : ""}{reward.lollipops_count} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-auto object-contain inline-block ml-0.5" />
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   );
