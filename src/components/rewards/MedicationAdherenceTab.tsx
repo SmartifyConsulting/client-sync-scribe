@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, subDays } from "date-fns";
 import { SuccessCelebration } from "./SuccessCelebration";
+import { PillBaselineCapture } from "./PillBaselineCapture";
 
 type Stage = "pill_check" | "ingestion";
 
@@ -55,6 +56,9 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
   const [countdown, setCountdown] = useState(30);
   const [celebration, setCelebration] = useState<{ open: boolean; vulasEarned: number; streak: number; medicationName: string }>({
     open: false, vulasEarned: 0, streak: 0, medicationName: "",
+  });
+  const [baselineCapture, setBaselineCapture] = useState<{ open: boolean; rxId: string; medication: string; dosage: string }>({
+    open: false, rxId: "", medication: "", dosage: "",
   });
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
