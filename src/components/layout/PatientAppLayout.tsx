@@ -131,7 +131,7 @@ export function PatientAppLayout() {
         <div className="px-4 md:px-8 py-3 flex items-center justify-between max-w-7xl mx-auto w-full">
           {/* Left: Logo */}
           <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <img src={holarcLogo} alt="Holarc" className="h-[62px] w-auto object-contain" />
+            <img src={holarcLogo} alt="Holarc" className="h-10 w-auto object-contain" />
           </button>
 
           {/* Center: Upcoming Appointments */}

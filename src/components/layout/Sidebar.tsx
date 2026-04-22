@@ -8,13 +8,13 @@ import {
   Settings,
   Settings2,
   LogOut,
-  CheckSquare,
   Loader2,
   User,
   LucideIcon,
   DollarSign,
   Gift,
   UserCog,
+  FolderOpen,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
@@ -39,8 +39,7 @@ const doctorNavItems: NavItem[] = [
 const patientNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Home", to: "/patient/details?section=home" },
   { icon: User, label: "My Profile", to: "/patient/details?section=health" },
-  { icon: Calendar, label: "My Calendar", to: "/patient/calendar" },
-  { icon: CheckSquare, label: "To-Do List", to: "/patient/tasks" },
+  { icon: FolderOpen, label: "My Desk", to: "/patient/details?section=admin" },
   { icon: Gift, label: "My Rewards", to: "/patient/rewards" },
 ];
 
@@ -94,7 +93,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     <aside className="fixed left-0 top-0 z-40 h-screen w-[210px] bg-sidebar border-r border-sidebar-border">
       <div className="flex h-full flex-col">
         <div className="flex h-20 items-center gap-3 px-6">
-          <img src={holarcLogo} alt="Holarc Health" className="h-[62px] w-auto" />
+          <img src={holarcLogo} alt="Holarc Health" className="h-12 w-auto object-contain" />
         </div>
 
         {/* Navigation */}
