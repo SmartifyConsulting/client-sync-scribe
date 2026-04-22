@@ -1138,20 +1138,11 @@ export function PatientDetailsEditor({
         {/* Row 3: Vula Vouchers - mobile only (shown inline on web) */}
         {!rewardsLoading && lollipopCount !== undefined && (
           <div className="mt-3 border-t border-border pt-3 md:hidden">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-foreground whitespace-nowrap">
-                {(() => {
-                  const hour = new Date().getHours();
-                  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-                  return `${greeting}, ${patient.name.split(" ")[0]}`;
-                })()}
+            <div className="flex items-center justify-end gap-2">
+              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-[72px] w-auto object-contain" />
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
+                <AnimatedCounter target={lollipopCount} />
               </span>
-              <div className="flex items-center gap-2">
-                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-[72px] w-auto object-contain" />
-                <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
-                  <AnimatedCounter target={lollipopCount} />
-                </span>
-              </div>
             </div>
           </div>
         )}
