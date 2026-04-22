@@ -22,6 +22,39 @@ async function callGemini(apiKey: string, content: any[], model = 'google/gemini
   });
 }
 
+type IntakeMethod = 'swallow' | 'chew' | 'crush' | 'dissolve' | 'gummy';
+
+function methodSignals(method: IntakeMethod | string | null): { required: string; disqualifying: string } {
+  switch (method) {
+    case 'chew':
+      return {
+        required: 'hand-to-mouth gesture, clear chewing motion across multiple frames, then swallow',
+        disqualifying: 'tablet swallowed immediately with no chewing motion',
+      };
+    case 'crush':
+      return {
+        required: 'powder or visibly broken tablet present, consumed via spoon or mixed in food/liquid',
+        disqualifying: 'a whole intact tablet placed directly into the mouth',
+      };
+    case 'dissolve':
+      return {
+        required: 'tablet placed in liquid (visible fizzing or stirring) and the liquid is then drunk',
+        disqualifying: 'tablet placed directly into the mouth without dissolving first',
+      };
+    case 'gummy':
+      return {
+        required: 'hand-to-mouth gesture and chewing motion (chewing is expected)',
+        disqualifying: 'none — chewing is the correct behaviour for a gummy',
+      };
+    case 'swallow':
+    default:
+      return {
+        required: 'hand-to-mouth gesture and a swallow action (jaw/throat movement, relaxed posture afterwards)',
+        disqualifying: 'repeated chewing motion suggesting the tablet was crushed by teeth',
+      };
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -47,13 +80,14 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // ============================================================
-    // BASELINE CAPTURE — describe the patient's reference pill once
+    // BASELINE CAPTURE — full first-dose video (frames only)
+    // Persists tablet description + ingestion-pattern summary
     // ============================================================
     if (body.mode === 'baseline_capture') {
-      const { imageUrl, prescriptionId } = body;
-      if (!imageUrl || !prescriptionId) {
+      const { closeupImageUrl, sequenceImageUrls, sequenceFilePaths, intakeMethod, prescriptionId } = body;
+      if (!closeupImageUrl || !prescriptionId || !intakeMethod) {
         return new Response(
-          JSON.stringify({ error: 'Missing imageUrl or prescriptionId' }),
+          JSON.stringify({ error: 'Missing closeupImageUrl, intakeMethod or prescriptionId' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
@@ -70,6 +104,7 @@ serve(async (req) => {
         );
       }
 
+      // 1) Describe the tablet from the close-up
       const describePrompt = `You are a medication identification assistant. Describe the pill or medication shown in this reference image. Reply in JSON ONLY:
 {
   "isPillVisible": true or false,
@@ -77,54 +112,76 @@ serve(async (req) => {
 }
 Only return JSON.`;
 
-      let describeResp: Response;
-      try {
-        describeResp = await callGemini(LOVABLE_API_KEY, [
-          { type: 'text', text: describePrompt },
-          { type: 'image_url', image_url: { url: imageUrl } },
-        ]);
-      } catch (e) {
-        console.error('baseline describe fetch failed:', e);
-        return new Response(
-          JSON.stringify({ ok: false, observedDescription: '' }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
       let observedDescription = '';
-      if (describeResp.ok) {
-        const dd = await describeResp.json();
-        const dc = dd.choices?.[0]?.message?.content || '';
-        try {
+      try {
+        const describeResp = await callGemini(LOVABLE_API_KEY, [
+          { type: 'text', text: describePrompt },
+          { type: 'image_url', image_url: { url: closeupImageUrl } },
+        ]);
+        if (describeResp.ok) {
+          const dd = await describeResp.json();
+          const dc = dd.choices?.[0]?.message?.content || '';
           const m = dc.match(/\{[\s\S]*\}/);
-          if (m) {
-            const parsed = JSON.parse(m[0]);
-            observedDescription = parsed.observedDescription || '';
-          }
-        } catch (e) { console.error('baseline parse error', e); }
+          if (m) observedDescription = JSON.parse(m[0]).observedDescription || '';
+        }
+      } catch (e) {
+        console.error('baseline tablet describe failed', e);
       }
 
-      // Persist the row (best effort — client also upserts to be safe)
+      // 2) Summarise the ingestion sequence
+      let baselinePatternSummary = '';
+      const seqUrls: string[] = Array.isArray(sequenceImageUrls) ? sequenceImageUrls : [];
+      if (seqUrls.length > 0) {
+        const patternPrompt = `You are observing a patient's first-dose baseline for ${rx.medication} (${rx.dosage || ''}). Their declared intake method is "${intakeMethod}". Summarise their ingestion routine across these ${seqUrls.length} chronological frames in 1-2 sentences for later pattern matching. Note hand used, body posture, presence of water/liquid/spoon, and timing cues. Reply in JSON ONLY:
+{ "baselinePatternSummary": "..." }
+Only return JSON.`;
+        const content: any[] = [{ type: 'text', text: patternPrompt }];
+        seqUrls.forEach((url, i) => {
+          content.push({ type: 'text', text: `Frame ${i + 1}:` });
+          content.push({ type: 'image_url', image_url: { url } });
+        });
+        try {
+          const patternResp = await callGemini(LOVABLE_API_KEY, content);
+          if (patternResp.ok) {
+            const pd = await patternResp.json();
+            const pc = pd.choices?.[0]?.message?.content || '';
+            const m = pc.match(/\{[\s\S]*\}/);
+            if (m) baselinePatternSummary = JSON.parse(m[0]).baselinePatternSummary || '';
+          }
+        } catch (e) {
+          console.error('baseline pattern summary failed', e);
+        }
+      }
+
+      // 3) Persist the row
       await supabase.from('prescription_pill_references').upsert(
         {
           prescription_id: prescriptionId,
           patient_id: rx.patient_id,
-          reference_image_url: imageUrl,
+          reference_image_url: closeupImageUrl,
           observed_description: observedDescription || null,
+          baseline_pattern_summary: baselinePatternSummary || null,
+          intake_method: intakeMethod,
           medication_snapshot: rx.medication,
           dosage_snapshot: rx.dosage || '',
         },
         { onConflict: 'prescription_id' },
       );
 
+      // 4) Cleanup sequence frames — we don't need them after extraction
+      if (Array.isArray(sequenceFilePaths) && sequenceFilePaths.length > 0) {
+        await supabase.storage.from('patient-media').remove(sequenceFilePaths).catch((e) => console.error('cleanup baseline frames', e));
+      }
+
       return new Response(
-        JSON.stringify({ ok: true, observedDescription }),
+        JSON.stringify({ ok: true, observedDescription, baselinePatternSummary }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     // ============================================================
     // PILL CHECK MODE — compare current image to reference image
+    // (skipped client-side for crush/dissolve methods)
     // ============================================================
     if (body.mode === 'pill_check') {
       const { imageUrl, prescriptionId } = body;
@@ -147,25 +204,23 @@ Only return JSON.`;
         );
       }
 
-      // Look up the baseline reference
       const { data: ref } = await supabase
         .from('prescription_pill_references')
-        .select('reference_image_url, observed_description, medication_snapshot, dosage_snapshot')
+        .select('reference_image_url, observed_description, intake_method, baseline_pattern_summary, medication_snapshot, dosage_snapshot')
         .eq('prescription_id', prescriptionId)
         .maybeSingle();
 
-      if (!ref || !ref.reference_image_url) {
+      if (!ref || !ref.reference_image_url || !ref.intake_method || !ref.baseline_pattern_summary) {
         return new Response(
           JSON.stringify({
             ok: true,
             requiresBaseline: true,
-            reason: 'No reference photo on file. Please capture a baseline photo of your pill first.',
+            reason: 'No baseline on file. Please record a baseline video first.',
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
-      // Stale check: medication or dosage changed since baseline
       const medChanged = (ref.medication_snapshot || '').trim().toLowerCase() !== (rx.medication || '').trim().toLowerCase();
       const dosChanged = (ref.dosage_snapshot || '').trim().toLowerCase() !== (rx.dosage || '').trim().toLowerCase();
       if (medChanged || dosChanged || !ref.observed_description) {
@@ -173,13 +228,20 @@ Only return JSON.`;
           JSON.stringify({
             ok: true,
             requiresBaseline: true,
-            reason: 'Medication updated — please capture a new reference photo.',
+            reason: 'Medication updated — please record a new baseline video.',
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
-      // Compare both images
+      // Crush / dissolve methods don't have a meaningful intact-tablet frame
+      if (ref.intake_method === 'crush' || ref.intake_method === 'dissolve') {
+        return new Response(
+          JSON.stringify({ ok: true, skip: true, reason: 'Pill check skipped for this intake method.' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       const matchPrompt = `Image A is the patient's REFERENCE photo of their prescribed medication (${rx.medication} ${rx.dosage || ''}).
 Image B is the pill they're about to take RIGHT NOW.
 
@@ -253,7 +315,7 @@ Only return JSON.`;
     }
 
     // ============================================================
-    // INGESTION VALIDATION MODE — multi-frame sequence
+    // INGESTION VALIDATION MODE — method-aware confidence scoring
     // ============================================================
     const { imageUrls, filePaths, prescriptionId, patientId } = body;
 
@@ -269,13 +331,22 @@ Only return JSON.`;
 
     const today = new Date().toISOString().split('T')[0];
 
+    // Look up baseline (intake method + pattern summary) for tailored prompting
+    const { data: ref } = await supabase
+      .from('prescription_pill_references')
+      .select('intake_method, observed_description, baseline_pattern_summary')
+      .eq('prescription_id', prescriptionId)
+      .maybeSingle();
+
+    const intakeMethod = (ref?.intake_method as IntakeMethod) || 'swallow';
+    const { required, disqualifying } = methodSignals(intakeMethod);
+
     const cleanupAllFiles = async () => {
       if (paths.length > 0) {
         const { error } = await supabase.storage.from('patient-media').remove(paths);
         if (error) console.error('Failed to delete frame files:', error);
       }
     };
-
     const cleanupExceptFirst = async () => {
       if (paths.length > 1) {
         const toDelete = paths.slice(1);
@@ -284,53 +355,53 @@ Only return JSON.`;
       }
     };
 
-    const savePendingReview = async () => {
-      try {
-        const firstFrameUrl = urls[0] || null;
-        const { data: existing } = await supabase
-          .from('medication_adherence')
-          .select('id')
-          .eq('patient_id', patientId)
-          .eq('prescription_id', prescriptionId)
-          .eq('scheduled_date', today)
-          .maybeSingle();
-
-        if (existing?.id) {
-          await supabase
-            .from('medication_adherence')
-            .update({ status: 'pending_review', taken_at: new Date().toISOString(), proof_url: firstFrameUrl })
-            .eq('id', existing.id);
-        } else {
-          await supabase.from('medication_adherence').insert({
-            patient_id: patientId, prescription_id: prescriptionId, scheduled_date: today,
-            status: 'pending_review', taken_at: new Date().toISOString(), proof_url: firstFrameUrl,
-          });
-        }
-      } catch (e) { console.error('savePendingReview failed:', e); }
+    const upsertAdherence = async (status: string, extras: Record<string, any> = {}) => {
+      const firstFrameUrl = urls[0] || null;
+      const { data: existing } = await supabase
+        .from('medication_adherence')
+        .select('id')
+        .eq('patient_id', patientId)
+        .eq('prescription_id', prescriptionId)
+        .eq('scheduled_date', today)
+        .maybeSingle();
+      const payload: Record<string, any> = {
+        status,
+        taken_at: new Date().toISOString(),
+        proof_url: status === 'completed' ? null : firstFrameUrl,
+        ...extras,
+      };
+      if (existing?.id) {
+        await supabase.from('medication_adherence').update(payload).eq('id', existing.id);
+      } else {
+        await supabase.from('medication_adherence').insert({
+          patient_id: patientId, prescription_id: prescriptionId, scheduled_date: today,
+          ...payload,
+        });
+      }
     };
 
-    // Stage 1 already confirmed the pill matches the reference. Focus on person + ingestion + completion + NO chewing.
-    const validationPrompt = `You are a healthcare compliance validator. You are given ${urls.length} frames extracted from a short video, in chronological order. The patient already confirmed the correct pill in a separate prior step, so do NOT fail this just because the pill isn't clearly visible — focus on swallowing behaviour.
+    const validationPrompt = `You are a healthcare compliance validator. You are given ${urls.length} frames extracted from a short video, in chronological order.
 
-Analyse the SEQUENCE for ALL of these criteria:
+The patient's declared intake method is: "${intakeMethod}".
+${ref?.observed_description ? `Tablet baseline description: ${ref.observed_description}` : ''}
+${ref?.baseline_pattern_summary ? `Patient's baseline routine: ${ref.baseline_pattern_summary}` : ''}
 
-1. **Person visible**: The same person must be clearly visible across the frames.
-2. **Ingestion action**: The middle-to-late frames must show the person placing something into their mouth (hand-to-mouth gesture).
-3. **Completion**: The final frame(s) should show the person has swallowed — ideally an open, empty mouth or relaxed posture after swallowing.
-4. **Swallowed whole (no chewing)**: The patient must swallow the medication whole (typically with water or a sip). If the frames clearly show repeated jaw/chewing motion suggesting the tablet was crushed by teeth, set chewing_detected: true. Many tablets must NOT be chewed.
+REQUIRED signals for this intake method: ${required}
+DISQUALIFYING signals for this intake method: ${disqualifying}
 
-Respond with JSON ONLY:
+Analyse the SEQUENCE and respond with JSON ONLY:
 {
   "isValid": true or false,
   "confidence": number 0-100,
+  "pattern_match_score": number 0-100,
   "description": "brief description of what the sequence shows",
   "person_detected": true or false,
   "ingestion_detected": true or false,
-  "chewing_detected": true or false,
+  "disqualifying_signal": true or false,
   "detected_elements": ["list", "of", "relevant", "elements"]
 }
 
-VALID only if person_detected AND ingestion_detected AND completion AND NOT chewing_detected. Only return JSON.`;
+Set isValid=true only if person_detected AND ingestion_detected AND the required signals are present AND no disqualifying signal is observed. Set confidence based on overall certainty. Only return JSON.`;
 
     const content: any[] = [{ type: 'text', text: validationPrompt }];
     urls.forEach((url, i) => {
@@ -343,10 +414,10 @@ VALID only if person_detected AND ingestion_detected AND completion AND NOT chew
       aiResponse = await callGemini(LOVABLE_API_KEY, content);
     } catch (fetchErr) {
       console.error('AI fetch threw:', fetchErr);
-      await savePendingReview();
+      await upsertAdherence('provisional', { confidence_score: null });
       await cleanupExceptFirst();
       return new Response(
-        JSON.stringify({ ok: false, fallback: true, message: 'Verification temporarily unavailable — your dose has been recorded for doctor review.' }),
+        JSON.stringify({ ok: false, fallback: true, reason: 'ai_unavailable', message: 'Verification temporarily unavailable — your dose has been recorded for end-of-month review.' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -354,10 +425,10 @@ VALID only if person_detected AND ingestion_detected AND completion AND NOT chew
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text().catch(() => '');
       console.error('AI validation failed:', aiResponse.status, errorText);
-      await savePendingReview();
+      await upsertAdherence('provisional', { confidence_score: null });
       await cleanupExceptFirst();
       return new Response(
-        JSON.stringify({ ok: false, fallback: true, message: 'Verification temporarily unavailable — your dose has been recorded for doctor review.' }),
+        JSON.stringify({ ok: false, fallback: true, reason: 'ai_unavailable', message: 'Verification temporarily unavailable — your dose has been recorded for end-of-month review.' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -372,28 +443,42 @@ VALID only if person_detected AND ingestion_detected AND completion AND NOT chew
       else throw new Error('No JSON found in response');
     } catch (parseError) {
       console.error('Failed to parse AI response:', parseError);
-      await savePendingReview();
+      await upsertAdherence('provisional', { confidence_score: null });
       await cleanupExceptFirst();
       return new Response(
-        JSON.stringify({ ok: false, fallback: true, message: 'Verification temporarily unavailable — your dose has been recorded for doctor review.' }),
+        JSON.stringify({ ok: false, fallback: true, reason: 'parse_error', message: 'Verification temporarily unavailable — your dose has been recorded for end-of-month review.' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Override isValid if AI said valid but also flagged chewing
-    if (validationResult.chewing_detected === true) {
-      validationResult.isValid = false;
-      validationResult.description = "Chewing detected — many tablets must be swallowed whole. Please contact your doctor before chewing or crushing medication.";
+    const confidence = typeof validationResult.confidence === 'number'
+      ? Math.max(0, Math.min(100, validationResult.confidence))
+      : 0;
+    const hardFail = validationResult.disqualifying_signal === true && confidence >= 60;
+
+    // ===== Decision tree =====
+    // Hard fail: locked, no Vulas
+    if (hardFail) {
+      await upsertAdherence('failed_verification', { confidence_score: confidence });
+      await cleanupExceptFirst();
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          validation: {
+            ...validationResult,
+            isValid: false,
+            description: validationResult.description || 'The intake did not match your declared method. Please contact your doctor before changing how you take this medicine.',
+          },
+          confidence,
+          molesAwarded: 0,
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    if (validationResult.isValid) {
-      const { error: updateError } = await supabase
-        .from('medication_adherence')
-        .update({ status: 'completed', taken_at: new Date().toISOString(), proof_url: null })
-        .eq('patient_id', patientId)
-        .eq('prescription_id', prescriptionId)
-        .eq('scheduled_date', today);
-      if (updateError) console.error('Failed to update adherence:', updateError);
+    // Confirmed: Vulas + completed
+    if (validationResult.isValid && confidence >= 75) {
+      await upsertAdherence('completed', { confidence_score: confidence });
 
       const { data: patient } = await supabase
         .from('patients')
@@ -417,7 +502,7 @@ VALID only if person_detected AND ingestion_detected AND completion AND NOT chew
         .select('scheduled_date')
         .eq('patient_id', patientId)
         .eq('prescription_id', prescriptionId)
-        .eq('status', 'completed')
+        .in('status', ['completed', 'provisional'])
         .order('scheduled_date', { ascending: false });
 
       if (streakRecords) {
@@ -444,38 +529,50 @@ VALID only if person_detected AND ingestion_detected AND completion AND NOT chew
       await cleanupAllFiles();
 
       return new Response(
-        JSON.stringify({ ok: true, validation: validationResult, molesAwarded: 5, streak: currentStreak }),
+        JSON.stringify({ ok: true, validation: validationResult, confidence, molesAwarded: 5, streak: currentStreak }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // AI ran but said "no"
-    try {
-      const firstFrameUrl = urls[0] || null;
-      const { data: existing } = await supabase
-        .from('medication_adherence')
-        .select('id')
-        .eq('patient_id', patientId)
-        .eq('prescription_id', prescriptionId)
-        .eq('scheduled_date', today)
+    // Provisional: 30-74 confidence — Vulas paid now, reconciled at month-end
+    if (confidence >= 30) {
+      await upsertAdherence('provisional', { confidence_score: confidence });
+
+      const { data: patient } = await supabase
+        .from('patients')
+        .select('patient_user_id')
+        .eq('id', patientId)
         .maybeSingle();
 
-      if (existing?.id) {
-        await supabase
-          .from('medication_adherence')
-          .update({ status: 'failed_verification', taken_at: new Date().toISOString(), proof_url: firstFrameUrl })
-          .eq('id', existing.id);
-      } else {
-        await supabase.from('medication_adherence').insert({
-          patient_id: patientId, prescription_id: prescriptionId, scheduled_date: today,
-          status: 'failed_verification', taken_at: new Date().toISOString(), proof_url: firstFrameUrl,
+      if (patient?.patient_user_id) {
+        await supabase.from('patient_rewards').insert({
+          patient_id: patientId,
+          awarded_by: patient.patient_user_id,
+          lollipops_count: 5,
+          visit_category: 'Medication Adherence',
+          reward_type: 'medication_adherence',
         });
       }
-    } catch (e) { console.error('failed_verification update error:', e); }
-    await cleanupExceptFirst();
 
+      await cleanupExceptFirst();
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          provisional: true,
+          confidence,
+          validation: validationResult,
+          molesAwarded: 5,
+          message: `Confidence ${Math.round(confidence)}% — provisional. Will be confirmed at month-end if your average stays above 50%.`,
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Too low: failed, no Vulas
+    await upsertAdherence('failed_verification', { confidence_score: confidence });
+    await cleanupExceptFirst();
     return new Response(
-      JSON.stringify({ ok: true, validation: validationResult, molesAwarded: 0 }),
+      JSON.stringify({ ok: true, validation: validationResult, confidence, molesAwarded: 0 }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
