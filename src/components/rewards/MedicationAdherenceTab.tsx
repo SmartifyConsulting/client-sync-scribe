@@ -294,6 +294,65 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
     });
   };
 
+  // STAGE 1 — Capture a single still and verify the pill matches the prescription
+  const capturePillImage = async () => {
+    if (!stream || !videoRef.current || !recordingPrescriptionId) return;
+    setIsCheckingPill(true);
+    try {
+      const video = videoRef.current;
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas context unavailable");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const blob: Blob = await new Promise((res, rej) =>
+        canvas.toBlob((b) => (b ? res(b) : rej(new Error("toBlob failed"))), "image/jpeg", 0.85)
+      );
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const ts = Date.now();
+      const filePath = `medication-proof/${user.id}/${ts}-pill.jpg`;
+      const { error: upErr } = await supabase.storage
+        .from("patient-media")
+        .upload(filePath, blob, { contentType: "image/jpeg" });
+      if (upErr) throw upErr;
+      const { data: urlData } = supabase.storage.from("patient-media").getPublicUrl(filePath);
+
+      const { data, error: fnError } = await supabase.functions.invoke("validate-medication-video", {
+        body: { mode: "pill_check", imageUrl: urlData.publicUrl, prescriptionId: recordingPrescriptionId },
+      });
+      if (fnError) throw fnError;
+
+      // Best-effort cleanup of the pill image
+      supabase.storage.from("patient-media").remove([filePath]).catch(() => {});
+
+      const result: PillCheckResult = {
+        isPillVisible: !!data?.isPillVisible,
+        isMatch: !!data?.isMatch,
+        matchReason: data?.matchReason || "",
+        observedDescription: data?.observedDescription,
+      };
+      setPillCheckResult(result);
+    } catch (e: any) {
+      console.error("pill check error", e);
+      toast({ title: "Pill check failed", description: e.message || "Could not analyse the image.", variant: "destructive" });
+    } finally {
+      setIsCheckingPill(false);
+    }
+  };
+
+  const proceedToIngestion = () => {
+    setPillCheckResult(null);
+    setStage("ingestion");
+  };
+
+  const retryPillCheck = () => {
+    setPillCheckResult(null);
+  };
+
   const handleSubmitProof = async () => {
     if (!recordedBlob || !recordingPrescriptionId) return;
 
@@ -329,6 +388,7 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
       const filePaths = uploads.map((u) => u.path);
 
       // 3. Call AI validation edge function
+      const rxName = prescriptions.find((p) => p.id === recordingPrescriptionId)?.medication || "";
       const { data, error: fnError } = await supabase.functions.invoke(
         "validate-medication-video",
         {
@@ -341,10 +401,11 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
       const validation = data?.validation;
 
       if (validation?.isValid) {
-        toast({ title: "✅ Medication verified!", description: `AI confirmed ingestion. +5 Vulas earned!` });
+        const earnedStreak = data?.streak ?? 0;
         handleCloseRecording();
         queryClient.invalidateQueries({ queryKey: ["medication-adherence", patientId] });
         queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
+        setCelebration({ open: true, vulasEarned: data?.molesAwarded ?? 5, streak: earnedStreak, medicationName: rxName });
       } else if (data?.fallback) {
         // AI service unavailable — evidence saved for doctor review
         toast({
@@ -377,7 +438,11 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
     setRecordedBlob(null);
     setIsRecording(false);
     setCountdown(30);
+    setStage("pill_check");
+    setPillCheckResult(null);
+    setIsCheckingPill(false);
   };
+
 
   if (prescriptionsLoading || adherenceLoading) {
     return (
