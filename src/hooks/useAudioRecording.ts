@@ -15,6 +15,7 @@ interface UseAudioRecordingOptions {
 export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
   const { toast } = useToast();
   const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isSavingAudio, setIsSavingAudio] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -181,8 +182,13 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && isRecording) {
+      // Resume first if paused so onstop fires correctly
+      if (mediaRecorderRef.current.state === 'paused') {
+        try { mediaRecorderRef.current.resume(); } catch {}
+      }
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      setIsPaused(false);
       // Stop speech recognition
       if (speechRecognitionRef.current) {
         try { speechRecognitionRef.current.stop(); } catch {}
@@ -190,6 +196,43 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
       }
     }
   }, [isRecording]);
+
+  const pauseRecording = useCallback(() => {
+    if (mediaRecorderRef.current?.state === 'recording') {
+      try {
+        mediaRecorderRef.current.pause();
+        setIsPaused(true);
+        if (speechRecognitionRef.current) {
+          try { speechRecognitionRef.current.stop(); } catch {}
+        }
+      } catch (err) {
+        console.error('Pause failed:', err);
+      }
+    }
+  }, []);
+
+  const resumeRecording = useCallback(() => {
+    if (mediaRecorderRef.current?.state === 'paused') {
+      try {
+        mediaRecorderRef.current.resume();
+        setIsPaused(false);
+        // Restart speech recognition
+        try {
+          const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+          if (SpeechRecognitionAPI && !speechRecognitionRef.current) {
+            const recognition = new SpeechRecognitionAPI();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            recognition.start();
+            speechRecognitionRef.current = recognition;
+          }
+        } catch {}
+      } catch (err) {
+        console.error('Resume failed:', err);
+      }
+    }
+  }, []);
 
   const transcribeAudio = async (audioBlob: Blob, storageUrl?: string | null) => {
     setIsTranscribing(true);
@@ -279,6 +322,7 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
 
   return {
     isRecording,
+    isPaused,
     isTranscribing,
     isSavingAudio,
     transcript,
@@ -286,6 +330,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
     savedAudioUrl,
     startRecording,
     stopRecording,
+    pauseRecording,
+    resumeRecording,
     clearTranscript,
   };
 }

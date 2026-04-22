@@ -23,6 +23,9 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DocumentPreview } from "@/components/sessions/DocumentPreview";
+import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
+import { useProfile } from "@/hooks/useProfile";
 
 interface TodoItem {
   id: string;
@@ -55,6 +58,7 @@ const actionTypeLabels: Record<string, string> = {
 export function CompactTodoList() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { profile } = useProfile();
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [newTaskText, setNewTaskText] = useState("");
@@ -65,6 +69,44 @@ export function CompactTodoList() {
   const [editText, setEditText] = useState("");
   const [filter, setFilter] = useState<"active" | "completed">("active");
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<{ content: string; title: string; logoUrl?: string; fontFamily?: string; userId?: string; templateName?: string } | null>(null);
+  const [loadingPreview, setLoadingPreview] = useState<string | null>(null);
+
+  const { headerFooter } = useDocumentHeaderFooter(
+    previewDoc ? { user_id: previewDoc.userId, template_name: previewDoc.templateName } : null
+  );
+
+  const handlePreviewDoc = async (todo: TodoItem) => {
+    if (!todo.document_id) return;
+    setLoadingPreview(todo.document_id);
+    try {
+      const { data: doc } = await supabase.from('documents').select('*').eq('id', todo.document_id).maybeSingle();
+      if (!doc) throw new Error('Document not found');
+      let content = doc.content || '';
+      if (profile) {
+        content = content
+          .replace(/\[PracticeNumber\]/g, profile.practice_number || '[PracticeNumber]')
+          .replace(/\[DoctorNumber\]/g, profile.doctor_number || '[DoctorNumber]')
+          .replace(/\[DoctorName\]/g, profile.full_name || '[DoctorName]')
+          .replace(/\[PracticeAddress\]/g, profile.practice_address || '[PracticeAddress]');
+        if ((profile as any)?.signature_url) {
+          content = content.replace(/\[DoctorSignature\]/g, `<img src="${(profile as any).signature_url}" alt="Signature" style="max-height: 60px;" />`);
+        }
+      }
+      setPreviewDoc({
+        content,
+        title: doc.template_name || doc.name || 'Document',
+        logoUrl: profile?.logo_url || undefined,
+        userId: doc.user_id,
+        templateName: doc.template_name,
+      });
+    } catch {
+      toast({ title: 'Preview failed', variant: 'destructive' });
+    } finally {
+      setLoadingPreview(null);
+    }
+  };
+
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -420,11 +462,17 @@ export function CompactTodoList() {
                     <div className="hidden group-hover:flex gap-0.5">
                       {todo.document_id && (
                         <>
-                          <button onClick={() => navigate(`/documents?view=${todo.document_id}`)} className="text-muted-foreground hover:text-foreground" title="Preview">
-                            <Eye className="h-3 w-3" />
-                          </button>
-                          <button onClick={() => navigate(`/documents?view=${todo.document_id}`)} className="text-primary hover:text-primary/80" title="Edit">
-                            <FileText className="h-3 w-3" />
+                          <button
+                            onClick={() => handlePreviewDoc(todo)}
+                            disabled={loadingPreview === todo.document_id}
+                            className="text-muted-foreground hover:text-foreground"
+                            title="Preview"
+                          >
+                            {loadingPreview === todo.document_id ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Eye className="h-3 w-3" />
+                            )}
                           </button>
                           <button
                             onClick={async () => {
@@ -463,6 +511,18 @@ export function CompactTodoList() {
           )}
         </div>
       </div>
+
+      {/* Document Preview Modal */}
+      {previewDoc && (
+        <DocumentPreview
+          title={previewDoc.title}
+          content={previewDoc.content}
+          logoUrl={previewDoc.logoUrl}
+          fontFamily={previewDoc.fontFamily ?? headerFooter?.font_family}
+          headerFooter={headerFooter}
+          onClose={() => setPreviewDoc(null)}
+        />
+      )}
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import {
   Mic,
   Play,
+  Pause,
   Square,
   FileText,
   Clock,
@@ -349,13 +350,16 @@ export default function Sessions() {
 
   const { 
     isRecording, 
+    isPaused,
     isTranscribing, 
     isSavingAudio,
-    transcript, 
+    transcript,
     audioUrl,
     savedAudioUrl,
-    startRecording, 
+    startRecording,
     stopRecording,
+    pauseRecording,
+    resumeRecording,
     clearTranscript 
   } = useAudioRecording({
     patientName: currentPatient?.name,
@@ -410,13 +414,13 @@ export default function Sessions() {
   // Session timer - only counts when recording
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
-    if (isRecording) {
+    if (isRecording && !isPaused) {
       interval = setInterval(() => {
         setSessionDuration(prev => prev + 1);
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [isRecording]);
+  }, [isRecording, isPaused]);
 
   const formatDuration = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600);
@@ -838,31 +842,49 @@ export default function Sessions() {
 
             {/* Recording Controls - Compact */}
             <div className="flex flex-col items-center gap-3 p-4">
-              <button
-                onClick={toggleRecording}
-                disabled={isTranscribing}
-                className={cn(
-                  "flex h-16 w-16 items-center justify-center rounded-full transition-all duration-300",
-                  isTranscribing && "opacity-50 cursor-not-allowed",
-                  isRecording
-                    ? "bg-destructive text-destructive-foreground animate-pulse-soft shadow-lg"
-                    : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-glow"
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={toggleRecording}
+                  disabled={isTranscribing}
+                  className={cn(
+                    "flex h-16 w-16 items-center justify-center rounded-full transition-all duration-300",
+                    isTranscribing && "opacity-50 cursor-not-allowed",
+                    isRecording
+                      ? "bg-destructive text-destructive-foreground animate-pulse-soft shadow-lg"
+                      : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-glow"
+                  )}
+                >
+                  {isTranscribing ? (
+                    <Loader2 className="h-7 w-7 animate-spin" />
+                  ) : isRecording ? (
+                    <Square className="h-7 w-7" />
+                  ) : (
+                    <Mic className="h-7 w-7" />
+                  )}
+                </button>
+
+                {/* Pause / Resume button — only while recording */}
+                {isRecording && !isTranscribing && (
+                  <button
+                    onClick={() => (isPaused ? resumeRecording() : pauseRecording())}
+                    className={cn(
+                      "flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 border-2",
+                      isPaused
+                        ? "bg-warning text-warning-foreground border-warning"
+                        : "bg-card text-foreground border-border hover:bg-muted"
+                    )}
+                    title={isPaused ? "Resume recording" : "Pause recording"}
+                  >
+                    {isPaused ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" />}
+                  </button>
                 )}
-              >
-                {isTranscribing ? (
-                  <Loader2 className="h-7 w-7 animate-spin" />
-                ) : isRecording ? (
-                  <Square className="h-7 w-7" />
-                ) : (
-                  <Mic className="h-7 w-7" />
-                )}
-              </button>
+              </div>
               
               <p className="text-xs text-muted-foreground text-center">
                 {isTranscribing 
                   ? "Transcribing..." 
                   : isRecording 
-                    ? "Recording... Tap to stop" 
+                    ? (isPaused ? "Paused — tap play to resume" : "Recording... Tap to stop")
                     : "Tap to record"}
               </p>
               <p className="text-[10px] text-muted-foreground/70 text-center mt-1">
@@ -872,7 +894,7 @@ export default function Sessions() {
               {/* Compact Waveform */}
               {(isRecording || isTranscribing) && (
                 <div className="w-full">
-                  <AudioWaveform isRecording={isRecording} />
+                  <AudioWaveform isRecording={isRecording && !isPaused} />
                 </div>
               )}
             </div>

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Send, Loader2, Trophy, Target, Flame, Gift, Star, ArrowRightLeft, Calendar as CalendarIcon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Send, Loader2, Trophy, Target, Flame, Gift, Star, ArrowRightLeft, Calendar as CalendarIcon, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { useMyRewards, useMyStreaks } from "@/hooks/usePatientRewards";
+import { VulaExplainerDialog } from "@/components/rewards/VulaExplainerDialog";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v2.png";
 
 const MILESTONES = [
@@ -33,7 +34,18 @@ export default function DoctorRewards() {
   const [transferToAppId, setTransferToAppId] = useState("");
   const [transferAmount, setTransferAmount] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
+  const [showVulaExplainer, setShowVulaExplainer] = useState(false);
   const queryClient = useQueryClient();
+
+  // Auto-open the explainer the first time a user lands on the rewards page.
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem("vulas_explainer_seen_v1")) {
+        setShowVulaExplainer(true);
+        localStorage.setItem("vulas_explainer_seen_v1", "1");
+      }
+    } catch {}
+  }, []);
 
   const { rewards, lollipopCount: patientLollipopCount, loading: rewardsLoading } = useMyRewards();
   const { streaks, loading: streaksLoading } = useMyStreaks();
@@ -113,9 +125,20 @@ export default function DoctorRewards() {
 
   return (
     <div className="space-y-6 animate-fade-in max-w-3xl">
+      <VulaExplainerDialog open={showVulaExplainer} onOpenChange={setShowVulaExplainer} />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">My Rewards</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-foreground">My Rewards</h1>
+            <button
+              onClick={() => setShowVulaExplainer(true)}
+              className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+              title="Learn about Vulas"
+            >
+              <Info className="h-3.5 w-3.5" />
+              What are Vulas?
+            </button>
+          </div>
           <p className="text-muted-foreground text-[12px]">Manage your Vulas balance, milestones, and streaks</p>
         </div>
         {partnerApps.length > 0 && (

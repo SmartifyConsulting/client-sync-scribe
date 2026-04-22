@@ -47,7 +47,6 @@ async function formatWithSpeakerLabels(rawText: string, patientName: string, doc
     }
 
     console.log("Formatting transcript with speaker labels...");
-    console.log("Patient name:", patientName, "Doctor name:", doctorName);
     
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -68,16 +67,7 @@ Rules:
 3. Each speaker's turn should start on a new line with their label
 4. Preserve all the original content - do not summarize or remove anything
 5. If you cannot determine speaker changes, use your best judgment based on conversational flow
-6. Add line breaks between speaker turns for readability
-
-Example output format:
-${doctorName}: Hello, how are you feeling today?
-
-${patientName}: I've been experiencing some headaches lately.
-
-${doctorName}: When did these headaches start?
-
-${patientName}: About two weeks ago.`,
+6. Add line breaks between speaker turns for readability`,
           },
           {
             role: "user",
@@ -114,52 +104,73 @@ serve(async (req) => {
   }
 
   try {
-    // Auth check using local JWT validation (avoids network call that can fail on long sessions)
+    // Auth check using local JWT validation
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-    const supabaseClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: authHeader } } });
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+    const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { global: { headers: { Authorization: authHeader } } });
     const token = authHeader.replace("Bearer ", "");
     const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
     if (claimsError || !claimsData?.claims?.sub) {
       console.error("Auth failed:", claimsError?.message);
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-    const userId = claimsData.claims.sub;
 
     const { audio, audioUrl, patientName, doctorName, language } = await req.json();
     
     if (!audio && !audioUrl) {
       console.error('No audio data or URL provided');
-      throw new Error('No audio data or URL provided');
+      return new Response(
+        JSON.stringify({ error: 'No audio data or URL provided' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
     if (!OPENAI_API_KEY) {
       console.error('OPENAI_API_KEY is not configured');
-      throw new Error('OPENAI_API_KEY is not configured');
+      return new Response(
+        JSON.stringify({ error: 'Transcription service is not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
     
-    // Default names if not provided
     const patient = patientName || 'Patient';
     const doctor = doctorName || 'Doctor';
 
-    // Prepare form data - get audio from URL or base64
     const formData = new FormData();
     
     if (audioUrl) {
-      // Download audio from storage URL (server-to-server, fast)
-      console.log('Fetching audio from storage URL:', audioUrl);
-      const audioResponse = await fetch(audioUrl);
-      if (!audioResponse.ok) {
-        throw new Error(`Failed to fetch audio from storage: ${audioResponse.status}`);
+      // Download from private session-audio bucket using service role
+      console.log('Downloading audio from session-audio bucket:', audioUrl);
+      try {
+        const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+        const { data: blob, error: downloadError } = await admin.storage
+          .from('session-audio')
+          .download(audioUrl);
+        if (downloadError || !blob) {
+          console.error('Storage download failed:', downloadError);
+          return new Response(
+            JSON.stringify({ error: `Failed to fetch audio: ${downloadError?.message || 'Unknown'}`, fallback: true }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        console.log('Downloaded audio blob size:', blob.size);
+        formData.append('file', blob, 'audio.webm');
+      } catch (downloadErr) {
+        console.error('Download exception:', downloadErr);
+        return new Response(
+          JSON.stringify({ error: 'Failed to fetch audio from storage', fallback: true }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
-      const audioBlob = await audioResponse.blob();
-      console.log('Downloaded audio blob size:', audioBlob.size);
-      formData.append('file', audioBlob, 'audio.webm');
     } else {
-      // Process base64 audio (fallback for short recordings)
+      // Process base64 audio
       console.log('Processing base64 audio data, length:', audio.length);
       const binaryAudio = processBase64Chunks(audio);
       console.log('Binary audio size:', binaryAudio.length);
@@ -177,19 +188,30 @@ serve(async (req) => {
 
     console.log('Sending to OpenAI Whisper API...');
 
-    // Send to OpenAI
-    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-      },
-      body: formData,
-    });
+    let response: Response;
+    try {
+      response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        },
+        body: formData,
+      });
+    } catch (fetchErr) {
+      console.error('OpenAI fetch failed:', fetchErr);
+      return new Response(
+        JSON.stringify({ error: 'Could not reach transcription service', fallback: true }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error('OpenAI API error:', response.status, errorText);
-      throw new Error(`OpenAI API error: ${errorText}`);
+      return new Response(
+        JSON.stringify({ error: `Transcription failed (${response.status})`, fallback: true }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const result = await response.json();
@@ -197,7 +219,6 @@ serve(async (req) => {
     
     const rawText = result.text || '';
     
-    // Format with speaker labels using AI
     const formattedText = await formatWithSpeakerLabels(rawText, patient, doctor);
 
     return new Response(
@@ -209,9 +230,9 @@ serve(async (req) => {
     console.error('Error in transcribe-audio function:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: errorMessage, fallback: true }),
       {
-        status: 500,
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
