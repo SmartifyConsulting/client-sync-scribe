@@ -14,6 +14,14 @@ import {
   Share2,
   Heart,
   ArrowRight,
+  Mic,
+  Video,
+  Gift,
+  Pill,
+  ClipboardList,
+  Sparkles,
+  Activity,
+  Hospital,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -124,48 +132,81 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
+      {/* Hero Section — full ecosystem showcase */}
+      <section className="relative pt-28 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Ambient background blobs */}
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute top-20 -left-24 h-72 w-72 rounded-full bg-primary/15 blur-3xl" />
+          <div className="absolute top-40 right-0 h-80 w-80 rounded-full bg-[#E01837]/10 blur-3xl" />
+          <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+        </div>
+
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-10 items-center">
+          {/* LEFT — copy + CTAs + capability pills */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
+            className="lg:col-span-7 text-center lg:text-left"
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="mb-8"
-            >
-              <img src={holarcLogo} alt="Holarc Health" className="h-32 sm:h-40 w-auto mx-auto" />
-            </motion.div>
+            <div className="mb-6 flex justify-center lg:justify-start">
+              <img src={holarcLogo} alt="Holarc Health" className="h-16 sm:h-20 w-auto" />
+            </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6">
-              One Ecosystem.
-              <span className="block text-gradient pb-4">360° Healthcare Intelligence.</span>
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1.5 text-xs font-medium mb-5">
+              <Sparkles className="h-3.5 w-3.5" />
+              AI-powered · Patient-controlled · HIPAA-aligned
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-[1.05] mb-5">
+              The healthcare ecosystem
+              <span className="block text-gradient pb-3">your records have been waiting for.</span>
             </h1>
 
-            <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
-              Powerful practice management for providers. A complete 360° health profile for patients. 
-              One unified ecosystem where every consultation, prescription, and clinical note connects 
-              seamlessly—putting the patient at the center of their care.
+            <p className="text-base sm:text-lg text-muted-foreground mb-7 max-w-2xl lg:mx-0 mx-auto">
+              Holarc is one connected platform where doctors run their entire practice and patients own their entire 360° health story —
+              from voice-recorded consultations and AI summaries, to video-verified medication adherence rewarded with Vulas,
+              cross-specialist Round Tables, hospital admissions, prescriptions, billing, and a unified care calendar.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+
+            {/* Capability pills */}
+            <div className="flex flex-wrap gap-2 justify-center lg:justify-start mb-8">
+              {[
+                { icon: Mic, label: "Voice consultations" },
+                { icon: Brain, label: "AI summaries" },
+                { icon: Video, label: "Adherence proof" },
+                { icon: Gift, label: "Vula rewards" },
+                { icon: Users, label: "Round Table" },
+                { icon: Pill, label: "Prescriptions" },
+                { icon: Hospital, label: "Hospital admissions" },
+                { icon: ClipboardList, label: "Auto-tasks" },
+                { icon: Calendar, label: "Unified calendar" },
+              ].map((p) => (
+                <span
+                  key={p.label}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 backdrop-blur-sm px-3 py-1.5 text-xs text-foreground/80 hover:border-primary/40 transition-colors"
+                >
+                  <p.icon className="h-3.5 w-3.5 text-primary" />
+                  {p.label}
+                </span>
+              ))}
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
               <Button
                 size="lg"
                 onClick={() => setShowRoleDialog(true)}
-                className="btn-pill text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-shadow"
+                className="btn-pill text-base px-7 py-6 shadow-lg hover:shadow-xl transition-shadow w-full sm:w-auto"
               >
                 Join the Ecosystem
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <div className="flex gap-3">
+              <div className="flex gap-2 w-full sm:w-auto">
                 <Button
                   size="lg"
                   variant="outline"
                   onClick={() => navigate("/auth?mode=login&role=doctor")}
-                  className="btn-pill"
+                  className="btn-pill flex-1 sm:flex-initial"
                 >
                   <Stethoscope className="mr-2 h-5 w-5" />
                   Doctors
@@ -174,11 +215,106 @@ export default function Landing() {
                   size="lg"
                   variant="outline"
                   onClick={() => navigate("/auth?mode=login&role=patient")}
-                  className="btn-pill"
+                  className="btn-pill flex-1 sm:flex-initial"
                 >
                   <UserCircle className="mr-2 h-5 w-5" />
                   Patients
                 </Button>
+              </div>
+            </div>
+
+            {/* Trust strip */}
+            <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-2 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5"><Shield className="h-3.5 w-3.5 text-primary" /> Patient-granted access</span>
+              <span className="inline-flex items-center gap-1.5"><Activity className="h-3.5 w-3.5 text-primary" /> Real-time collaboration</span>
+              <span className="inline-flex items-center gap-1.5"><Heart className="h-3.5 w-3.5 text-[#E01837]" /> Built around the patient</span>
+            </div>
+          </motion.div>
+
+          {/* RIGHT — feature cards mosaic */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="lg:col-span-5 relative"
+          >
+            <div className="relative grid grid-cols-2 gap-3 sm:gap-4">
+              {/* Live consultation */}
+              <div className="col-span-2 card-modern p-5 bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shrink-0">
+                    <Mic className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-semibold text-foreground text-sm">Live consultation</p>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-medium text-destructive">
+                        <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" /> REC
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      Voice transcribed in real time. AI extracts diagnoses, prescriptions and follow-up tasks automatically.
+                    </p>
+                    <div className="mt-3 flex items-end gap-1.5 h-10">
+                      {[18, 32, 24, 40, 28, 36, 22, 30, 26, 34, 20, 38].map((h, i) => (
+                        <span
+                          key={i}
+                          className="w-1 rounded-full bg-primary/60"
+                          style={{ height: `${h}px` }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Adherence + Vulas */}
+              <div className="card-modern p-4 border border-border bg-card">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#E01837]/10 mb-2">
+                  <Video className="h-5 w-5 text-[#E01837]" />
+                </div>
+                <p className="text-sm font-semibold text-foreground">Video adherence</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Verified ingestion. Confidence scored. Provisional doses auto-approved monthly.
+                </p>
+                <div className="mt-3 flex items-center gap-1.5">
+                  <Gift className="h-3.5 w-3.5 text-primary" />
+                  <span className="text-[11px] font-semibold text-primary">+5 Vulas earned</span>
+                </div>
+              </div>
+
+              {/* Round Table */}
+              <div className="card-modern p-4 border border-border bg-card">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 mb-2">
+                  <Users className="h-5 w-5 text-primary" />
+                </div>
+                <p className="text-sm font-semibold text-foreground">Round Table</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Specialists coordinate per patient with shared notes and read-receipts.
+                </p>
+                <div className="mt-3 flex -space-x-1.5">
+                  {["bg-primary", "bg-[#E01837]", "bg-amber-500", "bg-teal-500"].map((c, i) => (
+                    <span
+                      key={i}
+                      className={`h-5 w-5 rounded-full border-2 border-background ${c}`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* AI assistant */}
+              <div className="col-span-2 card-modern p-4 border border-border bg-card">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+                    <Brain className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-foreground">AI clinical assistant</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      Patient history summaries · medication conflict alerts · imaging analysis · auto-generated documents.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>
