@@ -172,15 +172,15 @@ export default function Landing() {
             {/* Capability pills */}
             <div className="flex flex-wrap gap-2 justify-center lg:justify-start mb-8">
               {[
-                { icon: Mic, label: "Voice consultations" },
-                { icon: Brain, label: "AI summaries" },
-                { icon: Video, label: "Adherence proof" },
-                { icon: Gift, label: "Vula rewards" },
+                { icon: Mic, label: "Voice Consultations" },
+                { icon: Brain, label: "AI Summaries" },
+                { icon: Video, label: "Incentivized Adherence" },
+                { icon: Gift, label: "Rewards" },
                 { icon: Users, label: "Round Table" },
                 { icon: Pill, label: "Prescriptions" },
-                { icon: Hospital, label: "Hospital admissions" },
-                { icon: ClipboardList, label: "Auto-tasks" },
-                { icon: Calendar, label: "Unified calendar" },
+                { icon: Hospital, label: "Hospital Admissions" },
+                { icon: ClipboardList, label: "Auto-Tasks" },
+                { icon: Calendar, label: "Unified Calendar" },
               ].map((p) => (
                 <span
                   key={p.label}
