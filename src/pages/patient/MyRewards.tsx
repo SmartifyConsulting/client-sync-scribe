@@ -85,7 +85,12 @@ interface VulaTransfer {
 export default function MyRewards() {
   const { rewards, lollipopCount, loading: rewardsLoading } = useMyRewards();
   const { streaks, loading: streaksLoading } = useMyStreaks();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTabRaw] = useState("overview");
+  // Fallback for any persisted/legacy tab values that no longer exist
+  const setActiveTab = (v: string) => {
+    if (v === "history" || v === "streaks") setActiveTabRaw("overview");
+    else setActiveTabRaw(v);
+  };
   const [showTransferDialog, setShowTransferDialog] = useState(false);
   const [transferFromAppId, setTransferFromAppId] = useState("");
   const [transferToAppId, setTransferToAppId] = useState("");
