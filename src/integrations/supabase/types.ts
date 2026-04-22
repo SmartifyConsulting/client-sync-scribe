@@ -1013,31 +1013,40 @@ export type Database = {
       }
       medication_adherence: {
         Row: {
+          auto_approved_at: string | null
+          confidence_score: number | null
           created_at: string
           id: string
           patient_id: string
           prescription_id: string
           proof_url: string | null
+          reconciliation_note: string | null
           scheduled_date: string
           status: string
           taken_at: string | null
         }
         Insert: {
+          auto_approved_at?: string | null
+          confidence_score?: number | null
           created_at?: string
           id?: string
           patient_id: string
           prescription_id: string
           proof_url?: string | null
+          reconciliation_note?: string | null
           scheduled_date: string
           status?: string
           taken_at?: string | null
         }
         Update: {
+          auto_approved_at?: string | null
+          confidence_score?: number | null
           created_at?: string
           id?: string
           patient_id?: string
           prescription_id?: string
           proof_url?: string | null
+          reconciliation_note?: string | null
           scheduled_date?: string
           status?: string
           taken_at?: string | null
@@ -1611,9 +1620,11 @@ export type Database = {
       }
       prescription_pill_references: {
         Row: {
+          baseline_pattern_summary: string | null
           created_at: string
           dosage_snapshot: string
           id: string
+          intake_method: string | null
           medication_snapshot: string
           observed_description: string | null
           patient_id: string
@@ -1622,9 +1633,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          baseline_pattern_summary?: string | null
           created_at?: string
           dosage_snapshot: string
           id?: string
+          intake_method?: string | null
           medication_snapshot: string
           observed_description?: string | null
           patient_id: string
@@ -1633,9 +1646,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          baseline_pattern_summary?: string | null
           created_at?: string
           dosage_snapshot?: string
           id?: string
+          intake_method?: string | null
           medication_snapshot?: string
           observed_description?: string | null
           patient_id?: string
