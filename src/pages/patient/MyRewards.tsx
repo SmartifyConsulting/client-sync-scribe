@@ -105,20 +105,34 @@ export default function MyRewards() {
     } catch {}
   }, []);
 
-  // Get patient record for chronic meds tab
+  // Get patient record for chronic meds tab — prefer the record with active prescriptions
   const { data: patientRecord } = useQuery({
-    queryKey: ["my-patient-record"],
+    queryKey: ["my-patient-record-with-rx"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
-      const { data } = await supabase
+      const { data: patients } = await supabase
         .from("patients")
-        .select("id, is_chronic")
-        .eq("patient_user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      return data;
+        .select("id, is_chronic, created_at")
+        .eq("patient_user_id", user.id);
+      if (!patients?.length) return null;
+
+      const ids = patients.map((p) => p.id);
+      const { data: rxRows } = await supabase
+        .from("prescriptions")
+        .select("patient_id")
+        .in("patient_id", ids)
+        .eq("status", "active");
+
+      const idWithRx = rxRows?.[0]?.patient_id;
+      const sortedNewestFirst = [...patients].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
+      return (
+        patients.find((p) => p.id === idWithRx) ??
+        sortedNewestFirst.find((p) => p.is_chronic) ??
+        sortedNewestFirst[0]
+      );
     },
   });
 
@@ -427,12 +441,6 @@ export default function MyRewards() {
           )}
           <TabsTrigger value="milestones" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
             Wins
-          </TabsTrigger>
-          <TabsTrigger value="streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-            Streaks
-          </TabsTrigger>
-          <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-            History
           </TabsTrigger>
           <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
              Vulas
