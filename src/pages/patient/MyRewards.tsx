@@ -54,19 +54,6 @@ const MILESTONES = [
   { count: 100, label: "Health Legend", icon: "👑", color: "text-pink-500" },
 ];
 
-interface PatientTask {
-  id: string;
-  title: string;
-  description: string | null;
-  priority: string;
-  status: string;
-  due_date: string | null;
-  created_at: string;
-  task_type: string;
-  moolas_reward: number;
-  proof_url: string | null;
-  patient_id: string | null;
-}
 
 interface PartnerApp {
   id: string;
