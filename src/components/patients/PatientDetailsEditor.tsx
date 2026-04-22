@@ -1213,13 +1213,13 @@ export function PatientDetailsEditor({
 
   // Tab list renderer
   const renderTabsList = () => {
-    const activeTabs = isMobile && isSelfService && section ? SECTION_TABS[section] || null : null;
+    const activeTabs = isSelfService && section ? SECTION_TABS[section] || null : null;
     const show = (tab: string) => !activeTabs || activeTabs.includes(tab);
     const triggerClass =
       "data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap";
 
-    // Mobile: flat filtered tabs
-    if (isMobile && isSelfService && section) {
+    // Self-service (mobile + tablet + web): tabs filtered by current section
+    if (isSelfService && section) {
       return (
         <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
           {show("personal") && (
@@ -1234,7 +1234,7 @@ export function PatientDetailsEditor({
           )}
           {show("doctors") && (
             <TabsTrigger value="doctors" className={triggerClass}>
-              {isMobile ? "My Holarchy" : "My Holarchy"}
+              My Holarchy
             </TabsTrigger>
           )}
           {show("sessions") && (
@@ -1245,6 +1245,11 @@ export function PatientDetailsEditor({
           {show("hospital_visits") && (
             <TabsTrigger value="hospital_visits" className={triggerClass}>
               Admissions
+            </TabsTrigger>
+          )}
+          {show("roundtable") && (
+            <TabsTrigger value="roundtable" className={triggerClass}>
+              Round Table
             </TabsTrigger>
           )}
           {show("calendar") && (
@@ -1262,64 +1267,9 @@ export function PatientDetailsEditor({
               My Documents
             </TabsTrigger>
           )}
-          {show("roundtable") && (
-            <TabsTrigger value="roundtable" className={triggerClass}>
-              Round Table
-            </TabsTrigger>
-          )}
           {show("admissions") && (
             <TabsTrigger value="admissions" className={triggerClass}>
               Admissions
-            </TabsTrigger>
-          )}
-        </TabsList>
-      );
-    }
-
-    // Desktop/Tablet for self-service: flat tab rendering (sidebar handles section nav)
-    if (isSelfService) {
-      return (
-        <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-          <TabsTrigger value="personal" className={triggerClass}>
-            Personal Information
-          </TabsTrigger>
-          <TabsTrigger value="medical" className={triggerClass}>
-            Medical Information
-          </TabsTrigger>
-          <TabsTrigger value="doctors" className={triggerClass}>
-            My Holarchy
-          </TabsTrigger>
-          <TabsTrigger value="sessions" className={triggerClass}>
-            Sessions
-          </TabsTrigger>
-          <TabsTrigger value="hospital_visits" className={triggerClass}>
-            Admissions
-          </TabsTrigger>
-          <TabsTrigger value="calendar" className={triggerClass}>
-            My Calendar
-          </TabsTrigger>
-          <TabsTrigger value="tasks" className={triggerClass}>
-            My Tasks
-          </TabsTrigger>
-          <TabsTrigger value="documents" className={triggerClass}>
-            My Documents
-          </TabsTrigger>
-          <TabsTrigger value="roundtable" className={triggerClass}>
-            Round Table
-          </TabsTrigger>
-          <TabsTrigger value="admissions" className={triggerClass}>
-            Admissions
-          </TabsTrigger>
-          {isDoctor && (
-            <TabsTrigger
-              value="practice"
-              className={triggerClass}
-              onClick={(e) => {
-                e.preventDefault();
-                navigate("/practice");
-              }}
-            >
-              My Practice
             </TabsTrigger>
           )}
         </TabsList>
