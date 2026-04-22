@@ -1,71 +1,106 @@
 
 
-# How verification works today + proposed two-step flow with confetti
+# Plan: Reference-image pill matching, swallow check, NOK email flag, Wins/Streaks tab, Vula dialog polish
 
-## How the current verification works
+## 1. Medication AI: reference image + swallow-only verification
 
-When a patient taps **Take Medication**, the camera opens for up to 30 seconds. After they stop (or 30s elapses), the client extracts **5 evenly-spaced JPEG frames** (at 10%, 30%, 50%, 70%, 90% of the clip), uploads them to storage, and sends the URLs to the `validate-medication-video` edge function.
+### 1a. Capture a baseline reference photo per prescription (one-time)
 
-That function asks Gemini Vision to check **all of these criteria across the sequence**:
+When a patient first opens a chronic prescription's **Take Medication** flow — or whenever the prescription's `medication` or `dosage` changes — they're routed to a **Pill Baseline Capture** screen before any dose recording is allowed.
 
-1. **Person visible** — same person across frames
-2. **Medication visible** — pill / tablet / capsule / liquid shown in early frames
-3. **Ingestion action** — placed into mouth in middle frames
-4. **Completion** — open/empty mouth in final frames
+**New table** `prescription_pill_references`:
+| col | type |
+|---|---|
+| `id` | uuid pk |
+| `prescription_id` | uuid → prescriptions.id (unique) |
+| `patient_id` | uuid → patients.id |
+| `reference_image_url` | text |
+| `observed_description` | text *(AI-generated colour/shape/markings)* |
+| `medication_snapshot` | text *(prescription medication at capture time)* |
+| `dosage_snapshot` | text *(prescription dosage at capture time)* |
+| `created_at` / `updated_at` | timestamptz |
 
-Gemini returns a JSON verdict (`isValid`, `confidence`, `description`, `medication_detected`, `ingestion_detected`, etc.). Only if **all four** pass does the row flip to `completed` and +5 Vulas are awarded.
+If `medication` or `dosage` differs from the snapshot → the existing reference is treated as stale and the patient is asked to recapture before the next dose.
 
-**What it does *not* do today:** it doesn't check that the pill matches the *prescribed* medication — only that *some* medication-shaped object is visible. A patient could film themselves taking a sweet and (if shaped right) it might pass.
+**Camera-guided capture UX** in a new `PillBaselineCapture.tsx`:
+- Uses `getUserMedia` rear camera, `aspectRatio: 1`.
+- Overlays a **circular framing guide** (~60% of viewport).
+- Live quality feedback (every 500ms, lightweight checks on a downsampled canvas):
+  - **Brightness** — average luma. Too dark → "Move to better light." Too bright → "Reduce glare."
+  - **Sharpness** — variance of Laplacian on a centre crop. Below threshold → "Hold steady — image is blurry."
+  - **Subject size** — colour-difference blob detection inside the circle vs background. Subject too small → "Move closer." Too large → "Move further away."
+  - All clear → green ring + "Looks great — tap Capture."
+- Disable the **Capture** button until all three checks pass for ~600ms continuous.
+- After capture: show preview with **Retake** / **Use this photo** (allowed at baseline only — no dose has been logged).
+- On confirm: upload JPEG (q=0.9) to `patient-media/pill-references/${user.id}/${prescriptionId}-${ts}.jpg`, then call `validate-medication-video` with `mode: "baseline_capture"` which runs Gemini once to produce `observedDescription` and stores it on the row.
 
-## Proposed: two-stage verification with explicit pill match + celebration
+### 1b. Per-dose verification — match against the reference
 
-### Stage 1 — "Show me the pill"
+Replace the existing Stage-1 box requirement.
 
-Before recording, show a **pill capture screen**:
-- Patient holds the pill up to the camera and taps **Capture pill**.
-- A single still is sent to a new lightweight call (`validate-medication-video` extended with a `mode: "pill_check"` branch) that asks Gemini:
-  > "Is a tablet/capsule/liquid medicine clearly visible in this image? If so, describe its colour, shape, and any visible markings or text."
-- The function compares the description to the prescription's `medication` (and `dosage` if shape/colour hints exist) using a second Gemini call:
-  > "Prescription: {medication, dosage}. Observed pill description: {…}. Could these plausibly be the same medication? Reply isMatch true/false with a one-sentence reason."
-- **Outcomes:**
-  - **Match** → green check, "Looks right — proceed to take it." Unlocks Stage 2.
-  - **Uncertain** (no clear markings, generic white tablet, etc.) → yellow note: "Couldn't confirm the exact pill, but a tablet is visible — proceeding." Still unlocks Stage 2 (we don't want to block legitimate doses for generics).
-  - **No pill detected** → red, "We couldn't see a pill. Hold it closer and try again." Allow re-capture of *this stage only* (pill check, not the ingestion clip — overdose safety preserved because no dose has been logged yet).
+**New `mode: "pill_check"` payload**: `{ imageUrl, prescriptionId }`. The function:
+1. Loads `prescription_pill_references` for that prescription.
+2. If **no baseline** → returns `{ requiresBaseline: true }`. Client routes user to `PillBaselineCapture` and blocks dose recording.
+3. If **stale baseline** (medication/dosage changed since snapshot) → same `requiresBaseline: true` with `reason: "Medication updated — please capture a new baseline photo."`.
+4. Otherwise sends Gemini both images:
+   > "Image A is the patient's reference photo of their prescribed medication. Image B is the pill they're about to take now. Are these plausibly the same pill? Compare colour, shape, size and any visible markings. Generic unmarked tablets only need to share colour and shape."
+5. Returns `{ isMatch, confidence, matchReason }`.
+6. **Outcomes** (client):
+   - `isMatch: true` → green check, "Looks like a match — proceed." Unlocks ingestion recording.
+   - `isMatch: false` → red, "This doesn't look like your usual pill. Please double-check before taking it." Allow re-capture of *this stage only*; if the patient insists after one retry, allow proceed with a `pending_review` flag.
 
-### Stage 2 — "Now take it"
+This removes the box-photo requirement entirely; the only mandatory packaging step is the **one-time baseline** when starting (or changing) a chronic medication.
 
-- Camera switches to record mode, 30s clip (existing flow).
-- Frames extracted and validated against criteria 1, 3, 4 (person, ingestion, completion). Criterion 2 (medication visible) is downgraded — Stage 1 already confirmed the pill, so we don't re-fail people who quickly pop it in.
-- Submit button locks the dose after one attempt (existing overdose-safety rule, unchanged).
+### 1c. Swallow-only — forbid chewing
 
-### Stage 3 — "Great job!" celebration
+Unchanged from previous plan: extend Stage-2 ingestion prompt with a `chewing_detected` criterion. If true → `isValid: false`, message: *"Chewing detected — many tablets must be swallowed whole. Please contact your doctor before chewing or crushing medication."* The dose locks per the existing one-attempt rule.
 
-On a successful `isValid: true` response:
-- Replace the current toast with a **full-dialog success state**:
-  - 🎉 **Confetti animation** using `canvas-confetti` (lightweight, 5KB) firing for ~2 seconds from the centre.
-  - Big green check icon with a gentle scale-in.
-  - Headline: **"Great job!"** (gradient blue→teal text matching the Vula brand).
-  - Subline: "+5 Vulas earned · {streak}-day streak"
-  - Auto-close after 3s, or **Done** button.
-- The fallback path ("recorded for review") gets a softer success — same confetti is **not** fired, neutral toast remains.
-- The failure path ("verification failed") stays as-is — no celebration.
+### 1d. Trigger a baseline recapture on prescription change
+
+In `PrescriptionEditor.tsx` (or wherever active prescriptions are edited), when `medication` or `dosage` changes on an `active` chronic prescription, set `prescription_pill_references.observed_description = null` for that row (server-side via a small RPC) so the next adherence attempt forces a recapture. The patient sees a banner on the Chronic Meds tab: *"{medication} updated — capture a new reference photo before your next dose."*
+
+## 2. Next of Kin — compulsory email + phone, notify on add only, "notified" badge
+
+(Unchanged from previously approved plan §2.)
+
+- New edge function `notify-next-of-kin` sends a Resend email reassuring the recipient: *"Holarc only contacts Next of Kin when the patient adds them. We will never tell you if a patient removes you."*
+- `PatientDetailsEditor.tsx` NOK form: Email + Phone become required, with red asterisks; on successful new add, invoke the edge function and stamp `notified_at`.
+- Both view + edit lists render a green **"Notified by email"** badge when `notified_at` is set.
+- Editing or removing a NOK does **not** send any email. The Bell icon becomes a manual "Resend email" action.
+
+## 3. My Rewards — separate "Wins and Streaks" tab
+
+(Unchanged from previously approved plan §3.)
+
+- Move the Milestones (Wins) and Health Streaks cards out of Overview into a new **Wins and Streaks** tab.
+- Tab order: **Overview** → **Chronic Meds** *(if chronic)* → **Wins and Streaks** → **Vulas**.
+- Legacy persisted tab values `milestones` / `streaks` / `history` map to `wins-streaks`.
+
+## 4. Vula explainer dialog — rounded, line-break fix, reword
+
+(Unchanged from previously approved plan §4.)
+
+- `<DialogContent>` gets `rounded-2xl`.
+- Headline restructured so "but always need" wraps to its own line via an explicit `<br />`.
+- Section 2 text becomes exactly: **"Vulas are a simple way to start building value for the future."**
 
 ## Files touched
 
 | File | Change |
 |---|---|
-| `src/components/rewards/MedicationAdherenceTab.tsx` | Add Stage 1 pill-capture UI before recording; add `pillCheckResult` state; gate the **Start recording** button on Stage 1 pass; replace success toast with a confetti success dialog |
-| `supabase/functions/validate-medication-video/index.ts` | Add `mode: "pill_check"` branch that takes a single image + prescription medication string and returns `{ isPillVisible, observedDescription, isMatch, matchReason }` via two Gemini calls |
-| `package.json` | Add `canvas-confetti` (~5KB) and `@types/canvas-confetti` |
-| `src/components/rewards/SuccessCelebration.tsx` (new) | Reusable confetti + "Great job!" dialog content, takes `vulasEarned` and `streak` props |
-
-## Decisions to confirm
-
-1. **Pill-match strictness** — should an uncertain match (generic white tablet, no markings) **block** or just **warn and proceed**? My recommendation: warn and proceed, because most generics have no markings and we'd block legitimate doses. Strict mode would frustrate patients on cheap generics.
-2. **Confetti everywhere or just first time per day?** Recommendation: every successful verification — small dopamine reward reinforces the daily habit, which is the whole point of the tab.
+| Migration | New `prescription_pill_references` table + RLS (patient self-access; doctor with active access can read) |
+| `supabase/functions/validate-medication-video/index.ts` | Add `mode: "baseline_capture"` (describe + store) and rewrite `mode: "pill_check"` to compare current frame against reference image; ingestion mode adds `chewing_detected` criterion |
+| `src/components/rewards/PillBaselineCapture.tsx` *(new)* | Camera-guided baseline capture with brightness / sharpness / subject-size gating |
+| `src/components/rewards/MedicationAdherenceTab.tsx` | Route to `PillBaselineCapture` when no/stale reference; per-dose flow now compares against reference (no box requirement); show "update reference" banner on prescription change |
+| `src/components/sessions/PrescriptionEditor.tsx` | On medication/dosage edit of an active chronic Rx, null out the reference's `observed_description` to force recapture |
+| `supabase/functions/notify-next-of-kin/index.ts` *(new)* | Resend email to newly-added NOK with the "we won't tell you if removed" reassurance |
+| `src/hooks/usePatients.ts` | Add `notified_at` to `NextOfKinMember` |
+| `src/components/patients/PatientDetailsEditor.tsx` | Compulsory phone/email on NOK add; invoke notify function and stamp `notified_at`; green "Notified by email" badge; Bell becomes "Resend email" |
+| `src/pages/patient/MyRewards.tsx` | Move Wins + Streaks back out into a dedicated "Wins and Streaks" tab |
+| `src/components/rewards/VulaExplainerDialog.tsx` | `rounded-2xl` corners; `<br />` wrap fix; reword Section 2 copy |
 
 ## Out of scope
-- Storing a "reference photo" of the pill from the doctor (would let us do exact visual matching instead of description matching — bigger build, separate task).
-- Confetti on streak milestones (currently a notification; could be its own reward moment later).
-- Doctor-side review of `pending_review` rows (still pending from earlier plan).
+- Doctor-side UI to view/approve baseline reference photos (rows are persisted; reviewer panel is a separate task).
+- Multi-pill prescriptions (combo pillboxes) — current scope is one reference per `prescription_id`.
+- Auto-detecting a new pill brand/colour change without the doctor editing the prescription text — relies on prescription edits as the trigger for recapture.
 
