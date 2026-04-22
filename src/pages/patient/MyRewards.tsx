@@ -85,7 +85,12 @@ interface VulaTransfer {
 export default function MyRewards() {
   const { rewards, lollipopCount, loading: rewardsLoading } = useMyRewards();
   const { streaks, loading: streaksLoading } = useMyStreaks();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTabRaw] = useState("overview");
+  // Fallback for any persisted/legacy tab values that no longer exist
+  const setActiveTab = (v: string) => {
+    if (v === "history" || v === "streaks") setActiveTabRaw("overview");
+    else setActiveTabRaw(v);
+  };
   const [showTransferDialog, setShowTransferDialog] = useState(false);
   const [transferFromAppId, setTransferFromAppId] = useState("");
   const [transferToAppId, setTransferToAppId] = useState("");
@@ -105,20 +110,34 @@ export default function MyRewards() {
     } catch {}
   }, []);
 
-  // Get patient record for chronic meds tab
+  // Get patient record for chronic meds tab — prefer the record with active prescriptions
   const { data: patientRecord } = useQuery({
-    queryKey: ["my-patient-record"],
+    queryKey: ["my-patient-record-with-rx"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
-      const { data } = await supabase
+      const { data: patients } = await supabase
         .from("patients")
-        .select("id, is_chronic")
-        .eq("patient_user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      return data;
+        .select("id, is_chronic, created_at")
+        .eq("patient_user_id", user.id);
+      if (!patients?.length) return null;
+
+      const ids = patients.map((p) => p.id);
+      const { data: rxRows } = await supabase
+        .from("prescriptions")
+        .select("patient_id")
+        .in("patient_id", ids)
+        .eq("status", "active");
+
+      const idWithRx = rxRows?.[0]?.patient_id;
+      const sortedNewestFirst = [...patients].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
+      return (
+        patients.find((p) => p.id === idWithRx) ??
+        sortedNewestFirst.find((p) => p.is_chronic) ??
+        sortedNewestFirst[0]
+      );
     },
   });
 
@@ -428,12 +447,6 @@ export default function MyRewards() {
           <TabsTrigger value="milestones" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
             Wins
           </TabsTrigger>
-          <TabsTrigger value="streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-            Streaks
-          </TabsTrigger>
-          <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-            History
-          </TabsTrigger>
           <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
              Vulas
            </TabsTrigger>
@@ -602,9 +615,8 @@ export default function MyRewards() {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
 
-        <TabsContent value="streaks" className="space-y-6">
+          {/* Streaks merged under Wins */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -624,11 +636,11 @@ export default function MyRewards() {
               ) : (
                 <div className="grid gap-4 md:grid-cols-2">
                   {streaks.map((streak) => {
-                    const daysUntilDue = streak.next_due_at 
+                    const daysUntilDue = streak.next_due_at
                       ? differenceInDays(parseISO(streak.next_due_at), new Date())
                       : null;
                     const isOverdue = daysUntilDue !== null && daysUntilDue < 0;
-                    
+
                     return (
                       <div
                         key={streak.id}
@@ -651,7 +663,7 @@ export default function MyRewards() {
                             <p className="text-xs text-muted-foreground">streak</p>
                           </div>
                         </div>
-                        
+
                         <div className="mt-3 pt-3 border-t border-muted flex items-center justify-between text-sm">
                           <div>
                             <span className="text-muted-foreground">Longest: </span>
@@ -659,14 +671,14 @@ export default function MyRewards() {
                           </div>
                           {daysUntilDue !== null && (
                             <Badge variant={isOverdue ? "destructive" : "secondary"}>
-                              {isOverdue 
+                              {isOverdue
                                 ? `${Math.abs(daysUntilDue)} days overdue`
                                 : `Due in ${daysUntilDue} days`
                               }
                             </Badge>
                           )}
                         </div>
-                        
+
                         <div className="mt-2 text-xs text-muted-foreground">
                           Earns: {streak.lollipops_awarded} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-auto object-contain inline-block" /> per completion
                         </div>
@@ -762,54 +774,6 @@ export default function MyRewards() {
                         <TableCell className="text-right">
                           <span className="text-blue-600 font-semibold">
                             -{transfer.amount} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-auto object-contain inline-block ml-0.5" />
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="history" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-primary" />
-                Full Reward History
-              </CardTitle>
-              <CardDescription>Complete log of all Vulas earned</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {rewards.length === 0 ? (
-                <div className="text-center py-8">
-                  <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-10 w-auto object-contain mx-auto mb-4" />
-                  <p className="text-muted-foreground">No rewards yet</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Visit Type</TableHead>
-                      <TableHead className="text-right">Vulas</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {rewards.map((reward) => (
-                      <TableRow key={reward.id}>
-                        <TableCell>
-                          <div>{format(parseISO(reward.awarded_at), "MMM d, yyyy")}</div>
-                          <span className="text-xs text-muted-foreground">{format(parseISO(reward.awarded_at), "h:mm a")}</span>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className="bg-primary/10 text-primary">{reward.visit_category}</Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <span className={`font-semibold ${reward.lollipops_count < 0 ? "text-blue-600" : "text-emerald-600"}`}>
-                            {reward.lollipops_count > 0 ? "+" : ""}{reward.lollipops_count} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-auto object-contain inline-block ml-0.5" />
                           </span>
                         </TableCell>
                       </TableRow>
