@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Pill, Video, Flame, Check, Clock, AlertCircle, Loader2, Square, X } from "lucide-react";
+import { Pill, Video, Flame, Check, Clock, AlertCircle, Loader2, Square, Camera, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { format, subDays, differenceInCalendarDays } from "date-fns";
+import { format, subDays } from "date-fns";
+import { SuccessCelebration } from "./SuccessCelebration";
+
+type Stage = "pill_check" | "ingestion";
+
+interface PillCheckResult {
+  isPillVisible: boolean;
+  isMatch: boolean;
+  matchReason: string;
+  observedDescription?: string;
+}
 
 interface Prescription {
   id: string;
