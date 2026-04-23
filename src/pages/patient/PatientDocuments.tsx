@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { cn } from "@/lib/utils";
 import {
   FileText,
@@ -1107,6 +1108,37 @@ function DocumentPreviewDialog({
     doc ? { id: doc.id, user_id: doc.userId, template_name: doc.templateName } : null
   );
 
+  const [resolvedContent, setResolvedContent] = useState<string>(doc?.content || "");
+
+  useEffect(() => {
+    if (!doc) {
+      setResolvedContent("");
+      return;
+    }
+    setResolvedContent(doc.content || "");
+    // Only stored documents (template-based) have placeholders worth resolving.
+    if (doc.source !== "documents") return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const resolved = await resolveDocumentPreviewContent({
+          id: doc.id,
+          content: doc.content || "",
+          user_id: doc.userId,
+          patient_id: doc.patientId,
+          template_name: doc.templateName,
+          session_id: null,
+          name: doc.name,
+        });
+        if (!cancelled) setResolvedContent(resolved.resolvedContent);
+      } catch (err) {
+        console.error("Preview resolve error:", err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [doc?.id]);
+
   const header = (headerFooter?.header as any) || null;
   const footer = (headerFooter?.footer as any) || null;
   const fontFamily = headerFooter?.font_family || undefined;
@@ -1140,7 +1172,7 @@ function DocumentPreviewDialog({
 
             <div
               className="whitespace-pre-wrap text-sm text-black min-h-[100px]"
-              dangerouslySetInnerHTML={{ __html: renderFormattedContent(doc.content || "") }}
+              dangerouslySetInnerHTML={{ __html: renderFormattedContent(resolvedContent) }}
             />
 
             {footer && (

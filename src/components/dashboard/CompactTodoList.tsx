@@ -26,6 +26,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DocumentPreview } from "@/components/sessions/DocumentPreview";
 import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
+import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 
 interface TodoItem {
   id: string;
@@ -82,25 +83,26 @@ export function CompactTodoList() {
     try {
       const { data: doc } = await supabase.from('documents').select('*').eq('id', todo.document_id).maybeSingle();
       if (!doc) throw new Error('Document not found');
-      let content = doc.content || '';
-      if (profile) {
-        content = content
-          .replace(/\[PracticeNumber\]/g, profile.practice_number || '[PracticeNumber]')
-          .replace(/\[DoctorNumber\]/g, profile.doctor_number || '[DoctorNumber]')
-          .replace(/\[DoctorName\]/g, profile.full_name || '[DoctorName]')
-          .replace(/\[PracticeAddress\]/g, profile.practice_address || '[PracticeAddress]');
-        if ((profile as any)?.signature_url) {
-          content = content.replace(/\[DoctorSignature\]/g, `<img src="${(profile as any).signature_url}" alt="Signature" style="max-height: 60px;" />`);
-        }
-      }
+
+      const resolved = await resolveDocumentPreviewContent({
+        id: doc.id,
+        content: doc.content,
+        user_id: doc.user_id,
+        patient_id: doc.patient_id,
+        template_name: doc.template_name,
+        session_id: doc.session_id,
+        name: doc.name,
+      });
+
       setPreviewDoc({
-        content,
+        content: resolved.resolvedContent,
         title: doc.template_name || doc.name || 'Document',
-        logoUrl: profile?.logo_url || undefined,
+        logoUrl: resolved.logoUrl || profile?.logo_url || undefined,
         userId: doc.user_id,
         templateName: doc.template_name,
       });
-    } catch {
+    } catch (err) {
+      console.error('Preview error:', err);
       toast({ title: 'Preview failed', variant: 'destructive' });
     } finally {
       setLoadingPreview(null);

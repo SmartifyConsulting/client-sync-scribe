@@ -57,6 +57,7 @@ import { DocumentEditor } from "@/components/documents/DocumentEditor";
 import { DocumentPreview } from "@/components/sessions/DocumentPreview";
 import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
+import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { renderFormattedContent } from "@/utils/documentFormatting";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -1206,12 +1207,38 @@ function DocumentPreviewWithLetterhead({
 }) {
   const { headerFooter, templateFontFamily } = useDocumentHeaderFooter(document);
   const { profile } = useProfile();
+  const [resolvedContent, setResolvedContent] = useState<string>(document.content);
+  const [logoUrl, setLogoUrl] = useState<string | undefined>(profile?.logo_url || undefined);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const resolved = await resolveDocumentPreviewContent({
+          id: document.id,
+          content: document.content,
+          user_id: document.user_id,
+          patient_id: document.patient_id,
+          template_name: document.template_name,
+          session_id: (document as any).session_id ?? null,
+          name: document.name,
+        });
+        if (cancelled) return;
+        setResolvedContent(resolved.resolvedContent);
+        if (resolved.logoUrl) setLogoUrl(resolved.logoUrl);
+      } catch (err) {
+        console.error('Preview resolve error:', err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [document.id]);
+
   return (
     <DocumentPreview
       title={document.name}
       subtitle={document.patient_name ? `Patient: ${document.patient_name}` : undefined}
-      content={document.content}
-      logoUrl={profile?.logo_url || undefined}
+      content={resolvedContent}
+      logoUrl={logoUrl}
       fontFamily={templateFontFamily || headerFooter?.font_family || undefined}
       headerFooter={headerFooter}
       onClose={onClose}
