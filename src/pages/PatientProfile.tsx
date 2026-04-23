@@ -57,6 +57,7 @@ import { DocumentEditor } from "@/components/documents/DocumentEditor";
 import { DocumentPreview } from "@/components/sessions/DocumentPreview";
 import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
+import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { renderFormattedContent } from "@/utils/documentFormatting";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
