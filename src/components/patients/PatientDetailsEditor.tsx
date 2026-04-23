@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
+import { cn, emitMedicationsUpdated } from "@/lib/utils";
+import { useQueryClient } from "@tanstack/react-query";
 import { AddressAutocomplete } from "@/components/patients/AddressAutocomplete";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -128,14 +129,37 @@ const COUNTRY_CODES = [
 
 const sectionFrame = "rounded-xl border border-primary bg-card p-4 shadow-sm";
 
-// Reusable collapsible section header with neutral background and black text
-const SectionHeader = ({ icon: Icon, label, extra }: { icon: any; label: string; extra?: React.ReactNode }) => (
+// Reusable collapsible section header with optional inline edit pencil
+const SectionHeader = ({
+  icon: Icon,
+  label,
+  extra,
+  onEdit,
+}: {
+  icon: any;
+  label: string;
+  extra?: React.ReactNode;
+  onEdit?: () => void;
+}) => (
   <CollapsibleTrigger className="flex w-full items-center justify-between rounded-xl border border-primary bg-card shadow-sm px-4 py-3 group">
     <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-2 text-left">
       <Icon className="h-4 w-4 text-primary" /> {label}
     </h3>
     <div className="flex items-center gap-2">
       {extra}
+      {onEdit && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
+          className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+          aria-label={`Edit ${label}`}
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      )}
       <ChevronDown className="h-4 w-4 text-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
     </div>
   </CollapsibleTrigger>
@@ -452,6 +476,10 @@ export function PatientDetailsEditor({
   const [newMed, setNewMed] = useState({
     name: "",
     dosage: "",
+    quantity: "1",
+    strength: "",
+    units: "mg",
+    times_per_day: "1",
     is_chronic: false,
     status: "current" as "current" | "past",
     start_date: "",
@@ -839,44 +867,49 @@ export function PatientDetailsEditor({
     setShowAddNOK(true);
   };
 
+  // Compose a human-readable dosage string from structured fields
+  const composeDosage = (m: { quantity?: string; strength?: string; units?: string; times_per_day?: string; dosage?: string }) => {
+    const parts: string[] = [];
+    if (m.quantity && m.strength) parts.push(`${m.quantity} × ${m.strength}${m.units || "mg"}`);
+    else if (m.strength) parts.push(`${m.strength}${m.units || "mg"}`);
+    else if (m.quantity && m.quantity !== "1") parts.push(`${m.quantity} units`);
+    if (m.times_per_day && m.times_per_day !== "1") parts.push(`${m.times_per_day}× daily`);
+    else if (m.times_per_day === "1") parts.push("once daily");
+    const composed = parts.join(", ");
+    return composed || m.dosage || "";
+  };
+
   // Current medications handlers
   const handleAddMed = () => {
     if (!newMed.name.trim()) {
       toast({ title: "Required", description: "Medication name is required", variant: "destructive" });
       return;
     }
+    const composedDosage = composeDosage(newMed) || newMed.dosage.trim() || undefined;
+    const fields = {
+      name: newMed.name.trim(),
+      dosage: composedDosage,
+      quantity: newMed.quantity || undefined,
+      strength: newMed.strength || undefined,
+      units: newMed.units || "mg",
+      times_per_day: newMed.times_per_day || undefined,
+      is_chronic: newMed.is_chronic,
+      status: newMed.status,
+      start_date: newMed.start_date || undefined,
+      end_date: newMed.end_date || undefined,
+    };
     if (editingMedId) {
       setCurrentMedications((prev) =>
-        prev.map((m) =>
-          m.id === editingMedId
-            ? {
-                ...m,
-                name: newMed.name.trim(),
-                dosage: newMed.dosage.trim() || undefined,
-                is_chronic: newMed.is_chronic,
-                status: newMed.status,
-                start_date: newMed.start_date || undefined,
-                end_date: newMed.end_date || undefined,
-              }
-            : m,
-        ),
+        prev.map((m) => (m.id === editingMedId ? { ...m, ...fields } : m)),
       );
       setEditingMedId(null);
     } else {
-      setCurrentMedications((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          name: newMed.name.trim(),
-          dosage: newMed.dosage.trim() || undefined,
-          is_chronic: newMed.is_chronic,
-          status: newMed.status,
-          start_date: newMed.start_date || undefined,
-          end_date: newMed.end_date || undefined,
-        },
-      ]);
+      setCurrentMedications((prev) => [...prev, { id: crypto.randomUUID(), ...fields }]);
     }
-    setNewMed({ name: "", dosage: "", is_chronic: false, status: "current", start_date: "", end_date: "" });
+    setNewMed({
+      name: "", dosage: "", quantity: "1", strength: "", units: "mg",
+      times_per_day: "1", is_chronic: false, status: "current", start_date: "", end_date: "",
+    });
     setShowAddMed(false);
     setHasChanges(true);
   };
@@ -885,6 +918,10 @@ export function PatientDetailsEditor({
     setNewMed({
       name: m.name,
       dosage: m.dosage || "",
+      quantity: m.quantity || "1",
+      strength: m.strength || "",
+      units: m.units || "mg",
+      times_per_day: m.times_per_day || "1",
       is_chronic: m.is_chronic,
       status: m.status || "current",
       start_date: m.start_date || "",

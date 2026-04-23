@@ -317,7 +317,9 @@ Only return JSON.`;
     // ============================================================
     // INGESTION VALIDATION MODE — method-aware confidence scoring
     // ============================================================
-    const { imageUrls, filePaths, prescriptionId, patientId } = body;
+    const { imageUrls, filePaths, prescriptionId, patientId, tabletIndex, tabletTotal } = body;
+    const tabletIdx = Number.isFinite(Number(tabletIndex)) && Number(tabletIndex) > 0 ? Number(tabletIndex) : 1;
+    const tabletTot = Number.isFinite(Number(tabletTotal)) && Number(tabletTotal) > 0 ? Number(tabletTotal) : 1;
 
     const urls: string[] = imageUrls || (body.videoUrl ? [body.videoUrl] : []);
     const paths: string[] = filePaths || (body.filePath ? [body.filePath] : []);
@@ -386,8 +388,12 @@ The patient's declared intake method is: "${intakeMethod}".
 ${ref?.observed_description ? `Tablet baseline description: ${ref.observed_description}` : ''}
 ${ref?.baseline_pattern_summary ? `Patient's baseline routine: ${ref.baseline_pattern_summary}` : ''}
 
+This clip covers TABLET ${tabletIdx} OF ${tabletTot} for this dose.
+
 REQUIRED signals for this intake method: ${required}
 DISQUALIFYING signals for this intake method: ${disqualifying}
+
+Also COUNT the number of distinct tablets/capsules/pills visible in the close-up frames at any point during the clip. If multiple tablets were taken together, count all of them. Return that integer in detectedTabletCount (0 if none visible).
 
 Analyse the SEQUENCE and respond with JSON ONLY:
 {
@@ -398,6 +404,7 @@ Analyse the SEQUENCE and respond with JSON ONLY:
   "person_detected": true or false,
   "ingestion_detected": true or false,
   "disqualifying_signal": true or false,
+  "detectedTabletCount": integer,
   "detected_elements": ["list", "of", "relevant", "elements"]
 }
 
@@ -454,12 +461,65 @@ Set isValid=true only if person_detected AND ingestion_detected AND the required
     const confidence = typeof validationResult.confidence === 'number'
       ? Math.max(0, Math.min(100, validationResult.confidence))
       : 0;
+    const detectedTabletCount = typeof validationResult.detectedTabletCount === 'number'
+      ? Math.max(0, Math.floor(validationResult.detectedTabletCount))
+      : 0;
     const hardFail = validationResult.disqualifying_signal === true && confidence >= 60;
+
+    // ===== Multi-tablet sub-clips =====
+    // For intermediate sub-clips of a multi-tablet dose, do NOT write the
+    // adherence row, do NOT award Vulas. The client orchestrator combines
+    // results and submits the final tablet to write the aggregate row.
+    const isFinalSubmission = tabletIdx >= tabletTot;
+    if (!isFinalSubmission) {
+      // Always cleanup frames; we don't keep proof for sub-clips
+      await cleanupAllFiles();
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          subClip: true,
+          tabletIndex: tabletIdx,
+          tabletTotal: tabletTot,
+          confidence,
+          detectedTabletCount,
+          validation: validationResult,
+          hardFail,
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Aggregate tablet counts across the dose. The client may also pass
+    // accumulated counts (`accumulatedTabletCount`, `averageConfidence`),
+    // but we always trust this clip's own detection as a baseline.
+    const accumulatedTabletCount = typeof body.accumulatedTabletCount === 'number'
+      ? Math.max(0, Math.floor(body.accumulatedTabletCount))
+      : detectedTabletCount;
+    const tabletDetected = Math.min(accumulatedTabletCount + detectedTabletCount - detectedTabletCount, tabletTot) || detectedTabletCount;
+    const tabletDetectedFinal = Math.min(Math.max(accumulatedTabletCount, detectedTabletCount), tabletTot);
+    const aggregateConfidence = typeof body.averageConfidence === 'number'
+      ? Math.max(0, Math.min(100, body.averageConfidence))
+      : confidence;
+
+    const adherenceExtras = {
+      confidence_score: aggregateConfidence,
+      tablet_count_expected: tabletTot,
+      tablet_count_detected: tabletDetectedFinal,
+    };
+
+    // Downgrade one tier if we detected fewer tablets than expected
+    const shortfall = tabletTot > 1 && tabletDetectedFinal < tabletTot;
+    const shortfallNote = shortfall
+      ? `Only ${tabletDetectedFinal} of ${tabletTot} tablets detected on camera.`
+      : null;
 
     // ===== Decision tree =====
     // Hard fail: locked, no Vulas
     if (hardFail) {
-      await upsertAdherence('failed_verification', { confidence_score: confidence });
+      await upsertAdherence('failed_verification', {
+        ...adherenceExtras,
+        ...(shortfallNote ? { reconciliation_note: shortfallNote } : {}),
+      });
       await cleanupExceptFirst();
       return new Response(
         JSON.stringify({
@@ -469,16 +529,18 @@ Set isValid=true only if person_detected AND ingestion_detected AND the required
             isValid: false,
             description: validationResult.description || 'The intake did not match your declared method. Please contact your doctor before changing how you take this medicine.',
           },
-          confidence,
+          confidence: aggregateConfidence,
+          detectedTabletCount: tabletDetectedFinal,
+          tabletExpected: tabletTot,
           molesAwarded: 0,
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Confirmed: Vulas + completed
-    if (validationResult.isValid && confidence >= 75) {
-      await upsertAdherence('completed', { confidence_score: confidence });
+    // Confirmed: Vulas + completed (downgraded to provisional if tablet shortfall)
+    if (validationResult.isValid && aggregateConfidence >= 75 && !shortfall) {
+      await upsertAdherence('completed', adherenceExtras);
 
       const { data: patient } = await supabase
         .from('patients')
@@ -529,14 +591,25 @@ Set isValid=true only if person_detected AND ingestion_detected AND the required
       await cleanupAllFiles();
 
       return new Response(
-        JSON.stringify({ ok: true, validation: validationResult, confidence, molesAwarded: 5, streak: currentStreak }),
+        JSON.stringify({
+          ok: true,
+          validation: validationResult,
+          confidence: aggregateConfidence,
+          detectedTabletCount: tabletDetectedFinal,
+          tabletExpected: tabletTot,
+          molesAwarded: 5,
+          streak: currentStreak,
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Provisional: 30-74 confidence — Vulas paid now, reconciled at month-end
-    if (confidence >= 30) {
-      await upsertAdherence('provisional', { confidence_score: confidence });
+    // Provisional: 30-74 confidence OR tablet shortfall — Vulas paid now, reconciled at month-end
+    if (aggregateConfidence >= 30) {
+      await upsertAdherence('provisional', {
+        ...adherenceExtras,
+        ...(shortfallNote ? { reconciliation_note: shortfallNote } : {}),
+      });
 
       const { data: patient } = await supabase
         .from('patients')
@@ -559,20 +632,34 @@ Set isValid=true only if person_detected AND ingestion_detected AND the required
         JSON.stringify({
           ok: true,
           provisional: true,
-          confidence,
+          confidence: aggregateConfidence,
+          detectedTabletCount: tabletDetectedFinal,
+          tabletExpected: tabletTot,
           validation: validationResult,
           molesAwarded: 5,
-          message: `Confidence ${Math.round(confidence)}% — provisional. Will be confirmed at month-end if your average stays above 50%.`,
+          message: shortfall
+            ? `Only ${tabletDetectedFinal} of ${tabletTot} tablets seen on camera — provisional, reviewed at month-end.`
+            : `Confidence ${Math.round(aggregateConfidence)}% — provisional. Will be confirmed at month-end if your average stays above 50%.`,
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     // Too low: failed, no Vulas
-    await upsertAdherence('failed_verification', { confidence_score: confidence });
+    await upsertAdherence('failed_verification', {
+      ...adherenceExtras,
+      ...(shortfallNote ? { reconciliation_note: shortfallNote } : {}),
+    });
     await cleanupExceptFirst();
     return new Response(
-      JSON.stringify({ ok: true, validation: validationResult, confidence, molesAwarded: 0 }),
+      JSON.stringify({
+        ok: true,
+        validation: validationResult,
+        confidence: aggregateConfidence,
+        detectedTabletCount: tabletDetectedFinal,
+        tabletExpected: tabletTot,
+        molesAwarded: 0,
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {

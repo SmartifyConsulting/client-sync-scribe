@@ -39,6 +39,14 @@ export interface CurrentMedication {
   id: string;
   name: string;
   dosage?: string;
+  /** Tablets/units per dose (e.g. "1", "2"). */
+  quantity?: string;
+  /** Strength value (e.g. "500"). */
+  strength?: string;
+  /** Strength units — defaults to "mg". */
+  units?: string;
+  /** Repeats/day, integer-as-string. */
+  times_per_day?: string;
   is_chronic: boolean;
   status?: 'current' | 'past';
   start_date?: string;
