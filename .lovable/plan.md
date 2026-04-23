@@ -1,84 +1,87 @@
 
 
-# Plan: PAID stamp on paid invoices + auto-email to medical aid claims address
+# Plan: Fix preview placeholders + tighten Admin tab typography + full Invoice CRUD
 
-## Status of what's already in place
+Three coordinated changes. (1) is the previously-approved preview fix; (2) and (3) are new.
 
-- `patients.claims_email` — **already exists** as a column. Already captured/edited in `PatientDetailsEditor.tsx` (under the Medical Aid section).
-- Doctor's "Mark Paid" handler in `src/pages/doctor/Invoices.tsx` already auto-forwards to `claims_email` IF the patient has toggled on `auto_email_invoice_to_insurance` in their settings.
-- The `submit-insurance-claim` edge function exists for manual patient-initiated claims.
+## 1. Document previews always show real values (legacy + new)
 
-So the field exists and the trigger fires — but **the email is a flat text dump** (`Invoice Number: …\nAmount: …`), not a real PAID-stamped invoice document. That's the gap.
+### Root cause
+Legacy `documents` rows for Invoices, Prescriptions, Certificates, etc. were saved with raw `[InvoiceNumber]`, `[PatientAddress]`, `[MedicalAid]`, `[BankDetails]`, `[Services]`, `[TotalAmount]`, `[DoctorNumber]` tokens. Previews render `doc.content` verbatim, so the brackets show.
 
-## What this plan does
+### Fix
+- **New** `src/lib/fillDocumentPlaceholders.ts` — single source-of-truth helper. Replaces all known patient / practice / invoice / time tokens (case-insensitive, supports `[Token]` and `[Token Name]`). Unknown tokens become a thin grey `___` so brackets never leak through.
+- **Render-time fill + auto-heal** in `src/pages/TodoList.tsx` (`handlePreviewDoc`) and `src/pages/Documents.tsx`: on open, fetch the doc's patient + doctor profile (+ matching `invoices` row when `template_name='Invoice'`), run the helper, pass resolved content to `<DocumentPreview>`. If the resolved content differs from what's stored, `update documents set content = resolved` so subsequent views, prints, and emails are clean.
+- **Refactor** `src/hooks/useSessions.ts` invoice/prescription/cert/referral/admission blocks to use the same helper — eliminates drift. Also fixes the bank-details lookup to read `profile.bank_account_details` (current code reads a non-existent `bank_details` column).
+- **Belt-and-braces** in `src/components/sessions/DocumentPreview.tsx`: `handlePrint` and `handleSendEmail` run the helper too (no-op if already resolved).
 
-1. Show the **Claims Email** field more prominently and label it as "Medical Aid Claims Email" with helper text explaining the auto-submit behavior. (Already in the editor; just relabel + add a small "Auto-submit on payment" hint and surface it in the read-only view too.)
-2. **Build a PAID-stamped invoice document** when the doctor marks an invoice paid — render the actual invoice template (header, footer, line items, totals, currency) and overlay a large red diagonal `PAID` watermark with the paid date.
-3. **Persist that PAID version** as a new `documents` row (`template_name='Invoice (Paid)'`, `is_draft=false`, `name="Invoice <number> — PAID"`) so it shows up in the patient's documents and the doctor's documents tab as the canonical paid version.
-4. **Auto-email to the medical aid claims address** using the rendered HTML invoice (not a text dump). Falls back gracefully when no claims email is set or the patient hasn't enabled the toggle.
-5. Allow the doctor to **manually trigger "Send to Medical Aid"** from the doctor Invoices page even when the patient hasn't enabled auto-submit (some practices want to send regardless).
+No data migration — auto-heal handles legacy docs lazily on first open.
 
-## How the PAID stamp works
+## 2. Admin tabs: enforce 11–12px scale across every screen
 
-We have two render paths to reuse:
-- The Invoice template content lives on `documents.content` (auto-created by `useSessions.ts`) or can be re-built from the `invoices` row.
+`src/pages/Admin.tsx` hosts four sub-screens via `<Tabs>`: **Calendar**, **To-Do**, **Invoices**, **Templates** (which renders `CalendarView`, `TodoList`, `doctor/Invoices`, `Documents`). They each have their own typography that's larger than the rest of the admin shell.
 
-Approach: build the rendered HTML on the client at the moment of "Mark Paid":
-- Read the matching auto-generated invoice document (joined by `session_id` + `template_name='Invoice'`) if it exists; otherwise build the invoice content from the `invoices` row + patient + profile (mirror the `useSessions.ts` invoice replacement map: invoice number, date, services lines, total in correct currency, practice address, doctor number, bank details, patient address, medical aid + number).
-- Wrap it in the standard letterhead HTML (the `useTemplateWithHeaderFooter` pattern already used in `DocumentPreview`).
-- Overlay a CSS-rotated absolutely-positioned div: `PAID` in bold red (#E01837), 120px, ~25° rotation, 0.35 opacity, plus a small "Paid on <date>" subtitle below it.
-- Save the resulting HTML to a new `documents` row.
+Apply the project mobile-compaction standard (`text-[11px]` body / `text-[12px]` headings) to anything rendered inside the Admin tabs:
 
-For the email body we send the same HTML (Resend handles HTML email natively — `send-document-email` already wraps `documentContent` in HTML; we'll bypass its `<br/>` text formatter when the caller passes `documentHtml` directly).
+- Wrap each `<TabsContent>` in a scoped class like `class="admin-tab-scope"` and add a section in `src/index.css`:
+  ```css
+  .admin-tab-scope, .admin-tab-scope * {
+    font-size: 11px;
+  }
+  .admin-tab-scope h1, .admin-tab-scope h2, .admin-tab-scope h3 { font-size: 12px; }
+  .admin-tab-scope .text-xs, .admin-tab-scope .text-sm,
+  .admin-tab-scope .text-base, .admin-tab-scope .text-lg,
+  .admin-tab-scope .text-xl, .admin-tab-scope .text-2xl,
+  .admin-tab-scope .text-3xl { font-size: 11px; }
+  .admin-tab-scope th, .admin-tab-scope td { font-size: 11px; padding: 6px 8px; }
+  .admin-tab-scope button { font-size: 11px; }
+  .admin-tab-scope input, .admin-tab-scope textarea, .admin-tab-scope select { font-size: 12px; }
+  ```
+  Inputs stay at 12px to avoid mobile zoom-on-focus. Icons untouched.
+- Do NOT modify the underlying pages (`CalendarView`, `TodoList`, `doctor/Invoices`, `Documents`) — those still need their own scales when used standalone. The scope class only applies inside Admin.
+- Tighten the Admin shell heading itself: `h1` from `text-xl` → `text-[12px] font-semibold`, and tabs row already uses `text-xs` (leave).
 
-## Edge function changes
+## 3. All Invoice records: preview + edit (no exceptions)
 
-`supabase/functions/send-document-email/index.ts`
-- Accept an optional `documentHtml` field. When present, use it verbatim as the email body (skip the text-to-HTML conversion). Keep the existing `documentContent` path for backwards compatibility.
-- Accept an optional `replyTo` (set to the doctor's email) so claim responses come back to the doctor.
+Today in `src/pages/doctor/Invoices.tsx`:
+- Only **paid** invoices have a "Send to Medical Aid" / view path; pending/overdue invoices show a Mark-Paid button and a download but no preview/edit affordance.
+- The doc-preview path only exists for the auto-generated Invoice document and the new "Invoice (Paid)".
 
-No new edge function needed.
+Add a uniform actions cluster on **every** invoice row regardless of status:
 
-## Doctor-side flow (`src/pages/doctor/Invoices.tsx`)
+| Action | Behavior |
+|---|---|
+| **Preview** (eye icon) | Opens `<DocumentPreview>` with the rendered HTML. Re-uses the same render path as TodoList/Documents (auto-heal placeholders, letterhead applied). If no `documents` row exists for the invoice yet (legacy/manual), build it on the fly via `buildPaidInvoiceHtml`-style helper renamed to `buildInvoiceHtml(invoice, patient, profile, headerFooter, { paid: boolean })` so the same renderer works for unpaid invoices (no PAID stamp) and paid (with stamp). |
+| **Edit** (pencil icon) | Opens the existing `InvoiceEditor` dialog, pre-loaded from the `invoices` row (line items, patient, currency, dates). Save updates the `invoices` row AND regenerates the linked `documents` row's `content`. Works for any status. |
+| **Mark Paid** | Existing button, only when `status !== 'paid'`. |
+| **Send to Medical Aid** | Existing button, only when `status === 'paid'` and `claims_email` present. |
+| **Download** | Existing. |
 
-Replace the current `markAsPaid` body after the DB update:
-
-1. Update the `invoices` row → `status='paid'`, `paid_at=now()`. (existing)
-2. Build the PAID-stamped invoice HTML via a new helper `buildPaidInvoiceHtml(invoice, patient, profile, headerFooter)`.
-3. Insert a `documents` row with that HTML (`template_name='Invoice (Paid)'`, `is_draft=false`, `name="Invoice <number> — PAID"`, `patient_id`, `user_id=doctor`, `session_id`).
-4. If `patient.claims_email` is set:
-   - If `auto_email_invoice_to_insurance` is on → fire `send-document-email` with `documentHtml` automatically and toast "Sent to <claims_email>".
-   - If off → don't auto-send, but show a "Send to Medical Aid" button next to the now-paid invoice that does the same call on click.
-5. If no `claims_email`, show toast: "No claims email on file — add it on the patient profile to enable auto-submit."
-
-Add a manual **"Resend to Medical Aid"** action in the row dropdown for paid invoices (wraps the same call). Useful for re-submission.
-
-## UI tweaks
-
-`src/components/patients/PatientDetailsEditor.tsx`
-- Relabel the existing `claims_email` field to **"Medical Aid Claims Email"** with helper text: "When invoices are marked paid, the PAID invoice is auto-submitted here (if enabled in patient settings)."
-- In the read-only view (line 1832), keep the same label.
-
-`src/pages/doctor/Invoices.tsx`
-- For paid rows, add a small "Send to Medical Aid" button (mail icon) that's disabled with a tooltip when `claims_email` is missing, mirroring the patient-side `submit-insurance-claim` UX.
-- Toast wording when auto-send fires: "Paid invoice emailed to <claims_email>".
-
-`src/components/settings/SettingsContent.tsx`
-- Existing patient toggle copy already correct ("Auto-email invoice to medical aid"). No change.
+Implementation notes:
+- Extract the invoice render into `src/lib/invoiceHtml.ts` (factor out from `paidInvoice.ts`); `paidInvoice.ts` becomes a thin wrapper that calls it with `{ paid: true }`.
+- `InvoiceEditor` already supports the multi-line-item flow used elsewhere — wire its `defaultValue` from the row when opened in edit mode and call `update invoices set ... where id=` on save, then upsert the matching `documents.content`.
+- Keep the existing read-only column layout; actions live in the trailing actions cell with consistent icon-button styling.
 
 ## Files touched
 
 | File | Change |
 |---|---|
-| `src/pages/doctor/Invoices.tsx` | Replace text-dump email with PAID-stamped HTML invoice; insert `documents` row; add manual "Send to Medical Aid" button on paid rows. |
-| `src/lib/paidInvoice.ts` *(new)* | `buildPaidInvoiceHtml(...)` — renders invoice template with letterhead + PAID watermark overlay. |
-| `src/components/patients/PatientDetailsEditor.tsx` | Relabel claims email field + add helper text. |
-| `supabase/functions/send-document-email/index.ts` | Accept `documentHtml` (use as-is) and `replyTo`. |
+| `src/lib/fillDocumentPlaceholders.ts` *(new)* | Shared placeholder filler. |
+| `src/lib/invoiceHtml.ts` *(new)* | `buildInvoiceHtml(...)` shared between preview, paid stamping, email. |
+| `src/lib/paidInvoice.ts` | Refactor to delegate to `invoiceHtml.ts`. |
+| `src/hooks/useSessions.ts` | Use shared helper for all template fills; fix bank-details column. |
+| `src/pages/TodoList.tsx` | Render-time fill + auto-heal in preview. |
+| `src/pages/Documents.tsx` | Same render-time fill + auto-heal. |
+| `src/components/sessions/DocumentPreview.tsx` | Safety pass through helper for print/email. |
+| `src/pages/Admin.tsx` | Add `admin-tab-scope` wrapper to each `<TabsContent>`; shrink the page `<h1>`. |
+| `src/index.css` | Add `.admin-tab-scope` typography rules (11–12px). |
+| `src/pages/doctor/Invoices.tsx` | Preview + Edit actions on every invoice row regardless of status; wire to `InvoiceEditor` and `<DocumentPreview>`; persist edits back to `invoices` and the linked `documents` row. |
 
 ## Out of scope
 
-- Generating a PDF attachment instead of inline HTML (HTML email renders fine in claims inboxes; PDF is a heavier change requiring a render service).
-- Reverting the PAID document if a doctor un-marks an invoice as paid (unmark isn't currently exposed; can add later).
-- Sending claim status callbacks from the medical aid back into the app.
-- Touching the patient-initiated `submit-insurance-claim` flow (already works for manual patient claims).
+- Changing typography of standalone (non-Admin) `CalendarView` / `TodoList` / `Documents` / `doctor/Invoices` pages.
+- PDF export of invoices (still HTML email + browser print).
+- Reverting an invoice from paid → pending (not exposed today).
+- SQL backfill of legacy docs (lazy auto-heal is enough).
+- Editing invoices that originated from a session in a way that diverges from the session — edits stay tied to the same `session_id`.
 
