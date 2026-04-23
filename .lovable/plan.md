@@ -1,79 +1,118 @@
 
+Fix the remaining document preview paths so session-generated documents always show real values instead of raw placeholders.
 
-# Plan: Fix cert dates, prescription preview, Admin invoice layout, smaller PAID stamp
+## What is still broken
 
-Four targeted fixes — root causes confirmed in DB and source.
+The current route is `/doctor-dashboard`, which renders `CompactTodoList`. That component still uses an old preview path that only replaces a few doctor tokens (`[PracticeNumber]`, `[DoctorName]`, etc.). It does not resolve:
 
-## 1. Medical Certificate: Start Date defaults to today (not session date)
+- patient placeholders
+- invoice placeholders
+- prescription indexed slots like `[Medication1]`, `[Dosage1]`
+- session-linked data needed after auto-generation
 
-**File:** `src/components/sessions/MedicalCertificateEditor.tsx`
+There are also other preview surfaces still rendering raw `document.content` directly:
 
-In the auto-detect `useEffect` (lines ~67–154), the session-date inference currently overwrites the user's expected default of today. Change behaviour:
+- `src/components/dashboard/CompactTodoList.tsx`
+- `src/pages/PatientProfile.tsx`
+- `src/pages/patient/PatientDocuments.tsx`
+- `src/pages/Documents.tsx` still has raw-content fallback rendering in `DocumentPreviewBody`
 
-- **Start Date stays at today** (initial `useState` value), regardless of session date.
-- **Examination Date** also defaults to today (matches when the certificate is being issued).
-- **End Date** defaults to today and only changes if the AI infers a return-to-work / leave-duration value from the summary (priority 1, 3, 4 logic kept; the from/to override of `setStartDate` in priority 2 is removed so the start date is never silently shifted backwards).
-- The `setStartDate(iso)` and `setExaminationDate(iso)` calls based on `data.started_at` are removed.
+So even though some preview flows were fixed earlier, the dashboard/admin/patient preview entry points are not all using the same resolution logic.
 
-Net effect: opening a Medical Certificate from any session always shows today's date, and the doctor can adjust if needed.
+## Implementation
 
-## 2. Prescription preview: render real medication data (not all `___`)
+### 1. Add one shared document-preview resolver
+Create a shared helper that loads all context needed for previewing a stored document before rendering it.
 
-**Root cause** (confirmed in DB): the doctor's saved Prescription template uses indexed slot tokens — `[Medication1]`, `[Dosage1]`, `[Quantity1]`, `[Instructions1]` (1–3), plus `[PrescriptionDate]`, `[NumberOfRepeats]`, `[SpecialInstructions]`. None of these are in the replacement map in `useSessions.ts` (lines 442–467). Line 468 then strips every remaining `[Token]` to `___`, blanking the entire Rx body. The medications list IS appended after, but the visible "1. ___ / Dosage: ___ / Quantity: ___ / Instructions: ___" rows above it look broken.
+**New helper:** `src/lib/resolveDocumentPreviewContent.ts`
 
-**Fix in `src/hooks/useSessions.ts`** (prescription block, lines ~420–520):
+It will:
+- accept a `documents` row
+- fetch:
+  - `patients` row when `patient_id` exists
+  - doctor `profiles` row from `user_id`
+  - matching `invoices` row when `template_name` is invoice-related and `session_id` exists
+  - matching `prescriptions` rows when `template_name` is prescription-related and `session_id` exists
+- build a `prescription` object for `fillDocumentPlaceholders(...)`
+- replace `[DoctorSignature]` with the stored signature image
+- return:
+  - `resolvedContent`
+  - `logoUrl`
+  - `template/user metadata`
+  - `didChange` so callers can auto-heal the stored `documents.content`
 
-- Build replacements for indexed medication slots dynamically from the AI-extracted `medications[]`:
-  - For `i = 1..max(3, medications.length)`: map `Medication{i}`, `Dosage{i}`, `Quantity{i}`, `Frequency{i}`, `Instructions{i}` to the corresponding fields (or empty string if that slot is unused).
-- Add the missing global tokens: `PrescriptionDate` → today, `NumberOfRepeats` → `rx.repeats ?? ''`, `SpecialInstructions` → `rx.special_instructions || rx.notes || ''`.
-- Skip the trailing "append `medsHtml` block" (line 470–473) when the template path is used — the template already contains the slots, so duplicating creates the messy `<p>` block beneath the structured Rx.
-- For the unmatched-token cleanup (line 468), replace empty slot tokens with empty string (not `___`) so unused Rx rows render as a blank line, not as visual noise. Only **non-slot, non-empty** unknown tokens fall back to `___`.
+For prescriptions, prefer:
+- rows from `prescriptions` filtered by `session_id`
+- fallback to latest active/current patient prescriptions if the session-linked rows are missing
 
-**Also extend `src/lib/fillDocumentPlaceholders.ts`** so the runtime auto-heal path on legacy docs handles the same indexed slots (read them off an optional `prescription` field added to `FillContext`). Used by the TodoList preview path which doesn't currently know about prescription slots.
+### 2. Use the shared resolver in every preview entry point
+Replace all ad-hoc preview logic with the shared resolver in:
 
-## 3. Admin invoice preview: render with line breaks (not one flat paragraph)
+- `src/components/dashboard/CompactTodoList.tsx`
+- `src/pages/TodoList.tsx`
+- `src/pages/Documents.tsx`
+- `src/pages/PatientProfile.tsx`
+- `src/pages/patient/PatientDocuments.tsx`
 
-**Root cause** (confirmed in DB): the auto-generated `documents.content` for invoices is **plain-text** with `\n` line breaks. `buildInvoiceHtml` → `fetchExistingInvoiceContent` returns that text and drops it directly into an iframe `srcDoc`, where HTML collapses all whitespace into single spaces. Result: one long line as in the screenshot.
+That means every preview modal will pass resolved content into `DocumentPreview`, not raw `document.content`.
 
-**Fix in `src/lib/invoiceHtml.ts`:**
+### 3. Fix dashboard preview specifically
+Update `CompactTodoList.tsx` so the doctor dashboard preview behaves the same as the main To-Do page.
 
-- In `fetchExistingInvoiceContent`, after running the placeholder fill, detect plain-text vs HTML content. If the resolved string contains no block-level HTML (no `<p>`, `<div>`, `<br>`, `<table>`, `<h1..6>`), wrap it in:
-  ```html
-  <div style="white-space: pre-wrap; font-family: Arial, sans-serif; padding: 24px; line-height: 1.5; color: #222;">…</div>
-  ```
-  This preserves `\n` breaks visually without needing to rewrite the template.
-- For HTML content, return as-is (current behaviour).
+Today it only does string replace for a few doctor fields. Replace that entire block with the same full resolver used elsewhere.
 
-This fix automatically applies to **every** existing R0/legacy invoice preview, the Admin tab preview, and the email path.
+This is the likely reason the user is still seeing “no data” from the dashboard preview.
 
-## 4. PAID stamp: ~10 cm, not full-page
+### 4. Ensure prescription previews resolve session medication data
+Extend the preview resolution path so prescription templates with indexed tokens work everywhere:
 
-**File:** `src/lib/invoiceHtml.ts` (lines ~154–185)
+- `[Medication1]`, `[Medication2]`, `[Medication3]`
+- `[Dosage1]`, `[Quantity1]`, `[Frequency1]`, `[Instructions1]`
+- `[PrescriptionDate]`
+- `[NumberOfRepeats]`
+- `[SpecialInstructions]`
 
-Reduce the stamp dimensions to roughly 10 cm wide:
+The resolver will populate these from real prescription rows linked to the session/patient before the preview opens.
 
-- `font-size: 140px` → `font-size: 56px`
-- `letter-spacing: 8px` → `letter-spacing: 4px`
-- `border: 10px solid` → `border: 4px solid`
-- `padding: 10px 40px` → `padding: 6px 24px`
-- `width: ~10cm` enforced via `max-width: 380px` on the inner stamp box.
-- Sub-line ("Paid on …") `font-size` stays at 14px; reduce `margin-top` to `4px`.
+### 5. Remove raw-content preview fallbacks
+Update remaining components that still directly render `document.content` / `doc.content` without resolution:
 
-Stamp keeps the diagonal `-25deg` rotation and centred position but is now ~10 cm across — visible but no longer dominating the page.
+- `src/pages/PatientProfile.tsx`
+- `src/pages/patient/PatientDocuments.tsx`
+- `src/pages/Documents.tsx` (`DocumentPreviewBody` raw-content branches)
+
+They should either:
+- use `DocumentPreview` with resolved content, or
+- run the shared resolver before any `dangerouslySetInnerHTML`.
+
+### 6. Keep lazy auto-heal for legacy docs
+When the resolved content differs from stored `documents.content`, update the document row so later previews, emails, and prints are already clean.
+
+This should be applied consistently in every preview path, not only some of them.
 
 ## Files touched
 
 | File | Change |
 |---|---|
-| `src/components/sessions/MedicalCertificateEditor.tsx` | Stop overwriting Start/Examination dates from session; today is the default. |
-| `src/hooks/useSessions.ts` | Map indexed `[Medication{n}]`/`[Dosage{n}]`/`[Quantity{n}]`/`[Frequency{n}]`/`[Instructions{n}]` slots, plus `[PrescriptionDate]`, `[NumberOfRepeats]`, `[SpecialInstructions]`. Skip duplicate medsHtml append when template path runs. Empty unused slots render blank, not `___`. |
-| `src/lib/fillDocumentPlaceholders.ts` | Extend `FillContext` with optional `prescription` carrying medications; resolve indexed slots; empty-slot cleanup matches behaviour above. |
-| `src/lib/invoiceHtml.ts` | Wrap plain-text invoice content in `white-space: pre-wrap` div so line breaks render. Shrink PAID stamp to ~10 cm. |
+| `src/lib/resolveDocumentPreviewContent.ts` | New shared resolver for stored document previews |
+| `src/components/dashboard/CompactTodoList.tsx` | Replace old doctor-only placeholder substitution with full resolver |
+| `src/pages/TodoList.tsx` | Refactor to use shared resolver |
+| `src/pages/Documents.tsx` | Refactor preview flow and remove raw-content fallback rendering |
+| `src/pages/PatientProfile.tsx` | Resolve stored document content before preview |
+| `src/pages/patient/PatientDocuments.tsx` | Resolve stored document content before preview |
+| `src/lib/fillDocumentPlaceholders.ts` | Reuse existing prescription/invoice support; only minor extension if resolver needs extra fields |
+
+## Expected result
+
+After this change:
+- previews opened from the doctor dashboard will show real data
+- prescription previews will show medication data from the session
+- patient/admin/document-library preview surfaces will behave consistently
+- legacy docs will self-heal after first preview
 
 ## Out of scope
 
-- Redesigning the doctor's Invoice / Prescription templates (we adapt to whatever shape they're in).
-- Backfilling old documents in SQL — the layout fix renders correctly on first preview without touching stored content.
-- Changing AI extraction prompts.
-- Adding a service-list dropdown inside `InvoiceEditor` — the previously-approved Edit action already lets the doctor pick from `service_prices` via the existing line-item editor; no new UI needed for that thread.
-
+- Changing document templates themselves
+- Reworking session AI extraction
+- Redesigning the preview modal UI
+- Database schema changes
