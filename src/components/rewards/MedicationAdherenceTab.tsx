@@ -559,7 +559,23 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
         <CardContent className="py-12 text-center">
           <Pill className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
           <p className="text-muted-foreground">No active chronic prescriptions found.</p>
-          <p className="text-sm text-muted-foreground mt-1">When your doctor prescribes chronic medication, it will appear here for daily tracking.</p>
+          {profileChronicState?.hasUnsyncedChronic ? (
+            <>
+              <p className="text-sm text-muted-foreground mt-1">
+                Some of your chronic meds aren't tracked yet — add your doctor under My Healthcare so we can set up baseline capture.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-4"
+                onClick={() => { window.location.href = "/patient/details?section=care"; }}
+              >
+                Add my doctor
+              </Button>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground mt-1">When your doctor prescribes chronic medication, it will appear here for daily tracking.</p>
+          )}
         </CardContent>
       </Card>
     );
