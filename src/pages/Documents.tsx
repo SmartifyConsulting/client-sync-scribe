@@ -34,6 +34,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { exportToPDF } from "@/utils/documentExport";
 import { renderFormattedContent } from "@/utils/documentFormatting";
 import { supabase } from "@/integrations/supabase/client";
+import { fillDocumentPlaceholders } from "@/lib/fillDocumentPlaceholders";
 import {
   Dialog,
   DialogContent,
@@ -1105,11 +1106,87 @@ function DocumentPreviewWithLetterhead({
 }) {
   const { headerFooter } = useDocumentHeaderFooter(document);
   const { profile } = useProfile();
+  const [resolvedContent, setResolvedContent] = useState<string>(document.content);
+  const [resolving, setResolving] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setResolving(true);
+      try {
+        const [patientRes, profileRes] = await Promise.all([
+          (document as any).patient_id
+            ? supabase.from('patients').select('*').eq('id', (document as any).patient_id).maybeSingle()
+            : Promise.resolve({ data: null } as any),
+          (document as any).user_id
+            ? supabase.from('profiles').select('*').eq('id', (document as any).user_id).maybeSingle()
+            : Promise.resolve({ data: null } as any),
+        ]);
+
+        let invoiceRow: any = null;
+        if (
+          (document as any).template_name === 'Invoice' &&
+          (document as any).session_id
+        ) {
+          const { data } = await supabase
+            .from('invoices')
+            .select('*')
+            .eq('session_id', (document as any).session_id)
+            .maybeSingle();
+          invoiceRow = data;
+        }
+
+        const filled = fillDocumentPlaceholders(document.content || '', {
+          patient: patientRes?.data || null,
+          profile: profileRes?.data || null,
+          invoice: invoiceRow
+            ? {
+                invoice_number: invoiceRow.invoice_number,
+                description: invoiceRow.description,
+                amount: invoiceRow.amount,
+                due_date: invoiceRow.due_date,
+                created_at: invoiceRow.created_at,
+                paid_at: invoiceRow.paid_at,
+                currency: 'ZAR',
+              }
+            : null,
+        });
+
+        let content = filled.content;
+        if ((profileRes?.data as any)?.signature_url) {
+          content = content.replace(
+            /\[DoctorSignature\]/g,
+            `<img src="${(profileRes.data as any).signature_url}" alt="Signature" style="max-height: 60px;" />`,
+          );
+        }
+
+        if (!cancelled) setResolvedContent(content);
+
+        // Auto-heal stored content if placeholders were resolved.
+        if (filled.hadPlaceholders && content !== document.content) {
+          try {
+            await supabase.from('documents').update({ content }).eq('id', document.id);
+          } catch (err) {
+            console.error('Auto-heal failed:', err);
+          }
+        }
+      } catch (err) {
+        console.error('Preview resolve error:', err);
+        if (!cancelled) setResolvedContent(document.content || '');
+      } finally {
+        if (!cancelled) setResolving(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [document.id]);
+
   return (
     <DocumentPreview
       title={document.name}
       subtitle={document.patient_name ? `Patient: ${document.patient_name}` : undefined}
-      content={document.content}
+      content={resolving ? document.content : resolvedContent}
       logoUrl={profile?.logo_url || undefined}
       fontFamily={headerFooter?.font_family || undefined}
       headerFooter={headerFooter}
