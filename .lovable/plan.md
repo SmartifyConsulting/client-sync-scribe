@@ -1,81 +1,122 @@
 
 
-# Plan: Three-step baseline capture — Packaging → Tablet → Take it
+# Plan: Fix preview formatting, add Documents-tab actions, merge session frames, smarter MC dates
 
-Restructure `PillBaselineCapture` so the patient explicitly captures three artefacts, in this order, before the baseline is saved.
+Four small, contained fixes.
 
-## New step flow
+## 1. Document preview shows raw `<b>...</b>` tags
+
+**Root cause:** In `src/components/sessions/DocumentPreview.tsx`, the `renderHeaderFooterSection` helper renders each header/footer cell's text with plain JSX (`{cell.text}`), so React escapes `<b>BORDER ORTHOPAEDICS</b>` and prints the markup verbatim — exactly what the screenshot shows.
+
+The body content elsewhere already uses `renderFormattedContent` + `dangerouslySetInnerHTML`. The header/footer cells just don't.
+
+**Fix:** Render each cell's text through the existing safe formatter:
+
+```tsx
+{cell.text && (
+  <div
+    style={{ fontSize: '9pt', lineHeight: 1.4, fontFamily }}
+    dangerouslySetInnerHTML={{ __html: renderFormattedContent(cell.text) }}
+  />
+)}
+```
+
+`renderFormattedContent` already whitelists `<b>`, `<i>`, `<u>`, `<br/>` etc. and is sanitized with DOMPurify, so this is safe.
+
+**Knock-on fix:** Apply the same change to the inline header/footer renderer in `src/pages/Documents.tsx` (`renderHFSectionPreview`, ~line 299) so the Templates → Preview view matches.
+
+## 2. Documents tab — Edit + Preview + Send for doctors
+
+The doctor-facing **Patient Documents** list at the bottom of `src/pages/Documents.tsx` already has Preview, Edit, Share (Send), Download, Delete buttons (lines 613–670), and the Send button already targets `send-document-email`. But:
+
+- **Preview uses a basic `Dialog`** that doesn't render the letterhead/header-footer the same way the To-Do preview does — so it looks inconsistent with the home-page preview the user likes.
+- **Edit opens an inline name/content textarea** rather than the full editor.
+
+**Fix:**
+
+- Replace the existing custom `previewDocument` `<Dialog>` in `Documents.tsx` with the same `<DocumentPreview>` component used by `TodoList` and the session editors. It already supports Print and Share-via-email, so the **Send** action becomes available right inside the preview too. Resolve `headerFooter` via the existing `useDocumentHeaderFooter` hook (already imported) keyed on `{ user_id: doc.user_id, template_name: doc.template_name }`.
+- Keep the standalone `Send` (green arrow) and `Edit` icons in the row exactly as they are today — they already work and match the home-page row layout. Just verify the Send icon is the green `<Send>` for unsent docs (already the case at line 646) and `ArrowUpRight` muted once sent.
+
+## 3. Merge "Session Notes" + "Session Recording" into one frame
+
+In `src/pages/SessionDetail.tsx` there are currently three separate framed sections after the AI Summary:
+
+1. **Session Recording** (audio player + retention warning) — lines 418–460
+2. **Full Transcription** (color-coded transcript) — lines 537–583
+3. **Session Notes** (manual `session.notes`) — lines 585–591
+
+**Fix — collapse into one card titled "Session Notes":**
 
 ```text
-intro → method → packaging → tablet → ingest → processing
+┌─ Session Notes ─────────────────────────────────────────┐
+│  [purple Volume2 icon]  Audio + transcript + notes      │
+│                                          [Download ▾]   │
+│  ───────────────────────────────────────────────────    │
+│  <audio controls />            ← only if audio_url      │
+│  ⚠ 7-day retention notice                              │
+│  ───────────────────────────────────────────────────    │
+│  Transcript                            [Download .txt]  │
+│  Dr. Allie:  ...                                        │
+│  Patient:    ...                                        │
+│  ───────────────────────────────────────────────────    │
+│  Manual notes                                           │
+│  <whitespace-pre-wrap notes>                            │
+└─────────────────────────────────────────────────────────┘
 ```
 
-### Step 1 — Packaging (new)
-- Single still photo of the **box / blister / bottle label**.
-- Camera opens rear-facing (`facingMode: "environment"`); patient taps **Capture**, then **Use photo** or **Retake**.
-- Helper text: *"Hold the box or blister so the medicine name and strength are readable."*
-- AI uses this to OCR the brand/strength and confirm it matches the prescription's `medication` + `dosage`. Mismatch shows a soft warning ("This looks like *Voxra 150mg* but your prescription says *Voxra 300mg* — continue anyway?").
+Implementation:
+- Replace the three `rounded-xl border border-primary bg-card p-6` blocks with a single one whose header reads **Session Notes** + small subtitle "Audio, transcript, and manual notes from the consultation".
+- Inside, render three subsections separated by `<hr className="my-4 border-border/60" />`, each only mounted when its data exists (`audio_url`, `transcript`, `notes`). If none exist, fall back to the existing empty-state card (line 594) — its condition stays the same.
+- Move the per-subsection download buttons (audio + transcript) into a single right-aligned dropdown in the card header, with options "Download audio" and "Download transcript", each disabled when its source is missing. The transcript download still produces the same `.txt` blob; the audio download still uses `signedAudioUrl`.
+- Section headings inside the card use small `text-sm font-semibold text-muted-foreground` labels (Audio · Transcript · Notes) so the visual hierarchy stays clear without three separate frames.
 
-### Step 2 — Tablet close-up (new)
-- Single still photo of the **tablet(s) on a flat surface** (palm or table).
-- Helper text: *"Place the tablet(s) on your palm or a plain surface and fill the frame."*
-- If `quantity > 1` on the prescription, helper reads *"Show all {quantity} tablets together."*
-- This replaces the "sharpest frame from first 25%" heuristic — it's now an explicit, deliberate shot, so close-up quality is consistent.
+No changes to the data model, the recording flow, or the 7-day retention rule.
 
-### Step 3 — Take the dose (kept, shorter)
-- Front-facing video, **15 seconds** (down from 30s — the close-up is no longer derived from this clip, so we only need ingestion evidence).
-- Same MediaRecorder logic as today; 5 evenly-spaced sequence frames extracted client-side, video discarded.
-- AI receives the sequence to confirm hand-to-mouth motion.
+## 4. Medical Certificate — smarter default dates
 
-## What gets stored
+In `src/components/sessions/MedicalCertificateEditor.tsx`, `startDate` and `endDate` both default to today. The user wants:
 
-| Artefact | Storage path | Kept? |
-|---|---|---|
-| Packaging still | `pill-references/{user_id}/{rxId}-{ts}-pack.jpg` | Yes — shown next to the close-up on the Chronic Meds card |
-| Tablet close-up | `pill-references/{user_id}/{rxId}-{ts}-tablet.jpg` | Yes — primary `reference_image_url` |
-| Sequence frames (5) | `pill-references/{user_id}/{rxId}-{ts}-seq-{i}.jpg` | Deleted by edge fn after AI scores ingestion |
-| Video blob | never uploaded | Discarded client-side |
+- **Start date** = the **session date** (when the session actually happened), not today.
+- **End date** = the **return-to-work date** if it can be inferred from the session AI summary; otherwise today.
 
-`prescription_pill_references` gains one new column: `packaging_image_url text`. The existing `reference_image_url` keeps holding the tablet close-up.
+**Fix:**
 
-## Edge function `validate-medication-video` (mode `baseline_capture`)
+- The component already accepts `sessionId` and fetches `sessions.summary`. Extend that fetch to also pull `started_at`:
 
-Updated payload:
-```ts
-{
-  mode: "baseline_capture",
-  packagingImageUrl,      // NEW
-  closeupImageUrl,        // tablet close-up (now explicit, not extracted)
-  sequenceImageUrls,      // ingestion evidence
-  sequenceFilePaths,      // for cleanup
-  intakeMethod,
-  prescriptionId,
-  expectedMedication,     // NEW: rx.medication
-  expectedDosage,         // NEW: rx.dosage
-  expectedQuantity,       // NEW: rx.quantity ?? 1
-}
-```
+  ```ts
+  .from('sessions')
+  .select('summary, started_at')
+  .eq('id', sessionId)
+  .maybeSingle();
+  ```
 
-Returns the existing `observedDescription` + `baselinePatternSummary`, plus a new optional `packagingMatch: { ok: boolean, detectedMedication?: string, detectedStrength?: string, message?: string }`. The client surfaces `packagingMatch.message` as a non-blocking toast when `ok === false`.
+  Then `setStartDate(format(new Date(data.started_at), 'yyyy-MM-dd'))` and `setExaminationDate(...)` to the same value, overwriting today's default whenever a session is attached.
 
-## UI niceties
+- For the end date, broaden the existing summary regex to recognise common phrasings the AI emits and patient-side language used during dictation:
+  - `return[_\s]?to[_\s]?work[:\s]*(\d{4}-\d{2}-\d{2})`
+  - `back[_\s]?to[_\s]?work[:\s]*(\d{4}-\d{2}-\d{2})`
+  - `fit[_\s]?for[_\s]?duty[:\s]*(\d{4}-\d{2}-\d{2})`
+  - the existing `to_date` / `leave from … to …` patterns
+  - relative expressions (`for 5 days`, `for one week`) — when matched, compute `endDate = startDate + N days`.
 
-- Step indicator at the top of the dialog: `1 Packaging · 2 Tablet · 3 Take it` with the current step highlighted in teal.
-- Each capture step has identical chrome: live preview, big shutter button, post-capture **Retake / Use** pair — so the patient learns the pattern once.
-- For the multi-tablet case (`quantity > 1`), Step 2 shows a small badge above the camera: *"Show {quantity} tablets"*. This piggybacks on the structured `quantity` field already added to `CurrentMedication`.
+  First successful match wins, in the order above.
+
+- If no end date can be inferred, leave it equal to start date (current behaviour) so the doctor types it manually. The "Period:" hint underneath updates live as before via `computeLeavePeriod`.
+
+When the editor is opened **without** a `sessionId` (rare — direct doc creation), behaviour stays exactly as today.
 
 ## Files touched
 
 | File | Change |
 |---|---|
-| `src/components/rewards/PillBaselineCapture.tsx` | Add `packaging` and `tablet` still-capture steps; shorten ingest video to 15s; remove the "extract sharpest early frame" heuristic; pass new payload fields. |
-| `supabase/functions/validate-medication-video/index.ts` | Accept `packagingImageUrl` + expected med/dosage/quantity; OCR the packaging via Gemini Vision; return `packagingMatch`. |
-| Migration | `ALTER TABLE prescription_pill_references ADD COLUMN packaging_image_url text;` |
-| `src/components/rewards/MedicationAdherenceTab.tsx` | When a baseline exists, show packaging thumbnail beside tablet thumbnail on the prescription card. |
+| `src/components/sessions/DocumentPreview.tsx` | Render header/footer cell text through `renderFormattedContent` + `dangerouslySetInnerHTML`. |
+| `src/pages/Documents.tsx` | Swap the custom preview `Dialog` for `<DocumentPreview>` (gives consistent letterhead + Send + Print). Apply the same `renderFormattedContent` fix to `renderHFSectionPreview`. |
+| `src/pages/SessionDetail.tsx` | Merge Session Recording + Full Transcription + Session Notes into a single "Session Notes" card with internal subsections and a single download dropdown. |
+| `src/components/sessions/MedicalCertificateEditor.tsx` | Default `startDate`/`examinationDate` to the session's `started_at`; widen end-date regex to cover return-to-work / back-to-work / fit-for-duty / "for N days" patterns. |
 
 ## Out of scope
 
-- Re-validating Shannon's existing baselines — old rows just won't have a `packaging_image_url`; the UI degrades gracefully.
-- Storing the ingest video for human review — still discarded client-side per the 7-day retention policy.
-- Per-tablet packaging (e.g. blister vs bottle for the same drug) — one packaging shot per prescription.
+- Re-architecting the document editor (`DocumentEditor` modal stays — only the preview path changes).
+- Changing the 7-day audio retention policy or the auto-email-to-employer flow.
+- Patient-facing Documents page (this request is about the doctor view).
 
