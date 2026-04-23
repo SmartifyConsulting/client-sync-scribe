@@ -1,60 +1,81 @@
 
 
-# Plan: Fix "new row violates row-level security policy" on baseline upload
+# Plan: Three-step baseline capture — Packaging → Tablet → Take it
 
-## Root cause
+Restructure `PillBaselineCapture` so the patient explicitly captures three artefacts, in this order, before the baseline is saved.
 
-The error is **not** on `prescription_pill_references` — it's on the **`patient-media` storage bucket**.
+## New step flow
 
-When Shannon taps **Set up baseline** and the camera frames upload, the request:
-
-```
-POST /storage/v1/object/patient-media/pill-references/{user_id}/...-tablet.jpg
-→ 403 "new row violates row-level security policy"
+```text
+intro → method → packaging → tablet → ingest → processing
 ```
 
-The bucket only has two RLS policies:
-- INSERT: `Authenticated users can upload media` (permissive on `bucket_id`)
-- DELETE: `Users can delete their media`
+### Step 1 — Packaging (new)
+- Single still photo of the **box / blister / bottle label**.
+- Camera opens rear-facing (`facingMode: "environment"`); patient taps **Capture**, then **Use photo** or **Retake**.
+- Helper text: *"Hold the box or blister so the medicine name and strength are readable."*
+- AI uses this to OCR the brand/strength and confirm it matches the prescription's `medication` + `dosage`. Mismatch shows a soft warning ("This looks like *Voxra 150mg* but your prescription says *Voxra 300mg* — continue anyway?").
 
-It's missing **SELECT** and **UPDATE** policies. The client uploads with `upsert: true` (in `PillBaselineCapture.tsx` lines 233 & 242), which makes Storage attempt an UPDATE-or-INSERT — and the missing UPDATE policy causes the 403. The same gap will eventually break any read of the uploaded image via `getPublicUrl` for authenticated reads.
+### Step 2 — Tablet close-up (new)
+- Single still photo of the **tablet(s) on a flat surface** (palm or table).
+- Helper text: *"Place the tablet(s) on your palm or a plain surface and fill the frame."*
+- If `quantity > 1` on the prescription, helper reads *"Show all {quantity} tablets together."*
+- This replaces the "sharpest frame from first 25%" heuristic — it's now an explicit, deliberate shot, so close-up quality is consistent.
 
-## Fix — single short migration
+### Step 3 — Take the dose (kept, shorter)
+- Front-facing video, **15 seconds** (down from 30s — the close-up is no longer derived from this clip, so we only need ingestion evidence).
+- Same MediaRecorder logic as today; 5 evenly-spaced sequence frames extracted client-side, video discarded.
+- AI receives the sequence to confirm hand-to-mouth motion.
 
-Add the two missing policies on `storage.objects` for the `patient-media` bucket. We keep the existing relaxed pattern (any authenticated user can interact with `patient-media`, matching the existing INSERT/DELETE policies) so this doesn't tighten or loosen behaviour beyond what's already implied.
+## What gets stored
 
-```sql
--- Allow authenticated users to update their patient-media uploads
--- (needed because PillBaselineCapture uploads with upsert: true)
-CREATE POLICY "Users can update their media"
-  ON storage.objects FOR UPDATE
-  TO authenticated
-  USING  (bucket_id = 'patient-media')
-  WITH CHECK (bucket_id = 'patient-media');
+| Artefact | Storage path | Kept? |
+|---|---|---|
+| Packaging still | `pill-references/{user_id}/{rxId}-{ts}-pack.jpg` | Yes — shown next to the close-up on the Chronic Meds card |
+| Tablet close-up | `pill-references/{user_id}/{rxId}-{ts}-tablet.jpg` | Yes — primary `reference_image_url` |
+| Sequence frames (5) | `pill-references/{user_id}/{rxId}-{ts}-seq-{i}.jpg` | Deleted by edge fn after AI scores ingestion |
+| Video blob | never uploaded | Discarded client-side |
 
--- Allow authenticated users to read patient-media objects
-CREATE POLICY "Users can read their media"
-  ON storage.objects FOR SELECT
-  TO authenticated
-  USING (bucket_id = 'patient-media');
+`prescription_pill_references` gains one new column: `packaging_image_url text`. The existing `reference_image_url` keeps holding the tablet close-up.
+
+## Edge function `validate-medication-video` (mode `baseline_capture`)
+
+Updated payload:
+```ts
+{
+  mode: "baseline_capture",
+  packagingImageUrl,      // NEW
+  closeupImageUrl,        // tablet close-up (now explicit, not extracted)
+  sequenceImageUrls,      // ingestion evidence
+  sequenceFilePaths,      // for cleanup
+  intakeMethod,
+  prescriptionId,
+  expectedMedication,     // NEW: rx.medication
+  expectedDosage,         // NEW: rx.dosage
+  expectedQuantity,       // NEW: rx.quantity ?? 1
+}
 ```
 
-Bucket is already marked **public** (per `<storage-buckets>`), so anonymous reads via `getPublicUrl` keep working; the new SELECT policy covers authenticated SDK reads consistently.
+Returns the existing `observedDescription` + `baselinePatternSummary`, plus a new optional `packagingMatch: { ok: boolean, detectedMedication?: string, detectedStrength?: string, message?: string }`. The client surfaces `packagingMatch.message` as a non-blocking toast when `ok === false`.
 
-## Belt-and-braces client tweak
+## UI niceties
 
-In `src/components/rewards/PillBaselineCapture.tsx`, the per-tablet path is already unique per timestamp, so `upsert: true` isn't strictly required. Drop it to `upsert: false` for the sequence frames (lines 240-243) so a stray duplicate path can't silently overwrite an unrelated dose's frame. Keep `upsert: true` on the close-up still (line 233) because the AI re-prompting flow may resubmit it. With the new UPDATE policy in place, both paths work either way.
+- Step indicator at the top of the dialog: `1 Packaging · 2 Tablet · 3 Take it` with the current step highlighted in teal.
+- Each capture step has identical chrome: live preview, big shutter button, post-capture **Retake / Use** pair — so the patient learns the pattern once.
+- For the multi-tablet case (`quantity > 1`), Step 2 shows a small badge above the camera: *"Show {quantity} tablets"*. This piggybacks on the structured `quantity` field already added to `CurrentMedication`.
 
 ## Files touched
 
 | File | Change |
 |---|---|
-| New migration | Add `UPDATE` and `SELECT` policies on `storage.objects` for `bucket_id = 'patient-media'`, scoped to `authenticated`. |
-| `src/components/rewards/PillBaselineCapture.tsx` | Set `upsert: false` on the sequence-frame uploads (one-line change inside `Promise.all`). |
+| `src/components/rewards/PillBaselineCapture.tsx` | Add `packaging` and `tablet` still-capture steps; shorten ingest video to 15s; remove the "extract sharpest early frame" heuristic; pass new payload fields. |
+| `supabase/functions/validate-medication-video/index.ts` | Accept `packagingImageUrl` + expected med/dosage/quantity; OCR the packaging via Gemini Vision; return `packagingMatch`. |
+| Migration | `ALTER TABLE prescription_pill_references ADD COLUMN packaging_image_url text;` |
+| `src/components/rewards/MedicationAdherenceTab.tsx` | When a baseline exists, show packaging thumbnail beside tablet thumbnail on the prescription card. |
 
 ## Out of scope
 
-- Tightening the bucket to per-user folder enforcement (would change existing INSERT/DELETE behaviour and break other features that already write to `patient-media`).
-- Changing the edge function (it uses the service role key and bypasses RLS).
-- Re-running Shannon's failed baseline — once the policies exist she can simply tap **Set up baseline** again.
+- Re-validating Shannon's existing baselines — old rows just won't have a `packaging_image_url`; the UI degrades gracefully.
+- Storing the ingest video for human review — still discarded client-side per the 7-day retention policy.
+- Per-tablet packaging (e.g. blister vs bottle for the same drug) — one packaging shot per prescription.
 
