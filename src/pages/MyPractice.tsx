@@ -26,6 +26,8 @@ import {
   Users2,
   Volume2,
   PenTool,
+  Calendar as CalendarIcon,
+  Palette,
 } from "lucide-react";
 import ReferralDoctors from "@/pages/ReferralDoctors";
 
