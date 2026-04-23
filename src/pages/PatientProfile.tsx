@@ -932,6 +932,100 @@ export default function PatientProfile() {
       {patient && (
         <ImageComparisonDialog open={showCompareDialog} onOpenChange={setShowCompareDialog} patientId={patient.id} />
       )}
+
+      {/* Document Preview */}
+      {previewDoc && (
+        <DocumentPreviewWithLetterhead document={previewDoc} onClose={() => setPreviewDoc(null)} />
+      )}
+
+      {/* Edit Document Dialog */}
+      <Dialog
+        open={!!editingDoc}
+        onOpenChange={(open) => {
+          if (!open) setEditingDoc(null);
+        }}
+      >
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Document</DialogTitle>
+            <DialogDescription>Update the document name and content</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-doc-name">Document Name</Label>
+              <Input
+                id="edit-doc-name"
+                value={editDocName}
+                onChange={(e) => setEditDocName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-doc-content">Content (HTML)</Label>
+              <textarea
+                id="edit-doc-content"
+                value={editDocContent}
+                onChange={(e) => setEditDocContent(e.target.value)}
+                className="flex min-h-[300px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono"
+              />
+            </div>
+            {editDocContent && (
+              <div className="space-y-2">
+                <Label>Preview</Label>
+                <div className="border border-border rounded-lg p-4 bg-white">
+                  <div
+                    className="whitespace-pre-wrap text-sm text-foreground"
+                    dangerouslySetInnerHTML={{ __html: renderFormattedContent(editDocContent) }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingDoc(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={async () => {
+                if (editingDoc) {
+                  const success = await updateDocument(editingDoc.id, {
+                    name: editDocName,
+                    content: editDocContent,
+                  });
+                  if (success) {
+                    setEditingDoc(null);
+                    fetchDocuments();
+                  }
+                }
+              }}
+              disabled={!editDocName.trim()}
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+  );
+}
+
+function DocumentPreviewWithLetterhead({
+  document,
+  onClose,
+}: {
+  document: DocumentRecord;
+  onClose: () => void;
+}) {
+  const { headerFooter } = useDocumentHeaderFooter(document);
+  const { profile } = useProfile();
+  return (
+    <DocumentPreview
+      title={document.name}
+      subtitle={document.patient_name ? `Patient: ${document.patient_name}` : undefined}
+      content={document.content}
+      logoUrl={profile?.logo_url || undefined}
+      fontFamily={headerFooter?.font_family || undefined}
+      headerFooter={headerFooter}
+      onClose={onClose}
+    />
   );
 }
