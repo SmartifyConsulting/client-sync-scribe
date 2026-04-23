@@ -46,6 +46,7 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { usePractice } from "@/hooks/usePractice";
 import { supabase } from "@/integrations/supabase/client";
 import { getSignedUrl } from "@/utils/storageUrls";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
