@@ -396,13 +396,36 @@ export default function CalendarView() {
             Manage your appointments and schedule
           </p>
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
+          {practice && (
+            <div className="flex rounded-lg border border-border overflow-hidden shrink-0">
+              {(['mine', 'practice'] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setScope(s)}
+                  className={cn(
+                    "px-2 py-1 text-[11px] md:px-3 md:py-1.5 md:text-sm font-medium transition-colors shrink-0",
+                    scope === s
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-muted text-muted-foreground"
+                  )}
+                >
+                  {s === 'mine' ? 'My Calendar' : 'Practice Calendar'}
+                </button>
+              ))}
+            </div>
+          )}
           {!calendarLoading && (
             isConnected ? (
-              <Button variant="outline" onClick={disconnect} className="gap-2">
-                <Unlink className="h-4 w-4" />
-                Disconnect Google
-              </Button>
+              <div className="flex flex-col items-end">
+                <Button variant="outline" onClick={disconnect} className="gap-2">
+                  <Unlink className="h-4 w-4" />
+                  Disconnect Google
+                </Button>
+                <p className="text-[10px] text-muted-foreground max-w-[200px] mt-1 text-right">
+                  Google sync mirrors only your own appointments.
+                </p>
+              </div>
             ) : (
               <Button 
                 variant="ghost" 
