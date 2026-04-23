@@ -26,7 +26,7 @@ export interface DocumentInput {
   patient_name?: string;
 }
 
-export function useDocuments() {
+export function useDocuments(patientId?: string) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -39,17 +39,24 @@ export function useDocuments() {
       setDocuments([]);
       setLoading(false);
     }
-  }, [user]);
+  }, [user, patientId]);
 
   const fetchDocuments = async () => {
     if (!user) return;
 
     setLoading(true);
-    const { data, error } = await supabase
+    let query = supabase
       .from('documents')
       .select('*')
-      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
+
+    if (patientId) {
+      query = query.eq('patient_id', patientId);
+    } else {
+      query = query.eq('user_id', user.id);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching documents:', error);

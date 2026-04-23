@@ -11,6 +11,7 @@ import {
   StickyNote,
   Save,
   AlertCircle,
+  AlertTriangle,
   Star,
   Plus,
   Send,
@@ -20,6 +21,9 @@ import {
   GitCompareArrows,
   Eye,
   Edit3,
+  Sparkles,
+  Trash2,
+  RotateCw,
 } from "lucide-react";
 import { ImageComparisonDialog } from "@/components/documents/ImageComparisonDialog";
 import { cn } from "@/lib/utils";
@@ -67,7 +71,7 @@ export default function PatientProfile() {
   const { sessions, loading: sessionsLoading } = useSessions(id);
   const { lollipopCount } = usePatientRewards(id);
   const { templates, loading: templatesLoading } = useTemplates();
-  const { documents, loading: documentsLoading, fetchDocuments, updateDocument } = useDocuments();
+  const { documents, loading: documentsLoading, fetchDocuments, updateDocument } = useDocuments(id);
   const { user } = useAuth();
   const [mailboxAlias, setMailboxAlias] = useState<string | null>(null);
   const [mailboxId, setMailboxId] = useState<string | null>(null);
@@ -119,6 +123,10 @@ export default function PatientProfile() {
   const [editingDoc, setEditingDoc] = useState<DocumentRecord | null>(null);
   const [editDocName, setEditDocName] = useState("");
   const [editDocContent, setEditDocContent] = useState("");
+  const [analyzingDocId, setAnalyzingDocId] = useState<string | null>(null);
+  const [analysisDialog, setAnalysisDialog] = useState<DocumentRecord | null>(null);
+  const [docToDelete, setDocToDelete] = useState<DocumentRecord | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Check if current doctor has access to all sessions
   useEffect(() => {
@@ -727,7 +735,7 @@ export default function PatientProfile() {
           </div>
           <div className="rounded-2xl bg-card shadow-card overflow-hidden">
             {(() => {
-              const patientDocuments = documents.filter((doc) => doc.patient_id === patient.id);
+              const patientDocuments = documents;
               if (documentsLoading) {
                 return (
                   <div className="p-10 text-center">
@@ -741,23 +749,33 @@ export default function PatientProfile() {
                     <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
                       <FileText className="h-7 w-7 text-muted-foreground" />
                     </div>
-                    <p className="text-muted-foreground">No documents yet</p>
-                    <p className="text-sm text-muted-foreground mt-1">Create a new document from a template</p>
+                    <p className="text-[11px] text-muted-foreground">No documents yet</p>
+                    <p className="text-[11px] text-muted-foreground mt-1">Create a new document from a template</p>
                   </div>
                 );
               }
               return (
                 <div className="divide-y divide-border/50">
-                  {patientDocuments.map((doc) => (
+                  {patientDocuments.map((doc) => {
+                    const mediaUrl = (doc as any).media_url as string | undefined;
+                    const mediaType = (doc as any).media_type as string | undefined;
+                    const isImageDoc = !!mediaUrl && (mediaType === "image" || /\.(jpe?g|png|webp|heic)(\?|$)/i.test(mediaUrl));
+                    const aiAnalysis = (doc as any).ai_analysis as string | undefined;
+                    const isAnalyzing = analyzingDocId === doc.id;
+                    return (
                     <div
                       key={doc.id}
                       className="flex items-center gap-3 p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer"
                     >
                       <div
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 overflow-hidden"
                         onClick={() => navigate(`/documents?view=${doc.id}`)}
                       >
-                        <FileText className="h-4 w-4 text-primary" />
+                        {isImageDoc ? (
+                          <img src={mediaUrl} alt={doc.name} className="h-8 w-8 object-cover" />
+                        ) : (
+                          <FileText className="h-4 w-4 text-primary" />
+                        )}
                       </div>
                       <div className="flex-1" onClick={() => navigate(`/documents?view=${doc.id}`)}>
                         <p className="text-[11px] font-semibold text-foreground leading-tight">{doc.name}</p>
@@ -776,6 +794,37 @@ export default function PatientProfile() {
                         </span>
                       )}
                       <div className="flex items-center gap-1">
+                        {isImageDoc && (
+                          <button
+                            className="h-7 w-7 rounded-full flex items-center justify-center text-violet-600 hover:text-violet-700 hover:bg-violet-50 transition-colors disabled:opacity-50"
+                            title={aiAnalysis ? "View AI analysis" : "Analyse with AI"}
+                            disabled={isAnalyzing}
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (aiAnalysis) {
+                                setAnalysisDialog(doc);
+                                return;
+                              }
+                              setAnalyzingDocId(doc.id);
+                              try {
+                                const { data, error } = await supabase.functions.invoke("analyze-medical-image", {
+                                  body: { imageUrl: mediaUrl, documentId: doc.id },
+                                });
+                                if (error) throw error;
+                                const updated = { ...doc, ai_analysis: data.analysis, ai_analyzed_at: data.analyzedAt } as any;
+                                setAnalysisDialog(updated);
+                                fetchDocuments();
+                                toast({ title: "Analysis Complete", description: "AI interpretation is ready" });
+                              } catch (err: any) {
+                                toast({ title: "Analysis Failed", description: err.message || "Could not analyse the image", variant: "destructive" });
+                              } finally {
+                                setAnalyzingDocId(null);
+                              }
+                            }}
+                          >
+                            {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                          </button>
+                        )}
                         <button
                           className="h-7 w-7 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                           title="Preview"
@@ -828,20 +877,26 @@ export default function PatientProfile() {
                                   .from("documents")
                                   .update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any
                               ).eq("id", doc.id);
-                              const { data: updatedDocs } = await supabase
-                                .from("documents")
-                                .select("*")
-                                .eq("patient_id", doc.patient_id!)
-                                .order("created_at", { ascending: false });
-                              if (updatedDocs) fetchDocuments();
+                              fetchDocuments();
                             } catch {}
                           }}
                         >
                           <Send className="h-4 w-4" />
                         </button>
+                        <button
+                          className="h-7 w-7 rounded-full flex items-center justify-center text-destructive hover:text-destructive hover:bg-destructive/10 transition-colors"
+                          title="Delete"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDocToDelete(doc);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               );
             })()}
@@ -1000,6 +1055,140 @@ export default function PatientProfile() {
               disabled={!editDocName.trim()}
             >
               Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Analysis Dialog */}
+      <Dialog open={!!analysisDialog} onOpenChange={(open) => !open && setAnalysisDialog(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-violet-600" />
+              AI Image Analysis
+            </DialogTitle>
+            <DialogDescription>{analysisDialog?.name}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {(analysisDialog as any)?.media_url && (
+              <div className="rounded-lg overflow-hidden border bg-muted">
+                <img
+                  src={(analysisDialog as any).media_url}
+                  alt={analysisDialog?.name}
+                  className="w-full max-h-64 object-contain"
+                />
+              </div>
+            )}
+            {(analysisDialog as any)?.ai_analysis ? (
+              <div className="space-y-3">
+                <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                  {(analysisDialog as any).ai_analysis}
+                </div>
+                {(analysisDialog as any)?.ai_analyzed_at && (
+                  <p className="text-xs text-muted-foreground">
+                    Analysed on {format(new Date((analysisDialog as any).ai_analyzed_at), "dd MMM yyyy 'at' HH:mm")}
+                  </p>
+                )}
+              </div>
+            ) : analyzingDocId === analysisDialog?.id ? (
+              <div className="flex items-center justify-center py-12 gap-3">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <span className="text-sm text-muted-foreground">Analysing image...</span>
+              </div>
+            ) : null}
+            <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 p-3">
+              <div className="flex gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-800 dark:text-amber-300">
+                  This AI analysis is for informational purposes only and does not constitute a medical diagnosis. Always consult a qualified healthcare professional for clinical interpretation and treatment decisions.
+                </p>
+              </div>
+            </div>
+          </div>
+          {(analysisDialog as any)?.ai_analysis && (
+            <DialogFooter>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={analyzingDocId === analysisDialog?.id}
+                className="gap-1.5"
+                onClick={async () => {
+                  if (!analysisDialog) return;
+                  const mediaUrl = (analysisDialog as any).media_url;
+                  setAnalyzingDocId(analysisDialog.id);
+                  setAnalysisDialog({ ...analysisDialog, ai_analysis: null, ai_analyzed_at: null } as any);
+                  try {
+                    const { data, error } = await supabase.functions.invoke("analyze-medical-image", {
+                      body: { imageUrl: mediaUrl, documentId: analysisDialog.id },
+                    });
+                    if (error) throw error;
+                    setAnalysisDialog({ ...analysisDialog, ai_analysis: data.analysis, ai_analyzed_at: data.analyzedAt } as any);
+                    fetchDocuments();
+                    toast({ title: "Re-analysis Complete" });
+                  } catch (err: any) {
+                    toast({ title: "Re-analysis Failed", description: err.message || "Could not re-analyse", variant: "destructive" });
+                  } finally {
+                    setAnalyzingDocId(null);
+                  }
+                }}
+              >
+                {analyzingDocId === analysisDialog?.id ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <RotateCw className="h-3.5 w-3.5" />
+                )}
+                Re-analyse
+              </Button>
+            </DialogFooter>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!docToDelete} onOpenChange={(open) => !open && setDocToDelete(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete this document?</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. The document {docToDelete?.name ? `"${docToDelete.name}"` : ""} will be permanently removed.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDocToDelete(null)} disabled={isDeleting}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={isDeleting}
+              onClick={async () => {
+                if (!docToDelete) return;
+                setIsDeleting(true);
+                try {
+                  const mediaUrl = (docToDelete as any).media_url as string | undefined;
+                  if (mediaUrl) {
+                    const marker = "/patient-media/";
+                    const idx = mediaUrl.indexOf(marker);
+                    if (idx !== -1) {
+                      const path = mediaUrl.substring(idx + marker.length).split("?")[0];
+                      try {
+                        await supabase.storage.from("patient-media").remove([path]);
+                      } catch {}
+                    }
+                  }
+                  const { error } = await supabase.from("documents").delete().eq("id", docToDelete.id);
+                  if (error) throw error;
+                  toast({ title: "Document deleted" });
+                  setDocToDelete(null);
+                  fetchDocuments();
+                } catch (err: any) {
+                  toast({ title: "Delete failed", description: err.message, variant: "destructive" });
+                } finally {
+                  setIsDeleting(false);
+                }
+              }}
+            >
+              {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>
