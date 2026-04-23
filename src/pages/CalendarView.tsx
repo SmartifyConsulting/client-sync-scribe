@@ -76,6 +76,10 @@ interface CalendarEvent {
   patientId?: string;
   notes?: string;
   location?: string;
+  ownerId: string;
+  ownerName?: string;
+  ownerColor?: string;
+  practiceId?: string | null;
 }
 
 function getDaysInMonth(date: Date) {
