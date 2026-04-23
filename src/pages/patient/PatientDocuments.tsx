@@ -210,6 +210,8 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
   const [showCompareDialog, setShowCompareDialog] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<UnifiedDocument | null>(null);
+  const [docToDelete, setDocToDelete] = useState<UnifiedDocument | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (user) fetchAll();
@@ -903,6 +905,17 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                           <Sparkles className="h-3.5 w-3.5" />
                         )}
                         {doc.aiAnalysis ? "View" : "AI"}
+                      </Button>
+                    )}
+                    {doc.source === "documents" && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => setDocToDelete(doc)}
+                        title="Delete document"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     )}
                     <span className="text-[10px] text-muted-foreground">
