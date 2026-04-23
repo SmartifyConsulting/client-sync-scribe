@@ -595,9 +595,95 @@ export function PatientDetailsEditor({
     }
   }, [patient]);
 
+  const syncChronicMedsToPrescriptions = useCallback(
+    async (meds: CurrentMedication[]) => {
+      if (!patient?.id) return;
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        let doctorId: string | null = null;
+        if (isDoctor) {
+          doctorId = user.id;
+        } else {
+          const { data: access } = await supabase
+            .from("doctor_patient_access")
+            .select("doctor_id, granted_at")
+            .eq("patient_user_id", user.id)
+            .eq("is_active", true)
+            .order("granted_at", { ascending: false })
+            .limit(1);
+          doctorId = access?.[0]?.doctor_id ?? null;
+        }
+        const chronicMeds = (meds || []).filter((m) => m.is_chronic && (m.name || "").trim());
+        if (chronicMeds.length > 0 && !doctorId) {
+          toast({
+            title: "Connect a doctor to track chronic meds",
+            description: "Add your doctor under My Healthcare so chronic meds appear under Rewards.",
+          });
+          return;
+        }
+        const { data: existingRx } = await supabase
+          .from("prescriptions")
+          .select("id, medication, status")
+          .eq("patient_id", patient.id);
+        const norm = (s: string) => (s || "").trim().toLowerCase();
+        const existingByName = new Map<string, { id: string; status: string }>();
+        (existingRx || []).forEach((r: any) => existingByName.set(norm(r.medication), { id: r.id, status: r.status }));
+        const composeDosage = (m: CurrentMedication) => {
+          const qty = (m.quantity || "").trim();
+          const strength = (m.strength || "").trim();
+          const units = (m.units || "mg").trim();
+          if (qty && strength) return `${qty} \u00d7 ${strength}${units}`;
+          if (strength) return `${strength}${units}`;
+          return (m.dosage || "").trim();
+        };
+        const composeFrequency = (m: CurrentMedication) => {
+          const tpd = parseInt((m.times_per_day || "").trim(), 10);
+          if (Number.isFinite(tpd) && tpd > 0) return `${tpd}\u00d7 daily`;
+          return "once daily";
+        };
+        const chronicNames = new Set(chronicMeds.map((m) => norm(m.name)));
+        for (const m of chronicMeds) {
+          const key = norm(m.name);
+          const existing = existingByName.get(key);
+          const payload = {
+            medication: m.name.trim(),
+            dosage: composeDosage(m),
+            frequency: composeFrequency(m),
+            status: "active",
+          };
+          if (existing) {
+            await supabase.from("prescriptions").update(payload).eq("id", existing.id);
+          } else {
+            await supabase.from("prescriptions").insert({
+              ...payload,
+              patient_id: patient.id,
+              doctor_id: doctorId!,
+            });
+          }
+        }
+        for (const [name, rx] of existingByName.entries()) {
+          if (!chronicNames.has(name) && rx.status === "active") {
+            await supabase.from("prescriptions").update({ status: "cancelled" }).eq("id", rx.id);
+          }
+        }
+        emitMedicationsUpdated(patient.id);
+        queryClient.invalidateQueries({ queryKey: ["chronic-prescriptions", patient.id] });
+        queryClient.invalidateQueries({ queryKey: ["todays-medications", patient.id] });
+      } catch (err) {
+        console.error("chronic to prescriptions sync failed", err);
+      }
+    },
+    [patient?.id, isDoctor, toast, queryClient],
+  );
+
   const performSave = useCallback(
     async (data: typeof formData, surgeriesData: Surgery[]) => {
       if (!data.first_name.trim() && !data.last_name.trim()) return;
+      if (!patient?.id) {
+        toast({ title: "Cannot save without a patient record", variant: "destructive" });
+        return;
+      }
       const fullName = `${data.first_name.trim()} ${data.last_name.trim()}`.trim();
       const isChronic = currentMedications.some((m) => m.is_chronic);
       setSaving(true);
