@@ -46,6 +46,7 @@ interface PillReference {
   baseline_pattern_summary: string | null;
   observed_description: string | null;
   reference_image_url: string | null;
+  packaging_image_url: string | null;
   updated_at: string;
 }
 
@@ -148,7 +149,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
       if (prescriptions.length === 0) return [] as PillReference[];
       const { data, error } = await supabase
         .from("prescription_pill_references")
-        .select("prescription_id, intake_method, baseline_pattern_summary, observed_description, reference_image_url, updated_at")
+        .select("prescription_id, intake_method, baseline_pattern_summary, observed_description, reference_image_url, packaging_image_url, updated_at")
         .in("prescription_id", prescriptions.map((p) => p.id));
       if (error) throw error;
       return (data || []) as PillReference[];
