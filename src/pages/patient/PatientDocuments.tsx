@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { cn } from "@/lib/utils";
 import {
   FileText,
