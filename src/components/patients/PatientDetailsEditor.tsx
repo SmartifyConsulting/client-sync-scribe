@@ -2519,6 +2519,10 @@ export function PatientDetailsEditor({
                                 setNewMed({
                                   name: "",
                                   dosage: "",
+                                  quantity: "1",
+                                  strength: "",
+                                  units: "mg",
+                                  times_per_day: "1",
                                   is_chronic: false,
                                   status: "current",
                                   start_date: "",
