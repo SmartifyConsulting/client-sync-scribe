@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   Clock,
   Sparkles,
-  Mic,
   CheckCircle,
   Circle,
   User,
