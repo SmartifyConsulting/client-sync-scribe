@@ -905,9 +905,7 @@ const completeSession = async (
               patient_id: patientId,
               session_id: sessionId,
               invoice_number: generatedInvoiceNumber,
-              description: lineItems.length > 0
-                ? lineItems.map((li: any) => li.description || li.name || 'Service').join(', ')
-                : `Consultation - ${todayLong}`,
+              description: plainDescription,
               amount: computedTotal || 0,
               due_date: dueDateISO,
               status: 'pending',
