@@ -1059,6 +1059,140 @@ export default function PatientProfile() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* AI Analysis Dialog */}
+      <Dialog open={!!analysisDialog} onOpenChange={(open) => !open && setAnalysisDialog(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-violet-600" />
+              AI Image Analysis
+            </DialogTitle>
+            <DialogDescription>{analysisDialog?.name}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {(analysisDialog as any)?.media_url && (
+              <div className="rounded-lg overflow-hidden border bg-muted">
+                <img
+                  src={(analysisDialog as any).media_url}
+                  alt={analysisDialog?.name}
+                  className="w-full max-h-64 object-contain"
+                />
+              </div>
+            )}
+            {(analysisDialog as any)?.ai_analysis ? (
+              <div className="space-y-3">
+                <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                  {(analysisDialog as any).ai_analysis}
+                </div>
+                {(analysisDialog as any)?.ai_analyzed_at && (
+                  <p className="text-xs text-muted-foreground">
+                    Analysed on {format(new Date((analysisDialog as any).ai_analyzed_at), "dd MMM yyyy 'at' HH:mm")}
+                  </p>
+                )}
+              </div>
+            ) : analyzingDocId === analysisDialog?.id ? (
+              <div className="flex items-center justify-center py-12 gap-3">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <span className="text-sm text-muted-foreground">Analysing image...</span>
+              </div>
+            ) : null}
+            <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 p-3">
+              <div className="flex gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-800 dark:text-amber-300">
+                  This AI analysis is for informational purposes only and does not constitute a medical diagnosis. Always consult a qualified healthcare professional for clinical interpretation and treatment decisions.
+                </p>
+              </div>
+            </div>
+          </div>
+          {(analysisDialog as any)?.ai_analysis && (
+            <DialogFooter>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={analyzingDocId === analysisDialog?.id}
+                className="gap-1.5"
+                onClick={async () => {
+                  if (!analysisDialog) return;
+                  const mediaUrl = (analysisDialog as any).media_url;
+                  setAnalyzingDocId(analysisDialog.id);
+                  setAnalysisDialog({ ...analysisDialog, ai_analysis: null, ai_analyzed_at: null } as any);
+                  try {
+                    const { data, error } = await supabase.functions.invoke("analyze-medical-image", {
+                      body: { imageUrl: mediaUrl, documentId: analysisDialog.id },
+                    });
+                    if (error) throw error;
+                    setAnalysisDialog({ ...analysisDialog, ai_analysis: data.analysis, ai_analyzed_at: data.analyzedAt } as any);
+                    fetchDocuments();
+                    toast({ title: "Re-analysis Complete" });
+                  } catch (err: any) {
+                    toast({ title: "Re-analysis Failed", description: err.message || "Could not re-analyse", variant: "destructive" });
+                  } finally {
+                    setAnalyzingDocId(null);
+                  }
+                }}
+              >
+                {analyzingDocId === analysisDialog?.id ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <RotateCw className="h-3.5 w-3.5" />
+                )}
+                Re-analyse
+              </Button>
+            </DialogFooter>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!docToDelete} onOpenChange={(open) => !open && setDocToDelete(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete this document?</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. The document {docToDelete?.name ? `"${docToDelete.name}"` : ""} will be permanently removed.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDocToDelete(null)} disabled={isDeleting}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={isDeleting}
+              onClick={async () => {
+                if (!docToDelete) return;
+                setIsDeleting(true);
+                try {
+                  const mediaUrl = (docToDelete as any).media_url as string | undefined;
+                  if (mediaUrl) {
+                    const marker = "/patient-media/";
+                    const idx = mediaUrl.indexOf(marker);
+                    if (idx !== -1) {
+                      const path = mediaUrl.substring(idx + marker.length).split("?")[0];
+                      try {
+                        await supabase.storage.from("patient-media").remove([path]);
+                      } catch {}
+                    }
+                  }
+                  const { error } = await supabase.from("documents").delete().eq("id", docToDelete.id);
+                  if (error) throw error;
+                  toast({ title: "Document deleted" });
+                  setDocToDelete(null);
+                  fetchDocuments();
+                } catch (err: any) {
+                  toast({ title: "Delete failed", description: err.message, variant: "destructive" });
+                } finally {
+                  setIsDeleting(false);
+                }
+              }}
+            >
+              {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
