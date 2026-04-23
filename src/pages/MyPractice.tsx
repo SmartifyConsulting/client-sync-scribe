@@ -1263,6 +1263,37 @@ export default function MyPractice() {
               />
             </div>
 
+            {/* Calendar color (used on shared practice calendar) */}
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5">
+                <Palette className="h-3.5 w-3.5 text-primary" />
+                Calendar Color
+              </Label>
+              <div className="flex items-center gap-2">
+                <span
+                  className="inline-block h-8 w-8 rounded-md border border-border shrink-0"
+                  style={{ backgroundColor: practiceColor }}
+                  aria-label="Color swatch"
+                />
+                <Input
+                  value={practiceColor}
+                  onChange={(e) => handlePracticeColorChange(e.target.value)}
+                  className="max-w-[140px] font-mono text-[12px]"
+                  placeholder="#0EA5E9"
+                />
+                <input
+                  type="color"
+                  value={practiceColor}
+                  onChange={(e) => handlePracticeColorChange(e.target.value)}
+                  className="h-9 w-12 cursor-pointer rounded border border-border bg-background"
+                  aria-label="Pick color"
+                />
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Used on the shared Practice Calendar so colleagues can see whose appointment a slot belongs to.
+              </p>
+            </div>
+
             {/* Logo */}
             <div className="space-y-1.5">
               <Label>Practice Logo</Label>
