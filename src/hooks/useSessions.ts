@@ -897,6 +897,37 @@ ${tasksHtml}`;
 
   useEffect(() => {
     fetchSessions();
+
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let cancelled = false;
+
+    const setupRealtime = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || cancelled) return;
+
+      const filter = patientId
+        ? `patient_id=eq.${patientId}`
+        : `user_id=eq.${user.id}`;
+
+      channel = supabase
+        .channel(`sessions-${patientId || user.id}`)
+        .on(
+          'postgres_changes' as any,
+          { event: '*', schema: 'public', table: 'sessions', filter },
+          () => { fetchSessions(); }
+        )
+        .subscribe();
+    };
+    setupRealtime();
+
+    const onFocus = () => { fetchSessions(); };
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener('focus', onFocus);
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [patientId]);
 
   return {
