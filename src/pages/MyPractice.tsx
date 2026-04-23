@@ -517,8 +517,19 @@ export default function MyPractice() {
 
       // Sync voice state
       setLocalVoice((profile as any).narration_voice || "shimmer");
+
+      // Sync practice color
+      setPracticeColor((profile as any).practice_color || "#0EA5E9");
     }
   }, [profile]);
+
+  const handlePracticeColorChange = (hex: string) => {
+    setPracticeColor(hex);
+    if (colorDebounce.current) clearTimeout(colorDebounce.current);
+    colorDebounce.current = setTimeout(async () => {
+      await updateProfile({ practice_color: hex } as any);
+    }, 350);
+  };
 
   const combinedFullName = `${formData.first_name} ${formData.last_name}`.trim();
   const getSignatureFontFamily = (v: string) =>
