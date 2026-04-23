@@ -63,46 +63,58 @@ function ChronicAdherenceSection({ patientId, patientName }: { patientId: string
   const [loading, setLoading] = useState(true);
   const [congratulating, setCongratulating] = useState(false);
 
+  const fetchAdherence = async () => {
+    setLoading(true);
+    try {
+      const { data: prescriptions } = await supabase
+        .from("prescriptions")
+        .select("id, medication")
+        .eq("patient_id", patientId)
+        .eq("status", "active");
+      if (!prescriptions || prescriptions.length === 0) { setAdherenceData([]); setLoading(false); return; }
+
+      const { data: adherence } = await supabase
+        .from("medication_adherence")
+        .select("prescription_id, scheduled_date, status")
+        .eq("patient_id", patientId)
+        .eq("status", "completed")
+        .order("scheduled_date", { ascending: false });
+
+      const streaks = prescriptions.map((rx) => {
+        const records = (adherence || [])
+          .filter((a) => a.prescription_id === rx.id)
+          .sort((a, b) => b.scheduled_date.localeCompare(a.scheduled_date));
+        let streak = 0;
+        const today = new Date();
+        let checkDate = today;
+        for (let i = 0; i < 365; i++) {
+          const dateStr = checkDate.toISOString().split("T")[0];
+          if (records.some((r) => r.scheduled_date === dateStr)) {
+            streak++;
+            checkDate = new Date(checkDate.getTime() - 86400000);
+          } else break;
+        }
+        return { prescription: rx.medication, streak };
+      });
+      setAdherenceData(streaks);
+    } catch (err) {
+      console.error(err);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchAdherence = async () => {
-      try {
-        const { data: prescriptions } = await supabase
-          .from("prescriptions")
-          .select("id, medication")
-          .eq("patient_id", patientId)
-          .eq("status", "active");
-        if (!prescriptions || prescriptions.length === 0) { setLoading(false); return; }
-
-        const { data: adherence } = await supabase
-          .from("medication_adherence")
-          .select("prescription_id, scheduled_date, status")
-          .eq("patient_id", patientId)
-          .eq("status", "completed")
-          .order("scheduled_date", { ascending: false });
-
-        const streaks = prescriptions.map((rx) => {
-          const records = (adherence || [])
-            .filter((a) => a.prescription_id === rx.id)
-            .sort((a, b) => b.scheduled_date.localeCompare(a.scheduled_date));
-          let streak = 0;
-          const today = new Date();
-          let checkDate = today;
-          for (let i = 0; i < 365; i++) {
-            const dateStr = checkDate.toISOString().split("T")[0];
-            if (records.some((r) => r.scheduled_date === dateStr)) {
-              streak++;
-              checkDate = new Date(checkDate.getTime() - 86400000);
-            } else break;
-          }
-          return { prescription: rx.medication, streak };
-        });
-        setAdherenceData(streaks);
-      } catch (err) {
-        console.error(err);
-      }
-      setLoading(false);
-    };
     fetchAdherence();
+  }, [patientId]);
+
+  // Refresh when medications are updated anywhere in the app
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { patientId?: string } | undefined;
+      if (!detail?.patientId || detail.patientId === patientId) fetchAdherence();
+    };
+    medicationSyncBus.addEventListener("medications-updated", handler);
+    return () => medicationSyncBus.removeEventListener("medications-updated", handler);
   }, [patientId]);
 
   const maxStreak = Math.max(0, ...adherenceData.map((d) => d.streak));
