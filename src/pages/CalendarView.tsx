@@ -120,6 +120,31 @@ export default function CalendarView() {
     localStorage.setItem("calendar-view", v);
   };
 
+  // Practice + scope
+  const { practice, members } = usePractice();
+  const [scope, setScopeState] = useState<'mine' | 'practice'>(
+    () => (localStorage.getItem("calendar-scope") as 'mine' | 'practice') || 'mine'
+  );
+  const setScope = (s: 'mine' | 'practice') => {
+    setScopeState(s);
+    localStorage.setItem("calendar-scope", s);
+  };
+  // Fall back to "mine" if no practice exists
+  useEffect(() => {
+    if (scope === 'practice' && !practice) setScopeState('mine');
+  }, [practice, scope]);
+
+  const colorByDoctor: Record<string, string> = {};
+  members.forEach((m) => {
+    colorByDoctor[m.doctor_id] = m.practice_color || '#0EA5E9';
+  });
+  const nameByDoctor: Record<string, string> = {};
+  members.forEach((m) => {
+    if (m.full_name) nameByDoctor[m.doctor_id] = m.full_name;
+  });
+  const initialsOf = (name?: string) =>
+    name ? name.split(/\s+/).map((w) => w[0]).join('').toUpperCase().slice(0, 2) : '';
+
   // Fetch service price colors
   useEffect(() => {
     const fetchServiceColors = async () => {
