@@ -18,6 +18,8 @@ import {
   Video,
   FilePlus,
   GitCompareArrows,
+  Eye,
+  Edit3,
 } from "lucide-react";
 import { ImageComparisonDialog } from "@/components/documents/ImageComparisonDialog";
 import { cn } from "@/lib/utils";
@@ -46,10 +48,16 @@ import { RoundTable } from "@/components/patients/RoundTable";
 import { AdmissionsView } from "@/components/admissions/AdmissionsView";
 import { LollipopDisplay } from "@/components/gamification/LollipopDisplay"; // Vula display
 import { useTemplates } from "@/hooks/useTemplates";
-import { useDocuments } from "@/hooks/useDocuments";
+import { useDocuments, Document as DocumentRecord } from "@/hooks/useDocuments";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
+import { DocumentPreview } from "@/components/sessions/DocumentPreview";
+import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
+import { useProfile } from "@/hooks/useProfile";
+import { renderFormattedContent } from "@/utils/documentFormatting";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 // DrawingPad hidden for later phase
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 export default function PatientProfile() {
   const { id } = useParams<{ id: string }>();
@@ -59,7 +67,7 @@ export default function PatientProfile() {
   const { sessions, loading: sessionsLoading } = useSessions(id);
   const { lollipopCount } = usePatientRewards(id);
   const { templates, loading: templatesLoading } = useTemplates();
-  const { documents, loading: documentsLoading, fetchDocuments } = useDocuments();
+  const { documents, loading: documentsLoading, fetchDocuments, updateDocument } = useDocuments();
   const { user } = useAuth();
   const [mailboxAlias, setMailboxAlias] = useState<string | null>(null);
   const [mailboxId, setMailboxId] = useState<string | null>(null);
@@ -107,6 +115,10 @@ export default function PatientProfile() {
   const [unreadRoundTableCount, setUnreadRoundTableCount] = useState(0);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
+  const [previewDoc, setPreviewDoc] = useState<DocumentRecord | null>(null);
+  const [editingDoc, setEditingDoc] = useState<DocumentRecord | null>(null);
+  const [editDocName, setEditDocName] = useState("");
+  const [editDocContent, setEditDocContent] = useState("");
 
   // Check if current doctor has access to all sessions
   useEffect(() => {
@@ -748,61 +760,86 @@ export default function PatientProfile() {
                         <FileText className="h-4 w-4 text-primary" />
                       </div>
                       <div className="flex-1" onClick={() => navigate(`/documents?view=${doc.id}`)}>
-                        <p className="text-[10px] font-semibold text-foreground leading-tight">{doc.name}</p>
-                        <p className="text-[9px] text-muted-foreground">
+                        <p className="text-[11px] font-semibold text-foreground leading-tight">{doc.name}</p>
+                        <p className="text-[11px] text-muted-foreground">
                           {format(new Date(doc.created_at), "MMM d, yyyy")}
                         </p>
                       </div>
                       {(doc as any).is_draft && !(doc as any).email_sent_at && (
-                        <span className="rounded-full bg-warning/10 px-1.5 py-0.5 text-[7px] font-medium text-warning border border-warning/30">
+                        <span className="rounded-full bg-warning/10 px-2 py-0.5 text-[11px] font-medium text-warning border border-warning/30">
                           DRAFT
                         </span>
                       )}
                       {doc.template_name && (
-                        <span className="rounded-full bg-muted/70 px-2 py-1 text-[8px] font-medium text-muted-foreground">
+                        <span className="rounded-full bg-muted/70 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                           {doc.template_name}
                         </span>
                       )}
-                      <button
-                        className={cn(
-                          "h-6 w-6 rounded-full flex items-center justify-center transition-colors",
-                          (doc as any).email_sent_at
-                            ? "text-muted-foreground cursor-default"
-                            : "text-green-600 hover:text-green-700 hover:bg-green-50",
-                        )}
-                        disabled={!!(doc as any).email_sent_at}
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          if ((doc as any).email_sent_at) return;
-                          try {
-                            const { data: patient } = await supabase
-                              .from("patients")
-                              .select("email, pharmacy_email")
-                              .eq("id", doc.patient_id!)
-                              .maybeSingle();
-                            const email = doc.template_name?.toLowerCase().includes("prescription")
-                              ? patient?.pharmacy_email || patient?.email
-                              : patient?.email;
-                            if (email)
-                              await supabase.functions.invoke("send-document-email", {
-                                body: { documentId: doc.id, recipientEmail: email },
-                              });
-                            await (
-                              supabase
+                      <div className="flex items-center gap-1">
+                        <button
+                          className="h-7 w-7 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                          title="Preview"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewDoc(doc);
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button
+                          className="h-7 w-7 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                          title="Edit"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingDoc(doc);
+                            setEditDocName(doc.name);
+                            setEditDocContent(doc.content);
+                          }}
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </button>
+                        <button
+                          className={cn(
+                            "h-7 w-7 rounded-full flex items-center justify-center transition-colors",
+                            (doc as any).email_sent_at
+                              ? "text-muted-foreground cursor-default"
+                              : "text-green-600 hover:text-green-700 hover:bg-green-50",
+                          )}
+                          disabled={!!(doc as any).email_sent_at}
+                          title={(doc as any).email_sent_at ? "Sent" : "Send"}
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            if ((doc as any).email_sent_at) return;
+                            try {
+                              const { data: patient } = await supabase
+                                .from("patients")
+                                .select("email, pharmacy_email")
+                                .eq("id", doc.patient_id!)
+                                .maybeSingle();
+                              const email = doc.template_name?.toLowerCase().includes("prescription")
+                                ? patient?.pharmacy_email || patient?.email
+                                : patient?.email;
+                              if (email)
+                                await supabase.functions.invoke("send-document-email", {
+                                  body: { documentId: doc.id, recipientEmail: email },
+                                });
+                              await (
+                                supabase
+                                  .from("documents")
+                                  .update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any
+                              ).eq("id", doc.id);
+                              const { data: updatedDocs } = await supabase
                                 .from("documents")
-                                .update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any
-                            ).eq("id", doc.id);
-                            const { data: updatedDocs } = await supabase
-                              .from("documents")
-                              .select("*")
-                              .eq("patient_id", doc.patient_id!)
-                              .order("created_at", { ascending: false });
-                            if (updatedDocs) fetchDocuments();
-                          } catch {}
-                        }}
-                      >
-                        <Send className="h-3 w-3" />
-                      </button>
+                                .select("*")
+                                .eq("patient_id", doc.patient_id!)
+                                .order("created_at", { ascending: false });
+                              if (updatedDocs) fetchDocuments();
+                            } catch {}
+                          }}
+                        >
+                          <Send className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -895,6 +932,100 @@ export default function PatientProfile() {
       {patient && (
         <ImageComparisonDialog open={showCompareDialog} onOpenChange={setShowCompareDialog} patientId={patient.id} />
       )}
+
+      {/* Document Preview */}
+      {previewDoc && (
+        <DocumentPreviewWithLetterhead document={previewDoc} onClose={() => setPreviewDoc(null)} />
+      )}
+
+      {/* Edit Document Dialog */}
+      <Dialog
+        open={!!editingDoc}
+        onOpenChange={(open) => {
+          if (!open) setEditingDoc(null);
+        }}
+      >
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Document</DialogTitle>
+            <DialogDescription>Update the document name and content</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-doc-name">Document Name</Label>
+              <Input
+                id="edit-doc-name"
+                value={editDocName}
+                onChange={(e) => setEditDocName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-doc-content">Content (HTML)</Label>
+              <textarea
+                id="edit-doc-content"
+                value={editDocContent}
+                onChange={(e) => setEditDocContent(e.target.value)}
+                className="flex min-h-[300px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono"
+              />
+            </div>
+            {editDocContent && (
+              <div className="space-y-2">
+                <Label>Preview</Label>
+                <div className="border border-border rounded-lg p-4 bg-white">
+                  <div
+                    className="whitespace-pre-wrap text-sm text-foreground"
+                    dangerouslySetInnerHTML={{ __html: renderFormattedContent(editDocContent) }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingDoc(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={async () => {
+                if (editingDoc) {
+                  const success = await updateDocument(editingDoc.id, {
+                    name: editDocName,
+                    content: editDocContent,
+                  });
+                  if (success) {
+                    setEditingDoc(null);
+                    fetchDocuments();
+                  }
+                }
+              }}
+              disabled={!editDocName.trim()}
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+  );
+}
+
+function DocumentPreviewWithLetterhead({
+  document,
+  onClose,
+}: {
+  document: DocumentRecord;
+  onClose: () => void;
+}) {
+  const { headerFooter } = useDocumentHeaderFooter(document);
+  const { profile } = useProfile();
+  return (
+    <DocumentPreview
+      title={document.name}
+      subtitle={document.patient_name ? `Patient: ${document.patient_name}` : undefined}
+      content={document.content}
+      logoUrl={profile?.logo_url || undefined}
+      fontFamily={headerFooter?.font_family || undefined}
+      headerFooter={headerFooter}
+      onClose={onClose}
+    />
   );
 }
