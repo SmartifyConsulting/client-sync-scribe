@@ -317,7 +317,9 @@ Only return JSON.`;
     // ============================================================
     // INGESTION VALIDATION MODE — method-aware confidence scoring
     // ============================================================
-    const { imageUrls, filePaths, prescriptionId, patientId } = body;
+    const { imageUrls, filePaths, prescriptionId, patientId, tabletIndex, tabletTotal } = body;
+    const tabletIdx = Number.isFinite(Number(tabletIndex)) && Number(tabletIndex) > 0 ? Number(tabletIndex) : 1;
+    const tabletTot = Number.isFinite(Number(tabletTotal)) && Number(tabletTotal) > 0 ? Number(tabletTotal) : 1;
 
     const urls: string[] = imageUrls || (body.videoUrl ? [body.videoUrl] : []);
     const paths: string[] = filePaths || (body.filePath ? [body.filePath] : []);
