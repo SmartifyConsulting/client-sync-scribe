@@ -760,8 +760,8 @@ export default function PatientProfile() {
                         <FileText className="h-4 w-4 text-primary" />
                       </div>
                       <div className="flex-1" onClick={() => navigate(`/documents?view=${doc.id}`)}>
-                        <p className="text-[10px] font-semibold text-foreground leading-tight">{doc.name}</p>
-                        <p className="text-[9px] text-muted-foreground">
+                        <p className="text-[11px] font-semibold text-foreground leading-tight">{doc.name}</p>
+                        <p className="text-[11px] text-muted-foreground">
                           {format(new Date(doc.created_at), "MMM d, yyyy")}
                         </p>
                       </div>
