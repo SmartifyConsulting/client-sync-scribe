@@ -1096,6 +1096,28 @@ interface HFCell {
   imageUrl?: string;
 }
 
+function DocumentPreviewWithLetterhead({
+  document,
+  onClose,
+}: {
+  document: Document;
+  onClose: () => void;
+}) {
+  const { headerFooter } = useDocumentHeaderFooter(document);
+  const { profile } = useProfile();
+  return (
+    <DocumentPreview
+      title={document.name}
+      subtitle={document.patient_name ? `Patient: ${document.patient_name}` : undefined}
+      content={document.content}
+      logoUrl={profile?.logo_url || undefined}
+      fontFamily={headerFooter?.font_family || undefined}
+      headerFooter={headerFooter}
+      onClose={onClose}
+    />
+  );
+}
+
 function DocumentPreviewBody({
   document,
   renderSection,
