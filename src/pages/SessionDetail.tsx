@@ -264,7 +264,7 @@ export default function SessionDetail() {
       {session.patient ? (
         <Link
           to={`/patients/${session.patient_id}`}
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-2 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to {session.patient.name}
@@ -272,7 +272,7 @@ export default function SessionDetail() {
       ) : (
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-2 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
@@ -282,20 +282,20 @@ export default function SessionDetail() {
       {/* Header */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex items-start gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
-            <Clock className="h-7 w-7 text-accent-foreground" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent">
+            <Clock className="h-5 w-5 text-accent-foreground" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">
+            <h1 className="text-[16px] font-semibold text-foreground">
               Session - {format(new Date(session.started_at), "MMMM d, yyyy")}
             </h1>
-            <div className="mt-1 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+            <div className="mt-1 flex flex-wrap items-center gap-4 text-[11px] text-muted-foreground">
               <span>{format(new Date(session.started_at), "h:mm a")}</span>
               {session.duration_minutes && (
                 <span>· {session.duration_minutes} minutes</span>
               )}
               <span
-                className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
                   session.status === "completed"
                     ? "bg-green-500/15 text-green-700 dark:text-green-400"
                     : "bg-amber-500/15 text-amber-700 dark:text-amber-400"
@@ -308,7 +308,7 @@ export default function SessionDetail() {
             {session.patient && (
               <Link
                 to={`/patients/${session.patient_id}`}
-                className="mt-2 inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+                className="mt-2 inline-flex items-center gap-1.5 text-[12px] text-primary hover:underline"
               >
                 <User className="h-4 w-4" />
                 {session.patient.name}
@@ -319,7 +319,7 @@ export default function SessionDetail() {
         <div className="flex items-center gap-2">
           <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm" className="gap-2">
+            <Button variant="destructive" size="sm" className="gap-2 text-[11px]">
               <Trash2 className="h-4 w-4" />
               Delete Session
             </Button>
