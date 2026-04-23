@@ -1,115 +1,137 @@
 
 
-# Plan: Show Dr Allie's new sessions on Shannon's profile + Fill invoice template fields
+# Plan: Shared practice calendar + per-doctor color
 
-Two real bugs, both confirmed against the DB.
+Three pieces: (1) practice-color picker per doctor, (2) shared "practice calendar" appointments visible to all member doctors, (3) ensure Google Calendar sync stays individual-only.
 
-## 1. New sessions don't appear on the patient profile
+## 1. Per-doctor practice color (My Practice)
 
-**Root cause confirmed.** Both of Dr Allie's 4/23 sessions for Shannon Kennedy exist in the DB with `status='completed'` and proper transcripts. They're NOT being filtered out. They're not appearing because **`useSessions(id)` only fetches once on mount** and there's no realtime subscription or refetch trigger:
+Add a single `practice_color` text column (hex) to `profiles`. Default `#0EA5E9`.
 
-```ts
-useEffect(() => { fetchSessions(); }, [patientId]);   // runs once per patient
+In `My Practice → Practice Profile` (above or beside the existing logo block), a new compact row:
+
+```
+Calendar color  [ swatch ][ #0EA5E9 ][ color picker ]
 ```
 
-When a doctor records a session from Shannon's profile, the recording flow uses a *different* React component that calls `useSessions()` (no patientId) — so its `completeSession()` updates a local `sessions` array in *that* component's hook instance. The profile page's hook instance never hears about the new row. Hard refresh works because the mount fetch re-runs.
+Auto-saves through the existing `updateProfile` debounce. This is the color used to render *this doctor's* events on the shared practice calendar so other doctors can tell at a glance whose appointment a slot belongs to.
 
-**Fix.** In `src/hooks/useSessions.ts` `useSessions(patientId)`:
+## 2. Shared practice calendar
 
-1. Add a Supabase realtime subscription on the `sessions` table filtered to the relevant rows. When `patientId` is set, listen for `INSERT`/`UPDATE`/`DELETE` events with `filter: 'patient_id=eq.<patientId>'`; when no `patientId`, filter by `user_id=eq.<currentUser>`. On any change → call `fetchSessions()` (debounced trivially by React state).
-2. Also re-`fetchSessions()` when the tab regains focus (`window.addEventListener('focus', …)`) — handles the case where the user records elsewhere then comes back to the tab.
-3. Keep the existing local `setSessions` updates inside `createSession`/`completeSession`/`updateSession` for the recording flow's own immediacy.
+### Concept
 
-Cleanup the subscription + focus listener on unmount.
+A doctor creates a **Practice** (a shared calendar group), invites colleagues by email, and any member can see/create appointments on the shared calendar. Each appointment is owned by one doctor (so they can edit/delete their own and Google-sync their own), but every member can *view* every appointment in the practice.
 
-This also fixes the symmetrical case where Round Table notes update or another tab adds a session.
+### Schema (one migration)
 
-## 2. Invoice (and other auto-generated documents) preview shows raw `[…]` placeholders
+```sql
+-- A shared calendar group
+create table public.practices (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  owner_id uuid not null references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
 
-**Root cause confirmed.** Pulled the latest auto-created invoice doc from the DB — its stored `content` literally contains `[DoctorNumber]`, `[InvoiceNumber]`, `[InvoiceDate]`, `[PatientAddress]`, `[MedicalAid]`, `[MedicalAidNumber]`, `[Services]`, `[TotalAmount]`, `[BankDetails]`, `[DueDate]`. The auto-fill replacement map in `useSessions.ts` (line 700–708) only includes `ClientName`, `PatientName`, `Date`, `SessionDate`, `DoctorName`, `PracticeNumber`, `PracticeAddress` — so every other placeholder survives unreplaced and shows up bare in the preview.
+-- Members of a practice (the doctors sharing the calendar)
+create table public.practice_members (
+  id uuid primary key default gen_random_uuid(),
+  practice_id uuid not null references public.practices(id) on delete cascade,
+  doctor_id uuid not null references auth.users(id) on delete cascade,
+  role text not null default 'member',     -- 'owner' | 'member'
+  joined_at timestamptz not null default now(),
+  unique (practice_id, doctor_id)
+);
 
-The same gap exists, to a lesser extent, in the prescription, medical-certificate, referral, and admission auto-fill blocks.
+-- Pending email invites
+create table public.practice_invitations (
+  id uuid primary key default gen_random_uuid(),
+  practice_id uuid not null references public.practices(id) on delete cascade,
+  invited_email text not null,
+  invited_by uuid not null references auth.users(id) on delete cascade,
+  status text not null default 'pending',  -- 'pending'|'accepted'|'declined'
+  token uuid not null default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  expires_at timestamptz not null default (now() + interval '14 days')
+);
 
-**Fix.** Beef up the replacement maps in `useSessions.ts` so they cover every common token the project's six default templates ship with. Also pull the additional patient fields (address, medical_aid, medical_aid_number, id_passport_number) and profile fields (`doctor_number`, `practice_address`) that are already in the DB.
+-- Mark appointments as belonging to a shared practice calendar
+alter table public.appointments
+  add column practice_id uuid references public.practices(id) on delete set null;
+create index appointments_practice_id_idx on public.appointments(practice_id);
 
-### Invoice block (lines 680–755) — biggest impact
-
-Extend the patient & profile selects:
-
-```ts
-supabase.from('patients')
-  .select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number')
-  .eq('id', patientId).maybeSingle(),
-supabase.from('profiles')
-  .select('full_name, practice_number, doctor_number, practice_address, default_currency, bank_details')
-  .eq('id', user.id).maybeSingle(),
+-- profiles: per-doctor color
+alter table public.profiles add column practice_color text default '#0EA5E9';
 ```
 
-(`bank_details` / `default_currency` may not exist on `profiles` — guard with `as any` and `?? ''`.)
+**SECURITY DEFINER helper** (avoids RLS recursion when checking membership):
 
-Generate a real invoice number once: `INV-YYYYMM-XXXXX` (mirror `InvoiceEditor.generateInvoiceNumber`). Build a default `Services` line using `summaryData?.invoice?.line_items` if present, otherwise a single "Consultation - <today>" row. Compute `TotalAmount` from those line items, fall back to `summaryData?.invoice?.total` or "[To be completed]" when no value is given.
-
-Replacement map becomes:
-
-```ts
-const todayLong = new Date(today).toLocaleDateString();
-const replacements: Record<string, string> = {
-  ClientName: patientName, PatientName: patientName, 'Patient Name': patientName,
-  Date: todayLong, SessionDate: todayLong, InvoiceDate: todayLong,
-  DueDate: dueDateLong,
-  DoctorName: docProfile?.full_name || '',
-  DoctorNumber: docProfile?.doctor_number || '',
-  RegistrationNumber: docProfile?.doctor_number || '',
-  PracticeNumber: docProfile?.practice_number || '',
-  PracticeAddress: docProfile?.practice_address || '',
-  PatientAddress: patientRecord?.physical_address || patientRecord?.address || '',
-  MedicalAid: patientRecord?.medical_aid || '',
-  MedicalAidNumber: patientRecord?.medical_aid_number || '',
-  Services: servicesLine,           // multi-line; preserves newlines
-  TotalAmount: formattedTotal,      // e.g. "R 0.00" (uses default_currency or ZAR)
-  BankDetails: (docProfile as any)?.bank_details || '',
-  InvoiceNumber: generatedInvoiceNumber,
-};
+```sql
+create or replace function public.is_practice_member(_practice_id uuid, _user_id uuid)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.practice_members
+                 where practice_id = _practice_id and doctor_id = _user_id)
+$$;
 ```
 
-Apply with the existing regex loop. Also write the same `invoice_number` and `total` into a real `invoices` row (currently only the `documents` row is created), so the auto-generated invoice is queryable from the Invoices admin page too.
+**RLS**
 
-### Prescription / Medical Cert / Referral / Admission blocks
+- `practices`: SELECT if `owner_id = auth.uid()` OR `is_practice_member(id, auth.uid())`. INSERT if `owner_id = auth.uid()`. UPDATE/DELETE owner-only.
+- `practice_members`: SELECT for members of that practice. INSERT/DELETE: practice owner only (use `is_practice_member`-style helper or direct check via `EXISTS (… practices where id=practice_id and owner_id=auth.uid())`). A member can DELETE their own row (leave practice).
+- `practice_invitations`: SELECT/INSERT/UPDATE for owner; SELECT for the invited user looking up by token (keep token-based lookup via an edge function rather than open SELECT).
+- `appointments`: extend the existing SELECT policy with an OR clause: `practice_id IS NOT NULL AND is_practice_member(practice_id, auth.uid())`. INSERT: keep `auth.uid() = user_id`, plus when `practice_id` is set we also require `is_practice_member(practice_id, auth.uid())`. UPDATE/DELETE stay owner-only (`auth.uid() = user_id`) — only the doctor who created an event can change/delete it, even on the shared calendar.
 
-Add the missing common tokens that templates typically use. Minimal additions to each existing map:
+### UI
 
-- All four blocks: add `DoctorNumber` (alias of `RegistrationNumber`), `PracticeAddress`, `PatientAddress`, `MedicalAid`, `MedicalAidNumber`, `IDNumber`, `DOB`, `Phone`, `Email`. Pull the matching extra columns in each `supabase.from('patients').select(...)` call.
-- Prescription: `Allergies`, `Repeats`, `Pharmacy` (from `patients.pharmacy_name`).
-- Medical Cert: `FromDate`, `ToDate`, `Reason`, `Diagnosis` (already there); add `IssuedDate`, `Days` (computed from from/to).
-- Referral: add `ReferringDoctor` (= DoctorName), `Specialty` (`profile.specialty`).
-- Admission: already covers most; add `PracticeAddress`, `PatientAddress`, `MedicalAid`, `MedicalAidNumber`.
+**a. My Practice → new "Shared Calendar" accordion** (next to "Practice Partners"):
 
-This is a one-pass extension of each replacement-map literal — no structural change.
+- If the doctor has no practice → a "Create Practice Calendar" button + name input.
+- If they belong to one → show practice name, owner badge, member list (avatar, name, color swatch, role), and:
+  - "Invite member" form: email input + Send.
+  - "Leave practice" (members) / "Delete practice" (owner only).
+- Pending invitations list with Resend / Revoke.
 
-### Generic fallback for any unmatched placeholder
+**b. Calendar page** (`src/pages/CalendarView.tsx`):
 
-After the replacement loop, run one final pass:
+- New toggle in the header next to the view-mode buttons:  
+  `[ My Calendar ] [ Practice Calendar ]`  
+  Persisted to localStorage `calendar-scope`.
+- "My Calendar" — current behaviour, unchanged: `appointments WHERE user_id = me`.
+- "Practice Calendar" — fetch `appointments WHERE practice_id = <my practice>` (RLS does the heavy lifting). Each event tile is colored by the **owning doctor's** `practice_color` (joined via a small select on `profiles`). A small initials chip on the tile shows whose appointment it is.
+- Booking dialog: when scope = Practice, the new appointment is inserted with `practice_id` set; user_id remains the booking doctor (so they own it for edit/delete + Google sync).
+- Events created on Practice scope are read-only for non-owners (no edit / delete buttons; just a tooltip "Owned by Dr X — only they can change this").
 
-```ts
-content = content.replace(/\[[A-Za-z][A-Za-z0-9_ -]*\]/g, '___');
-```
+**c. Invitation acceptance**
 
-So if a doctor invents a new template token we don't know about, it shows a fillable underscore line in the preview rather than the literal `[Foo]` syntax. Apply this in all five blocks.
+When an invited doctor logs in, a small banner on the Calendar / Dashboard: "Dr X invited you to share their practice calendar — Accept / Decline". Accept inserts a `practice_members` row and marks the invitation `accepted`. (No new edge function needed; client-side with RLS.)
 
-### Effect on existing rows
+## 3. Google Calendar sync stays individual-only
 
-The two stale invoice docs already in the DB will keep showing the placeholders — those were generated before the fix. We can either (a) leave them (the user already sees the fresh invoices going forward) or (b) add a one-time SQL migration that deletes auto-draft invoice/prescription docs created in the last 24h with `is_draft=true` so the user can re-run a session if they want clean ones. Recommend **(a)** — non-destructive — and surface a small toast when the user opens an old broken doc: "Older draft — re-create from session for filled values." (Actually, simplest: just leave them. Going forward all new ones are correct.)
+No code changes required to enforce this — already correct:
+
+- `useGoogleCalendar` only reads/writes `calendar_connections` rows where `user_id = auth.uid()` (RLS).
+- `google-calendar-sync` edge function looks up the calling user's connection only and syncs events that the caller passes in.
+- We will only call `syncEvent(...)` for appointments **the caller owns** (i.e. `appointment.user_id === me`). The booking flow already creates the appointment with `user_id = me`, so Google sync naturally only mirrors the doctor's own appointments — never their colleagues'. We add a one-line guard in the calendar page so any future "save" path skips `syncEvent` when `appointment.user_id !== currentUser.id`.
+
+A small visible note in the Calendar header next to the Google Calendar button:  
+"Google sync only mirrors your own appointments. Your partners' appointments stay on the shared Holarc calendar."
 
 ## Files touched
 
 | File | Change |
 |---|---|
-| `src/hooks/useSessions.ts` | Add realtime subscription + `focus` refetch in `useSessions(patientId)`. Extend invoice/prescription/cert/referral/admission replacement maps + their patient/profile selects + the generic `[Token]` → `___` fallback. Insert a real `invoices` row in the invoice block. |
+| `supabase/migrations/<new>.sql` | Tables `practices`, `practice_members`, `practice_invitations`; add `appointments.practice_id`; add `profiles.practice_color`; helper `is_practice_member`; RLS for all new tables; extend appointments SELECT policy. |
+| `src/pages/MyPractice.tsx` | New "Calendar color" picker (auto-saves to `profiles.practice_color`). New "Shared Calendar" accordion to create practice, invite members, list members + leave/delete. |
+| `src/pages/CalendarView.tsx` | Scope toggle (My / Practice), color-by-owner rendering, event-owner chip, edit/delete gating, practice-scoped insert. |
+| `src/hooks/useGoogleCalendar.ts` | One-line guard: `syncEvent` only fires when `appointment.user_id === user.id`. |
+| `src/hooks/useProfile.ts` | Surface `practice_color` field (no logic change beyond passthrough). |
+| New `src/hooks/usePractice.ts` | Encapsulates: fetch my practice + members, create practice, invite, accept invite, leave, delete. |
 
 ## Out of scope
 
-- Backfilling old auto-generated documents that already have placeholders (leave the historical drafts alone).
-- Touching `summarize-session` edge function (the placeholders bug is on the *consumer* side, not the AI side — the AI doesn't put `[Token]` strings in; the template the user designed does).
-- Realtime for `documents`/`todos` on the profile page (separate request if the user reports those going stale).
-- Reworking how invoice line items are entered manually in `InvoiceEditor` — unchanged.
+- Cross-practice / multiple-practice membership per doctor (one practice per doctor for v1; the schema supports more later).
+- Color-coding of patient avatars or anything outside the calendar tiles.
+- Syncing the *shared* practice calendar to a single shared Google Calendar (still individual Google sync only, by request).
+- Patient-facing view of the shared calendar (patients keep their existing per-doctor booking view).
 
