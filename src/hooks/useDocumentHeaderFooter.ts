@@ -8,6 +8,12 @@ interface DocumentLike {
   template_name?: string | null;
 }
 
+interface DocumentHeaderFooterResult {
+  headerFooter: HeaderFooterTemplate | null;
+  templateFontFamily: string | null;
+  isLoading: boolean;
+}
+
 /**
  * Resolves the letterhead (header/footer template) that should be applied
  * to a given document, using the DOCUMENT'S AUTHOR (`documents.user_id`)
@@ -18,26 +24,28 @@ interface DocumentLike {
  *   2. If found, fetch that header/footer template
  *   3. Fallback to the author's `is_default` header/footer template
  */
-export function useDocumentHeaderFooter(document: DocumentLike | null | undefined) {
+export function useDocumentHeaderFooter(document: DocumentLike | null | undefined): DocumentHeaderFooterResult {
   const authorId = document?.user_id ?? null;
   const templateName = document?.template_name ?? null;
 
-  const { data: headerFooter, isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["document-header-footer", authorId, templateName],
     enabled: !!authorId,
-    queryFn: async (): Promise<HeaderFooterTemplate | null> => {
-      if (!authorId) return null;
+    queryFn: async (): Promise<{ hf: HeaderFooterTemplate | null; templateFontFamily: string | null }> => {
+      if (!authorId) return { hf: null, templateFontFamily: null };
 
       let linkedHfId: string | null = null;
+      let templateFontFamily: string | null = null;
 
       if (templateName) {
         const { data: tpl } = await supabase
           .from("templates")
-          .select("header_footer_template_id")
+          .select("header_footer_template_id, font_family")
           .eq("user_id", authorId)
           .eq("name", templateName)
           .maybeSingle();
         linkedHfId = (tpl as any)?.header_footer_template_id ?? null;
+        templateFontFamily = (tpl as any)?.font_family ?? null;
       }
 
       if (linkedHfId) {

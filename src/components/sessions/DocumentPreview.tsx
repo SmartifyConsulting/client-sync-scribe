@@ -10,6 +10,20 @@ import { printDocument } from "@/utils/documentExport";
 import { HeaderFooterTemplate } from "@/hooks/useHeaderFooterTemplates";
 import { renderFormattedContent } from "@/utils/documentFormatting";
 
+const FONT_FAMILY_MAP: Record<string, string> = {
+  sans: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+  roboto: '"Roboto", sans-serif',
+  "open-sans": '"Open Sans", sans-serif',
+  lora: '"Lora", serif',
+  merriweather: '"Merriweather", serif',
+  playfair: '"Playfair Display", serif',
+  "source-serif": '"Source Serif 4", serif',
+  rockwell: 'Rockwell, Georgia, serif',
+};
+
+const resolveFont = (key?: string | null) =>
+  (key && FONT_FAMILY_MAP[key]) || FONT_FAMILY_MAP.sans;
+
 function renderHeaderFooterSection(section: { left: { text: string; alignment: string; imageUrl?: string }; center: { text: string; alignment: string; imageUrl?: string }; right: { text: string; alignment: string; imageUrl?: string } }, fontFamily?: string) {
   const hasContent = section.left?.text || section.center?.text || section.right?.text || section.left?.imageUrl || section.center?.imageUrl || section.right?.imageUrl;
   if (!hasContent) return null;
@@ -19,7 +33,7 @@ function renderHeaderFooterSection(section: { left: { text: string; alignment: s
       {cell.imageUrl && <img src={cell.imageUrl} alt="" style={{ maxHeight: '50px', objectFit: 'contain', marginBottom: '4px' }} />}
       {cell.text && (
         <div
-          style={{ whiteSpace: 'pre-wrap', fontSize: '9pt', lineHeight: '1.4', fontFamily: fontFamily || 'system-ui' }}
+          style={{ whiteSpace: 'pre-wrap', fontSize: '9pt', lineHeight: '1.4', fontFamily: resolveFont(fontFamily) }}
           dangerouslySetInnerHTML={{ __html: renderFormattedContent(cell.text) }}
         />
       )}
@@ -135,7 +149,7 @@ export function DocumentPreview({
               minHeight: "297mm",
               maxWidth: "100%",
               padding: "20mm",
-              fontFamily: fontFamily || "system-ui, -apple-system, sans-serif",
+              fontFamily: resolveFont(fontFamily),
             }}
           >
             {/* Structured Header */}
@@ -155,10 +169,10 @@ export function DocumentPreview({
             
             {/* Document Content */}
             <div 
-              className="whitespace-pre-wrap text-sm text-black leading-relaxed"
+              className="whitespace-pre-wrap text-black leading-relaxed"
               style={{ 
-                fontFamily: fontFamily || "system-ui, -apple-system, sans-serif",
-                fontSize: "12pt",
+                fontFamily: resolveFont(fontFamily),
+                fontSize: "14px",
               }}
               dangerouslySetInnerHTML={{ __html: renderFormattedContent(content) }}
             />
