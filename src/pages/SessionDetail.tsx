@@ -344,52 +344,52 @@ export default function SessionDetail() {
       {/* Quick Actions */}
       {session.status === "completed" && session.patient && (
         <div className="rounded-xl border border-primary bg-card p-6">
-          <h2 className="font-semibold text-foreground mb-4">Quick Actions</h2>
+          <h2 className="text-[12px] font-semibold text-foreground mb-4">Quick Actions</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2">
             <Button
-              className="gap-1.5 text-sm h-10 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
+              className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowPrescriptionEditor(true)}
             >
               <Pill className="h-4 w-4 shrink-0" />
               <span className="truncate">Prescription</span>
             </Button>
             <Button
-              className="gap-1.5 text-sm h-10 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
+              className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowInvoiceEditor(true)}
             >
               <Receipt className="h-4 w-4 shrink-0" />
               <span className="truncate">Invoice</span>
             </Button>
             <Button
-              className="gap-1.5 text-sm h-10 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
+              className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowMedicalCertificateEditor(true)}
             >
               <FileBadge className="h-4 w-4 shrink-0" />
               <span className="truncate">Medical Certificate</span>
             </Button>
             <Button
-              className="gap-1.5 text-sm h-10 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
+              className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowReferralLetterEditor(true)}
             >
               <FileText className="h-4 w-4 shrink-0" />
               <span className="truncate">Referral Letter</span>
             </Button>
             <Button
-              className="gap-1.5 text-sm h-10 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
+              className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowGeneralLetterEditor(true)}
             >
               <FileEdit className="h-4 w-4 shrink-0" />
               <span className="truncate">General Letter</span>
             </Button>
             <Button
-              className="gap-1.5 text-sm h-10 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
+              className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowDrawingPad(true)}
             >
               <PenTool className="h-4 w-4 shrink-0" />
               <span className="truncate">Drawing Pad</span>
             </Button>
             <Button
-              className="gap-1.5 text-sm h-10 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
+              className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowHospitalAdmissionEditor(true)}
             >
               <Hospital className="h-4 w-4 shrink-0" />
@@ -404,37 +404,37 @@ export default function SessionDetail() {
         <div className="rounded-xl border border-primary bg-card p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Sparkles className="h-5 w-5 text-primary" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                <Sparkles className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <h2 className="font-semibold text-foreground">AI Summary</h2>
-                <p className="text-xs text-muted-foreground">Generated from session content</p>
+                <h2 className="text-[12px] font-semibold text-foreground">AI Summary</h2>
+                <p className="text-[11px] text-muted-foreground">Generated from session content</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               {isTranslating && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
               <Select value={selectedLanguage} onValueChange={handleTranslate}>
-                <SelectTrigger className="w-[160px] h-8 text-xs">
+                <SelectTrigger className="w-[160px] h-8 text-[11px]">
                   <Languages className="h-3.5 w-3.5 mr-1.5" />
                   <SelectValue placeholder="Translate..." />
                 </SelectTrigger>
                 <SelectContent>
                   {LANGUAGES.map(lang => (
-                    <SelectItem key={lang.code} value={lang.code} className="text-xs">
+                    <SelectItem key={lang.code} value={lang.code} className="text-[11px]">
                       {lang.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {translatedSummary && (
-                <Button variant="ghost" size="sm" className="text-xs h-8" onClick={() => { setTranslatedSummary(null); setSelectedLanguage(""); }}>
+                <Button variant="ghost" size="sm" className="text-[11px] h-8" onClick={() => { setTranslatedSummary(null); setSelectedLanguage(""); }}>
                   Original
                 </Button>
               )}
             </div>
           </div>
-          <p className="text-foreground leading-relaxed">{translatedSummary || session.summary}</p>
+          <p className="text-[12px] text-foreground leading-relaxed">{translatedSummary || session.summary}</p>
         </div>
       )}
 
@@ -443,12 +443,12 @@ export default function SessionDetail() {
         <div className="rounded-xl border border-primary bg-card p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10">
-                <Volume2 className="h-5 w-5 text-purple-600" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/10">
+                <Volume2 className="h-4 w-4 text-purple-600" />
               </div>
               <div>
-                <h2 className="font-semibold text-foreground">Session Notes</h2>
-                <p className="text-xs text-muted-foreground">Audio, transcript, and manual notes from the consultation</p>
+                <h2 className="text-[12px] font-semibold text-foreground">Session Notes</h2>
+                <p className="text-[11px] text-muted-foreground">Audio, transcript, and manual notes from the consultation</p>
               </div>
             </div>
             {(session.audio_url || session.transcript) && (
@@ -466,15 +466,15 @@ export default function SessionDetail() {
                   }
                 }}
               >
-                <SelectTrigger className="w-[160px] h-8 text-xs">
+                <SelectTrigger className="w-[160px] h-8 text-[11px]">
                   <Download className="h-3.5 w-3.5 mr-1.5" />
                   <SelectValue placeholder="Download..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="audio" disabled={!session.audio_url} className="text-xs">
+                  <SelectItem value="audio" disabled={!session.audio_url} className="text-[11px]">
                     Download audio
                   </SelectItem>
-                  <SelectItem value="transcript" disabled={!session.transcript} className="text-xs">
+                  <SelectItem value="transcript" disabled={!session.transcript} className="text-[11px]">
                     Download transcript
                   </SelectItem>
                 </SelectContent>
@@ -485,13 +485,13 @@ export default function SessionDetail() {
           {/* Audio subsection */}
           {session.audio_url && (
             <div className="space-y-3">
-              <p className="text-sm font-semibold text-muted-foreground">Audio</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Audio</p>
               <audio controls className="w-full" src={signedAudioUrl || ''}>
                 Your browser does not support the audio element.
               </audio>
               <Alert className="border-amber-500/30 bg-amber-500/5">
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
-                <AlertDescription className="text-xs text-amber-700">
+                <AlertDescription className="text-[11px] text-amber-700">
                   Voice recordings and transcriptions are automatically deleted after 7 days. Download them to keep.
                   AI summaries remain permanently.
                 </AlertDescription>
@@ -504,7 +504,7 @@ export default function SessionDetail() {
             <>
               {session.audio_url && <hr className="my-4 border-border/60" />}
               <div className="space-y-3">
-                <p className="text-sm font-semibold text-muted-foreground">Transcript</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Transcript</p>
                 <div className="bg-muted/30 rounded-lg p-4 max-h-[400px] overflow-y-auto space-y-2">
                   {session.transcript.split('\n').map((line, index) => {
                     const colonIndex = line.indexOf(':');
@@ -514,13 +514,13 @@ export default function SessionDetail() {
                       const speakerLower = speaker.toLowerCase().trim();
                       const isDoctor = speakerLower.includes('dr') || speakerLower.includes('doctor') || (doctorName && speakerLower.includes(doctorName.toLowerCase()));
                       return (
-                        <p key={index} className={`leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
+                        <p key={index} className={`text-[12px] leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
                           <span className="font-bold">{speaker}</span>:{text}
                         </p>
                       );
                     }
                     return line.trim() ? (
-                      <p key={index} className="text-foreground leading-relaxed">{line}</p>
+                      <p key={index} className="text-[12px] text-foreground leading-relaxed">{line}</p>
                     ) : null;
                   })}
                 </div>
@@ -533,13 +533,76 @@ export default function SessionDetail() {
             <>
               {(session.audio_url || session.transcript) && <hr className="my-4 border-border/60" />}
               <div className="space-y-3">
-                <p className="text-sm font-semibold text-muted-foreground">Notes</p>
-                <p className="text-foreground whitespace-pre-wrap">{session.notes}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Notes</p>
+                <p className="text-[12px] text-foreground whitespace-pre-wrap">{session.notes}</p>
               </div>
             </>
           )}
         </div>
       )}
+
+      {/* Private Notes — doctor-only */}
+      <div className="rounded-xl border border-amber-500/40 bg-amber-50/30 dark:bg-amber-950/10 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/15">
+              <Lock className="h-4 w-4 text-amber-600" />
+            </div>
+            <div>
+              <h2 className="text-[12px] font-semibold text-foreground">Private Notes</h2>
+              <p className="text-[11px] text-muted-foreground">Only visible to you. Not shared with the patient or other doctors.</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {!editingPrivateNotes ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-[11px] h-8"
+                onClick={() => {
+                  setPrivateNotesDraft((session as any).private_notes || "");
+                  setEditingPrivateNotes(true);
+                }}
+              >
+                <Edit3 className="h-3.5 w-3.5 mr-1.5" />
+                Edit
+              </Button>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-[11px] h-8"
+                  disabled={savingPrivateNotes}
+                  onClick={() => { setEditingPrivateNotes(false); setPrivateNotesDraft(""); }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  className="text-[11px] h-8"
+                  disabled={savingPrivateNotes}
+                  onClick={handleSavePrivateNotes}
+                >
+                  {savingPrivateNotes ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+        {editingPrivateNotes ? (
+          <Textarea
+            value={privateNotesDraft}
+            onChange={(e) => setPrivateNotesDraft(e.target.value)}
+            placeholder="Write notes only you can see…"
+            className="text-[12px] min-h-[140px]"
+          />
+        ) : (session as any).private_notes ? (
+          <p className="text-[12px] whitespace-pre-wrap text-foreground">{(session as any).private_notes}</p>
+        ) : (
+          <p className="text-[11px] text-muted-foreground italic">No private notes yet — click Edit to add notes only you can see.</p>
+        )}
+      </div>
 
       {/* Session Documents */}
       {sessionDocs.length > 0 && (
