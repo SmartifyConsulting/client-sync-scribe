@@ -23,7 +23,9 @@ import {
   AlertTriangle,
   Edit3,
   Send,
+  Lock,
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
@@ -77,7 +79,7 @@ export default function SessionDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { session, loading } = useSession(id || "");
+  const { session, loading, refetch } = useSession(id || "");
   const { deleteSession } = useSessions();
   const [showPrescriptionEditor, setShowPrescriptionEditor] = useState(false);
   const [showInvoiceEditor, setShowInvoiceEditor] = useState(false);
@@ -93,6 +95,9 @@ export default function SessionDetail() {
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
   const [doctorName, setDoctorName] = useState<string>("");
   const [signedAudioUrl, setSignedAudioUrl] = useState<string | null>(null);
+  const [editingPrivateNotes, setEditingPrivateNotes] = useState(false);
+  const [privateNotesDraft, setPrivateNotesDraft] = useState("");
+  const [savingPrivateNotes, setSavingPrivateNotes] = useState(false);
 
   // Fetch doctor name
   useEffect(() => {
@@ -207,6 +212,25 @@ export default function SessionDetail() {
       description: "The session has been removed.",
     });
     navigate(-1);
+  };
+
+  const handleSavePrivateNotes = async () => {
+    if (!id) return;
+    setSavingPrivateNotes(true);
+    try {
+      const { error } = await (supabase
+        .from('sessions')
+        .update({ private_notes: privateNotesDraft } as any) as any)
+        .eq('id', id);
+      if (error) throw error;
+      toast({ title: "Private notes saved" });
+      setEditingPrivateNotes(false);
+      refetch();
+    } catch (err: any) {
+      toast({ title: "Failed to save notes", description: err?.message, variant: "destructive" });
+    } finally {
+      setSavingPrivateNotes(false);
+    }
   };
 
   if (loading) {
