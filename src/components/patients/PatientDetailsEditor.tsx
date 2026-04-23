@@ -1396,35 +1396,22 @@ export function PatientDetailsEditor({
       );
     }
 
-    // Desktop/Tablet for doctor-viewed patient: grouped tabs
+    // Desktop/Tablet for doctor-viewed patient: Personal & Medical tabs on the green bar
     return (
-      <div className="space-y-1">
-        <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-          {/* My Profile parent trigger */}
-          <button
-            type="button"
-            onClick={() => handleParentTabClick("profile", PROFILE_TABS)}
-            className={cn(
-              "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-xs font-medium transition-all",
-              activeParentTab === "profile" ? "bg-white text-black shadow-sm" : "text-white hover:bg-white/10",
-            )}
-          >
-            My Profile
-          </button>
-        </TabsList>
-
-        {/* Sub-tab row for My Profile */}
-        {activeParentTab === "profile" && (
-          <TabsList className="bg-primary/25 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-            <TabsTrigger value="personal" className="text-xs whitespace-nowrap text-foreground">
-              Personal Information
-            </TabsTrigger>
-            <TabsTrigger value="medical" className="text-xs whitespace-nowrap text-foreground">
-              Medical Information
-            </TabsTrigger>
-          </TabsList>
-        )}
-      </div>
+      <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+        <TabsTrigger
+          value="personal"
+          className="text-xs whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black"
+        >
+          Personal Information
+        </TabsTrigger>
+        <TabsTrigger
+          value="medical"
+          className="text-xs whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black"
+        >
+          Medical Information
+        </TabsTrigger>
+      </TabsList>
     );
   };
 
