@@ -114,7 +114,7 @@ export function DocumentPreview({
         body: {
           to: recipientEmail,
           subject: emailSubject,
-          content: content,
+          content: safeContent,
           documentType: title,
         },
       });
