@@ -18,9 +18,10 @@ function renderHeaderFooterSection(section: { left: { text: string; alignment: s
     <div style={{ textAlign: align as any }}>
       {cell.imageUrl && <img src={cell.imageUrl} alt="" style={{ maxHeight: '50px', objectFit: 'contain', marginBottom: '4px' }} />}
       {cell.text && (
-        <div style={{ whiteSpace: 'pre-wrap', fontSize: '9pt', lineHeight: '1.4', fontFamily: fontFamily || 'system-ui' }}>
-          {cell.text}
-        </div>
+        <div
+          style={{ whiteSpace: 'pre-wrap', fontSize: '9pt', lineHeight: '1.4', fontFamily: fontFamily || 'system-ui' }}
+          dangerouslySetInnerHTML={{ __html: renderFormattedContent(cell.text) }}
+        />
       )}
     </div>
   );
