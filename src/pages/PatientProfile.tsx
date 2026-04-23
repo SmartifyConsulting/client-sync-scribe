@@ -766,55 +766,80 @@ export default function PatientProfile() {
                         </p>
                       </div>
                       {(doc as any).is_draft && !(doc as any).email_sent_at && (
-                        <span className="rounded-full bg-warning/10 px-1.5 py-0.5 text-[7px] font-medium text-warning border border-warning/30">
+                        <span className="rounded-full bg-warning/10 px-2 py-0.5 text-[11px] font-medium text-warning border border-warning/30">
                           DRAFT
                         </span>
                       )}
                       {doc.template_name && (
-                        <span className="rounded-full bg-muted/70 px-2 py-1 text-[8px] font-medium text-muted-foreground">
+                        <span className="rounded-full bg-muted/70 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                           {doc.template_name}
                         </span>
                       )}
-                      <button
-                        className={cn(
-                          "h-6 w-6 rounded-full flex items-center justify-center transition-colors",
-                          (doc as any).email_sent_at
-                            ? "text-muted-foreground cursor-default"
-                            : "text-green-600 hover:text-green-700 hover:bg-green-50",
-                        )}
-                        disabled={!!(doc as any).email_sent_at}
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          if ((doc as any).email_sent_at) return;
-                          try {
-                            const { data: patient } = await supabase
-                              .from("patients")
-                              .select("email, pharmacy_email")
-                              .eq("id", doc.patient_id!)
-                              .maybeSingle();
-                            const email = doc.template_name?.toLowerCase().includes("prescription")
-                              ? patient?.pharmacy_email || patient?.email
-                              : patient?.email;
-                            if (email)
-                              await supabase.functions.invoke("send-document-email", {
-                                body: { documentId: doc.id, recipientEmail: email },
-                              });
-                            await (
-                              supabase
+                      <div className="flex items-center gap-1">
+                        <button
+                          className="h-7 w-7 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                          title="Preview"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewDoc(doc);
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button
+                          className="h-7 w-7 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                          title="Edit"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingDoc(doc);
+                            setEditDocName(doc.name);
+                            setEditDocContent(doc.content);
+                          }}
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </button>
+                        <button
+                          className={cn(
+                            "h-7 w-7 rounded-full flex items-center justify-center transition-colors",
+                            (doc as any).email_sent_at
+                              ? "text-muted-foreground cursor-default"
+                              : "text-green-600 hover:text-green-700 hover:bg-green-50",
+                          )}
+                          disabled={!!(doc as any).email_sent_at}
+                          title={(doc as any).email_sent_at ? "Sent" : "Send"}
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            if ((doc as any).email_sent_at) return;
+                            try {
+                              const { data: patient } = await supabase
+                                .from("patients")
+                                .select("email, pharmacy_email")
+                                .eq("id", doc.patient_id!)
+                                .maybeSingle();
+                              const email = doc.template_name?.toLowerCase().includes("prescription")
+                                ? patient?.pharmacy_email || patient?.email
+                                : patient?.email;
+                              if (email)
+                                await supabase.functions.invoke("send-document-email", {
+                                  body: { documentId: doc.id, recipientEmail: email },
+                                });
+                              await (
+                                supabase
+                                  .from("documents")
+                                  .update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any
+                              ).eq("id", doc.id);
+                              const { data: updatedDocs } = await supabase
                                 .from("documents")
-                                .update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any
-                            ).eq("id", doc.id);
-                            const { data: updatedDocs } = await supabase
-                              .from("documents")
-                              .select("*")
-                              .eq("patient_id", doc.patient_id!)
-                              .order("created_at", { ascending: false });
-                            if (updatedDocs) fetchDocuments();
-                          } catch {}
-                        }}
-                      >
-                        <Send className="h-3 w-3" />
-                      </button>
+                                .select("*")
+                                .eq("patient_id", doc.patient_id!)
+                                .order("created_at", { ascending: false });
+                              if (updatedDocs) fetchDocuments();
+                            } catch {}
+                          }}
+                        >
+                          <Send className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
