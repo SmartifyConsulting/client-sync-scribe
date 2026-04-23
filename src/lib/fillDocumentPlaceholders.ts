@@ -88,8 +88,8 @@ function fmtAmount(amount: number | string | null | undefined, currency = "ZAR")
   return `${sym} ${n.toFixed(2)}`;
 }
 
-function buildReplacements(ctx: FillContext): Record<string, string> {
-  const { patient, profile, invoice } = ctx;
+function buildReplacements(ctx: FillContext): { lookup: Record<string, string>; slotKeys: Set<string> } {
+  const { patient, profile, invoice, prescription } = ctx;
   const today = ctx.today || new Date();
   const todayLong = fmtDateLong(today);
 
@@ -132,6 +132,7 @@ function buildReplacements(ctx: FillContext): Record<string, string> {
     Date: todayLong,
     SessionDate: todayLong,
     Today: todayLong,
+    PrescriptionDate: todayLong,
 
     // Invoice (optional)
     InvoiceNumber: invoice?.invoice_number || "",
@@ -144,14 +145,38 @@ function buildReplacements(ctx: FillContext): Record<string, string> {
     TotalAmount: invoice ? fmtAmount(invoice.amount ?? 0, currency) : "",
     Amount: invoice ? fmtAmount(invoice.amount ?? 0, currency) : "",
     Currency: currency,
+
+    // Prescription (optional)
+    NumberOfRepeats: prescription?.repeats != null ? String(prescription.repeats) : "",
+    Repeats: prescription?.repeats != null ? String(prescription.repeats) : "",
+    SpecialInstructions:
+      prescription?.special_instructions || prescription?.notes || "",
   };
+
+  // Indexed prescription slots — register as known so unused slots render blank, not ___
+  const slotKeys = new Set<string>();
+  const meds = prescription?.medications || [];
+  const slotMax = Math.max(3, meds.length);
+  for (let i = 1; i <= slotMax; i++) {
+    const m = meds[i - 1];
+    map[`Medication${i}`] = m?.medication || m?.name || "";
+    map[`Dosage${i}`] = m?.dosage || "";
+    map[`Quantity${i}`] = m?.quantity || "";
+    map[`Frequency${i}`] = m?.frequency || "";
+    map[`Instructions${i}`] = m?.instructions || "";
+    slotKeys.add(`medication${i}`);
+    slotKeys.add(`dosage${i}`);
+    slotKeys.add(`quantity${i}`);
+    slotKeys.add(`frequency${i}`);
+    slotKeys.add(`instructions${i}`);
+  }
 
   // Build a case-insensitive, space-insensitive lookup table.
   const normalized: Record<string, string> = {};
   for (const [k, v] of Object.entries(map)) {
     normalized[k.toLowerCase().replace(/\s+/g, "")] = v;
   }
-  return normalized;
+  return { lookup: normalized, slotKeys };
 }
 
 export interface FillResult {
