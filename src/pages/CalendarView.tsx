@@ -698,21 +698,38 @@ export default function CalendarView() {
                             const initials = patientName
                               ? patientName.split(/\s+/).map(w => w[0]).join("").toUpperCase().slice(0, 2)
                               : null;
+                            const isPracticeScope = scope === 'practice';
+                            const tileColor = isPracticeScope
+                              ? (event.ownerColor || '#0EA5E9')
+                              : getTypeColor(event.type);
+                            const ownerInitials = isPracticeScope ? initialsOf(event.ownerName) : '';
                             return (
                               <div
                                 key={event.id}
                                 onClick={() => handleEventClick(event)}
                                 className="flex items-center gap-1 truncate rounded px-1 py-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity"
                                 style={{
-                                  backgroundColor: getTypeColor(event.type) ? `${getTypeColor(event.type)}22` : undefined,
-                                  color: getTypeColor(event.type) || undefined,
+                                  backgroundColor: tileColor ? `${tileColor}22` : undefined,
+                                  color: tileColor || undefined,
                                 }}
                               >
+                                {isPracticeScope && ownerInitials ? (
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <span className="inline-flex h-4 px-1 items-center justify-center rounded text-[9px] font-bold text-white shrink-0" style={{ backgroundColor: event.ownerColor || '#0EA5E9' }}>
+                                          {ownerInitials}
+                                        </span>
+                                      </TooltipTrigger>
+                                      <TooltipContent>{event.ownerName || 'Doctor'}</TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                ) : null}
                                 {initials ? (
                                   <TooltipProvider>
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold text-white shrink-0" style={{ backgroundColor: getTypeColor(event.type) || 'hsl(350, 78%, 55%)' }}>
+                                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold text-white shrink-0" style={{ backgroundColor: tileColor || 'hsl(350, 78%, 55%)' }}>
                                           {initials}
                                         </span>
                                       </TooltipTrigger>
