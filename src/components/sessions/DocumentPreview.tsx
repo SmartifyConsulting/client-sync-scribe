@@ -77,8 +77,25 @@ export function DocumentPreview({
   const [emailSubject, setEmailSubject] = useState(title);
   const [isSending, setIsSending] = useState(false);
 
+  // Belt-and-braces: if the parent forgot to resolve placeholders, do it here too.
+  // No-op if `content` already has no [Token] markers.
+  const safeContent = useMemo(() => {
+    if (!content) return content;
+    if (!/\[[A-Za-z][A-Za-z0-9 _-]*\]/.test(content)) return content;
+    try {
+      return fillDocumentPlaceholders(content, {
+        patient: null,
+        profile: null,
+        invoice: null,
+        today: new Date(),
+      }).content;
+    } catch {
+      return content;
+    }
+  }, [content]);
+
   const handlePrint = () => {
-    printDocument(content, title, logoUrl, fontFamily, headerFooter || undefined);
+    printDocument(safeContent, title, logoUrl, fontFamily, headerFooter || undefined);
   };
 
   const handleSendEmail = async () => {
