@@ -51,9 +51,11 @@ interface PillReference {
 
 interface MedicationAdherenceTabProps {
   patientId: string;
+  focusRxId?: string | null;
+  onFocusHandled?: () => void;
 }
 
-export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProps) {
+export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }: MedicationAdherenceTabProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [recordingPrescriptionId, setRecordingPrescriptionId] = useState<string | null>(null);

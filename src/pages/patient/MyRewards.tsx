@@ -472,11 +472,14 @@ export default function MyRewards() {
 
         {patientRecord?.is_chronic && patientRecord?.id && (
           <TabsContent value="chronic-meds" className="space-y-6">
-            <MedicationAdherenceTab patientId={patientRecord.id} />
+            <MedicationAdherenceTab patientId={patientRecord.id} focusRxId={focusRxId} onFocusHandled={() => setFocusRxId(null)} />
           </TabsContent>
         )}
 
         <TabsContent value="overview" className="space-y-6">
+          {patientRecord?.is_chronic && patientRecord?.id && (
+            <TodaysMedicationsCard patientId={patientRecord.id} onTakeMedication={handleTakeMedication} />
+          )}
           {nextMilestone && (
             <Card>
               <CardHeader>
