@@ -315,8 +315,8 @@ const completeSession = async (
         try {
           const admission = summaryData.hospital_admission;
           const [patientRes, profileRes, templateRes] = await Promise.all([
-            supabase.from('patients').select('name').eq('id', patientId).maybeSingle(),
-            supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty').eq('id', user.id).maybeSingle(),
+            supabase.from('patients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email').eq('id', patientId).maybeSingle(),
+            supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty, practice_address').eq('id', user.id).maybeSingle(),
             supabase.from('templates').select('id, name, content, header_footer_template_id').eq('user_id', user.id),
           ]);
 
