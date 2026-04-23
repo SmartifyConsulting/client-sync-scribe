@@ -11,6 +11,7 @@ import {
   StickyNote,
   Save,
   AlertCircle,
+  AlertTriangle,
   Star,
   Plus,
   Send,
@@ -20,6 +21,9 @@ import {
   GitCompareArrows,
   Eye,
   Edit3,
+  Sparkles,
+  Trash2,
+  RotateCw,
 } from "lucide-react";
 import { ImageComparisonDialog } from "@/components/documents/ImageComparisonDialog";
 import { cn } from "@/lib/utils";
@@ -67,7 +71,7 @@ export default function PatientProfile() {
   const { sessions, loading: sessionsLoading } = useSessions(id);
   const { lollipopCount } = usePatientRewards(id);
   const { templates, loading: templatesLoading } = useTemplates();
-  const { documents, loading: documentsLoading, fetchDocuments, updateDocument } = useDocuments();
+  const { documents, loading: documentsLoading, fetchDocuments, updateDocument } = useDocuments(id);
   const { user } = useAuth();
   const [mailboxAlias, setMailboxAlias] = useState<string | null>(null);
   const [mailboxId, setMailboxId] = useState<string | null>(null);
@@ -119,6 +123,10 @@ export default function PatientProfile() {
   const [editingDoc, setEditingDoc] = useState<DocumentRecord | null>(null);
   const [editDocName, setEditDocName] = useState("");
   const [editDocContent, setEditDocContent] = useState("");
+  const [analyzingDocId, setAnalyzingDocId] = useState<string | null>(null);
+  const [analysisDialog, setAnalysisDialog] = useState<DocumentRecord | null>(null);
+  const [docToDelete, setDocToDelete] = useState<DocumentRecord | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Check if current doctor has access to all sessions
   useEffect(() => {
