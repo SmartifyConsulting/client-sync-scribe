@@ -1025,37 +1025,60 @@ export default function CalendarView() {
                       </div>
                     )}
 
-                    {/* Mobile: icon-only buttons */}
-                    <div className="flex md:hidden gap-3 justify-center pt-4">
-                      <Button variant="outline" size="icon" className="h-11 w-11" onClick={() => setIsEditMode(true)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button variant="destructive" size="icon" className="h-11 w-11" onClick={handleDeleteEvent}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                      {selectedEvent.type !== "internal" && selectedEvent.patientId && (
-                        <Button size="icon" className="h-11 w-11 bg-green-600 hover:bg-green-700 text-white" onClick={handleStartSession}>
-                          <Play className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
+                    {(() => {
+                      const isOwner = !!user && selectedEvent.ownerId === user.id;
+                      if (!isOwner) {
+                        return (
+                          <div className="pt-4">
+                            <p className="text-[11px] text-muted-foreground italic">
+                              Owned by {selectedEvent.ownerName ? `Dr ${selectedEvent.ownerName}` : 'another doctor'} — only they can change this.
+                            </p>
+                            {selectedEvent.type !== "internal" && selectedEvent.patientId && (
+                              <Button className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white" onClick={handleStartSession}>
+                                <Play className="h-3.5 w-3.5 mr-1" />
+                                Start Session
+                              </Button>
+                            )}
+                          </div>
+                        );
+                      }
+                      return (
+                        <>
+                          {/* Mobile: icon-only buttons */}
+                          <div className="flex md:hidden gap-3 justify-center pt-4">
+                            <Button variant="outline" size="icon" className="h-11 w-11" onClick={() => setIsEditMode(true)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button variant="destructive" size="icon" className="h-11 w-11" onClick={handleDeleteEvent}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                            {selectedEvent.type !== "internal" && selectedEvent.patientId && (
+                              <Button size="icon" className="h-11 w-11 bg-green-600 hover:bg-green-700 text-white" onClick={handleStartSession}>
+                                <Play className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
 
-                    {/* Desktop: full text buttons */}
-                    <div className="hidden md:grid grid-cols-3 gap-2 pt-4">
-                      <Button variant="outline" onClick={() => setIsEditMode(true)}>
-                        <Pencil className="h-3.5 w-3.5 mr-1" />
-                        Edit
-                      </Button>
-                      <Button variant="destructive" onClick={handleDeleteEvent}>
-                        <Trash2 className="h-3.5 w-3.5 mr-1" />
-                        Delete
-                      </Button>
-                      {selectedEvent.type !== "internal" && selectedEvent.patientId && (
-                        <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={handleStartSession}>
-                          <Play className="h-3.5 w-3.5 mr-1" />
-                          Start Session
-                        </Button>
-                      )}
+                          {/* Desktop: full text buttons */}
+                          <div className="hidden md:grid grid-cols-3 gap-2 pt-4">
+                            <Button variant="outline" onClick={() => setIsEditMode(true)}>
+                              <Pencil className="h-3.5 w-3.5 mr-1" />
+                              Edit
+                            </Button>
+                            <Button variant="destructive" onClick={handleDeleteEvent}>
+                              <Trash2 className="h-3.5 w-3.5 mr-1" />
+                              Delete
+                            </Button>
+                            {selectedEvent.type !== "internal" && selectedEvent.patientId && (
+                              <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={handleStartSession}>
+                                <Play className="h-3.5 w-3.5 mr-1" />
+                                Start Session
+                              </Button>
+                            )}
+                          </div>
+                        </>
+                      );
+                    })()}
                     </div>
                   </div>
                 </>
