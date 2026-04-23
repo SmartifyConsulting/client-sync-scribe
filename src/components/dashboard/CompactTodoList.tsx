@@ -26,6 +26,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DocumentPreview } from "@/components/sessions/DocumentPreview";
 import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
+import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 
 interface TodoItem {
   id: string;
