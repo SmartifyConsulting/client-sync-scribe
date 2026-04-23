@@ -1,107 +1,136 @@
 
 
-# Plan: Video baseline + monthly confidence auto-approval (revised)
+# Plan: Medication editor — quantity, units, repeats/day, in-section edit, chronic refresh, and multi-tablet AI capture
 
-## 1. Baseline = a full first-dose video, not just two photos
+## 1. Extend `CurrentMedication` shape
 
-Replace the 3-step photo wizard with a **single guided video capture** the first time a patient opens **Take Medication** for a chronic Rx (and again whenever the prescription's medication or dosage changes).
+In `src/hooks/usePatients.ts`, add three optional fields to the `CurrentMedication` interface:
 
-### Capture flow in `PillBaselineCapture.tsx`
-
-1. **Intro card** — "We'll record your first dose as a baseline. This helps us recognise your routine over time. The video is **not stored** — only a description and a snapshot of the tablet are kept."
-2. **Intake method picker** (the one we agreed earlier): Swallow whole / Chew / Crush and mix / Dissolve in liquid / Gummy.
-3. **Camera-guided recording** (up to 30s, same MediaRecorder pipeline as daily doses):
-   - Live framing guide + brightness gate before recording starts.
-   - Patient films themselves taking the dose end-to-end (showing the tablet, then ingestion).
-4. **AI processing** — extract 5 evenly-spaced frames + 1 dedicated "tablet close-up" frame (the sharpest of the first 25% of frames), upload **only those frames** to storage, then call `validate-medication-video` with `mode: "baseline_capture"` + `intakeMethod`.
-
-The video blob is **discarded client-side** as soon as the frames are uploaded — never written to storage. Same policy applies to all subsequent dose recordings (already the case today; we make this explicit in copy).
-
-### What gets persisted (revised `prescription_pill_references` migration)
-
-| col | type | source |
+| field | type | notes |
 |---|---|---|
-| `reference_image_url` | text | the tablet close-up frame |
-| `observed_description` | text | Gemini description of the tablet |
-| `intake_method` | text | patient pick |
-| `baseline_pattern_summary` | text *(new)* | Gemini summary of the full ingestion sequence — e.g. "Right hand, tablet placed on tongue, sip of water, head tilt back, ~3 second swallow." Used as a textual reference for pattern recognition. |
-| `medication_snapshot`, `dosage_snapshot`, timestamps | unchanged |
+| `quantity` | `string` | tablets/units per dose (e.g. "1", "2") |
+| `units` | `string` | defaults to `"mg"`; selectable |
+| `times_per_day` | `string` | repeats/day, integer-as-string |
 
-The `label_image_url` and `label_text_extracted` columns from the previous plan are **dropped** — no separate packaging photo. Pharmacy-relabelled bottles are common and the tablet description + ongoing pattern matching is enough.
+Stored in the existing `patients.current_medications` JSON column — no DB migration needed.
 
-The existing `mark_pill_reference_stale` trigger is extended to also null `intake_method` and `baseline_pattern_summary` when medication or dosage changes, forcing a fresh baseline video.
+## 2. Medication add/edit form (in `PatientDetailsEditor.tsx`)
 
-## 2. Per-dose verification = method-aware + confidence score
+In the existing "Allergies, Medication & Conditions" accordion, replace the single free-text **Dosage** input with a structured row:
 
-Every daily dose is recorded the same way as the baseline (≤30s clip, frames extracted, blob discarded). The `validate-medication-video` ingestion mode:
+- **Quantity** — number input (default `"1"`)
+- **Strength** — number input
+- **Units** — small `<Select>` with options: **mg, mcg, g, ml, IU, %, drops, puffs, tablets, capsules** (default `"mg"`)
+- **Times per day** — number input (default `"1"`, min `1`, max `12`)
 
-1. Loads the prescription's `intake_method`, `observed_description`, and `baseline_pattern_summary`.
-2. Asks Gemini to compare the new frames against the baseline pattern + tablet description, with required/disqualifying signals tailored to the declared method:
+The form keeps the existing **Status / Start date / End date / Chronic** controls. `handleAddMed` and `handleEditMed` are updated to read/write the four new fields, and the legacy `dosage` string is auto-composed for display + backwards compatibility (e.g. `"1 × 500 mg, 2× daily"`).
 
-   | Method | Required | Disqualifying |
-   |---|---|---|
-   | swallow | hand-to-mouth + swallow action | repeated chewing motion |
-   | chew | hand-to-mouth + chewing + swallow | swallowed whole, no chewing |
-   | crush | powder/broken tablet + spoon/liquid | whole tablet into mouth |
-   | dissolve | tablet in liquid + drinking | tablet directly into mouth |
-   | gummy | hand-to-mouth + chewing | none — chewing is correct |
+The medication list rows render the composed string so older entries (which only have `dosage`) still display correctly.
 
-3. Returns `{ isValid, confidence (0-100), pattern_match_score (0-100), description, disqualifying_signal }`.
+## 3. Inline edit buttons on every collapsible section header
 
-### Decision tree (replaces the previous pass/fail)
+`SectionHeader` currently shows only label + chevron. Add an optional `onEdit` prop and, when in view-only mode, render a small **pencil button** between the label and chevron that:
 
-| Outcome | Condition | Storage row |
-|---|---|---|
-| **Confirmed** | `confidence ≥ 75` AND no disqualifying signal | `status: completed`, +5 Vulas + confetti immediately |
-| **Hard fail** | any disqualifying signal at high confidence | `status: failed_verification`, locked, "contact your doctor" toast |
-| **Provisional** | `confidence` between 30 and 74 | `status: provisional`, **+5 Vulas awarded immediately** so the patient isn't punished, but the row is flagged for end-of-month reconciliation |
-| **Too low** | `confidence < 30` | `status: failed_verification`, no Vulas |
+- `e.stopPropagation()`s so it doesn't toggle the collapsible
+- flips the editor into edit mode and scrolls the section into view
 
-A new `medication_adherence` column `confidence_score numeric` is added to store the value. The previous `pending_review` status is replaced by `provisional`.
+Apply this to every collapsible: Personal Info, Contact, Address, Employment, Medical Aid, Vitals, Allergies/Medication/Conditions, Surgeries, Family History, Next of Kin, Pharmacies, Organ Donor.
 
-## 3. Monthly auto-reconciliation — no doctor involvement
+The existing top-of-page **Edit** button stays; the per-section edit pencils are an additional shortcut.
 
-A new daily **`reconcile-adherence-monthly`** scheduled edge function (runs once per day, processes the previous calendar month on the 1st of each month, and also retroactively on demand):
+## 4. Auto-promote chronic meds into the `prescriptions` table
 
-- For each prescription, gather all `provisional` rows from the month being reconciled.
-- Compute the **average confidence** across those rows.
-- If `avg ≥ 50` → bulk-update them to `status: completed`, set `auto_approved_at = now()`, and add a `reconciliation_note` ("Auto-approved: monthly average confidence {x}% across {n} doses").
-- If `avg < 50` → bulk-update them to `status: failed_verification`, no Vula clawback (Vulas were already paid; we don't punish retroactively — keeps trust intact). Add a soft notification to the patient: *"{n} doses last month couldn't be confirmed clearly. Try to film the moment you swallow next month."*
+In `PatientDetailsEditor.tsx` `handleSave`, after the patient `.update()` succeeds:
 
-New columns on `medication_adherence`: `auto_approved_at timestamptz`, `reconciliation_note text`.
+1. Diff `currentMedications` against the previous saved list.
+2. For each medication where `is_chronic === true`, **upsert** a row into `prescriptions` keyed on `(patient_id, medication, doctor_id)`:
+   - `medication` ← `name`
+   - `dosage` ← composed `"{quantity} × {strength}{units}"`
+   - `frequency` ← `"{times_per_day}× daily"`
+   - `status` ← `"active"` (or `"completed"` if the medication was un-chroniced / deleted)
+   - `doctor_id` ← `auth.uid()` when a practitioner edits; when the patient edits their own self-record, fall back to their primary doctor or skip with a toast.
+3. When a medication is **un-chroniced** or removed, mark the matching `prescriptions` row `status = 'cancelled'`.
 
-Scheduling is done via the existing pg_cron pattern in Supabase (a new migration registers the daily job pointing at the function endpoint with the service-role JWT).
+This sync happens once per save and uses one `upsert` + one `update` call.
 
-## 4. Patient-visible UI
+## 5. Refresh every "current medications" surface
 
-- **Chronic Meds tab** — each prescription row shows a small confidence ring next to today's dose, e.g. "Confidence 82% · Confirmed" or "Confidence 58% · Provisional, will be confirmed at month-end if your average stays above 50%."
-- **Wins and Streaks tab** — new compact line under each month: "{x}/{y} doses confirmed · {avg}% average confidence." If a month was auto-approved by reconciliation, badge it: **"Auto-approved"** in muted teal.
-- **Recapture banner** — when the trigger nulls the baseline, the Chronic Meds card shows: *"{medication} updated — record a new baseline video before your next dose."*
+After save, invalidate the React Query caches that consume this data:
 
-## 5. Privacy copy reinforcement
+- `["chronic-prescriptions", patientId]` — Chronic Meds tab
+- `["medication-adherence", patientId]` — adherence stats
+- `["pill-references", patientId, …]` — baseline references
+- `["patient", patientId]` — patient overview
+- `["patients"]` — patient list
+- `["active-prescriptions", patientId]` — Sessions prescription editor
 
-A small line under the camera in both `PillBaselineCapture` and the daily ingestion view:
-> *"Your video isn't saved. We only keep a short text description and a single still of the tablet."*
+Add a lightweight `medicationSyncBus` (a tiny `EventTarget` in `src/lib/utils.ts`) that emits `"medications-updated"` on save. `MedicationAdherenceTab`, `Sessions`, and `PatientOverview` listen and call `queryClient.invalidateQueries` so views refresh in real time across role layouts.
 
-This sets expectations and matches the implementation (frames-only upload, blob discarded).
+In `src/pages/Sessions.tsx`, convert `fetchActivePrescriptions` to a `useQuery` keyed `["active-prescriptions", patientId]` so it can be invalidated.
+
+## 6. Multi-tablet AI capture *(new)*
+
+When a chronic prescription's `quantity > 1`, the baseline + daily ingestion flow records **one short clip per tablet** so the AI can confirm every dose unit was actually taken.
+
+### Capture orchestrator (in `PillBaselineCapture.tsx` + `MedicationAdherenceTab.tsx` ingestion path)
+
+1. Read `quantity` from the prescription (fallback `1`).
+2. Render a **"Tablet 1 of N"** header above the camera, with an N-segment progress bar.
+3. After each clip is recorded, frames are extracted and sent to `validate-medication-video` with two new payload fields: `tabletIndex` (1-based) and `tabletTotal`.
+4. The edge function returns `detectedTabletCount` (how many tablets it can see in the close-up frames). The orchestrator uses this to:
+   - **Pass** — if `detectedTabletCount >= 1` and ingestion signals match the declared `intake_method`, mark this tablet as captured and prompt: *"Tablet {i} confirmed. Ready for tablet {i+1}? "* with a **Record next tablet** button.
+   - **Multi-detect shortcut** — if `detectedTabletCount >= tabletTotal` in a single clip (patient took all tablets together) and ingestion signals are clear, accept the clip as covering all tablets and skip the remaining steps.
+   - **Retry** — if no tablet is detected, show: *"We couldn't see a tablet. Please try again with the tablet visible before you swallow."*
+5. Only after all `N` tablets are confirmed (or covered by the multi-detect shortcut) does the dose row get written. The combined `confidence_score` is the **average** across all sub-clips.
+
+### Storage rows
+
+A single `medication_adherence` row per dose with two new columns:
+- `tablet_count_expected integer` — the prescription's `quantity` at time of capture
+- `tablet_count_detected integer` — sum of `detectedTabletCount` across sub-clips, capped at expected
+
+If `detected < expected`, status downgrades by one tier (e.g. `completed` → `provisional`) with a `reconciliation_note` explaining the shortfall.
+
+### Edge function changes (`validate-medication-video`)
+
+- New input fields: `tabletIndex`, `tabletTotal`, plus existing `intakeMethod`, `mode`.
+- Gemini prompt extended: *"Count distinct tablets/capsules visible in the close-up frames. Return `detectedTabletCount` (integer)."*
+- Response shape adds `detectedTabletCount` (integer, 0 if none).
+- The four-way decision tree (`completed` / `provisional` / `failed_verification`) runs unchanged on each sub-clip; the orchestrator combines results client-side.
+
+### UI copy
+
+- Baseline intro updated: *"You're prescribed {N} tablets per dose — we'll record each one briefly so we can recognise them later. Your videos aren't saved."*
+- Per-tablet header: **"Tablet {i} of {N}"** with the segmented progress bar.
+- Between-tablet prompt: *"Tablet {i} confirmed ✓ — get the next one ready, then tap Record."*
+- Multi-detect toast: *"We detected all {N} tablets in one clip — you're done."*
+
+## 7. Display
+
+Med list rows render:
+```
+Metformin · 1 × 500 mg · 2× daily   [Current] [Chronic]
+```
+falling back to legacy `dosage` when structured fields are absent.
 
 ## Files touched
 
 | File | Change |
 |---|---|
-| Migration | `prescription_pill_references`: drop `label_image_url`/`label_text_extracted` from the previously-approved set; add `intake_method` (text) + `baseline_pattern_summary` (text). Extend `mark_pill_reference_stale` trigger to also null those two. `medication_adherence`: add `confidence_score numeric`, `auto_approved_at timestamptz`, `reconciliation_note text`; allow `status: 'provisional'`. Register a daily pg_cron job calling `reconcile-adherence-monthly`. |
-| `src/components/rewards/PillBaselineCapture.tsx` | Replace 3-step wizard with: intro → intake method picker → guided video recording → frame extraction → upload frames + close-up still → call `mode: "baseline_capture"`. Discard video blob client-side. |
-| `src/components/rewards/MedicationAdherenceTab.tsx` | Show confidence ring + provisional copy on each dose row; render "video not saved" privacy line; route to baseline when `intake_method`/`baseline_pattern_summary` is null; show recapture banner on staleness. |
-| `src/pages/patient/MyRewards.tsx` (Wins and Streaks tab) | Per-month adherence summary line + "Auto-approved" badge when `auto_approved_at` rows exist. |
-| `supabase/functions/validate-medication-video/index.ts` | `baseline_capture` mode now ingests frames from the full first-dose video, returns `observed_description` (tablet) + `baseline_pattern_summary` (sequence). Ingestion mode switches required/disqualifying signals on `intake_method`, returns `confidence`, applies the new four-way decision tree (`completed` / `provisional` / `failed_verification`). Drops the previous `pending_review` path. |
-| `supabase/functions/reconcile-adherence-monthly/index.ts` *(new)* | Daily job: groups previous-month `provisional` rows per prescription, averages `confidence_score`, flips to `completed` if ≥50% else `failed_verification`; writes `auto_approved_at` and `reconciliation_note`; emits one consolidated patient notification per prescription. |
-| `supabase/config.toml` | Register `reconcile-adherence-monthly` (no `verify_jwt` change needed; in-code service-role check). |
-| `src/integrations/supabase/types.ts` | Auto-regenerated. |
+| `src/hooks/usePatients.ts` | Add `quantity`, `units`, `times_per_day` to `CurrentMedication`. |
+| `src/components/patients/PatientDetailsEditor.tsx` | Structured med form; per-section edit pencils on every `SectionHeader`/Collapsible; chronic→prescriptions sync; query invalidation + event emit on save. |
+| `src/pages/Sessions.tsx` | Convert `fetchActivePrescriptions` to React Query and listen for `medications-updated`. |
+| `src/components/rewards/MedicationAdherenceTab.tsx` | Listen for `medications-updated` and invalidate `chronic-prescriptions`; orchestrate multi-tablet capture loop using prescription `quantity`. |
+| `src/components/rewards/PillBaselineCapture.tsx` | Multi-tablet baseline loop with "Tablet i of N" header, segmented progress, multi-detect shortcut, between-tablet prompts. |
+| `src/components/patients/PatientOverview.tsx` | Listener + invalidate. |
+| `src/lib/utils.ts` | Export `medicationSyncBus` (`EventTarget`). |
+| `supabase/functions/validate-medication-video/index.ts` | Accept `tabletIndex`/`tabletTotal`; return `detectedTabletCount`; extend Gemini prompt to count tablets. |
+| Migration | Add `tablet_count_expected integer` and `tablet_count_detected integer` to `medication_adherence`. |
 
 ## Out of scope
 
-- Doctor-side dashboards for `provisional` doses (no longer needed — auto-reconciliation removes them from the doctor's plate).
-- Vula clawback on failed monthly averages (intentionally not implemented — Vulas already paid stay paid).
-- Storing the actual video — explicitly forbidden by this plan.
-- Multi-pill regimens / weekly pillboxes.
+- Splitting `current_medications` into its own table.
+- Per-time-of-day schedule (morning/noon/evening) — `times_per_day` is a single integer for now.
+- Patient-side ability to mark a med chronic from outside the doctor flow.
+- Distinguishing tablet identities (e.g. red vs white pills) within the same prescription — `detectedTabletCount` is a count only.
 
