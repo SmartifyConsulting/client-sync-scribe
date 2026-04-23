@@ -526,8 +526,8 @@ const completeSession = async (
         try {
           const cert = summaryData.medical_certificate;
           const [patientRes, profileRes, templateRes] = await Promise.all([
-            supabase.from('patients').select('name').eq('id', patientId).maybeSingle(),
-            supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty').eq('id', user.id).maybeSingle(),
+            supabase.from('patients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email').eq('id', patientId).maybeSingle(),
+            supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty, practice_address').eq('id', user.id).maybeSingle(),
             supabase.from('templates').select('id, name, content').eq('user_id', user.id),
           ]);
 
@@ -542,24 +542,39 @@ const completeSession = async (
 
           let certContent: string;
           if (certTemplate) {
+            const fromDate = cert.from_date || today;
+            const toDate = cert.to_date || today;
+            const days = Math.max(1, Math.round((new Date(toDate).getTime() - new Date(fromDate).getTime()) / 86400000) + 1);
             const replacements: Record<string, string> = {
               'ClientName': patientRecord?.name || 'Unknown',
               'PatientName': patientRecord?.name || 'Unknown',
               'Patient Name': patientRecord?.name || 'Unknown',
               'Date': today,
+              'IssuedDate': today,
               'SessionDate': today,
               'DoctorName': docProfile?.full_name || '',
+              'DoctorNumber': docProfile?.doctor_number || '',
               'PracticeNumber': docProfile?.practice_number || '',
               'RegistrationNumber': docProfile?.doctor_number || '',
+              'PracticeAddress': docProfile?.practice_address || '',
+              'PatientAddress': (patientRecord as any)?.physical_address || (patientRecord as any)?.address || '',
+              'MedicalAid': (patientRecord as any)?.medical_aid || '',
+              'MedicalAidNumber': (patientRecord as any)?.medical_aid_number || '',
+              'IDNumber': (patientRecord as any)?.id_passport_number || '',
+              'DOB': (patientRecord as any)?.dob || '',
+              'Phone': (patientRecord as any)?.phone || '',
+              'Email': (patientRecord as any)?.email || '',
               'Diagnosis': cert.diagnosis || '',
-              'FromDate': cert.from_date || today,
-              'ToDate': cert.to_date || today,
+              'FromDate': fromDate,
+              'ToDate': toDate,
+              'Days': String(days),
               'Reason': cert.reason || '',
             };
             certContent = certTemplate.content;
             for (const [key, value] of Object.entries(replacements)) {
               certContent = certContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
             }
+            certContent = certContent.replace(/\[[A-Za-z][A-Za-z0-9_ -]*\]/g, '___');
           } else {
             certContent = `<h2>Medical Certificate</h2>
 <p><strong>Date:</strong> ${today}</p>
