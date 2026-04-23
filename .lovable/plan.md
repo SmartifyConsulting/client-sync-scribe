@@ -1,96 +1,115 @@
 
 
-# Plan: SessionDetail typography to 11–12px scale + Doctor private notes
+# Plan: Show Dr Allie's new sessions on Shannon's profile + Fill invoice template fields
 
-Two scoped changes to `/sessions/:id`. The system-wide style question is answered briefly at the end.
+Two real bugs, both confirmed against the DB.
 
-## 1. Bring SessionDetail to the 11–12px scale
+## 1. New sessions don't appear on the patient profile
 
-`src/pages/SessionDetail.tsx` still uses the legacy 14–24px sizes (`text-2xl`, `text-sm`, `font-semibold` defaults). Standardise per the project's compact scale used everywhere else (Round Table, Patient Profile, Documents).
+**Root cause confirmed.** Both of Dr Allie's 4/23 sessions for Shannon Kennedy exist in the DB with `status='completed'` and proper transcripts. They're NOT being filtered out. They're not appearing because **`useSessions(id)` only fetches once on mount** and there's no realtime subscription or refetch trigger:
 
-| Section | Element | Current | New |
-|---|---|---|---|
-| Back link | text | `text-sm` | `text-[11px]` |
-| Header | Page title `h1` | `text-2xl font-bold` | `text-[16px] font-semibold` |
-| Header | Icon tile | `h-14 w-14` / `h-7 w-7` | `h-10 w-10` / `h-5 w-5` |
-| Header | Meta line (time, duration) | `text-sm` | `text-[11px]` |
-| Header | Status pill | `text-xs` | `text-[10px]` |
-| Header | Patient link | `text-sm` | `text-[12px]` |
-| Header | Delete button | `size="sm"` default text | add `text-[11px]` |
-| Quick Actions card | `h2` | default (~16px) | `text-[12px] font-semibold` |
-| Quick Actions card | Buttons | `text-sm h-10` | `text-[11px] h-9` (icons stay `h-4 w-4`, gap `gap-1.5`) |
-| AI Summary | `h2` + subtitle | default + `text-xs` | `text-[12px] font-semibold` + `text-[11px]` |
-| AI Summary | Icon tile | `h-10 w-10` / `h-5 w-5` | `h-8 w-8` / `h-4 w-4` |
-| AI Summary | Translate Select trigger + items | `text-xs h-8` | `text-[11px] h-8` |
-| AI Summary | Body paragraph | default (~16px) | `text-[12px] leading-relaxed` |
-| Session Notes | Header `h2` + subtitle | default + `text-xs` | `text-[12px] font-semibold` + `text-[11px]` |
-| Session Notes | Audio / Transcript / Notes labels | `text-sm font-semibold` | `text-[11px] font-semibold uppercase tracking-wide` |
-| Session Notes | Transcript paragraphs | default | `text-[12px]` |
-| Session Notes | Notes paragraph | default | `text-[12px]` |
-| Session Notes | Amber retention alert | `text-xs` | `text-[11px]` |
-| Session Notes | Download Select trigger | `text-xs h-8` | `text-[11px] h-8` |
-| Session Documents | `h2` + subtitle | default + `text-xs` | `text-[12px] font-semibold` + `text-[11px]` |
-| Session Documents | Row name | `text-sm font-medium` | `text-[12px] font-semibold` |
-| Session Documents | DRAFT badge | `text-[10px]` | keep |
-| Session Documents | Action buttons | `h-7 w-7 / h-3.5` | keep |
-| Action Points | `h2` + subtitle | default + `text-xs` | `text-[12px] font-semibold` + `text-[11px]` |
-| Action Points | List item | default | `text-[12px]` |
-| Empty state | text | default | `text-[11px]` |
-
-Card padding stays `p-6` desktop, but icon tile shrinks so the card visually rebalances. No structural changes — only typographic scale.
-
-## 2. Doctor-only Private Notes section
-
-These are notes a doctor writes for themselves on a session — never shown to other doctors or to the patient.
-
-### Schema
-
-New nullable column on `public.sessions`:
-
-```sql
-ALTER TABLE public.sessions ADD COLUMN private_notes text;
+```ts
+useEffect(() => { fetchSessions(); }, [patientId]);   // runs once per patient
 ```
 
-No new RLS needed: the existing session policies are already owner-only (`auth.uid() = user_id` for SELECT/UPDATE/DELETE; INSERT WITH CHECK same). A second doctor with `doctor_patient_access` to the patient cannot read this row at all because no cross-doctor SELECT policy exists on `sessions`. So a column on this table is automatically private to the recording doctor.
+When a doctor records a session from Shannon's profile, the recording flow uses a *different* React component that calls `useSessions()` (no patientId) — so its `completeSession()` updates a local `sessions` array in *that* component's hook instance. The profile page's hook instance never hears about the new row. Hard refresh works because the mount fetch re-runs.
 
-**Documents/Round Table comparison:** I confirmed `documents` and `round_table_notes` are the only tables that intentionally expose data across doctors via additional policies. `sessions` does not — perfect for private notes.
+**Fix.** In `src/hooks/useSessions.ts` `useSessions(patientId)`:
 
-### UI
+1. Add a Supabase realtime subscription on the `sessions` table filtered to the relevant rows. When `patientId` is set, listen for `INSERT`/`UPDATE`/`DELETE` events with `filter: 'patient_id=eq.<patientId>'`; when no `patientId`, filter by `user_id=eq.<currentUser>`. On any change → call `fetchSessions()` (debounced trivially by React state).
+2. Also re-`fetchSessions()` when the tab regains focus (`window.addEventListener('focus', …)`) — handles the case where the user records elsewhere then comes back to the tab.
+3. Keep the existing local `setSessions` updates inside `createSession`/`completeSession`/`updateSession` for the recording flow's own immediacy.
 
-New card placed immediately below the public **Session Notes** card (and above Session Documents), so it reads as the private companion to the shared notes.
+Cleanup the subscription + focus listener on unmount.
 
-- Card: `rounded-xl border border-amber-500/40 bg-amber-50/30 dark:bg-amber-950/10 p-6` — amber border to visually flag "private".
-- Header row:
-  - Icon tile `h-8 w-8 rounded-lg bg-amber-500/15`, `Lock` icon (lucide) `h-4 w-4 text-amber-600`.
-  - `h2` "Private Notes" — `text-[12px] font-semibold`.
-  - Subtitle `text-[11px] text-muted-foreground`: "Only visible to you. Not shared with the patient or other doctors."
-  - Right side: Edit / Save / Cancel buttons (`size="sm" text-[11px]`).
-- Body:
-  - Read mode (default when not editing and `private_notes` set): `<p className="text-[12px] whitespace-pre-wrap text-foreground">{session.private_notes}</p>`.
-  - Empty + not editing: muted placeholder line "No private notes yet — click Edit to add notes only you can see." (`text-[11px] text-muted-foreground italic`).
-  - Edit mode: `<Textarea text-[12px] min-h-[140px]>` bound to a local `privateNotesDraft` state; Save calls `supabase.from('sessions').update({ private_notes: privateNotesDraft }).eq('id', id)`, refreshes the session via the existing `useSession` hook (add a `refetch` or invalidate), and toasts "Private notes saved". Cancel discards the draft.
+This also fixes the symmetrical case where Round Table notes update or another tab adds a session.
 
-Always rendered (even when `session.private_notes` is empty) so the doctor can add notes from any session view.
+## 2. Invoice (and other auto-generated documents) preview shows raw `[…]` placeholders
 
-### Hook changes
+**Root cause confirmed.** Pulled the latest auto-created invoice doc from the DB — its stored `content` literally contains `[DoctorNumber]`, `[InvoiceNumber]`, `[InvoiceDate]`, `[PatientAddress]`, `[MedicalAid]`, `[MedicalAidNumber]`, `[Services]`, `[TotalAmount]`, `[BankDetails]`, `[DueDate]`. The auto-fill replacement map in `useSessions.ts` (line 700–708) only includes `ClientName`, `PatientName`, `Date`, `SessionDate`, `DoctorName`, `PracticeNumber`, `PracticeAddress` — so every other placeholder survives unreplaced and shows up bare in the preview.
 
-`src/hooks/useSessions.ts` → make sure `useSession` returns `private_notes` (Supabase types regenerate automatically once the column exists; the hook uses `select('*')` patterns so no change needed there). Add a small `refetch()` returned from `useSession` so the new card can refresh after save without a full page reload. If `useSession` already exposes a refresher, reuse it; otherwise add one tiny `setRefreshKey` pattern.
+The same gap exists, to a lesser extent, in the prescription, medical-certificate, referral, and admission auto-fill blocks.
 
-### Files touched
+**Fix.** Beef up the replacement maps in `useSessions.ts` so they cover every common token the project's six default templates ship with. Also pull the additional patient fields (address, medical_aid, medical_aid_number, id_passport_number) and profile fields (`doctor_number`, `practice_address`) that are already in the DB.
+
+### Invoice block (lines 680–755) — biggest impact
+
+Extend the patient & profile selects:
+
+```ts
+supabase.from('patients')
+  .select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number')
+  .eq('id', patientId).maybeSingle(),
+supabase.from('profiles')
+  .select('full_name, practice_number, doctor_number, practice_address, default_currency, bank_details')
+  .eq('id', user.id).maybeSingle(),
+```
+
+(`bank_details` / `default_currency` may not exist on `profiles` — guard with `as any` and `?? ''`.)
+
+Generate a real invoice number once: `INV-YYYYMM-XXXXX` (mirror `InvoiceEditor.generateInvoiceNumber`). Build a default `Services` line using `summaryData?.invoice?.line_items` if present, otherwise a single "Consultation - <today>" row. Compute `TotalAmount` from those line items, fall back to `summaryData?.invoice?.total` or "[To be completed]" when no value is given.
+
+Replacement map becomes:
+
+```ts
+const todayLong = new Date(today).toLocaleDateString();
+const replacements: Record<string, string> = {
+  ClientName: patientName, PatientName: patientName, 'Patient Name': patientName,
+  Date: todayLong, SessionDate: todayLong, InvoiceDate: todayLong,
+  DueDate: dueDateLong,
+  DoctorName: docProfile?.full_name || '',
+  DoctorNumber: docProfile?.doctor_number || '',
+  RegistrationNumber: docProfile?.doctor_number || '',
+  PracticeNumber: docProfile?.practice_number || '',
+  PracticeAddress: docProfile?.practice_address || '',
+  PatientAddress: patientRecord?.physical_address || patientRecord?.address || '',
+  MedicalAid: patientRecord?.medical_aid || '',
+  MedicalAidNumber: patientRecord?.medical_aid_number || '',
+  Services: servicesLine,           // multi-line; preserves newlines
+  TotalAmount: formattedTotal,      // e.g. "R 0.00" (uses default_currency or ZAR)
+  BankDetails: (docProfile as any)?.bank_details || '',
+  InvoiceNumber: generatedInvoiceNumber,
+};
+```
+
+Apply with the existing regex loop. Also write the same `invoice_number` and `total` into a real `invoices` row (currently only the `documents` row is created), so the auto-generated invoice is queryable from the Invoices admin page too.
+
+### Prescription / Medical Cert / Referral / Admission blocks
+
+Add the missing common tokens that templates typically use. Minimal additions to each existing map:
+
+- All four blocks: add `DoctorNumber` (alias of `RegistrationNumber`), `PracticeAddress`, `PatientAddress`, `MedicalAid`, `MedicalAidNumber`, `IDNumber`, `DOB`, `Phone`, `Email`. Pull the matching extra columns in each `supabase.from('patients').select(...)` call.
+- Prescription: `Allergies`, `Repeats`, `Pharmacy` (from `patients.pharmacy_name`).
+- Medical Cert: `FromDate`, `ToDate`, `Reason`, `Diagnosis` (already there); add `IssuedDate`, `Days` (computed from from/to).
+- Referral: add `ReferringDoctor` (= DoctorName), `Specialty` (`profile.specialty`).
+- Admission: already covers most; add `PracticeAddress`, `PatientAddress`, `MedicalAid`, `MedicalAidNumber`.
+
+This is a one-pass extension of each replacement-map literal — no structural change.
+
+### Generic fallback for any unmatched placeholder
+
+After the replacement loop, run one final pass:
+
+```ts
+content = content.replace(/\[[A-Za-z][A-Za-z0-9_ -]*\]/g, '___');
+```
+
+So if a doctor invents a new template token we don't know about, it shows a fillable underscore line in the preview rather than the literal `[Foo]` syntax. Apply this in all five blocks.
+
+### Effect on existing rows
+
+The two stale invoice docs already in the DB will keep showing the placeholders — those were generated before the fix. We can either (a) leave them (the user already sees the fresh invoices going forward) or (b) add a one-time SQL migration that deletes auto-draft invoice/prescription docs created in the last 24h with `is_draft=true` so the user can re-run a session if they want clean ones. Recommend **(a)** — non-destructive — and surface a small toast when the user opens an old broken doc: "Older draft — re-create from session for filled values." (Actually, simplest: just leave them. Going forward all new ones are correct.)
+
+## Files touched
 
 | File | Change |
 |---|---|
-| `supabase/migrations/<new>.sql` | `ALTER TABLE public.sessions ADD COLUMN private_notes text;` |
-| `src/hooks/useSessions.ts` | Expose a `refetch` from `useSession` (small additive change). |
-| `src/pages/SessionDetail.tsx` | Apply the typography table above; add the Private Notes card with edit/save/cancel logic and `Lock` icon import. |
-
-## On the system-wide consistency question
-
-There's no enforced design-token layer for typography in this project — `STYLE_MANIFEST.md` covers spacing/layout but doesn't fix a numeric font scale, so older pages drifted to Tailwind defaults (`text-sm`, `text-2xl`) while newer pages use the explicit `text-[11px]`/`text-[12px]` pattern. A real fix is a follow-up: add a typography section to `STYLE_MANIFEST.md` (e.g. body 12px, label 11px, page title 16px, section title 12px-semibold), and a one-time sweep across the remaining legacy pages. **Not done in this task** — call it out and tackle as its own pass once you confirm the scale you want canonised.
+| `src/hooks/useSessions.ts` | Add realtime subscription + `focus` refetch in `useSessions(patientId)`. Extend invoice/prescription/cert/referral/admission replacement maps + their patient/profile selects + the generic `[Token]` → `___` fallback. Insert a real `invoices` row in the invoice block. |
 
 ## Out of scope
 
-- Sweeping every other legacy page to the 11–12px scale (separate, larger pass).
-- Sharing/printing private notes — they intentionally never leave the doctor's view.
-- Including private notes in the AI summary or transcripts.
+- Backfilling old auto-generated documents that already have placeholders (leave the historical drafts alone).
+- Touching `summarize-session` edge function (the placeholders bug is on the *consumer* side, not the AI side — the AI doesn't put `[Token]` strings in; the template the user designed does).
+- Realtime for `documents`/`todos` on the profile page (separate request if the user reports those going stale).
+- Reworking how invoice line items are entered manually in `InvoiceEditor` — unchanged.
 
