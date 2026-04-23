@@ -1,87 +1,74 @@
 
 
-# Plan: Make Shannon's chronic meds visible and actionable on Rewards
+# Plan: Bug tracker on mobile + chronic meds appearing on Rewards
 
-## Root cause
+## Issue 1 — Bug tracker icon missing on mobile
 
-Shannon **does** have 3 active chronic prescriptions (Sertra 50mg, melatonin 100mg, Dormanoct) on patient record `bc6973cc...`. The network logs confirm they load successfully on `/patient/rewards`. The problem is **discoverability** — they live behind a separate "Chronic Meds" tab that:
+**Root cause:** `PatientAppLayout.tsx` has a hand-rolled mobile top bar (lines 130–282) that only renders Calendar, Bell, and Avatar buttons. The `TopBarIcons` component (which contains the green Bug/Report button) is rendered only inside the **desktop-only** wrapper at line 286–288 (`hidden md:flex`). The doctor's `MobileHeader.tsx` already uses `TopBarIcons` correctly — only the patient layout is missing it.
 
-1. Only appears when `patientRecord.is_chronic === true`, and the wrong record can be picked when a user has multiple patient rows.
-2. Is not opened by default — the page lands on "Overview", which has zero medication context, so it looks empty.
-3. Has no surfacing on the Overview hero — patients don't know to switch tabs.
+**Fix:** Replace the hand-rolled mobile header in `PatientAppLayout.tsx` with `<TopBarIcons />` so patients see the same icon set as doctors: **Bug · Calendar · Mic · Bell · Avatar**. The existing desktop `TopBarIcons` at line 287 stays. The mobile-only Calendar/Bell/Avatar buttons currently rendered in the `<header>` are removed because `TopBarIcons` already provides all of them (and adds the Bug button + Mic).
 
-Also, Shannon now has **3 patient records** (the editor's chronic→prescriptions sync from the previous plan keeps creating copies instead of consolidating), which makes the patient-record-picker brittle.
+The mobile header stays sticky and keeps the logo on the left + icons on the right. No behavior change for desktop.
 
-## Fix 1 — Always land on Chronic Meds when patient is chronic
+## Issue 2 — Lilly Fluoxetine, Voxra, Nuvigil don't show a baseline tracker
 
-In `src/pages/patient/MyRewards.tsx`:
+**Root cause:** Confirmed in the database:
 
-- Change the default tab: when the resolved `patientRecord?.is_chronic === true`, initialise `activeTab` to `"chronic-meds"` instead of `"overview"`.
-- Persist last-viewed tab in `localStorage` so navigation between sessions remembers their preference, but for a chronic patient with **at least one active prescription** the first visit defaults to Chronic Meds.
+- Shannon's `patients.current_medications` JSON contains 6 chronic meds: Nuvigil, Metformin, Voxra, Amlodipine, Atorvastatin, Lilly Fluoxetine — all flagged `is_chronic: true`.
+- Her `prescriptions` table has only **3** rows: Sertra, melatonin, Dormanoct.
+- The Rewards "Chronic Meds" tab (`MedicationAdherenceTab`) queries `prescriptions` only — it has no awareness of `current_medications`.
+- The chronic→prescriptions sync described in the previous approved plan was **never wired into `handleSave`** (the save handler in `PatientDetailsEditor.tsx` contains zero references to the `prescriptions` table).
 
-## Fix 2 — Surface a "Today's medications" card on the Overview tab
+So when Shannon adds a chronic med to her profile, it lands in `patients.current_medications` but never propagates to `prescriptions`, so no baseline-capture row ever appears.
 
-So the meds are visible even without changing tabs. In `MyRewards.tsx` Overview pane, add a new `TodaysMedicationsCard` that:
+**Fix — three parts:**
 
-- Queries `prescriptions` for `patient_id = patientRecord.id`, `status = 'active'`.
-- Shows each med as a row: name · dosage · frequency, plus a primary **Take Medication** button (or **Set up baseline** when no `prescription_pill_references` row yet).
-- Clicking the button switches `activeTab` to `"chronic-meds"` and sets a `?focus={rxId}` query param so `MedicationAdherenceTab` auto-scrolls and opens the recorder for that prescription.
-- Empty state: "No active chronic medications. Ask your doctor to add one."
+### A. Backfill the missing prescriptions for Shannon (one-off migration)
 
-This card sits at the top of Overview, above "Recent Rewards", so a chronic patient sees their meds the moment Rewards opens — even if the default-tab change above is reverted later.
+Insert one `prescriptions` row per chronic med in her `current_medications` that doesn't already exist (matching by lowercase trimmed `medication` name on `patient_id = bc6973cc...`):
 
-## Fix 3 — Robust patient-record selection
+| medication | dosage | frequency | status | doctor_id |
+|---|---|---|---|---|
+| Nuvigil | 150 mg | once daily | active | her connected doctor |
+| Voxra | 300 mg | once daily | active | her connected doctor |
+| Lilly Fluoxetine | 20 × 2 | once daily | active | her connected doctor |
+| Metformin | 500mg BD | once daily | active | her connected doctor |
+| Amlodipine | 5mg OD | once daily | active | her connected doctor |
+| Atorvastatin | 10mg nocte | once daily | active | her connected doctor |
 
-The current selector in `MyRewards.tsx` (lines 108–136) prefers the patient record that has active prescriptions, then any chronic one, then newest. This is correct but fragile when duplicates exist. Tighten it:
+`doctor_id` resolves from the most recent `doctor_patient_access` row for `patient_user_id = 96740682-…`; if none, falls back to the doctor that owns the existing 3 prescriptions (`54fa34d8-…`).
 
-- Run **one** query that joins-in-application: select all of the user's patient rows, plus all active prescriptions for those rows, plus all `medication_adherence` rows for today. Pick the patient record with the highest count of active prescriptions; tie-break by most recent adherence activity, then `is_chronic`, then newest `created_at`.
-- Add a one-line dev console log (gated by `import.meta.env.DEV`) showing which patient_id was chosen and why, so future "I can't see my meds" reports are diagnosable in 5 seconds.
+After insert, all 9 chronic meds (the 3 existing + 6 new) appear under **Chronic Meds** with the **"Set up baseline"** button ready to capture.
 
-The same picker is exposed as a tiny hook `useMyChronicPatientId()` in `src/hooks/usePatientRewards.ts` so `MyRewards`, `TodaysMedicationsCard`, and `MedicationAdherenceTab` all agree on the chosen record.
+### B. Wire the chronic→prescriptions sync into `PatientDetailsEditor.handleSave`
 
-## Fix 4 — Prevent duplicate patient records on signup/edit
+So this never happens again. After the patient `.update()` succeeds:
 
-Audit `src/components/patients/PatientDetailsEditor.tsx` `handleSave` (the chronic→prescriptions sync added previously) to ensure it does **not** create a new `patients` row when the patient edits their own self-record. The save path must always `update` an existing row matched by `id`, never `insert`. Add an explicit guard:
+1. For every entry in `currentMedications` with `is_chronic === true`, **upsert** a `prescriptions` row keyed on `(patient_id, lower(trim(medication)))`:
+   - `medication` ← `name`
+   - `dosage` ← composed `"{quantity} × {strength}{units}"` (or legacy `dosage` string when structured fields absent)
+   - `frequency` ← `"{times_per_day}× daily"` (default `"once daily"`)
+   - `status` ← `"active"`
+   - `doctor_id` ← `auth.uid()` if a doctor is editing; otherwise the patient's primary connected doctor (most recent active `doctor_patient_access`); if none, skip the upsert and toast: *"Add a doctor to your profile so chronic meds can be tracked under Rewards."*
+2. For every `prescriptions` row whose medication name is no longer present (or is no longer `is_chronic`), `update status = 'cancelled'`.
+3. Emit `medicationSyncBus` `"medications-updated"` (already implemented) so `MyRewards`, `MedicationAdherenceTab`, `TodaysMedicationsCard`, `Sessions`, and `PatientOverview` invalidate their query caches and refresh.
 
-```ts
-if (!patientId) {
-  toast({ title: "Cannot save without a patient record", variant: "destructive" });
-  return;
-}
-```
+### C. Show a friendly empty-state hint when sync is blocked
 
-Then add a one-off cleanup migration that:
-- For each `patient_user_id`, keeps the row that has the most prescriptions (or, if tied, the oldest), and merges `current_medications`, `chronic_medications`, `is_chronic`, and `conditions_diagnoses` from the duplicates into it.
-- Reassigns any `prescriptions`, `medication_adherence`, `health_photos`, `documents`, `appointments`, `hospital_admissions`, `patient_rewards`, `image_comparisons`, `invoices`, `appointment_requests`, `emoticon_messages`, and `messages` rows that point at a duplicate `patient_id` over to the surviving row.
-- Soft-deletes the duplicates by setting `status = 'archived'` (rather than `DELETE`, to preserve history).
-
-For Shannon specifically the cleanup will collapse her 3 records (`30cadfb3`, `bc6973cc`, `a1b2c3d4`) down to `bc6973cc` (the one with prescriptions), and her chronic meds will become unambiguous everywhere.
-
-## Fix 5 — Show the legacy `dosage` clearly
-
-Two of Shannon's prescriptions have empty/odd `dosage` ("Dormanoct" has none; "Sertra" shows "daily, Monday to Friday" inside `frequency`). In the Chronic Meds list and the new Overview card, render:
-
-```
-Sertra · 50mg · daily, Monday to Friday   [Active] [Chronic]
-Dormanoct · — · once daily                [Active] [Chronic]
-```
-
-with an em-dash for missing dosage and a small **"Update dosage"** link (visible only to the patient on her own record) that opens the `PatientDetailsEditor` medication edit dialog focused on that med.
+If the patient has chronic meds in their profile but no connected doctor to attribute prescriptions to, the Rewards "Chronic Meds" tab shows a one-line hint above the prescription list: *"Some of your chronic meds aren't tracked yet — add your doctor under My Healthcare so we can set up baseline capture."* with a button linking to `/patient/details?section=care`.
 
 ## Files touched
 
 | File | Change |
 |---|---|
-| `src/pages/patient/MyRewards.tsx` | Default to `chronic-meds` tab when chronic; add `TodaysMedicationsCard` to Overview; use new `useMyChronicPatientId` hook. |
-| `src/components/rewards/TodaysMedicationsCard.tsx` *(new)* | List of today's chronic prescriptions with **Take Medication** / **Set up baseline** buttons, jumps to Chronic Meds tab. |
-| `src/hooks/usePatientRewards.ts` | New `useMyChronicPatientId()` hook with robust selection + dev log. |
-| `src/components/rewards/MedicationAdherenceTab.tsx` | Honour `?focus={rxId}` query param: scroll to that prescription card and open recorder/baseline if pending. Render `dosage` with em-dash fallback. |
-| `src/components/patients/PatientDetailsEditor.tsx` | Insert/update guard so patients can never accidentally create duplicate `patients` rows. |
-| Migration | One-off cleanup: dedupe `patients` per `patient_user_id`, reassign all child rows to the survivor, archive the rest. |
+| `src/components/layout/PatientAppLayout.tsx` | Replace hand-rolled mobile Calendar/Bell/Avatar buttons with `<TopBarIcons />` so the green Bug button (and Mic) appears on mobile. Desktop layout unchanged. |
+| `src/components/patients/PatientDetailsEditor.tsx` | Wire chronic→prescriptions upsert + cancellation into `handleSave`; emit `medicationSyncBus`. |
+| `src/components/rewards/MedicationAdherenceTab.tsx` | Add empty-state hint when patient has chronic meds in profile but no doctor connected. |
+| Migration | One-off backfill of Shannon's 6 missing chronic prescriptions into `prescriptions`. |
 
 ## Out of scope
 
-- Removing the Chronic Meds tab — keep it for a focused workspace and for the monthly summary on Wins & Streaks.
-- Doctor-side tooling to manage patient-record duplicates (covered by the migration for now; we can add an admin tool later if it recurs).
-- Backfilling missing `dosage`/`frequency` on existing prescriptions — surfaced via the "Update dosage" link instead.
+- Changing the doctor-side mobile header (already uses `TopBarIcons`).
+- Auto-creating baseline pill references — patient still taps "Set up baseline" per med.
+- Backfilling prescriptions for other patients — only Shannon was reported. The `handleSave` fix prevents new occurrences for everyone going forward; if other patients are affected we can run a project-wide backfill later.
 
