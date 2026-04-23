@@ -1,0 +1,1 @@
+ALTER TABLE public.sessions ADD COLUMN private_notes text;

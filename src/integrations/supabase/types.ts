@@ -2115,6 +2115,7 @@ export type Database = {
           id: string
           notes: string | null
           patient_id: string
+          private_notes: string | null
           started_at: string
           status: string
           summary: string | null
@@ -2132,6 +2133,7 @@ export type Database = {
           id?: string
           notes?: string | null
           patient_id: string
+          private_notes?: string | null
           started_at?: string
           status?: string
           summary?: string | null
@@ -2149,6 +2151,7 @@ export type Database = {
           id?: string
           notes?: string | null
           patient_id?: string
+          private_notes?: string | null
           started_at?: string
           status?: string
           summary?: string | null
