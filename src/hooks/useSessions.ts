@@ -732,7 +732,7 @@ const completeSession = async (
       // Auto-generate invoice after session completion
       if (patientId) {
         try {
-          const [patientRes, profileRes, templateRes] = await Promise.all([
+          const [patientRes, profileRes, templateRes, servicePricesRes, priorSessionsRes] = await Promise.all([
             supabase.from('patients')
               .select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email')
               .eq('id', patientId).maybeSingle(),
@@ -740,11 +740,21 @@ const completeSession = async (
               .select('full_name, practice_number, doctor_number, practice_address, specialty')
               .eq('id', user.id).maybeSingle(),
             supabase.from('templates').select('id, name, content').eq('user_id', user.id),
+            supabase.from('service_prices')
+              .select('id, service_name, default_price, currency, is_first_consultation')
+              .eq('user_id', user.id),
+            supabase.from('sessions')
+              .select('id', { count: 'exact', head: true })
+              .eq('patient_id', patientId)
+              .eq('user_id', user.id),
           ]);
 
           const patientRecord = patientRes.data;
           const docProfile = profileRes.data;
           const doctorTemplates = templateRes.data || [];
+          const allServicePrices = servicePricesRes.data || [];
+          const isFirstConsultation = (priorSessionsRes.count || 0) <= 1; // counts current session
+
           const today = new Date().toISOString().split('T')[0];
           const todayLong = new Date(today).toLocaleDateString();
           const dueDate = new Date(Date.now() + 30 * 86400000);
@@ -757,14 +767,39 @@ const completeSession = async (
           const rand = String(Math.floor(Math.random() * 100000)).padStart(5, '0');
           const generatedInvoiceNumber = `INV-${yyyymm}-${rand}`;
 
+          // Currency code → symbol mapping (matches InvoiceEditor)
+          const currencySymbol = (code: string): string => {
+            const map: Record<string, string> = {
+              ZAR: 'R', USD: '$', EUR: '€', GBP: '£',
+              BWP: 'P', NAD: 'N$', SZL: 'E', LSL: 'M',
+            };
+            return map[code?.toUpperCase()] || code || 'R';
+          };
+
+          // Pick a default service price as a fallback when AI didn't extract billing.
+          const pickDefaultService = () => {
+            if (allServicePrices.length === 0) return null;
+            if (isFirstConsultation) {
+              const firstConsult = allServicePrices.find((s: any) => s.is_first_consultation);
+              if (firstConsult) return firstConsult;
+            }
+            const general = allServicePrices.find((s: any) =>
+              /general\s*consultation|^consultation$/i.test(s.service_name || '')
+            );
+            if (general) return general;
+            return allServicePrices[0];
+          };
+
           // Build services line + total from extracted invoice
           const inv = (summaryData?.invoice as any) || {};
           const lineItems: any[] = Array.isArray(inv.line_items) ? inv.line_items
             : Array.isArray(inv.items) ? inv.items
             : [];
-          const currency = inv.currency || 'R';
+          let currency = inv.currency || 'R';
           let computedTotal = 0;
           let servicesLine: string;
+          let plainDescription: string;
+
           if (lineItems.length > 0) {
             servicesLine = lineItems.map((li: any) => {
               const desc = li.description || li.name || 'Service';
@@ -774,10 +809,24 @@ const completeSession = async (
               computedTotal += lineTotal;
               return `${desc} (x${qty}) - ${currency} ${lineTotal.toFixed(2)}`;
             }).join('<br/>');
+            plainDescription = lineItems.map((li: any) => li.description || li.name || 'Service').join(', ');
           } else {
-            servicesLine = `Consultation - ${todayLong}`;
-            computedTotal = Number(inv.total || 0);
+            // No AI line items — fall back to the doctor's default service price.
+            const defaultService = pickDefaultService();
+            if (!defaultService) {
+              // No service prices configured at all — skip auto-invoice creation entirely.
+              toast({
+                title: 'Auto-invoice skipped',
+                description: 'No default service price configured. Set one in Settings to enable auto-invoicing.',
+              });
+              return;
+            }
+            currency = currencySymbol(defaultService.currency);
+            computedTotal = Number(defaultService.default_price || 0);
+            servicesLine = `${defaultService.service_name} - ${currency} ${computedTotal.toFixed(2)}`;
+            plainDescription = defaultService.service_name;
           }
+
           const formattedTotal = computedTotal > 0
             ? `${currency} ${computedTotal.toFixed(2)}`
             : (inv.total ? `${currency} ${Number(inv.total).toFixed(2)}` : '___');
@@ -856,9 +905,7 @@ const completeSession = async (
               patient_id: patientId,
               session_id: sessionId,
               invoice_number: generatedInvoiceNumber,
-              description: lineItems.length > 0
-                ? lineItems.map((li: any) => li.description || li.name || 'Service').join(', ')
-                : `Consultation - ${todayLong}`,
+              description: plainDescription,
               amount: computedTotal || 0,
               due_date: dueDateISO,
               status: 'pending',
