@@ -1019,6 +1019,54 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
         onOpenChange={setShowCompareDialog}
         patientId={patientIds[0]}
       />
+
+      {/* Delete confirmation */}
+      <Dialog open={!!docToDelete} onOpenChange={(open) => !open && setDocToDelete(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete this document?</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. {docToDelete?.name ? `"${docToDelete.name}"` : "The document"} will be permanently removed.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setDocToDelete(null)} disabled={isDeleting}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={isDeleting}
+              onClick={async () => {
+                if (!docToDelete) return;
+                setIsDeleting(true);
+                try {
+                  if (docToDelete.mediaUrl) {
+                    const marker = "/patient-media/";
+                    const idx = docToDelete.mediaUrl.indexOf(marker);
+                    if (idx !== -1) {
+                      const path = docToDelete.mediaUrl.substring(idx + marker.length).split("?")[0];
+                      try {
+                        await supabase.storage.from("patient-media").remove([path]);
+                      } catch {}
+                    }
+                  }
+                  const { error } = await supabase.from("documents").delete().eq("id", docToDelete.id);
+                  if (error) throw error;
+                  toast({ title: "Document deleted" });
+                  setDocToDelete(null);
+                  fetchAll();
+                } catch (err: any) {
+                  toast({ title: "Delete failed", description: err.message, variant: "destructive" });
+                } finally {
+                  setIsDeleting(false);
+                }
+              }}
+            >
+              {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
