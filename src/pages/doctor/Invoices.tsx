@@ -1690,6 +1690,58 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
         </div>
       )}
 
+      {/* HTML Preview Modal (uses buildInvoiceHtml renderer) */}
+      {previewHtml && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="relative w-full max-w-4xl max-h-[92vh] overflow-hidden rounded-xl border border-primary bg-card shadow-lg flex flex-col">
+            <div className="flex items-center justify-between border-b border-border p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <Eye className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">{previewHtml.title}</h2>
+                  <p className="text-xs text-muted-foreground">Invoice preview</p>
+                </div>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setPreviewHtml(null)}>
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto bg-muted/30 p-4">
+              <iframe
+                title={previewHtml.title}
+                srcDoc={previewHtml.html}
+                className="w-full h-[70vh] bg-white rounded-lg border border-border"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2 border-t border-border p-4">
+              <Button variant="outline" onClick={() => setPreviewHtml(null)}>
+                Close
+              </Button>
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={() => {
+                  const w = window.open("", "_blank");
+                  if (w) {
+                    w.document.write(previewHtml.html);
+                    w.document.close();
+                    w.focus();
+                    setTimeout(() => w.print(), 300);
+                  }
+                }}
+              >
+                <Download className="h-4 w-4" />
+                Print / Save PDF
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* View Invoice Modal - Template Format */}
       {viewingInvoice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">

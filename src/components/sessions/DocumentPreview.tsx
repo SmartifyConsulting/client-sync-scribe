@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { X, Eye, Printer, Mail, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { printDocument } from "@/utils/documentExport";
 import { HeaderFooterTemplate } from "@/hooks/useHeaderFooterTemplates";
 import { renderFormattedContent } from "@/utils/documentFormatting";
+import { fillDocumentPlaceholders } from "@/lib/fillDocumentPlaceholders";
 
 const FONT_FAMILY_MAP: Record<string, string> = {
   sans: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
@@ -76,8 +77,25 @@ export function DocumentPreview({
   const [emailSubject, setEmailSubject] = useState(title);
   const [isSending, setIsSending] = useState(false);
 
+  // Belt-and-braces: if the parent forgot to resolve placeholders, do it here too.
+  // No-op if `content` already has no [Token] markers.
+  const safeContent = useMemo(() => {
+    if (!content) return content;
+    if (!/\[[A-Za-z][A-Za-z0-9 _-]*\]/.test(content)) return content;
+    try {
+      return fillDocumentPlaceholders(content, {
+        patient: null,
+        profile: null,
+        invoice: null,
+        today: new Date(),
+      }).content;
+    } catch {
+      return content;
+    }
+  }, [content]);
+
   const handlePrint = () => {
-    printDocument(content, title, logoUrl, fontFamily, headerFooter || undefined);
+    printDocument(safeContent, title, logoUrl, fontFamily, headerFooter || undefined);
   };
 
   const handleSendEmail = async () => {
@@ -96,7 +114,7 @@ export function DocumentPreview({
         body: {
           to: recipientEmail,
           subject: emailSubject,
-          content: content,
+          content: safeContent,
           documentType: title,
         },
       });
@@ -174,7 +192,7 @@ export function DocumentPreview({
                 fontFamily: resolveFont(fontFamily),
                 fontSize: "14px",
               }}
-              dangerouslySetInnerHTML={{ __html: renderFormattedContent(content) }}
+              dangerouslySetInnerHTML={{ __html: renderFormattedContent(safeContent) }}
             />
 
             {/* Structured Footer */}
