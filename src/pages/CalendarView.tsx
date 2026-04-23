@@ -33,6 +33,7 @@ import { usePatients } from "@/hooks/usePatients";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { usePractice } from "@/hooks/usePractice";
 import { Label } from "@/components/ui/label";
 import { format, startOfMonth, endOfMonth, addMonths, startOfYear, endOfYear, eachMonthOfInterval, parseISO, isSameDay, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isToday as isTodayFn } from "date-fns";
 
@@ -75,6 +76,10 @@ interface CalendarEvent {
   patientId?: string;
   notes?: string;
   location?: string;
+  ownerId: string;
+  ownerName?: string;
+  ownerColor?: string;
+  practiceId?: string | null;
 }
 
 function getDaysInMonth(date: Date) {
@@ -115,6 +120,31 @@ export default function CalendarView() {
     localStorage.setItem("calendar-view", v);
   };
 
+  // Practice + scope
+  const { practice, members } = usePractice();
+  const [scope, setScopeState] = useState<'mine' | 'practice'>(
+    () => (localStorage.getItem("calendar-scope") as 'mine' | 'practice') || 'mine'
+  );
+  const setScope = (s: 'mine' | 'practice') => {
+    setScopeState(s);
+    localStorage.setItem("calendar-scope", s);
+  };
+  // Fall back to "mine" if no practice exists
+  useEffect(() => {
+    if (scope === 'practice' && !practice) setScopeState('mine');
+  }, [practice, scope]);
+
+  const colorByDoctor: Record<string, string> = {};
+  members.forEach((m) => {
+    colorByDoctor[m.doctor_id] = m.practice_color || '#0EA5E9';
+  });
+  const nameByDoctor: Record<string, string> = {};
+  members.forEach((m) => {
+    if (m.full_name) nameByDoctor[m.doctor_id] = m.full_name;
+  });
+  const initialsOf = (name?: string) =>
+    name ? name.split(/\s+/).map((w) => w[0]).join('').toUpperCase().slice(0, 2) : '';
+
   // Fetch service price colors
   useEffect(() => {
     const fetchServiceColors = async () => {
@@ -139,24 +169,29 @@ export default function CalendarView() {
     const fetchAppointments = async () => {
       setEventsLoading(true);
       try {
-        const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
         const monthStart = startOfMonth(selectedDate);
         const monthEnd = endOfMonth(selectedDate);
 
-        const { data, error } = await supabase
+        let query = supabase
           .from('appointments')
-          .select('id, title, start_time, type, location, patient_id, description')
-          .eq('user_id', user.id)
+          .select('id, title, start_time, type, location, patient_id, description, user_id, practice_id')
           .gte('start_time', monthStart.toISOString())
           .lte('start_time', monthEnd.toISOString())
           .order('start_time', { ascending: true });
 
+        if (scope === 'practice' && practice) {
+          query = query.eq('practice_id', practice.id);
+        } else {
+          query = query.eq('user_id', user.id);
+        }
+
+        const { data, error } = await query;
         if (error) throw error;
 
         if (data) {
-          const mapped: CalendarEvent[] = data.map(apt => ({
+          const mapped: CalendarEvent[] = data.map((apt: any) => ({
             id: apt.id,
             title: apt.title,
             time: format(new Date(apt.start_time), "h:mm a"),
@@ -165,6 +200,10 @@ export default function CalendarView() {
             patientId: apt.patient_id || undefined,
             notes: apt.description || undefined,
             location: apt.location || undefined,
+            ownerId: apt.user_id,
+            ownerName: nameByDoctor[apt.user_id],
+            ownerColor: colorByDoctor[apt.user_id] || '#0EA5E9',
+            practiceId: apt.practice_id,
           }));
           setEvents(mapped);
         }
@@ -176,7 +215,11 @@ export default function CalendarView() {
     };
 
     fetchAppointments();
-  }, [selectedDate]);
+    const onFocus = () => fetchAppointments();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate, scope, practice?.id, members.length, user?.id]);
 
   const currentDate = new Date();
   const monthName = selectedDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
@@ -191,7 +234,7 @@ export default function CalendarView() {
 
   const todayEvents = events.filter((e) => e.day === currentDate.getDate());
 
-  const handleCreateAppointment = () => {
+  const handleCreateAppointment = async () => {
     if (!newAppointment.patientId || !newAppointment.date || !newAppointment.time) {
       toast({
         title: "Error",
@@ -200,8 +243,50 @@ export default function CalendarView() {
       });
       return;
     }
+    if (!user) return;
 
     const selectedPatient = patients.find(p => p.id === newAppointment.patientId);
+    const startISO = new Date(`${newAppointment.date}T${newAppointment.time}:00`).toISOString();
+    const endISO = new Date(new Date(startISO).getTime() + 30 * 60000).toISOString();
+
+    const { data, error } = await supabase
+      .from('appointments')
+      .insert({
+        user_id: user.id,
+        patient_id: newAppointment.patientId,
+        title: selectedPatient?.name || 'Appointment',
+        type: newAppointment.type,
+        description: newAppointment.notes || null,
+        start_time: startISO,
+        end_time: endISO,
+        practice_id: scope === 'practice' && practice ? practice.id : null,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    if (data) {
+      const newEvent: CalendarEvent = {
+        id: data.id,
+        title: data.title,
+        time: format(new Date(data.start_time), "h:mm a"),
+        day: new Date(data.start_time).getDate(),
+        type: data.type || "session",
+        patientId: data.patient_id || undefined,
+        notes: data.description || undefined,
+        location: data.location || undefined,
+        ownerId: data.user_id,
+        ownerName: nameByDoctor[data.user_id],
+        ownerColor: colorByDoctor[data.user_id] || '#0EA5E9',
+        practiceId: data.practice_id,
+      };
+      setEvents(prev => [...prev, newEvent]);
+    }
+
     toast({
       title: "Appointment Created",
       description: `Appointment scheduled for ${selectedPatient?.name} on ${newAppointment.date} at ${newAppointment.time}`,
@@ -217,8 +302,25 @@ export default function CalendarView() {
     setIsEventDetailOpen(true);
   };
 
-  const handleSaveEvent = () => {
-    if (!editedEvent) return;
+  const handleSaveEvent = async () => {
+    if (!editedEvent || !user) return;
+    if (editedEvent.ownerId !== user.id) {
+      toast({ title: "Read-only", description: "Only the owner can edit this appointment.", variant: "destructive" });
+      return;
+    }
+    const { error } = await supabase
+      .from('appointments')
+      .update({
+        title: editedEvent.title,
+        type: editedEvent.type,
+        location: editedEvent.location || null,
+        description: editedEvent.notes || null,
+      })
+      .eq('id', editedEvent.id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
     setEvents(prev => prev.map(e => e.id === editedEvent.id ? editedEvent : e));
     setSelectedEvent(editedEvent);
     setIsEditMode(false);
@@ -233,8 +335,20 @@ export default function CalendarView() {
     setIsEditMode(false);
   };
 
-  const handleDeleteEvent = () => {
-    if (!selectedEvent) return;
+  const handleDeleteEvent = async () => {
+    if (!selectedEvent || !user) return;
+    if (selectedEvent.ownerId !== user.id) {
+      toast({ title: "Read-only", description: "Only the owner can delete this appointment.", variant: "destructive" });
+      return;
+    }
+    const { error } = await supabase
+      .from('appointments')
+      .delete()
+      .eq('id', selectedEvent.id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
     setEvents(prev => prev.filter(e => e.id !== selectedEvent.id));
     setIsEventDetailOpen(false);
     setSelectedEvent(null);
@@ -282,13 +396,36 @@ export default function CalendarView() {
             Manage your appointments and schedule
           </p>
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
+          {practice && (
+            <div className="flex rounded-lg border border-border overflow-hidden shrink-0">
+              {(['mine', 'practice'] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setScope(s)}
+                  className={cn(
+                    "px-2 py-1 text-[11px] md:px-3 md:py-1.5 md:text-sm font-medium transition-colors shrink-0",
+                    scope === s
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-muted text-muted-foreground"
+                  )}
+                >
+                  {s === 'mine' ? 'My Calendar' : 'Practice Calendar'}
+                </button>
+              ))}
+            </div>
+          )}
           {!calendarLoading && (
             isConnected ? (
-              <Button variant="outline" onClick={disconnect} className="gap-2">
-                <Unlink className="h-4 w-4" />
-                Disconnect Google
-              </Button>
+              <div className="flex flex-col items-end">
+                <Button variant="outline" onClick={disconnect} className="gap-2">
+                  <Unlink className="h-4 w-4" />
+                  Disconnect Google
+                </Button>
+                <p className="text-[10px] text-muted-foreground max-w-[200px] mt-1 text-right">
+                  Google sync mirrors only your own appointments.
+                </p>
+              </div>
             ) : (
               <Button 
                 variant="ghost" 
@@ -313,8 +450,14 @@ export default function CalendarView() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Schedule New Appointment</DialogTitle>
-              <DialogDescription>Create a new appointment for a patient</DialogDescription>
+              <DialogTitle>
+                {scope === 'practice' ? 'Schedule on Practice Calendar' : 'Schedule New Appointment'}
+              </DialogTitle>
+              <DialogDescription>
+                {scope === 'practice'
+                  ? 'Create a new appointment on the shared practice calendar'
+                  : 'Create a new appointment for a patient'}
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div>
@@ -555,21 +698,38 @@ export default function CalendarView() {
                             const initials = patientName
                               ? patientName.split(/\s+/).map(w => w[0]).join("").toUpperCase().slice(0, 2)
                               : null;
+                            const isPracticeScope = scope === 'practice';
+                            const tileColor = isPracticeScope
+                              ? (event.ownerColor || '#0EA5E9')
+                              : getTypeColor(event.type);
+                            const ownerInitials = isPracticeScope ? initialsOf(event.ownerName) : '';
                             return (
                               <div
                                 key={event.id}
                                 onClick={() => handleEventClick(event)}
                                 className="flex items-center gap-1 truncate rounded px-1 py-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity"
                                 style={{
-                                  backgroundColor: getTypeColor(event.type) ? `${getTypeColor(event.type)}22` : undefined,
-                                  color: getTypeColor(event.type) || undefined,
+                                  backgroundColor: tileColor ? `${tileColor}22` : undefined,
+                                  color: tileColor || undefined,
                                 }}
                               >
+                                {isPracticeScope && ownerInitials ? (
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <span className="inline-flex h-4 px-1 items-center justify-center rounded text-[9px] font-bold text-white shrink-0" style={{ backgroundColor: event.ownerColor || '#0EA5E9' }}>
+                                          {ownerInitials}
+                                        </span>
+                                      </TooltipTrigger>
+                                      <TooltipContent>{event.ownerName || 'Doctor'}</TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                ) : null}
                                 {initials ? (
                                   <TooltipProvider>
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold text-white shrink-0" style={{ backgroundColor: getTypeColor(event.type) || 'hsl(350, 78%, 55%)' }}>
+                                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold text-white shrink-0" style={{ backgroundColor: tileColor || 'hsl(350, 78%, 55%)' }}>
                                           {initials}
                                         </span>
                                       </TooltipTrigger>
@@ -685,6 +845,18 @@ export default function CalendarView() {
                       <Clock className="h-5 w-5 text-accent-foreground" />
                     </div>
                   )}
+                  {scope === 'practice' && event.ownerColor ? (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="inline-flex h-5 px-1.5 items-center justify-center rounded text-[10px] font-bold text-white shrink-0" style={{ backgroundColor: event.ownerColor }}>
+                            {initialsOf(event.ownerName)}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>{event.ownerName || 'Doctor'}</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : null}
                   <div className="flex-1">
                     <p className="font-medium text-foreground">{event.title}</p>
                     <p className="text-sm text-muted-foreground">{event.time}</p>
@@ -853,38 +1025,60 @@ export default function CalendarView() {
                       </div>
                     )}
 
-                    {/* Mobile: icon-only buttons */}
-                    <div className="flex md:hidden gap-3 justify-center pt-4">
-                      <Button variant="outline" size="icon" className="h-11 w-11" onClick={() => setIsEditMode(true)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button variant="destructive" size="icon" className="h-11 w-11" onClick={handleDeleteEvent}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                      {selectedEvent.type !== "internal" && selectedEvent.patientId && (
-                        <Button size="icon" className="h-11 w-11 bg-green-600 hover:bg-green-700 text-white" onClick={handleStartSession}>
-                          <Play className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
+                    {(() => {
+                      const isOwner = !!user && selectedEvent.ownerId === user.id;
+                      if (!isOwner) {
+                        return (
+                          <div className="pt-4">
+                            <p className="text-[11px] text-muted-foreground italic">
+                              Owned by {selectedEvent.ownerName ? `Dr ${selectedEvent.ownerName}` : 'another doctor'} — only they can change this.
+                            </p>
+                            {selectedEvent.type !== "internal" && selectedEvent.patientId && (
+                              <Button className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white" onClick={handleStartSession}>
+                                <Play className="h-3.5 w-3.5 mr-1" />
+                                Start Session
+                              </Button>
+                            )}
+                          </div>
+                        );
+                      }
+                      return (
+                        <>
+                          {/* Mobile: icon-only buttons */}
+                          <div className="flex md:hidden gap-3 justify-center pt-4">
+                            <Button variant="outline" size="icon" className="h-11 w-11" onClick={() => setIsEditMode(true)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button variant="destructive" size="icon" className="h-11 w-11" onClick={handleDeleteEvent}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                            {selectedEvent.type !== "internal" && selectedEvent.patientId && (
+                              <Button size="icon" className="h-11 w-11 bg-green-600 hover:bg-green-700 text-white" onClick={handleStartSession}>
+                                <Play className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
 
-                    {/* Desktop: full text buttons */}
-                    <div className="hidden md:grid grid-cols-3 gap-2 pt-4">
-                      <Button variant="outline" onClick={() => setIsEditMode(true)}>
-                        <Pencil className="h-3.5 w-3.5 mr-1" />
-                        Edit
-                      </Button>
-                      <Button variant="destructive" onClick={handleDeleteEvent}>
-                        <Trash2 className="h-3.5 w-3.5 mr-1" />
-                        Delete
-                      </Button>
-                      {selectedEvent.type !== "internal" && selectedEvent.patientId && (
-                        <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={handleStartSession}>
-                          <Play className="h-3.5 w-3.5 mr-1" />
-                          Start Session
-                        </Button>
-                      )}
-                    </div>
+                          {/* Desktop: full text buttons */}
+                          <div className="hidden md:grid grid-cols-3 gap-2 pt-4">
+                            <Button variant="outline" onClick={() => setIsEditMode(true)}>
+                              <Pencil className="h-3.5 w-3.5 mr-1" />
+                              Edit
+                            </Button>
+                            <Button variant="destructive" onClick={handleDeleteEvent}>
+                              <Trash2 className="h-3.5 w-3.5 mr-1" />
+                              Delete
+                            </Button>
+                            {selectedEvent.type !== "internal" && selectedEvent.patientId && (
+                              <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={handleStartSession}>
+                                <Play className="h-3.5 w-3.5 mr-1" />
+                                Start Session
+                              </Button>
+                            )}
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                 </>
               )}
