@@ -115,6 +115,10 @@ export default function PatientProfile() {
   const [unreadRoundTableCount, setUnreadRoundTableCount] = useState(0);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
+  const [previewDoc, setPreviewDoc] = useState<DocumentRecord | null>(null);
+  const [editingDoc, setEditingDoc] = useState<DocumentRecord | null>(null);
+  const [editDocName, setEditDocName] = useState("");
+  const [editDocContent, setEditDocContent] = useState("");
 
   // Check if current doctor has access to all sessions
   useEffect(() => {
