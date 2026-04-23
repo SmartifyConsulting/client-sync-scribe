@@ -630,8 +630,8 @@ const completeSession = async (
         try {
           const ref = summaryData.referral;
           const [patientRes, profileRes, templateRes] = await Promise.all([
-            supabase.from('patients').select('name').eq('id', patientId).maybeSingle(),
-            supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty').eq('id', user.id).maybeSingle(),
+            supabase.from('patients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email').eq('id', patientId).maybeSingle(),
+            supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty, practice_address').eq('id', user.id).maybeSingle(),
             supabase.from('templates').select('id, name, content').eq('user_id', user.id),
           ]);
 
@@ -653,16 +653,29 @@ const completeSession = async (
               'Date': today,
               'SessionDate': today,
               'DoctorName': docProfile?.full_name || '',
+              'DoctorNumber': docProfile?.doctor_number || '',
               'PracticeNumber': docProfile?.practice_number || '',
               'RegistrationNumber': docProfile?.doctor_number || '',
+              'PracticeAddress': docProfile?.practice_address || '',
+              'Specialty': docProfile?.specialty || '',
+              'ReferringDoctor': docProfile?.full_name || '',
+              'PatientAddress': (patientRecord as any)?.physical_address || (patientRecord as any)?.address || '',
+              'MedicalAid': (patientRecord as any)?.medical_aid || '',
+              'MedicalAidNumber': (patientRecord as any)?.medical_aid_number || '',
+              'IDNumber': (patientRecord as any)?.id_passport_number || '',
+              'DOB': (patientRecord as any)?.dob || '',
+              'Phone': (patientRecord as any)?.phone || '',
+              'Email': (patientRecord as any)?.email || '',
               'ReferralDoctor': ref.referred_to || '',
               'ReferralReason': ref.reason || '',
               'Diagnosis': ref.diagnosis || '',
+              'ClinicalNotes': ref.clinical_notes || '',
             };
             refContent = refTemplate.content;
             for (const [key, value] of Object.entries(replacements)) {
               refContent = refContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
             }
+            refContent = refContent.replace(/\[[A-Za-z][A-Za-z0-9_ -]*\]/g, '___');
           } else {
             refContent = `<h2>Referral Letter</h2>
 <p><strong>Date:</strong> ${today}</p>
