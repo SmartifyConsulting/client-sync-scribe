@@ -234,7 +234,7 @@ export default function CalendarView() {
 
   const todayEvents = events.filter((e) => e.day === currentDate.getDate());
 
-  const handleCreateAppointment = () => {
+  const handleCreateAppointment = async () => {
     if (!newAppointment.patientId || !newAppointment.date || !newAppointment.time) {
       toast({
         title: "Error",
@@ -243,8 +243,50 @@ export default function CalendarView() {
       });
       return;
     }
+    if (!user) return;
 
     const selectedPatient = patients.find(p => p.id === newAppointment.patientId);
+    const startISO = new Date(`${newAppointment.date}T${newAppointment.time}:00`).toISOString();
+    const endISO = new Date(new Date(startISO).getTime() + 30 * 60000).toISOString();
+
+    const { data, error } = await supabase
+      .from('appointments')
+      .insert({
+        user_id: user.id,
+        patient_id: newAppointment.patientId,
+        title: selectedPatient?.name || 'Appointment',
+        type: newAppointment.type,
+        description: newAppointment.notes || null,
+        start_time: startISO,
+        end_time: endISO,
+        practice_id: scope === 'practice' && practice ? practice.id : null,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    if (data) {
+      const newEvent: CalendarEvent = {
+        id: data.id,
+        title: data.title,
+        time: format(new Date(data.start_time), "h:mm a"),
+        day: new Date(data.start_time).getDate(),
+        type: data.type || "session",
+        patientId: data.patient_id || undefined,
+        notes: data.description || undefined,
+        location: data.location || undefined,
+        ownerId: data.user_id,
+        ownerName: nameByDoctor[data.user_id],
+        ownerColor: colorByDoctor[data.user_id] || '#0EA5E9',
+        practiceId: data.practice_id,
+      };
+      setEvents(prev => [...prev, newEvent]);
+    }
+
     toast({
       title: "Appointment Created",
       description: `Appointment scheduled for ${selectedPatient?.name} on ${newAppointment.date} at ${newAppointment.time}`,
@@ -260,8 +302,25 @@ export default function CalendarView() {
     setIsEventDetailOpen(true);
   };
 
-  const handleSaveEvent = () => {
-    if (!editedEvent) return;
+  const handleSaveEvent = async () => {
+    if (!editedEvent || !user) return;
+    if (editedEvent.ownerId !== user.id) {
+      toast({ title: "Read-only", description: "Only the owner can edit this appointment.", variant: "destructive" });
+      return;
+    }
+    const { error } = await supabase
+      .from('appointments')
+      .update({
+        title: editedEvent.title,
+        type: editedEvent.type,
+        location: editedEvent.location || null,
+        description: editedEvent.notes || null,
+      })
+      .eq('id', editedEvent.id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
     setEvents(prev => prev.map(e => e.id === editedEvent.id ? editedEvent : e));
     setSelectedEvent(editedEvent);
     setIsEditMode(false);
@@ -276,8 +335,20 @@ export default function CalendarView() {
     setIsEditMode(false);
   };
 
-  const handleDeleteEvent = () => {
-    if (!selectedEvent) return;
+  const handleDeleteEvent = async () => {
+    if (!selectedEvent || !user) return;
+    if (selectedEvent.ownerId !== user.id) {
+      toast({ title: "Read-only", description: "Only the owner can delete this appointment.", variant: "destructive" });
+      return;
+    }
+    const { error } = await supabase
+      .from('appointments')
+      .delete()
+      .eq('id', selectedEvent.id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
     setEvents(prev => prev.filter(e => e.id !== selectedEvent.id));
     setIsEventDetailOpen(false);
     setSelectedEvent(null);
