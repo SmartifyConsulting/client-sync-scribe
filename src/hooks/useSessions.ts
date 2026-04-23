@@ -422,8 +422,8 @@ const completeSession = async (
           const medications = rx.medications || rx.items || [];
           if (medications.length > 0 || rx.medication) {
             const [patientRes, profileRes, templateRes] = await Promise.all([
-              supabase.from('patients').select('name').eq('id', patientId).maybeSingle(),
-              supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty').eq('id', user.id).maybeSingle(),
+              supabase.from('patients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email, allergies, pharmacy_name').eq('id', patientId).maybeSingle(),
+              supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty, practice_address').eq('id', user.id).maybeSingle(),
               supabase.from('templates').select('id, name, content, header_footer_template_id').eq('user_id', user.id),
             ]);
 
@@ -445,13 +445,26 @@ const completeSession = async (
                 'Date': today,
                 'SessionDate': today,
                 'DoctorName': docProfile?.full_name || '',
+                'DoctorNumber': docProfile?.doctor_number || '',
                 'PracticeNumber': docProfile?.practice_number || '',
                 'RegistrationNumber': docProfile?.doctor_number || '',
+                'PracticeAddress': docProfile?.practice_address || '',
+                'PatientAddress': (patientRecord as any)?.physical_address || (patientRecord as any)?.address || '',
+                'MedicalAid': (patientRecord as any)?.medical_aid || '',
+                'MedicalAidNumber': (patientRecord as any)?.medical_aid_number || '',
+                'IDNumber': (patientRecord as any)?.id_passport_number || '',
+                'DOB': (patientRecord as any)?.dob || '',
+                'Phone': (patientRecord as any)?.phone || '',
+                'Email': (patientRecord as any)?.email || '',
+                'Allergies': (patientRecord as any)?.allergies || 'None known',
+                'Pharmacy': (patientRecord as any)?.pharmacy_name || '',
+                'Repeats': String(rx.repeats ?? ''),
               };
               rxContent = rxTemplate.content;
               for (const [key, value] of Object.entries(replacements)) {
                 rxContent = rxContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
               }
+              rxContent = rxContent.replace(/\[[A-Za-z][A-Za-z0-9_ -]*\]/g, '___');
               // Append medications list
               const medsList = (medications.length > 0 ? medications : [{ medication: rx.medication, dosage: rx.dosage, frequency: rx.frequency, instructions: rx.instructions }])
                 .map((m: any) => `<p><strong>${m.medication || m.name}</strong> — ${m.dosage || ''} ${m.frequency || ''} ${m.instructions ? `(${m.instructions})` : ''}</p>`)
