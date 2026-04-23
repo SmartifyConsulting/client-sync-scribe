@@ -1,87 +1,52 @@
 
 
-# Plan: Fix preview placeholders + tighten Admin tab typography + full Invoice CRUD
+# Plan: Fix auto-generated invoices showing R0.00 with no service line
 
-Three coordinated changes. (1) is the previously-approved preview fix; (2) and (3) are new.
+## What actually happened in your Shannon session
 
-## 1. Document previews always show real values (legacy + new)
+The invoice **was** auto-created (`INV-202604-99958`, document + `invoices` row, both linked to the session). But:
 
-### Root cause
-Legacy `documents` rows for Invoices, Prescriptions, Certificates, etc. were saved with raw `[InvoiceNumber]`, `[PatientAddress]`, `[MedicalAid]`, `[BankDetails]`, `[Services]`, `[TotalAmount]`, `[DoctorNumber]` tokens. Previews render `doc.content` verbatim, so the brackets show.
+- The AI summary returned `"Invoice detected: false"` because billing wasn't discussed in the dictation.
+- The auto-invoice block runs unconditionally for every session, so it inserted the row with `amount = R0.00` and a placeholder `Consultation - <date>` services line.
+- Result: a "blank" invoice that looks like nothing happened.
 
-### Fix
-- **New** `src/lib/fillDocumentPlaceholders.ts` — single source-of-truth helper. Replaces all known patient / practice / invoice / time tokens (case-insensitive, supports `[Token]` and `[Token Name]`). Unknown tokens become a thin grey `___` so brackets never leak through.
-- **Render-time fill + auto-heal** in `src/pages/TodoList.tsx` (`handlePreviewDoc`) and `src/pages/Documents.tsx`: on open, fetch the doc's patient + doctor profile (+ matching `invoices` row when `template_name='Invoice'`), run the helper, pass resolved content to `<DocumentPreview>`. If the resolved content differs from what's stored, `update documents set content = resolved` so subsequent views, prints, and emails are clean.
-- **Refactor** `src/hooks/useSessions.ts` invoice/prescription/cert/referral/admission blocks to use the same helper — eliminates drift. Also fixes the bank-details lookup to read `profile.bank_account_details` (current code reads a non-existent `bank_details` column).
-- **Belt-and-braces** in `src/components/sessions/DocumentPreview.tsx`: `handlePrint` and `handleSendEmail` run the helper too (no-op if already resolved).
+This has been silently happening on every session — `INV-202604-49814` (the earlier Shannon session today) is also R0.00.
 
-No data migration — auto-heal handles legacy docs lazily on first open.
+## Fix: use the doctor's default service price as a fallback
 
-## 2. Admin tabs: enforce 11–12px scale across every screen
+Change `src/hooks/useSessions.ts` invoice block (lines ~733–890) so when the AI doesn't extract billing details:
 
-`src/pages/Admin.tsx` hosts four sub-screens via `<Tabs>`: **Calendar**, **To-Do**, **Invoices**, **Templates** (which renders `CalendarView`, `TodoList`, `doctor/Invoices`, `Documents`). They each have their own typography that's larger than the rest of the admin shell.
+1. **Look up a default service price** from `service_prices` for the doctor:
+   - Prefer the one matching `is_first_consultation` based on whether this is the patient's first session with this doctor (count `sessions where patient_id=… and user_id=…` before insert).
+   - Otherwise prefer one named like "General Consultation" / "Consultation".
+   - Otherwise the first row.
+2. If a default service is found and AI gave no line items, build the invoice with that single line:
+   - Description: service name (e.g. "General Consultation with examination")
+   - Amount: `default_price`
+   - Currency: from the service row (e.g. `ZAR` → `R`)
+3. If no service prices configured at all, **skip auto-invoice creation entirely** and toast: *"No default service price configured — set one in Settings to enable auto-invoicing."* (Don't litter the system with R0 invoices.)
+4. Persist the proper amount on both the `documents.content` (rendered invoice) and the `invoices.amount` row.
 
-Apply the project mobile-compaction standard (`text-[11px]` body / `text-[12px]` headings) to anything rendered inside the Admin tabs:
+## Currency symbol mapping
 
-- Wrap each `<TabsContent>` in a scoped class like `class="admin-tab-scope"` and add a section in `src/index.css`:
-  ```css
-  .admin-tab-scope, .admin-tab-scope * {
-    font-size: 11px;
-  }
-  .admin-tab-scope h1, .admin-tab-scope h2, .admin-tab-scope h3 { font-size: 12px; }
-  .admin-tab-scope .text-xs, .admin-tab-scope .text-sm,
-  .admin-tab-scope .text-base, .admin-tab-scope .text-lg,
-  .admin-tab-scope .text-xl, .admin-tab-scope .text-2xl,
-  .admin-tab-scope .text-3xl { font-size: 11px; }
-  .admin-tab-scope th, .admin-tab-scope td { font-size: 11px; padding: 6px 8px; }
-  .admin-tab-scope button { font-size: 11px; }
-  .admin-tab-scope input, .admin-tab-scope textarea, .admin-tab-scope select { font-size: 12px; }
-  ```
-  Inputs stay at 12px to avoid mobile zoom-on-focus. Icons untouched.
-- Do NOT modify the underlying pages (`CalendarView`, `TodoList`, `doctor/Invoices`, `Documents`) — those still need their own scales when used standalone. The scope class only applies inside Admin.
-- Tighten the Admin shell heading itself: `h1` from `text-xl` → `text-[12px] font-semibold`, and tabs row already uses `text-xs` (leave).
+Tiny helper inline: `ZAR→R`, `USD→$`, `EUR→€`, `GBP→£`, `BWP→P`, `NAD→N$`, `SZL→E`, `LSL→M` (mirrors the table in `InvoiceEditor.tsx`).
 
-## 3. All Invoice records: preview + edit (no exceptions)
+## Cleanup of existing R0.00 ghost invoices
 
-Today in `src/pages/doctor/Invoices.tsx`:
-- Only **paid** invoices have a "Send to Medical Aid" / view path; pending/overdue invoices show a Mark-Paid button and a download but no preview/edit affordance.
-- The doc-preview path only exists for the auto-generated Invoice document and the new "Invoice (Paid)".
+One-off: a self-heal in the doctor's Invoices page that flags any `amount = 0 AND status = 'pending' AND session_id IS NOT NULL` row with a small "Set amount" inline action so the doctor can quickly populate it (or delete it). No automatic deletion — these still belong to real sessions.
 
-Add a uniform actions cluster on **every** invoice row regardless of status:
-
-| Action | Behavior |
-|---|---|
-| **Preview** (eye icon) | Opens `<DocumentPreview>` with the rendered HTML. Re-uses the same render path as TodoList/Documents (auto-heal placeholders, letterhead applied). If no `documents` row exists for the invoice yet (legacy/manual), build it on the fly via `buildPaidInvoiceHtml`-style helper renamed to `buildInvoiceHtml(invoice, patient, profile, headerFooter, { paid: boolean })` so the same renderer works for unpaid invoices (no PAID stamp) and paid (with stamp). |
-| **Edit** (pencil icon) | Opens the existing `InvoiceEditor` dialog, pre-loaded from the `invoices` row (line items, patient, currency, dates). Save updates the `invoices` row AND regenerates the linked `documents` row's `content`. Works for any status. |
-| **Mark Paid** | Existing button, only when `status !== 'paid'`. |
-| **Send to Medical Aid** | Existing button, only when `status === 'paid'` and `claims_email` present. |
-| **Download** | Existing. |
-
-Implementation notes:
-- Extract the invoice render into `src/lib/invoiceHtml.ts` (factor out from `paidInvoice.ts`); `paidInvoice.ts` becomes a thin wrapper that calls it with `{ paid: true }`.
-- `InvoiceEditor` already supports the multi-line-item flow used elsewhere — wire its `defaultValue` from the row when opened in edit mode and call `update invoices set ... where id=` on save, then upsert the matching `documents.content`.
-- Keep the existing read-only column layout; actions live in the trailing actions cell with consistent icon-button styling.
+Optionally also: when the doctor opens `/admin` Invoices and there are pending R0 auto-invoices, show a one-time toast suggesting they configure default service prices.
 
 ## Files touched
 
 | File | Change |
 |---|---|
-| `src/lib/fillDocumentPlaceholders.ts` *(new)* | Shared placeholder filler. |
-| `src/lib/invoiceHtml.ts` *(new)* | `buildInvoiceHtml(...)` shared between preview, paid stamping, email. |
-| `src/lib/paidInvoice.ts` | Refactor to delegate to `invoiceHtml.ts`. |
-| `src/hooks/useSessions.ts` | Use shared helper for all template fills; fix bank-details column. |
-| `src/pages/TodoList.tsx` | Render-time fill + auto-heal in preview. |
-| `src/pages/Documents.tsx` | Same render-time fill + auto-heal. |
-| `src/components/sessions/DocumentPreview.tsx` | Safety pass through helper for print/email. |
-| `src/pages/Admin.tsx` | Add `admin-tab-scope` wrapper to each `<TabsContent>`; shrink the page `<h1>`. |
-| `src/index.css` | Add `.admin-tab-scope` typography rules (11–12px). |
-| `src/pages/doctor/Invoices.tsx` | Preview + Edit actions on every invoice row regardless of status; wire to `InvoiceEditor` and `<DocumentPreview>`; persist edits back to `invoices` and the linked `documents` row. |
+| `src/hooks/useSessions.ts` | Look up default `service_prices` row; fall back to it for line item + amount; skip insert if none configured. |
+| `src/pages/doctor/Invoices.tsx` | Highlight `amount = 0` pending invoices with an inline "Set amount" affordance (re-uses the new Edit dialog from the previous plan). |
 
 ## Out of scope
 
-- Changing typography of standalone (non-Admin) `CalendarView` / `TodoList` / `Documents` / `doctor/Invoices` pages.
-- PDF export of invoices (still HTML email + browser print).
-- Reverting an invoice from paid → pending (not exposed today).
-- SQL backfill of legacy docs (lazy auto-heal is enough).
-- Editing invoices that originated from a session in a way that diverges from the session — edits stay tied to the same `session_id`.
+- Asking the AI to *always* invent an invoice (risky — would invent prices).
+- Backfilling amounts for the two existing R0 Shannon invoices automatically (the doctor can edit them via the new Edit action).
+- Changing the AI prompt (it's correctly returning "no billing discussed").
 
