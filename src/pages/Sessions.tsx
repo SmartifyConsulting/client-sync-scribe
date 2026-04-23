@@ -175,24 +175,42 @@ export default function Sessions() {
     setSearchParams({ patient: value });
   };
 
-  // Fetch active prescriptions when patient changes
-  useEffect(() => {
-    const fetchActivePrescriptions = async () => {
-      if (!patientId) return;
-      
-      const { data, error } = await supabase
-        .from('prescriptions')
-        .select('medication, dosage, frequency')
-        .eq('patient_id', patientId)
-        .eq('status', 'active');
-      
-      if (!error && data) {
-        setCurrentMedications(data);
-      }
-    };
-    
-    fetchActivePrescriptions();
+  // Fetch active prescriptions when patient changes — refreshable on med updates
+  const fetchActivePrescriptions = useCallback(async () => {
+    if (!patientId) return;
+    const { data, error } = await supabase
+      .from('prescriptions')
+      .select('medication, dosage, frequency')
+      .eq('patient_id', patientId)
+      .eq('status', 'active');
+    if (!error && data) {
+      setCurrentMedications(data);
+    }
   }, [patientId]);
+
+  useEffect(() => {
+    fetchActivePrescriptions();
+  }, [fetchActivePrescriptions]);
+
+  // Listen for cross-component medication updates
+  useEffect(() => {
+    if (!patientId) return;
+    let cancelled = false;
+    let unsubscribe: (() => void) | null = null;
+    import("@/lib/utils").then(({ medicationSyncBus }) => {
+      if (cancelled) return;
+      const handler = (e: Event) => {
+        const detail = (e as CustomEvent).detail as { patientId?: string } | undefined;
+        if (!detail?.patientId || detail.patientId === patientId) fetchActivePrescriptions();
+      };
+      medicationSyncBus.addEventListener("medications-updated", handler);
+      unsubscribe = () => medicationSyncBus.removeEventListener("medications-updated", handler);
+    });
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
+  }, [patientId, fetchActivePrescriptions]);
 
   // Fetch past sessions for patient (for AI clinician context)
   useEffect(() => {
