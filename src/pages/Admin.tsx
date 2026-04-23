@@ -6,8 +6,8 @@ import TodoList from "@/pages/TodoList";
 
 export default function Admin() {
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-bold text-foreground">Admin</h1>
+    <div className="space-y-3">
+      <h1 className="text-[12px] font-semibold text-foreground">Admin</h1>
       <Tabs defaultValue="calendar" className="w-full">
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger
@@ -37,19 +37,27 @@ export default function Admin() {
         </TabsList>
 
         <TabsContent value="calendar" className="mt-4">
-          <CalendarView />
+          <div className="admin-tab-scope">
+            <CalendarView />
+          </div>
         </TabsContent>
 
         <TabsContent value="todo" className="mt-4">
-          <TodoList />
+          <div className="admin-tab-scope">
+            <TodoList />
+          </div>
         </TabsContent>
 
         <TabsContent value="invoices" className="mt-4">
-          <DoctorInvoices hideHeader />
+          <div className="admin-tab-scope">
+            <DoctorInvoices hideHeader />
+          </div>
         </TabsContent>
 
         <TabsContent value="templates" className="mt-4">
-          <Documents hideHeader />
+          <div className="admin-tab-scope">
+            <Documents hideHeader />
+          </div>
         </TabsContent>
       </Tabs>
     </div>

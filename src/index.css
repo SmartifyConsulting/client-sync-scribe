@@ -299,3 +299,50 @@
     font-size: 14px;
   }
 }
+
+/* Admin tab compact typography (11–12px scale) */
+.admin-tab-scope,
+.admin-tab-scope p,
+.admin-tab-scope span,
+.admin-tab-scope div,
+.admin-tab-scope li,
+.admin-tab-scope a,
+.admin-tab-scope label {
+  font-size: 11px;
+  line-height: 1.45;
+}
+.admin-tab-scope h1,
+.admin-tab-scope h2,
+.admin-tab-scope h3,
+.admin-tab-scope h4,
+.admin-tab-scope h5,
+.admin-tab-scope h6 {
+  font-size: 12px;
+  line-height: 1.4;
+}
+.admin-tab-scope .text-xs,
+.admin-tab-scope .text-sm,
+.admin-tab-scope .text-base,
+.admin-tab-scope .text-lg,
+.admin-tab-scope .text-xl,
+.admin-tab-scope .text-2xl,
+.admin-tab-scope .text-3xl {
+  font-size: 11px !important;
+}
+.admin-tab-scope th,
+.admin-tab-scope td {
+  font-size: 11px !important;
+  padding: 6px 8px;
+}
+.admin-tab-scope button {
+  font-size: 11px !important;
+}
+.admin-tab-scope input,
+.admin-tab-scope textarea,
+.admin-tab-scope select {
+  font-size: 12px !important;
+}
+.admin-tab-scope .text-2xl.font-bold,
+.admin-tab-scope .text-xl.font-bold {
+  font-size: 14px !important;
+}

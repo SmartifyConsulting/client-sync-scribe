@@ -40,6 +40,7 @@ import { format, isToday, isYesterday } from "date-fns";
 import { DocumentPreview } from "@/components/sessions/DocumentPreview";
 import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
+import { fillDocumentPlaceholders, hasUnresolvedPlaceholders } from "@/lib/fillDocumentPlaceholders";
 
 interface TodoItem {
   id: string;
@@ -125,26 +126,75 @@ export default function TodoList() {
 
       let content = doc.content || '';
 
-      // Replace profile placeholders
-      if (profile) {
-        content = content
-          .replace(/\[PracticeNumber\]/g, profile.practice_number || '[PracticeNumber]')
-          .replace(/\[DoctorNumber\]/g, profile.doctor_number || '[DoctorNumber]')
-          .replace(/\[DoctorName\]/g, profile.full_name || '[DoctorName]')
-          .replace(/\[PracticeAddress\]/g, profile.practice_address || '[PracticeAddress]');
-        if ((profile as any)?.signature_url) {
-          content = content.replace(/\[DoctorSignature\]/g, `<img src="${(profile as any).signature_url}" alt="Signature" style="max-height: 60px;" />`);
+      // Fetch patient + doctor profile (+ matching invoice when relevant) so we
+      // can resolve all template placeholders to real values.
+      const [patientRes, profileRes] = await Promise.all([
+        doc.patient_id
+          ? supabase.from('patients').select('*').eq('id', doc.patient_id).maybeSingle()
+          : Promise.resolve({ data: null } as any),
+        doc.user_id
+          ? supabase.from('profiles').select('*').eq('id', doc.user_id).maybeSingle()
+          : Promise.resolve({ data: null } as any),
+      ]);
+
+      let invoiceRow: any = null;
+      if (doc.template_name === 'Invoice' && doc.session_id) {
+        const { data } = await supabase
+          .from('invoices')
+          .select('*')
+          .eq('session_id', doc.session_id)
+          .maybeSingle();
+        invoiceRow = data;
+      }
+
+      const filled = fillDocumentPlaceholders(content, {
+        patient: patientRes?.data || null,
+        profile: profileRes?.data || null,
+        invoice: invoiceRow
+          ? {
+              invoice_number: invoiceRow.invoice_number,
+              description: invoiceRow.description,
+              amount: invoiceRow.amount,
+              due_date: invoiceRow.due_date,
+              created_at: invoiceRow.created_at,
+              paid_at: invoiceRow.paid_at,
+              currency: 'ZAR',
+            }
+          : null,
+      });
+
+      content = filled.content;
+
+      // Auto-heal: if the stored content still had raw placeholders, persist
+      // the resolved version so subsequent views/prints/emails are clean.
+      if (filled.hadPlaceholders && content !== doc.content) {
+        try {
+          await supabase
+            .from('documents')
+            .update({ content })
+            .eq('id', doc.id);
+        } catch (healErr) {
+          console.error('Auto-heal failed:', healErr);
         }
+      }
+
+      // Doctor signature is rendered separately (not a [PlaceHolder]).
+      if ((profileRes?.data as any)?.signature_url) {
+        content = content.replace(
+          /\[DoctorSignature\]/g,
+          `<img src="${(profileRes.data as any).signature_url}" alt="Signature" style="max-height: 60px;" />`,
+        );
       }
 
       setPreviewDoc({
         content,
         title: doc.template_name || doc.name || 'Document',
-        logoUrl: profile?.logo_url || undefined,
+        logoUrl: (profileRes?.data as any)?.logo_url || profile?.logo_url || undefined,
         userId: doc.user_id,
         templateName: doc.template_name,
       });
     } catch (err) {
+      console.error('Preview error:', err);
       toast({ title: 'Preview failed', variant: 'destructive' });
     } finally {
       setLoadingPreview(null);

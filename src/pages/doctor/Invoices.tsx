@@ -74,6 +74,9 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/hooks/useProfile";
 import { buildPaidInvoiceHtml } from "@/lib/paidInvoice";
+import { buildInvoiceHtml } from "@/lib/invoiceHtml";
+import { DocumentPreview } from "@/components/sessions/DocumentPreview";
+import { Eye } from "lucide-react";
 
 interface Patient {
   id: string;
@@ -186,6 +189,8 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [emailAddress, setEmailAddress] = useState("");
+  const [previewHtml, setPreviewHtml] = useState<{ html: string; title: string } | null>(null);
+  const [loadingPreviewId, setLoadingPreviewId] = useState<string | null>(null);
   
   // Create invoice state
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -475,6 +480,44 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       });
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  // Build a (rendered) preview HTML for any invoice — paid or unpaid.
+  const previewInvoice = async (invoice: Invoice) => {
+    setLoadingPreviewId(invoice.id);
+    try {
+      const { data: patientData } = invoice.patient?.id
+        ? await supabase
+            .from("patients")
+            .select("id, name, physical_address, postal_address, address, medical_aid, medical_aid_number, primary_member, claims_email")
+            .eq("id", invoice.patient.id)
+            .maybeSingle()
+        : { data: null } as any;
+
+      const html = await buildInvoiceHtml({
+        invoice: {
+          id: invoice.id,
+          invoice_number: invoice.invoice_number,
+          description: invoice.description,
+          amount: invoice.amount,
+          due_date: invoice.due_date,
+          created_at: invoice.created_at,
+          paid_at: invoice.paid_at,
+          session_id: invoice.session_id ?? null,
+          patient: invoice.patient,
+        },
+        patient: patientData,
+        profile,
+        currency: invoiceCurrency,
+        paid: getInvoiceStatus(invoice) === "paid",
+      });
+      setPreviewHtml({ html, title: `Invoice ${invoice.invoice_number}` });
+    } catch (err: any) {
+      console.error("Preview error:", err);
+      toast({ title: "Preview failed", description: err.message, variant: "destructive" });
+    } finally {
+      setLoadingPreviewId(null);
     }
   };
 
@@ -1472,7 +1515,34 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                     </TableCell>
                     <TableCell>{getStatusBadge(status)}</TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1.5">
+                        {/* Preview — every row */}
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          onClick={() => previewInvoice(invoice)}
+                          disabled={loadingPreviewId === invoice.id}
+                          title="Preview invoice"
+                        >
+                          {loadingPreviewId === invoice.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+
+                        {/* Edit — every row */}
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          onClick={() => openEditDialog(invoice)}
+                          title="Edit invoice"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+
                         {status !== "paid" && status !== "archived" && (
                           <Button
                             size="sm"
@@ -1504,7 +1574,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                             </Button>
                           </>
                         )}
-                        {status !== "paid" && status !== "archived" && (
+                        {status !== "archived" && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -1512,15 +1582,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => openEditDialog(invoice)}>
-                                <Pencil className="h-4 w-4 mr-2" />
-                                Edit Invoice
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                onClick={() => archiveInvoice(invoice.id)}
-                                className="text-muted-foreground"
-                              >
+                              <DropdownMenuItem onClick={() => archiveInvoice(invoice.id)} className="text-muted-foreground">
                                 <Archive className="h-4 w-4 mr-2" />
                                 Archive
                               </DropdownMenuItem>
