@@ -38,11 +38,12 @@ import {
 } from "@/components/ui/accordion";
 import { format, parseISO, differenceInDays, startOfWeek, endOfWeek, isWithinInterval } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import { useMyRewards, useMyStreaks } from "@/hooks/usePatientRewards";
+import { useMyRewards, useMyStreaks, useMyChronicPatientId } from "@/hooks/usePatientRewards";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MedicationAdherenceTab } from "@/components/rewards/MedicationAdherenceTab";
 import { MonthlyAdherenceSummary } from "@/components/rewards/MonthlyAdherenceSummary";
+import { TodaysMedicationsCard } from "@/components/rewards/TodaysMedicationsCard";
 import { useToast } from "@/hooks/use-toast";
 import { VulaExplainerDialog } from "@/components/rewards/VulaExplainerDialog";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v2.png";
@@ -78,12 +79,21 @@ interface VulaTransfer {
 export default function MyRewards() {
   const { rewards, lollipopCount, loading: rewardsLoading } = useMyRewards();
   const { streaks, loading: streaksLoading } = useMyStreaks();
-  const [activeTab, setActiveTabRaw] = useState("overview");
+  const [activeTab, setActiveTabRaw] = useState<string>(() => {
+    try {
+      return localStorage.getItem("rewards_last_tab_v1") || "overview";
+    } catch {
+      return "overview";
+    }
+  });
+  const [focusRxId, setFocusRxId] = useState<string | null>(null);
   // Fallback for any persisted/legacy tab values that no longer exist
   const setActiveTab = (v: string) => {
-    if (v === "history") setActiveTabRaw("overview");
-    else if (v === "streaks" || v === "milestones" || v === "wins" || v === "wins-and-streaks") setActiveTabRaw("wins-streaks");
-    else setActiveTabRaw(v);
+    let next = v;
+    if (v === "history") next = "overview";
+    else if (v === "streaks" || v === "milestones" || v === "wins" || v === "wins-and-streaks") next = "wins-streaks";
+    setActiveTabRaw(next);
+    try { localStorage.setItem("rewards_last_tab_v1", next); } catch {}
   };
   const [showTransferDialog, setShowTransferDialog] = useState(false);
   const [transferFromAppId, setTransferFromAppId] = useState("");
@@ -104,36 +114,25 @@ export default function MyRewards() {
     } catch {}
   }, []);
 
-  // Get patient record for chronic meds tab — prefer the record with active prescriptions
-  const { data: patientRecord } = useQuery({
-    queryKey: ["my-patient-record-with-rx"],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
-      const { data: patients } = await supabase
-        .from("patients")
-        .select("id, is_chronic, created_at")
-        .eq("patient_user_id", user.id);
-      if (!patients?.length) return null;
+  // Get patient record (robust selector — prefers record with active prescriptions)
+  const { data: patientRecord } = useMyChronicPatientId();
 
-      const ids = patients.map((p) => p.id);
-      const { data: rxRows } = await supabase
-        .from("prescriptions")
-        .select("patient_id")
-        .in("patient_id", ids)
-        .eq("status", "active");
+  // Default chronic patients to the chronic-meds tab on first paint
+  const [hasAutoSwitched, setHasAutoSwitched] = useState(false);
+  useEffect(() => {
+    if (hasAutoSwitched) return;
+    if (!patientRecord?.is_chronic) return;
+    const stored = (() => { try { return localStorage.getItem("rewards_last_tab_v1"); } catch { return null; } })();
+    if (!stored || stored === "overview") {
+      setActiveTabRaw("chronic-meds");
+    }
+    setHasAutoSwitched(true);
+  }, [patientRecord, hasAutoSwitched]);
 
-      const idWithRx = rxRows?.[0]?.patient_id;
-      const sortedNewestFirst = [...patients].sort(
-        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-      );
-      return (
-        patients.find((p) => p.id === idWithRx) ??
-        sortedNewestFirst.find((p) => p.is_chronic) ??
-        sortedNewestFirst[0]
-      );
-    },
-  });
+  const handleTakeMedication = (rxId: string) => {
+    setFocusRxId(rxId);
+    setActiveTab("chronic-meds");
+  };
 
 
 

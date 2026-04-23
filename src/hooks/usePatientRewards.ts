@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { addMonths } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
+import { addMonths, format } from 'date-fns';
 
 export interface PatientReward {
   id: string;
@@ -366,6 +367,71 @@ export function useMyRewards() {
   }, []);
 
   return { rewards, lollipopCount, loading };
+}
+
+// Picks the patient record with the most active prescriptions for the
+// signed-in user. Falls back to chronic, then newest. Excludes archived rows.
+export function useMyChronicPatientId() {
+  return useQuery({
+    queryKey: ['my-chronic-patient-record'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data: patients } = await supabase
+        .from('patients')
+        .select('id, is_chronic, created_at, status')
+        .eq('patient_user_id', user.id)
+        .neq('status', 'archived');
+
+      if (!patients?.length) return null;
+
+      const ids = patients.map((p) => p.id);
+      const { data: rxRows } = await supabase
+        .from('prescriptions')
+        .select('patient_id')
+        .in('patient_id', ids)
+        .eq('status', 'active');
+
+      const today = format(new Date(), 'yyyy-MM-dd');
+      const { data: adhRows } = await supabase
+        .from('medication_adherence')
+        .select('patient_id, taken_at')
+        .in('patient_id', ids)
+        .gte('scheduled_date', today)
+        .order('taken_at', { ascending: false });
+
+      const rxCount = new Map<string, number>();
+      (rxRows ?? []).forEach((r) => rxCount.set(r.patient_id, (rxCount.get(r.patient_id) ?? 0) + 1));
+
+      const lastAdh = new Map<string, number>();
+      (adhRows ?? []).forEach((r) => {
+        if (r.taken_at && !lastAdh.has(r.patient_id)) {
+          lastAdh.set(r.patient_id, new Date(r.taken_at).getTime());
+        }
+      });
+
+      const ranked = [...patients].sort((a, b) => {
+        const rx = (rxCount.get(b.id) ?? 0) - (rxCount.get(a.id) ?? 0);
+        if (rx !== 0) return rx;
+        const adh = (lastAdh.get(b.id) ?? 0) - (lastAdh.get(a.id) ?? 0);
+        if (adh !== 0) return adh;
+        const chronic = Number(!!b.is_chronic) - Number(!!a.is_chronic);
+        if (chronic !== 0) return chronic;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+
+      const chosen = ranked[0];
+      if (import.meta.env.DEV) {
+        const reason = (rxCount.get(chosen.id) ?? 0) > 0
+          ? `most active prescriptions (${rxCount.get(chosen.id)})`
+          : chosen.is_chronic ? 'is_chronic flag' : 'newest record';
+        // eslint-disable-next-line no-console
+        console.log('[useMyChronicPatientId] picked', chosen.id, '·', reason);
+      }
+      return chosen;
+    },
+  });
 }
 
 // Hook for patients to view their streaks
