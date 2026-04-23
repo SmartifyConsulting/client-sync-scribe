@@ -33,6 +33,8 @@ serve(async (req) => {
     let to = body.to;
     let subject = body.subject;
     let documentContent = body.documentContent;
+    const documentHtml: string | undefined = body.documentHtml;
+    const replyTo: string | undefined = body.replyTo;
     let documentName = body.documentName || "Document";
     let senderName = body.senderName || "Holarc Health";
     let practiceName = body.practiceName;
@@ -62,54 +64,69 @@ serve(async (req) => {
       subject = subject || `${documentName}${doc.patient_name ? ` - ${doc.patient_name}` : ""}`;
     }
 
-    if (!to || !subject || !documentContent) {
-      throw new Error("Missing required fields: to, subject, documentContent");
+    if (!to || !subject || (!documentContent && !documentHtml)) {
+      throw new Error("Missing required fields: to, subject, documentContent or documentHtml");
     }
 
-    // Format document content as HTML
-    const formattedContent = documentContent
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/&lt;b&gt;/g, "<b>")
-      .replace(/&lt;\/b&gt;/g, "</b>")
-      .replace(/&lt;i&gt;/g, "<i>")
-      .replace(/&lt;\/i&gt;/g, "</i>")
-      .replace(/&lt;u&gt;/g, "<u>")
-      .replace(/&lt;\/u&gt;/g, "</u>")
-      .replace(/\n/g, "<br/>");
+    let htmlContent: string;
+    if (documentHtml) {
+      // Caller supplied a fully-rendered HTML document (e.g. PAID invoice).
+      // Use as-is so visual layout (watermark, letterhead, etc.) is preserved.
+      htmlContent = documentHtml;
+    } else {
+      // Format document content as HTML (legacy text path)
+      const formattedContent = (documentContent as string)
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/&lt;b&gt;/g, "<b>")
+        .replace(/&lt;\/b&gt;/g, "</b>")
+        .replace(/&lt;i&gt;/g, "<i>")
+        .replace(/&lt;\/i&gt;/g, "</i>")
+        .replace(/&lt;u&gt;/g, "<u>")
+        .replace(/&lt;\/u&gt;/g, "</u>")
+        .replace(/\n/g, "<br/>");
 
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .document-container { 
-            max-width: 800px; 
-            margin: 0 auto; 
-            padding: 40px; 
-            background: #fff;
-            border: 1px solid #e5e5e5;
-          }
-          .header { margin-bottom: 20px; color: #666; font-size: 12px; }
-          .content { white-space: pre-wrap; }
-          .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #666; }
-        </style>
-      </head>
-      <body>
-        <div class="document-container">
-          <div class="header">
-            <strong>${documentName}</strong>
-            ${practiceName ? `<br/>From: ${practiceName}` : ""}
+      htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .document-container { 
+              max-width: 800px; 
+              margin: 0 auto; 
+              padding: 40px; 
+              background: #fff;
+              border: 1px solid #e5e5e5;
+            }
+            .header { margin-bottom: 20px; color: #666; font-size: 12px; }
+            .content { white-space: pre-wrap; }
+            .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #666; }
+          </style>
+        </head>
+        <body>
+          <div class="document-container">
+            <div class="header">
+              <strong>${documentName}</strong>
+              ${practiceName ? `<br/>From: ${practiceName}` : ""}
+            </div>
+            <div class="content">${formattedContent}</div>
+            <div class="footer">
+              Sent by ${senderName}${practiceName ? ` - ${practiceName}` : ""}
+            </div>
           </div>
-          <div class="content">${formattedContent}</div>
-          <div class="footer">
-            Sent by ${senderName}${practiceName ? ` - ${practiceName}` : ""}
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
+        </body>
+        </html>
+      `;
+    }
+
+    const resendPayload: Record<string, unknown> = {
+      from: "Holarc Health <noreply@smartify.co.za>",
+      to: [to],
+      subject: subject,
+      html: htmlContent,
+    };
+    if (replyTo) resendPayload.reply_to = replyTo;
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -117,12 +134,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
-      body: JSON.stringify({
-        from: "Holarc Health <noreply@smartify.co.za>",
-        to: [to],
-        subject: subject,
-        html: htmlContent,
-      }),
+      body: JSON.stringify(resendPayload),
     });
 
     const data = await res.json();
