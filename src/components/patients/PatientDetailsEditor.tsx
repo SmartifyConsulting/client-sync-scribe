@@ -129,14 +129,37 @@ const COUNTRY_CODES = [
 
 const sectionFrame = "rounded-xl border border-primary bg-card p-4 shadow-sm";
 
-// Reusable collapsible section header with neutral background and black text
-const SectionHeader = ({ icon: Icon, label, extra }: { icon: any; label: string; extra?: React.ReactNode }) => (
+// Reusable collapsible section header with optional inline edit pencil
+const SectionHeader = ({
+  icon: Icon,
+  label,
+  extra,
+  onEdit,
+}: {
+  icon: any;
+  label: string;
+  extra?: React.ReactNode;
+  onEdit?: () => void;
+}) => (
   <CollapsibleTrigger className="flex w-full items-center justify-between rounded-xl border border-primary bg-card shadow-sm px-4 py-3 group">
     <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-2 text-left">
       <Icon className="h-4 w-4 text-primary" /> {label}
     </h3>
     <div className="flex items-center gap-2">
       {extra}
+      {onEdit && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
+          className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+          aria-label={`Edit ${label}`}
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      )}
       <ChevronDown className="h-4 w-4 text-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
     </div>
   </CollapsibleTrigger>
