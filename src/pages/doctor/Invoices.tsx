@@ -250,13 +250,13 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       const { data, error } = await supabase
         .from('invoices')
         .select(`
-          *,
+          id, invoice_number, description, amount, status, due_date, paid_at, created_at, session_id,
           patient:patients(id, name)
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setInvoices(data || []);
+      setInvoices((data as any) || []);
     } catch (error: any) {
       console.error("Error fetching invoices:", error);
       toast({
