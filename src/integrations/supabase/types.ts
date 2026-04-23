@@ -1023,6 +1023,8 @@ export type Database = {
           reconciliation_note: string | null
           scheduled_date: string
           status: string
+          tablet_count_detected: number | null
+          tablet_count_expected: number | null
           taken_at: string | null
         }
         Insert: {
@@ -1036,6 +1038,8 @@ export type Database = {
           reconciliation_note?: string | null
           scheduled_date: string
           status?: string
+          tablet_count_detected?: number | null
+          tablet_count_expected?: number | null
           taken_at?: string | null
         }
         Update: {
@@ -1049,6 +1053,8 @@ export type Database = {
           reconciliation_note?: string | null
           scheduled_date?: string
           status?: string
+          tablet_count_detected?: number | null
+          tablet_count_expected?: number | null
           taken_at?: string | null
         }
         Relationships: [
