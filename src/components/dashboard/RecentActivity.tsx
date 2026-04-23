@@ -105,7 +105,7 @@ export function RecentActivity() {
   }
 
   return (
-    <Collapsible defaultOpen={false}>
+    <Collapsible defaultOpen={true}>
       <div className="rounded-xl border border-primary bg-card shadow-sm">
         <CollapsibleTrigger className="w-full rounded-xl data-[state=open]:rounded-b-none bg-primary px-4 py-3 flex items-center justify-between transition-all">
           <h3 className="text-sm font-semibold text-primary-foreground">Recent Activity</h3>
