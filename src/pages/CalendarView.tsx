@@ -845,6 +845,18 @@ export default function CalendarView() {
                       <Clock className="h-5 w-5 text-accent-foreground" />
                     </div>
                   )}
+                  {scope === 'practice' && event.ownerColor ? (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="inline-flex h-5 px-1.5 items-center justify-center rounded text-[10px] font-bold text-white shrink-0" style={{ backgroundColor: event.ownerColor }}>
+                            {initialsOf(event.ownerName)}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>{event.ownerName || 'Doctor'}</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : null}
                   <div className="flex-1">
                     <p className="font-medium text-foreground">{event.title}</p>
                     <p className="text-sm text-muted-foreground">{event.time}</p>
