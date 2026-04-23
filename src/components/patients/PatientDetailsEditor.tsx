@@ -732,10 +732,12 @@ export function PatientDetailsEditor({
         conditions_diagnoses: conditionsDiagnoses,
         is_chronic: isChronic,
       });
+      // Sync chronic meds → prescriptions so they appear under Rewards
+      await syncChronicMedsToPrescriptions(currentMedications);
       setSaving(false);
       setHasChanges(false);
     },
-    [onSave, pharmacies, familyHistory, organDonorOrgans, nokMembers, currentMedications, conditionsDiagnoses],
+    [onSave, pharmacies, familyHistory, organDonorOrgans, nokMembers, currentMedications, conditionsDiagnoses, syncChronicMedsToPrescriptions, patient?.id, toast],
   );
 
   useEffect(() => {
