@@ -483,6 +483,44 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
     }
   };
 
+  // Build a (rendered) preview HTML for any invoice — paid or unpaid.
+  const previewInvoice = async (invoice: Invoice) => {
+    setLoadingPreviewId(invoice.id);
+    try {
+      const { data: patientData } = invoice.patient?.id
+        ? await supabase
+            .from("patients")
+            .select("id, name, physical_address, postal_address, address, medical_aid, medical_aid_number, primary_member, claims_email")
+            .eq("id", invoice.patient.id)
+            .maybeSingle()
+        : { data: null } as any;
+
+      const html = await buildInvoiceHtml({
+        invoice: {
+          id: invoice.id,
+          invoice_number: invoice.invoice_number,
+          description: invoice.description,
+          amount: invoice.amount,
+          due_date: invoice.due_date,
+          created_at: invoice.created_at,
+          paid_at: invoice.paid_at,
+          session_id: invoice.session_id ?? null,
+          patient: invoice.patient,
+        },
+        patient: patientData,
+        profile,
+        currency: invoiceCurrency,
+        paid: getInvoiceStatus(invoice) === "paid",
+      });
+      setPreviewHtml({ html, title: `Invoice ${invoice.invoice_number}` });
+    } catch (err: any) {
+      console.error("Preview error:", err);
+      toast({ title: "Preview failed", description: err.message, variant: "destructive" });
+    } finally {
+      setLoadingPreviewId(null);
+    }
+  };
+
   const openEditDialog = (invoice: Invoice) => {
     setEditingInvoice(invoice);
     setEditForm({
