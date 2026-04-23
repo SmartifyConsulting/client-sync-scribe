@@ -351,6 +351,7 @@ export function PatientDetailsEditor({
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { isDoctor } = useUserRole();
+  const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [activeParentTab, setActiveParentTab] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
