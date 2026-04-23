@@ -608,19 +608,19 @@ export default function SessionDetail() {
       {sessionDocs.length > 0 && (
         <div className="rounded-xl border border-primary bg-card p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <FileText className="h-5 w-5 text-primary" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <FileText className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <h2 className="font-semibold text-foreground">Session Documents</h2>
-              <p className="text-xs text-muted-foreground">Auto-generated documents from this session</p>
+              <h2 className="text-[12px] font-semibold text-foreground">Session Documents</h2>
+              <p className="text-[11px] text-muted-foreground">Auto-generated documents from this session</p>
             </div>
           </div>
           <div className="space-y-2">
             {sessionDocs.map((doc) => (
               <div key={doc.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
                 <FileText className="h-4 w-4 text-primary shrink-0" />
-                <span className="flex-1 text-sm font-medium text-foreground truncate">{doc.name}</span>
+                <span className="flex-1 text-[12px] font-semibold text-foreground truncate">{doc.name}</span>
                 {doc.is_draft && !doc.email_sent_at && (
                   <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30 text-[10px]">
                     DRAFT
@@ -657,19 +657,19 @@ export default function SessionDetail() {
       {session.action_points && session.action_points.length > 0 && (
         <div className="rounded-xl border border-primary bg-card p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/10">
-              <CheckCircle className="h-5 w-5 text-green-600" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-500/10">
+              <CheckCircle className="h-4 w-4 text-green-600" />
             </div>
             <div>
-              <h2 className="font-semibold text-foreground">Action Points / TO-DO</h2>
-              <p className="text-xs text-muted-foreground">Tasks extracted from this session</p>
+              <h2 className="text-[12px] font-semibold text-foreground">Action Points / TO-DO</h2>
+              <p className="text-[11px] text-muted-foreground">Tasks extracted from this session</p>
             </div>
           </div>
           <ul className="space-y-2 ml-4">
             {session.action_points.map((point, i) => (
               <li
                 key={i}
-                className="flex items-start gap-3 text-foreground p-3 rounded-lg bg-muted/30"
+                className="flex items-start gap-3 text-[12px] text-foreground p-3 rounded-lg bg-muted/30"
               >
                 <Circle className="h-4 w-4 text-primary fill-primary shrink-0 mt-0.5" />
                 <span>{point}</span>
@@ -682,7 +682,7 @@ export default function SessionDetail() {
       {/* Empty State */}
       {!session.summary && !session.transcript && (!session.action_points || session.action_points.length === 0) && (
         <div className="rounded-xl border border-primary bg-card p-8 text-center">
-          <p className="text-muted-foreground">No content recorded for this session yet.</p>
+          <p className="text-[11px] text-muted-foreground">No content recorded for this session yet.</p>
         </div>
       )}
 
