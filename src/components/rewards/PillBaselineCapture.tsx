@@ -239,7 +239,7 @@ export function PillBaselineCapture({
           const filePath = `pill-references/${user.id}/${prescriptionId}-${ts}-seq-${i}.jpg`;
           const { error } = await supabase.storage
             .from("patient-media")
-            .upload(filePath, frame, { contentType: "image/jpeg", upsert: true });
+            .upload(filePath, frame, { contentType: "image/jpeg", upsert: false });
           if (error) throw error;
           const { data: urlData } = supabase.storage.from("patient-media").getPublicUrl(filePath);
           return { url: urlData.publicUrl, path: filePath };
