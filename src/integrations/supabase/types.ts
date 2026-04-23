@@ -322,6 +322,7 @@ export type Database = {
           id: string
           location: string | null
           patient_id: string | null
+          practice_id: string | null
           start_time: string
           synced_at: string | null
           title: string
@@ -337,6 +338,7 @@ export type Database = {
           id?: string
           location?: string | null
           patient_id?: string | null
+          practice_id?: string | null
           start_time: string
           synced_at?: string | null
           title: string
@@ -352,6 +354,7 @@ export type Database = {
           id?: string
           location?: string | null
           patient_id?: string | null
+          practice_id?: string | null
           start_time?: string
           synced_at?: string | null
           title?: string
@@ -365,6 +368,13 @@ export type Database = {
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: false
+            referencedRelation: "practices"
             referencedColumns: ["id"]
           },
         ]
@@ -1591,6 +1601,79 @@ export type Database = {
           },
         ]
       }
+      practice_invitations: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          invited_by: string
+          invited_email: string
+          practice_id: string
+          status: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          invited_email: string
+          practice_id: string
+          status?: string
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          invited_email?: string
+          practice_id?: string
+          status?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "practice_invitations_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: false
+            referencedRelation: "practices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      practice_members: {
+        Row: {
+          doctor_id: string
+          id: string
+          joined_at: string
+          practice_id: string
+          role: string
+        }
+        Insert: {
+          doctor_id: string
+          id?: string
+          joined_at?: string
+          practice_id: string
+          role?: string
+        }
+        Update: {
+          doctor_id?: string
+          id?: string
+          joined_at?: string
+          practice_id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "practice_members_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: false
+            referencedRelation: "practices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       practice_partners: {
         Row: {
           created_at: string
@@ -1621,6 +1704,30 @@ export type Database = {
           registration_number?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      practices: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1823,6 +1930,7 @@ export type Database = {
           mobile_number: string | null
           narration_voice: string | null
           practice_address: string | null
+          practice_color: string | null
           practice_number: string | null
           preferred_language: string | null
           preferred_languages: string[] | null
@@ -1856,6 +1964,7 @@ export type Database = {
           mobile_number?: string | null
           narration_voice?: string | null
           practice_address?: string | null
+          practice_color?: string | null
           practice_number?: string | null
           preferred_language?: string | null
           preferred_languages?: string[] | null
@@ -1889,6 +1998,7 @@ export type Database = {
           mobile_number?: string | null
           narration_voice?: string | null
           practice_address?: string | null
+          practice_color?: string | null
           practice_number?: string | null
           preferred_language?: string | null
           preferred_languages?: string[] | null
@@ -2523,6 +2633,14 @@ export type Database = {
           _role: Database["public"]["Enums"]["user_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_practice_member: {
+        Args: { _practice_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_practice_owner: {
+        Args: { _practice_id: string; _user_id: string }
         Returns: boolean
       }
       search_doctor_profiles: {
