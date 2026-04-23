@@ -74,6 +74,9 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/hooks/useProfile";
 import { buildPaidInvoiceHtml } from "@/lib/paidInvoice";
+import { buildInvoiceHtml } from "@/lib/invoiceHtml";
+import { DocumentPreview } from "@/components/sessions/DocumentPreview";
+import { Eye } from "lucide-react";
 
 interface Patient {
   id: string;
@@ -186,6 +189,8 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [emailAddress, setEmailAddress] = useState("");
+  const [previewHtml, setPreviewHtml] = useState<{ html: string; title: string } | null>(null);
+  const [loadingPreviewId, setLoadingPreviewId] = useState<string | null>(null);
   
   // Create invoice state
   const [showCreateDialog, setShowCreateDialog] = useState(false);
