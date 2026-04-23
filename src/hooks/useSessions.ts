@@ -9,6 +9,7 @@ export interface Session {
   patient_id: string;
   title: string | null;
   notes: string | null;
+  private_notes: string | null;
   transcript: string | null;
   summary: string | null;
   action_points: string[];
@@ -913,6 +914,7 @@ export function useSession(id: string) {
   const { toast } = useToast();
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -945,7 +947,9 @@ export function useSession(id: string) {
     };
 
     if (id) fetchSession();
-  }, [id]);
+  }, [id, refreshKey]);
 
-  return { session, loading };
+  const refetch = () => setRefreshKey((k) => k + 1);
+
+  return { session, loading, refetch };
 }
