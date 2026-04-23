@@ -169,24 +169,29 @@ export default function CalendarView() {
     const fetchAppointments = async () => {
       setEventsLoading(true);
       try {
-        const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
         const monthStart = startOfMonth(selectedDate);
         const monthEnd = endOfMonth(selectedDate);
 
-        const { data, error } = await supabase
+        let query = supabase
           .from('appointments')
-          .select('id, title, start_time, type, location, patient_id, description')
-          .eq('user_id', user.id)
+          .select('id, title, start_time, type, location, patient_id, description, user_id, practice_id')
           .gte('start_time', monthStart.toISOString())
           .lte('start_time', monthEnd.toISOString())
           .order('start_time', { ascending: true });
 
+        if (scope === 'practice' && practice) {
+          query = query.eq('practice_id', practice.id);
+        } else {
+          query = query.eq('user_id', user.id);
+        }
+
+        const { data, error } = await query;
         if (error) throw error;
 
         if (data) {
-          const mapped: CalendarEvent[] = data.map(apt => ({
+          const mapped: CalendarEvent[] = data.map((apt: any) => ({
             id: apt.id,
             title: apt.title,
             time: format(new Date(apt.start_time), "h:mm a"),
@@ -195,6 +200,10 @@ export default function CalendarView() {
             patientId: apt.patient_id || undefined,
             notes: apt.description || undefined,
             location: apt.location || undefined,
+            ownerId: apt.user_id,
+            ownerName: nameByDoctor[apt.user_id],
+            ownerColor: colorByDoctor[apt.user_id] || '#0EA5E9',
+            practiceId: apt.practice_id,
           }));
           setEvents(mapped);
         }
@@ -206,7 +215,11 @@ export default function CalendarView() {
     };
 
     fetchAppointments();
-  }, [selectedDate]);
+    const onFocus = () => fetchAppointments();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate, scope, practice?.id, members.length, user?.id]);
 
   const currentDate = new Date();
   const monthName = selectedDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
