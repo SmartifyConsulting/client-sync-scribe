@@ -361,7 +361,28 @@ export default function MyPractice() {
   const { toast } = useToast();
   const { user } = useAuth();
   const { profile, loading, fetchProfile, updateProfile, uploadLogo } = useProfile();
+  const {
+    practice,
+    members,
+    invitations,
+    pendingInvites,
+    isOwner: isPracticeOwner,
+    createPractice,
+    inviteMember,
+    revokeInvitation,
+    acceptInvitation,
+    declineInvitation,
+    removeMember,
+    leavePractice,
+    deletePractice,
+  } = usePractice();
   const [searchParams] = useSearchParams();
+
+  // ── Shared calendar form state ──
+  const [newPracticeName, setNewPracticeName] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [practiceColor, setPracticeColor] = useState<string>("#0EA5E9");
+  const colorDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Form state (auto-save) ──
   const [savedStatus, setSavedStatus] = useState<"idle" | "saving" | "saved">("idle");
