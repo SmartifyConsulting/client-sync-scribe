@@ -77,6 +77,13 @@ async function fetchExistingInvoiceContent(
     },
     today: new Date(),
   });
+
+  // Plain-text content (no block-level HTML) collapses in an iframe.
+  // Wrap it so \n line breaks render visually.
+  const hasBlockHtml = /<(p|div|br|table|h[1-6]|ul|ol|li|section|article)\b/i.test(filled.content);
+  if (!hasBlockHtml) {
+    return `<div style="white-space: pre-wrap; font-family: Arial, sans-serif; padding: 24px; line-height: 1.5; color: #222;">${filled.content}</div>`;
+  }
   return filled.content;
 }
 
@@ -165,20 +172,21 @@ export async function buildInvoiceHtml(args: BuildInvoiceArgs): Promise<string> 
         <div style="
           color:#E01837;
           opacity:0.32;
-          font-size:140px;
+          font-size:56px;
           font-weight:900;
-          letter-spacing:8px;
-          border:10px solid #E01837;
-          padding:10px 40px;
+          letter-spacing:4px;
+          border:4px solid #E01837;
+          padding:6px 24px;
           line-height:1;
           font-family:Arial,sans-serif;
+          max-width:380px;
         ">PAID</div>
         <div style="
           color:#E01837;
           opacity:0.55;
           font-size:14px;
           font-weight:bold;
-          margin-top:8px;
+          margin-top:4px;
           letter-spacing:2px;
         ">Paid on ${paidDate}</div>
       </div>`

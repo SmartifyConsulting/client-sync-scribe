@@ -439,12 +439,17 @@ const completeSession = async (
 
             let rxContent: string;
             if (rxTemplate) {
+              const medsArr: any[] = medications.length > 0
+                ? medications
+                : [{ medication: rx.medication, dosage: rx.dosage, frequency: rx.frequency, instructions: rx.instructions }];
+
               const replacements: Record<string, string> = {
                 'ClientName': patientRecord?.name || 'Unknown',
                 'PatientName': patientRecord?.name || 'Unknown',
                 'Patient Name': patientRecord?.name || 'Unknown',
                 'Date': today,
                 'SessionDate': today,
+                'PrescriptionDate': today,
                 'DoctorName': docProfile?.full_name || '',
                 'DoctorNumber': docProfile?.doctor_number || '',
                 'PracticeNumber': docProfile?.practice_number || '',
@@ -460,17 +465,38 @@ const completeSession = async (
                 'Allergies': (patientRecord as any)?.allergies || 'None known',
                 'Pharmacy': (patientRecord as any)?.pharmacy_name || '',
                 'Repeats': String(rx.repeats ?? ''),
+                'NumberOfRepeats': String(rx.repeats ?? ''),
+                'SpecialInstructions': rx.special_instructions || rx.notes || '',
               };
+
+              // Indexed medication slots (1..max(3, medsArr.length)) — known slot keys
+              const slotMax = Math.max(3, medsArr.length);
+              const slotKeys = new Set<string>();
+              for (let i = 1; i <= slotMax; i++) {
+                const m = medsArr[i - 1];
+                replacements[`Medication${i}`] = m?.medication || m?.name || '';
+                replacements[`Dosage${i}`] = m?.dosage || '';
+                replacements[`Quantity${i}`] = m?.quantity || '';
+                replacements[`Frequency${i}`] = m?.frequency || '';
+                replacements[`Instructions${i}`] = m?.instructions || '';
+                slotKeys.add(`Medication${i}`.toLowerCase());
+                slotKeys.add(`Dosage${i}`.toLowerCase());
+                slotKeys.add(`Quantity${i}`.toLowerCase());
+                slotKeys.add(`Frequency${i}`.toLowerCase());
+                slotKeys.add(`Instructions${i}`.toLowerCase());
+              }
+
               rxContent = rxTemplate.content;
               for (const [key, value] of Object.entries(replacements)) {
                 rxContent = rxContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
               }
-              rxContent = rxContent.replace(/\[[A-Za-z][A-Za-z0-9_ -]*\]/g, '___');
-              // Append medications list
-              const medsList = (medications.length > 0 ? medications : [{ medication: rx.medication, dosage: rx.dosage, frequency: rx.frequency, instructions: rx.instructions }])
-                .map((m: any) => `<p><strong>${m.medication || m.name}</strong> — ${m.dosage || ''} ${m.frequency || ''} ${m.instructions ? `(${m.instructions})` : ''}</p>`)
-                .join('');
-              rxContent += `\n${medsList}`;
+              // Empty unused indexed slots → blank; other unknown tokens → ___
+              rxContent = rxContent.replace(/\[([A-Za-z][A-Za-z0-9_ -]*)\]/g, (_full, token: string) => {
+                const norm = token.toLowerCase().replace(/\s+/g, '');
+                if (slotKeys.has(norm)) return '';
+                return '___';
+              });
+              // Template path already contains slots — do NOT append duplicate medsHtml
             } else {
               const medsHtml = (medications.length > 0 ? medications : [{ medication: rx.medication, dosage: rx.dosage, frequency: rx.frequency, instructions: rx.instructions }])
                 .map((m: any) => `<tr><td>${m.medication || m.name || ''}</td><td>${m.dosage || ''}</td><td>${m.frequency || ''}</td><td>${m.instructions || ''}</td><td>${m.repeats || ''}</td></tr>`)

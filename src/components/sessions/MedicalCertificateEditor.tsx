@@ -63,31 +63,20 @@ export function MedicalCertificateEditor({
   const [medicalReason, setMedicalReason] = useState("");
   const [examinationDate, setExaminationDate] = useState(new Date().toISOString().split('T')[0]);
 
-  // Auto-detect dates from session: default start to session date, then try to infer end date from AI summary
+  // Auto-detect leave duration from session summary. Start/Examination dates always default to today.
   useEffect(() => {
     if (!sessionId) return;
     const fetchSessionDates = async () => {
       const { data } = await supabase
         .from('sessions')
-        .select('summary, started_at')
+        .select('summary')
         .eq('id', sessionId)
         .maybeSingle();
-
-      // Default start/examination dates to the actual session date
-      let inferredStart: string | null = null;
-      if (data?.started_at) {
-        const d = new Date(data.started_at);
-        const iso = d.toISOString().split('T')[0];
-        inferredStart = iso;
-        setStartDate(iso);
-        setExaminationDate(iso);
-        setEndDate(iso); // sensible default until we infer otherwise
-      }
 
       if (data?.summary) {
         try {
           const summary: string = data.summary;
-          const startBase = inferredStart ? new Date(inferredStart) : new Date();
+          const startBase = new Date(); // today
 
           // Priority 1: explicit "return to work / back to work / fit for duty: YYYY-MM-DD"
           const rtwPatterns = [
@@ -105,22 +94,19 @@ export function MedicalCertificateEditor({
             }
           }
 
-          // Priority 2: existing from_date / to_date pattern
+          // Priority 2: explicit to_date pattern (do NOT override start date — keep today)
           if (!endSet) {
-            const fromMatch = summary.match(/from[_\s]?date[:\s]*(\d{4}-\d{2}-\d{2})/i);
             const toMatch = summary.match(/to[_\s]?date[:\s]*(\d{4}-\d{2}-\d{2})/i);
-            if (fromMatch?.[1]) setStartDate(fromMatch[1]);
             if (toMatch?.[1]) {
               setEndDate(toMatch[1]);
               endSet = true;
             }
           }
 
-          // Priority 3: "leave from X to Y" pattern
+          // Priority 3: "leave from X to Y" — only consume the end date
           if (!endSet) {
             const leaveMatch = summary.match(/leave.*?(\d{4}-\d{2}-\d{2}).*?(?:to|until).*?(\d{4}-\d{2}-\d{2})/i);
-            if (leaveMatch?.[1] && leaveMatch?.[2]) {
-              setStartDate(leaveMatch[1]);
+            if (leaveMatch?.[2]) {
               setEndDate(leaveMatch[2]);
               endSet = true;
             }
