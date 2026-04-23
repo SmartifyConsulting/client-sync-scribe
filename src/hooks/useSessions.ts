@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { Json } from '@/integrations/supabase/types';
+import { fillDocumentPlaceholders } from '@/lib/fillDocumentPlaceholders';
 
 export interface Session {
   id: string;
@@ -809,7 +810,10 @@ const completeSession = async (
             Email: patientRecord?.email || '',
             Services: servicesLine,
             TotalAmount: formattedTotal,
-            BankDetails: (docProfile as any)?.bank_details || '',
+            BankDetails:
+              (docProfile as any)?.bank_account_details ||
+              (docProfile as any)?.bank_details ||
+              '',
             InvoiceNumber: generatedInvoiceNumber,
           };
 
