@@ -1488,7 +1488,13 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
               filteredInvoices.map((invoice) => {
                 const status = getInvoiceStatus(invoice);
                 return (
-                  <TableRow key={invoice.id}>
+                  <TableRow
+                    key={invoice.id}
+                    className={cn(
+                      Number(invoice.amount) === 0 && status !== "paid" && status !== "archived" &&
+                        "bg-amber-500/5 hover:bg-amber-500/10",
+                    )}
+                  >
                     <TableCell>
                       <button
                         onClick={() => setViewingInvoice(invoice)}
@@ -1506,7 +1512,15 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                       </div>
                     </TableCell>
                     <TableCell className="max-w-[200px] truncate">{invoice.description}</TableCell>
-                    <TableCell className="font-semibold">{getCurrencySymbol(invoiceCurrency)} {Number(invoice.amount).toFixed(2)}</TableCell>
+                    <TableCell className="font-semibold">
+                      {Number(invoice.amount) === 0 && status !== "paid" ? (
+                        <span className="text-amber-600">
+                          {getCurrencySymbol(invoiceCurrency)} 0.00
+                        </span>
+                      ) : (
+                        <>{getCurrencySymbol(invoiceCurrency)} {Number(invoice.amount).toFixed(2)}</>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1 text-sm">
                         <Calendar className="h-3 w-3 text-muted-foreground" />
@@ -1516,6 +1530,19 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                     <TableCell>{getStatusBadge(status)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1.5">
+                        {/* Set Amount — pending zero-amount auto-invoices */}
+                        {Number(invoice.amount) === 0 && status !== "paid" && status !== "archived" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 text-[11px] border-amber-500/40 text-amber-700 hover:bg-amber-500/10"
+                            onClick={() => openEditDialog(invoice)}
+                            title="This invoice has no amount — click to set it"
+                          >
+                            Set amount
+                          </Button>
+                        )}
+
                         {/* Preview — every row */}
                         <Button
                           size="icon"
