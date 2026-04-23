@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { Session } from "@/hooks/useSessions";
+import { medicationSyncBus } from "@/lib/utils";
 
 interface PatientOverviewProps {
   patient: {
