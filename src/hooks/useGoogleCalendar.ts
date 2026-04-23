@@ -149,7 +149,7 @@ export function useGoogleCalendar() {
     } finally {
       setIsSyncing(false);
     }
-  }, [connection]);
+  }, [connection, user]);
 
   const fetchGoogleEvents = useCallback(async () => {
     if (!connection) return [];
