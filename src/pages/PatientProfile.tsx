@@ -18,6 +18,8 @@ import {
   Video,
   FilePlus,
   GitCompareArrows,
+  Eye,
+  Edit3,
 } from "lucide-react";
 import { ImageComparisonDialog } from "@/components/documents/ImageComparisonDialog";
 import { cn } from "@/lib/utils";
