@@ -1079,7 +1079,6 @@ export default function CalendarView() {
                         </>
                       );
                     })()}
-                    </div>
                   </div>
                 </>
               )}
