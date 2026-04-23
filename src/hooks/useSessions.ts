@@ -315,8 +315,8 @@ const completeSession = async (
         try {
           const admission = summaryData.hospital_admission;
           const [patientRes, profileRes, templateRes] = await Promise.all([
-            supabase.from('patients').select('name').eq('id', patientId).maybeSingle(),
-            supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty').eq('id', user.id).maybeSingle(),
+            supabase.from('patients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email').eq('id', patientId).maybeSingle(),
+            supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty, practice_address').eq('id', user.id).maybeSingle(),
             supabase.from('templates').select('id, name, content, header_footer_template_id').eq('user_id', user.id),
           ]);
 
@@ -340,8 +340,17 @@ const completeSession = async (
               'Date': today,
               'SessionDate': today,
               'DoctorName': profileData?.full_name || '',
+              'DoctorNumber': profileData?.doctor_number || '',
               'PracticeNumber': profileData?.practice_number || '',
               'RegistrationNumber': profileData?.doctor_number || '',
+              'PracticeAddress': (profileData as any)?.practice_address || '',
+              'PatientAddress': (patientRecord as any)?.physical_address || (patientRecord as any)?.address || '',
+              'MedicalAid': (patientRecord as any)?.medical_aid || '',
+              'MedicalAidNumber': (patientRecord as any)?.medical_aid_number || '',
+              'IDNumber': (patientRecord as any)?.id_passport_number || '',
+              'DOB': (patientRecord as any)?.dob || '',
+              'Phone': (patientRecord as any)?.phone || '',
+              'Email': (patientRecord as any)?.email || '',
               'AdmissionDate': admission.admission_date || 'TBD',
               'Hospital': admission.hospital_name || 'TBD',
               'Diagnosis': admission.diagnosis || '',
@@ -352,6 +361,7 @@ const completeSession = async (
             for (const [key, value] of Object.entries(replacements)) {
               admissionContent = admissionContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
             }
+            admissionContent = admissionContent.replace(/\[[A-Za-z][A-Za-z0-9_ -]*\]/g, '___');
           } else {
             admissionContent = `<h2>Hospital Admission Form</h2>
 <p><strong>Date:</strong> ${today}</p>
@@ -412,8 +422,8 @@ const completeSession = async (
           const medications = rx.medications || rx.items || [];
           if (medications.length > 0 || rx.medication) {
             const [patientRes, profileRes, templateRes] = await Promise.all([
-              supabase.from('patients').select('name').eq('id', patientId).maybeSingle(),
-              supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty').eq('id', user.id).maybeSingle(),
+              supabase.from('patients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email, allergies, pharmacy_name').eq('id', patientId).maybeSingle(),
+              supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty, practice_address').eq('id', user.id).maybeSingle(),
               supabase.from('templates').select('id, name, content, header_footer_template_id').eq('user_id', user.id),
             ]);
 
@@ -435,13 +445,26 @@ const completeSession = async (
                 'Date': today,
                 'SessionDate': today,
                 'DoctorName': docProfile?.full_name || '',
+                'DoctorNumber': docProfile?.doctor_number || '',
                 'PracticeNumber': docProfile?.practice_number || '',
                 'RegistrationNumber': docProfile?.doctor_number || '',
+                'PracticeAddress': docProfile?.practice_address || '',
+                'PatientAddress': (patientRecord as any)?.physical_address || (patientRecord as any)?.address || '',
+                'MedicalAid': (patientRecord as any)?.medical_aid || '',
+                'MedicalAidNumber': (patientRecord as any)?.medical_aid_number || '',
+                'IDNumber': (patientRecord as any)?.id_passport_number || '',
+                'DOB': (patientRecord as any)?.dob || '',
+                'Phone': (patientRecord as any)?.phone || '',
+                'Email': (patientRecord as any)?.email || '',
+                'Allergies': (patientRecord as any)?.allergies || 'None known',
+                'Pharmacy': (patientRecord as any)?.pharmacy_name || '',
+                'Repeats': String(rx.repeats ?? ''),
               };
               rxContent = rxTemplate.content;
               for (const [key, value] of Object.entries(replacements)) {
                 rxContent = rxContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
               }
+              rxContent = rxContent.replace(/\[[A-Za-z][A-Za-z0-9_ -]*\]/g, '___');
               // Append medications list
               const medsList = (medications.length > 0 ? medications : [{ medication: rx.medication, dosage: rx.dosage, frequency: rx.frequency, instructions: rx.instructions }])
                 .map((m: any) => `<p><strong>${m.medication || m.name}</strong> — ${m.dosage || ''} ${m.frequency || ''} ${m.instructions ? `(${m.instructions})` : ''}</p>`)
@@ -503,8 +526,8 @@ const completeSession = async (
         try {
           const cert = summaryData.medical_certificate;
           const [patientRes, profileRes, templateRes] = await Promise.all([
-            supabase.from('patients').select('name').eq('id', patientId).maybeSingle(),
-            supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty').eq('id', user.id).maybeSingle(),
+            supabase.from('patients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email').eq('id', patientId).maybeSingle(),
+            supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty, practice_address').eq('id', user.id).maybeSingle(),
             supabase.from('templates').select('id, name, content').eq('user_id', user.id),
           ]);
 
@@ -519,24 +542,39 @@ const completeSession = async (
 
           let certContent: string;
           if (certTemplate) {
+            const fromDate = cert.from_date || today;
+            const toDate = cert.to_date || today;
+            const days = Math.max(1, Math.round((new Date(toDate).getTime() - new Date(fromDate).getTime()) / 86400000) + 1);
             const replacements: Record<string, string> = {
               'ClientName': patientRecord?.name || 'Unknown',
               'PatientName': patientRecord?.name || 'Unknown',
               'Patient Name': patientRecord?.name || 'Unknown',
               'Date': today,
+              'IssuedDate': today,
               'SessionDate': today,
               'DoctorName': docProfile?.full_name || '',
+              'DoctorNumber': docProfile?.doctor_number || '',
               'PracticeNumber': docProfile?.practice_number || '',
               'RegistrationNumber': docProfile?.doctor_number || '',
+              'PracticeAddress': docProfile?.practice_address || '',
+              'PatientAddress': (patientRecord as any)?.physical_address || (patientRecord as any)?.address || '',
+              'MedicalAid': (patientRecord as any)?.medical_aid || '',
+              'MedicalAidNumber': (patientRecord as any)?.medical_aid_number || '',
+              'IDNumber': (patientRecord as any)?.id_passport_number || '',
+              'DOB': (patientRecord as any)?.dob || '',
+              'Phone': (patientRecord as any)?.phone || '',
+              'Email': (patientRecord as any)?.email || '',
               'Diagnosis': cert.diagnosis || '',
-              'FromDate': cert.from_date || today,
-              'ToDate': cert.to_date || today,
+              'FromDate': fromDate,
+              'ToDate': toDate,
+              'Days': String(days),
               'Reason': cert.reason || '',
             };
             certContent = certTemplate.content;
             for (const [key, value] of Object.entries(replacements)) {
               certContent = certContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
             }
+            certContent = certContent.replace(/\[[A-Za-z][A-Za-z0-9_ -]*\]/g, '___');
           } else {
             certContent = `<h2>Medical Certificate</h2>
 <p><strong>Date:</strong> ${today}</p>
@@ -592,8 +630,8 @@ const completeSession = async (
         try {
           const ref = summaryData.referral;
           const [patientRes, profileRes, templateRes] = await Promise.all([
-            supabase.from('patients').select('name').eq('id', patientId).maybeSingle(),
-            supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty').eq('id', user.id).maybeSingle(),
+            supabase.from('patients').select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email').eq('id', patientId).maybeSingle(),
+            supabase.from('profiles').select('full_name, practice_number, doctor_number, specialty, practice_address').eq('id', user.id).maybeSingle(),
             supabase.from('templates').select('id, name, content').eq('user_id', user.id),
           ]);
 
@@ -615,16 +653,29 @@ const completeSession = async (
               'Date': today,
               'SessionDate': today,
               'DoctorName': docProfile?.full_name || '',
+              'DoctorNumber': docProfile?.doctor_number || '',
               'PracticeNumber': docProfile?.practice_number || '',
               'RegistrationNumber': docProfile?.doctor_number || '',
+              'PracticeAddress': docProfile?.practice_address || '',
+              'Specialty': docProfile?.specialty || '',
+              'ReferringDoctor': docProfile?.full_name || '',
+              'PatientAddress': (patientRecord as any)?.physical_address || (patientRecord as any)?.address || '',
+              'MedicalAid': (patientRecord as any)?.medical_aid || '',
+              'MedicalAidNumber': (patientRecord as any)?.medical_aid_number || '',
+              'IDNumber': (patientRecord as any)?.id_passport_number || '',
+              'DOB': (patientRecord as any)?.dob || '',
+              'Phone': (patientRecord as any)?.phone || '',
+              'Email': (patientRecord as any)?.email || '',
               'ReferralDoctor': ref.referred_to || '',
               'ReferralReason': ref.reason || '',
               'Diagnosis': ref.diagnosis || '',
+              'ClinicalNotes': ref.clinical_notes || '',
             };
             refContent = refTemplate.content;
             for (const [key, value] of Object.entries(replacements)) {
               refContent = refContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
             }
+            refContent = refContent.replace(/\[[A-Za-z][A-Za-z0-9_ -]*\]/g, '___');
           } else {
             refContent = `<h2>Referral Letter</h2>
 <p><strong>Date:</strong> ${today}</p>
@@ -681,8 +732,12 @@ const completeSession = async (
       if (patientId) {
         try {
           const [patientRes, profileRes, templateRes] = await Promise.all([
-            supabase.from('patients').select('name').eq('id', patientId).maybeSingle(),
-            supabase.from('profiles').select('full_name, practice_number, doctor_number, practice_address').eq('id', user.id).maybeSingle(),
+            supabase.from('patients')
+              .select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email')
+              .eq('id', patientId).maybeSingle(),
+            supabase.from('profiles')
+              .select('full_name, practice_number, doctor_number, practice_address, specialty')
+              .eq('id', user.id).maybeSingle(),
             supabase.from('templates').select('id, name, content').eq('user_id', user.id),
           ]);
 
@@ -690,55 +745,130 @@ const completeSession = async (
           const docProfile = profileRes.data;
           const doctorTemplates = templateRes.data || [];
           const today = new Date().toISOString().split('T')[0];
+          const todayLong = new Date(today).toLocaleDateString();
+          const dueDate = new Date(Date.now() + 30 * 86400000);
+          const dueDateISO = dueDate.toISOString().split('T')[0];
+          const dueDateLong = dueDate.toLocaleDateString();
+
+          // Generate invoice number: INV-YYYYMM-XXXXX
+          const ymd = new Date();
+          const yyyymm = `${ymd.getFullYear()}${String(ymd.getMonth() + 1).padStart(2, '0')}`;
+          const rand = String(Math.floor(Math.random() * 100000)).padStart(5, '0');
+          const generatedInvoiceNumber = `INV-${yyyymm}-${rand}`;
+
+          // Build services line + total from extracted invoice
+          const inv = (summaryData?.invoice as any) || {};
+          const lineItems: any[] = Array.isArray(inv.line_items) ? inv.line_items
+            : Array.isArray(inv.items) ? inv.items
+            : [];
+          const currency = inv.currency || 'R';
+          let computedTotal = 0;
+          let servicesLine: string;
+          if (lineItems.length > 0) {
+            servicesLine = lineItems.map((li: any) => {
+              const desc = li.description || li.name || 'Service';
+              const qty = Number(li.quantity || 1);
+              const price = Number(li.price || li.amount || 0);
+              const lineTotal = qty * price;
+              computedTotal += lineTotal;
+              return `${desc} (x${qty}) - ${currency} ${lineTotal.toFixed(2)}`;
+            }).join('<br/>');
+          } else {
+            servicesLine = `Consultation - ${todayLong}`;
+            computedTotal = Number(inv.total || 0);
+          }
+          const formattedTotal = computedTotal > 0
+            ? `${currency} ${computedTotal.toFixed(2)}`
+            : (inv.total ? `${currency} ${Number(inv.total).toFixed(2)}` : '___');
 
           const invoiceTemplate = doctorTemplates.find(t =>
             t.name.toLowerCase().includes('invoice')
           );
 
+          const patientName = patientRecord?.name || 'Unknown';
+          const replacements: Record<string, string> = {
+            ClientName: patientName,
+            PatientName: patientName,
+            'Patient Name': patientName,
+            Date: todayLong,
+            SessionDate: todayLong,
+            InvoiceDate: todayLong,
+            DueDate: dueDateLong,
+            DoctorName: docProfile?.full_name || '',
+            DoctorNumber: docProfile?.doctor_number || '',
+            RegistrationNumber: docProfile?.doctor_number || '',
+            PracticeNumber: docProfile?.practice_number || '',
+            PracticeAddress: docProfile?.practice_address || '',
+            Specialty: docProfile?.specialty || '',
+            PatientAddress: patientRecord?.physical_address || patientRecord?.address || '',
+            MedicalAid: patientRecord?.medical_aid || '',
+            MedicalAidNumber: patientRecord?.medical_aid_number || '',
+            IDNumber: patientRecord?.id_passport_number || '',
+            DOB: patientRecord?.dob || '',
+            Phone: patientRecord?.phone || '',
+            Email: patientRecord?.email || '',
+            Services: servicesLine,
+            TotalAmount: formattedTotal,
+            BankDetails: (docProfile as any)?.bank_details || '',
+            InvoiceNumber: generatedInvoiceNumber,
+          };
+
           let invoiceContent: string;
           if (invoiceTemplate) {
-            const replacements: Record<string, string> = {
-              'ClientName': patientRecord?.name || 'Unknown',
-              'PatientName': patientRecord?.name || 'Unknown',
-              'Date': today,
-              'SessionDate': today,
-              'DoctorName': docProfile?.full_name || '',
-              'PracticeNumber': docProfile?.practice_number || '',
-              'PracticeAddress': docProfile?.practice_address || '',
-            };
             invoiceContent = invoiceTemplate.content;
             for (const [key, value] of Object.entries(replacements)) {
               invoiceContent = invoiceContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
             }
           } else {
-            invoiceContent = `<h2>Invoice</h2>
-<p><strong>Date:</strong> ${today}</p>
-<p><strong>Patient:</strong> ${patientRecord?.name || 'Unknown'}</p>
+            invoiceContent = `<h2>Invoice ${generatedInvoiceNumber}</h2>
+<p><strong>Date:</strong> ${todayLong}</p>
+<p><strong>Due Date:</strong> ${dueDateLong}</p>
+<p><strong>Patient:</strong> ${patientName}</p>
 <p><strong>Doctor:</strong> ${docProfile?.full_name || ''}</p>
 <p><strong>Practice Number:</strong> ${docProfile?.practice_number || ''}</p>
 <br/>
-<p><strong>Description:</strong> Consultation on ${today}</p>
-<p><strong>Amount:</strong> [To be completed]</p>`;
+<p><strong>Services:</strong><br/>${servicesLine}</p>
+<p><strong>Total:</strong> ${formattedTotal}</p>`;
           }
+          // Generic fallback for any unmatched [Token]
+          invoiceContent = invoiceContent.replace(/\[[A-Za-z][A-Za-z0-9_ -]*\]/g, '___');
 
           const { data: invoiceDoc } = await supabase.from('documents').insert({
             user_id: user.id,
             patient_id: patientId,
-            name: `Invoice - ${patientRecord?.name || 'Patient'} - ${today}`,
+            name: `Invoice ${generatedInvoiceNumber} - ${patientName} - ${today}`,
             content: invoiceContent,
             template_name: 'Invoice',
-            patient_name: patientRecord?.name || null,
+            patient_name: patientName,
             is_draft: true,
             session_id: sessionId,
           } as any).select('id').single();
           console.log('Invoice document auto-created');
+
+          // Also create a real invoices row for the Invoices admin page
+          try {
+            await supabase.from('invoices').insert({
+              doctor_id: user.id,
+              patient_id: patientId,
+              session_id: sessionId,
+              invoice_number: generatedInvoiceNumber,
+              description: lineItems.length > 0
+                ? lineItems.map((li: any) => li.description || li.name || 'Service').join(', ')
+                : `Consultation - ${todayLong}`,
+              amount: computedTotal || 0,
+              due_date: dueDateISO,
+              status: 'pending',
+            } as any);
+          } catch (invRowError) {
+            console.error('Error creating invoice row:', invRowError);
+          }
 
           if (invoiceDoc) {
             await supabase.from('todos').insert({
               user_id: user.id,
               session_id: sessionId,
               patient_id: patientId,
-              title: `Review Invoice - ${patientRecord?.name || 'Patient'}`,
+              title: `Review Invoice - ${patientName}`,
               document_id: invoiceDoc.id,
               task_type: 'document_review',
               priority: 'high',
@@ -897,6 +1027,37 @@ ${tasksHtml}`;
 
   useEffect(() => {
     fetchSessions();
+
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let cancelled = false;
+
+    const setupRealtime = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || cancelled) return;
+
+      const filter = patientId
+        ? `patient_id=eq.${patientId}`
+        : `user_id=eq.${user.id}`;
+
+      channel = supabase
+        .channel(`sessions-${patientId || user.id}`)
+        .on(
+          'postgres_changes' as any,
+          { event: '*', schema: 'public', table: 'sessions', filter },
+          () => { fetchSessions(); }
+        )
+        .subscribe();
+    };
+    setupRealtime();
+
+    const onFocus = () => { fetchSessions(); };
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener('focus', onFocus);
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [patientId]);
 
   return {
