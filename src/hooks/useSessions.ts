@@ -340,8 +340,17 @@ const completeSession = async (
               'Date': today,
               'SessionDate': today,
               'DoctorName': profileData?.full_name || '',
+              'DoctorNumber': profileData?.doctor_number || '',
               'PracticeNumber': profileData?.practice_number || '',
               'RegistrationNumber': profileData?.doctor_number || '',
+              'PracticeAddress': (profileData as any)?.practice_address || '',
+              'PatientAddress': (patientRecord as any)?.physical_address || (patientRecord as any)?.address || '',
+              'MedicalAid': (patientRecord as any)?.medical_aid || '',
+              'MedicalAidNumber': (patientRecord as any)?.medical_aid_number || '',
+              'IDNumber': (patientRecord as any)?.id_passport_number || '',
+              'DOB': (patientRecord as any)?.dob || '',
+              'Phone': (patientRecord as any)?.phone || '',
+              'Email': (patientRecord as any)?.email || '',
               'AdmissionDate': admission.admission_date || 'TBD',
               'Hospital': admission.hospital_name || 'TBD',
               'Diagnosis': admission.diagnosis || '',
@@ -352,6 +361,7 @@ const completeSession = async (
             for (const [key, value] of Object.entries(replacements)) {
               admissionContent = admissionContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
             }
+            admissionContent = admissionContent.replace(/\[[A-Za-z][A-Za-z0-9_ -]*\]/g, '___');
           } else {
             admissionContent = `<h2>Hospital Admission Form</h2>
 <p><strong>Date:</strong> ${today}</p>
