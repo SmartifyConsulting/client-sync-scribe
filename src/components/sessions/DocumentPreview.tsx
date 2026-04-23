@@ -192,7 +192,7 @@ export function DocumentPreview({
                 fontFamily: resolveFont(fontFamily),
                 fontSize: "14px",
               }}
-              dangerouslySetInnerHTML={{ __html: renderFormattedContent(content) }}
+              dangerouslySetInnerHTML={{ __html: renderFormattedContent(safeContent) }}
             />
 
             {/* Structured Footer */}
