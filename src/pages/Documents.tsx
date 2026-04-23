@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
+import { DocumentPreview } from "@/components/sessions/DocumentPreview";
 import { TemplateForm, TemplateData } from "@/components/templates/TemplateForm";
 import { HeaderFooterTemplateForm, HeaderFooterTemplateData } from "@/components/templates/HeaderFooterTemplateForm";
 import { useToast } from "@/hooks/use-toast";
