@@ -593,62 +593,6 @@ export default function SessionDetail() {
         </div>
       )}
 
-      {/* Transcription */}
-      {session.transcript && (
-        <div className="rounded-xl border border-primary bg-card p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
-                <Mic className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-foreground">Full Transcription</h2>
-                <p className="text-xs text-muted-foreground">Voice recording transcript</p>
-              </div>
-            </div>
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => {
-              const blob = new Blob([session.transcript || ''], { type: 'text/plain' });
-              const url = URL.createObjectURL(blob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = `transcript-${format(new Date(session.started_at), 'yyyy-MM-dd')}.txt`;
-              link.click();
-              URL.revokeObjectURL(url);
-            }}>
-              <Download className="h-3.5 w-3.5" /> Download
-            </Button>
-          </div>
-          <div className="bg-muted/30 rounded-lg p-4 max-h-[400px] overflow-y-auto space-y-2">
-            {session.transcript.split('\n').map((line, index) => {
-              const colonIndex = line.indexOf(':');
-              if (colonIndex > 0 && colonIndex < 50) {
-                const speaker = line.substring(0, colonIndex);
-                const text = line.substring(colonIndex + 1);
-                const speakerLower = speaker.toLowerCase().trim();
-                const isDoctor = speakerLower.includes('dr') || speakerLower.includes('doctor') || (doctorName && speakerLower.includes(doctorName.toLowerCase()));
-                
-                  return (
-                   <p key={index} className={`leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
-                     <span className="font-bold">{speaker}</span>:{text}
-                   </p>
-                 );
-              }
-              return line.trim() ? (
-                <p key={index} className="text-foreground leading-relaxed">{line}</p>
-              ) : null;
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Notes */}
-      {session.notes && (
-        <div className="rounded-xl border border-primary bg-card p-6">
-          <h2 className="font-semibold text-foreground mb-3">Session Notes</h2>
-          <p className="text-muted-foreground whitespace-pre-wrap">{session.notes}</p>
-        </div>
-      )}
-
       {/* Empty State */}
       {!session.summary && !session.transcript && (!session.action_points || session.action_points.length === 0) && (
         <div className="rounded-xl border border-primary bg-card p-8 text-center">
