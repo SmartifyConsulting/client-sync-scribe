@@ -45,10 +45,27 @@ export interface FillInvoice {
   services_html?: string | null;
 }
 
+export interface FillPrescriptionMed {
+  medication?: string | null;
+  name?: string | null;
+  dosage?: string | null;
+  quantity?: string | null;
+  frequency?: string | null;
+  instructions?: string | null;
+}
+
+export interface FillPrescription {
+  medications?: FillPrescriptionMed[] | null;
+  repeats?: number | string | null;
+  special_instructions?: string | null;
+  notes?: string | null;
+}
+
 export interface FillContext {
   patient?: FillPatient | null;
   profile?: FillProfile | null;
   invoice?: FillInvoice | null;
+  prescription?: FillPrescription | null;
   today?: Date;
 }
 
@@ -156,7 +173,7 @@ export function fillDocumentPlaceholders(
 ): FillResult {
   if (!content) return { content: "", replacedCount: 0, hadPlaceholders: false };
 
-  const lookup = buildReplacements(ctx);
+  const { lookup, slotKeys } = buildReplacements(ctx);
   let replacedCount = 0;
   let hadPlaceholders = false;
 
@@ -170,6 +187,8 @@ export function fillDocumentPlaceholders(
         replacedCount += 1;
         return val;
       }
+      // Indexed prescription slot with no data — render blank so unused rows disappear
+      if (slotKeys.has(key)) return "";
       // Known token, no value — render as quiet underscore placeholder.
       return `<span style="color:#999;">___</span>`;
     }
