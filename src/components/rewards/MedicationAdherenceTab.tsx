@@ -96,6 +96,35 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
     },
   });
 
+  // Detect chronic meds in patient profile that haven't been synced into prescriptions yet
+  // (typically because the patient has no connected doctor to attribute prescriptions to).
+  const { data: profileChronicState } = useQuery({
+    queryKey: ["profile-chronic-state", patientId],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { hasUnsyncedChronic: false };
+      const { data: patient } = await supabase
+        .from("patients")
+        .select("current_medications, patient_user_id")
+        .eq("id", patientId)
+        .maybeSingle();
+      const meds = Array.isArray(patient?.current_medications)
+        ? (patient!.current_medications as any[])
+        : [];
+      const chronicCount = meds.filter((m) => m?.is_chronic && (m?.name || "").trim()).length;
+      if (chronicCount === 0) return { hasUnsyncedChronic: false };
+      // Check if patient has any active doctor connection
+      const { data: access } = await supabase
+        .from("doctor_patient_access")
+        .select("doctor_id")
+        .eq("patient_user_id", patient?.patient_user_id || user.id)
+        .eq("is_active", true)
+        .limit(1);
+      const hasDoctor = (access?.length ?? 0) > 0;
+      return { hasUnsyncedChronic: !hasDoctor && chronicCount > 0 };
+    },
+  });
+
   // Fetch adherence records for last 30 days
   const thirtyDaysAgo = format(subDays(new Date(), 30), "yyyy-MM-dd");
   const { data: adherenceRecords = [], isLoading: adherenceLoading } = useQuery({
