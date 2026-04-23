@@ -48,10 +48,16 @@ import { RoundTable } from "@/components/patients/RoundTable";
 import { AdmissionsView } from "@/components/admissions/AdmissionsView";
 import { LollipopDisplay } from "@/components/gamification/LollipopDisplay"; // Vula display
 import { useTemplates } from "@/hooks/useTemplates";
-import { useDocuments } from "@/hooks/useDocuments";
+import { useDocuments, Document as DocumentRecord } from "@/hooks/useDocuments";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
+import { DocumentPreview } from "@/components/sessions/DocumentPreview";
+import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
+import { useProfile } from "@/hooks/useProfile";
+import { renderFormattedContent } from "@/utils/documentFormatting";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 // DrawingPad hidden for later phase
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 export default function PatientProfile() {
   const { id } = useParams<{ id: string }>();
