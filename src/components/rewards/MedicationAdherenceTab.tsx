@@ -96,6 +96,35 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
     },
   });
 
+  // Detect chronic meds in patient profile that haven't been synced into prescriptions yet
+  // (typically because the patient has no connected doctor to attribute prescriptions to).
+  const { data: profileChronicState } = useQuery({
+    queryKey: ["profile-chronic-state", patientId],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { hasUnsyncedChronic: false };
+      const { data: patient } = await supabase
+        .from("patients")
+        .select("current_medications, patient_user_id")
+        .eq("id", patientId)
+        .maybeSingle();
+      const meds = Array.isArray(patient?.current_medications)
+        ? (patient!.current_medications as any[])
+        : [];
+      const chronicCount = meds.filter((m) => m?.is_chronic && (m?.name || "").trim()).length;
+      if (chronicCount === 0) return { hasUnsyncedChronic: false };
+      // Check if patient has any active doctor connection
+      const { data: access } = await supabase
+        .from("doctor_patient_access")
+        .select("doctor_id")
+        .eq("patient_user_id", patient?.patient_user_id || user.id)
+        .eq("is_active", true)
+        .limit(1);
+      const hasDoctor = (access?.length ?? 0) > 0;
+      return { hasUnsyncedChronic: !hasDoctor && chronicCount > 0 };
+    },
+  });
+
   // Fetch adherence records for last 30 days
   const thirtyDaysAgo = format(subDays(new Date(), 30), "yyyy-MM-dd");
   const { data: adherenceRecords = [], isLoading: adherenceLoading } = useQuery({
@@ -530,7 +559,23 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
         <CardContent className="py-12 text-center">
           <Pill className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
           <p className="text-muted-foreground">No active chronic prescriptions found.</p>
-          <p className="text-sm text-muted-foreground mt-1">When your doctor prescribes chronic medication, it will appear here for daily tracking.</p>
+          {profileChronicState?.hasUnsyncedChronic ? (
+            <>
+              <p className="text-sm text-muted-foreground mt-1">
+                Some of your chronic meds aren't tracked yet — add your doctor under My Healthcare so we can set up baseline capture.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-4"
+                onClick={() => { window.location.href = "/patient/details?section=care"; }}
+              >
+                Add my doctor
+              </Button>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground mt-1">When your doctor prescribes chronic medication, it will appear here for daily tracking.</p>
+          )}
         </CardContent>
       </Card>
     );
