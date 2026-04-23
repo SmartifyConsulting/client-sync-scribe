@@ -1633,6 +1633,7 @@ export type Database = {
           intake_method: string | null
           medication_snapshot: string
           observed_description: string | null
+          packaging_image_url: string | null
           patient_id: string
           prescription_id: string
           reference_image_url: string
@@ -1646,6 +1647,7 @@ export type Database = {
           intake_method?: string | null
           medication_snapshot: string
           observed_description?: string | null
+          packaging_image_url?: string | null
           patient_id: string
           prescription_id: string
           reference_image_url: string
@@ -1659,6 +1661,7 @@ export type Database = {
           intake_method?: string | null
           medication_snapshot?: string
           observed_description?: string | null
+          packaging_image_url?: string | null
           patient_id?: string
           prescription_id?: string
           reference_image_url?: string

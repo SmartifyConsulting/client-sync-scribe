@@ -46,6 +46,7 @@ interface PillReference {
   baseline_pattern_summary: string | null;
   observed_description: string | null;
   reference_image_url: string | null;
+  packaging_image_url: string | null;
   updated_at: string;
 }
 
@@ -148,7 +149,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
       if (prescriptions.length === 0) return [] as PillReference[];
       const { data, error } = await supabase
         .from("prescription_pill_references")
-        .select("prescription_id, intake_method, baseline_pattern_summary, observed_description, reference_image_url, updated_at")
+        .select("prescription_id, intake_method, baseline_pattern_summary, observed_description, reference_image_url, packaging_image_url, updated_at")
         .in("prescription_id", prescriptions.map((p) => p.id));
       if (error) throw error;
       return (data || []) as PillReference[];
@@ -635,19 +636,37 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                     const methodLabel = ref.intake_method ? `${ref.intake_method}-method` : "";
                     const captured = ref.updated_at ? format(new Date(ref.updated_at), "MMM d, yyyy") : "";
                     return (
-                      <p className="text-[11px] text-muted-foreground mt-1">
-                        Reference: {ref.observed_description?.split(/[,.]/)[0] || "tablet"}
-                        {methodLabel ? ` · ${methodLabel}` : ""}
-                        {captured ? ` · captured ${captured}` : ""}
-                        {" · "}
-                        <button
-                          type="button"
-                          className="underline hover:text-foreground"
-                          onClick={() => setBaselineCapture({ open: true, rxId: rx.id, medication: rx.medication, dosage: rx.dosage })}
-                        >
-                          Recapture reference
-                        </button>
-                      </p>
+                      <div className="mt-2 space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          {ref.packaging_image_url && (
+                            <img
+                              src={ref.packaging_image_url}
+                              alt="Packaging reference"
+                              className="h-10 w-10 rounded-md object-cover border border-border"
+                            />
+                          )}
+                          {ref.reference_image_url && (
+                            <img
+                              src={ref.reference_image_url}
+                              alt="Tablet reference"
+                              className="h-10 w-10 rounded-md object-cover border border-border"
+                            />
+                          )}
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">
+                          Reference: {ref.observed_description?.split(/[,.]/)[0] || "tablet"}
+                          {methodLabel ? ` · ${methodLabel}` : ""}
+                          {captured ? ` · captured ${captured}` : ""}
+                          {" · "}
+                          <button
+                            type="button"
+                            className="underline hover:text-foreground"
+                            onClick={() => setBaselineCapture({ open: true, rxId: rx.id, medication: rx.medication, dosage: rx.dosage })}
+                          >
+                            Recapture reference
+                          </button>
+                        </p>
+                      </div>
                     );
                   })()}
 

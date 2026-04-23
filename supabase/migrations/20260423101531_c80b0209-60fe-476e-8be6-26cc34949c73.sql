@@ -1,0 +1,1 @@
+ALTER TABLE public.prescription_pill_references ADD COLUMN IF NOT EXISTS packaging_image_url text;

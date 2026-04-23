@@ -84,7 +84,17 @@ serve(async (req) => {
     // Persists tablet description + ingestion-pattern summary
     // ============================================================
     if (body.mode === 'baseline_capture') {
-      const { closeupImageUrl, sequenceImageUrls, sequenceFilePaths, intakeMethod, prescriptionId } = body;
+      const {
+        packagingImageUrl,
+        closeupImageUrl,
+        sequenceImageUrls,
+        sequenceFilePaths,
+        intakeMethod,
+        prescriptionId,
+        expectedMedication,
+        expectedDosage,
+        expectedQuantity,
+      } = body;
       if (!closeupImageUrl || !prescriptionId || !intakeMethod) {
         return new Response(
           JSON.stringify({ error: 'Missing closeupImageUrl, intakeMethod or prescriptionId' }),
@@ -103,6 +113,10 @@ serve(async (req) => {
           { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+
+      const expectedMed = (expectedMedication || rx.medication || '').toString();
+      const expectedDose = (expectedDosage || rx.dosage || '').toString();
+      const expectedQty = Number.isFinite(Number(expectedQuantity)) && Number(expectedQuantity) > 0 ? Number(expectedQuantity) : 1;
 
       // 1) Describe the tablet from the close-up
       const describePrompt = `You are a medication identification assistant. Describe the pill or medication shown in this reference image. Reply in JSON ONLY:
@@ -128,11 +142,54 @@ Only return JSON.`;
         console.error('baseline tablet describe failed', e);
       }
 
+      // 1b) OCR the packaging and check it matches the prescription
+      let packagingMatch: { ok: boolean; detectedMedication?: string; detectedStrength?: string; message?: string } | null = null;
+      if (packagingImageUrl) {
+        const packPrompt = `You are reading the packaging of a medication. The patient's prescription says:
+- Medication: "${expectedMed}"
+- Strength/Dosage: "${expectedDose}"
+
+Read the visible text on the packaging in this image (box, blister, bottle label).
+Reply in JSON ONLY:
+{
+  "detectedMedication": "brand or generic name as printed (or empty string)",
+  "detectedStrength": "strength as printed e.g. 50mg, 100mg (or empty string)",
+  "matchesPrescription": true or false,
+  "reason": "one short sentence — if it doesn't match, name what looks different"
+}
+Be lenient: a match is ok if the medication name (brand or generic) and strength are clearly the same product, even if formatting differs. Only return JSON.`;
+        try {
+          const packResp = await callGemini(LOVABLE_API_KEY, [
+            { type: 'text', text: packPrompt },
+            { type: 'image_url', image_url: { url: packagingImageUrl } },
+          ]);
+          if (packResp.ok) {
+            const pd = await packResp.json();
+            const pc = pd.choices?.[0]?.message?.content || '';
+            const m = pc.match(/\{[\s\S]*\}/);
+            if (m) {
+              const parsed = JSON.parse(m[0]);
+              const ok = !!parsed.matchesPrescription;
+              packagingMatch = {
+                ok,
+                detectedMedication: parsed.detectedMedication || '',
+                detectedStrength: parsed.detectedStrength || '',
+                message: ok
+                  ? undefined
+                  : `This looks like ${parsed.detectedMedication || 'an unknown medicine'} ${parsed.detectedStrength || ''} but your prescription says ${expectedMed} ${expectedDose}. ${parsed.reason || ''}`.trim(),
+              };
+            }
+          }
+        } catch (e) {
+          console.error('baseline packaging OCR failed', e);
+        }
+      }
+
       // 2) Summarise the ingestion sequence
       let baselinePatternSummary = '';
       const seqUrls: string[] = Array.isArray(sequenceImageUrls) ? sequenceImageUrls : [];
       if (seqUrls.length > 0) {
-        const patternPrompt = `You are observing a patient's first-dose baseline for ${rx.medication} (${rx.dosage || ''}). Their declared intake method is "${intakeMethod}". Summarise their ingestion routine across these ${seqUrls.length} chronological frames in 1-2 sentences for later pattern matching. Note hand used, body posture, presence of water/liquid/spoon, and timing cues. Reply in JSON ONLY:
+        const patternPrompt = `You are observing a patient's first-dose baseline for ${rx.medication} (${rx.dosage || ''}). Their declared intake method is "${intakeMethod}" and they are taking ${expectedQty} tablet(s) per dose. Summarise their ingestion routine across these ${seqUrls.length} chronological frames in 1-2 sentences for later pattern matching. Note hand used, body posture, presence of water/liquid/spoon, and timing cues. Reply in JSON ONLY:
 { "baselinePatternSummary": "..." }
 Only return JSON.`;
         const content: any[] = [{ type: 'text', text: patternPrompt }];
@@ -153,12 +210,13 @@ Only return JSON.`;
         }
       }
 
-      // 3) Persist the row
+      // 3) Persist the row (now includes packaging_image_url)
       await supabase.from('prescription_pill_references').upsert(
         {
           prescription_id: prescriptionId,
           patient_id: rx.patient_id,
           reference_image_url: closeupImageUrl,
+          packaging_image_url: packagingImageUrl || null,
           observed_description: observedDescription || null,
           baseline_pattern_summary: baselinePatternSummary || null,
           intake_method: intakeMethod,
@@ -174,7 +232,7 @@ Only return JSON.`;
       }
 
       return new Response(
-        JSON.stringify({ ok: true, observedDescription, baselinePatternSummary }),
+        JSON.stringify({ ok: true, observedDescription, baselinePatternSummary, packagingMatch }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
