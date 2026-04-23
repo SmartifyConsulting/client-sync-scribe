@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
+import { DocumentPreview } from "@/components/sessions/DocumentPreview";
 import { TemplateForm, TemplateData } from "@/components/templates/TemplateForm";
 import { HeaderFooterTemplateForm, HeaderFooterTemplateData } from "@/components/templates/HeaderFooterTemplateForm";
 import { useToast } from "@/hooks/use-toast";
@@ -931,56 +932,13 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
         </DialogContent>
       </Dialog>
 
-      {/* Document Preview Dialog */}
-      <Dialog open={!!previewDocument} onOpenChange={(open) => !open && setPreviewDocument(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{previewDocument?.name}</DialogTitle>
-            <DialogDescription>
-              {previewDocument?.patient_name && `Patient: ${previewDocument.patient_name} · `}
-              Created: {previewDocument?.created_at ? formatDate(previewDocument.created_at) : ""}
-            </DialogDescription>
-          </DialogHeader>
-          {previewDocument && (
-            <div className="space-y-4">
-              <div className="border border-border rounded-lg p-6 bg-white">
-                <DocumentPreviewBody
-                  document={previewDocument}
-                  renderSection={renderHFSectionPreview}
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4 border-t border-border">
-                <Button variant="outline" onClick={() => setPreviewDocument(null)} className="flex-1">
-                  Close
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShareDocument(previewDocument);
-                    setPreviewDocument(null);
-                  }}
-                  className="gap-2"
-                >
-                  <Send className="h-4 w-4" />
-                  Share
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    exportToPDF({ title: previewDocument.name, content: previewDocument.content });
-                    toast({ title: "PDF Downloaded", description: `"${previewDocument.name}" downloaded` });
-                  }}
-                  className="gap-2"
-                >
-                  <Download className="h-4 w-4" />
-                  Download PDF
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Document Preview - shared component with letterhead + Send + Print */}
+      {previewDocument && (
+        <DocumentPreviewWithLetterhead
+          document={previewDocument}
+          onClose={() => setPreviewDocument(null)}
+        />
+      )}
 
       {/* Delete Document Confirmation */}
       <AlertDialog open={!!documentToDelete} onOpenChange={(open) => !open && setDocumentToDelete(null)}>
@@ -1136,6 +1094,28 @@ interface HFCell {
   text: string;
   alignment: string;
   imageUrl?: string;
+}
+
+function DocumentPreviewWithLetterhead({
+  document,
+  onClose,
+}: {
+  document: Document;
+  onClose: () => void;
+}) {
+  const { headerFooter } = useDocumentHeaderFooter(document);
+  const { profile } = useProfile();
+  return (
+    <DocumentPreview
+      title={document.name}
+      subtitle={document.patient_name ? `Patient: ${document.patient_name}` : undefined}
+      content={document.content}
+      logoUrl={profile?.logo_url || undefined}
+      fontFamily={headerFooter?.font_family || undefined}
+      headerFooter={headerFooter}
+      onClose={onClose}
+    />
+  );
 }
 
 function DocumentPreviewBody({
