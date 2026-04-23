@@ -1488,9 +1488,21 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                           </Button>
                         )}
                         {status === "paid" && invoice.paid_at && (
-                          <span className="text-xs text-muted-foreground">
-                            Paid {format(new Date(invoice.paid_at), 'dd MMM')}
-                          </span>
+                          <>
+                            <span className="text-xs text-muted-foreground">
+                              Paid {format(new Date(invoice.paid_at), 'dd MMM')}
+                            </span>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="gap-1.5 h-8 text-[11px]"
+                              onClick={() => sendPaidInvoiceToMedicalAid(invoice)}
+                              title="Send PAID invoice to Medical Aid claims email"
+                            >
+                              <Send className="h-3.5 w-3.5" />
+                              Send to Medical Aid
+                            </Button>
+                          </>
                         )}
                         {status !== "paid" && status !== "archived" && (
                           <DropdownMenu>
