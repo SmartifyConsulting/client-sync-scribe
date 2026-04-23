@@ -73,6 +73,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/hooks/useProfile";
+import { buildPaidInvoiceHtml } from "@/lib/paidInvoice";
 
 interface Patient {
   id: string;
@@ -95,6 +96,7 @@ interface Invoice {
   due_date: string;
   paid_at: string | null;
   created_at: string;
+  session_id?: string | null;
   patient: {
     id: string;
     name: string;
@@ -248,13 +250,13 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       const { data, error } = await supabase
         .from('invoices')
         .select(`
-          *,
+          id, invoice_number, description, amount, status, due_date, paid_at, created_at, session_id,
           patient:patients(id, name)
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setInvoices(data || []);
+      setInvoices((data as any) || []);
     } catch (error: any) {
       console.error("Error fetching invoices:", error);
       toast({
@@ -267,14 +269,120 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
     }
   };
 
+  // Send a PAID-stamped invoice copy to the medical aid claims email.
+  // Used both by the auto-submit path (in markAsPaid) and the manual button.
+  const sendPaidInvoiceToMedicalAid = async (invoice: Invoice, opts: { silent?: boolean } = {}) => {
+    if (!invoice.patient?.id) return false;
+
+    try {
+      // Pull patient details + linked patient profile (for auto-email toggle).
+      const { data: patientData } = await supabase
+        .from("patients")
+        .select("id, name, physical_address, postal_address, address, medical_aid, medical_aid_number, primary_member, claims_email, patient_user_id")
+        .eq("id", invoice.patient.id)
+        .maybeSingle();
+
+      if (!patientData?.claims_email) {
+        if (!opts.silent) {
+          toast({
+            title: "No Claims Email",
+            description: "Add a Medical Aid Claims Email on the patient profile to send claims.",
+            variant: "destructive",
+          });
+        }
+        return false;
+      }
+
+      const paidAt = invoice.paid_at ? new Date(invoice.paid_at) : new Date();
+
+      const html = await buildPaidInvoiceHtml(
+        {
+          id: invoice.id,
+          invoice_number: invoice.invoice_number,
+          description: invoice.description,
+          amount: invoice.amount,
+          due_date: invoice.due_date,
+          paid_at: invoice.paid_at,
+          session_id: invoice.session_id ?? null,
+          patient: invoice.patient,
+        },
+        patientData,
+        profile,
+        paidAt,
+        invoiceCurrency,
+      );
+
+      // Persist a "Invoice (Paid)" document so it shows up in the documents tab.
+      // Only insert if one doesn't already exist for this invoice.
+      try {
+        const { data: existingPaidDoc } = await supabase
+          .from("documents")
+          .select("id")
+          .eq("user_id", (await supabase.auth.getUser()).data.user?.id || "")
+          .eq("template_name", "Invoice (Paid)")
+          .ilike("name", `%${invoice.invoice_number}%`)
+          .limit(1)
+          .maybeSingle();
+
+        if (!existingPaidDoc) {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            await supabase.from("documents").insert({
+              user_id: user.id,
+              patient_id: invoice.patient.id,
+              session_id: invoice.session_id ?? null,
+              name: `Invoice ${invoice.invoice_number} — PAID`,
+              template_name: "Invoice (Paid)",
+              content: html,
+              patient_name: invoice.patient.name,
+              is_draft: false,
+            } as any);
+          }
+        }
+      } catch (docErr) {
+        console.error("Error persisting paid invoice document:", docErr);
+      }
+
+      const { error: emailErr } = await supabase.functions.invoke("send-document-email", {
+        body: {
+          to: patientData.claims_email,
+          subject: `Invoice ${invoice.invoice_number} (PAID) - ${patientData.name}`,
+          documentName: `Invoice ${invoice.invoice_number} — PAID`,
+          documentHtml: html,
+          senderName: profile?.full_name || "Doctor",
+          practiceName: profile?.practice_number || undefined,
+        },
+      });
+
+      if (emailErr) throw emailErr;
+
+      toast({
+        title: "Sent to Medical Aid",
+        description: `Paid invoice emailed to ${patientData.claims_email}`,
+      });
+      return true;
+    } catch (err: any) {
+      console.error("Error sending paid invoice to medical aid:", err);
+      if (!opts.silent) {
+        toast({
+          title: "Send Failed",
+          description: err.message || "Failed to send paid invoice to medical aid",
+          variant: "destructive",
+        });
+      }
+      return false;
+    }
+  };
+
   const markAsPaid = async (invoiceId: string) => {
     setUpdatingId(invoiceId);
     try {
+      const paidAtIso = new Date().toISOString();
       const { error } = await supabase
         .from('invoices')
         .update({ 
           status: 'paid', 
-          paid_at: new Date().toISOString() 
+          paid_at: paidAtIso 
         })
         .eq('id', invoiceId);
 
@@ -284,7 +392,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
 
       setInvoices(prev => prev.map(inv => 
         inv.id === invoiceId 
-          ? { ...inv, status: 'paid', paid_at: new Date().toISOString() }
+          ? { ...inv, status: 'paid', paid_at: paidAtIso }
           : inv
       ));
 
@@ -293,17 +401,22 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
         description: "Invoice marked as paid",
       });
 
-      // Auto-forward to claims email if patient has one AND patient allows it
+      // Auto-forward the PAID-stamped invoice to the claims email
+      // (only if patient has enabled the auto-email toggle).
       if (updatedInvoice?.patient?.id) {
         try {
           const { data: patientData } = await supabase
             .from('patients')
-            .select('claims_email, name, patient_user_id')
+            .select('claims_email, patient_user_id')
             .eq('id', updatedInvoice.patient.id)
             .maybeSingle();
 
-          if (patientData?.claims_email && patientData?.patient_user_id) {
-            // Check patient's auto-email preference
+          if (!patientData?.claims_email) {
+            toast({
+              title: "No Claims Email",
+              description: "Add a Medical Aid Claims Email on the patient profile to enable auto-submit.",
+            });
+          } else if (patientData?.patient_user_id) {
             const { data: patientProfile } = await supabase
               .from('profiles')
               .select('auto_email_invoice_to_insurance')
@@ -311,21 +424,10 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
               .maybeSingle();
 
             if (patientProfile?.auto_email_invoice_to_insurance) {
-              await supabase.functions.invoke('send-document-email', {
-                body: {
-                  to: patientData.claims_email,
-                  subject: `Invoice ${updatedInvoice.invoice_number} - ${patientData.name}`,
-                  documentName: `Invoice ${updatedInvoice.invoice_number}`,
-                  documentContent: `Invoice Number: ${updatedInvoice.invoice_number}\nPatient: ${patientData.name}\nDescription: ${updatedInvoice.description}\nAmount: ${updatedInvoice.amount}\nStatus: Paid\nPaid At: ${new Date().toLocaleDateString()}`,
-                  senderName: profile?.full_name || 'Doctor',
-                  practiceName: profile?.practice_number || undefined,
-                },
-              });
-
-              toast({
-                title: "Claim Forwarded",
-                description: `Invoice automatically sent to ${patientData.claims_email}`,
-              });
+              await sendPaidInvoiceToMedicalAid(
+                { ...(updatedInvoice as Invoice), paid_at: paidAtIso, status: 'paid' },
+                { silent: false },
+              );
             }
           }
         } catch (claimError) {
@@ -1386,9 +1488,21 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                           </Button>
                         )}
                         {status === "paid" && invoice.paid_at && (
-                          <span className="text-xs text-muted-foreground">
-                            Paid {format(new Date(invoice.paid_at), 'dd MMM')}
-                          </span>
+                          <>
+                            <span className="text-xs text-muted-foreground">
+                              Paid {format(new Date(invoice.paid_at), 'dd MMM')}
+                            </span>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="gap-1.5 h-8 text-[11px]"
+                              onClick={() => sendPaidInvoiceToMedicalAid(invoice)}
+                              title="Send PAID invoice to Medical Aid claims email"
+                            >
+                              <Send className="h-3.5 w-3.5" />
+                              Send to Medical Aid
+                            </Button>
+                          </>
                         )}
                         {status !== "paid" && status !== "archived" && (
                           <DropdownMenu>

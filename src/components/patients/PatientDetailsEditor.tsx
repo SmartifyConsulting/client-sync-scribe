@@ -1829,7 +1829,7 @@ export function PatientDetailsEditor({
                         <ViewField label="Insurance Product" value={patient.medical_insurance_product} />
                         <ViewField label="Insurance Number" value={patient.medical_aid_number} />
                         <ViewField label="Primary Member" value={patient.primary_member} />
-                        <ViewField label="Claims Email (auto-submission)" value={patient.claims_email} />
+                        <ViewField label="Medical Aid Claims Email" value={patient.claims_email} />
                       </div>
                     </CollapsibleContent>
                   </Collapsible>
@@ -3164,7 +3164,7 @@ export function PatientDetailsEditor({
                         />
                       </div>
                       <div className="space-y-1.5 sm:col-span-2">
-                        <Label>Claims Email (for auto-submission of claims)</Label>
+                        <Label>Medical Aid Claims Email</Label>
                         <Input
                           className="text-sm"
                           type="email"
@@ -3172,6 +3172,9 @@ export function PatientDetailsEditor({
                           onChange={(e) => updateFormData({ claims_email: e.target.value })}
                           placeholder="claims@insurance.com"
                         />
+                        <p className="text-[11px] text-muted-foreground">
+                          When invoices are marked paid, the PAID invoice is auto-submitted here (if enabled in patient settings).
+                        </p>
                       </div>
                     </div>
                   </CollapsibleContent>
