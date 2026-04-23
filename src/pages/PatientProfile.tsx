@@ -1204,7 +1204,7 @@ function DocumentPreviewWithLetterhead({
   document: DocumentRecord;
   onClose: () => void;
 }) {
-  const { headerFooter } = useDocumentHeaderFooter(document);
+  const { headerFooter, templateFontFamily } = useDocumentHeaderFooter(document);
   const { profile } = useProfile();
   return (
     <DocumentPreview
@@ -1212,7 +1212,7 @@ function DocumentPreviewWithLetterhead({
       subtitle={document.patient_name ? `Patient: ${document.patient_name}` : undefined}
       content={document.content}
       logoUrl={profile?.logo_url || undefined}
-      fontFamily={headerFooter?.font_family || undefined}
+      fontFamily={templateFontFamily || headerFooter?.font_family || undefined}
       headerFooter={headerFooter}
       onClose={onClose}
     />
