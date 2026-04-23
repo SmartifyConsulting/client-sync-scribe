@@ -63,28 +63,87 @@ export function MedicalCertificateEditor({
   const [medicalReason, setMedicalReason] = useState("");
   const [examinationDate, setExaminationDate] = useState(new Date().toISOString().split('T')[0]);
 
-  // Auto-detect dates from session AI summary
+  // Auto-detect dates from session: default start to session date, then try to infer end date from AI summary
   useEffect(() => {
     if (!sessionId) return;
     const fetchSessionDates = async () => {
       const { data } = await supabase
         .from('sessions')
-        .select('summary')
+        .select('summary, started_at')
         .eq('id', sessionId)
         .maybeSingle();
+
+      // Default start/examination dates to the actual session date
+      let inferredStart: string | null = null;
+      if (data?.started_at) {
+        const d = new Date(data.started_at);
+        const iso = d.toISOString().split('T')[0];
+        inferredStart = iso;
+        setStartDate(iso);
+        setExaminationDate(iso);
+        setEndDate(iso); // sensible default until we infer otherwise
+      }
+
       if (data?.summary) {
         try {
-          // Try to parse dates from structured summary
-          const fromMatch = data.summary.match(/from[_\s]?date[:\s]*(\d{4}-\d{2}-\d{2})/i);
-          const toMatch = data.summary.match(/to[_\s]?date[:\s]*(\d{4}-\d{2}-\d{2})/i);
-          if (fromMatch?.[1]) setStartDate(fromMatch[1]);
-          if (toMatch?.[1]) setEndDate(toMatch[1]);
-          
-          // Also try "leave from X to Y" pattern
-          const leaveMatch = data.summary.match(/leave.*?(\d{4}-\d{2}-\d{2}).*?(?:to|until).*?(\d{4}-\d{2}-\d{2})/i);
-          if (leaveMatch?.[1] && leaveMatch?.[2]) {
-            setStartDate(leaveMatch[1]);
-            setEndDate(leaveMatch[2]);
+          const summary: string = data.summary;
+          const startBase = inferredStart ? new Date(inferredStart) : new Date();
+
+          // Priority 1: explicit "return to work / back to work / fit for duty: YYYY-MM-DD"
+          const rtwPatterns = [
+            /return[_\s-]?to[_\s-]?work[:\s]*(\d{4}-\d{2}-\d{2})/i,
+            /back[_\s-]?to[_\s-]?work[:\s]*(\d{4}-\d{2}-\d{2})/i,
+            /fit[_\s-]?for[_\s-]?duty[:\s]*(\d{4}-\d{2}-\d{2})/i,
+          ];
+          let endSet = false;
+          for (const pat of rtwPatterns) {
+            const m = summary.match(pat);
+            if (m?.[1]) {
+              setEndDate(m[1]);
+              endSet = true;
+              break;
+            }
+          }
+
+          // Priority 2: existing from_date / to_date pattern
+          if (!endSet) {
+            const fromMatch = summary.match(/from[_\s]?date[:\s]*(\d{4}-\d{2}-\d{2})/i);
+            const toMatch = summary.match(/to[_\s]?date[:\s]*(\d{4}-\d{2}-\d{2})/i);
+            if (fromMatch?.[1]) setStartDate(fromMatch[1]);
+            if (toMatch?.[1]) {
+              setEndDate(toMatch[1]);
+              endSet = true;
+            }
+          }
+
+          // Priority 3: "leave from X to Y" pattern
+          if (!endSet) {
+            const leaveMatch = summary.match(/leave.*?(\d{4}-\d{2}-\d{2}).*?(?:to|until).*?(\d{4}-\d{2}-\d{2})/i);
+            if (leaveMatch?.[1] && leaveMatch?.[2]) {
+              setStartDate(leaveMatch[1]);
+              setEndDate(leaveMatch[2]);
+              endSet = true;
+            }
+          }
+
+          // Priority 4: relative durations — "for 5 days", "for one week"
+          if (!endSet) {
+            const wordToNum: Record<string, number> = {
+              one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7,
+              eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, fourteen: 14,
+            };
+            const relMatch = summary.match(/for\s+(\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fourteen)\s+(day|days|week|weeks)/i);
+            if (relMatch) {
+              const raw = relMatch[1].toLowerCase();
+              const n = /^\d+$/.test(raw) ? parseInt(raw, 10) : (wordToNum[raw] ?? 0);
+              const unit = relMatch[2].toLowerCase();
+              const totalDays = unit.startsWith('week') ? n * 7 : n;
+              if (totalDays > 0) {
+                const end = new Date(startBase);
+                end.setDate(end.getDate() + totalDays - 1);
+                setEndDate(end.toISOString().split('T')[0]);
+              }
+            }
           }
         } catch (e) {
           console.warn('Could not parse dates from session summary:', e);
