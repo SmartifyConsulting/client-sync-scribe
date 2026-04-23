@@ -67,7 +67,7 @@ export default function PatientProfile() {
   const { sessions, loading: sessionsLoading } = useSessions(id);
   const { lollipopCount } = usePatientRewards(id);
   const { templates, loading: templatesLoading } = useTemplates();
-  const { documents, loading: documentsLoading, fetchDocuments } = useDocuments();
+  const { documents, loading: documentsLoading, fetchDocuments, updateDocument } = useDocuments();
   const { user } = useAuth();
   const [mailboxAlias, setMailboxAlias] = useState<string | null>(null);
   const [mailboxId, setMailboxId] = useState<string | null>(null);
