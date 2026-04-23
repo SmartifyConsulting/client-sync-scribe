@@ -681,8 +681,12 @@ const completeSession = async (
       if (patientId) {
         try {
           const [patientRes, profileRes, templateRes] = await Promise.all([
-            supabase.from('patients').select('name').eq('id', patientId).maybeSingle(),
-            supabase.from('profiles').select('full_name, practice_number, doctor_number, practice_address').eq('id', user.id).maybeSingle(),
+            supabase.from('patients')
+              .select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email')
+              .eq('id', patientId).maybeSingle(),
+            supabase.from('profiles')
+              .select('full_name, practice_number, doctor_number, practice_address, specialty')
+              .eq('id', user.id).maybeSingle(),
             supabase.from('templates').select('id, name, content').eq('user_id', user.id),
           ]);
 
@@ -690,55 +694,130 @@ const completeSession = async (
           const docProfile = profileRes.data;
           const doctorTemplates = templateRes.data || [];
           const today = new Date().toISOString().split('T')[0];
+          const todayLong = new Date(today).toLocaleDateString();
+          const dueDate = new Date(Date.now() + 30 * 86400000);
+          const dueDateISO = dueDate.toISOString().split('T')[0];
+          const dueDateLong = dueDate.toLocaleDateString();
+
+          // Generate invoice number: INV-YYYYMM-XXXXX
+          const ymd = new Date();
+          const yyyymm = `${ymd.getFullYear()}${String(ymd.getMonth() + 1).padStart(2, '0')}`;
+          const rand = String(Math.floor(Math.random() * 100000)).padStart(5, '0');
+          const generatedInvoiceNumber = `INV-${yyyymm}-${rand}`;
+
+          // Build services line + total from extracted invoice
+          const inv = (summaryData?.invoice as any) || {};
+          const lineItems: any[] = Array.isArray(inv.line_items) ? inv.line_items
+            : Array.isArray(inv.items) ? inv.items
+            : [];
+          const currency = inv.currency || 'R';
+          let computedTotal = 0;
+          let servicesLine: string;
+          if (lineItems.length > 0) {
+            servicesLine = lineItems.map((li: any) => {
+              const desc = li.description || li.name || 'Service';
+              const qty = Number(li.quantity || 1);
+              const price = Number(li.price || li.amount || 0);
+              const lineTotal = qty * price;
+              computedTotal += lineTotal;
+              return `${desc} (x${qty}) - ${currency} ${lineTotal.toFixed(2)}`;
+            }).join('<br/>');
+          } else {
+            servicesLine = `Consultation - ${todayLong}`;
+            computedTotal = Number(inv.total || 0);
+          }
+          const formattedTotal = computedTotal > 0
+            ? `${currency} ${computedTotal.toFixed(2)}`
+            : (inv.total ? `${currency} ${Number(inv.total).toFixed(2)}` : '___');
 
           const invoiceTemplate = doctorTemplates.find(t =>
             t.name.toLowerCase().includes('invoice')
           );
 
+          const patientName = patientRecord?.name || 'Unknown';
+          const replacements: Record<string, string> = {
+            ClientName: patientName,
+            PatientName: patientName,
+            'Patient Name': patientName,
+            Date: todayLong,
+            SessionDate: todayLong,
+            InvoiceDate: todayLong,
+            DueDate: dueDateLong,
+            DoctorName: docProfile?.full_name || '',
+            DoctorNumber: docProfile?.doctor_number || '',
+            RegistrationNumber: docProfile?.doctor_number || '',
+            PracticeNumber: docProfile?.practice_number || '',
+            PracticeAddress: docProfile?.practice_address || '',
+            Specialty: docProfile?.specialty || '',
+            PatientAddress: patientRecord?.physical_address || patientRecord?.address || '',
+            MedicalAid: patientRecord?.medical_aid || '',
+            MedicalAidNumber: patientRecord?.medical_aid_number || '',
+            IDNumber: patientRecord?.id_passport_number || '',
+            DOB: patientRecord?.dob || '',
+            Phone: patientRecord?.phone || '',
+            Email: patientRecord?.email || '',
+            Services: servicesLine,
+            TotalAmount: formattedTotal,
+            BankDetails: (docProfile as any)?.bank_details || '',
+            InvoiceNumber: generatedInvoiceNumber,
+          };
+
           let invoiceContent: string;
           if (invoiceTemplate) {
-            const replacements: Record<string, string> = {
-              'ClientName': patientRecord?.name || 'Unknown',
-              'PatientName': patientRecord?.name || 'Unknown',
-              'Date': today,
-              'SessionDate': today,
-              'DoctorName': docProfile?.full_name || '',
-              'PracticeNumber': docProfile?.practice_number || '',
-              'PracticeAddress': docProfile?.practice_address || '',
-            };
             invoiceContent = invoiceTemplate.content;
             for (const [key, value] of Object.entries(replacements)) {
               invoiceContent = invoiceContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
             }
           } else {
-            invoiceContent = `<h2>Invoice</h2>
-<p><strong>Date:</strong> ${today}</p>
-<p><strong>Patient:</strong> ${patientRecord?.name || 'Unknown'}</p>
+            invoiceContent = `<h2>Invoice ${generatedInvoiceNumber}</h2>
+<p><strong>Date:</strong> ${todayLong}</p>
+<p><strong>Due Date:</strong> ${dueDateLong}</p>
+<p><strong>Patient:</strong> ${patientName}</p>
 <p><strong>Doctor:</strong> ${docProfile?.full_name || ''}</p>
 <p><strong>Practice Number:</strong> ${docProfile?.practice_number || ''}</p>
 <br/>
-<p><strong>Description:</strong> Consultation on ${today}</p>
-<p><strong>Amount:</strong> [To be completed]</p>`;
+<p><strong>Services:</strong><br/>${servicesLine}</p>
+<p><strong>Total:</strong> ${formattedTotal}</p>`;
           }
+          // Generic fallback for any unmatched [Token]
+          invoiceContent = invoiceContent.replace(/\[[A-Za-z][A-Za-z0-9_ -]*\]/g, '___');
 
           const { data: invoiceDoc } = await supabase.from('documents').insert({
             user_id: user.id,
             patient_id: patientId,
-            name: `Invoice - ${patientRecord?.name || 'Patient'} - ${today}`,
+            name: `Invoice ${generatedInvoiceNumber} - ${patientName} - ${today}`,
             content: invoiceContent,
             template_name: 'Invoice',
-            patient_name: patientRecord?.name || null,
+            patient_name: patientName,
             is_draft: true,
             session_id: sessionId,
           } as any).select('id').single();
           console.log('Invoice document auto-created');
+
+          // Also create a real invoices row for the Invoices admin page
+          try {
+            await supabase.from('invoices').insert({
+              doctor_id: user.id,
+              patient_id: patientId,
+              session_id: sessionId,
+              invoice_number: generatedInvoiceNumber,
+              description: lineItems.length > 0
+                ? lineItems.map((li: any) => li.description || li.name || 'Service').join(', ')
+                : `Consultation - ${todayLong}`,
+              amount: computedTotal || 0,
+              due_date: dueDateISO,
+              status: 'pending',
+            } as any);
+          } catch (invRowError) {
+            console.error('Error creating invoice row:', invRowError);
+          }
 
           if (invoiceDoc) {
             await supabase.from('todos').insert({
               user_id: user.id,
               session_id: sessionId,
               patient_id: patientId,
-              title: `Review Invoice - ${patientRecord?.name || 'Patient'}`,
+              title: `Review Invoice - ${patientName}`,
               document_id: invoiceDoc.id,
               task_type: 'document_review',
               priority: 'high',
