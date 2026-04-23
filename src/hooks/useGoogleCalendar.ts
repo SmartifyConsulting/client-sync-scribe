@@ -122,6 +122,12 @@ export function useGoogleCalendar() {
       return null;
     }
 
+    // Individual-only sync: never mirror another doctor's appointments to this user's Google Calendar
+    if (appointment?.user_id && user?.id && appointment.user_id !== user.id) {
+      console.log('Skipping Google sync: appointment owned by another doctor');
+      return null;
+    }
+
     setIsSyncing(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -143,7 +149,7 @@ export function useGoogleCalendar() {
     } finally {
       setIsSyncing(false);
     }
-  }, [connection]);
+  }, [connection, user]);
 
   const fetchGoogleEvents = useCallback(async () => {
     if (!connection) return [];
