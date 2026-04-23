@@ -1,99 +1,96 @@
 
 
-# Plan: Fix preview font + Round Table typography
+# Plan: SessionDetail typography to 11–12px scale + Doctor private notes
 
-Two unrelated tweaks in a small set of files.
+Two scoped changes to `/sessions/:id`. The system-wide style question is answered briefly at the end.
 
-## 1. Document preview fonts don't match the template
+## 1. Bring SessionDetail to the 11–12px scale
 
-**Root cause.** Templates store `font_family` as a logical key like `"sans"`, `"open-sans"`, `"lora"`, `"roboto"`, `"playfair"`, etc. The template editor previews these correctly because it uses Tailwind classes (`font-sans`, `font-open-sans`, `font-lora`) that resolve to the real loaded font families in `tailwind.config.ts` (Inter, Open Sans, Lora…).
+`src/pages/SessionDetail.tsx` still uses the legacy 14–24px sizes (`text-2xl`, `text-sm`, `font-semibold` defaults). Standardise per the project's compact scale used everywhere else (Round Table, Patient Profile, Documents).
 
-But `DocumentPreview` (`src/components/sessions/DocumentPreview.tsx`) takes that same key and shoves it straight into a CSS `font-family` style:
+| Section | Element | Current | New |
+|---|---|---|---|
+| Back link | text | `text-sm` | `text-[11px]` |
+| Header | Page title `h1` | `text-2xl font-bold` | `text-[16px] font-semibold` |
+| Header | Icon tile | `h-14 w-14` / `h-7 w-7` | `h-10 w-10` / `h-5 w-5` |
+| Header | Meta line (time, duration) | `text-sm` | `text-[11px]` |
+| Header | Status pill | `text-xs` | `text-[10px]` |
+| Header | Patient link | `text-sm` | `text-[12px]` |
+| Header | Delete button | `size="sm"` default text | add `text-[11px]` |
+| Quick Actions card | `h2` | default (~16px) | `text-[12px] font-semibold` |
+| Quick Actions card | Buttons | `text-sm h-10` | `text-[11px] h-9` (icons stay `h-4 w-4`, gap `gap-1.5`) |
+| AI Summary | `h2` + subtitle | default + `text-xs` | `text-[12px] font-semibold` + `text-[11px]` |
+| AI Summary | Icon tile | `h-10 w-10` / `h-5 w-5` | `h-8 w-8` / `h-4 w-4` |
+| AI Summary | Translate Select trigger + items | `text-xs h-8` | `text-[11px] h-8` |
+| AI Summary | Body paragraph | default (~16px) | `text-[12px] leading-relaxed` |
+| Session Notes | Header `h2` + subtitle | default + `text-xs` | `text-[12px] font-semibold` + `text-[11px]` |
+| Session Notes | Audio / Transcript / Notes labels | `text-sm font-semibold` | `text-[11px] font-semibold uppercase tracking-wide` |
+| Session Notes | Transcript paragraphs | default | `text-[12px]` |
+| Session Notes | Notes paragraph | default | `text-[12px]` |
+| Session Notes | Amber retention alert | `text-xs` | `text-[11px]` |
+| Session Notes | Download Select trigger | `text-xs h-8` | `text-[11px] h-8` |
+| Session Documents | `h2` + subtitle | default + `text-xs` | `text-[12px] font-semibold` + `text-[11px]` |
+| Session Documents | Row name | `text-sm font-medium` | `text-[12px] font-semibold` |
+| Session Documents | DRAFT badge | `text-[10px]` | keep |
+| Session Documents | Action buttons | `h-7 w-7 / h-3.5` | keep |
+| Action Points | `h2` + subtitle | default + `text-xs` | `text-[12px] font-semibold` + `text-[11px]` |
+| Action Points | List item | default | `text-[12px]` |
+| Empty state | text | default | `text-[11px]` |
 
-```tsx
-fontFamily: fontFamily || "system-ui, -apple-system, sans-serif"
+Card padding stays `p-6` desktop, but icon tile shrinks so the card visually rebalances. No structural changes — only typographic scale.
+
+## 2. Doctor-only Private Notes section
+
+These are notes a doctor writes for themselves on a session — never shown to other doctors or to the patient.
+
+### Schema
+
+New nullable column on `public.sessions`:
+
+```sql
+ALTER TABLE public.sessions ADD COLUMN private_notes text;
 ```
 
-CSS has no idea what `"sans"` or `"open-sans"` means — so the browser falls back to its default serif/sans, and the preview looks nothing like the template. Body text is also locked at `12pt` regardless of what the template chose, while header/footer cells are locked at `9pt`.
+No new RLS needed: the existing session policies are already owner-only (`auth.uid() = user_id` for SELECT/UPDATE/DELETE; INSERT WITH CHECK same). A second doctor with `doctor_patient_access` to the patient cannot read this row at all because no cross-doctor SELECT policy exists on `sessions`. So a column on this table is automatically private to the recording doctor.
 
-**Fix.**
+**Documents/Round Table comparison:** I confirmed `documents` and `round_table_notes` are the only tables that intentionally expose data across doctors via additional policies. `sessions` does not — perfect for private notes.
 
-a. Add a small `FONT_FAMILY_MAP` constant (mirrors the values in `tailwind.config.ts`):
+### UI
 
-```ts
-const FONT_FAMILY_MAP: Record<string, string> = {
-  sans: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
-  roboto: '"Roboto", sans-serif',
-  "open-sans": '"Open Sans", sans-serif',
-  lora: '"Lora", serif',
-  merriweather: '"Merriweather", serif',
-  playfair: '"Playfair Display", serif',
-  "source-serif": '"Source Serif 4", serif',
-  rockwell: 'Rockwell, Georgia, serif',
-};
-const resolveFont = (key?: string | null) =>
-  (key && FONT_FAMILY_MAP[key]) || FONT_FAMILY_MAP.sans;
-```
+New card placed immediately below the public **Session Notes** card (and above Session Documents), so it reads as the private companion to the shared notes.
 
-Use `resolveFont(fontFamily)` everywhere `DocumentPreview.tsx` currently writes a raw `fontFamily` string (the page wrapper, the body content `div`, and the `renderHeaderFooterSection` cells).
+- Card: `rounded-xl border border-amber-500/40 bg-amber-50/30 dark:bg-amber-950/10 p-6` — amber border to visually flag "private".
+- Header row:
+  - Icon tile `h-8 w-8 rounded-lg bg-amber-500/15`, `Lock` icon (lucide) `h-4 w-4 text-amber-600`.
+  - `h2` "Private Notes" — `text-[12px] font-semibold`.
+  - Subtitle `text-[11px] text-muted-foreground`: "Only visible to you. Not shared with the patient or other doctors."
+  - Right side: Edit / Save / Cancel buttons (`size="sm" text-[11px]`).
+- Body:
+  - Read mode (default when not editing and `private_notes` set): `<p className="text-[12px] whitespace-pre-wrap text-foreground">{session.private_notes}</p>`.
+  - Empty + not editing: muted placeholder line "No private notes yet — click Edit to add notes only you can see." (`text-[11px] text-muted-foreground italic`).
+  - Edit mode: `<Textarea text-[12px] min-h-[140px]>` bound to a local `privateNotesDraft` state; Save calls `supabase.from('sessions').update({ private_notes: privateNotesDraft }).eq('id', id)`, refreshes the session via the existing `useSession` hook (add a `refetch` or invalidate), and toasts "Private notes saved". Cancel discards the draft.
 
-b. Pass the same resolved family into `printDocument(...)` so the printed/PDF output matches the on-screen preview.
+Always rendered (even when `session.private_notes` is empty) so the doctor can add notes from any session view.
 
-c. Make body text size match the template editor's preview (which uses default body text, ~14px / `text-sm`) instead of the hard-coded `12pt`. Header/footer cell size stays small (`9pt` is already correct for letterhead).
+### Hook changes
 
-d. In `DocumentPreviewWithLetterhead` inside `PatientProfile.tsx` (line 1215), also fall back to the document's *template* `font_family` when the header/footer template doesn't set one — currently it only reads `headerFooter?.font_family`. Add a tiny query (or extend `useDocumentHeaderFooter`) to also return `template.font_family`, and pass `template.font_family ?? headerFooter?.font_family` as `fontFamily`.
+`src/hooks/useSessions.ts` → make sure `useSession` returns `private_notes` (Supabase types regenerate automatically once the column exists; the hook uses `select('*')` patterns so no change needed there). Add a small `refetch()` returned from `useSession` so the new card can refresh after save without a full page reload. If `useSession` already exposes a refresher, reuse it; otherwise add one tiny `setRefreshKey` pattern.
 
-After this, what the user typed/styled in the template editor and what they see in the doctor-side preview will be visually identical (font family, weight cascade, italic/bold inline tags from `renderFormattedContent`).
-
-## 2. Round Table fonts too big & inconsistent
-
-The Round Table panels (used inside `PatientProfile.tsx`'s Round Table tab and the patient portal at `/patient/round-table`) use the app's default 14–16px sizes, while the rest of the clinical surfaces sit at the standardised 11–12px.
-
-### `src/components/patients/RoundTable.tsx` (doctor-side)
-
-| Element | Current | New |
-|---|---|---|
-| Header `h3` ("Round Table") | `font-semibold` (~16px) | `text-[12px] font-semibold` |
-| Header subtitle | `text-xs` | `text-[11px]` |
-| Avatar circle | `h-8 w-8` text-sm | `h-7 w-7 text-[11px]` |
-| Doctor name | `font-medium` (~14px) | `text-[12px] font-semibold` |
-| Specialty pill | `text-xs px-2 py-0.5` | `text-[10px] px-1.5 py-0` |
-| Date line | `text-xs` | `text-[11px]` |
-| Note body content | `text-sm` | `text-[12px]` |
-| "New" indicator | `text-xs` | `text-[10px]` |
-| Empty-state line | base | `text-[11px]` |
-| Textarea placeholder/min-height | `min-h-[100px]` | keep height; `text-[12px]` for typed content |
-| Delete icon button | `h-8 w-8 / h-4 w-4` | `h-7 w-7 / h-3.5 w-3.5` |
-
-### `src/pages/patient/PatientRoundTable.tsx` (patient-side)
-
-| Element | Current | New |
-|---|---|---|
-| Page title `h1` | `text-2xl font-bold` | `text-[16px] font-semibold` (matches other patient holarchive pages) |
-| Subtitle | `text-[12px]` | `text-[11px]` |
-| Empty-state title `h3` | `text-lg font-semibold` | `text-[13px] font-semibold` |
-| Empty-state body | `text-sm` | `text-[11px]` |
-| Avatar | `h-9 w-9 text-xs` | `h-7 w-7 text-[11px]` |
-| Doctor name | `text-sm font-medium` | `text-[12px] font-semibold` |
-| Date | `text-xs` | `text-[11px]` |
-| Note body | `text-sm` | `text-[12px]` |
-
-Spacing stays the same — only typographic scale changes.
-
-## Files touched
+### Files touched
 
 | File | Change |
 |---|---|
-| `src/components/sessions/DocumentPreview.tsx` | Add `FONT_FAMILY_MAP`, resolve key → real CSS family in body + header/footer cells + print call; switch body from `12pt` to `14px`. |
-| `src/hooks/useDocumentHeaderFooter.ts` | Also return the matched template's `font_family` so callers can prefer it. |
-| `src/pages/PatientProfile.tsx` | In `DocumentPreviewWithLetterhead`, pass `template.font_family ?? headerFooter.font_family` as `fontFamily`. |
-| `src/components/patients/RoundTable.tsx` | Shrink all typography per table above. |
-| `src/pages/patient/PatientRoundTable.tsx` | Shrink all typography per table above. |
+| `supabase/migrations/<new>.sql` | `ALTER TABLE public.sessions ADD COLUMN private_notes text;` |
+| `src/hooks/useSessions.ts` | Expose a `refetch` from `useSession` (small additive change). |
+| `src/pages/SessionDetail.tsx` | Apply the typography table above; add the Private Notes card with edit/save/cancel logic and `Lock` icon import. |
+
+## On the system-wide consistency question
+
+There's no enforced design-token layer for typography in this project — `STYLE_MANIFEST.md` covers spacing/layout but doesn't fix a numeric font scale, so older pages drifted to Tailwind defaults (`text-sm`, `text-2xl`) while newer pages use the explicit `text-[11px]`/`text-[12px]` pattern. A real fix is a follow-up: add a typography section to `STYLE_MANIFEST.md` (e.g. body 12px, label 11px, page title 16px, section title 12px-semibold), and a one-time sweep across the remaining legacy pages. **Not done in this task** — call it out and tackle as its own pass once you confirm the scale you want canonised.
 
 ## Out of scope
 
-- Changing how templates store `font_family` (key-based storage stays — only the *render* layer is fixed).
-- Touching the template editor's own preview (already correct).
-- Loading new web fonts; the app already loads all eight families.
-- Round Table real-time / read-tracking logic.
+- Sweeping every other legacy page to the 11–12px scale (separate, larger pass).
+- Sharing/printing private notes — they intentionally never leave the doctor's view.
+- Including private notes in the AI summary or transcripts.
 
