@@ -20,10 +20,10 @@ interface ReportFixSheetProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const TYPE_META: Record<ReportType, { label: string; icon: typeof Bug; border: string; chip: string }> = {
-  bug: { label: "Bug", icon: Bug, border: "border-l-destructive", chip: "bg-destructive/10 text-destructive" },
-  fix: { label: "Fix", icon: Wrench, border: "border-l-primary", chip: "bg-primary/10 text-primary" },
-  nice_to_have: { label: "Nice-to-have", icon: Sparkles, border: "border-l-amber-500", chip: "bg-amber-500/10 text-amber-700" },
+const TYPE_META: Record<ReportType, { label: string; icon: typeof Bug; border: string; chip: string; fill: string }> = {
+  bug: { label: "Bug", icon: Bug, border: "border-l-destructive", chip: "bg-destructive/10 text-destructive", fill: "bg-destructive hover:bg-destructive/90" },
+  fix: { label: "Fix", icon: Wrench, border: "border-l-primary", chip: "bg-primary/10 text-primary", fill: "bg-primary hover:bg-primary/90" },
+  nice_to_have: { label: "Nice-to-have", icon: Sparkles, border: "border-l-amber-500", chip: "bg-amber-500/10 text-amber-700", fill: "bg-amber-500 hover:bg-amber-600" },
 };
 
 export function ReportFixSheet({ open, onOpenChange }: ReportFixSheetProps) {
@@ -114,9 +114,9 @@ export function ReportFixSheet({ open, onOpenChange }: ReportFixSheetProps) {
                   type="button"
                   onClick={() => setType(t)}
                   className={cn(
-                    "flex items-center justify-center gap-1.5 px-2 py-2 rounded-md border-l-4 border border-border transition-colors text-xs font-medium",
-                    meta.border,
-                    active ? "bg-accent" : "bg-background hover:bg-accent/50"
+                    "flex items-center justify-center gap-1.5 px-2 py-2 rounded-md transition-all text-xs font-semibold text-white",
+                    meta.fill,
+                    active ? "ring-2 ring-foreground/40 shadow-md" : "opacity-70"
                   )}
                 >
                   <Icon className="h-3.5 w-3.5" />
