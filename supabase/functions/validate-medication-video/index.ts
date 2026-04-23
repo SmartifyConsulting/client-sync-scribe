@@ -388,8 +388,12 @@ The patient's declared intake method is: "${intakeMethod}".
 ${ref?.observed_description ? `Tablet baseline description: ${ref.observed_description}` : ''}
 ${ref?.baseline_pattern_summary ? `Patient's baseline routine: ${ref.baseline_pattern_summary}` : ''}
 
+This clip covers TABLET ${tabletIdx} OF ${tabletTot} for this dose.
+
 REQUIRED signals for this intake method: ${required}
 DISQUALIFYING signals for this intake method: ${disqualifying}
+
+Also COUNT the number of distinct tablets/capsules/pills visible in the close-up frames at any point during the clip. If multiple tablets were taken together, count all of them. Return that integer in detectedTabletCount (0 if none visible).
 
 Analyse the SEQUENCE and respond with JSON ONLY:
 {
@@ -400,6 +404,7 @@ Analyse the SEQUENCE and respond with JSON ONLY:
   "person_detected": true or false,
   "ingestion_detected": true or false,
   "disqualifying_signal": true or false,
+  "detectedTabletCount": integer,
   "detected_elements": ["list", "of", "relevant", "elements"]
 }
 
