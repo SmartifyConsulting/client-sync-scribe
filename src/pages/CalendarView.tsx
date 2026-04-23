@@ -450,8 +450,14 @@ export default function CalendarView() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Schedule New Appointment</DialogTitle>
-              <DialogDescription>Create a new appointment for a patient</DialogDescription>
+              <DialogTitle>
+                {scope === 'practice' ? 'Schedule on Practice Calendar' : 'Schedule New Appointment'}
+              </DialogTitle>
+              <DialogDescription>
+                {scope === 'practice'
+                  ? 'Create a new appointment on the shared practice calendar'
+                  : 'Create a new appointment for a patient'}
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div>
