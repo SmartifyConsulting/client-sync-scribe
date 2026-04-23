@@ -239,8 +239,8 @@ export function RoundTable({ patientId, patientName, onUnreadCountChange, hideHe
             <Users className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h3 className="font-semibold text-foreground">Round Table</h3>
-            <p className="text-xs text-muted-foreground">
+            <h3 className="text-[12px] font-semibold text-foreground">Round Table</h3>
+            <p className="text-[11px] text-muted-foreground">
               Collaborative notes from all doctors on {patientName}'s care team
             </p>
           </div>
@@ -253,7 +253,7 @@ export function RoundTable({ patientId, patientName, onUnreadCountChange, hideHe
           placeholder="Add a note for the care team..."
           value={newNote}
           onChange={(e) => setNewNote(e.target.value)}
-          className="min-h-[100px] resize-none bg-background"
+          className="min-h-[100px] resize-none bg-background text-[12px]"
         />
         <div className="flex justify-end">
           <Button 
@@ -273,7 +273,7 @@ export function RoundTable({ patientId, patientName, onUnreadCountChange, hideHe
 
       {/* Notes List */}
       {notes.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border p-8 text-center text-muted-foreground">
+        <div className="rounded-lg border border-dashed border-border p-8 text-center text-[11px] text-muted-foreground">
           No notes yet. Be the first to add a note to the Round Table!
         </div>
       ) : (
@@ -289,19 +289,19 @@ export function RoundTable({ patientId, patientName, onUnreadCountChange, hideHe
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-sm font-medium">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-[11px] font-medium">
                     {note.doctor_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="font-medium text-foreground">{note.doctor_name}</p>
+                      <p className="text-[12px] font-semibold text-foreground">{note.doctor_name}</p>
                       {note.doctor_specialty && (
-                        <span className="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
+                        <span className="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-1.5 py-0 text-[10px] font-medium text-blue-700 dark:text-blue-300">
                           {note.doctor_specialty}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-[11px] text-muted-foreground">
                       {format(new Date(note.created_at), "MMM d, yyyy 'at' h:mm a")}
                     </p>
                   </div>
@@ -310,18 +310,18 @@ export function RoundTable({ patientId, patientName, onUnreadCountChange, hideHe
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    className="h-7 w-7 text-muted-foreground hover:text-destructive"
                     onClick={() => handleDelete(note.id)}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 )}
               </div>
-              <p className="mt-3 text-sm text-foreground whitespace-pre-wrap">
+              <p className="mt-3 text-[12px] text-foreground whitespace-pre-wrap">
                 {note.content}
               </p>
               {!note.isRead && (
-                <span className="mt-2 inline-block text-xs text-primary font-medium">
+                <span className="mt-2 inline-block text-[10px] text-primary font-medium">
                   New
                 </span>
               )}

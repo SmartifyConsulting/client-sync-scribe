@@ -252,7 +252,7 @@ const loadImage = (url: string): Promise<HTMLImageElement> => {
 
 const getFontFamily = (fontFamily?: string): string => {
   const fontMap: Record<string, string> = {
-    'sans': 'system-ui, -apple-system, sans-serif',
+    'sans': 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
     'roboto': "'Roboto', sans-serif",
     'open-sans': "'Open Sans', sans-serif",
     'lora': "'Lora', serif",
