@@ -51,9 +51,11 @@ interface PillReference {
 
 interface MedicationAdherenceTabProps {
   patientId: string;
+  focusRxId?: string | null;
+  onFocusHandled?: () => void;
 }
 
-export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProps) {
+export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }: MedicationAdherenceTabProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [recordingPrescriptionId, setRecordingPrescriptionId] = useState<string | null>(null);
@@ -191,6 +193,32 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
     };
     checkMissed();
   }, [prescriptions.length, adherenceRecords.length]);
+
+  // Honour ?focus={rxId} from the Overview "Take Medication" button:
+  // scroll the matching card into view and auto-open the recorder/baseline.
+  useEffect(() => {
+    if (!focusRxId || prescriptions.length === 0) return;
+    const rx = prescriptions.find((p) => p.id === focusRxId);
+    if (!rx) return;
+    const el = document.getElementById(`rx-card-${focusRxId}`);
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    // Defer trigger so the card scroll completes first
+    const t = setTimeout(() => {
+      const todayRecord = adherenceRecords.find(
+        (r) => r.prescription_id === focusRxId && r.scheduled_date === today,
+      );
+      if (todayRecord && todayRecord.status !== "pending") {
+        // already done — just leave the card focused
+      } else if (needsBaseline(focusRxId)) {
+        setBaselineCapture({ open: true, rxId: rx.id, medication: rx.medication, dosage: rx.dosage });
+      } else {
+        setRecordingPrescriptionId(rx.id);
+      }
+      onFocusHandled?.();
+    }, 350);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusRxId, prescriptions.length, pillReferences.length, adherenceRecords.length]);
 
   // Calculate streak for a prescription
   const getStreak = (prescriptionId: string) => {
@@ -534,7 +562,7 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
         const adherenceRate = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
 
         return (
-          <Card key={rx.id} className={todayStatus === "completed" ? "border-green-500/30" : ""}>
+          <Card key={rx.id} id={`rx-card-${rx.id}`} className={todayStatus === "completed" ? "border-green-500/30" : ""}>
             <CardContent className="pt-6">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
@@ -554,7 +582,7 @@ export function MedicationAdherenceTab({ patientId }: MedicationAdherenceTabProp
                       </Badge>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground">{rx.dosage} • {rx.frequency}</p>
+                  <p className="text-sm text-muted-foreground">{rx.dosage?.trim() || "—"} • {rx.frequency?.trim() || "once daily"}</p>
 
                   {(() => {
                     const ref = getReference(rx.id);
