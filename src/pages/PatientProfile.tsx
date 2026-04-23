@@ -735,7 +735,7 @@ export default function PatientProfile() {
           </div>
           <div className="rounded-2xl bg-card shadow-card overflow-hidden">
             {(() => {
-              const patientDocuments = documents.filter((doc) => doc.patient_id === patient.id);
+              const patientDocuments = documents;
               if (documentsLoading) {
                 return (
                   <div className="p-10 text-center">
@@ -749,23 +749,33 @@ export default function PatientProfile() {
                     <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
                       <FileText className="h-7 w-7 text-muted-foreground" />
                     </div>
-                    <p className="text-muted-foreground">No documents yet</p>
-                    <p className="text-sm text-muted-foreground mt-1">Create a new document from a template</p>
+                    <p className="text-[11px] text-muted-foreground">No documents yet</p>
+                    <p className="text-[11px] text-muted-foreground mt-1">Create a new document from a template</p>
                   </div>
                 );
               }
               return (
                 <div className="divide-y divide-border/50">
-                  {patientDocuments.map((doc) => (
+                  {patientDocuments.map((doc) => {
+                    const mediaUrl = (doc as any).media_url as string | undefined;
+                    const mediaType = (doc as any).media_type as string | undefined;
+                    const isImageDoc = !!mediaUrl && (mediaType === "image" || /\.(jpe?g|png|webp|heic)(\?|$)/i.test(mediaUrl));
+                    const aiAnalysis = (doc as any).ai_analysis as string | undefined;
+                    const isAnalyzing = analyzingDocId === doc.id;
+                    return (
                     <div
                       key={doc.id}
                       className="flex items-center gap-3 p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer"
                     >
                       <div
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 overflow-hidden"
                         onClick={() => navigate(`/documents?view=${doc.id}`)}
                       >
-                        <FileText className="h-4 w-4 text-primary" />
+                        {isImageDoc ? (
+                          <img src={mediaUrl} alt={doc.name} className="h-8 w-8 object-cover" />
+                        ) : (
+                          <FileText className="h-4 w-4 text-primary" />
+                        )}
                       </div>
                       <div className="flex-1" onClick={() => navigate(`/documents?view=${doc.id}`)}>
                         <p className="text-[11px] font-semibold text-foreground leading-tight">{doc.name}</p>
@@ -784,6 +794,37 @@ export default function PatientProfile() {
                         </span>
                       )}
                       <div className="flex items-center gap-1">
+                        {isImageDoc && (
+                          <button
+                            className="h-7 w-7 rounded-full flex items-center justify-center text-violet-600 hover:text-violet-700 hover:bg-violet-50 transition-colors disabled:opacity-50"
+                            title={aiAnalysis ? "View AI analysis" : "Analyse with AI"}
+                            disabled={isAnalyzing}
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (aiAnalysis) {
+                                setAnalysisDialog(doc);
+                                return;
+                              }
+                              setAnalyzingDocId(doc.id);
+                              try {
+                                const { data, error } = await supabase.functions.invoke("analyze-medical-image", {
+                                  body: { imageUrl: mediaUrl, documentId: doc.id },
+                                });
+                                if (error) throw error;
+                                const updated = { ...doc, ai_analysis: data.analysis, ai_analyzed_at: data.analyzedAt } as any;
+                                setAnalysisDialog(updated);
+                                fetchDocuments();
+                                toast({ title: "Analysis Complete", description: "AI interpretation is ready" });
+                              } catch (err: any) {
+                                toast({ title: "Analysis Failed", description: err.message || "Could not analyse the image", variant: "destructive" });
+                              } finally {
+                                setAnalyzingDocId(null);
+                              }
+                            }}
+                          >
+                            {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                          </button>
+                        )}
                         <button
                           className="h-7 w-7 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                           title="Preview"
@@ -836,20 +877,26 @@ export default function PatientProfile() {
                                   .from("documents")
                                   .update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any
                               ).eq("id", doc.id);
-                              const { data: updatedDocs } = await supabase
-                                .from("documents")
-                                .select("*")
-                                .eq("patient_id", doc.patient_id!)
-                                .order("created_at", { ascending: false });
-                              if (updatedDocs) fetchDocuments();
+                              fetchDocuments();
                             } catch {}
                           }}
                         >
                           <Send className="h-4 w-4" />
                         </button>
+                        <button
+                          className="h-7 w-7 rounded-full flex items-center justify-center text-destructive hover:text-destructive hover:bg-destructive/10 transition-colors"
+                          title="Delete"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDocToDelete(doc);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               );
             })()}
