@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { X, Eye, Printer, Mail, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { printDocument } from "@/utils/documentExport";
 import { HeaderFooterTemplate } from "@/hooks/useHeaderFooterTemplates";
 import { renderFormattedContent } from "@/utils/documentFormatting";
+import { fillDocumentPlaceholders } from "@/lib/fillDocumentPlaceholders";
 
 const FONT_FAMILY_MAP: Record<string, string> = {
   sans: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
