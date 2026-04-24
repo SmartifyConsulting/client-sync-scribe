@@ -1,8 +1,12 @@
 /**
- * Tiny dev-gated logger. `error` and `warn` always pass through; `debug` and
- * `info` are silenced in production builds.
+ * Dev-only logger used to gate verbose `console.log` calls.
  *
- * Phase 5 will migrate stray `console.log` calls to `logger.debug`.
+ * Phase 5 has migrated the noisiest hooks (`useSessions`,
+ * `useAudioRecording`, `useGoogleCalendar`) to `logger.debug`. Other
+ * call sites can adopt this incrementally; nothing is forced.
+ *
+ * `console.error` and `console.warn` are intentionally untouched —
+ * those should always reach production logs.
  */
 
 const isDev = typeof import.meta !== "undefined" && import.meta.env?.DEV === true;

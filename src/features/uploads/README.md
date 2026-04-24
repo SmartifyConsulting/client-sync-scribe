@@ -1,11 +1,23 @@
-# Uploads feature (placeholder)
+# Uploads
 
-Future home of all file/storage logic.
+Centralised storage upload helpers (Phase 5).
 
-Will consolidate scattered storage-bucket calls (`patient-media`, `session-audio`, `health-photos`, `cpd-certificates`, `logos`, `avatars`) behind a single `useUpload(bucket, options)` hook while preserving:
+## `useUpload(bucket, options?)`
 
-- 5MB limit for audio/video uploads
-- 100MB patient storage allocation
-- private-bucket signed URL behaviour (see `src/utils/storageUrls.ts`, `src/utils/audioUrl.ts`)
+A single hook that wraps every Supabase Storage bucket used by the app:
 
-**Phase 1 is additive only — no existing upload code has been moved.**
+| Bucket             | Public | Default use |
+|--------------------|--------|-------------|
+| `logos`            | ✅     | Practice logos |
+| `avatars`          | ✅     | User avatars |
+| `patient-media`    | ✅     | Captured photos / drawings |
+| `session-audio`    | ❌     | Session recordings (5 MB cap) |
+| `cpd-certificates` | ❌     | CPD documents |
+| `health-photos`    | ❌     | Patient health photos (private) |
+
+Returns `{ upload, isUploading, error }`. `upload(file, path)` resolves to
+`{ path, url, isPublic }` — the `url` is a public URL for public buckets
+or a signed URL (default 1-hour TTL) for private ones.
+
+Existing components keep their inline `supabase.storage.from(...)` calls
+to avoid churn; new code should prefer this hook.
