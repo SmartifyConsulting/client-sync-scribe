@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/services/logger';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 
@@ -118,13 +119,13 @@ export function useGoogleCalendar() {
 
   const syncEvent = useCallback(async (action: 'create' | 'update' | 'delete', appointment: any) => {
     if (!connection) {
-      console.log('No calendar connection, skipping sync');
+      logger.debug('No calendar connection, skipping sync');
       return null;
     }
 
     // Individual-only sync: never mirror another doctor's appointments to this user's Google Calendar
     if (appointment?.user_id && user?.id && appointment.user_id !== user.id) {
-      console.log('Skipping Google sync: appointment owned by another doctor');
+      logger.debug('Skipping Google sync: appointment owned by another doctor');
       return null;
     }
 
