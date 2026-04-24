@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/services/logger';
 import { useToast } from '@/hooks/use-toast';
 
 interface UseAudioRecordingOptions {
@@ -57,7 +58,7 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
       }
 
       // Store the file path (not public URL) - bucket is private, use signed URLs to access
-      console.log('Audio uploaded successfully:', fileName);
+      logger.debug('Audio uploaded successfully:', fileName);
       return fileName;
     } catch (error) {
       console.error('Error in uploadAudioToStorage:', error);
@@ -142,7 +143,7 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
             const text = last[0].transcript.toLowerCase().trim();
             if (endPhrases.some(phrase => text.includes(phrase))) {
               endSessionDetectedRef.current = true;
-              console.log('End session detected via Web Speech API:', text);
+              logger.debug('End session detected via Web Speech API:', text);
               optionsRef.current.onEndSessionDetected?.();
               recognition.stop();
             }
@@ -248,7 +249,7 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
 
       if (storageUrl) {
         // Send storage URL instead of large base64 payload
-        console.log('Sending audio storage URL for transcription');
+        logger.debug('Sending audio storage URL for transcription');
         body = {
           audioUrl: storageUrl,
           patientName: optionsRef.current.patientName,
@@ -267,7 +268,7 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
         });
         reader.readAsDataURL(audioBlob);
         const base64Audio = await base64Promise;
-        console.log('Sending audio as base64 for transcription, size:', base64Audio.length);
+        logger.debug('Sending audio as base64 for transcription, size:', base64Audio.length);
         body = {
           audio: base64Audio,
           patientName: optionsRef.current.patientName,
@@ -292,7 +293,7 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
       
       // Set transcript directly (no append — each transcription is the full result)
       setTranscript(transcribedText);
-      console.log('Calling onTranscriptionComplete with text length:', transcribedText.length);
+      logger.debug('Calling onTranscriptionComplete with text length:', transcribedText.length);
       optionsRef.current.onTranscriptionComplete?.(transcribedText);
 
       toast({

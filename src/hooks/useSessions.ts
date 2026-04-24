@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/services/logger';
 import { useToast } from '@/hooks/use-toast';
 import type { Json } from '@/integrations/supabase/types';
 import { fillDocumentPlaceholders } from '@/lib/fillDocumentPlaceholders';
@@ -168,7 +169,7 @@ const completeSession = async (
         ? `${content}\n\nAdditional Notes:\n${additionalNotes}`
         : content;
 
-      console.log('Completing session with content length:', fullContent?.length);
+      logger.debug('Completing session with content length:', fullContent?.length);
 
       // Fetch user's preferred language for AI responses
       const { data: profileData } = await supabase
@@ -187,8 +188,8 @@ const completeSession = async (
         console.error('AI summary error:', summaryError);
       }
 
-      console.log('Summary data received:', JSON.stringify(summaryData, null, 2));
-      console.log('Action points from summary:', summaryData?.action_points);
+      logger.debug('Summary data received:', JSON.stringify(summaryData, null, 2));
+      logger.debug('Action points from summary:', summaryData?.action_points);
 
       const now = new Date().toISOString();
       const startedAt = creationData?.started_at || now;
@@ -257,7 +258,7 @@ const completeSession = async (
       // Auto-execute action points via process-todo-actions
       if (summaryData?.action_points?.length > 0) {
         const actionPointsText = summaryData.action_points.join('. ');
-        console.log('Auto-executing action points via process-todo-actions:', actionPointsText);
+        logger.debug('Auto-executing action points via process-todo-actions:', actionPointsText);
         
         try {
           const { data: processResult, error: processError } = await supabase.functions.invoke('process-todo-actions', {
@@ -283,7 +284,7 @@ const completeSession = async (
               }
             }
           } else {
-            console.log('Auto-execution result:', processResult);
+            logger.debug('Auto-execution result:', processResult);
             const autoCount = processResult?.results?.filter((r: any) => r.auto_executed).length || 0;
             const manualCount = processResult?.results?.filter((r: any) => !r.auto_executed).length || 0;
             if (autoCount > 0) {
@@ -395,7 +396,7 @@ const completeSession = async (
             is_draft: true,
             session_id: sessionId,
           } as any).select('id').single();
-          console.log('Hospital admission document auto-created');
+          logger.debug('Hospital admission document auto-created');
 
           // Create review todo for the draft document
           if (admissionDoc) {
@@ -520,7 +521,7 @@ const completeSession = async (
               is_draft: true,
               session_id: sessionId,
             } as any).select('id').single();
-            console.log('Prescription document auto-created');
+            logger.debug('Prescription document auto-created');
 
             if (rxDoc) {
               await supabase.from('todos').insert({
@@ -625,7 +626,7 @@ const completeSession = async (
             is_draft: true,
             session_id: sessionId,
           } as any).select('id').single();
-          console.log('Medical certificate document auto-created');
+          logger.debug('Medical certificate document auto-created');
 
           if (certDoc) {
             await supabase.from('todos').insert({
@@ -728,7 +729,7 @@ const completeSession = async (
             is_draft: true,
             session_id: sessionId,
           } as any).select('id').single();
-          console.log('Referral letter document auto-created');
+          logger.debug('Referral letter document auto-created');
 
           if (refDoc) {
             await supabase.from('todos').insert({
@@ -922,7 +923,7 @@ const completeSession = async (
             is_draft: true,
             session_id: sessionId,
           } as any).select('id').single();
-          console.log('Invoice document auto-created');
+          logger.debug('Invoice document auto-created');
 
           // Also create a real invoices row for the Invoices admin page
           try {
@@ -1051,7 +1052,7 @@ ${tasksHtml}`;
         if (rewardError) {
           console.error('Error awarding vula:', rewardError);
         } else {
-          console.log('Vula awarded for:', visitCategory, 'count:', lollipopsToAward);
+          logger.debug('Vula awarded for:', visitCategory, 'count:', lollipopsToAward);
           
           if (patientData?.patient_user_id) {
             await supabase.from('notifications').insert({
