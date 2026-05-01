@@ -25,6 +25,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import TermsAndConditions from "./pages/TermsAndConditions";
+import IntellectualProperty from "./pages/IntellectualProperty";
 import PatientConsent from "./pages/PatientConsent";
 import BusinessAssociateAgreement from "./pages/BusinessAssociateAgreement";
 
@@ -58,6 +59,26 @@ import { supabase } from "@/integrations/supabase/client";
 supabase.auth.onAuthStateChange(() => {
   queryClient.invalidateQueries();
 });
+
+// Legal/IP deterrence notice for anyone opening DevTools.
+// Same pattern Facebook, PayPal, Google use. Zero UX impact.
+if (typeof window !== "undefined" && !(window as any).__holarcNoticeShown) {
+  (window as any).__holarcNoticeShown = true;
+  // eslint-disable-next-line no-console
+  console.log(
+    "%c⚠ Stop!",
+    "color:#E01837;font-size:32px;font-weight:bold;"
+  );
+  // eslint-disable-next-line no-console
+  console.log(
+    "%cThis is a private application owned by Holarc Health (Pty) Ltd.\n" +
+      "Unauthorised access, scraping, reverse engineering, or any attempt to\n" +
+      "copy, clone, or white-label this service is strictly prohibited and\n" +
+      "may result in legal action.\n\n" +
+      "See https://holarchealth.com/intellectual-property",
+    "color:#0F766E;font-size:13px;line-height:1.5;"
+  );
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -106,6 +127,7 @@ const App = () => (
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+          <Route path="/intellectual-property" element={<IntellectualProperty />} />
           <Route path="/patient-consent" element={<PatientConsent />} />
           <Route path="/business-associate-agreement" element={<BusinessAssociateAgreement />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
