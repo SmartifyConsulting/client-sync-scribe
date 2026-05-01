@@ -1,115 +1,114 @@
+# Anti-cloning + IP protection plan
 
+You picked: **Audit edge functions + Supabase linter**, **Hide the Lovable badge**, **Legal + copyright pack** (no PDF watermarks).
 
-# Plan: Safe, incremental refactor of Holarc Health
+The honest framing still applies: this work won't stop someone from rebuilding your UI from screenshots — nothing can. What it *does* do is (1) lock down the only IP that actually matters (server-side data and logic), (2) remove the obvious "built on Lovable" tell, and (3) give you legal teeth so you can act if a clone shows up using your name, copy, or scraped data.
 
-A full directory rewrite of a 200+ file production app would risk every existing feature (auth flows, sessions, prescriptions, invoices, document resolver — all just stabilised). Instead, this plan delivers the same goals — structure, deduplication, separation of concerns, AI-readiness — through **non-breaking, incremental moves**, all behind import re-exports so nothing breaks at runtime.
+---
 
-## Guiding rules
+## Part 1 — Edge function security audit
 
-- Zero behaviour change. Every page, route, hook and component keeps its current public surface.
-- Moves are done with **re-export shims** at the old paths, so existing imports keep working.
-- No DB schema changes. No route changes. No removed features.
-- Done in 6 small phases, each independently testable.
+I scanned all 29 edge functions. Findings:
 
-## Phase 1 — Establish the new structure (additive only)
-
-Create new directories alongside the existing ones:
+**Functions missing JWT validation (need review):**
 
 ```text
-src/
-  features/
-    patients/        (hooks + components + services for patient domain)
-    sessions/
-    documents/       (incl. invoice / prescription / certificate logic)
-    rewards/
-    appointments/
-    admin/
-    insights/        (placeholder for AI layer — empty index.ts + README)
-  services/          (Supabase + edge-function wrappers, no UI)
-  types/             (shared TS interfaces extracted from inline use)
-  hooks/             (only truly cross-feature hooks remain here)
-  utils/             (only generic helpers remain here)
-  lib/               (kept for shadcn `cn` + tiny primitives)
-  components/        (only generic / shared UI; ui/ untouched)
-  pages/             (unchanged route entry points)
+google-places-autocomplete  - public proxy, may need auth gating
+parse-patient-import        - handles patient PII, must require auth
+translate-text              - currently public, should require auth
 ```
 
-Nothing is deleted in this phase.
+**Functions that are intentionally unauthenticated (correct, no change):**
 
-## Phase 2 — Extract a real services layer
+```text
+receive-email-document      - inbound email webhook (signature-based)
+reconcile-adherence-monthly - cron job (service-role only)
+remind-audio-retention      - cron job (service-role only)
+send-invoice-report         - cron job (service-role only)
+```
 
-Centralise Supabase calls currently embedded in hooks/components:
+**Steps:**
 
-- `services/supabase/patients.ts`, `sessions.ts`, `documents.ts`, `invoices.ts`, `prescriptions.ts`, `profiles.ts`, `appointments.ts`, `rewards.ts`, `admissions.ts`.
-- Each exports typed functions like `fetchPatientById`, `listPatientsForDoctor`, `createInvoiceForSession`, etc.
-- `services/edge/` for edge-function callers (`summarizeSession`, `transcribeAudio`, `translateText`, `analyzeMedicalImage`, `parsePatientImport`, `narrateBriefing`, `processTodoActions`, etc.) so all `supabase.functions.invoke` calls live in one place with consistent error handling.
-- Existing hooks (`useSessions`, `usePatients`, `useDocuments`, …) are refactored to **call these services** instead of inlining queries — their public API stays identical, so every page/component keeps working.
+1. Open each of the 3 flagged functions, add the standard `getClaims()` block from your existing pattern (already used in `analyze-medical-image`, `lookup-medical-codes`, etc.).
+2. For each function, add Zod-style input validation on `req.json()` body to reject malformed payloads with 400 before doing any work.
+3. Run `supabase--linter` to catch RLS gaps, missing policies, and other DB-level misconfigurations. Fix anything flagged at error/warn severity via migration.
+4. Verify `LOVABLE_API_KEY`, `OPENAI_API_KEY`, `RESEND_API_KEY`, `PAYPAL_CLIENT_SECRET`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_MAPS_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY` are never referenced from `src/` (they shouldn't be — confirming).
 
-Result: API calls disappear from UI components and from the bottom half of fat hooks.
+This is the highest-value work in the plan. A single missing RLS policy leaks more than a fully obfuscated bundle ever could protect.
 
-## Phase 3 — Move feature code into `features/`
+---
 
-Move (not rewrite) into feature folders, with re-export shims at the old paths:
+## Part 2 — Hide the Lovable badge
 
-- `components/patients/*` → `features/patients/components/*` + shim `components/patients/index.ts`
-- `components/sessions/*` → `features/sessions/components/*`
-- `components/documents/*`, `lib/fillDocumentPlaceholders.ts`, `lib/invoiceHtml.ts`, `lib/paidInvoice.ts`, `lib/resolveDocumentPreviewContent.ts`, `utils/documentExport.ts`, `utils/documentFormatting.ts` → `features/documents/`
-- `components/rewards/*`, `hooks/usePatientRewards.ts` → `features/rewards/`
-- `components/appointments/*` → `features/appointments/`
-- `components/admissions/*`, `hooks/useHospitalAdmissions.ts` → `features/sessions/admissions/`
-- `pages/admin/*` + admin components → `features/admin/`
+One toggle via `set_badge_visibility(hide_badge: true)`. Removes the "Edit with Lovable" badge from `holarchealth.com` and `medpad.lovable.app` so a copycat can't trivially identify the build tool from your published site. Requires Pro plan (you'll be prompted if not on it).
 
-Each move keeps a 1-line re-export at the old path so no existing import path breaks.
+---
 
-## Phase 4 — Standardise types
+## Part 3 — Legal + copyright pack
 
-- Extract `Patient`, `Session`, `Document`, `Invoice`, `Prescription`, `Profile`, `Appointment`, `Reward` interfaces (currently inline in 30+ files) into `types/`.
-- Consume `Database` types from `integrations/supabase/types.ts` (untouched — auto-generated) where appropriate.
-- Remove ad-hoc `any` in service signatures.
+Current state: footer already shows `© {year} Holarc Health. All rights reserved.` and links to `/terms-and-conditions`. Good baseline.
 
-## Phase 5 — Targeted cleanup (the "🧼" tasks)
+What to add:
 
-Conservative, file-by-file:
+**A. Strengthen `src/pages/TermsAndConditions.tsx`** — append an "Intellectual Property & Anti-Cloning" section covering:
+- All UI, code, copy, workflows, terminology ("Holarchive", "Round Table", "Vula"), and design are owned by Holarc Health (Pty) Ltd.
+- Prohibited: reverse engineering, decompilation, scraping, automated access, creating derivative works, building competing products from observation of the service, using screenshots or recordings to recreate the UI.
+- Account termination + liability for damages on breach.
+- Trademark notice for "Holarc Health" and the logo.
+- Governing law: South Africa (adjust if needed).
 
-1. **Dead code**: only remove imports/components that have **zero references** found via project search. Anything ambiguous stays.
-2. **`console.log` audit**: keep `console.error` / `console.warn`. Wrap remaining debug logs in a tiny `services/logger.ts` (`logger.debug`, gated by `import.meta.env.DEV`).
-3. **Naming**: only rename obvious unclear locals (no exported APIs, no component names, no route paths).
-4. **Error handling**: standard wrapper `safeInvoke()` in `services/edge/` so every edge-function call returns `{ data, error }` with toast-friendly messages — adopted incrementally where each call already does ad-hoc try/catch.
-5. **UI dedup**: extract repeated patterns (page header, empty-state, loading spinner, section accordion, “PAID” stamp wrapper) into `components/shared/`. Keep teal-border + form-field standards from the Style Manifest intact.
-6. **Uploads isolation**: gather scattered storage-bucket logic (`patient-media`, `session-audio`, `health-photos`, `cpd-certificates`, `logos`, `avatars`) into `features/uploads/` with one `useUpload(bucket, options)` hook, while preserving the 5MB/100MB limits, signed-URL behaviour, and bucket choices already in place.
+**B. New page `src/pages/IntellectualProperty.tsx`** — a dedicated, link-shareable IP notice you can point a cease-and-desist at. Listed in footer next to T&C.
 
-## Phase 6 — AI-readiness scaffolding (no behaviour change)
+**C. `index.html` meta hardening:**
+```html
+<meta name="copyright" content="© 2026 Holarc Health (Pty) Ltd. All rights reserved." />
+<meta name="rights" content="All rights reserved. Reverse engineering and unauthorized reproduction prohibited." />
+```
 
-Create the empty seams the user wants, with no live wiring:
+**D. Footer update** — add the new IP link beside Terms & Conditions, keep the existing copyright line.
 
-- `features/insights/` with `services/insights.ts` exposing a typed `runInsight(kind, payload)` stub that today simply forwards to existing edge functions (`summarize-session`, `analyze-medical-image`, `ai-clinician-diagnosis`, `check-medication-conflicts`, `lookup-medical-codes`, `summarize-patient-history`).
-- `services/ingestion/` for future raw-record pipelines — `ingestRawRecord({ source, payload, patientId })` that today just stores in existing tables; documented as the future ingestion entry point.
-- README in each new folder describing intended responsibility so future AI work has a clear home.
+**E. Console notice** (Facebook/PayPal style, one-time per session) on app boot:
+```text
+⚠ Stop!
+This is a private application owned by Holarc Health (Pty) Ltd.
+Unauthorized access, scraping, reverse engineering, or attempts to
+copy this service are prohibited and may result in legal action.
+See holarchealth.com/intellectual-property
+```
+Single `console.warn` on mount of `App.tsx`. Zero UX impact, zero false security, but it's the standard "we are watching and we have lawyers" signal.
 
-## What is explicitly **not** changing
+**Not doing:**
+- ❌ PDF watermarks (you said no).
+- ❌ Right-click / DevTools / shortcut blocking (breaks accessibility, doesn't deter).
+- ❌ Heavy obfuscation (5–20× bundle size, useless).
+- ❌ Rate limiting (Lovable platform doesn't support it yet).
 
-- `src/integrations/supabase/client.ts` and `types.ts` (auto-generated, hands-off).
-- Routes, route params, page filenames in `pages/` (App.tsx untouched).
-- Database schema, RLS policies, edge functions.
-- Style Manifest rules, teal borders, mobile compaction, role-based nav.
-- Existing user flows (auth, signup, sessions, prescriptions, invoices, dashboard, admin).
-- `components/ui/*` (shadcn primitives).
-- The recent fixes: medical certificate dates, prescription preview resolver, invoice layout, PAID stamp.
+---
 
-## Risk mitigation
+## Files to touch
 
-- Every phase is independently revertable from chat history.
-- Every move keeps a re-export shim, so a broken import is impossible at the path level.
-- No phase touches authentication, RLS, or Supabase config.
+```text
+supabase/functions/google-places-autocomplete/index.ts   (add auth)
+supabase/functions/parse-patient-import/index.ts         (add auth)
+supabase/functions/translate-text/index.ts               (add auth)
++ any migrations the Supabase linter requires
+src/pages/TermsAndConditions.tsx                         (extend)
+src/pages/IntellectualProperty.tsx                       (new)
+src/components/layout/Footer.tsx                         (add IP link)
+src/App.tsx                                              (route + console notice)
+index.html                                               (meta tags)
+[platform action] hide Lovable badge
+```
 
-## Suggested execution order (one phase per chat turn)
+## What this protects, honestly
 
-1. Phase 1 — create folders + READMEs + `insights/` seam.
-2. Phase 2 — services layer extraction (highest leverage, biggest win).
-3. Phase 3 — move features (mechanical, large diff but low risk via shims).
-4. Phase 4 — extract shared types.
-5. Phase 5 — cleanup (dead code, logger, error wrapper, UI dedup, uploads hook).
-6. Phase 6 — AI/ingestion scaffolding.
+| Threat | Protected? |
+|---|---|
+| Visual UI cloning by AI / dev shop | No (impossible) |
+| Use of your name, logo, distinctive terms | Yes (legal) |
+| Scraping your data via your APIs | Yes (auth audit + RLS) |
+| Stealing your AI prompts / business logic | Yes (already server-side, audit confirms) |
+| Someone publishing a clone on AppStore | Improved (DMCA + trademark grounds) |
+| Identifying you built on Lovable | Yes (badge hidden) |
 
-Reply with which phase to start, or "start with Phase 1" to proceed top-to-bottom.
-
+Reply approve to execute, or tell me what to change.
