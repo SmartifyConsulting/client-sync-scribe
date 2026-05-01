@@ -160,6 +160,22 @@ export default function TermsAndConditions() {
             You may not reproduce, distribute, modify, create derivative works of, publicly display, or exploit the Platform or any portion thereof without our express written permission.
           </p>
 
+          <h3>9.4 Anti-Cloning &amp; Trade Dress</h3>
+          <p>
+            The Platform's user interface, visual design, layout, copy, iconography,
+            workflows, and distinctive terminology (including but not limited to
+            <em> Holarchive</em>, <em>My Holarchive</em>, <em>Round Table</em>, and
+            <em> Vula</em>) constitute the protected trade dress and trademarks of
+            Holarc Health (Pty) Ltd. You may not, and may not permit any third party
+            to, use screenshots, screen recordings, automated capture, or observation
+            of the Platform to recreate, clone, "white-label", or build a competing or
+            substantially similar product or service. See our{" "}
+            <a href="/intellectual-property" target="_blank" rel="noopener noreferrer" className="text-primary underline hover:text-primary/80">
+              Intellectual Property &amp; Anti-Cloning Notice
+            </a>{" "}
+            for the full terms.
+          </p>
+
           <h2>10. Prohibited Conduct</h2>
           <p>By using the Platform, you agree not to:</p>
           <ul>
@@ -173,6 +189,8 @@ export default function TermsAndConditions() {
             <li>Use the Platform for marketing or solicitation without authorization</li>
             <li>Share or sell access to your account</li>
             <li>Scrape, data mine, or use automated systems to access the Platform</li>
+            <li>Reverse engineer, decompile, or disassemble the Platform or any portion of it</li>
+            <li>Recreate, clone, white-label, or build a competing product based on observation, screenshots, or recordings of the Platform</li>
             <li>Practice medicine outside your scope of licensure (for providers)</li>
             <li>Provide false health information (for patients)</li>
           </ul>
