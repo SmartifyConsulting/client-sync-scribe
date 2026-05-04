@@ -186,11 +186,6 @@ export default function HolarcHelpProviders() {
             </span>
           </div>
         </TableCell>
-            <span className={`text-[11px] font-semibold ${r.accepting_patients !== false ? "text-emerald-700" : "text-red-600"}`}>
-              {r.accepting_patients !== false ? "Yes" : "Full"}
-            </span>
-          </div>
-        </TableCell>
         <TableCell className="text-right space-x-1">
           <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEdit({ kind, row: r })}>
             <Pencil className="h-3.5 w-3.5" />
@@ -203,7 +198,7 @@ export default function HolarcHelpProviders() {
     );
   };
 
-  const headers = ["Name", "Contact", "City", "Tier", "Status", "Accepting", "Actions"];
+  const headers = ["Name", "Contact", "City", "Tier", "Status", "Actions"];
 
   const renderGroupedTable = (rows: any[], kind: Kind) => {
     if (rows.length === 0) return <Empty label={`No ${status === "all" ? "" : status + " "}${kind === "hospital" ? "hospitals" : "ambulances"}`} />;
