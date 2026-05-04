@@ -83,6 +83,7 @@ export default function HolarcHelpProviders() {
   const [loading, setLoading] = useState(true);
   const [edit, setEdit] = useState<EditState>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ kind: Kind; id: string; name: string } | null>(null);
+  const [chooserOpen, setChooserOpen] = useState(false);
 
   const [voiceClipPath, setVoiceClipPath] = useState<string | null>(null);
   const [clipFile, setClipFile] = useState<File | null>(null);
@@ -132,11 +133,6 @@ export default function HolarcHelpProviders() {
     const { error } = await supabase.from(tableFor(kind) as any).update(patch).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success(active ? "Activated" : "Deactivated"); load();
-  };
-  const setAccepting = async (kind: Kind, id: string, accepting: boolean) => {
-    const { error } = await supabase.from(tableFor(kind) as any).update({ accepting_patients: accepting } as any).eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success(accepting ? "Accepting patients" : "Marked full capacity"); load();
   };
   const setTier = async (kind: Kind, id: string, tier: string) => {
     const { error } = await supabase.from(tableFor(kind) as any).update({ tier } as any).eq("id", id);
@@ -191,14 +187,6 @@ export default function HolarcHelpProviders() {
             </span>
           </div>
         </TableCell>
-        <TableCell>
-          <div className="flex items-center gap-2">
-            <Switch checked={r.accepting_patients !== false} onCheckedChange={(v) => setAccepting(kind, r.id, v)} />
-            <span className={`text-[11px] font-semibold ${r.accepting_patients !== false ? "text-emerald-700" : "text-red-600"}`}>
-              {r.accepting_patients !== false ? "Yes" : "Full"}
-            </span>
-          </div>
-        </TableCell>
         <TableCell className="text-right space-x-1">
           <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEdit({ kind, row: r })}>
             <Pencil className="h-3.5 w-3.5" />
@@ -211,7 +199,7 @@ export default function HolarcHelpProviders() {
     );
   };
 
-  const headers = ["Name", "Contact", "City", "Tier", "Status", "Accepting", "Actions"];
+  const headers = ["Name", "Contact", "City", "Tier", "Status", "Actions"];
 
   const renderGroupedTable = (rows: any[], kind: Kind) => {
     if (rows.length === 0) return <Empty label={`No ${status === "all" ? "" : status + " "}${kind === "hospital" ? "hospitals" : "ambulances"}`} />;
@@ -310,9 +298,9 @@ export default function HolarcHelpProviders() {
                   <Ambulance className="mr-1.5 h-4 w-4" />Ambulance
                 </TabsTrigger>
               </TabsList>
-              <Button size="sm" onClick={() => setEdit({ kind: tab, row: null })}>
+              <Button size="sm" onClick={() => setChooserOpen(true)}>
                 <Plus className="mr-1.5 h-4 w-4" />
-                Add {tab === "hospital" ? "Hospital" : "Ambulance"}
+                Add
               </Button>
             </div>
 
@@ -370,6 +358,24 @@ export default function HolarcHelpProviders() {
         onSaved={() => { setEdit(null); load(); }}
       />
 
+      <Dialog open={chooserOpen} onOpenChange={setChooserOpen}>
+        <DialogContent className="sm:max-w-xs">
+          <DialogHeader>
+            <DialogTitle>Add provider</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3 py-2">
+            <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("hospital"); setEdit({ kind: "hospital", row: null }); }}>
+              <Hospital className="h-6 w-6" />
+              <span className="text-xs font-semibold">Hospital</span>
+            </Button>
+            <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("ambulance"); setEdit({ kind: "ambulance", row: null }); }}>
+              <Ambulance className="h-6 w-6" />
+              <span className="text-xs font-semibold">Ambulance</span>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -423,7 +429,6 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
         city: form.city || null,
         country: form.country || null,
         tier: form.tier || "tier_3",
-        accepting_patients: form.accepting_patients !== false,
         latitude: form.latitude ?? null,
         longitude: form.longitude ?? null,
       };
@@ -452,10 +457,19 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
           <DialogTitle>{isEdit ? "Edit" : "Add"} {kind === "hospital" ? "Hospital" : "Ambulance Provider"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
+          <div className="space-y-1.5">
+            <Label>{kind === "hospital" ? "Hospital name" : "Company name"}</Label>
+            <Input
+              value={form[nameField(kind)] ?? ""}
+              onChange={(e) => update(nameField(kind), e.target.value)}
+              placeholder={kind === "hospital" ? "e.g. Netcare Milpark Hospital" : "e.g. ER24"}
+              autoFocus
+            />
+          </div>
           <LocationPicker
+            initialQuery={form[nameField(kind)] ?? ""}
             onPick={(d) => setForm((f: any) => ({
               ...f,
-              [nameField(kind)]: d.name || f[nameField(kind)],
               city: d.city || f.city,
               country: d.country || f.country,
               contact_phone: d.phone || f.contact_phone,
@@ -469,10 +483,6 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
               Pinned at {Number(form.latitude).toFixed(4)}, {Number(form.longitude).toFixed(4)}
             </p>
           )}
-          <div className="space-y-1.5">
-            <Label>{kind === "hospital" ? "Name" : "Company name"}</Label>
-            <Input value={form[nameField(kind)] ?? ""} onChange={(e) => update(nameField(kind), e.target.value)} />
-          </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Email</Label>
@@ -503,13 +513,9 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center justify-between rounded-lg border p-3">
-            <div>
-              <p className="text-sm font-semibold">Accepting patients</p>
-              <p className="text-[11px] text-muted-foreground">Turn off when at full capacity. Greys this provider out on the patient map.</p>
-            </div>
-            <Switch checked={form.accepting_patients !== false} onCheckedChange={(v) => update("accepting_patients", v)} />
-          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Note: providers control their own "accepting patients" status from their provider view.
+          </p>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancel</Button>
@@ -537,8 +543,8 @@ type PlaceDetails = {
   phone?: string | null; website?: string | null;
 };
 
-function LocationPicker({ onPick }: { onPick: (d: PlaceDetails) => void }) {
-  const [q, setQ] = useState("");
+function LocationPicker({ onPick, initialQuery }: { onPick: (d: PlaceDetails) => void; initialQuery?: string }) {
+  const [q, setQ] = useState(initialQuery ?? "");
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<{ description: string; place_id: string }[]>([]);
   const [searching, setSearching] = useState(false);
@@ -558,9 +564,23 @@ function LocationPicker({ onPick }: { onPick: (d: PlaceDetails) => void }) {
     if (input.trim().length < 3) { setItems([]); return; }
     setSearching(true);
     try {
-      const { data } = await supabase.functions.invoke("google-places-autocomplete", { body: { input, types: "establishment" } });
-      setItems((data?.predictions ?? []).map((p: any) => ({ description: p.description, place_id: p.place_id })));
+      const { data, error } = await supabase.functions.invoke("google-places-autocomplete", { body: { input, types: "any" } });
+      if (error) {
+        console.error("Places autocomplete invoke error:", error);
+        toast.error("Location search failed — check API settings");
+        setItems([]);
+        return;
+      }
+      if (data?.status && data.status !== "OK" && data.status !== "ZERO_RESULTS") {
+        console.error("Google Places status:", data.status, data.error_message);
+        toast.error(`Google Places: ${data.status}`);
+      }
+      const preds = (data?.predictions ?? []).map((p: any) => ({ description: p.description, place_id: p.place_id }));
+      setItems(preds);
       setOpen(true);
+    } catch (e: any) {
+      console.error("Places autocomplete failed:", e);
+      toast.error(e?.message ?? "Location search failed");
     } finally { setSearching(false); }
   };
 
@@ -576,7 +596,7 @@ function LocationPicker({ onPick }: { onPick: (d: PlaceDetails) => void }) {
       const { data, error } = await supabase.functions.invoke("google-place-details", { body: { place_id } });
       if (error) throw error;
       onPick(data as PlaceDetails);
-      setQ(data?.name || label);
+      setQ(data?.formatted_address || label);
       setOpen(false);
       toast.success("Location pinned — fields auto-filled");
     } catch (e: any) {
@@ -586,12 +606,12 @@ function LocationPicker({ onPick }: { onPick: (d: PlaceDetails) => void }) {
 
   return (
     <div className="space-y-1.5" ref={boxRef}>
-      <Label>Search location (auto-fills below)</Label>
+      <Label>Search address {initialQuery ? `for "${initialQuery}"` : ""}</Label>
       <div className="relative">
         <Input
           value={q}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Search hospital or address…"
+          placeholder="Type the provider name or address…"
           onFocus={() => items.length > 0 && setOpen(true)}
         />
         {searching && <Loader2 className="absolute right-2 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />}
@@ -612,6 +632,7 @@ function LocationPicker({ onPick }: { onPick: (d: PlaceDetails) => void }) {
           </div>
         )}
       </div>
+      <p className="text-[11px] text-muted-foreground">Selecting a result auto-fills city, country, phone, and pins the location on the map.</p>
     </div>
   );
 }

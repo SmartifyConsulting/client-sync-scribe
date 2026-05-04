@@ -43,7 +43,7 @@ serve(async (req) => {
     const body = await req.json().catch(() => null);
     const input = typeof body?.input === "string" ? body.input.trim() : "";
     const requestedTypes = typeof body?.types === "string" ? body.types.trim() : "address";
-    const allowedTypes = new Set(["address", "establishment", "geocode", "(cities)", "(regions)"]);
+    const allowedTypes = new Set(["address", "establishment", "geocode", "(cities)", "(regions)", "any"]);
     const types = allowedTypes.has(requestedTypes) ? requestedTypes : "address";
     if (!input || input.length < 2) {
       return new Response(JSON.stringify({ predictions: [] }), {
@@ -57,11 +57,19 @@ serve(async (req) => {
       });
     }
 
-    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&types=${encodeURIComponent(types)}&key=${GOOGLE_MAPS_API_KEY}`;
+    const typesParam = types === "any" ? "" : `&types=${encodeURIComponent(types)}`;
+    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}${typesParam}&key=${GOOGLE_MAPS_API_KEY}`;
     const response = await fetch(url);
     const data = await response.json();
+    if (data.status && data.status !== "OK" && data.status !== "ZERO_RESULTS") {
+      console.error("Google Places autocomplete non-OK:", data.status, data.error_message);
+    }
 
-    return new Response(JSON.stringify({ predictions: data.predictions || [] }), {
+    return new Response(JSON.stringify({
+      predictions: data.predictions || [],
+      status: data.status,
+      error_message: data.error_message,
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
