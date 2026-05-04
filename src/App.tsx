@@ -57,6 +57,7 @@ import HolarcHelpRoutes from "./modules/holarchelp/routes";
 import ProviderRoutes from "./modules/holarchelp/routes-provider";
 import PublicTrack from "./modules/holarchelp/pages/PublicTrack";
 import HolarcHelpProviders from "./pages/admin/HolarcHelpProviders";
+import HolarcHelpAccountability from "./pages/admin/HolarcHelpAccountability";
 
 const queryClient = new QueryClient();
 
