@@ -28,10 +28,10 @@ export default function PublicTrack() {
 
   const load = async () => {
     if (!token) return;
-    const { data: inc } = await supabase.rpc("guardian_get_tracking_incident" as any, { _token: token });
+    const { data: inc } = await supabase.rpc("holarchelp_get_tracking_incident" as any, { _token: token });
     if (!inc || (inc as any).length === 0) { setNotFound(true); return; }
     setIncident((inc as any)[0]);
-    const { data: locs } = await supabase.rpc("guardian_get_tracking_locations" as any, { _token: token, _limit: 200 });
+    const { data: locs } = await supabase.rpc("holarchelp_get_tracking_locations" as any, { _token: token, _limit: 200 });
     setLocations((locs as any) ?? []);
   };
 
@@ -55,7 +55,7 @@ export default function PublicTrack() {
     <div className="min-h-dvh bg-background">
       <header className="border-b px-5 py-3 flex items-center gap-2">
         <Heart className="h-5 w-5 fill-primary text-primary" />
-        <span className="font-extrabold"><span className="text-primary">Holarc</span><span className="text-sos"> Guardian</span></span>
+        <span className="font-extrabold"><span className="text-primary">Holarc</span><span className="text-sos">HolarcHelp</span></span>
       </header>
       <div className="mx-auto max-w-2xl px-5 py-5">
         <div className="flex items-center justify-between">

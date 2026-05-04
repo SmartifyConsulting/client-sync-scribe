@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
  * Returns whether the Guardian module is enabled for the current user.
  * Combines:
  *  - global app_modules.guardian.enabled (admin kill-switch)
- *  - per-user profiles.guardian_enabled (admin-toggled subscription flag)
+ *  - per-user profiles.holarchelp_enabled (admin-toggled subscription flag)
  */
 export function useGuardianAccess() {
   const { user, loading: authLoading } = useAuth();
@@ -23,12 +23,12 @@ export function useGuardianAccess() {
     let cancelled = false;
     (async () => {
       const [{ data: mod }, { data: prof }] = await Promise.all([
-        supabase.from("app_modules" as any).select("enabled").eq("module_key", "guardian").maybeSingle(),
-        supabase.from("profiles").select("guardian_enabled" as any).eq("id", user.id).maybeSingle(),
+        supabase.from("app_modules" as any).select("enabled").eq("module_key", "holarchelp").maybeSingle(),
+        supabase.from("profiles").select("holarchelp_enabled" as any).eq("id", user.id).maybeSingle(),
       ]);
       if (cancelled) return;
       const globalOn = (mod as any)?.enabled !== false;
-      const userOn = !!(prof as any)?.guardian_enabled;
+      const userOn = !!(prof as any)?.holarchelp_enabled;
       setEnabled(globalOn && userOn);
       setLoading(false);
     })();

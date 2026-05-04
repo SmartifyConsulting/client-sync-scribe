@@ -24,11 +24,11 @@ export default function GuardianHome() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("guardian_incidents" as any).select("id")
+    supabase.from("holarchelp_incidents" as any).select("id")
       .eq("user_id", user.id).eq("status", "active")
       .order("created_at", { ascending: false }).limit(1).maybeSingle()
       .then(({ data }: any) => setActiveIncidentId(data?.id ?? null));
-    supabase.from("guardian_emergency_contacts" as any).select("id", { count: "exact", head: true })
+    supabase.from("holarchelp_emergency_contacts" as any).select("id", { count: "exact", head: true })
       .eq("user_id", user.id).then(({ count }) => setContactCount(count ?? 0));
   }, [user]);
 
@@ -38,7 +38,7 @@ export default function GuardianHome() {
     if (!user || triggering) return;
     if (noContacts) {
       toast.error("Add at least one emergency contact before using SOS");
-      navigate("/guardian/contacts");
+      navigate("/patient/guardian/contacts");
       return;
     }
     setTriggering(true);
@@ -49,13 +49,13 @@ export default function GuardianHome() {
       }).catch(() => null);
 
       const { data: incident, error } = await supabase
-        .from("guardian_incidents" as any)
+        .from("holarchelp_incidents" as any)
         .insert({ user_id: user.id, status: "active" } as any)
         .select("id, tracking_token").single();
       if (error || !incident) throw error ?? new Error("Failed to create incident");
 
       if (pos) {
-        await supabase.from("guardian_locations" as any).insert({
+        await supabase.from("holarchelp_locations" as any).insert({
           incident_id: (incident as any).id,
           latitude: pos.coords.latitude,
           longitude: pos.coords.longitude,
@@ -78,7 +78,7 @@ export default function GuardianHome() {
     setSeverityOpen(false);
     const { id } = pending;
     if (severity) {
-      await supabase.from("guardian_incidents" as any).update({
+      await supabase.from("holarchelp_incidents" as any).update({
         severity: severity.severity,
         conscious: severity.conscious,
         breathing: severity.breathing,
@@ -86,17 +86,17 @@ export default function GuardianHome() {
     }
     toast.success("Emergency alert created. Notifying contacts…");
     setPending(null);
-    navigate(`/guardian/incident/${id}`);
+    navigate(`/patient/guardian/incident/${id}`);
   };
 
   const startHold = () => {
     if (noContacts) {
       toast.error("Add at least one emergency contact before using SOS");
-      navigate("/guardian/contacts");
+      navigate("/patient/guardian/contacts");
       return;
     }
     if (activeIncidentId) {
-      navigate(`/guardian/incident/${activeIncidentId}`);
+      navigate(`/patient/guardian/incident/${activeIncidentId}`);
       return;
     }
     setHolding(true);
@@ -158,7 +158,7 @@ export default function GuardianHome() {
             <p className="font-semibold">Add an emergency contact</p>
             <p className="text-muted-foreground">SOS is disabled until you have at least one contact.</p>
           </div>
-          <Button size="sm" onClick={() => navigate("/guardian/contacts")}>Add</Button>
+          <Button size="sm" onClick={() => navigate("/patient/guardian/contacts")}>Add</Button>
         </div>
       )}
 
@@ -169,7 +169,7 @@ export default function GuardianHome() {
             <p className="font-semibold text-sos">Active emergency</p>
             <p className="text-muted-foreground">Your live location is being shared.</p>
           </div>
-          <Button size="sm" variant="outline" onClick={() => navigate(`/guardian/incident/${activeIncidentId}`)}>View</Button>
+          <Button size="sm" variant="outline" onClick={() => navigate(`/patient/guardian/incident/${activeIncidentId}`)}>View</Button>
         </div>
       )}
 
@@ -203,7 +203,7 @@ export default function GuardianHome() {
         <Button variant="outline" className="h-14 justify-start gap-3 rounded-2xl text-base" onClick={shareLocation}>
           <MapPin className="h-5 w-5 text-primary" /> Share my location
         </Button>
-        <Button variant="outline" className="h-14 justify-start gap-3 rounded-2xl text-base" onClick={() => navigate("/guardian/contacts")}>
+        <Button variant="outline" className="h-14 justify-start gap-3 rounded-2xl text-base" onClick={() => navigate("/patient/guardian/contacts")}>
           <Phone className="h-5 w-5 text-primary" /> Manage emergency contacts
         </Button>
       </div>
