@@ -55,7 +55,7 @@ export default function PublicTrack() {
     <div className="min-h-dvh bg-background">
       <header className="border-b px-5 py-3 flex items-center gap-2">
         <Heart className="h-5 w-5 fill-primary text-primary" />
-        <span className="font-extrabold"><span className="text-primary">Holarc</span><span className="text-sos">HolarcHelp</span></span>
+        <span className="font-extrabold"><span className="text-primary">Holarc</span><span className="text-sos">Help</span></span>
       </header>
       <div className="mx-auto max-w-2xl px-5 py-5">
         <div className="flex items-center justify-between">
