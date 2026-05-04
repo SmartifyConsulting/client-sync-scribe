@@ -57,6 +57,7 @@ import HolarcHelpRoutes from "./modules/holarchelp/routes";
 import ProviderRoutes from "./modules/holarchelp/routes-provider";
 import PublicTrack from "./modules/holarchelp/pages/PublicTrack";
 import HolarcHelpProviders from "./pages/admin/HolarcHelpProviders";
+import HolarcHelpAccountability from "./pages/admin/HolarcHelpAccountability";
 
 const queryClient = new QueryClient();
 
@@ -196,6 +197,7 @@ const App = () => (
             <Route path="/admin/gamification" element={<GamificationAdmin />} />
             <Route path="/admin/users" element={<UserManagement />} />
             <Route path="/admin/holarchelp-providers" element={<HolarcHelpProviders />} />
+            <Route path="/admin/holarchelp-accountability" element={<HolarcHelpAccountability />} />
             
             {/* Common routes */}
             <Route path="/settings" element={<Settings />} />
