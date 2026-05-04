@@ -84,6 +84,8 @@ const SessionHistoryTableLazy = lazy(() =>
 );
 const PatientDashboardLazy = lazy(() => import("@/pages/patient/PatientDashboard"));
 const PatientTasksLazy = lazy(() => import("@/pages/patient/PatientTasks"));
+const AdmissionsViewLazy = lazy(() => import("@/features/sessions/admissions/AdmissionsView").then(m => ({ default: m.AdmissionsView })));
+const PatientIncidentHistoryLazy = lazy(() => import("@/components/holarchelp/PatientIncidentHistory"));
 
 interface PatientDetailsEditorProps {
   patient: Patient;
@@ -1981,6 +1983,24 @@ export function PatientDetailsEditor({
                 >
                   <PatientRoundTable hideHeader />
                 </Suspense>
+              </TabsContent>
+              <TabsContent value="hospital_visits" className="mt-4">
+                <Tabs defaultValue="admissions">
+                  <TabsList className="bg-primary">
+                    <TabsTrigger value="admissions" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Hospital Admissions</TabsTrigger>
+                    <TabsTrigger value="incidents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Emergency Incidents</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="admissions" className="mt-3">
+                    <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>}>
+                      <AdmissionsViewLazy patientId={patient.id} canEdit />
+                    </Suspense>
+                  </TabsContent>
+                  <TabsContent value="incidents" className="mt-3">
+                    <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>}>
+                      <PatientIncidentHistoryLazy userId={patient.patient_user_id ?? null} />
+                    </Suspense>
+                  </TabsContent>
+                </Tabs>
               </TabsContent>
             )}
           </Tabs>
