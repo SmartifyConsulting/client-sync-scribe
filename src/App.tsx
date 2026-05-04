@@ -197,6 +197,7 @@ const App = () => (
             <Route path="/admin/gamification" element={<GamificationAdmin />} />
             <Route path="/admin/users" element={<UserManagement />} />
             <Route path="/admin/holarchelp-providers" element={<HolarcHelpProviders />} />
+            <Route path="/admin/holarchelp-accountability" element={<HolarcHelpAccountability />} />
             
             {/* Common routes */}
             <Route path="/settings" element={<Settings />} />
