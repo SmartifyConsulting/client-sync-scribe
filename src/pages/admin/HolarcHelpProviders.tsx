@@ -260,12 +260,30 @@ export default function HolarcHelpProviders() {
     );
   };
 
+  const seedTestProviders = async () => {
+    try {
+      const { data, error } = await (await import("@/integrations/supabase/client")).supabase.functions.invoke("seed-test-providers");
+      if (error) throw error;
+      const { toast } = await import("sonner");
+      toast.success("Test providers seeded");
+      console.log("seed-test-providers result", data);
+    } catch (e: any) {
+      const { toast } = await import("sonner");
+      toast.error(e?.message ?? "Seeding failed");
+    }
+  };
+
   return (
     <div className="container mx-auto p-4 sm:p-6 space-y-5">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Admin</p>
-        <h1 className="text-2xl font-extrabold">HolarcHelp Admin</h1>
-        <p className="text-sm text-muted-foreground">Manage providers, accountability, and the SOS voice clip.</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Admin</p>
+          <h1 className="text-2xl font-extrabold">HolarcHelp Admin</h1>
+          <p className="text-sm text-muted-foreground">Manage providers, accountability, and the SOS voice clip.</p>
+        </div>
+        <button onClick={seedTestProviders} className="rounded-lg border border-primary/40 bg-primary/5 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/10">
+          Seed test providers
+        </button>
       </div>
 
       <Tabs defaultValue="providers">
