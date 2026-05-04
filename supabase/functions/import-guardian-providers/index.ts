@@ -13,8 +13,8 @@ Deno.serve(async (req) => {
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const SRC_KEY = Deno.env.get("GUARDIAN_SOURCE_SERVICE_KEY")!;
-    if (!SRC_KEY) throw new Error("GUARDIAN_SOURCE_SERVICE_KEY missing");
+    // Source project's public anon key — safe to hardcode (publishable)
+    const SRC_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3ZnR1amtsd3Nkb21keG1ib3RrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3Mjk5NTQsImV4cCI6MjA5MzMwNTk1NH0.uyiVhfYXDpm6__QZP-8Qyr0daJ66EUQXnFERD1BNWAo";
 
     // Verify caller is admin
     const authHeader = req.headers.get("Authorization") ?? "";
