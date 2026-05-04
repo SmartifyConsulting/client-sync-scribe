@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Loader2, ShieldAlert, Users, Pencil, Save, X } from "lucide-react";
+import { Loader2, ShieldAlert, Users, Pencil, Save, X, Shield } from "lucide-react";
 import { InviteUserDialog } from "@/components/InviteUserDialog";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -22,6 +23,7 @@ interface UserRecord {
   role: string;
   created_at: string;
   status: string;
+  guardian_enabled?: boolean;
 }
 
 interface EditState {
@@ -48,8 +50,34 @@ export default function UserManagement() {
   const fetchUsers = async () => {
     setLoading(true);
     const { data, error } = await supabase.rpc("get_users_admin");
-    if (!error && data) setUsers(data as UserRecord[]);
+    if (!error && data) {
+      const baseUsers = data as UserRecord[];
+      const ids = baseUsers.map(u => u.user_id);
+      if (ids.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("id, guardian_enabled" as any)
+          .in("id", ids);
+        const map = new Map((profs || []).map((p: any) => [p.id, !!p.guardian_enabled]));
+        setUsers(baseUsers.map(u => ({ ...u, guardian_enabled: map.get(u.user_id) || false })));
+      } else {
+        setUsers(baseUsers);
+      }
+    }
     setLoading(false);
+  };
+
+  const toggleGuardian = async (userId: string, current: boolean) => {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ guardian_enabled: !current } as any)
+      .eq("id", userId);
+    if (error) {
+      toast({ title: "Failed to toggle Guardian", description: error.message, variant: "destructive" });
+      return;
+    }
+    setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, guardian_enabled: !current } : u));
+    toast({ title: !current ? "Guardian enabled" : "Guardian disabled" });
   };
 
   const splitName = (fullName: string | null) => {
@@ -168,6 +196,7 @@ export default function UserManagement() {
               <TableHead>Last Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
+              <TableHead><span className="inline-flex items-center gap-1"><Shield className="h-3.5 w-3.5" />Guardian</span></TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Joined</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
