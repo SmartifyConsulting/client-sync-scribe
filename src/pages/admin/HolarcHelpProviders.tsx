@@ -358,6 +358,24 @@ export default function HolarcHelpProviders() {
         onSaved={() => { setEdit(null); load(); }}
       />
 
+      <Dialog open={chooserOpen} onOpenChange={setChooserOpen}>
+        <DialogContent className="sm:max-w-xs">
+          <DialogHeader>
+            <DialogTitle>Add provider</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3 py-2">
+            <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("hospital"); setEdit({ kind: "hospital", row: null }); }}>
+              <Hospital className="h-6 w-6" />
+              <span className="text-xs font-semibold">Hospital</span>
+            </Button>
+            <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("ambulance"); setEdit({ kind: "ambulance", row: null }); }}>
+              <Ambulance className="h-6 w-6" />
+              <span className="text-xs font-semibold">Ambulance</span>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
