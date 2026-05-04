@@ -19,7 +19,7 @@ export default function GuardianIncidents() {
         {items.length === 0 && <li className="rounded-2xl border border-dashed p-5 text-center text-sm text-muted-foreground">No incidents yet</li>}
         {items.map((i) => (
           <li key={i.id}>
-            <Link to={`/guardian/incident/${i.id}`} className="flex items-center justify-between rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)]">
+            <Link to={`/patient/guardian/incident/${i.id}`} className="flex items-center justify-between rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)]">
               <div>
                 <p className="font-semibold">{new Date(i.created_at).toLocaleString()}</p>
                 <p className="text-xs text-muted-foreground">{i.resolved_at ? `Resolved ${new Date(i.resolved_at).toLocaleString()}` : "In progress"}</p>

@@ -13,7 +13,7 @@ export default function GuardianRoutes() {
         <Route path="contacts" element={<GuardianContacts />} />
         <Route path="incidents" element={<GuardianIncidents />} />
         <Route path="incident/:id" element={<GuardianIncidentDetail />} />
-        <Route path="*" element={<Navigate to="/guardian" replace />} />
+        <Route path="*" element={<Navigate to="/patient/guardian" replace />} />
       </Routes>
     </GuardianGate>
   );

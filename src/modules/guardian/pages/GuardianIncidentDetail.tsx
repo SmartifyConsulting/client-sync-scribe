@@ -56,7 +56,7 @@ export default function GuardianIncidentDetail() {
       .update({ status: "resolved", resolved_at: new Date().toISOString() } as any).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Incident resolved");
-    navigate("/guardian");
+    navigate("/patient/guardian");
   };
 
   if (!incident) return <div className="p-5 text-muted-foreground">Loading…</div>;
