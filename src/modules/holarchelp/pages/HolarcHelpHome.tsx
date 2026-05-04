@@ -3,50 +3,125 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import { MapPin, Phone, AlertCircle, UserPlus, Crosshair } from "lucide-react";
+import { AlertCircle, AlertTriangle, Crosshair, Loader2, Shield, Siren } from "lucide-react";
 import { SeverityPicker, type SeverityResult } from "../components/SeverityPicker";
+import { ProviderMap, type ProviderMarker } from "../components/ProviderMap";
+import hospitalIcon from "@/assets/marker-hospital.png";
+import ambulanceIcon from "@/assets/marker-ambulance.png";
 
-const HOLD_MS = 1500;
+type Coords = { lat: number; lng: number };
+
+const distanceKm = (a: Coords, b: Coords) => {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const x = Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(x));
+};
 
 export default function HolarcHelpHome() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeIncidentId, setActiveIncidentId] = useState<string | null>(null);
-  const [contactCount, setContactCount] = useState<number | null>(null);
-  const [holding, setHolding] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [triggering, setTriggering] = useState(false);
+  const [permDenied, setPermDenied] = useState(false);
+  const [coords, setCoords] = useState<Coords | null>(null);
+  const [providers, setProviders] = useState<(ProviderMarker & { _d: number })[]>([]);
+  const [incidentId, setIncidentId] = useState<string | null>(null);
+  const [helpOnTheWay, setHelpOnTheWay] = useState(false);
   const [severityOpen, setSeverityOpen] = useState(false);
-  const [pending, setPending] = useState<{ id: string; tracking_token: string } | null>(null);
-  const startedAt = useRef<number | null>(null);
-  const rafRef = useRef<number | null>(null);
+  const [requesting, setRequesting] = useState<string | null>(null);
+  const channelRef = useRef<any>(null);
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("holarchelp_incidents" as any).select("id")
+    supabase.from("holarchelp_incidents" as any).select("id, assigned_provider_id, accepted_at")
       .eq("user_id", user.id).eq("status", "active")
       .order("created_at", { ascending: false }).limit(1).maybeSingle()
-      .then(({ data }: any) => setActiveIncidentId(data?.id ?? null));
-    supabase.from("holarchelp_emergency_contacts" as any).select("id", { count: "exact", head: true })
-      .eq("user_id", user.id).then(({ count }) => setContactCount(count ?? 0));
+      .then(({ data }: any) => {
+        if (data?.id) {
+          setIncidentId(data.id);
+          setActiveIncidentId(data.id);
+          if (data.assigned_provider_id || data.accepted_at) setHelpOnTheWay(true);
+        }
+      });
   }, [user]);
 
-  const noContacts = contactCount === 0;
+  // Realtime subscription for the active incident
+  useEffect(() => {
+    if (!incidentId) return;
+    const ch = supabase
+      .channel(`incident-${incidentId}`)
+      .on("postgres_changes",
+        { event: "UPDATE", schema: "public", table: "holarchelp_incidents", filter: `id=eq.${incidentId}` },
+        (payload: any) => {
+          const row = payload.new;
+          if (row.assigned_provider_id || row.accepted_at) setHelpOnTheWay(true);
+          if (row.status && row.status !== "active") {
+            setIncidentId(null);
+            setHelpOnTheWay(false);
+            setCoords(null);
+            setProviders([]);
+            setActiveIncidentId(null);
+          }
+        })
+      .subscribe();
+    channelRef.current = ch;
+    return () => { supabase.removeChannel(ch); };
+  }, [incidentId]);
+
+  // Load providers when coords available
+  useEffect(() => {
+    if (!coords) return;
+    let cancelled = false;
+    (async () => {
+      const [{ data: hs }, { data: as_ }] = await Promise.all([
+        supabase.from("holarchelp_hospitals" as any)
+          .select("id, name, latitude, longitude, city, status")
+          .eq("status", "approved").not("latitude", "is", null).not("longitude", "is", null),
+        supabase.from("holarchelp_ambulance_providers" as any)
+          .select("id, company_name, latitude, longitude, city, status")
+          .eq("status", "approved").not("latitude", "is", null).not("longitude", "is", null),
+      ]);
+      if (cancelled) return;
+      const list: ProviderMarker[] = [
+        ...((hs as any[]) ?? []).map((h) => ({ id: h.id, name: h.name, latitude: h.latitude, longitude: h.longitude, type: "hospital" as const, subtitle: h.city ?? undefined })),
+        ...((as_ as any[]) ?? []).map((a) => ({ id: a.id, name: a.company_name, latitude: a.latitude, longitude: a.longitude, type: "ambulance" as const, subtitle: a.city ?? undefined })),
+      ];
+      const sorted = list
+        .map((p) => ({ ...p, _d: distanceKm(coords, { lat: p.latitude, lng: p.longitude }) }))
+        .sort((a, b) => a._d - b._d).slice(0, 10);
+      setProviders(sorted);
+    })();
+    return () => { cancelled = true; };
+  }, [coords?.lat, coords?.lng]);
 
   const triggerSOS = async () => {
     if (!user || triggering) return;
-    if (noContacts) {
-      toast.error("Add at least one emergency contact before using SOS");
-      navigate("/patient/holarchelp/contacts");
+    if (activeIncidentId) {
+      navigate(`/patient/holarchelp/incident/${activeIncidentId}`);
       return;
     }
     setTriggering(true);
     try {
+      // Get location (required)
       const pos = await new Promise<GeolocationPosition>((res, rej) => {
         if (!("geolocation" in navigator)) return rej(new Error("Geolocation not supported"));
         navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 10000 });
-      }).catch(() => null);
+      }).catch((e: any) => {
+        if (e?.code === 1) setPermDenied(true);
+        return null;
+      });
+      if (!pos) {
+        setTriggering(false);
+        return;
+      }
+      setPermDenied(false);
+      setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
 
       const { data: incident, error } = await supabase
         .from("holarchelp_incidents" as any)
@@ -54,17 +129,16 @@ export default function HolarcHelpHome() {
         .select("id, tracking_token").single();
       if (error || !incident) throw error ?? new Error("Failed to create incident");
 
-      if (pos) {
-        await supabase.from("holarchelp_locations" as any).insert({
-          incident_id: (incident as any).id,
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-          accuracy: pos.coords.accuracy,
-        });
-      }
+      await supabase.from("holarchelp_locations" as any).insert({
+        incident_id: (incident as any).id,
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
+        accuracy: pos.coords.accuracy,
+      });
 
       if ("vibrate" in navigator) navigator.vibrate?.([200, 100, 200]);
-      setPending({ id: (incident as any).id, tracking_token: (incident as any).tracking_token });
+      setIncidentId((incident as any).id);
+      setActiveIncidentId((incident as any).id);
       setSeverityOpen(true);
     } catch (e: any) {
       toast.error(e?.message ?? "Could not trigger SOS");
@@ -73,126 +147,150 @@ export default function HolarcHelpHome() {
     }
   };
 
-  const finishDispatch = async (severity: SeverityResult | null) => {
-    if (!pending) return;
+  const finishSeverity = async (severity: SeverityResult | null) => {
     setSeverityOpen(false);
-    const { id } = pending;
-    if (severity) {
-      await supabase.from("holarchelp_incidents" as any).update({
-        severity: severity.severity,
-        conscious: severity.conscious,
-        breathing: severity.breathing,
-      } as any).eq("id", id);
-    }
-    toast.success("Emergency alert created. Notifying contacts…");
-    setPending(null);
-    navigate(`/patient/holarchelp/incident/${id}`);
+    if (!incidentId || !severity) return;
+    await supabase.from("holarchelp_incidents" as any).update({
+      severity: severity.severity,
+      conscious: severity.conscious,
+      breathing: severity.breathing,
+    } as any).eq("id", incidentId);
   };
 
-  const startHold = () => {
-    if (noContacts) {
-      toast.error("Add at least one emergency contact before using SOS");
-      navigate("/patient/holarchelp/contacts");
-      return;
+  const requestProvider = async (p: ProviderMarker & { _d: number }) => {
+    if (!incidentId || requesting) return;
+    setRequesting(p.id);
+    try {
+      const { error: upErr } = await supabase.from("holarchelp_incidents" as any).update({
+        assigned_provider_id: p.id,
+        accepted_at: new Date().toISOString(),
+      } as any).eq("id", incidentId);
+      if (upErr) throw upErr;
+      await supabase.from("holarchelp_incident_offers" as any).insert({
+        incident_id: incidentId, provider_id: p.id, response: "accepted",
+        responded_at: new Date().toISOString(), distance_km: p._d,
+      });
+      setHelpOnTheWay(true);
+      toast.success(`Request sent to ${p.name}`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not request provider");
+    } finally {
+      setRequesting(null);
     }
-    if (activeIncidentId) {
-      navigate(`/patient/holarchelp/incident/${activeIncidentId}`);
-      return;
-    }
-    setHolding(true);
-    startedAt.current = performance.now();
-    const tick = (t: number) => {
-      const elapsed = t - (startedAt.current ?? t);
-      const p = Math.min(1, elapsed / HOLD_MS);
-      setProgress(p);
-      if (p >= 1) {
-        cancelHold();
-        triggerSOS();
-      } else {
-        rafRef.current = requestAnimationFrame(tick);
-      }
-    };
-    rafRef.current = requestAnimationFrame(tick);
-  };
-  const cancelHold = () => {
-    setHolding(false);
-    setProgress(0);
-    startedAt.current = null;
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
   };
 
-  const shareLocation = () => {
-    if (!("geolocation" in navigator)) return toast.error("GPS not supported");
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      const url = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-      try {
-        if (navigator.share) await navigator.share({ title: "My location", url });
-        else { await navigator.clipboard.writeText(url); toast.success("Location copied to clipboard"); }
-      } catch {}
-    }, () => toast.error("Couldn't get GPS — please allow location access"));
-  };
+  // ============ RENDER ============
 
+  if (helpOnTheWay && incidentId) {
+    return (
+      <div className="mx-auto max-w-md py-12 text-center">
+        <button
+          onClick={() => navigate(`/patient/holarchelp/incident/${incidentId}`)}
+          className="inline-flex flex-col items-center justify-center gap-3 rounded-3xl bg-emerald-500 hover:bg-emerald-600 transition-colors px-10 py-10 text-white shadow-2xl active:scale-95"
+        >
+          <Shield className="h-16 w-16" />
+          <p className="text-2xl font-extrabold tracking-tight">Help is on the way.</p>
+          <p className="text-xs opacity-90">Tap to view live status</p>
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-md">
-      <SeverityPicker open={severityOpen} onSubmit={finishDispatch} onSkip={() => finishDispatch(null)} />
+      <SeverityPicker open={severityOpen} onSubmit={finishSeverity} onSkip={() => finishSeverity(null)} />
 
-      {noContacts && (
-        <div className="mb-4 flex items-start gap-3 rounded-2xl border border-primary/40 bg-primary/5 p-4">
-          <UserPlus className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-          <div className="flex-1 text-sm">
-            <p className="font-semibold">Add an emergency contact</p>
-            <p className="text-muted-foreground">SOS is disabled until you have at least one contact.</p>
-          </div>
-          <Button size="sm" onClick={() => navigate("/patient/holarchelp/contacts")}>Add</Button>
-        </div>
+      {permDenied && (
+        <Card className="mb-4 border-amber-500/40 bg-amber-50">
+          <CardContent className="p-4 space-y-2 text-sm">
+            <div className="flex items-center gap-2 font-semibold text-amber-800">
+              <AlertTriangle className="h-4 w-4" /> Location access required
+            </div>
+            <p className="text-amber-900/80 text-xs">
+              SOS needs your location to find the closest emergency services. Enable it for this site:
+            </p>
+            <ul className="list-disc pl-5 text-xs text-amber-900/80 space-y-0.5">
+              <li>Tap the lock/info icon in the address bar</li>
+              <li>Find <strong>Location</strong> permission and set to <strong>Allow</strong></li>
+              <li>Reload this page and try again</li>
+            </ul>
+            <Button size="sm" onClick={triggerSOS} className="mt-1">Try again</Button>
+          </CardContent>
+        </Card>
       )}
 
-      {activeIncidentId && (
-        <div className="mb-4 flex items-start gap-3 rounded-2xl border border-sos/40 bg-sos/5 p-4">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-sos" />
-          <div className="flex-1 text-sm">
-            <p className="font-semibold text-sos">Active emergency</p>
-            <p className="text-muted-foreground">Your live location is being shared.</p>
+      {coords && incidentId && !helpOnTheWay ? (
+        <div className="space-y-3">
+          <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-900">
+            <Siren className="h-4 w-4 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold">SOS active — pick a provider or wait for one to accept</p>
+              <p className="opacity-80">Your live location is being shared.</p>
+            </div>
           </div>
-          <Button size="sm" variant="outline" onClick={() => navigate(`/patient/holarchelp/incident/${activeIncidentId}`)}>View</Button>
+          <ProviderMap center={coords} providers={providers} height={260} />
+          <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+            <span className="flex items-center gap-1.5"><img src={hospitalIcon} alt="" className="h-4 w-4" /> Hospital</span>
+            <span className="flex items-center gap-1.5"><img src={ambulanceIcon} alt="" className="h-4 w-4" /> Ambulance</span>
+          </div>
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nearest providers</p>
+            {providers.map((p) => (
+              <div key={p.id} className="flex items-center gap-3 rounded-xl border bg-card p-3">
+                <img src={p.type === "hospital" ? hospitalIcon : ambulanceIcon} alt="" className="h-9 w-9 object-contain" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold truncate">{p.name}</p>
+                  <p className="text-[11px] text-muted-foreground capitalize">{p.type} {p.subtitle && `· ${p.subtitle}`} · {p._d.toFixed(1)} km</p>
+                </div>
+                <Button size="sm" disabled={!!requesting} onClick={() => requestProvider(p)}>
+                  {requesting === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Request"}
+                </Button>
+              </div>
+            ))}
+            {providers.length === 0 && (
+              <p className="rounded-xl border border-dashed p-4 text-center text-xs text-muted-foreground">
+                No approved providers nearby. Waiting for someone to respond…
+              </p>
+            )}
+          </div>
         </div>
-      )}
-
-      <div className="mt-4 text-center">
-        <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">Press and hold</p>
-        <h1 className="mt-1 text-3xl font-extrabold tracking-tight">to send SOS</h1>
-      </div>
-
-      <div className="mt-8 flex justify-center">
-        <button
-          onPointerDown={startHold} onPointerUp={cancelHold} onPointerLeave={cancelHold} onPointerCancel={cancelHold}
-          disabled={triggering}
-          className="relative flex h-60 w-60 items-center justify-center rounded-full text-3xl font-extrabold tracking-[0.2em] text-sos-foreground transition active:scale-95"
-          style={{ background: "var(--gradient-sos)" }}
-          aria-label="Hold to send SOS"
-        >
-          {triggering ? "SENDING…" : activeIncidentId ? "ACTIVE" : "SOS"}
-          {holding && (
-            <svg className="absolute inset-0 h-full w-full -rotate-90" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="46" fill="none" stroke="white" strokeWidth="4" strokeOpacity="0.9"
-                strokeDasharray={`${progress * 289} 289`} strokeLinecap="round" />
-            </svg>
+      ) : (
+        <>
+          {activeIncidentId && (
+            <div className="mb-4 flex items-start gap-3 rounded-2xl border border-red-300 bg-red-50 p-4">
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+              <div className="flex-1 text-sm">
+                <p className="font-semibold text-red-700">Active emergency</p>
+                <p className="text-muted-foreground">Tap to view live tracking.</p>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => navigate(`/patient/holarchelp/incident/${activeIncidentId}`)}>View</Button>
+            </div>
           )}
-        </button>
-      </div>
 
-      <div className="mt-10 grid gap-3">
-        <Button variant="outline" className="h-14 justify-start gap-3 rounded-2xl text-base" onClick={() => navigate("/patient/holarchelp/nearby")}>
-          <Crosshair className="h-5 w-5 text-primary" /> Find nearby provider
-        </Button>
-        <Button variant="outline" className="h-14 justify-start gap-3 rounded-2xl text-base" onClick={shareLocation}>
-          <MapPin className="h-5 w-5 text-primary" /> Share my location
-        </Button>
-        <Button variant="outline" className="h-14 justify-start gap-3 rounded-2xl text-base" onClick={() => navigate("/patient/holarchelp/contacts")}>
-          <Phone className="h-5 w-5 text-primary" /> Manage emergency contacts
-        </Button>
-      </div>
+          <div className="mt-4 text-center">
+            <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">Tap to send</p>
+            <h1 className="mt-1 text-3xl font-extrabold tracking-tight">SOS</h1>
+          </div>
+
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={triggerSOS}
+              disabled={triggering}
+              className="relative flex h-60 w-60 items-center justify-center rounded-full text-3xl font-extrabold tracking-[0.2em] text-white transition active:scale-95 shadow-2xl"
+              style={{ background: "linear-gradient(135deg, hsl(354,84%,54%), hsl(0,75%,42%))" }}
+              aria-label="Send SOS"
+            >
+              {triggering ? "SENDING…" : "SOS"}
+            </button>
+          </div>
+
+          <div className="mt-10 grid gap-3">
+            <Button variant="outline" className="h-14 justify-start gap-3 rounded-2xl text-base" onClick={() => navigate("/patient/holarchelp/nearby")}>
+              <Crosshair className="h-5 w-5 text-primary" /> Find nearby provider
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
