@@ -8,7 +8,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Loader2, ShieldAlert, AlertTriangle, ArrowLeft } from "lucide-react";
+import { Loader2, ShieldAlert, AlertTriangle, ArrowLeft, History } from "lucide-react";
 
 type Row = {
   provider_id: string;
