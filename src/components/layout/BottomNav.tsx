@@ -11,6 +11,8 @@ import {
   Gift,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useGuardianAccess } from "@/modules/guardian/hooks/useGuardianAccess";
+import { Shield } from "lucide-react";
 
 const doctorNavItems = [
   { icon: LayoutDashboard, label: "Home", to: "/doctor-dashboard" },

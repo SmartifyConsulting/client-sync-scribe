@@ -52,6 +52,10 @@ import ReferralDoctors from "./pages/ReferralDoctors";
 import ExpiringRecordings from "./pages/ExpiringRecordings";
 import Admin from "./pages/Admin";
 
+// Guardian module
+import GuardianRoutes from "./modules/guardian/routes";
+import PublicTrack from "./modules/guardian/pages/PublicTrack";
+
 const queryClient = new QueryClient();
 
 // Invalidate all queries on auth state change to prevent stale cached profiles
@@ -130,6 +134,7 @@ const App = () => (
           <Route path="/intellectual-property" element={<IntellectualProperty />} />
           <Route path="/patient-consent" element={<PatientConsent />} />
           <Route path="/business-associate-agreement" element={<BusinessAssociateAgreement />} />
+          <Route path="/track/:token" element={<PublicTrack />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           
@@ -152,6 +157,7 @@ const App = () => (
             <Route path="/patient/documents" element={<PatientDocuments />} />
             <Route path="/patient/round-table" element={<PatientRoundTable />} />
             <Route path="/patient/details" element={<MyDetails />} />
+            <Route path="/patient/guardian/*" element={<GuardianRoutes />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
 
