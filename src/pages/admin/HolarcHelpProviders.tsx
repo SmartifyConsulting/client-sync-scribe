@@ -457,10 +457,19 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
           <DialogTitle>{isEdit ? "Edit" : "Add"} {kind === "hospital" ? "Hospital" : "Ambulance Provider"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
+          <div className="space-y-1.5">
+            <Label>{kind === "hospital" ? "Hospital name" : "Company name"}</Label>
+            <Input
+              value={form[nameField(kind)] ?? ""}
+              onChange={(e) => update(nameField(kind), e.target.value)}
+              placeholder={kind === "hospital" ? "e.g. Netcare Milpark Hospital" : "e.g. ER24"}
+              autoFocus
+            />
+          </div>
           <LocationPicker
+            initialQuery={form[nameField(kind)] ?? ""}
             onPick={(d) => setForm((f: any) => ({
               ...f,
-              [nameField(kind)]: d.name || f[nameField(kind)],
               city: d.city || f.city,
               country: d.country || f.country,
               contact_phone: d.phone || f.contact_phone,
@@ -474,10 +483,6 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
               Pinned at {Number(form.latitude).toFixed(4)}, {Number(form.longitude).toFixed(4)}
             </p>
           )}
-          <div className="space-y-1.5">
-            <Label>{kind === "hospital" ? "Name" : "Company name"}</Label>
-            <Input value={form[nameField(kind)] ?? ""} onChange={(e) => update(nameField(kind), e.target.value)} />
-          </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Email</Label>
@@ -508,13 +513,9 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center justify-between rounded-lg border p-3">
-            <div>
-              <p className="text-sm font-semibold">Accepting patients</p>
-              <p className="text-[11px] text-muted-foreground">Turn off when at full capacity. Greys this provider out on the patient map.</p>
-            </div>
-            <Switch checked={form.accepting_patients !== false} onCheckedChange={(v) => update("accepting_patients", v)} />
-          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Note: providers control their own "accepting patients" status from their provider view.
+          </p>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancel</Button>
