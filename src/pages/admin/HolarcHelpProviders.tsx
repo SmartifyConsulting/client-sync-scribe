@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -11,18 +14,63 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Hospital, Ambulance, ShieldAlert, Loader2, Download } from "lucide-react";
+import { Hospital, Ambulance, ShieldAlert, Loader2, Download, Upload, BarChart3 } from "lucide-react";
 
 type Status = "all" | "pending" | "approved" | "rejected" | "suspended";
+
+const COUNTRY_FLAGS: Record<string, string> = {
+  "South Africa": "🇿🇦", "ZA": "🇿🇦", "RSA": "🇿🇦",
+  "Nigeria": "🇳🇬", "NG": "🇳🇬",
+};
+const COUNTRY_PINS = ["South Africa", "Nigeria"];
+const TIER_ORDER = ["tier_1", "tier_2", "tier_3", "tier_4"];
+const TIER_CHIP: Record<string, string> = {
+  tier_1: "bg-pink-100 text-pink-700 border-pink-200",
+  tier_2: "bg-orange-100 text-orange-700 border-orange-200",
+  tier_3: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  tier_4: "bg-blue-100 text-blue-700 border-blue-200",
+};
+
+function normalizeCountry(c: string | null | undefined) {
+  if (!c) return "Unknown";
+  const t = c.trim();
+  if (/^(za|rsa|south africa)$/i.test(t)) return "South Africa";
+  if (/^(ng|nigeria)$/i.test(t)) return "Nigeria";
+  return t;
+}
+
+function groupByCountryTier(rows: any[]) {
+  const out: Record<string, Record<string, any[]>> = {};
+  for (const r of rows) {
+    const c = normalizeCountry(r.country);
+    const t = r.tier || "tier_3";
+    if (!out[c]) out[c] = {};
+    if (!out[c][t]) out[c][t] = [];
+    out[c][t].push(r);
+  }
+  return out;
+}
+
+function sortedCountries(grouped: Record<string, any>) {
+  const keys = Object.keys(grouped);
+  const pinned = COUNTRY_PINS.filter((c) => keys.includes(c));
+  const rest = keys.filter((c) => !pinned.includes(c)).sort();
+  return [...pinned, ...rest];
+}
 
 export default function HolarcHelpProviders() {
   const { isAdmin, loading: roleLoading } = useUserRole();
   const [tab, setTab] = useState<"hospitals" | "ambulances">("hospitals");
-  const [status, setStatus] = useState<Status>("pending");
+  const [status, setStatus] = useState<Status>("all");
   const [hospitals, setHospitals] = useState<any[]>([]);
   const [ambulances, setAmbulances] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [importing, setImporting] = useState(false);
+
+  // Voice clip state
+  const [voiceClipPath, setVoiceClipPath] = useState<string | null>(null);
+  const [clipFile, setClipFile] = useState<File | null>(null);
+  const [uploadingClip, setUploadingClip] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -37,7 +85,17 @@ export default function HolarcHelpProviders() {
     setLoading(false);
   };
 
+  const loadVoiceClip = async () => {
+    const { data } = await supabase
+      .from("holarchelp_voice_clip_settings" as any)
+      .select("default_clip_path")
+      .eq("id", 1)
+      .maybeSingle();
+    setVoiceClipPath((data as any)?.default_clip_path ?? null);
+  };
+
   useEffect(() => { if (isAdmin) load(); }, [isAdmin, status]);
+  useEffect(() => { if (isAdmin) loadVoiceClip(); }, [isAdmin]);
 
   if (roleLoading) {
     return <div className="flex h-64 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>;
@@ -54,28 +112,151 @@ export default function HolarcHelpProviders() {
   const approveHospital = async (id: string) => {
     const { error } = await supabase.rpc("holarchelp_approve_hospital" as any, { _hospital_id: id });
     if (error) return toast.error(error.message);
-    toast.success("Hospital approved");
-    load();
+    toast.success("Hospital approved"); load();
   };
   const approveAmbulance = async (id: string) => {
     const { error } = await supabase.rpc("holarchelp_approve_ambulance" as any, { _provider_id: id });
     if (error) return toast.error(error.message);
-    toast.success("Ambulance provider approved");
-    load();
+    toast.success("Ambulance provider approved"); load();
   };
   const setStatusOn = async (table: string, id: string, newStatus: string) => {
     const patch: any = { status: newStatus };
     if (newStatus === "approved") patch.approved_at = new Date().toISOString();
     const { error } = await supabase.from(table as any).update(patch).eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("Updated");
-    load();
+    toast.success("Updated"); load();
   };
   const setTier = async (table: string, id: string, tier: string) => {
     const { error } = await supabase.from(table as any).update({ tier } as any).eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("Tier updated");
-    load();
+    toast.success("Tier updated"); load();
+  };
+
+  const uploadClip = async () => {
+    if (!clipFile) return toast.error("Choose an MP3 first");
+    setUploadingClip(true);
+    const path = `default/${Date.now()}-${clipFile.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+    const { error: upErr } = await supabase.storage.from("guardian-voice-clips").upload(path, clipFile, {
+      contentType: clipFile.type || "audio/mpeg", upsert: false,
+    });
+    if (upErr) { setUploadingClip(false); return toast.error(upErr.message); }
+    const { error: dbErr } = await supabase.from("holarchelp_voice_clip_settings" as any)
+      .upsert({ id: 1, default_clip_path: path, updated_at: new Date().toISOString() } as any, { onConflict: "id" });
+    setUploadingClip(false);
+    if (dbErr) return toast.error(dbErr.message);
+    toast.success("SOS voice clip set");
+    setClipFile(null);
+    loadVoiceClip();
+  };
+
+  const renderHospitalRow = (h: any) => (
+    <TableRow key={h.id}>
+      <TableCell className="font-medium">{h.name}</TableCell>
+      <TableCell className="text-xs">{h.contact_email}<br /><span className="text-muted-foreground">{h.contact_phone}</span></TableCell>
+      <TableCell className="text-xs">{h.city ?? "—"}</TableCell>
+      <TableCell>
+        <Select value={h.tier} onValueChange={(v) => setTier("holarchelp_hospitals", h.id, v)}>
+          <SelectTrigger className="h-8 w-28"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {["tier_1","tier_2","tier_3"].map((t) => <SelectItem key={t} value={t}>{t.replace("_", " ")}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </TableCell>
+      <TableCell><StatusBadge s={h.status} /></TableCell>
+      <TableCell className="text-xs">{h.beds_available}/{h.bed_capacity}</TableCell>
+      <TableCell className="text-right space-x-1">
+        {h.status === "pending" && <Button size="sm" onClick={() => approveHospital(h.id)}>Approve</Button>}
+        {h.status === "pending" && <Button size="sm" variant="outline" onClick={() => setStatusOn("holarchelp_hospitals", h.id, "rejected")}>Reject</Button>}
+        {h.status === "approved" && <Button size="sm" variant="outline" onClick={() => setStatusOn("holarchelp_hospitals", h.id, "suspended")}>Suspend</Button>}
+        {h.status === "suspended" && <Button size="sm" onClick={() => setStatusOn("holarchelp_hospitals", h.id, "approved")}>Reactivate</Button>}
+      </TableCell>
+    </TableRow>
+  );
+
+  const renderAmbulanceRow = (a: any) => (
+    <TableRow key={a.id}>
+      <TableCell className="font-medium">{a.company_name}</TableCell>
+      <TableCell className="text-xs">{a.contact_email}<br /><span className="text-muted-foreground">{a.contact_phone}</span></TableCell>
+      <TableCell className="text-xs">{a.city ?? "—"}</TableCell>
+      <TableCell>
+        <Select value={a.tier} onValueChange={(v) => setTier("holarchelp_ambulance_providers", a.id, v)}>
+          <SelectTrigger className="h-8 w-28"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {["tier_1","tier_2","tier_3","tier_4"].map((t) => <SelectItem key={t} value={t}>{t.replace("_", " ")}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </TableCell>
+      <TableCell><StatusBadge s={a.status} /></TableCell>
+      <TableCell className="text-xs">{a.fleet_size}</TableCell>
+      <TableCell className="text-right space-x-1">
+        {a.status === "pending" && <Button size="sm" onClick={() => approveAmbulance(a.id)}>Approve</Button>}
+        {a.status === "pending" && <Button size="sm" variant="outline" onClick={() => setStatusOn("holarchelp_ambulance_providers", a.id, "rejected")}>Reject</Button>}
+        {a.status === "approved" && <Button size="sm" variant="outline" onClick={() => setStatusOn("holarchelp_ambulance_providers", a.id, "suspended")}>Suspend</Button>}
+        {a.status === "suspended" && <Button size="sm" onClick={() => setStatusOn("holarchelp_ambulance_providers", a.id, "approved")}>Reactivate</Button>}
+      </TableCell>
+    </TableRow>
+  );
+
+  const renderGroupedTable = (
+    rows: any[],
+    kind: "hospital" | "ambulance",
+    headers: string[],
+    rowFn: (r: any) => JSX.Element,
+  ) => {
+    if (rows.length === 0) return <Empty label={`No ${status === "all" ? "" : status + " "}${kind === "hospital" ? "hospitals" : "ambulances"}`} />;
+    const grouped = groupByCountryTier(rows);
+    const countries = sortedCountries(grouped);
+    const noun = kind === "hospital" ? "hospitals" : "ambulances";
+    return (
+      <Accordion type="multiple" defaultValue={countries.slice(0, 2)} className="space-y-2">
+        {countries.map((country) => {
+          const tiers = grouped[country];
+          const total = Object.values(tiers).reduce((s, arr) => s + arr.length, 0);
+          const flag = COUNTRY_FLAGS[country] ?? "🌍";
+          return (
+            <AccordionItem key={country} value={country} className="border rounded-2xl bg-card overflow-hidden border-primary/30">
+              <AccordionTrigger className="px-4 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <span className="text-lg">{flag}</span>
+                  <span className="font-bold">{country}</span>
+                  <span className="text-xs text-muted-foreground">{total} {noun}</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-3 pb-3">
+                <Accordion type="multiple" className="space-y-2">
+                  {TIER_ORDER.filter((t) => tiers[t]?.length).map((t) => (
+                    <AccordionItem key={t} value={t} className="border rounded-xl overflow-hidden">
+                      <AccordionTrigger className="px-3 hover:no-underline">
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border ${TIER_CHIP[t]}`}>
+                            {t.replace("_", " ").replace("tier", "Tier")}
+                          </span>
+                          <span className="text-xs text-muted-foreground">{tiers[t].length} {noun}</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="p-0">
+                        <div className="overflow-x-auto">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                {headers.map((h) => (
+                                  <TableHead key={h} className={h === "Actions" ? "text-right" : ""}>{h}</TableHead>
+                                ))}
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>{tiers[t].map(rowFn)}</TableBody>
+                          </Table>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
+    );
   };
 
   return (
@@ -86,23 +267,62 @@ export default function HolarcHelpProviders() {
           <h1 className="text-2xl font-extrabold">HolarcHelp Providers</h1>
           <p className="text-sm text-muted-foreground">Approve, suspend, and manage hospitals and ambulance providers in the HolarcHelp network.</p>
         </div>
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={importing}
-          onClick={async () => {
-            setImporting(true);
-            const { data, error } = await supabase.functions.invoke("import-guardian-providers", { body: {} });
-            setImporting(false);
-            if (error) return toast.error(error.message);
-            toast.success(`Imported ${data?.hospitals_imported ?? 0} hospitals, ${data?.ambulances_imported ?? 0} ambulances`);
-            load();
-          }}
-        >
-          {importing ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Download className="mr-1.5 h-4 w-4" />}
-          Import from Holarc Guardian
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Link to="/admin/holarchelp-accountability">
+            <Button size="sm" variant="outline" className="gap-1.5">
+              <BarChart3 className="h-4 w-4" /> Accountability
+            </Button>
+          </Link>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={importing}
+            onClick={async () => {
+              setImporting(true);
+              const { data, error } = await supabase.functions.invoke("import-guardian-providers", { body: {} });
+              setImporting(false);
+              if (error) return toast.error(error.message);
+              toast.success(`Imported ${data?.hospitals_imported ?? 0} hospitals, ${data?.ambulances_imported ?? 0} ambulances`);
+              load();
+            }}
+          >
+            {importing ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Download className="mr-1.5 h-4 w-4" />}
+            Import from Holarc Guardian
+          </Button>
+        </div>
       </div>
+
+      {/* SOS voice clip card */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">SOS voice clip</CardTitle>
+          <CardDescription>The MP3 played to emergency contacts when an SOS call connects.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="rounded-xl border p-3 bg-muted/30">
+            <p className="text-xs font-semibold">Current default clip</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {voiceClipPath ? voiceClipPath : "None — calls will use a fallback text-to-speech message."}
+            </p>
+          </div>
+          <div className="rounded-xl border p-3 space-y-2">
+            <p className="text-xs font-semibold">Upload new MP3</p>
+            <input
+              type="file"
+              accept="audio/mpeg,.mp3"
+              onChange={(e) => setClipFile(e.target.files?.[0] ?? null)}
+              className="block w-full text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-muted file:text-foreground"
+            />
+            <Button onClick={uploadClip} disabled={!clipFile || uploadingClip} className="w-full sm:w-auto">
+              {uploadingClip ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Upload className="mr-1.5 h-4 w-4" />}
+              Upload &amp; set as default
+            </Button>
+            <p className="text-[11px] text-muted-foreground">
+              Tip: keep clips under ~30 seconds. Africa's Talking sandbox only delivers to numbers registered in their Simulator.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="flex flex-wrap items-center gap-2">
         {(["pending", "approved", "suspended", "rejected", "all"] as Status[]).map((s) => (
@@ -114,88 +334,32 @@ export default function HolarcHelpProviders() {
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
         <TabsList className="bg-primary">
-          <TabsTrigger value="hospitals" className="data-[state=active]:bg-background"><Hospital className="mr-1.5 h-4 w-4" />Hospitals</TabsTrigger>
-          <TabsTrigger value="ambulances" className="data-[state=active]:bg-background"><Ambulance className="mr-1.5 h-4 w-4" />Ambulance providers</TabsTrigger>
+          <TabsTrigger value="hospitals" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
+            <Hospital className="mr-1.5 h-4 w-4" />Hospitals
+          </TabsTrigger>
+          <TabsTrigger value="ambulances" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
+            <Ambulance className="mr-1.5 h-4 w-4" />Ambulance
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="hospitals" className="mt-4">
-          {loading ? <Loader className="h-6 w-6" /> : hospitals.length === 0 ? <Empty label={`No ${status === "all" ? "" : status + " "}hospitals`} /> : (
-            <div className="rounded-2xl border overflow-x-auto bg-card">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead><TableHead>Contact</TableHead><TableHead>City</TableHead>
-                    <TableHead>Tier</TableHead><TableHead>Status</TableHead><TableHead>Beds</TableHead><TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {hospitals.map((h) => (
-                    <TableRow key={h.id}>
-                      <TableCell className="font-medium">{h.name}</TableCell>
-                      <TableCell className="text-xs">{h.contact_email}<br /><span className="text-muted-foreground">{h.contact_phone}</span></TableCell>
-                      <TableCell className="text-xs">{h.city ?? "—"}</TableCell>
-                      <TableCell>
-                        <Select value={h.tier} onValueChange={(v) => setTier("holarchelp_hospitals", h.id, v)}>
-                          <SelectTrigger className="h-8 w-28"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {["tier_1","tier_2","tier_3"].map((t) => <SelectItem key={t} value={t}>{t.replace("_", " ")}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell><StatusBadge s={h.status} /></TableCell>
-                      <TableCell className="text-xs">{h.beds_available}/{h.bed_capacity}</TableCell>
-                      <TableCell className="text-right space-x-1">
-                        {h.status === "pending" && <Button size="sm" onClick={() => approveHospital(h.id)}>Approve</Button>}
-                        {h.status === "pending" && <Button size="sm" variant="outline" onClick={() => setStatusOn("holarchelp_hospitals", h.id, "rejected")}>Reject</Button>}
-                        {h.status === "approved" && <Button size="sm" variant="outline" onClick={() => setStatusOn("holarchelp_hospitals", h.id, "suspended")}>Suspend</Button>}
-                        {h.status === "suspended" && <Button size="sm" onClick={() => setStatusOn("holarchelp_hospitals", h.id, "approved")}>Reactivate</Button>}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+          {loading ? <Loader />
+            : renderGroupedTable(
+                hospitals,
+                "hospital",
+                ["Name", "Contact", "City", "Tier", "Status", "Beds", "Actions"],
+                renderHospitalRow,
+              )}
         </TabsContent>
 
         <TabsContent value="ambulances" className="mt-4">
-          {loading ? <Loader className="h-6 w-6" /> : ambulances.length === 0 ? <Empty label={`No ${status === "all" ? "" : status + " "}ambulance providers`} /> : (
-            <div className="rounded-2xl border overflow-x-auto bg-card">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Company</TableHead><TableHead>Contact</TableHead><TableHead>City</TableHead>
-                    <TableHead>Tier</TableHead><TableHead>Status</TableHead><TableHead>Fleet</TableHead><TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {ambulances.map((a) => (
-                    <TableRow key={a.id}>
-                      <TableCell className="font-medium">{a.company_name}</TableCell>
-                      <TableCell className="text-xs">{a.contact_email}<br /><span className="text-muted-foreground">{a.contact_phone}</span></TableCell>
-                      <TableCell className="text-xs">{a.city ?? "—"}</TableCell>
-                      <TableCell>
-                        <Select value={a.tier} onValueChange={(v) => setTier("holarchelp_ambulance_providers", a.id, v)}>
-                          <SelectTrigger className="h-8 w-28"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {["tier_1","tier_2","tier_3","tier_4"].map((t) => <SelectItem key={t} value={t}>{t.replace("_", " ")}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell><StatusBadge s={a.status} /></TableCell>
-                      <TableCell className="text-xs">{a.fleet_size}</TableCell>
-                      <TableCell className="text-right space-x-1">
-                        {a.status === "pending" && <Button size="sm" onClick={() => approveAmbulance(a.id)}>Approve</Button>}
-                        {a.status === "pending" && <Button size="sm" variant="outline" onClick={() => setStatusOn("holarchelp_ambulance_providers", a.id, "rejected")}>Reject</Button>}
-                        {a.status === "approved" && <Button size="sm" variant="outline" onClick={() => setStatusOn("holarchelp_ambulance_providers", a.id, "suspended")}>Suspend</Button>}
-                        {a.status === "suspended" && <Button size="sm" onClick={() => setStatusOn("holarchelp_ambulance_providers", a.id, "approved")}>Reactivate</Button>}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+          {loading ? <Loader />
+            : renderGroupedTable(
+                ambulances,
+                "ambulance",
+                ["Company", "Contact", "City", "Tier", "Status", "Fleet", "Actions"],
+                renderAmbulanceRow,
+              )}
         </TabsContent>
       </Tabs>
     </div>
@@ -212,6 +376,6 @@ const StatusBadge = ({ s }: { s: string }) => {
 const Empty = ({ label }: { label: string }) => (
   <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">{label}</div>
 );
-const Loader = ({ className }: { className?: string }) => (
-  <div className="flex justify-center p-8"><Loader2 className={`animate-spin ${className ?? "h-5 w-5"}`} /></div>
+const Loader = () => (
+  <div className="flex justify-center p-8"><Loader2 className="animate-spin h-5 w-5" /></div>
 );
