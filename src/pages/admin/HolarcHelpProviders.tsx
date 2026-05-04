@@ -424,6 +424,8 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
         country: form.country || null,
         tier: form.tier || "tier_3",
         accepting_patients: form.accepting_patients !== false,
+        latitude: form.latitude ?? null,
+        longitude: form.longitude ?? null,
       };
       if (!isEdit) {
         payload.status = "approved";
@@ -445,11 +447,28 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit" : "Add"} {kind === "hospital" ? "Hospital" : "Ambulance Provider"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
+          <LocationPicker
+            onPick={(d) => setForm((f: any) => ({
+              ...f,
+              [nameField(kind)]: d.name || f[nameField(kind)],
+              city: d.city || f.city,
+              country: d.country || f.country,
+              contact_phone: d.phone || f.contact_phone,
+              latitude: d.lat,
+              longitude: d.lng,
+              address: d.formatted_address ?? f.address,
+            }))}
+          />
+          {form.latitude != null && form.longitude != null && (
+            <p className="text-[11px] text-muted-foreground">
+              Pinned at {Number(form.latitude).toFixed(4)}, {Number(form.longitude).toFixed(4)}
+            </p>
+          )}
           <div className="space-y-1.5">
             <Label>{kind === "hospital" ? "Name" : "Company name"}</Label>
             <Input value={form[nameField(kind)] ?? ""} onChange={(e) => update(nameField(kind), e.target.value)} />
