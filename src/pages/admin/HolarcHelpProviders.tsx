@@ -270,29 +270,12 @@ export default function HolarcHelpProviders() {
     );
   };
 
-  const seedTestProviders = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke("seed-test-providers");
-      if (error) throw error;
-      toast.success("Test providers seeded");
-      console.log("seed-test-providers result", data);
-      load();
-    } catch (e: any) {
-      toast.error(e?.message ?? "Seeding failed");
-    }
-  };
-
   return (
     <div className="container mx-auto p-4 sm:p-6 space-y-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Admin</p>
-          <h1 className="text-2xl font-extrabold">HolarcHelp Admin</h1>
-          <p className="text-sm text-muted-foreground">Manage providers, accountability, and the SOS voice clip.</p>
-        </div>
-        <button onClick={seedTestProviders} className="rounded-lg border border-primary/40 bg-primary/5 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/10">
-          Seed test providers
-        </button>
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Admin</p>
+        <h1 className="text-2xl font-extrabold">HolarcHelp Admin</h1>
+        <p className="text-sm text-muted-foreground">Manage providers, accountability, and the SOS voice clip.</p>
       </div>
 
       <Tabs defaultValue="providers">
@@ -309,29 +292,29 @@ export default function HolarcHelpProviders() {
         </TabsList>
 
         <TabsContent value="providers" className="mt-4 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              {(["active", "inactive", "all"] as Status[]).map((s) => (
-                <Button key={s} size="sm" variant={status === s ? "default" : "outline"} onClick={() => setStatus(s)} className="rounded-full capitalize">
-                  {s}
-                </Button>
-              ))}
-            </div>
-            <Button size="sm" onClick={() => setEdit({ kind: tab, row: null })}>
-              <Plus className="mr-1.5 h-4 w-4" />
-              Add {tab === "hospital" ? "Hospital" : "Ambulance"}
-            </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            {(["active", "inactive", "all"] as Status[]).map((s) => (
+              <Button key={s} size="sm" variant={status === s ? "default" : "outline"} onClick={() => setStatus(s)} className="rounded-full capitalize">
+                {s}
+              </Button>
+            ))}
           </div>
 
           <Tabs value={tab} onValueChange={(v) => setTab(v as Kind)}>
-            <TabsList className="bg-primary">
-              <TabsTrigger value="hospital" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
-                <Hospital className="mr-1.5 h-4 w-4" />Hospitals
-              </TabsTrigger>
-              <TabsTrigger value="ambulance" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
-                <Ambulance className="mr-1.5 h-4 w-4" />Ambulance
-              </TabsTrigger>
-            </TabsList>
+            <div className="flex items-center justify-between gap-2">
+              <TabsList className="bg-primary">
+                <TabsTrigger value="hospital" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
+                  <Hospital className="mr-1.5 h-4 w-4" />Hospitals
+                </TabsTrigger>
+                <TabsTrigger value="ambulance" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
+                  <Ambulance className="mr-1.5 h-4 w-4" />Ambulance
+                </TabsTrigger>
+              </TabsList>
+              <Button size="sm" onClick={() => setEdit({ kind: tab, row: null })}>
+                <Plus className="mr-1.5 h-4 w-4" />
+                Add {tab === "hospital" ? "Hospital" : "Ambulance"}
+              </Button>
+            </div>
 
             <TabsContent value="hospital" className="mt-4">
               {loading ? <Loader /> : renderGroupedTable(hospitals, "hospital")}
