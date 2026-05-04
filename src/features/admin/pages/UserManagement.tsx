@@ -73,11 +73,11 @@ export default function UserManagement() {
       .update({ holarchelp_enabled: !current } as any)
       .eq("id", userId);
     if (error) {
-      toast({ title: "Failed to toggle Guardian", description: error.message, variant: "destructive" });
+      toast({ title: "Failed to toggle HolarcHelp", description: error.message, variant: "destructive" });
       return;
     }
     setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, holarchelp_enabled: !current } : u));
-    toast({ title: !current ? "Guardian enabled" : "Guardian disabled" });
+    toast({ title: !current ? "HolarcHelp enabled" : "HolarcHelp disabled" });
   };
 
   const splitName = (fullName: string | null) => {
@@ -196,7 +196,7 @@ export default function UserManagement() {
               <TableHead>Last Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
-              <TableHead><span className="inline-flex items-center gap-1"><Shield className="h-3.5 w-3.5" />Guardian</span></TableHead>
+              <TableHead><span className="inline-flex items-center gap-1"><Shield className="h-3.5 w-3.5" />HolarcHelp</span></TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Joined</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
@@ -247,7 +247,7 @@ export default function UserManagement() {
                     <Switch
                       checked={!!u.holarchelp_enabled}
                       onCheckedChange={() => toggleGuardian(u.user_id, !!u.holarchelp_enabled)}
-                      aria-label="Toggle Guardian module"
+                      aria-label="Toggle HolarcHelp module"
                     />
                   </TableCell>
                   <TableCell>{statusBadge(u.status)}</TableCell>
