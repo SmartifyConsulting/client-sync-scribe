@@ -186,9 +186,6 @@ export default function HolarcHelpProviders() {
             </span>
           </div>
         </TableCell>
-        <TableCell>
-          <div className="flex items-center gap-2">
-            <Switch checked={r.accepting_patients !== false} onCheckedChange={(v) => setAccepting(kind, r.id, v)} />
             <span className={`text-[11px] font-semibold ${r.accepting_patients !== false ? "text-emerald-700" : "text-red-600"}`}>
               {r.accepting_patients !== false ? "Yes" : "Full"}
             </span>
