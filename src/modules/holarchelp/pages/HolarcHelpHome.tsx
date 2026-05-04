@@ -31,7 +31,7 @@ export default function HolarcHelpHome() {
   const [triggering, setTriggering] = useState(false);
   const [permDenied, setPermDenied] = useState(false);
   const [coords, setCoords] = useState<Coords | null>(null);
-  const [providers, setProviders] = useState<(ProviderMarker & { _d: number; accepting: boolean })[]>([]);
+  const [providers, setProviders] = useState<(ProviderMarker & { _d: number; accepting: boolean; tier?: string; distanceKm?: number })[]>([]);
   const [incidentId, setIncidentId] = useState<string | null>(null);
   const [helpOnTheWay, setHelpOnTheWay] = useState(false);
   const [severityOpen, setSeverityOpen] = useState(false);
