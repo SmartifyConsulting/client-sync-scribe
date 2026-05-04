@@ -9,6 +9,7 @@ import {
   Briefcase,
   UserCog,
   Gift,
+  Shield,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useHolarcHelpAccess } from "@/modules/holarchelp/hooks/useHolarcHelpAccess";
