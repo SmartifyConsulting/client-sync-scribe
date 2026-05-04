@@ -1,10 +1,10 @@
-import { useGuardianAccess } from "../hooks/useGuardianAccess";
+import { useHolarcHelpAccess } from "../hooks/useHolarcHelpAccess";
 import { Shield, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
-export function GuardianGate({ children }: { children: React.ReactNode }) {
-  const { enabled, loading } = useGuardianAccess();
+export function HolarcHelpGate({ children }: { children: React.ReactNode }) {
+  const { enabled, loading } = useHolarcHelpAccess();
   const navigate = useNavigate();
 
   if (loading) {

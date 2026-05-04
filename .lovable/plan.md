@@ -1,86 +1,114 @@
-# Full Rename: Guardian → HolarcHelp
+# HolarcHelp: Folder/Route Rename + Providers Admin + Provider Portal
 
-Three coordinated changes shipped together so the app stays consistent.
+Three coordinated workstreams.
 
-## 1. Database migration (schema rename)
+## 1. Full folder & route rename `guardian` → `holarchelp`
 
-Rename every `guardian_*` object to `holarchelp_*`. RLS policies, foreign keys, and indexes follow the table rename automatically; functions are dropped and recreated with new names and bodies.
+Goal: zero references to "guardian" anywhere a future developer would look — file paths, URLs, symbol names, comments.
 
-**Tables renamed (15):**
-- `guardian_incidents` → `holarchelp_incidents`
-- `guardian_locations` → `holarchelp_locations`
-- `guardian_emergency_contacts` → `holarchelp_emergency_contacts`
-- `guardian_hospitals` → `holarchelp_hospitals`
-- `guardian_hospital_members` → `holarchelp_hospital_members`
-- `guardian_ambulance_providers` → `holarchelp_ambulance_providers`
-- `guardian_ambulance_members` → `holarchelp_ambulance_members`
-- `guardian_incident_events` → `holarchelp_incident_events`
-- `guardian_incident_offers` → `holarchelp_incident_offers`
-- `guardian_incident_cancellations` → `holarchelp_incident_cancellations`
-- `guardian_incident_feedback` → `holarchelp_incident_feedback`
-- `guardian_messaging_log` → `holarchelp_messaging_log`
-- `guardian_voice_clip_settings` → `holarchelp_voice_clip_settings`
-- `guardian_provider_status` → `holarchelp_provider_status` (enum or table — kept as-is)
-- `guardian_subscription_status` → `holarchelp_subscription_status`
-
-**Column renamed:**
-- `profiles.guardian_enabled` → `profiles.holarchelp_enabled`
-
-**Functions dropped & recreated (4):**
-- `guardian_get_tracking_incident` → `holarchelp_get_tracking_incident`
-- `guardian_get_tracking_locations` → `holarchelp_get_tracking_locations`
-- `guardian_user_enabled` → `holarchelp_user_enabled`
-- `guardian_approve_hospital` → `holarchelp_approve_hospital`
-- `guardian_approve_ambulance` → `holarchelp_approve_ambulance`
-
-**Enums / app_modules:**
-- `app_modules.module_key = 'guardian'` row updated to `'holarchelp'`
-- Enum values `guardian_hospital_tier`, `guardian_ambulance_tier` left as type names but recreated as `holarchelp_hospital_tier`, `holarchelp_ambulance_tier`
-
-**Storage bucket:**
-- `guardian-voice-clips` bucket kept (renaming buckets requires object copy + RLS rewrite). A code constant maps the brand to the bucket id.
-
-## 2. Code updates
-
-Find/replace everything matching `guardian_*` (DB identifiers) and rewrite Supabase calls to use the new names. `src/integrations/supabase/types.ts` regenerates automatically after the migration.
-
-**Files touched:**
-- `src/modules/guardian/hooks/useGuardianAccess.ts` — `guardian_user_enabled` → `holarchelp_user_enabled`, `guardian_enabled` → `holarchelp_enabled`
-- `src/modules/guardian/hooks/useLocationTracking.ts` — table refs
-- `src/modules/guardian/lib/whatsapp.ts` — table refs
-- `src/modules/guardian/pages/GuardianHome.tsx` — table refs + UI copy + internal links to `/patient/guardian/...`
-- `src/modules/guardian/pages/GuardianContacts.tsx` — table refs + UI copy
-- `src/modules/guardian/pages/GuardianIncidents.tsx` — table refs + UI copy + links
-- `src/modules/guardian/pages/GuardianIncidentDetail.tsx` — table refs + UI copy + links
-- `src/modules/guardian/pages/PublicTrack.tsx` — `guardian_get_tracking_*` RPCs renamed
-- `src/modules/guardian/components/GuardianGate.tsx` — column ref
-- `src/modules/guardian/routes.tsx` — catch-all `Navigate to="/guardian"` → `"/patient/guardian"`
-- `src/modules/guardian/README.md` — describe rename
-- `src/features/admin/pages/UserManagement.tsx` — column `holarchelp_enabled`, header label "HolarcHelp"
-- `src/features/patients/components/PatientDetailsEditor.tsx` — column ref if any
-- `src/App.tsx` — verify route mounts, brand label
-- `src/components/layout/BottomNav.tsx` — label "HolarcHelp"
-- `src/index.css` — any guardian-prefixed classnames renamed (cosmetic)
-- `src/pages/PatientConsent.tsx`, `src/pages/TermsAndConditions.tsx` — replace word "Guardian" with "HolarcHelp" in copy
-
-**Folder & symbol rename (internal codebase only):**
+**Folder rename:**
 - `src/modules/guardian/` → `src/modules/holarchelp/`
-- `useGuardianAccess` → `useHolarcHelpAccess`, `GuardianGate` → `HolarcHelpGate`, page components `GuardianHome` → `HolarcHelpHome` etc.
-- Route segment kept as `/patient/guardian` for now (changing it breaks any saved links and the public tracking URLs already in the wild). A short note in README explains.
+- Inside: `GuardianHome.tsx` → `HolarcHelpHome.tsx`, `GuardianContacts.tsx` → `HolarcHelpContacts.tsx`, `GuardianIncidents.tsx` → `HolarcHelpIncidents.tsx`, `GuardianIncidentDetail.tsx` → `HolarcHelpIncidentDetail.tsx`, `GuardianGate.tsx` → `HolarcHelpGate.tsx`, `useGuardianAccess.ts` → `useHolarcHelpAccess.ts`. `PublicTrack.tsx`, `LiveMap.tsx`, `SeverityPicker.tsx`, `useLocationTracking.ts`, `whatsapp.ts`, `routes.tsx`, `README.md` keep filenames.
 
-## 3. Route 404 fix (folded in)
+**Symbol rename:**
+- `GuardianHome` / `GuardianContacts` / `GuardianIncidents` / `GuardianIncidentDetail` / `GuardianGate` / `GuardianRoutes` → `HolarcHelp*` equivalents
+- `useGuardianAccess` → `useHolarcHelpAccess`, hook variables `guardianEnabled` → `holarchelpEnabled`, `isOnGuardian` → `isOnHolarcHelp`, `toggleGuardian` → `toggleHolarcHelp`
 
-While editing the page files, all internal `/guardian/...` links are repointed to `/patient/guardian/...` so the user-reported 404s disappear.
+**Route rename:**
+- `/patient/guardian/*` → `/patient/holarchelp/*` (mounted in `App.tsx`)
+- All internal `navigate()` / `<Link>` targets updated
+- Public tracking URL `/track/:token` is unchanged (no "guardian" in it already)
+- Realtime channel name `guardian-incident-${id}` → `holarchelp-incident-${id}`
 
-## Risk & rollback
+**Importers updated:**
+- `src/App.tsx` — import path + route path
+- `src/components/layout/BottomNav.tsx` — import path + variable names + path-startsWith check
 
-- Migration is wrapped in a single transaction. If any step fails, nothing changes.
-- Public tracking links (`/track/:token`) keep working — only the underlying RPC name changes.
-- The `guardian-voice-clips` storage bucket is intentionally NOT renamed. A constant `HOLARCHELP_VOICE_BUCKET = 'guardian-voice-clips'` keeps existing audio reachable.
-- Any external integrations querying `guardian_*` tables directly (none known) would need updating.
+**README rewritten** to reflect HolarcHelp branding and explain the public-name vs DB-codename history.
 
-## Out of scope
+After this, `grep -ri guardian src/` returns zero hits except for unrelated legal copy ("parent or legal guardian") and the relationship dropdown option.
 
-- Renaming the storage bucket (would require copying every object).
-- Renaming the URL segment `/patient/guardian` → `/patient/holarchelp` (would break saved tracking links).
-- Building a dedicated provider/dispatcher portal (separate task).
+## 2. Providers admin page (option b)
+
+A new page for platform admins to review and manage hospital and ambulance provider applications.
+
+**Route:** `/admin/holarchelp-providers`
+
+**Sidebar:** add "Providers" item under Admin nav (icon: `Hospital` or `Ambulance` from lucide).
+
+**Page layout** — two tabs:
+
+- **Hospitals tab** — table of `holarchelp_hospitals` rows with columns: Name · Owner email · City · Tier · Status · Subscription · Beds (avail/total) · Actions
+- **Ambulance providers tab** — table of `holarchelp_ambulance_providers` with: Name · Owner email · Coverage · Tier · Status · Subscription · Actions
+
+**Filters:** status pill row (`pending` / `approved` / `rejected` / `suspended` / `all`).
+
+**Actions per row:**
+- "Approve" (only when `status='pending'`) → calls `holarchelp_approve_hospital` or `holarchelp_approve_ambulance` RPC, which flips status and grants the `hospital_staff` / `ambulance_staff` role to the owner.
+- "Reject" → updates `status='rejected'` (admin RLS already covers this).
+- "Suspend" / "Reactivate" → toggles between `approved` / `suspended`.
+- "Edit tier" (inline select) → updates `tier` column.
+
+**Empty states:** clear "No pending hospitals" / "No ambulance providers yet" cards.
+
+No DB schema changes required — RLS policies already let admins manage these tables. Approval functions already exist (renamed in the previous migration).
+
+## 3. Provider portal (option c)
+
+A dedicated workspace for hospital and ambulance staff to receive, accept, and track SOS dispatches.
+
+**Route base:** `/provider`
+
+**Auth gate:** new `ProviderGate` component that allows entry only if the user has `hospital_staff` or `ambulance_staff` role (already in the `user_role` enum).
+
+**Pages:**
+
+- `/provider` — **Dispatch Dashboard**
+  - Top: summary cards (Active SOS in your region · Accepted by us · En route · Resolved today)
+  - Live feed of `holarchelp_incidents` filtered to incidents in the provider's coverage area (or all `pending` for hospitals — geo-filter is a follow-up)
+  - Each card shows: severity badge, time elapsed, last known location (map snippet via existing `LiveMap`), patient name, vitals flags (conscious/breathing)
+  - Buttons: **Accept** (writes to `holarchelp_incident_offers` then sets `assigned_provider_id` on the incident) · **Decline** (writes to `holarchelp_incident_cancellations`)
+
+- `/provider/incident/:id` — **Active Incident View**
+  - Reuses `LiveMap` component for live patient location
+  - Status timeline pulled from `holarchelp_incident_events`
+  - ETA controls (update `eta_minutes`, mark `en_route_at`, mark `arrived_at`)
+  - Quick-message buttons (canned messages logged to `holarchelp_messaging_log`)
+
+- `/provider/profile` — **Provider Profile**
+  - Hospital staff: edit hospital details (capacity, beds available, ICU available, at_capacity flag) — writes to their `holarchelp_hospitals` row
+  - Ambulance staff: edit ambulance provider details — writes to `holarchelp_ambulance_providers`
+  - Both: see subscription status and tier (read-only — managed by admin)
+
+**Layout:** new `ProviderLayout` with its own sidebar (Dashboard · Active Incidents · Profile · Sign out). Sign-up flow for new providers is out of scope — admins create initial provider records and link the owner via the providers admin page. A simple "Apply to be a provider" form on the public site can be a follow-up.
+
+**Realtime:** subscribe to `holarchelp_incidents` insertions (filtered server-side via RLS) and `holarchelp_locations` for the active incident.
+
+## Files added
+
+- `src/modules/holarchelp/components/ProviderGate.tsx`
+- `src/modules/holarchelp/pages/provider/ProviderDashboard.tsx`
+- `src/modules/holarchelp/pages/provider/ProviderIncidentDetail.tsx`
+- `src/modules/holarchelp/pages/provider/ProviderProfile.tsx`
+- `src/modules/holarchelp/pages/provider/ProviderLayout.tsx`
+- `src/modules/holarchelp/routes-provider.tsx` (mounted at `/provider/*`)
+- `src/pages/admin/HolarcHelpProviders.tsx` (the providers admin page)
+
+## Files modified
+
+- `src/App.tsx` — new routes, updated import paths
+- `src/components/layout/Sidebar.tsx` — add "Providers" admin item; add provider role detection so hospital/ambulance staff get the provider sidebar
+- `src/components/layout/BottomNav.tsx` — updated import path + symbol names + route prefix
+- `src/hooks/useUserRole.ts` — expose `isHospitalStaff` / `isAmbulanceStaff` flags
+- README in the renamed module
+
+## DB changes
+
+None. The previous migration already renamed every table, function, column, and enum to `holarchelp_*`. RLS policies for hospital/ambulance owners and admins are already in place.
+
+## Out of scope (call-outs)
+
+- Geo-based incident filtering for providers (today: list-all-active; v2: filter by hospital lat/lng radius).
+- Public provider self-signup wizard (today: admin manually creates the provider record + sets owner_id).
+- Storage bucket rename from `guardian-voice-clips` to `holarchelp-voice-clips` (would require copying every existing audio object and rewriting RLS — kept for a future maintenance window). Code references the bucket via a single constant for easy future rename.
+- Renaming the inherited `useGuardianAccess` hook export's display in devtools (cosmetic; the hook itself is renamed).

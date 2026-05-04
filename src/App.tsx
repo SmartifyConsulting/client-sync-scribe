@@ -52,9 +52,11 @@ import ReferralDoctors from "./pages/ReferralDoctors";
 import ExpiringRecordings from "./pages/ExpiringRecordings";
 import Admin from "./pages/Admin";
 
-// Guardian module
-import GuardianRoutes from "./modules/guardian/routes";
-import PublicTrack from "./modules/guardian/pages/PublicTrack";
+// HolarcHelp module
+import HolarcHelpRoutes from "./modules/holarchelp/routes";
+import ProviderRoutes from "./modules/holarchelp/routes-provider";
+import PublicTrack from "./modules/holarchelp/pages/PublicTrack";
+import HolarcHelpProviders from "./pages/admin/HolarcHelpProviders";
 
 const queryClient = new QueryClient();
 
@@ -157,7 +159,7 @@ const App = () => (
             <Route path="/patient/documents" element={<PatientDocuments />} />
             <Route path="/patient/round-table" element={<PatientRoundTable />} />
             <Route path="/patient/details" element={<MyDetails />} />
-            <Route path="/patient/guardian/*" element={<GuardianRoutes />} />
+            <Route path="/patient/holarchelp/*" element={<HolarcHelpRoutes />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
 
@@ -193,12 +195,16 @@ const App = () => (
             <Route path="/admin/pricing" element={<PricingAdmin />} />
             <Route path="/admin/gamification" element={<GamificationAdmin />} />
             <Route path="/admin/users" element={<UserManagement />} />
+            <Route path="/admin/holarchelp-providers" element={<HolarcHelpProviders />} />
             
             {/* Common routes */}
             <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<Profile />} />
           </Route>
           
+          {/* HolarcHelp provider portal (its own layout, gated by hospital_staff/ambulance_staff role) */}
+          <Route path="/provider/*" element={<ProtectedRoute><ProviderRoutes /></ProtectedRoute>} />
+
           {/* Role-based redirect for /dashboard */}
           <Route path="/dashboard" element={<ProtectedRoute><RoleBasedRedirect /></ProtectedRoute>} />
           

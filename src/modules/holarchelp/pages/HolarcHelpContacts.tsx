@@ -16,7 +16,7 @@ const schema = z.object({
   relationship: z.string().trim().max(60).optional(),
 });
 
-export default function GuardianContacts() {
+export default function HolarcHelpContacts() {
   const { user } = useAuth();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [form, setForm] = useState({ name: "", phone: "", email: "", relationship: "" });

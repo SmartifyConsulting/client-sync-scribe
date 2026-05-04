@@ -11,7 +11,7 @@ import { buildSosMessage, waLink } from "../lib/whatsapp";
 
 type Loc = { latitude: number; longitude: number; recorded_at: string };
 
-export default function GuardianIncidentDetail() {
+export default function HolarcHelpIncidentDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -34,7 +34,7 @@ export default function GuardianIncidentDetail() {
         .then(({ data }) => { if (data?.full_name) setProfileName(data.full_name); });
     }
 
-    const ch = supabase.channel(`guardian-incident-${id}`)
+    const ch = supabase.channel(`holarchelp-incident-${id}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "holarchelp_locations", filter: `incident_id=eq.${id}` },
         (p) => setLocations((prev) => [p.new as any, ...prev].slice(0, 200)))
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "holarchelp_incidents", filter: `id=eq.${id}` },
@@ -56,7 +56,7 @@ export default function GuardianIncidentDetail() {
       .update({ status: "resolved", resolved_at: new Date().toISOString() } as any).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Incident resolved");
-    navigate("/patient/guardian");
+    navigate("/patient/holarchelp");
   };
 
   if (!incident) return <div className="p-5 text-muted-foreground">Loading…</div>;

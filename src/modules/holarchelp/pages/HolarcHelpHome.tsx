@@ -9,7 +9,7 @@ import { SeverityPicker, type SeverityResult } from "../components/SeverityPicke
 
 const HOLD_MS = 1500;
 
-export default function GuardianHome() {
+export default function HolarcHelpHome() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeIncidentId, setActiveIncidentId] = useState<string | null>(null);
@@ -38,7 +38,7 @@ export default function GuardianHome() {
     if (!user || triggering) return;
     if (noContacts) {
       toast.error("Add at least one emergency contact before using SOS");
-      navigate("/patient/guardian/contacts");
+      navigate("/patient/holarchelp/contacts");
       return;
     }
     setTriggering(true);
@@ -86,17 +86,17 @@ export default function GuardianHome() {
     }
     toast.success("Emergency alert created. Notifying contacts…");
     setPending(null);
-    navigate(`/patient/guardian/incident/${id}`);
+    navigate(`/patient/holarchelp/incident/${id}`);
   };
 
   const startHold = () => {
     if (noContacts) {
       toast.error("Add at least one emergency contact before using SOS");
-      navigate("/patient/guardian/contacts");
+      navigate("/patient/holarchelp/contacts");
       return;
     }
     if (activeIncidentId) {
-      navigate(`/patient/guardian/incident/${activeIncidentId}`);
+      navigate(`/patient/holarchelp/incident/${activeIncidentId}`);
       return;
     }
     setHolding(true);
@@ -158,7 +158,7 @@ export default function GuardianHome() {
             <p className="font-semibold">Add an emergency contact</p>
             <p className="text-muted-foreground">SOS is disabled until you have at least one contact.</p>
           </div>
-          <Button size="sm" onClick={() => navigate("/patient/guardian/contacts")}>Add</Button>
+          <Button size="sm" onClick={() => navigate("/patient/holarchelp/contacts")}>Add</Button>
         </div>
       )}
 
@@ -169,7 +169,7 @@ export default function GuardianHome() {
             <p className="font-semibold text-sos">Active emergency</p>
             <p className="text-muted-foreground">Your live location is being shared.</p>
           </div>
-          <Button size="sm" variant="outline" onClick={() => navigate(`/patient/guardian/incident/${activeIncidentId}`)}>View</Button>
+          <Button size="sm" variant="outline" onClick={() => navigate(`/patient/holarchelp/incident/${activeIncidentId}`)}>View</Button>
         </div>
       )}
 
@@ -203,7 +203,7 @@ export default function GuardianHome() {
         <Button variant="outline" className="h-14 justify-start gap-3 rounded-2xl text-base" onClick={shareLocation}>
           <MapPin className="h-5 w-5 text-primary" /> Share my location
         </Button>
-        <Button variant="outline" className="h-14 justify-start gap-3 rounded-2xl text-base" onClick={() => navigate("/patient/guardian/contacts")}>
+        <Button variant="outline" className="h-14 justify-start gap-3 rounded-2xl text-base" onClick={() => navigate("/patient/holarchelp/contacts")}>
           <Phone className="h-5 w-5 text-primary" /> Manage emergency contacts
         </Button>
       </div>

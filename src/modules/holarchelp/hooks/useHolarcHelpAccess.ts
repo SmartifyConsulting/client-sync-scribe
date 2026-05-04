@@ -3,12 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 /**
- * Returns whether the Guardian module is enabled for the current user.
+ * Returns whether the HolarcHelp module is enabled for the current user.
  * Combines:
- *  - global app_modules.guardian.enabled (admin kill-switch)
+ *  - global app_modules.holarchelp.enabled (admin kill-switch)
  *  - per-user profiles.holarchelp_enabled (admin-toggled subscription flag)
  */
-export function useGuardianAccess() {
+export function useHolarcHelpAccess() {
   const { user, loading: authLoading } = useAuth();
   const [enabled, setEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
