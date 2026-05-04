@@ -132,20 +132,6 @@ export default function HolarcHelpHome() {
     }, () => toast.error("Couldn't get GPS — please allow location access"));
   };
 
-  const enableLocation = () => {
-    if (!("geolocation" in navigator)) return toast.error("GPS not supported on this device");
-    navigator.geolocation.getCurrentPosition(
-      () => toast.success("Location access enabled"),
-      (err) => {
-        if (err.code === err.PERMISSION_DENIED) {
-          toast.error("Location blocked — enable it in your browser site settings");
-        } else {
-          toast.error("Couldn't get location. Try again.");
-        }
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  };
 
   return (
     <div className="mx-auto max-w-md">
@@ -197,8 +183,8 @@ export default function HolarcHelpHome() {
       </div>
 
       <div className="mt-10 grid gap-3">
-        <Button variant="outline" className="h-14 justify-start gap-3 rounded-2xl text-base" onClick={enableLocation}>
-          <Crosshair className="h-5 w-5 text-primary" /> Enable location access
+        <Button variant="outline" className="h-14 justify-start gap-3 rounded-2xl text-base" onClick={() => navigate("/patient/holarchelp/nearby")}>
+          <Crosshair className="h-5 w-5 text-primary" /> Find nearby provider
         </Button>
         <Button variant="outline" className="h-14 justify-start gap-3 rounded-2xl text-base" onClick={shareLocation}>
           <MapPin className="h-5 w-5 text-primary" /> Share my location

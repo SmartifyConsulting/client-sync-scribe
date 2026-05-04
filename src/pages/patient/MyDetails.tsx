@@ -123,7 +123,7 @@ export default function MyDetails() {
               </CardContent>
             </Card>
           </Link>
-          <Link to="/patient/holarchelp/contacts" className="block">
+          <Link to="/patient/holarchelp/nearby" className="block">
             <Card className="h-full border-primary/20 hover:shadow-lg transition-all cursor-pointer">
               <CardContent className="flex flex-col items-center justify-center gap-1 p-4">
                 <MapPin className="h-7 w-7 text-primary" />

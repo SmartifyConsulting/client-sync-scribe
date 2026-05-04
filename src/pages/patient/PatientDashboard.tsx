@@ -409,7 +409,7 @@ export default function PatientDashboard() {
               </CardContent>
             </Card>
           </Link>
-          <Link to="/patient/holarchelp/contacts" className="block">
+          <Link to="/patient/holarchelp/nearby" className="block">
             <Card className="h-full border-primary/20 hover:shadow-lg transition-all cursor-pointer">
               <CardContent className="flex flex-col items-center justify-center gap-1 p-5">
                 <MapPin className="h-8 w-8 text-primary" />

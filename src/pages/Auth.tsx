@@ -916,8 +916,9 @@ export default function Auth() {
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Sign In
                 </Button>
               </form>
-              <div className="mt-4 text-center">
-                <button type="button" onClick={() => { setIsLogin(false); setCurrentStep(0); }} className="text-sm text-primary hover:underline">Don't have an account? Sign up</button>
+              <div className="mt-4 text-center space-y-2">
+                <button type="button" onClick={() => { setIsLogin(false); setCurrentStep(0); }} className="block w-full text-sm text-primary hover:underline">Don't have an account? Sign up</button>
+                <a href="/provider-signup" className="block text-xs text-muted-foreground hover:text-primary hover:underline">Are you a hospital or ambulance provider? Sign up here</a>
               </div>
             </div>
           </div>
