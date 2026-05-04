@@ -11,6 +11,7 @@ export type ProviderMarker = {
   longitude: number;
   type: "hospital" | "ambulance";
   subtitle?: string;
+  accepting?: boolean;
 };
 
 interface Props {
