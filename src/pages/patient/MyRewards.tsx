@@ -104,15 +104,7 @@ export default function MyRewards() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  // First-time launch: auto-open the explainer once per user/device.
-  useEffect(() => {
-    try {
-      if (!localStorage.getItem("vulas_explainer_seen_v1")) {
-        setShowVulaExplainer(true);
-        localStorage.setItem("vulas_explainer_seen_v1", "1");
-      }
-    } catch {}
-  }, []);
+  // Auto-popup disabled per user request — explainer is available via the "What are Vulas?" button.
 
   // Get patient record (robust selector — prefers record with active prescriptions)
   const { data: patientRecord } = useMyChronicPatientId();
@@ -295,7 +287,7 @@ export default function MyRewards() {
   const totalTransferred = transfers.reduce((sum, t) => sum + t.amount, 0);
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6">
       <VulaExplainerDialog open={showVulaExplainer} onOpenChange={setShowVulaExplainer} />
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
