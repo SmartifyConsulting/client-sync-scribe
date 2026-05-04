@@ -24,13 +24,7 @@ import {
   Hospital,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { Footer } from "@/components/layout/Footer";
 
@@ -38,7 +32,8 @@ const patientBenefits = [
   {
     icon: Eye,
     title: "Complete Health Picture",
-    description: "See your entire medical history, prescriptions, and care team in one unified view—no more scattered records.",
+    description:
+      "See your entire medical history, prescriptions, and care team in one unified view—no more scattered records.",
   },
   {
     icon: Users,
@@ -48,7 +43,8 @@ const patientBenefits = [
   {
     icon: Shield,
     title: "You're in Control",
-    description: "Decide exactly which doctors see your records. Grant or revoke access anytime with granular permissions.",
+    description:
+      "Decide exactly which doctors see your records. Grant or revoke access anytime with granular permissions.",
   },
   {
     icon: Calendar,
@@ -61,7 +57,8 @@ const providerBenefits = [
   {
     icon: Brain,
     title: "AI-Powered Insights",
-    description: "Get comprehensive patient history summaries and medication conflict alerts before every consultation.",
+    description:
+      "Get comprehensive patient history summaries and medication conflict alerts before every consultation.",
   },
   {
     icon: Share2,
@@ -76,7 +73,8 @@ const providerBenefits = [
   {
     icon: Heart,
     title: "Better Patient Outcomes",
-    description: "Access complete patient history across all their providers—make informed decisions with the full picture.",
+    description:
+      "Access complete patient history across all their providers—make informed decisions with the full picture.",
   },
 ];
 
@@ -159,14 +157,15 @@ export default function Landing() {
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-[1.05] mb-5">
-              The healthcare ecosystem
-              <span className="block text-gradient pb-3">your records have been waiting for.</span>
+              A revolutionary healthcare ecosystem
+              <span className="block text-gradient pb-3">built around you”.</span>
             </h1>
 
             <p className="text-base sm:text-lg text-muted-foreground mb-7 max-w-2xl lg:mx-0 mx-auto">
-              Holarc is one connected platform where doctors run their entire practice and patients own their entire 360° health story —
-              from voice-recorded consultations and AI summaries, to video-verified medication adherence rewarded with Vulas,
-              cross-specialist Round Tables, hospital admissions, prescriptions, billing, and a unified care calendar.
+              Holarc is one connected platform where doctors run their entire practice and patients own their entire
+              360° health story — from voice-recorded consultations and AI summaries, to video-verified medication
+              adherence rewarded with Vulas, cross-specialist Round Tables, hospital admissions, prescriptions, billing,
+              and a unified care calendar.
             </p>
 
             {/* Capability pills */}
@@ -225,9 +224,15 @@ export default function Landing() {
 
             {/* Trust strip */}
             <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-2 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5"><Shield className="h-3.5 w-3.5 text-primary" /> Patient-granted access</span>
-              <span className="inline-flex items-center gap-1.5"><Activity className="h-3.5 w-3.5 text-primary" /> Real-time collaboration</span>
-              <span className="inline-flex items-center gap-1.5"><Heart className="h-3.5 w-3.5 text-[#E01837]" /> Built around the patient</span>
+              <span className="inline-flex items-center gap-1.5">
+                <Shield className="h-3.5 w-3.5 text-primary" /> Patient-granted access
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Activity className="h-3.5 w-3.5 text-primary" /> Real-time collaboration
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Heart className="h-3.5 w-3.5 text-[#E01837]" /> Built around the patient
+              </span>
             </div>
           </motion.div>
 
@@ -253,15 +258,12 @@ export default function Landing() {
                       </span>
                     </div>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
-                      Voice transcribed in real time. AI extracts diagnoses, prescriptions and follow-up tasks automatically.
+                      Voice transcribed in real time. AI extracts diagnoses, prescriptions and follow-up tasks
+                      automatically.
                     </p>
                     <div className="mt-3 flex items-end gap-1.5 h-10">
                       {[18, 32, 24, 40, 28, 36, 22, 30, 26, 34, 20, 38].map((h, i) => (
-                        <span
-                          key={i}
-                          className="w-1 rounded-full bg-primary/60"
-                          style={{ height: `${h}px` }}
-                        />
+                        <span key={i} className="w-1 rounded-full bg-primary/60" style={{ height: `${h}px` }} />
                       ))}
                     </div>
                   </div>
@@ -294,10 +296,7 @@ export default function Landing() {
                 </p>
                 <div className="mt-3 flex -space-x-1.5">
                   {["bg-primary", "bg-[#E01837]", "bg-amber-500", "bg-teal-500"].map((c, i) => (
-                    <span
-                      key={i}
-                      className={`h-5 w-5 rounded-full border-2 border-background ${c}`}
-                    />
+                    <span key={i} className={`h-5 w-5 rounded-full border-2 border-background ${c}`} />
                   ))}
                 </div>
               </div>
@@ -311,7 +310,8 @@ export default function Landing() {
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-foreground">AI clinical assistant</p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
-                      Patient history summaries · medication conflict alerts · imaging analysis · auto-generated documents.
+                      Patient history summaries · medication conflict alerts · imaging analysis · auto-generated
+                      documents.
                     </p>
                   </div>
                 </div>
@@ -339,7 +339,8 @@ export default function Landing() {
               Your Health. <span className="text-primary">360°</span> View.
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Holarc gives you a complete 360-degree view of your health profile—every consultation, prescription, and clinical note from every provider, unified in one place and entirely under your control.
+              Holarc gives you a complete 360-degree view of your health profile—every consultation, prescription, and
+              clinical note from every provider, unified in one place and entirely under your control.
             </p>
           </motion.div>
 
@@ -356,12 +357,8 @@ export default function Landing() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-4">
                   <benefit.icon className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  {benefit.title}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {benefit.description}
-                </p>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{benefit.title}</h3>
+                <p className="text-sm text-muted-foreground">{benefit.description}</p>
               </motion.div>
             ))}
           </div>
@@ -382,11 +379,10 @@ export default function Landing() {
               <Stethoscope className="h-4 w-4" />
               For Healthcare Providers
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Practice with the Full Picture
-            </h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">Practice with the Full Picture</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              When patients grant you access, you see everything—their complete history across all providers. Make better decisions with better information.
+              When patients grant you access, you see everything—their complete history across all providers. Make
+              better decisions with better information.
             </p>
           </motion.div>
 
@@ -403,12 +399,8 @@ export default function Landing() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-4">
                   <benefit.icon className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  {benefit.title}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {benefit.description}
-                </p>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{benefit.title}</h3>
+                <p className="text-sm text-muted-foreground">{benefit.description}</p>
               </motion.div>
             ))}
           </div>
@@ -425,17 +417,12 @@ export default function Landing() {
             viewport={{ once: true }}
             className="card-modern p-12 bg-gradient-to-br from-primary/5 to-primary/10"
           >
-            <h2 className="text-3xl font-bold text-foreground mb-4">
-              Ready for Healthcare That Works Together?
-            </h2>
+            <h2 className="text-3xl font-bold text-foreground mb-4">Ready for Healthcare That Works Together?</h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Join thousands of patients and providers building a better healthcare experience—one where your health story is complete, connected, and under your control.
+              Join thousands of patients and providers building a better healthcare experience—one where your health
+              story is complete, connected, and under your control.
             </p>
-            <Button
-              size="lg"
-              onClick={() => setShowRoleDialog(true)}
-              className="btn-pill text-lg px-8 py-6"
-            >
+            <Button size="lg" onClick={() => setShowRoleDialog(true)} className="btn-pill text-lg px-8 py-6">
               Get Started Today
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
@@ -448,9 +435,7 @@ export default function Landing() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-center text-2xl">Join Holarc</DialogTitle>
-            <DialogDescription className="text-center">
-              How will you use the platform?
-            </DialogDescription>
+            <DialogDescription className="text-center">How will you use the platform?</DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4 pt-4">
             <button
