@@ -21,6 +21,8 @@ export default function MyDetails() {
   const [userEmail, setUserEmail] = useState<string>("");
   const { toast } = useToast();
   const { lollipopCount, loading: rewardsLoading } = useMyRewards();
+  const { user } = useAuth();
+  const { enabled: holarcHelpOn } = useHolarcHelpAccess();
 
   useEffect(() => {
     fetchPatientRecord();
@@ -109,6 +111,33 @@ export default function MyDetails() {
         <h1 className="text-2xl font-bold text-foreground">{heading.title}</h1>
         <p className="text-muted-foreground text-[12px]">{heading.subtitle}</p>
       </div>
+
+      {holarcHelpOn && (
+        <div className="grid grid-cols-2 gap-3">
+          <Link to="/patient/holarchelp" className="block">
+            <Card className="h-full border-red-500/30 bg-gradient-to-br from-red-500 to-red-600 hover:shadow-lg transition-all cursor-pointer">
+              <CardContent className="flex flex-col items-center justify-center gap-1 p-4 text-white">
+                <Siren className="h-7 w-7" />
+                <p className="text-base font-extrabold tracking-wide">SOS</p>
+                <p className="text-[10px] opacity-90">Emergency help</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link to="/patient/holarchelp/contacts" className="block">
+            <Card className="h-full border-primary/20 hover:shadow-lg transition-all cursor-pointer">
+              <CardContent className="flex flex-col items-center justify-center gap-1 p-4">
+                <MapPin className="h-7 w-7 text-primary" />
+                <p className="text-base font-extrabold tracking-wide text-foreground">Nearby</p>
+                <p className="text-[10px] text-muted-foreground">Hospitals & ambulances</p>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+      )}
+
+      {holarcHelpOn && user?.id && (
+        <PatientIncidentHistory userId={user.id} />
+      )}
 
       <PatientDetailsEditor patient={patient} onSave={handleSave} isSelfService userEmail={userEmail} lollipopCount={lollipopCount} rewardsLoading={rewardsLoading} section={section} />
     </div>
