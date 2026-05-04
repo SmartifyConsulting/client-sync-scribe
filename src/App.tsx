@@ -51,6 +51,7 @@ import UserManagement from "./pages/admin/UserManagement";
 import ReferralDoctors from "./pages/ReferralDoctors";
 import ExpiringRecordings from "./pages/ExpiringRecordings";
 import Admin from "./pages/Admin";
+import ProviderSignup from "./pages/ProviderSignup";
 
 // HolarcHelp module
 import HolarcHelpRoutes from "./modules/holarchelp/routes";
@@ -134,6 +135,7 @@ const App = () => (
           {/* Public routes */}
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/provider-signup" element={<ProviderSignup />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/intellectual-property" element={<IntellectualProperty />} />
           <Route path="/patient-consent" element={<PatientConsent />} />
