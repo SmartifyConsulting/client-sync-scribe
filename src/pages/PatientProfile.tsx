@@ -330,15 +330,15 @@ export default function PatientProfile() {
             </p>
           </div>
           {/* Vula Rewards */}
-          <div className="rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-2 shadow-sm border border-emerald-200 dark:border-emerald-800/30 flex items-center justify-between gap-2">
-            <div className="flex flex-col min-w-0">
+          <div className="rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-2 shadow-sm border border-emerald-200 dark:border-emerald-800/30 flex flex-col items-center justify-center gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+            <div className="flex flex-col items-center sm:items-start min-w-0">
               <p className="text-[10px] font-medium text-muted-foreground">Vulas</p>
               <p className="mt-1 text-sm font-bold text-emerald-600 dark:text-emerald-400">{lollipopCount}</p>
             </div>
             <img
               src={vulaSymbol}
               alt="Vulas"
-              className="h-7 w-7 md:h-8 md:w-8 object-contain shrink-0"
+              className="h-7 w-7 md:h-8 md:w-8 object-contain shrink-0 mx-auto sm:mx-0"
             />
           </div>
         </div>
