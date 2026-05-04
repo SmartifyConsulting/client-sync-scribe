@@ -117,6 +117,11 @@ export default function HolarcHelpHome() {
       navigate(`/patient/holarchelp/incident/${activeIncidentId}`);
       return;
     }
+    if (hasNok === false) {
+      toast.error("Add a Next of Kin first — they are your Emergency Contact.");
+      navigate("/patient/details?section=health");
+      return;
+    }
     setTriggering(true);
     try {
       // Get location (required)
