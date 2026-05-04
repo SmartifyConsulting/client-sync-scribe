@@ -30,15 +30,23 @@ export default function HolarcHelpHome() {
   const [triggering, setTriggering] = useState(false);
   const [permDenied, setPermDenied] = useState(false);
   const [coords, setCoords] = useState<Coords | null>(null);
-  const [providers, setProviders] = useState<(ProviderMarker & { _d: number })[]>([]);
+  const [providers, setProviders] = useState<(ProviderMarker & { _d: number; accepting: boolean })[]>([]);
   const [incidentId, setIncidentId] = useState<string | null>(null);
   const [helpOnTheWay, setHelpOnTheWay] = useState(false);
   const [severityOpen, setSeverityOpen] = useState(false);
   const [requesting, setRequesting] = useState<string | null>(null);
+  const [hasNok, setHasNok] = useState<boolean | null>(null);
   const channelRef = useRef<any>(null);
 
   useEffect(() => {
     if (!user) return;
+    supabase.from("patients" as any)
+      .select("next_of_kin_name, next_of_kin_phone")
+      .eq("patient_user_id", user.id)
+      .order("created_at", { ascending: false }).limit(1).maybeSingle()
+      .then(({ data }: any) => {
+        setHasNok(!!(data?.next_of_kin_name && data?.next_of_kin_phone));
+      });
     supabase.from("holarchelp_incidents" as any).select("id, assigned_provider_id, accepted_at")
       .eq("user_id", user.id).eq("status", "active")
       .order("created_at", { ascending: false }).limit(1).maybeSingle()
