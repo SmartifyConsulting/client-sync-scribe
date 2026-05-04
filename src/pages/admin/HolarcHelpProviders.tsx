@@ -133,11 +133,6 @@ export default function HolarcHelpProviders() {
     if (error) return toast.error(error.message);
     toast.success(active ? "Activated" : "Deactivated"); load();
   };
-  const setAccepting = async (kind: Kind, id: string, accepting: boolean) => {
-    const { error } = await supabase.from(tableFor(kind) as any).update({ accepting_patients: accepting } as any).eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success(accepting ? "Accepting patients" : "Marked full capacity"); load();
-  };
   const setTier = async (kind: Kind, id: string, tier: string) => {
     const { error } = await supabase.from(tableFor(kind) as any).update({ tier } as any).eq("id", id);
     if (error) return toast.error(error.message);
