@@ -58,6 +58,10 @@ export default {
           light: "hsl(var(--terracotta-light))",
           dark: "hsl(var(--terracotta-dark))",
         },
+        sos: {
+          DEFAULT: "hsl(var(--sos))",
+          foreground: "hsl(var(--sos-foreground))",
+        },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
