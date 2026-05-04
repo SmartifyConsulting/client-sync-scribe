@@ -23,7 +23,7 @@ interface UserRecord {
   role: string;
   created_at: string;
   status: string;
-  guardian_enabled?: boolean;
+  holarchelp_enabled?: boolean;
 }
 
 interface EditState {
@@ -56,10 +56,10 @@ export default function UserManagement() {
       if (ids.length) {
         const { data: profs } = await supabase
           .from("profiles")
-          .select("id, guardian_enabled" as any)
+          .select("id, holarchelp_enabled" as any)
           .in("id", ids);
-        const map = new Map((profs || []).map((p: any) => [p.id, !!p.guardian_enabled]));
-        setUsers(baseUsers.map(u => ({ ...u, guardian_enabled: map.get(u.user_id) || false })));
+        const map = new Map((profs || []).map((p: any) => [p.id, !!p.holarchelp_enabled]));
+        setUsers(baseUsers.map(u => ({ ...u, holarchelp_enabled: map.get(u.user_id) || false })));
       } else {
         setUsers(baseUsers);
       }
@@ -70,13 +70,13 @@ export default function UserManagement() {
   const toggleGuardian = async (userId: string, current: boolean) => {
     const { error } = await supabase
       .from("profiles")
-      .update({ guardian_enabled: !current } as any)
+      .update({ holarchelp_enabled: !current } as any)
       .eq("id", userId);
     if (error) {
       toast({ title: "Failed to toggle Guardian", description: error.message, variant: "destructive" });
       return;
     }
-    setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, guardian_enabled: !current } : u));
+    setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, holarchelp_enabled: !current } : u));
     toast({ title: !current ? "Guardian enabled" : "Guardian disabled" });
   };
 
@@ -245,8 +245,8 @@ export default function UserManagement() {
                   </TableCell>
                   <TableCell>
                     <Switch
-                      checked={!!u.guardian_enabled}
-                      onCheckedChange={() => toggleGuardian(u.user_id, !!u.guardian_enabled)}
+                      checked={!!u.holarchelp_enabled}
+                      onCheckedChange={() => toggleGuardian(u.user_id, !!u.holarchelp_enabled)}
                       aria-label="Toggle Guardian module"
                     />
                   </TableCell>

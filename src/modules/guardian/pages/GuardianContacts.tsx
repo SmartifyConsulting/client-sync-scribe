@@ -22,7 +22,7 @@ export default function GuardianContacts() {
   const [form, setForm] = useState({ name: "", phone: "", email: "", relationship: "" });
 
   const load = async () => {
-    const { data } = await supabase.from("guardian_emergency_contacts" as any).select("*").order("created_at", { ascending: true });
+    const { data } = await supabase.from("holarchelp_emergency_contacts" as any).select("*").order("created_at", { ascending: true });
     setContacts((data as any) ?? []);
   };
   useEffect(() => { if (user) load(); }, [user]);
@@ -32,7 +32,7 @@ export default function GuardianContacts() {
     if (!user) return;
     const parsed = schema.safeParse(form);
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
-    const { error } = await supabase.from("guardian_emergency_contacts" as any).insert({
+    const { error } = await supabase.from("holarchelp_emergency_contacts" as any).insert({
       user_id: user.id,
       name: parsed.data.name,
       phone: parsed.data.phone,
@@ -46,7 +46,7 @@ export default function GuardianContacts() {
   };
 
   const remove = async (id: string) => {
-    await supabase.from("guardian_emergency_contacts" as any).delete().eq("id", id);
+    await supabase.from("holarchelp_emergency_contacts" as any).delete().eq("id", id);
     toast.success("Removed");
     load();
   };

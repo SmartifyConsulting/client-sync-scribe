@@ -8,7 +8,7 @@ export default function GuardianIncidents() {
   const [items, setItems] = useState<any[]>([]);
   useEffect(() => {
     if (!user) return;
-    supabase.from("guardian_incidents" as any).select("*").order("created_at", { ascending: false })
+    supabase.from("holarchelp_incidents" as any).select("*").order("created_at", { ascending: false })
       .then(({ data }) => setItems((data as any) ?? []));
   }, [user]);
 

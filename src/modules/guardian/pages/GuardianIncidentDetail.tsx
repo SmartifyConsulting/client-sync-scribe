@@ -22,22 +22,22 @@ export default function GuardianIncidentDetail() {
 
   useEffect(() => {
     if (!id) return;
-    supabase.from("guardian_incidents" as any).select("*").eq("id", id).maybeSingle()
+    supabase.from("holarchelp_incidents" as any).select("*").eq("id", id).maybeSingle()
       .then(({ data }) => setIncident(data));
-    supabase.from("guardian_locations" as any).select("latitude, longitude, recorded_at")
+    supabase.from("holarchelp_locations" as any).select("latitude, longitude, recorded_at")
       .eq("incident_id", id).order("recorded_at", { ascending: false }).limit(200)
       .then(({ data }) => setLocations((data as any) ?? []));
     if (user) {
-      supabase.from("guardian_emergency_contacts" as any).select("id, name, phone").eq("user_id", user.id)
+      supabase.from("holarchelp_emergency_contacts" as any).select("id, name, phone").eq("user_id", user.id)
         .then(({ data }) => setContacts((data as any) ?? []));
       supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle()
         .then(({ data }) => { if (data?.full_name) setProfileName(data.full_name); });
     }
 
     const ch = supabase.channel(`guardian-incident-${id}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "guardian_locations", filter: `incident_id=eq.${id}` },
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "holarchelp_locations", filter: `incident_id=eq.${id}` },
         (p) => setLocations((prev) => [p.new as any, ...prev].slice(0, 200)))
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "guardian_incidents", filter: `id=eq.${id}` },
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "holarchelp_incidents", filter: `id=eq.${id}` },
         (p) => setIncident((prev: any) => ({ ...(prev ?? {}), ...(p.new as any) })))
       .subscribe();
     return () => { supabase.removeChannel(ch); };
@@ -52,7 +52,7 @@ export default function GuardianIncidentDetail() {
 
   const resolve = async () => {
     if (!id) return;
-    const { error } = await supabase.from("guardian_incidents" as any)
+    const { error } = await supabase.from("holarchelp_incidents" as any)
       .update({ status: "resolved", resolved_at: new Date().toISOString() } as any).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Incident resolved");

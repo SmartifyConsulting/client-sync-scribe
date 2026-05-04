@@ -24,11 +24,11 @@ export default function GuardianHome() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("guardian_incidents" as any).select("id")
+    supabase.from("holarchelp_incidents" as any).select("id")
       .eq("user_id", user.id).eq("status", "active")
       .order("created_at", { ascending: false }).limit(1).maybeSingle()
       .then(({ data }: any) => setActiveIncidentId(data?.id ?? null));
-    supabase.from("guardian_emergency_contacts" as any).select("id", { count: "exact", head: true })
+    supabase.from("holarchelp_emergency_contacts" as any).select("id", { count: "exact", head: true })
       .eq("user_id", user.id).then(({ count }) => setContactCount(count ?? 0));
   }, [user]);
 
@@ -49,13 +49,13 @@ export default function GuardianHome() {
       }).catch(() => null);
 
       const { data: incident, error } = await supabase
-        .from("guardian_incidents" as any)
+        .from("holarchelp_incidents" as any)
         .insert({ user_id: user.id, status: "active" } as any)
         .select("id, tracking_token").single();
       if (error || !incident) throw error ?? new Error("Failed to create incident");
 
       if (pos) {
-        await supabase.from("guardian_locations" as any).insert({
+        await supabase.from("holarchelp_locations" as any).insert({
           incident_id: (incident as any).id,
           latitude: pos.coords.latitude,
           longitude: pos.coords.longitude,
@@ -78,7 +78,7 @@ export default function GuardianHome() {
     setSeverityOpen(false);
     const { id } = pending;
     if (severity) {
-      await supabase.from("guardian_incidents" as any).update({
+      await supabase.from("holarchelp_incidents" as any).update({
         severity: severity.severity,
         conscious: severity.conscious,
         breathing: severity.breathing,

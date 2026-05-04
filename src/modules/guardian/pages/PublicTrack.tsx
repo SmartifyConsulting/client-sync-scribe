@@ -28,10 +28,10 @@ export default function PublicTrack() {
 
   const load = async () => {
     if (!token) return;
-    const { data: inc } = await supabase.rpc("guardian_get_tracking_incident" as any, { _token: token });
+    const { data: inc } = await supabase.rpc("holarchelp_get_tracking_incident" as any, { _token: token });
     if (!inc || (inc as any).length === 0) { setNotFound(true); return; }
     setIncident((inc as any)[0]);
-    const { data: locs } = await supabase.rpc("guardian_get_tracking_locations" as any, { _token: token, _limit: 200 });
+    const { data: locs } = await supabase.rpc("holarchelp_get_tracking_locations" as any, { _token: token, _limit: 200 });
     setLocations((locs as any) ?? []);
   };
 

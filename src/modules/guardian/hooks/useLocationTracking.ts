@@ -26,7 +26,7 @@ export const useLocationTracking = (incidentId: string | null, enabled: boolean)
           const now = Date.now();
           if (now - lastWriteRef.current < 5000) return;
           lastWriteRef.current = now;
-          await supabase.from("guardian_locations" as any).insert({
+          await supabase.from("holarchelp_locations" as any).insert({
             incident_id: incidentId,
             latitude: pos.coords.latitude,
             longitude: pos.coords.longitude,
