@@ -132,20 +132,6 @@ export default function HolarcHelpHome() {
     }, () => toast.error("Couldn't get GPS — please allow location access"));
   };
 
-  const enableLocation = () => {
-    if (!("geolocation" in navigator)) return toast.error("GPS not supported on this device");
-    navigator.geolocation.getCurrentPosition(
-      () => toast.success("Location access enabled"),
-      (err) => {
-        if (err.code === err.PERMISSION_DENIED) {
-          toast.error("Location blocked — enable it in your browser site settings");
-        } else {
-          toast.error("Couldn't get location. Try again.");
-        }
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  };
 
   return (
     <div className="mx-auto max-w-md">
