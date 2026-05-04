@@ -1967,6 +1967,7 @@ export function PatientDetailsEditor({
             )}
 
             {isSelfService && (
+              <>
               <TabsContent value="roundtable" className="mt-4">
                 <div className="mb-4">
                   <h2 className="text-lg font-semibold text-foreground">My Round Table</h2>
@@ -2002,6 +2003,7 @@ export function PatientDetailsEditor({
                   </TabsContent>
                 </Tabs>
               </TabsContent>
+              </>
             )}
           </Tabs>
         </div>
