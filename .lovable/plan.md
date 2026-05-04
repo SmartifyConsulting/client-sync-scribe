@@ -1,114 +1,103 @@
-# Anti-cloning + IP protection plan
+# Import Holarc Guardian as a Toggleable Module
 
-You picked: **Audit edge functions + Supabase linter**, **Hide the Lovable badge**, **Legal + copyright pack** (no PDF watermarks).
+Bring the entire **Holarc Guardian** project (SOS, live location, responders, admin) into this app as a self-contained module under `src/modules/guardian/`, gated behind a per-user subscription flag that admins (and eventually billing) can switch on/off.
 
-The honest framing still applies: this work won't stop someone from rebuilding your UI from screenshots — nothing can. What it *does* do is (1) lock down the only IP that actually matters (server-side data and logic), (2) remove the obvious "built on Lovable" tell, and (3) give you legal teeth so you can act if a clone shows up using your name, copy, or scraped data.
+## What gets imported from Holarc Guardian
 
----
+**Frontend (24 pages, 11 components, 4 hooks, 4 lib files):**
+- Pages: Home, Profile, Contacts, Incident(s), Discover, PublicTrack, IncidentFeedback, MessagingLog, ProviderDashboard / Queue / Incident, RegisterProvider, Admin, AdminIncident, AdminProviders, AdminVoiceClips, AdminAccountability, Unsubscribe, VerifyEmail (Auth/ResetPassword **skipped** — we already have those).
+- Components: AppShell, LiveMap, ProvidersMap, IncidentStatusBanner, SeverityPicker, PhoneInput, AddressAutocomplete, Logo, NavLink, ProtectedRoute.
+- Hooks: useLocationTracking, useProviderLocation.
+- Lib: google-geocode, whatsapp, auth helpers (merged into existing auth).
 
-## Part 1 — Edge function security audit
+**Backend (15 edge functions + 14 migrations):**
+- Functions: `sos-dispatch`, `dispatch-broadcast`, `incident-accept/cancel/feedback/monitor/status`, `at-voice-callback`, `voice-clip-upload-url`, `process-email-queue`, `send-transactional-email`, `preview-transactional-email`, `handle-email-suppression`, `handle-email-unsubscribe`.
+- New tables (all prefixed/namespaced under `guardian_` to avoid collision with existing `profiles`, `user_roles`, `notifications`): `guardian_emergency_contacts`, `guardian_incidents`, `guardian_locations`, `guardian_providers`, `guardian_provider_locations`, `guardian_dispatches`, `guardian_voice_clips`, `guardian_email_*` queue tables, etc.
 
-I scanned all 29 edge functions. Findings:
+## Module gating ("switch on/off")
 
-**Functions missing JWT validation (need review):**
+A new boolean flag `guardian_enabled` per user controls visibility. Two layers:
 
-```text
-google-places-autocomplete  - public proxy, may need auth gating
-parse-patient-import        - handles patient PII, must require auth
-translate-text              - currently public, should require auth
-```
+1. **Per-user opt-in/subscription flag** — new column `profiles.guardian_enabled boolean default false`. Set by:
+   - Admin (User Management page → toggle).
+   - Eventually a self-serve subscription upgrade (PayPal / Stripe add-on, deferred — placeholder hook ready).
+2. **Global kill switch** — `app_modules` config table with row `('guardian', enabled boolean)` so the whole module can be disabled across the org.
 
-**Functions that are intentionally unauthenticated (correct, no change):**
+A single hook `useGuardianAccess()` returns `{ enabled, loading }` combining both. Used to:
+- Hide/show the Guardian sidebar entry & bottom-nav item.
+- Guard all `/guardian/*` routes (redirect to `/settings` with upsell if disabled).
+- Skip-render Guardian widgets on dashboards.
 
-```text
-receive-email-document      - inbound email webhook (signature-based)
-reconcile-adherence-monthly - cron job (service-role only)
-remind-audio-retention      - cron job (service-role only)
-send-invoice-report         - cron job (service-role only)
-```
-
-**Steps:**
-
-1. Open each of the 3 flagged functions, add the standard `getClaims()` block from your existing pattern (already used in `analyze-medical-image`, `lookup-medical-codes`, etc.).
-2. For each function, add Zod-style input validation on `req.json()` body to reject malformed payloads with 400 before doing any work.
-3. Run `supabase--linter` to catch RLS gaps, missing policies, and other DB-level misconfigurations. Fix anything flagged at error/warn severity via migration.
-4. Verify `LOVABLE_API_KEY`, `OPENAI_API_KEY`, `RESEND_API_KEY`, `PAYPAL_CLIENT_SECRET`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_MAPS_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY` are never referenced from `src/` (they shouldn't be — confirming).
-
-This is the highest-value work in the plan. A single missing RLS policy leaks more than a fully obfuscated bundle ever could protect.
-
----
-
-## Part 2 — Hide the Lovable badge
-
-One toggle via `set_badge_visibility(hide_badge: true)`. Removes the "Edit with Lovable" badge from `holarchealth.com` and `medpad.lovable.app` so a copycat can't trivially identify the build tool from your published site. Requires Pro plan (you'll be prompted if not on it).
-
----
-
-## Part 3 — Legal + copyright pack
-
-Current state: footer already shows `© {year} Holarc Health. All rights reserved.` and links to `/terms-and-conditions`. Good baseline.
-
-What to add:
-
-**A. Strengthen `src/pages/TermsAndConditions.tsx`** — append an "Intellectual Property & Anti-Cloning" section covering:
-- All UI, code, copy, workflows, terminology ("Holarchive", "Round Table", "Vula"), and design are owned by Holarc Health (Pty) Ltd.
-- Prohibited: reverse engineering, decompilation, scraping, automated access, creating derivative works, building competing products from observation of the service, using screenshots or recordings to recreate the UI.
-- Account termination + liability for damages on breach.
-- Trademark notice for "Holarc Health" and the logo.
-- Governing law: South Africa (adjust if needed).
-
-**B. New page `src/pages/IntellectualProperty.tsx`** — a dedicated, link-shareable IP notice you can point a cease-and-desist at. Listed in footer next to T&C.
-
-**C. `index.html` meta hardening:**
-```html
-<meta name="copyright" content="© 2026 Holarc Health (Pty) Ltd. All rights reserved." />
-<meta name="rights" content="All rights reserved. Reverse engineering and unauthorized reproduction prohibited." />
-```
-
-**D. Footer update** — add the new IP link beside Terms & Conditions, keep the existing copyright line.
-
-**E. Console notice** (Facebook/PayPal style, one-time per session) on app boot:
-```text
-⚠ Stop!
-This is a private application owned by Holarc Health (Pty) Ltd.
-Unauthorized access, scraping, reverse engineering, or attempts to
-copy this service are prohibited and may result in legal action.
-See holarchealth.com/intellectual-property
-```
-Single `console.warn` on mount of `App.tsx`. Zero UX impact, zero false security, but it's the standard "we are watching and we have lawyers" signal.
-
-**Not doing:**
-- ❌ PDF watermarks (you said no).
-- ❌ Right-click / DevTools / shortcut blocking (breaks accessibility, doesn't deter).
-- ❌ Heavy obfuscation (5–20× bundle size, useless).
-- ❌ Rate limiting (Lovable platform doesn't support it yet).
-
----
-
-## Files to touch
+## File layout in this project
 
 ```text
-supabase/functions/google-places-autocomplete/index.ts   (add auth)
-supabase/functions/parse-patient-import/index.ts         (add auth)
-supabase/functions/translate-text/index.ts               (add auth)
-+ any migrations the Supabase linter requires
-src/pages/TermsAndConditions.tsx                         (extend)
-src/pages/IntellectualProperty.tsx                       (new)
-src/components/layout/Footer.tsx                         (add IP link)
-src/App.tsx                                              (route + console notice)
-index.html                                               (meta tags)
-[platform action] hide Lovable badge
+src/modules/guardian/
+  index.ts                  // public exports + GuardianRoutes
+  routes.tsx                // <Route path="guardian/*"> tree
+  pages/                    // all 22 imported pages, paths re-prefixed
+  components/               // LiveMap, ProvidersMap, etc.
+  hooks/                    // useLocationTracking, useProviderLocation, useGuardianAccess
+  lib/                      // google-geocode, whatsapp
+  README.md
+supabase/functions/guardian-*/   // all 15 functions, prefixed `guardian-`
+supabase/migrations/<ts>_guardian_module.sql  // single consolidated migration
 ```
 
-## What this protects, honestly
+All Guardian internal links rewritten from `/home`, `/incidents`, `/admin/...` → `/guardian`, `/guardian/incidents`, `/guardian/admin/...`.
 
-| Threat | Protected? |
-|---|---|
-| Visual UI cloning by AI / dev shop | No (impossible) |
-| Use of your name, logo, distinctive terms | Yes (legal) |
-| Scraping your data via your APIs | Yes (auth audit + RLS) |
-| Stealing your AI prompts / business logic | Yes (already server-side, audit confirms) |
-| Someone publishing a clone on AppStore | Improved (DMCA + trademark grounds) |
-| Identifying you built on Lovable | Yes (badge hidden) |
+## Routing changes
 
-Reply approve to execute, or tell me what to change.
+In `src/App.tsx`, mount the module lazily:
+
+```tsx
+const GuardianRoutes = lazy(() => import("@/modules/guardian/routes"));
+...
+<Route path="/guardian/*" element={
+  <ProtectedRoute><GuardianGate><GuardianRoutes /></GuardianGate></ProtectedRoute>
+} />
+<Route path="/track/:token" element={<PublicTrack />} />  // public, ungated
+```
+
+`GuardianGate` checks `useGuardianAccess()`; renders upsell page if disabled.
+
+## Sidebar / nav integration
+
+- Add a "Guardian SOS" entry to `Sidebar.tsx` and `BottomNav.tsx`, conditionally rendered when `useGuardianAccess().enabled`.
+- Match existing teal/red Holarc styling (Guardian already uses the same shadcn tokens — verified in cross-project check).
+
+## Admin toggle UI
+
+In `src/pages/admin/UserManagement.tsx` add a "Guardian" column with a switch per user that updates `profiles.guardian_enabled`. Admin can also toggle the global `app_modules.guardian.enabled` from a new card on `/admin`.
+
+## Database & secrets
+
+**Migration** creates all `guardian_*` tables with RLS (mirrors original Guardian policies, swapping `app_role` checks to use existing `user_roles` table + `has_role(_, 'admin')`). Adds:
+- `profiles.guardian_enabled boolean default false`
+- `app_modules` table (admin-managed)
+
+**Existing secrets reused:** RESEND_API_KEY, GOOGLE_MAPS_API_KEY, OPENAI_API_KEY, SUPABASE_*.
+**New secrets needed:** Africa's Talking voice API creds (only if voice-callback feature is desired) — will request via `add_secret` only when user confirms voice features should be active. Otherwise the voice-clip + at-voice-callback functions ship disabled.
+
+## Things explicitly NOT brought over
+
+- Guardian's separate `Auth.tsx`, `ResetPassword.tsx`, `Index.tsx` — we already have ours; users sign in once, Guardian just becomes a module.
+- Guardian's separate `profiles` / `user_roles` tables — merged into existing ones (Guardian's `medical_info`, `notes` columns added to existing profiles).
+- Guardian's standalone QueryClient, Toaster, Tooltip providers — uses the host app's.
+
+## Implementation steps (when approved)
+
+1. Create migration: `guardian_*` tables + RLS + `profiles.guardian_enabled` + `app_modules`.
+2. Copy 15 edge functions into `supabase/functions/guardian-*` (rewriting internal function-to-function calls to new names).
+3. Copy frontend files into `src/modules/guardian/`, rewrite imports & internal route paths.
+4. Add `useGuardianAccess` hook + `GuardianGate` wrapper.
+5. Mount lazy routes in `App.tsx`; add public `/track/:token`.
+6. Add conditional nav entries in `Sidebar.tsx` + `BottomNav.tsx`.
+7. Add admin toggle in `UserManagement.tsx` and global toggle on `/admin`.
+8. Add upsell page shown when module is disabled.
+9. Update `mem://index.md` with a new "Guardian module" memory file.
+
+## Open questions before I build
+
+1. **Who can self-enable Guardian?** Admin-only for now, or do you want a "Subscribe to Guardian" button for end-users immediately (PayPal add-on)?
+2. **Voice clips / Africa's Talking callbacks** — include now (need API keys) or ship disabled?
+3. **Patient vs Doctor visibility** — should Guardian appear for patients only, doctors only, or both when enabled?
