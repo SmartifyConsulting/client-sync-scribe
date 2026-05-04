@@ -52,9 +52,11 @@ import ReferralDoctors from "./pages/ReferralDoctors";
 import ExpiringRecordings from "./pages/ExpiringRecordings";
 import Admin from "./pages/Admin";
 
-// Guardian module
-import GuardianRoutes from "./modules/guardian/routes";
-import PublicTrack from "./modules/guardian/pages/PublicTrack";
+// HolarcHelp module
+import HolarcHelpRoutes from "./modules/holarchelp/routes";
+import ProviderRoutes from "./modules/holarchelp/routes-provider";
+import PublicTrack from "./modules/holarchelp/pages/PublicTrack";
+import HolarcHelpProviders from "./pages/admin/HolarcHelpProviders";
 
 const queryClient = new QueryClient();
 
