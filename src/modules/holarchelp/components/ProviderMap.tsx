@@ -12,6 +12,19 @@ export type ProviderMarker = {
   type: "hospital" | "ambulance";
   subtitle?: string;
   accepting?: boolean;
+  tier?: string;
+  distanceKm?: number;
+};
+
+const TIER_LABEL = (t?: string) => t ? t.replace("tier_", "Tier ") : "";
+const TIER_COLOR: Record<string, string> = {
+  tier_1: "#db2777", tier_2: "#ea580c", tier_3: "#ca8a04", tier_4: "#2563eb",
+};
+const distanceBetweenKm = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
+  const R = 6371, toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat), dLng = toRad(b.lng - a.lng);
+  const x = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(x));
 };
 
 interface Props {
