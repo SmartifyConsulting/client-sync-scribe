@@ -298,9 +298,9 @@ export default function HolarcHelpProviders() {
                   <Ambulance className="mr-1.5 h-4 w-4" />Ambulance
                 </TabsTrigger>
               </TabsList>
-              <Button size="sm" onClick={() => setEdit({ kind: tab, row: null })}>
+              <Button size="sm" onClick={() => setChooserOpen(true)}>
                 <Plus className="mr-1.5 h-4 w-4" />
-                Add {tab === "hospital" ? "Hospital" : "Ambulance"}
+                Add
               </Button>
             </div>
 
