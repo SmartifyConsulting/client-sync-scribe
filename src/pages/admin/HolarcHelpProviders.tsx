@@ -11,7 +11,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Hospital, Ambulance, ShieldAlert, Loader2 } from "lucide-react";
+import { Hospital, Ambulance, ShieldAlert, Loader2, Download } from "lucide-react";
 
 type Status = "all" | "pending" | "approved" | "rejected" | "suspended";
 
@@ -22,6 +22,7 @@ export default function HolarcHelpProviders() {
   const [hospitals, setHospitals] = useState<any[]>([]);
   const [ambulances, setAmbulances] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [importing, setImporting] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -79,10 +80,28 @@ export default function HolarcHelpProviders() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 space-y-6">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Admin</p>
-        <h1 className="text-2xl font-extrabold">HolarcHelp Providers</h1>
-        <p className="text-sm text-muted-foreground">Approve, suspend, and manage hospitals and ambulance providers in the HolarcHelp network.</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Admin</p>
+          <h1 className="text-2xl font-extrabold">HolarcHelp Providers</h1>
+          <p className="text-sm text-muted-foreground">Approve, suspend, and manage hospitals and ambulance providers in the HolarcHelp network.</p>
+        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={importing}
+          onClick={async () => {
+            setImporting(true);
+            const { data, error } = await supabase.functions.invoke("import-guardian-providers", { body: {} });
+            setImporting(false);
+            if (error) return toast.error(error.message);
+            toast.success(`Imported ${data?.hospitals_imported ?? 0} hospitals, ${data?.ambulances_imported ?? 0} ambulances`);
+            load();
+          }}
+        >
+          {importing ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Download className="mr-1.5 h-4 w-4" />}
+          Import from Holarc Guardian
+        </Button>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
