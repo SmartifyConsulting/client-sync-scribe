@@ -1059,6 +1059,7 @@ export type Database = {
           contact_phone: string | null
           country: string | null
           created_at: string
+          dispatch_priority: number
           icu_available: number | null
           icu_capacity: number | null
           id: string
@@ -1085,6 +1086,7 @@ export type Database = {
           contact_phone?: string | null
           country?: string | null
           created_at?: string
+          dispatch_priority?: number
           icu_available?: number | null
           icu_capacity?: number | null
           id?: string
@@ -1111,6 +1113,7 @@ export type Database = {
           contact_phone?: string | null
           country?: string | null
           created_at?: string
+          dispatch_priority?: number
           icu_available?: number | null
           icu_capacity?: number | null
           id?: string
@@ -3262,6 +3265,25 @@ export type Database = {
           latitude: number
           longitude: number
           recorded_at: string
+        }[]
+      }
+      holarchelp_provider_accountability: {
+        Args: never
+        Returns: {
+          accepts: number
+          avg_arr_min: number
+          avg_rating: number
+          cancels: number
+          country: string
+          critical_cancels: number
+          dispatch_priority: number
+          flags: number
+          name: string
+          provider_id: string
+          provider_type: string
+          stalled: number
+          status: string
+          tier: string
         }[]
       }
       holarchelp_user_enabled: { Args: { _uid: string }; Returns: boolean }
