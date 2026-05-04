@@ -9,10 +9,10 @@ import {
   Briefcase,
   UserCog,
   Gift,
+  Shield,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
-import { useGuardianAccess } from "@/modules/guardian/hooks/useGuardianAccess";
-import { Shield } from "lucide-react";
+import { useHolarcHelpAccess } from "@/modules/holarchelp/hooks/useHolarcHelpAccess";
 
 const doctorNavItems = [
   { icon: LayoutDashboard, label: "Home", to: "/doctor-dashboard" },
@@ -31,7 +31,7 @@ const patientSections = [
 
 export function BottomNav() {
   const { isPatient, loading } = useUserRole();
-  const { enabled: guardianEnabled } = useGuardianAccess();
+  const { enabled: holarchelpEnabled } = useHolarcHelpAccess();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -76,12 +76,12 @@ export function BottomNav() {
   // Patient nav - section-based
   const currentSection = searchParams.get("section") || "health";
   const isOnDetails = location.pathname === "/patient/details";
-  const isOnGuardian = location.pathname.startsWith("/patient/guardian");
+  const isOnHolarcHelp = location.pathname.startsWith("/patient/holarchelp");
 
-  const items = guardianEnabled
+  const items = holarchelpEnabled
     ? [
         ...patientSections,
-        { icon: Shield, label: "SOS", section: "guardian", to: "/patient/guardian" } as const,
+        { icon: Shield, label: "SOS", section: "holarchelp", to: "/patient/holarchelp" } as const,
       ]
     : patientSections;
 
@@ -90,8 +90,8 @@ export function BottomNav() {
       <div className="flex items-center justify-around px-2 py-2">
         {items.map((item) => {
           const isActive =
-            item.section === "guardian"
-              ? isOnGuardian
+            item.section === "holarchelp"
+              ? isOnHolarcHelp
               : item.section === "rewards"
               ? location.pathname === "/patient/rewards"
               : isOnDetails && currentSection === item.section;
