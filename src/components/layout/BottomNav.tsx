@@ -31,6 +31,7 @@ const patientSections = [
 
 export function BottomNav() {
   const { isPatient, loading } = useUserRole();
+  const { enabled: guardianEnabled } = useGuardianAccess();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -75,14 +76,26 @@ export function BottomNav() {
   // Patient nav - section-based
   const currentSection = searchParams.get("section") || "health";
   const isOnDetails = location.pathname === "/patient/details";
+  const isOnGuardian = location.pathname.startsWith("/patient/guardian");
+
+  const items = guardianEnabled
+    ? [
+        ...patientSections.slice(0, 3),
+        { icon: Shield, label: "SOS", section: "guardian", to: "/patient/guardian" } as const,
+        patientSections[3],
+      ]
+    : patientSections;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg safe-area-pb font-size-preserve md:hidden">
       <div className="flex items-center justify-around px-2 py-2">
-        {patientSections.map((item) => {
-          const isActive = item.section === "rewards"
-            ? location.pathname === "/patient/rewards"
-            : isOnDetails && currentSection === item.section;
+        {items.map((item) => {
+          const isActive =
+            item.section === "guardian"
+              ? isOnGuardian
+              : item.section === "rewards"
+              ? location.pathname === "/patient/rewards"
+              : isOnDetails && currentSection === item.section;
           return (
             <button
               key={item.section}
