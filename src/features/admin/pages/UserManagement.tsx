@@ -243,6 +243,13 @@ export default function UserManagement() {
                       roleBadge(u.role)
                     )}
                   </TableCell>
+                  <TableCell>
+                    <Switch
+                      checked={!!u.guardian_enabled}
+                      onCheckedChange={() => toggleGuardian(u.user_id, !!u.guardian_enabled)}
+                      aria-label="Toggle Guardian module"
+                    />
+                  </TableCell>
                   <TableCell>{statusBadge(u.status)}</TableCell>
                   <TableCell>{format(new Date(u.created_at), "dd MMM yyyy")}</TableCell>
                   <TableCell>
@@ -266,7 +273,7 @@ export default function UserManagement() {
             })}
             {users.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground py-8">No users found</TableCell>
+                <TableCell colSpan={8} className="text-center text-muted-foreground py-8">No users found</TableCell>
               </TableRow>
             )}
           </TableBody>
