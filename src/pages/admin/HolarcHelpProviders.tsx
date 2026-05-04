@@ -429,7 +429,6 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
         city: form.city || null,
         country: form.country || null,
         tier: form.tier || "tier_3",
-        accepting_patients: form.accepting_patients !== false,
         latitude: form.latitude ?? null,
         longitude: form.longitude ?? null,
       };
