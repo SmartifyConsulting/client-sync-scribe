@@ -42,6 +42,9 @@ serve(async (req) => {
 
     const body = await req.json().catch(() => null);
     const input = typeof body?.input === "string" ? body.input.trim() : "";
+    const requestedTypes = typeof body?.types === "string" ? body.types.trim() : "address";
+    const allowedTypes = new Set(["address", "establishment", "geocode", "(cities)", "(regions)"]);
+    const types = allowedTypes.has(requestedTypes) ? requestedTypes : "address";
     if (!input || input.length < 2) {
       return new Response(JSON.stringify({ predictions: [] }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -54,7 +57,7 @@ serve(async (req) => {
       });
     }
 
-    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&types=address&key=${GOOGLE_MAPS_API_KEY}`;
+    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&types=${encodeURIComponent(types)}&key=${GOOGLE_MAPS_API_KEY}`;
     const response = await fetch(url);
     const data = await response.json();
 

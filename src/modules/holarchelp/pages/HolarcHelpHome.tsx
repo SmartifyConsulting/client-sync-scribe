@@ -31,7 +31,7 @@ export default function HolarcHelpHome() {
   const [triggering, setTriggering] = useState(false);
   const [permDenied, setPermDenied] = useState(false);
   const [coords, setCoords] = useState<Coords | null>(null);
-  const [providers, setProviders] = useState<(ProviderMarker & { _d: number; accepting: boolean })[]>([]);
+  const [providers, setProviders] = useState<(ProviderMarker & { _d: number; accepting: boolean; tier?: string; distanceKm?: number })[]>([]);
   const [incidentId, setIncidentId] = useState<string | null>(null);
   const [helpOnTheWay, setHelpOnTheWay] = useState(false);
   const [severityOpen, setSeverityOpen] = useState(false);
@@ -90,19 +90,22 @@ export default function HolarcHelpHome() {
     (async () => {
       const [{ data: hs }, { data: as_ }] = await Promise.all([
         supabase.from("holarchelp_hospitals" as any)
-          .select("id, name, latitude, longitude, city, status, accepting_patients")
+          .select("id, name, latitude, longitude, city, status, accepting_patients, tier")
           .eq("status", "approved").not("latitude", "is", null).not("longitude", "is", null),
         supabase.from("holarchelp_ambulance_providers" as any)
-          .select("id, company_name, latitude, longitude, city, status, accepting_patients")
+          .select("id, company_name, latitude, longitude, city, status, accepting_patients, tier")
           .eq("status", "approved").not("latitude", "is", null).not("longitude", "is", null),
       ]);
       if (cancelled) return;
       const list = [
-        ...((hs as any[]) ?? []).map((h) => ({ id: h.id, name: h.name, latitude: h.latitude, longitude: h.longitude, type: "hospital" as const, subtitle: h.city ?? undefined, accepting: h.accepting_patients !== false })),
-        ...((as_ as any[]) ?? []).map((a) => ({ id: a.id, name: a.company_name, latitude: a.latitude, longitude: a.longitude, type: "ambulance" as const, subtitle: a.city ?? undefined, accepting: a.accepting_patients !== false })),
+        ...((hs as any[]) ?? []).map((h) => ({ id: h.id, name: h.name, latitude: h.latitude, longitude: h.longitude, type: "hospital" as const, subtitle: h.city ?? undefined, accepting: h.accepting_patients !== false, tier: h.tier ?? undefined })),
+        ...((as_ as any[]) ?? []).map((a) => ({ id: a.id, name: a.company_name, latitude: a.latitude, longitude: a.longitude, type: "ambulance" as const, subtitle: a.city ?? undefined, accepting: a.accepting_patients !== false, tier: a.tier ?? undefined })),
       ];
       const sorted = list
-        .map((p) => ({ ...p, _d: distanceKm(coords, { lat: p.latitude, lng: p.longitude }) }))
+        .map((p) => {
+          const d = distanceKm(coords, { lat: p.latitude, lng: p.longitude });
+          return { ...p, _d: d, distanceKm: d };
+        })
         .sort((a, b) => {
           if (a.accepting !== b.accepting) return a.accepting ? -1 : 1;
           return a._d - b._d;

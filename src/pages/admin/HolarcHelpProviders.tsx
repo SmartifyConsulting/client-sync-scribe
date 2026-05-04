@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -270,29 +270,12 @@ export default function HolarcHelpProviders() {
     );
   };
 
-  const seedTestProviders = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke("seed-test-providers");
-      if (error) throw error;
-      toast.success("Test providers seeded");
-      console.log("seed-test-providers result", data);
-      load();
-    } catch (e: any) {
-      toast.error(e?.message ?? "Seeding failed");
-    }
-  };
-
   return (
     <div className="container mx-auto p-4 sm:p-6 space-y-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Admin</p>
-          <h1 className="text-2xl font-extrabold">HolarcHelp Admin</h1>
-          <p className="text-sm text-muted-foreground">Manage providers, accountability, and the SOS voice clip.</p>
-        </div>
-        <button onClick={seedTestProviders} className="rounded-lg border border-primary/40 bg-primary/5 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/10">
-          Seed test providers
-        </button>
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Admin</p>
+        <h1 className="text-2xl font-extrabold">HolarcHelp Admin</h1>
+        <p className="text-sm text-muted-foreground">Manage providers, accountability, and the SOS voice clip.</p>
       </div>
 
       <Tabs defaultValue="providers">
@@ -309,29 +292,29 @@ export default function HolarcHelpProviders() {
         </TabsList>
 
         <TabsContent value="providers" className="mt-4 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              {(["active", "inactive", "all"] as Status[]).map((s) => (
-                <Button key={s} size="sm" variant={status === s ? "default" : "outline"} onClick={() => setStatus(s)} className="rounded-full capitalize">
-                  {s}
-                </Button>
-              ))}
-            </div>
-            <Button size="sm" onClick={() => setEdit({ kind: tab, row: null })}>
-              <Plus className="mr-1.5 h-4 w-4" />
-              Add {tab === "hospital" ? "Hospital" : "Ambulance"}
-            </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            {(["active", "inactive", "all"] as Status[]).map((s) => (
+              <Button key={s} size="sm" variant={status === s ? "default" : "outline"} onClick={() => setStatus(s)} className="rounded-full capitalize">
+                {s}
+              </Button>
+            ))}
           </div>
 
           <Tabs value={tab} onValueChange={(v) => setTab(v as Kind)}>
-            <TabsList className="bg-primary">
-              <TabsTrigger value="hospital" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
-                <Hospital className="mr-1.5 h-4 w-4" />Hospitals
-              </TabsTrigger>
-              <TabsTrigger value="ambulance" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
-                <Ambulance className="mr-1.5 h-4 w-4" />Ambulance
-              </TabsTrigger>
-            </TabsList>
+            <div className="flex items-center justify-between gap-2">
+              <TabsList className="bg-primary">
+                <TabsTrigger value="hospital" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
+                  <Hospital className="mr-1.5 h-4 w-4" />Hospitals
+                </TabsTrigger>
+                <TabsTrigger value="ambulance" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
+                  <Ambulance className="mr-1.5 h-4 w-4" />Ambulance
+                </TabsTrigger>
+              </TabsList>
+              <Button size="sm" onClick={() => setEdit({ kind: tab, row: null })}>
+                <Plus className="mr-1.5 h-4 w-4" />
+                Add {tab === "hospital" ? "Hospital" : "Ambulance"}
+              </Button>
+            </div>
 
             <TabsContent value="hospital" className="mt-4">
               {loading ? <Loader /> : renderGroupedTable(hospitals, "hospital")}
@@ -441,6 +424,8 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
         country: form.country || null,
         tier: form.tier || "tier_3",
         accepting_patients: form.accepting_patients !== false,
+        latitude: form.latitude ?? null,
+        longitude: form.longitude ?? null,
       };
       if (!isEdit) {
         payload.status = "approved";
@@ -462,11 +447,28 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit" : "Add"} {kind === "hospital" ? "Hospital" : "Ambulance Provider"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
+          <LocationPicker
+            onPick={(d) => setForm((f: any) => ({
+              ...f,
+              [nameField(kind)]: d.name || f[nameField(kind)],
+              city: d.city || f.city,
+              country: d.country || f.country,
+              contact_phone: d.phone || f.contact_phone,
+              latitude: d.lat,
+              longitude: d.lng,
+              address: d.formatted_address ?? f.address,
+            }))}
+          />
+          {form.latitude != null && form.longitude != null && (
+            <p className="text-[11px] text-muted-foreground">
+              Pinned at {Number(form.latitude).toFixed(4)}, {Number(form.longitude).toFixed(4)}
+            </p>
+          )}
           <div className="space-y-1.5">
             <Label>{kind === "hospital" ? "Name" : "Company name"}</Label>
             <Input value={form[nameField(kind)] ?? ""} onChange={(e) => update(nameField(kind), e.target.value)} />
@@ -527,3 +529,89 @@ const Empty = ({ label }: { label: string }) => (
 const Loader = () => (
   <div className="flex justify-center p-8"><Loader2 className="animate-spin h-5 w-5" /></div>
 );
+
+type PlaceDetails = {
+  name?: string | null; formatted_address?: string | null;
+  lat?: number | null; lng?: number | null;
+  city?: string | null; country?: string | null;
+  phone?: string | null; website?: string | null;
+};
+
+function LocationPicker({ onPick }: { onPick: (d: PlaceDetails) => void }) {
+  const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
+  const [items, setItems] = useState<{ description: string; place_id: string }[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [picking, setPicking] = useState<string | null>(null);
+  const tRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onDoc = (e: MouseEvent) => {
+      if (boxRef.current && !boxRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, []);
+
+  const search = async (input: string) => {
+    if (input.trim().length < 3) { setItems([]); return; }
+    setSearching(true);
+    try {
+      const { data } = await supabase.functions.invoke("google-places-autocomplete", { body: { input, types: "establishment" } });
+      setItems((data?.predictions ?? []).map((p: any) => ({ description: p.description, place_id: p.place_id })));
+      setOpen(true);
+    } finally { setSearching(false); }
+  };
+
+  const onChange = (v: string) => {
+    setQ(v);
+    if (tRef.current) clearTimeout(tRef.current);
+    tRef.current = setTimeout(() => search(v), 350);
+  };
+
+  const pick = async (place_id: string, label: string) => {
+    setPicking(place_id);
+    try {
+      const { data, error } = await supabase.functions.invoke("google-place-details", { body: { place_id } });
+      if (error) throw error;
+      onPick(data as PlaceDetails);
+      setQ(data?.name || label);
+      setOpen(false);
+      toast.success("Location pinned — fields auto-filled");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not load place details");
+    } finally { setPicking(null); }
+  };
+
+  return (
+    <div className="space-y-1.5" ref={boxRef}>
+      <Label>Search location (auto-fills below)</Label>
+      <div className="relative">
+        <Input
+          value={q}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Search hospital or address…"
+          onFocus={() => items.length > 0 && setOpen(true)}
+        />
+        {searching && <Loader2 className="absolute right-2 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />}
+        {open && items.length > 0 && (
+          <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-lg max-h-60 overflow-y-auto">
+            {items.map((s) => (
+              <button
+                key={s.place_id}
+                type="button"
+                onClick={() => pick(s.place_id, s.description)}
+                disabled={picking === s.place_id}
+                className="block w-full text-left px-3 py-2 text-xs hover:bg-muted disabled:opacity-50"
+              >
+                {picking === s.place_id ? <Loader2 className="inline mr-2 h-3 w-3 animate-spin" /> : null}
+                {s.description}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
