@@ -529,3 +529,89 @@ const Empty = ({ label }: { label: string }) => (
 const Loader = () => (
   <div className="flex justify-center p-8"><Loader2 className="animate-spin h-5 w-5" /></div>
 );
+
+type PlaceDetails = {
+  name?: string | null; formatted_address?: string | null;
+  lat?: number | null; lng?: number | null;
+  city?: string | null; country?: string | null;
+  phone?: string | null; website?: string | null;
+};
+
+function LocationPicker({ onPick }: { onPick: (d: PlaceDetails) => void }) {
+  const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
+  const [items, setItems] = useState<{ description: string; place_id: string }[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [picking, setPicking] = useState<string | null>(null);
+  const tRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onDoc = (e: MouseEvent) => {
+      if (boxRef.current && !boxRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, []);
+
+  const search = async (input: string) => {
+    if (input.trim().length < 3) { setItems([]); return; }
+    setSearching(true);
+    try {
+      const { data } = await supabase.functions.invoke("google-places-autocomplete", { body: { input } });
+      setItems((data?.predictions ?? []).map((p: any) => ({ description: p.description, place_id: p.place_id })));
+      setOpen(true);
+    } finally { setSearching(false); }
+  };
+
+  const onChange = (v: string) => {
+    setQ(v);
+    if (tRef.current) clearTimeout(tRef.current);
+    tRef.current = setTimeout(() => search(v), 350);
+  };
+
+  const pick = async (place_id: string, label: string) => {
+    setPicking(place_id);
+    try {
+      const { data, error } = await supabase.functions.invoke("google-place-details", { body: { place_id } });
+      if (error) throw error;
+      onPick(data as PlaceDetails);
+      setQ(data?.name || label);
+      setOpen(false);
+      toast.success("Location pinned — fields auto-filled");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not load place details");
+    } finally { setPicking(null); }
+  };
+
+  return (
+    <div className="space-y-1.5" ref={boxRef}>
+      <Label>Search location (auto-fills below)</Label>
+      <div className="relative">
+        <Input
+          value={q}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Search hospital or address…"
+          onFocus={() => items.length > 0 && setOpen(true)}
+        />
+        {searching && <Loader2 className="absolute right-2 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />}
+        {open && items.length > 0 && (
+          <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-lg max-h-60 overflow-y-auto">
+            {items.map((s) => (
+              <button
+                key={s.place_id}
+                type="button"
+                onClick={() => pick(s.place_id, s.description)}
+                disabled={picking === s.place_id}
+                className="block w-full text-left px-3 py-2 text-xs hover:bg-muted disabled:opacity-50"
+              >
+                {picking === s.place_id ? <Loader2 className="inline mr-2 h-3 w-3 animate-spin" /> : null}
+                {s.description}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
