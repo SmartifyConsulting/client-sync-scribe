@@ -38,6 +38,7 @@ export function ProviderMap({ center, providers, height = 360 }: Props) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const userMarkerRef = useRef<google.maps.marker.AdvancedMarkerElement | null>(null);
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
+  const infoRef = useRef<google.maps.InfoWindow | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -86,20 +87,41 @@ export function ProviderMap({ center, providers, height = 360 }: Props) {
     if (!ready || !mapRef.current) return;
     markersRef.current.forEach((m) => (m.map = null));
     markersRef.current = [];
+    if (!infoRef.current) infoRef.current = new google.maps.InfoWindow();
     for (const p of providers) {
       if (p.latitude == null || p.longitude == null) continue;
       const img = document.createElement("img");
       const dimmed = p.accepting === false;
       img.src = p.type === "hospital" ? hospitalIcon : ambulanceIcon;
-      img.style.cssText = `width:38px;height:38px;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.35))${dimmed ? " grayscale(1)" : ""};opacity:${dimmed ? 0.45 : 1}`;
+      img.style.cssText = `width:38px;height:38px;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.35))${dimmed ? " grayscale(1)" : ""};opacity:${dimmed ? 0.45 : 1};cursor:pointer`;
       img.alt = p.name;
       const marker = new google.maps.marker.AdvancedMarkerElement({
         position: { lat: p.latitude, lng: p.longitude },
-        map: mapRef.current!, content: img, title: `${p.name}${p.subtitle ? " — " + p.subtitle : ""}`,
+        map: mapRef.current!, content: img, title: p.name,
+      });
+      const dKm = p.distanceKm ?? (center ? distanceBetweenKm(center, { lat: p.latitude, lng: p.longitude }) : null);
+      const eta = dKm != null ? Math.max(1, Math.round((dKm / 40) * 60)) : null;
+      const tierColor = TIER_COLOR[p.tier ?? ""] ?? "#64748b";
+      const html = `
+        <div style="font-family:system-ui,sans-serif;min-width:180px;padding:2px 4px">
+          <div style="font-weight:700;font-size:14px;color:#0f172a;margin-bottom:4px">${escapeHtml(p.name)}</div>
+          ${p.tier ? `<div style="display:inline-block;padding:2px 8px;border-radius:999px;background:${tierColor}1a;color:${tierColor};font-size:11px;font-weight:600;margin-bottom:6px">${TIER_LABEL(p.tier)}</div>` : ""}
+          ${dKm != null ? `<div style="font-size:12px;color:#475569"><strong>${dKm.toFixed(1)} km</strong> away</div>` : ""}
+          ${eta != null ? `<div style="font-size:12px;color:#475569">≈ ${eta} min by car</div>` : ""}
+          ${dimmed ? `<div style="font-size:11px;color:#dc2626;font-weight:600;margin-top:4px">Currently full capacity</div>` : ""}
+        </div>`;
+      marker.addListener("gmp-click", () => {
+        infoRef.current!.setContent(html);
+        infoRef.current!.setPosition({ lat: p.latitude, lng: p.longitude });
+        infoRef.current!.open({ map: mapRef.current!, anchor: marker });
       });
       markersRef.current.push(marker);
     }
-  }, [ready, providers]);
+  }, [ready, providers, center?.lat, center?.lng]);
 
   return <div ref={containerRef} style={{ height }} className="overflow-hidden rounded-2xl border" />;
+}
+
+function escapeHtml(s: string) {
+  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 }
