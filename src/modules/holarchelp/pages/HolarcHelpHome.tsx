@@ -267,18 +267,24 @@ export default function HolarcHelpHome() {
           </div>
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nearest providers</p>
-            {providers.map((p) => (
-              <div key={p.id} className="flex items-center gap-3 rounded-xl border bg-card p-3">
-                <img src={p.type === "hospital" ? hospitalIcon : ambulanceIcon} alt="" className="h-9 w-9 object-contain" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold truncate">{p.name}</p>
-                  <p className="text-[11px] text-muted-foreground capitalize">{p.type} {p.subtitle && `· ${p.subtitle}`} · {p._d.toFixed(1)} km</p>
+            {providers.map((p) => {
+              const dimmed = !p.accepting;
+              return (
+                <div key={p.id} className={cn("flex items-center gap-3 rounded-xl border bg-card p-3", dimmed && "opacity-50 grayscale")}>
+                  <img src={p.type === "hospital" ? hospitalIcon : ambulanceIcon} alt="" className="h-9 w-9 object-contain" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold truncate">{p.name}</p>
+                    <p className="text-[11px] text-muted-foreground capitalize">
+                      {p.type} {p.subtitle && `· ${p.subtitle}`} · {p._d.toFixed(1)} km
+                      {dimmed && <span className="ml-1 text-red-600 font-semibold">· Full capacity</span>}
+                    </p>
+                  </div>
+                  <Button size="sm" disabled={!!requesting || dimmed} onClick={() => requestProvider(p)}>
+                    {requesting === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : dimmed ? "Full" : "Request"}
+                  </Button>
                 </div>
-                <Button size="sm" disabled={!!requesting} onClick={() => requestProvider(p)}>
-                  {requesting === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Request"}
-                </Button>
-              </div>
-            ))}
+              );
+            })}
             {providers.length === 0 && (
               <p className="rounded-xl border border-dashed p-4 text-center text-xs text-muted-foreground">
                 No approved providers nearby. Waiting for someone to respond…
