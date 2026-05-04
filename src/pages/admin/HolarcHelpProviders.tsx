@@ -83,6 +83,7 @@ export default function HolarcHelpProviders() {
   const [loading, setLoading] = useState(true);
   const [edit, setEdit] = useState<EditState>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ kind: Kind; id: string; name: string } | null>(null);
+  const [chooserOpen, setChooserOpen] = useState(false);
 
   const [voiceClipPath, setVoiceClipPath] = useState<string | null>(null);
   const [clipFile, setClipFile] = useState<File | null>(null);
