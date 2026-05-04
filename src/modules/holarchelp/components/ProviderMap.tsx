@@ -11,6 +11,7 @@ export type ProviderMarker = {
   longitude: number;
   type: "hospital" | "ambulance";
   subtitle?: string;
+  accepting?: boolean;
 };
 
 interface Props {
@@ -75,8 +76,9 @@ export function ProviderMap({ center, providers, height = 360 }: Props) {
     for (const p of providers) {
       if (p.latitude == null || p.longitude == null) continue;
       const img = document.createElement("img");
+      const dimmed = p.accepting === false;
       img.src = p.type === "hospital" ? hospitalIcon : ambulanceIcon;
-      img.style.cssText = "width:38px;height:38px;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.35))";
+      img.style.cssText = `width:38px;height:38px;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.35))${dimmed ? " grayscale(1)" : ""};opacity:${dimmed ? 0.45 : 1}`;
       img.alt = p.name;
       const marker = new google.maps.marker.AdvancedMarkerElement({
         position: { lat: p.latitude, lng: p.longitude },

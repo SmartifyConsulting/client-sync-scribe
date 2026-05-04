@@ -1,109 +1,40 @@
-## Scope
+## Plan
 
-Five tightly related changes to the SOS / HolarcHelp surface:
+### 1. Move SOS to bottom nav (right of My Rewards)
+- **`src/components/layout/BottomNav.tsx`**: Add a 5th patient nav item `{ icon: Shield, label: "SOS", to: "/patient/holarchelp" }` after `My Rewards`. Use red color: when not active `text-red-600`, active state uses red tint instead of teal. Active when `location.pathname.startsWith("/patient/holarchelp")`.
+- **`src/components/layout/PatientAppLayout.tsx`**: Remove global `<SOSFab />` mount.
+- **`src/components/layout/SOSFab.tsx`**: Delete (no longer used).
 
-1. Strip the SOS card, Nearby card, and Emergency incidents card off the patient profile page.
-2. Move the Emergency incidents history under **Admissions** (My Holarchy → Admissions) as a sub-tab.
-3. Replace the bottom-nav SOS tab with a floating **red shield FAB** in the bottom-right corner — red icon, red "SOS" label, no green/primary ring.
-4. Slim down `HolarcHelpHome`: remove "Manage emergency contacts" and "Share my location" buttons.
-5. Rework the SOS flow on `HolarcHelpHome` so that pressing SOS:
-   - requires browser location to be granted (otherwise prompt / instruct the user),
-   - shows a live map of the nearest emergency services to the user,
-   - lets the patient **tap a marker / list item to select a provider** themselves, OR wait for a provider to accept,
-   - and as soon as either path completes, the map disappears and a **green SOS pill** with the text "Help is on the way." takes its place.
+### 2. Emergency Contact = Next of Kin
+- **`src/modules/holarchelp/pages/HolarcHelpHome.tsx`**: Before creating an SOS incident, query NOK fields from `patients` (e.g. `next_of_kin_name`, `next_of_kin_phone`). If missing → show amber gate card: *"Add a Next of Kin to enable SOS — your Next of Kin is your Emergency Contact."* with a button linking to `/patient/details?section=health`. If present → proceed and pass NOK info into the incident payload (existing columns or `notes`).
+- Update any standalone "Emergency Contact" copy to read "Emergency Contact (Next of Kin)".
 
----
+### 3. Admin Providers — remove Import, simplify status, add CRUD, availability flag
+**`src/pages/admin/HolarcHelpProviders.tsx`:**
+- Remove **"Import from Holarc Guardian"** button + `importing` state + `Download` import.
+- Replace status filter pills with **`["active", "inactive", "all"]`**.
+- Replace status badge + approve/reject/suspend buttons with a single **Active/Inactive Switch**.
+  - DB mapping (no schema migration): `status='approved'` = **Active**; anything else = **Inactive**. Toggle ON → `status='approved' + approved_at=now()`; OFF → `status='suspended'`.
+- **CRUD:**
+  - **Create**: "+ Add Hospital" / "+ Add Ambulance" dialog with fields: name/company_name, contact_email, contact_phone, city, country, tier, plus the new **Accepting Patients** toggle (and fleet_size for ambulances). Inserts with `status='approved'`.
+  - **Edit**: row "Edit" opens prefilled dialog.
+  - **Delete**: trash button + confirm AlertDialog.
+- Keep tier `Select` and grouped accordion view.
 
-## Files to change
+### 4. Capacity availability (replace bed counts)
+- **DB migration:** add `accepting_patients boolean not null default true` to `holarchelp_hospitals` and `holarchelp_ambulance_providers`. Keep existing bed/fleet columns untouched (not displayed).
+- **Admin table:** drop the **Beds** (`beds_available/bed_capacity`) and **Fleet** columns. Add a single **Accepting** column with a Switch bound to `accepting_patients`. Inline toggle updates the row.
+- **Provider dashboard** (`src/modules/holarchelp/pages/provider/ProviderDashboard.tsx` or `ProviderProfile.tsx`): expose the same toggle so providers can mark themselves "Full capacity" / "Accepting patients".
+- **Patient-facing map & list** (`src/modules/holarchelp/components/ProviderMap.tsx` and the nearest-list in `HolarcHelpHome.tsx`):
+  - Markers/list rows where `accepting_patients=false` render **greyed out** (opacity-40, grayscale icon, `cursor-not-allowed`). The "Request this provider" button is disabled with tooltip "At full capacity".
+  - Accepting providers render in full color and remain interactive.
+- **Auto-dispatch / sorting:** keep haversine sort but push non-accepting providers to the bottom of the list and exclude them from any auto-assignment offer logic.
 
-### `src/pages/patient/MyDetails.tsx`
-- Remove the two-card grid (SOS + Nearby) and the `<PatientIncidentHistory>` block.
-- Drop now-unused imports (`Siren`, `MapPin`, `Card`, `CardContent`, `Link`, `PatientIncidentHistory`, `useHolarcHelpAccess`, `useAuth`).
+### 5. Memory updates
+- New entry: `mem://features/holarchelp/provider-availability` — "Providers expose `accepting_patients` boolean. Greyed out on patient map when false. Replaces bed/fleet counts in admin views."
+- New entry: `mem://features/holarchelp/sos-and-nok` — "Emergency Contact = Next of Kin. SOS requires NOK on file. SOS lives in patient bottom nav (red, right of My Rewards)."
+- Update `mem://architecture/role-based-system/navigation-and-profile-switching` to note 5-item patient nav now ends with SOS.
 
-### `src/features/patients/components/PatientDetailsEditor.tsx`
-- Inside the existing `TabsContent value="hospital_visits"` (Admissions tab in self-service `care` section), wrap the existing `AdmissionsView` and a new `PatientIncidentHistory` in a nested `<Tabs>` with two triggers: **Hospital Admissions** and **Emergency Incidents**.
-- Reuse the lazy `AdmissionsView` (passing `patient.id`) and `PatientIncidentHistory userId={patient.patient_user_id}`.
-- Apply the standard teal `TabsList` + `data-[state=active]:bg-white data-[state=active]:text-black` styling.
-
-### `src/components/layout/BottomNav.tsx`
-- Remove the `Shield`/SOS tab from the patient nav `items` array; drop the `Shield` import.
-
-### NEW `src/components/layout/SOSFab.tsx`
-- Floating action button rendered globally for patients with HolarcHelp enabled.
-- Position: `fixed bottom-20 right-4 z-50` (above the mobile bottom nav).
-- Visual: 56px circular white button with a 2px red border, `Shield` icon in red, small red "SOS" label underneath. No ring, no green halo, no gradient.
-- onClick → `navigate("/patient/holarchelp")`.
-- Hidden when already on `/patient/holarchelp/*` or for non-patients.
-- Mounted in the patient layout wrapper.
-
-### `src/modules/holarchelp/pages/HolarcHelpHome.tsx`
-Big rewrite of the action area:
-- Delete "Share my location" and "Manage emergency contacts" buttons (and `shareLocation` helper). Keep "Find nearby provider" link.
-- Replace the press-and-hold gesture with a single tap that:
-  1. Calls `navigator.permissions.query({ name: 'geolocation' })`. If `denied`, render an amber help card with browser instructions to enable location and abort. Otherwise request `getCurrentPosition`.
-  2. Creates the incident, then immediately renders an inline `<ProviderMap>` (reuse `src/modules/holarchelp/components/ProviderMap.tsx`) showing nearest hospitals + ambulances around the user's coords (sorted by haversine, top 10).
-- **Patient-driven selection**: each marker and list row has a "Request this provider" action. Tapping it inserts a row into `holarchelp_incident_offers` with `response='accepted'` (patient-initiated) and updates the incident's `assigned_provider_id` + `accepted_at` for the chosen hospital/ambulance, immediately flipping the UI to the green "Help is on the way." state.
-- **Provider-driven selection**: subscribe to realtime updates on `holarchelp_incidents` filtered to the active id. When `assigned_provider_id` becomes non-null OR `accepted_at` is set by any other actor, swap the map for the same green state.
-- Green state UI: `bg-emerald-500 text-white` rounded-full pill with a `Shield` icon and label **"Help is on the way."** Tapping it routes to `/patient/holarchelp/incident/<id>` for live tracking.
-- Severity picker still appears once after incident creation.
-
-### Cleanup
-- `PatientIncidentHistory` stays as-is (now used in the Admissions sub-tab and in `HolarcHelpProviderIncidents`).
-- No DB migration required — `assigned_provider_id`, `accepted_at`, `holarchelp_incident_offers`, and realtime on `holarchelp_incidents` already exist.
-
----
-
-## Technical notes
-
-```text
-Patient profile (MyDetails)
-  - SOS / Nearby cards          → removed
-  - PatientIncidentHistory      → removed (moved under Admissions)
-
-My Holarchy → Admissions tab
-  ┌──────────────────────────────────────────────┐
-  │ [Hospital Admissions] [Emergency Incidents]  │
-  ├──────────────────────────────────────────────┤
-  │ AdmissionsView  /  PatientIncidentHistory    │
-  └──────────────────────────────────────────────┘
-
-Floating SOS FAB
-  ○ red Shield icon, red "SOS" label (bottom-right, above bottom nav)
-
-HolarcHelpHome on tap SOS
-  - permission denied            → amber help card
-  - permission ok                → create incident
-                                 → show ProviderMap of nearest providers + list
-  - patient taps "Request"       → assign provider, flip to green pill
-  - provider accepts elsewhere   → realtime update flips to green pill
-  - green pill                   → "Help is on the way."
-```
-
-Realtime subscription pattern:
-
-```ts
-supabase
-  .channel(`incident-${id}`)
-  .on('postgres_changes',
-    { event: 'UPDATE', schema: 'public', table: 'holarchelp_incidents', filter: `id=eq.${id}` },
-    payload => {
-      const row: any = payload.new;
-      if (row.assigned_provider_id || row.accepted_at) setHelpOnTheWay(true);
-    })
-  .subscribe();
-```
-
-Patient-initiated selection writes:
-
-```ts
-await supabase.from('holarchelp_incidents').update({
-  assigned_provider_id: provider.id,
-  accepted_at: new Date().toISOString(),
-}).eq('id', incidentId);
-await supabase.from('holarchelp_incident_offers').insert({
-  incident_id: incidentId,
-  provider_id: provider.id,
-  response: 'accepted',
-  responded_at: new Date().toISOString(),
-});
-```
+### Out of scope
+- No removal of `seed-test-providers` button (dev-only).
+- No changes to incident accept/dispatch RPCs beyond filtering by `accepting_patients`.

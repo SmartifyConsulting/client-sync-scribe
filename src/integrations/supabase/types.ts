@@ -912,6 +912,7 @@ export type Database = {
       }
       holarchelp_ambulance_providers: {
         Row: {
+          accepting_patients: boolean
           approved_at: string | null
           at_capacity: boolean
           base_address: string | null
@@ -936,6 +937,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          accepting_patients?: boolean
           approved_at?: string | null
           at_capacity?: boolean
           base_address?: string | null
@@ -960,6 +962,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          accepting_patients?: boolean
           approved_at?: string | null
           at_capacity?: boolean
           base_address?: string | null
@@ -1049,6 +1052,7 @@ export type Database = {
       }
       holarchelp_hospitals: {
         Row: {
+          accepting_patients: boolean
           address: string | null
           approved_at: string | null
           at_capacity: boolean
@@ -1076,6 +1080,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          accepting_patients?: boolean
           address?: string | null
           approved_at?: string | null
           at_capacity?: boolean
@@ -1103,6 +1108,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          accepting_patients?: boolean
           address?: string | null
           approved_at?: string | null
           at_capacity?: boolean

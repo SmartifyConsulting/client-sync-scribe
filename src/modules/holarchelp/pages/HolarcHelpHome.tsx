@@ -10,6 +10,7 @@ import { SeverityPicker, type SeverityResult } from "../components/SeverityPicke
 import { ProviderMap, type ProviderMarker } from "../components/ProviderMap";
 import hospitalIcon from "@/assets/marker-hospital.png";
 import ambulanceIcon from "@/assets/marker-ambulance.png";
+import { cn } from "@/lib/utils";
 
 type Coords = { lat: number; lng: number };
 
@@ -30,15 +31,23 @@ export default function HolarcHelpHome() {
   const [triggering, setTriggering] = useState(false);
   const [permDenied, setPermDenied] = useState(false);
   const [coords, setCoords] = useState<Coords | null>(null);
-  const [providers, setProviders] = useState<(ProviderMarker & { _d: number })[]>([]);
+  const [providers, setProviders] = useState<(ProviderMarker & { _d: number; accepting: boolean })[]>([]);
   const [incidentId, setIncidentId] = useState<string | null>(null);
   const [helpOnTheWay, setHelpOnTheWay] = useState(false);
   const [severityOpen, setSeverityOpen] = useState(false);
   const [requesting, setRequesting] = useState<string | null>(null);
+  const [hasNok, setHasNok] = useState<boolean | null>(null);
   const channelRef = useRef<any>(null);
 
   useEffect(() => {
     if (!user) return;
+    supabase.from("patients" as any)
+      .select("next_of_kin_name, next_of_kin_phone")
+      .eq("patient_user_id", user.id)
+      .order("created_at", { ascending: false }).limit(1).maybeSingle()
+      .then(({ data }: any) => {
+        setHasNok(!!(data?.next_of_kin_name && data?.next_of_kin_phone));
+      });
     supabase.from("holarchelp_incidents" as any).select("id, assigned_provider_id, accepted_at")
       .eq("user_id", user.id).eq("status", "active")
       .order("created_at", { ascending: false }).limit(1).maybeSingle()
@@ -81,20 +90,23 @@ export default function HolarcHelpHome() {
     (async () => {
       const [{ data: hs }, { data: as_ }] = await Promise.all([
         supabase.from("holarchelp_hospitals" as any)
-          .select("id, name, latitude, longitude, city, status")
+          .select("id, name, latitude, longitude, city, status, accepting_patients")
           .eq("status", "approved").not("latitude", "is", null).not("longitude", "is", null),
         supabase.from("holarchelp_ambulance_providers" as any)
-          .select("id, company_name, latitude, longitude, city, status")
+          .select("id, company_name, latitude, longitude, city, status, accepting_patients")
           .eq("status", "approved").not("latitude", "is", null).not("longitude", "is", null),
       ]);
       if (cancelled) return;
-      const list: ProviderMarker[] = [
-        ...((hs as any[]) ?? []).map((h) => ({ id: h.id, name: h.name, latitude: h.latitude, longitude: h.longitude, type: "hospital" as const, subtitle: h.city ?? undefined })),
-        ...((as_ as any[]) ?? []).map((a) => ({ id: a.id, name: a.company_name, latitude: a.latitude, longitude: a.longitude, type: "ambulance" as const, subtitle: a.city ?? undefined })),
+      const list = [
+        ...((hs as any[]) ?? []).map((h) => ({ id: h.id, name: h.name, latitude: h.latitude, longitude: h.longitude, type: "hospital" as const, subtitle: h.city ?? undefined, accepting: h.accepting_patients !== false })),
+        ...((as_ as any[]) ?? []).map((a) => ({ id: a.id, name: a.company_name, latitude: a.latitude, longitude: a.longitude, type: "ambulance" as const, subtitle: a.city ?? undefined, accepting: a.accepting_patients !== false })),
       ];
       const sorted = list
         .map((p) => ({ ...p, _d: distanceKm(coords, { lat: p.latitude, lng: p.longitude }) }))
-        .sort((a, b) => a._d - b._d).slice(0, 10);
+        .sort((a, b) => {
+          if (a.accepting !== b.accepting) return a.accepting ? -1 : 1;
+          return a._d - b._d;
+        }).slice(0, 10);
       setProviders(sorted);
     })();
     return () => { cancelled = true; };
@@ -104,6 +116,11 @@ export default function HolarcHelpHome() {
     if (!user || triggering) return;
     if (activeIncidentId) {
       navigate(`/patient/holarchelp/incident/${activeIncidentId}`);
+      return;
+    }
+    if (hasNok === false) {
+      toast.error("Add a Next of Kin first — they are your Emergency Contact.");
+      navigate("/patient/details?section=health");
       return;
     }
     setTriggering(true);
@@ -200,6 +217,22 @@ export default function HolarcHelpHome() {
     <div className="mx-auto max-w-md">
       <SeverityPicker open={severityOpen} onSubmit={finishSeverity} onSkip={() => finishSeverity(null)} />
 
+      {hasNok === false && (
+        <Card className="mb-4 border-amber-500/40 bg-amber-50">
+          <CardContent className="p-4 space-y-2 text-sm">
+            <div className="flex items-center gap-2 font-semibold text-amber-800">
+              <AlertTriangle className="h-4 w-4" /> Add a Next of Kin to enable SOS
+            </div>
+            <p className="text-amber-900/80 text-xs">
+              Your Next of Kin <strong>is</strong> your Emergency Contact. We need their details to notify them when you trigger an SOS.
+            </p>
+            <Button size="sm" className="mt-1" onClick={() => navigate("/patient/details?section=health")}>
+              Add Next of Kin
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {permDenied && (
         <Card className="mb-4 border-amber-500/40 bg-amber-50">
           <CardContent className="p-4 space-y-2 text-sm">
@@ -235,18 +268,24 @@ export default function HolarcHelpHome() {
           </div>
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nearest providers</p>
-            {providers.map((p) => (
-              <div key={p.id} className="flex items-center gap-3 rounded-xl border bg-card p-3">
-                <img src={p.type === "hospital" ? hospitalIcon : ambulanceIcon} alt="" className="h-9 w-9 object-contain" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold truncate">{p.name}</p>
-                  <p className="text-[11px] text-muted-foreground capitalize">{p.type} {p.subtitle && `· ${p.subtitle}`} · {p._d.toFixed(1)} km</p>
+            {providers.map((p) => {
+              const dimmed = !p.accepting;
+              return (
+                <div key={p.id} className={cn("flex items-center gap-3 rounded-xl border bg-card p-3", dimmed && "opacity-50 grayscale")}>
+                  <img src={p.type === "hospital" ? hospitalIcon : ambulanceIcon} alt="" className="h-9 w-9 object-contain" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold truncate">{p.name}</p>
+                    <p className="text-[11px] text-muted-foreground capitalize">
+                      {p.type} {p.subtitle && `· ${p.subtitle}`} · {p._d.toFixed(1)} km
+                      {dimmed && <span className="ml-1 text-red-600 font-semibold">· Full capacity</span>}
+                    </p>
+                  </div>
+                  <Button size="sm" disabled={!!requesting || dimmed} onClick={() => requestProvider(p)}>
+                    {requesting === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : dimmed ? "Full" : "Request"}
+                  </Button>
                 </div>
-                <Button size="sm" disabled={!!requesting} onClick={() => requestProvider(p)}>
-                  {requesting === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Request"}
-                </Button>
-              </div>
-            ))}
+              );
+            })}
             {providers.length === 0 && (
               <p className="rounded-xl border border-dashed p-4 text-center text-xs text-muted-foreground">
                 No approved providers nearby. Waiting for someone to respond…
