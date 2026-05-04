@@ -43,7 +43,7 @@ serve(async (req) => {
     const body = await req.json().catch(() => null);
     const input = typeof body?.input === "string" ? body.input.trim() : "";
     const requestedTypes = typeof body?.types === "string" ? body.types.trim() : "address";
-    const allowedTypes = new Set(["address", "establishment", "geocode", "(cities)", "(regions)"]);
+    const allowedTypes = new Set(["address", "establishment", "geocode", "(cities)", "(regions)", "any"]);
     const types = allowedTypes.has(requestedTypes) ? requestedTypes : "address";
     if (!input || input.length < 2) {
       return new Response(JSON.stringify({ predictions: [] }), {
