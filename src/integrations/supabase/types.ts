@@ -226,6 +226,27 @@ export type Database = {
           },
         ]
       }
+      app_modules: {
+        Row: {
+          description: string | null
+          enabled: boolean
+          module_key: string
+          updated_at: string
+        }
+        Insert: {
+          description?: string | null
+          enabled?: boolean
+          module_key: string
+          updated_at?: string
+        }
+        Update: {
+          description?: string | null
+          enabled?: boolean
+          module_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       appointment_requests: {
         Row: {
           created_at: string | null
@@ -768,6 +789,584 @@ export type Database = {
           lollipops_awarded?: number
           updated_at?: string
           visit_category?: string
+        }
+        Relationships: []
+      }
+      guardian_ambulance_members: {
+        Row: {
+          created_at: string
+          id: string
+          provider_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          provider_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          provider_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardian_ambulance_members_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "guardian_ambulance_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guardian_ambulance_providers: {
+        Row: {
+          approved_at: string | null
+          at_capacity: boolean
+          base_address: string | null
+          city: string | null
+          company_name: string
+          contact_email: string
+          contact_phone: string | null
+          country: string | null
+          created_at: string
+          dispatch_priority: number
+          fleet_size: number | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          owner_id: string
+          registration_number: string | null
+          sos_voice_clip_path: string | null
+          state: string | null
+          status: Database["public"]["Enums"]["guardian_provider_status"]
+          subscription_status: Database["public"]["Enums"]["guardian_subscription_status"]
+          tier: Database["public"]["Enums"]["guardian_ambulance_tier"]
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          at_capacity?: boolean
+          base_address?: string | null
+          city?: string | null
+          company_name: string
+          contact_email: string
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          dispatch_priority?: number
+          fleet_size?: number | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          owner_id: string
+          registration_number?: string | null
+          sos_voice_clip_path?: string | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["guardian_provider_status"]
+          subscription_status?: Database["public"]["Enums"]["guardian_subscription_status"]
+          tier?: Database["public"]["Enums"]["guardian_ambulance_tier"]
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          at_capacity?: boolean
+          base_address?: string | null
+          city?: string | null
+          company_name?: string
+          contact_email?: string
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          dispatch_priority?: number
+          fleet_size?: number | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          owner_id?: string
+          registration_number?: string | null
+          sos_voice_clip_path?: string | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["guardian_provider_status"]
+          subscription_status?: Database["public"]["Enums"]["guardian_subscription_status"]
+          tier?: Database["public"]["Enums"]["guardian_ambulance_tier"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      guardian_emergency_contacts: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          relationship: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          relationship?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          relationship?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      guardian_hospital_members: {
+        Row: {
+          created_at: string
+          hospital_id: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          hospital_id: string
+          id?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          hospital_id?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardian_hospital_members_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "guardian_hospitals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guardian_hospitals: {
+        Row: {
+          address: string | null
+          approved_at: string | null
+          at_capacity: boolean
+          bed_capacity: number | null
+          beds_available: number | null
+          city: string | null
+          contact_email: string
+          contact_phone: string | null
+          country: string | null
+          created_at: string
+          icu_available: number | null
+          icu_capacity: number | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          name: string
+          owner_id: string
+          registration_number: string | null
+          services: string[] | null
+          state: string | null
+          status: Database["public"]["Enums"]["guardian_provider_status"]
+          subscription_status: Database["public"]["Enums"]["guardian_subscription_status"]
+          tier: Database["public"]["Enums"]["guardian_hospital_tier"]
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          approved_at?: string | null
+          at_capacity?: boolean
+          bed_capacity?: number | null
+          beds_available?: number | null
+          city?: string | null
+          contact_email: string
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          icu_available?: number | null
+          icu_capacity?: number | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          owner_id: string
+          registration_number?: string | null
+          services?: string[] | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["guardian_provider_status"]
+          subscription_status?: Database["public"]["Enums"]["guardian_subscription_status"]
+          tier?: Database["public"]["Enums"]["guardian_hospital_tier"]
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          approved_at?: string | null
+          at_capacity?: boolean
+          bed_capacity?: number | null
+          beds_available?: number | null
+          city?: string | null
+          contact_email?: string
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          icu_available?: number | null
+          icu_capacity?: number | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          owner_id?: string
+          registration_number?: string | null
+          services?: string[] | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["guardian_provider_status"]
+          subscription_status?: Database["public"]["Enums"]["guardian_subscription_status"]
+          tier?: Database["public"]["Enums"]["guardian_hospital_tier"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      guardian_incident_cancellations: {
+        Row: {
+          created_at: string
+          evidence_note: string | null
+          id: string
+          incident_id: string
+          provider_id: string
+          reason_code: string
+          reason_text: string
+        }
+        Insert: {
+          created_at?: string
+          evidence_note?: string | null
+          id?: string
+          incident_id: string
+          provider_id: string
+          reason_code: string
+          reason_text: string
+        }
+        Update: {
+          created_at?: string
+          evidence_note?: string | null
+          id?: string
+          incident_id?: string
+          provider_id?: string
+          reason_code?: string
+          reason_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardian_incident_cancellations_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "guardian_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guardian_incident_events: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          incident_id: string
+          latitude: number | null
+          longitude: number | null
+          payload: Json | null
+          provider_id: string | null
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          incident_id: string
+          latitude?: number | null
+          longitude?: number | null
+          payload?: Json | null
+          provider_id?: string | null
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          incident_id?: string
+          latitude?: number | null
+          longitude?: number | null
+          payload?: Json | null
+          provider_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardian_incident_events_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "guardian_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guardian_incident_feedback: {
+        Row: {
+          arrived_on_time: boolean
+          comment: string | null
+          created_at: string
+          critical_flag: boolean
+          felt_safe: boolean
+          id: string
+          incident_id: string
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          arrived_on_time: boolean
+          comment?: string | null
+          created_at?: string
+          critical_flag?: boolean
+          felt_safe: boolean
+          id?: string
+          incident_id: string
+          rating: number
+          user_id: string
+        }
+        Update: {
+          arrived_on_time?: boolean
+          comment?: string | null
+          created_at?: string
+          critical_flag?: boolean
+          felt_safe?: boolean
+          id?: string
+          incident_id?: string
+          rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardian_incident_feedback_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: true
+            referencedRelation: "guardian_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guardian_incident_offers: {
+        Row: {
+          distance_km: number | null
+          id: string
+          incident_id: string
+          offered_at: string
+          priority_boost: boolean
+          provider_id: string
+          responded_at: string | null
+          response: string
+        }
+        Insert: {
+          distance_km?: number | null
+          id?: string
+          incident_id: string
+          offered_at?: string
+          priority_boost?: boolean
+          provider_id: string
+          responded_at?: string | null
+          response?: string
+        }
+        Update: {
+          distance_km?: number | null
+          id?: string
+          incident_id?: string
+          offered_at?: string
+          priority_boost?: boolean
+          provider_id?: string
+          responded_at?: string | null
+          response?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardian_incident_offers_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "guardian_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guardian_incidents: {
+        Row: {
+          accepted_at: string | null
+          arrived_at: string | null
+          assigned_provider_id: string | null
+          at_risk: boolean
+          breathing: boolean | null
+          conscious: boolean | null
+          created_at: string
+          en_route_at: string | null
+          eta_minutes: number | null
+          id: string
+          last_eta_update: string | null
+          priority_boost: boolean
+          resolved_at: string | null
+          severity: string
+          status: string
+          tracking_token: string
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          arrived_at?: string | null
+          assigned_provider_id?: string | null
+          at_risk?: boolean
+          breathing?: boolean | null
+          conscious?: boolean | null
+          created_at?: string
+          en_route_at?: string | null
+          eta_minutes?: number | null
+          id?: string
+          last_eta_update?: string | null
+          priority_boost?: boolean
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          tracking_token?: string
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          arrived_at?: string | null
+          assigned_provider_id?: string | null
+          at_risk?: boolean
+          breathing?: boolean | null
+          conscious?: boolean | null
+          created_at?: string
+          en_route_at?: string | null
+          eta_minutes?: number | null
+          id?: string
+          last_eta_update?: string | null
+          priority_boost?: boolean
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          tracking_token?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      guardian_locations: {
+        Row: {
+          accuracy: number | null
+          id: string
+          incident_id: string
+          latitude: number
+          longitude: number
+          recorded_at: string
+        }
+        Insert: {
+          accuracy?: number | null
+          id?: string
+          incident_id: string
+          latitude: number
+          longitude: number
+          recorded_at?: string
+        }
+        Update: {
+          accuracy?: number | null
+          id?: string
+          incident_id?: string
+          latitude?: number
+          longitude?: number
+          recorded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardian_locations_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "guardian_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guardian_messaging_log: {
+        Row: {
+          channel: string
+          cost: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          incident_id: string | null
+          metadata: Json | null
+          provider_message_id: string | null
+          recipient_email: string | null
+          recipient_name: string | null
+          recipient_phone: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          channel: string
+          cost?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          incident_id?: string | null
+          metadata?: Json | null
+          provider_message_id?: string | null
+          recipient_email?: string | null
+          recipient_name?: string | null
+          recipient_phone?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          channel?: string
+          cost?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          incident_id?: string | null
+          metadata?: Json | null
+          provider_message_id?: string | null
+          recipient_email?: string | null
+          recipient_name?: string | null
+          recipient_phone?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      guardian_voice_clip_settings: {
+        Row: {
+          default_clip_path: string | null
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          default_clip_path?: string | null
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          default_clip_path?: string | null
+          id?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1922,6 +2521,7 @@ export type Database = {
           created_at: string
           doctor_number: string | null
           full_name: string | null
+          guardian_enabled: boolean
           id: string
           inactive_threshold_months: number | null
           logo_url: string | null
@@ -1956,6 +2556,7 @@ export type Database = {
           created_at?: string
           doctor_number?: string | null
           full_name?: string | null
+          guardian_enabled?: boolean
           id: string
           inactive_threshold_months?: number | null
           logo_url?: string | null
@@ -1990,6 +2591,7 @@ export type Database = {
           created_at?: string
           doctor_number?: string | null
           full_name?: string | null
+          guardian_enabled?: boolean
           id?: string
           inactive_threshold_months?: number | null
           logo_url?: string | null
@@ -2628,6 +3230,34 @@ export type Database = {
           user_id: string
         }[]
       }
+      guardian_approve_ambulance: {
+        Args: { _provider_id: string }
+        Returns: undefined
+      }
+      guardian_approve_hospital: {
+        Args: { _hospital_id: string }
+        Returns: undefined
+      }
+      guardian_get_tracking_incident: {
+        Args: { _token: string }
+        Returns: {
+          created_at: string
+          full_name: string
+          id: string
+          resolved_at: string
+          status: string
+        }[]
+      }
+      guardian_get_tracking_locations: {
+        Args: { _limit?: number; _token: string }
+        Returns: {
+          accuracy: number
+          latitude: number
+          longitude: number
+          recorded_at: string
+        }[]
+      }
+      guardian_user_enabled: { Args: { _uid: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["user_role"]
@@ -2663,8 +3293,25 @@ export type Database = {
         | "calendar"
         | "session_summaries"
         | "prescription_history"
+      guardian_ambulance_tier: "tier_1" | "tier_2" | "tier_3" | "tier_4"
+      guardian_hospital_tier: "tier_1" | "tier_2" | "tier_3"
+      guardian_provider_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "suspended"
+      guardian_subscription_status:
+        | "inactive"
+        | "active"
+        | "past_due"
+        | "cancelled"
       invitation_status: "pending" | "accepted" | "declined" | "expired"
-      user_role: "doctor" | "patient" | "admin"
+      user_role:
+        | "doctor"
+        | "patient"
+        | "admin"
+        | "hospital_staff"
+        | "ambulance_staff"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2798,8 +3445,28 @@ export const Constants = {
         "session_summaries",
         "prescription_history",
       ],
+      guardian_ambulance_tier: ["tier_1", "tier_2", "tier_3", "tier_4"],
+      guardian_hospital_tier: ["tier_1", "tier_2", "tier_3"],
+      guardian_provider_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "suspended",
+      ],
+      guardian_subscription_status: [
+        "inactive",
+        "active",
+        "past_due",
+        "cancelled",
+      ],
       invitation_status: ["pending", "accepted", "declined", "expired"],
-      user_role: ["doctor", "patient", "admin"],
+      user_role: [
+        "doctor",
+        "patient",
+        "admin",
+        "hospital_staff",
+        "ambulance_staff",
+      ],
     },
   },
 } as const

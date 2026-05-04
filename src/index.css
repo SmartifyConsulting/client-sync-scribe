@@ -69,6 +69,11 @@
     --terracotta-light: 356 67% 52%;
     --terracotta-dark: 356 67% 32%;
 
+    /* Guardian SOS — emergency red, used by the optional Guardian module */
+    --sos: 354 84% 54%;
+    --sos-foreground: 0 0% 100%;
+    --gradient-sos: linear-gradient(135deg, hsl(354 84% 54%), hsl(0 75% 45%));
+
     /* Borders - very subtle */
     --border: 220 13% 91%;
     --input: 220 13% 91%;

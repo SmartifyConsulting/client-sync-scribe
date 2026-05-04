@@ -1,0 +1,36 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+
+export default function GuardianIncidents() {
+  const { user } = useAuth();
+  const [items, setItems] = useState<any[]>([]);
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("guardian_incidents" as any).select("*").order("created_at", { ascending: false })
+      .then(({ data }) => setItems((data as any) ?? []));
+  }, [user]);
+
+  return (
+    <div className="mx-auto max-w-md">
+      <h1 className="text-2xl font-extrabold">Incident history</h1>
+      <ul className="mt-4 space-y-2">
+        {items.length === 0 && <li className="rounded-2xl border border-dashed p-5 text-center text-sm text-muted-foreground">No incidents yet</li>}
+        {items.map((i) => (
+          <li key={i.id}>
+            <Link to={`/guardian/incident/${i.id}`} className="flex items-center justify-between rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)]">
+              <div>
+                <p className="font-semibold">{new Date(i.created_at).toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">{i.resolved_at ? `Resolved ${new Date(i.resolved_at).toLocaleString()}` : "In progress"}</p>
+              </div>
+              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${i.status === "active" ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>
+                {i.status.toUpperCase()}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
