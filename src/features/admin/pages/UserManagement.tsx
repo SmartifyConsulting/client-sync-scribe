@@ -67,7 +67,7 @@ export default function UserManagement() {
     setLoading(false);
   };
 
-  const toggleGuardian = async (userId: string, current: boolean) => {
+  const toggleHolarcHelp = async (userId: string, current: boolean) => {
     const { error } = await supabase
       .from("profiles")
       .update({ holarchelp_enabled: !current } as any)
@@ -246,7 +246,7 @@ export default function UserManagement() {
                   <TableCell>
                     <Switch
                       checked={!!u.holarchelp_enabled}
-                      onCheckedChange={() => toggleGuardian(u.user_id, !!u.holarchelp_enabled)}
+                      onCheckedChange={() => toggleHolarcHelp(u.user_id, !!u.holarchelp_enabled)}
                       aria-label="Toggle HolarcHelp module"
                     />
                   </TableCell>
