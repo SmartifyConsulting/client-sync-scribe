@@ -397,8 +397,29 @@ export default function PatientDashboard() {
         </Card>
       </div>
 
-      {/* Row 2: Vulas Balance + Earn More Vulas */}
+      {/* Row 2: SOS + Nearby + Vulas Balance */}
       <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
+        <div className="grid grid-cols-2 gap-3">
+          <Link to="/patient/holarchelp" className="block">
+            <Card className="h-full border-red-500/30 bg-gradient-to-br from-red-500 to-red-600 hover:shadow-lg transition-all cursor-pointer">
+              <CardContent className="flex flex-col items-center justify-center gap-1 p-5 text-white">
+                <Siren className="h-8 w-8" />
+                <p className="text-base font-extrabold tracking-wide">SOS</p>
+                <p className="text-[10px] opacity-90">Emergency help</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link to="/patient/holarchelp/contacts" className="block">
+            <Card className="h-full border-primary/20 hover:shadow-lg transition-all cursor-pointer">
+              <CardContent className="flex flex-col items-center justify-center gap-1 p-5">
+                <MapPin className="h-8 w-8 text-primary" />
+                <p className="text-base font-extrabold tracking-wide text-foreground">Nearby</p>
+                <p className="text-[10px] text-muted-foreground">Hospitals & ambulances</p>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+
         <Link to="/patient/rewards">
           <Card className="h-full border-primary/20 bg-gradient-to-br from-primary/5 via-card to-secondary/5 hover:shadow-lg transition-all cursor-pointer">
             <CardContent className="flex items-center gap-4 p-5">
@@ -406,13 +427,14 @@ export default function PatientDashboard() {
                 <Trophy className="h-7 w-7 text-primary" />
               </div>
               <div className="flex-1">
-                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">My Vulas Balance</p>
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">My Vula Vouchers</p>
                 <p className="text-2xl font-bold text-foreground">{lollipopCount}</p>
               </div>
               <ArrowRight className="h-4 w-4 text-muted-foreground" />
             </CardContent>
           </Card>
         </Link>
+
 
         {!isMobile && (
           <Card className="border-primary/10 bg-gradient-to-br from-primary/3 to-card">
