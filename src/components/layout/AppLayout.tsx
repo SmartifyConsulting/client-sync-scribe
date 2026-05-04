@@ -14,12 +14,15 @@ import { AlertCircle } from "lucide-react";
 export function AppLayout() {
   const location = useLocation();
   const { isBlocked, daysRemaining, loading } = useSubscriptionGate();
-  const { isPatient, loading: roleLoading } = useUserRole();
+  const { isPatient, isAdmin, loading: roleLoading } = useUserRole();
 
   // Allow access to settings page even when blocked (so they can subscribe)
   const isSettingsPage = location.pathname.startsWith("/settings");
+  const isAdminRoute = location.pathname.startsWith("/admin");
 
-  if (!roleLoading && isPatient) {
+  // Patients should be redirected to their layout, UNLESS they also hold the
+  // admin role and are visiting an admin route — admins use this layout.
+  if (!roleLoading && isPatient && !(isAdmin && isAdminRoute)) {
     return <Navigate to="/patient/details" replace />;
   }
 

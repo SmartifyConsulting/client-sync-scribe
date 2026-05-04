@@ -81,7 +81,7 @@ export function useUserRole() {
     loading,
     isDoctor: role === 'doctor',
     isPatient: role === 'patient',
-    isAdmin: role === 'admin',
+    isAdmin: availableRoles.includes('admin'),
     hasDoctorRole: availableRoles.includes('doctor'),
     hasPatientRole: availableRoles.includes('patient'),
     hasAdminRole: availableRoles.includes('admin'),
