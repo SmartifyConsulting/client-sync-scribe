@@ -80,9 +80,8 @@ export function BottomNav() {
 
   const items = guardianEnabled
     ? [
-        ...patientSections.slice(0, 3),
+        ...patientSections,
         { icon: Shield, label: "SOS", section: "guardian", to: "/patient/guardian" } as const,
-        patientSections[3],
       ]
     : patientSections;
 

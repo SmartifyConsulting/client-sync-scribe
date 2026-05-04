@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { MapPin, Phone, AlertCircle, UserPlus } from "lucide-react";
+import { MapPin, Phone, AlertCircle, UserPlus, Crosshair } from "lucide-react";
 import { SeverityPicker, type SeverityResult } from "../components/SeverityPicker";
 
 const HOLD_MS = 1500;
@@ -132,6 +132,21 @@ export default function GuardianHome() {
     }, () => toast.error("Couldn't get GPS — please allow location access"));
   };
 
+  const enableLocation = () => {
+    if (!("geolocation" in navigator)) return toast.error("GPS not supported on this device");
+    navigator.geolocation.getCurrentPosition(
+      () => toast.success("Location access enabled"),
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+          toast.error("Location blocked — enable it in your browser site settings");
+        } else {
+          toast.error("Couldn't get location. Try again.");
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
   return (
     <div className="mx-auto max-w-md">
       <SeverityPicker open={severityOpen} onSubmit={finishDispatch} onSkip={() => finishDispatch(null)} />
@@ -182,6 +197,9 @@ export default function GuardianHome() {
       </div>
 
       <div className="mt-10 grid gap-3">
+        <Button variant="outline" className="h-14 justify-start gap-3 rounded-2xl text-base" onClick={enableLocation}>
+          <Crosshair className="h-5 w-5 text-primary" /> Enable location access
+        </Button>
         <Button variant="outline" className="h-14 justify-start gap-3 rounded-2xl text-base" onClick={shareLocation}>
           <MapPin className="h-5 w-5 text-primary" /> Share my location
         </Button>
