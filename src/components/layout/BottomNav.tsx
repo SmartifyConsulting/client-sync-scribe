@@ -9,7 +9,6 @@ import {
   Briefcase,
   UserCog,
   Gift,
-  Shield,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useHolarcHelpAccess } from "@/modules/holarchelp/hooks/useHolarcHelpAccess";
@@ -78,12 +77,7 @@ export function BottomNav() {
   const isOnDetails = location.pathname === "/patient/details";
   const isOnHolarcHelp = location.pathname.startsWith("/patient/holarchelp");
 
-  const items = holarchelpEnabled
-    ? [
-        ...patientSections,
-        { icon: Shield, label: "SOS", section: "holarchelp", to: "/patient/holarchelp" } as const,
-      ]
-    : patientSections;
+  const items = patientSections;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg safe-area-pb font-size-preserve md:hidden">
