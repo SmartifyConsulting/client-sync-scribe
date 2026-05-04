@@ -62,7 +62,17 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const { profile } = useProfile();
   const location = useLocation();
   const isOnPatientRoute = location.pathname.startsWith("/patient/");
-  const navItems = isAdmin ? adminNavItems : (isPatient || isOnPatientRoute) ? patientNavItems : doctorNavItems;
+  const isOnAdminRoute = location.pathname.startsWith("/admin");
+
+  const baseNav = isOnAdminRoute && isAdmin
+    ? adminNavItems
+    : (isPatient || isOnPatientRoute) ? patientNavItems : doctorNavItems;
+
+  // For admins not currently on an admin route, surface an "Admin" entry so
+  // they can always reach the admin section.
+  const navItems = isAdmin && !isOnAdminRoute
+    ? [...baseNav, { icon: UserCog, label: "Admin", to: "/admin/users" }]
+    : baseNav;
 
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ["unread-notifications-count"],
