@@ -66,7 +66,6 @@ export function PatientAppLayout() {
       </div>
 
       <BottomNav />
-      <SOSFab />
     </div>
   );
 }
