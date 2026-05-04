@@ -14,7 +14,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Hospital, Ambulance, ShieldAlert, Loader2, Download, Upload, BarChart3 } from "lucide-react";
+import { Hospital, Ambulance, ShieldAlert, Loader2, Download, Upload, BarChart3, Mic2, Building2 } from "lucide-react";
+import { AccountabilityPanel } from "./HolarcHelpAccountability";
 
 type Status = "all" | "pending" | "approved" | "rejected" | "suspended";
 
@@ -260,106 +261,123 @@ export default function HolarcHelpProviders() {
   };
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Admin</p>
-          <h1 className="text-2xl font-extrabold">HolarcHelp Providers</h1>
-          <p className="text-sm text-muted-foreground">Approve, suspend, and manage hospitals and ambulance providers in the HolarcHelp network.</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link to="/admin/holarchelp-accountability">
-            <Button size="sm" variant="outline" className="gap-1.5">
-              <BarChart3 className="h-4 w-4" /> Accountability
-            </Button>
-          </Link>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={importing}
-            onClick={async () => {
-              setImporting(true);
-              const { data, error } = await supabase.functions.invoke("import-guardian-providers", { body: {} });
-              setImporting(false);
-              if (error) return toast.error(error.message);
-              toast.success(`Imported ${data?.hospitals_imported ?? 0} hospitals, ${data?.ambulances_imported ?? 0} ambulances`);
-              load();
-            }}
-          >
-            {importing ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Download className="mr-1.5 h-4 w-4" />}
-            Import from Holarc Guardian
-          </Button>
-        </div>
+    <div className="container mx-auto p-4 sm:p-6 space-y-5">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Admin</p>
+        <h1 className="text-2xl font-extrabold">HolarcHelp Admin</h1>
+        <p className="text-sm text-muted-foreground">Manage providers, accountability, and the SOS voice clip.</p>
       </div>
 
-      {/* SOS voice clip card */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">SOS voice clip</CardTitle>
-          <CardDescription>The MP3 played to emergency contacts when an SOS call connects.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="rounded-xl border p-3 bg-muted/30">
-            <p className="text-xs font-semibold">Current default clip</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {voiceClipPath ? voiceClipPath : "None — calls will use a fallback text-to-speech message."}
-            </p>
-          </div>
-          <div className="rounded-xl border p-3 space-y-2">
-            <p className="text-xs font-semibold">Upload new MP3</p>
-            <input
-              type="file"
-              accept="audio/mpeg,.mp3"
-              onChange={(e) => setClipFile(e.target.files?.[0] ?? null)}
-              className="block w-full text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-muted file:text-foreground"
-            />
-            <Button onClick={uploadClip} disabled={!clipFile || uploadingClip} className="w-full sm:w-auto">
-              {uploadingClip ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Upload className="mr-1.5 h-4 w-4" />}
-              Upload &amp; set as default
-            </Button>
-            <p className="text-[11px] text-muted-foreground">
-              Tip: keep clips under ~30 seconds. Africa's Talking sandbox only delivers to numbers registered in their Simulator.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="flex flex-wrap items-center gap-2">
-        {(["pending", "approved", "suspended", "rejected", "all"] as Status[]).map((s) => (
-          <Button key={s} size="sm" variant={status === s ? "default" : "outline"} onClick={() => setStatus(s)} className="rounded-full capitalize">
-            {s}
-          </Button>
-        ))}
-      </div>
-
-      <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
-        <TabsList className="bg-primary">
-          <TabsTrigger value="hospitals" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
-            <Hospital className="mr-1.5 h-4 w-4" />Hospitals
+      <Tabs defaultValue="providers">
+        <TabsList className="bg-primary w-full sm:w-auto">
+          <TabsTrigger value="providers" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white gap-1.5">
+            <Building2 className="h-4 w-4" />Providers
           </TabsTrigger>
-          <TabsTrigger value="ambulances" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
-            <Ambulance className="mr-1.5 h-4 w-4" />Ambulance
+          <TabsTrigger value="accountability" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white gap-1.5">
+            <BarChart3 className="h-4 w-4" />Accountability
+          </TabsTrigger>
+          <TabsTrigger value="voice-clip" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white gap-1.5">
+            <Mic2 className="h-4 w-4" />SOS Voice Clip
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="hospitals" className="mt-4">
-          {loading ? <Loader />
-            : renderGroupedTable(
-                hospitals,
-                "hospital",
-                ["Name", "Contact", "City", "Tier", "Status", "Beds", "Actions"],
-                renderHospitalRow,
-              )}
+        {/* Providers tab */}
+        <TabsContent value="providers" className="mt-4 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              {(["pending", "approved", "suspended", "rejected", "all"] as Status[]).map((s) => (
+                <Button key={s} size="sm" variant={status === s ? "default" : "outline"} onClick={() => setStatus(s)} className="rounded-full capitalize">
+                  {s}
+                </Button>
+              ))}
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={importing}
+              onClick={async () => {
+                setImporting(true);
+                const { data, error } = await supabase.functions.invoke("import-guardian-providers", { body: {} });
+                setImporting(false);
+                if (error) return toast.error(error.message);
+                toast.success(`Imported ${data?.hospitals_imported ?? 0} hospitals, ${data?.ambulances_imported ?? 0} ambulances`);
+                load();
+              }}
+            >
+              {importing ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Download className="mr-1.5 h-4 w-4" />}
+              Import from Holarc Guardian
+            </Button>
+          </div>
+
+          <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
+            <TabsList className="bg-primary">
+              <TabsTrigger value="hospitals" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
+                <Hospital className="mr-1.5 h-4 w-4" />Hospitals
+              </TabsTrigger>
+              <TabsTrigger value="ambulances" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
+                <Ambulance className="mr-1.5 h-4 w-4" />Ambulance
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="hospitals" className="mt-4">
+              {loading ? <Loader />
+                : renderGroupedTable(
+                    hospitals,
+                    "hospital",
+                    ["Name", "Contact", "City", "Tier", "Status", "Beds", "Actions"],
+                    renderHospitalRow,
+                  )}
+            </TabsContent>
+
+            <TabsContent value="ambulances" className="mt-4">
+              {loading ? <Loader />
+                : renderGroupedTable(
+                    ambulances,
+                    "ambulance",
+                    ["Company", "Contact", "City", "Tier", "Status", "Fleet", "Actions"],
+                    renderAmbulanceRow,
+                  )}
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
-        <TabsContent value="ambulances" className="mt-4">
-          {loading ? <Loader />
-            : renderGroupedTable(
-                ambulances,
-                "ambulance",
-                ["Company", "Contact", "City", "Tier", "Status", "Fleet", "Actions"],
-                renderAmbulanceRow,
-              )}
+        {/* Accountability tab */}
+        <TabsContent value="accountability" className="mt-4">
+          <AccountabilityPanel />
+        </TabsContent>
+
+        {/* SOS voice clip tab */}
+        <TabsContent value="voice-clip" className="mt-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">SOS voice clip</CardTitle>
+              <CardDescription>The MP3 played to emergency contacts when an SOS call connects.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="rounded-xl border p-3 bg-muted/30">
+                <p className="text-xs font-semibold">Current default clip</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {voiceClipPath ? voiceClipPath : "None — calls will use a fallback text-to-speech message."}
+                </p>
+              </div>
+              <div className="rounded-xl border p-3 space-y-2">
+                <p className="text-xs font-semibold">Upload new MP3</p>
+                <input
+                  type="file"
+                  accept="audio/mpeg,.mp3"
+                  onChange={(e) => setClipFile(e.target.files?.[0] ?? null)}
+                  className="block w-full text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-muted file:text-foreground"
+                />
+                <Button onClick={uploadClip} disabled={!clipFile || uploadingClip} className="w-full sm:w-auto">
+                  {uploadingClip ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Upload className="mr-1.5 h-4 w-4" />}
+                  Upload &amp; set as default
+                </Button>
+                <p className="text-[11px] text-muted-foreground">
+                  Tip: keep clips under ~30 seconds. Africa's Talking sandbox only delivers to numbers registered in their Simulator.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

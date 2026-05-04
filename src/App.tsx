@@ -58,6 +58,7 @@ import ProviderRoutes from "./modules/holarchelp/routes-provider";
 import PublicTrack from "./modules/holarchelp/pages/PublicTrack";
 import HolarcHelpProviders from "./pages/admin/HolarcHelpProviders";
 import HolarcHelpAccountability from "./pages/admin/HolarcHelpAccountability";
+import HolarcHelpProviderIncidents from "./pages/admin/HolarcHelpProviderIncidents";
 
 const queryClient = new QueryClient();
 
@@ -198,6 +199,7 @@ const App = () => (
             <Route path="/admin/users" element={<UserManagement />} />
             <Route path="/admin/holarchelp-providers" element={<HolarcHelpProviders />} />
             <Route path="/admin/holarchelp-accountability" element={<HolarcHelpAccountability />} />
+            <Route path="/admin/holarchelp-providers/:type/:id/incidents" element={<HolarcHelpProviderIncidents />} />
             
             {/* Common routes */}
             <Route path="/settings" element={<Settings />} />

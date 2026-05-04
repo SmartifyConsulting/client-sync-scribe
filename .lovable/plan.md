@@ -1,156 +1,89 @@
 ## Scope
 
-Four additions to HolarcHelp:
+Four updates around HolarcHelp:
 
-1. Provider admin: re-organize Hospitals & Ambulances tables grouped by country → tier
-2. New "Accountability" admin screen with provider performance metrics
-3. SOS voice clip upload UI (admin)
-4. Patient dashboard: add SOS button + Nearby icon under Upcoming Events, left of Vula Vouchers
-5. Rename "Ambulance providers" tab → "Ambulance" with white styling
+1. Add SOS + Nearby buttons to the patient **My Profile** view (currently only on Dashboard).
+2. Restructure `/admin/holarchelp-providers` into a **single hub with three sub-tabs**: Providers, Accountability, SOS Voice Clip.
+3. Add **incident history per patient** (visible on the patient's own profile and on a doctor's view of a patient).
+4. Add **incident history per hospital/ambulance provider** (admin view, drill-down from Accountability).
 
 ---
 
-## 1. Providers admin — group by Country → Tier
+## 1. SOS + Nearby on My Profile
 
-File: `src/pages/admin/HolarcHelpProviders.tsx`
+File: `src/pages/patient/MyDetails.tsx` (the "My Profile" page at `/patient/my-details`).
 
-- Replace flat table with collapsible accordion sections:
-  - Outer: country group (with country flag emoji + name + total count, e.g. "🇳🇬 Nigeria")
-  - Inner: tier sub-sections matching the screenshot style:
-    - Tier 1 — pink chip
-    - Tier 2 — orange chip  
-    - Tier 3 — yellow chip
-    - Tier 4 — blue chip (ambulances only)
-    - Each shows "{count} hospitals" / "{count} ambulances"
-- Each tier expands to the existing row table (Name/Contact/City/Status/Beds/Actions) — same actions preserved
-- Sort countries alphabetically; ZA + NG pinned to top
-- Rename Tab: `Ambulance providers` → `Ambulance`; both TabsTriggers get white background styling (`data-[state=active]:bg-white data-[state=active]:text-foreground`) with the parent TabsList keeping teal background
+Insert a compact red SOS card and an outline Nearby card at the top of the page (above the existing details editor), gated on `useHolarcHelpAccess`. Same visual style already used on `PatientDashboard` (red gradient + Siren icon, outline + MapPin icon). Both link to `/patient/holarchelp` and `/patient/holarchelp/contacts` respectively.
 
-## 2. Accountability admin screen
+Note: The user said they don't see the SOS button on "My Profile". On `PatientDashboard` it already exists in Row 2. We're adding the same pair to `MyDetails.tsx` so it appears wherever the patient lands.
 
-New route: `/admin/holarchelp-accountability` (admin only, link from sidebar + "Accountability" button on Providers page header).
+## 2. Admin hub — three sub-tabs
 
-File: `src/pages/admin/HolarcHelpAccountability.tsx`
+File: `src/pages/admin/HolarcHelpProviders.tsx` (rename heading to "HolarcHelp Admin"; route stays `/admin/holarchelp-providers`).
 
-Columns (per screenshot):
-- Provider (name + status sub-label)
-- Accepts — count of `holarchelp_incident_offers` where response='accepted'
-- Avg Arr (min) — average minutes between offer accepted_at and incident `arrived_at`/resolved_at
-- Cancels — count from `holarchelp_incident_cancellations`
-- Critical Cancels — cancels where source incident severity in (high, critical)
-- Stalled — accepted offers with no movement in >15min and not resolved
-- Avg Rating — from `holarchelp_feedback` for incidents assigned to provider
-- Flags — count of `holarchelp_incident_cancellations` with reason_code != 'declined' (proxy)
-- Priority — `dispatch_priority` (editable inline; numeric)
-- Actions: `Lower` (decrement priority by 10, min 0), `Suspend` (set provider status='suspended')
-
-Data source: aggregate via SQL view `vw_holarchelp_provider_accountability` (created in migration) or compute client-side from queries against `holarchelp_incidents`, `holarchelp_incident_offers`, `holarchelp_incident_cancellations`, `holarchelp_feedback`. Migration approach is preferred (one query, faster).
-
-Tabs at top: Hospitals | Ambulance.
-
-## 3. SOS Voice Clip upload
-
-The schema (`holarchelp_voice_clip_settings` + `guardian-voice-clips` bucket) already exists.
-
-Add a new card on the Providers admin page (or its own `/admin/holarchelp-voice-clip` route — single-page card) titled "SOS voice clip":
-- Shows current default clip path (or "None — calls will use a fallback text-to-speech message.")
-- File input (accepts `audio/mpeg,.mp3`)
-- "Upload & set as default" button → uploads to `guardian-voice-clips/default/{timestamp}.mp3`, then upserts `holarchelp_voice_clip_settings` row id=1 with new path
-- Tip text below: "keep clips under ~30 seconds. Africa's Talking sandbox only delivers to numbers registered in their Simulator."
-
-Place this card on the existing `/admin/holarchelp-providers` page (above tabs) so admins have one HolarcHelp hub.
-
-## 4. Patient dashboard — SOS + Nearby
-
-File: `src/pages/patient/PatientDashboard.tsx`
-
-Insert a new row directly **after** the Upcoming Appointments card and **before** the existing Vulas Balance row (Row 2):
+Replace the current page-level layout with a top-level Tabs component:
 
 ```text
-[ SOS button ][ Nearby icon ]   [ Vula Vouchers card ]
+[ Providers ] [ Accountability ] [ SOS Voice Clip ]
 ```
 
-Implementation:
-- New grid row: `grid-cols-2` on mobile (SOS+Nearby on left half, Vulas on right half) — but since current layout is full-width Vulas row, change Row 2 to a 3-col layout on desktop, 2-col on mobile:
-  - Col 1-2: small horizontal pair with two square buttons:
-    - **SOS** — red gradient button, links to `/patient/holarchelp` (HolarcHelpHome). Uses `Siren` lucide icon.
-    - **Nearby** — outline button with `MapPin` icon, links to `/patient/holarchelp/contacts` (lists nearby hospitals/ambulances)
-  - Col 3 (or row 2 on mobile): existing Vulas balance card unchanged
-- Both buttons gated on `useHolarcHelpAccess` — if not enabled, hide gracefully
+- **Providers tab** — current Hospitals/Ambulance accordion grouping + status filter + Import button (unchanged behavior, just nested inside the new outer tab).
+- **Accountability tab** — embed the table from `HolarcHelpAccountability.tsx` (refactor it into a reusable `<AccountabilityPanel />` component so the standalone route `/admin/holarchelp-accountability` can keep working). Adds a "View incidents" action per row that opens a side sheet with the provider's recent incidents (see §4).
+- **SOS Voice Clip tab** — current "SOS voice clip" card (upload MP3, show current default).
 
-## 5. Sidebar nav
+Sidebar: keep the existing "HolarcHelp Providers" link; remove the separate "Accountability" sub-link (it's now a tab).
 
-Add "Accountability" link under the existing "HolarcHelp Providers" admin item in `src/components/layout/Sidebar.tsx`.
+## 3. Incident history per patient
+
+New section on the patient's profile views.
+
+Sources:
+- For **patient viewing their own** profile (`MyDetails.tsx`): query `holarchelp_incidents` where `user_id = auth.uid()`, with the assigned provider's name (lookup via `assigned_provider_id` against `holarchelp_hospitals`/`holarchelp_ambulance_providers`).
+- For **doctor viewing a patient** (`src/pages/PatientProfile.tsx`): query the same table where `user_id = patientRecord.patient_user_id`. RLS already permits patient + admin reads; we'll add a policy allowing doctors with active `doctor_patient_access` for that patient to read their incidents (read-only).
+
+UI: A new collapsible section "Emergency incidents" listing each incident with date, severity chip, status, assigned provider, ETA/arrived timestamps, and a small link to view details. Empty state shows "No SOS calls on record."
+
+## 4. Incident history per hospital/ambulance provider
+
+Two surfaces:
+
+- **Per-provider drill-down (admin)** — from the Accountability table, "View incidents" button opens a Sheet listing incidents where `assigned_provider_id = provider.id`. Columns: Date, Patient (name from joined profile, admin only), Severity, Status, Accepted at, Arrived at, Resolved at, Rating (from `holarchelp_incident_feedback`).
+- **Per-provider standalone page** — new route `/admin/holarchelp-providers/:type/:id/incidents` (linked from the provider row Actions). Same table as the sheet, plus aggregate header (total incidents, accepts, avg arrival, avg rating).
+
+Data: client-side `supabase.from("holarchelp_incidents").select(...).eq("assigned_provider_id", id)` — admin RLS allows full read.
 
 ---
 
 ## Technical details
 
-### Migrations
+### New/edited files
+
+- `src/pages/patient/MyDetails.tsx` — add SOS + Nearby card row at top.
+- `src/pages/admin/HolarcHelpProviders.tsx` — wrap content in 3 outer tabs.
+- `src/pages/admin/HolarcHelpAccountability.tsx` — refactor table into exported `<AccountabilityPanel />` component; keep page as a thin wrapper.
+- `src/pages/admin/HolarcHelpProviderIncidents.tsx` — NEW (per-provider incidents page).
+- `src/components/holarchelp/PatientIncidentHistory.tsx` — NEW (re-used by `MyDetails.tsx` and `PatientProfile.tsx`).
+- `src/App.tsx` — add `/admin/holarchelp-providers/:type/:id/incidents` route.
+- `src/components/layout/Sidebar.tsx` — remove duplicate "Accountability" entry.
+
+### Migration
 
 ```sql
--- Materialized aggregates (fast read for accountability)
-CREATE OR REPLACE VIEW public.vw_holarchelp_provider_accountability AS
-SELECT
-  p.id AS provider_id,
-  p.name,
-  p.status,
-  p.dispatch_priority,
-  'hospital'::text AS provider_type,
-  p.country,
-  p.tier,
-  (SELECT count(*) FROM holarchelp_incident_offers o WHERE o.provider_id=p.id AND o.response='accepted') AS accepts,
-  (SELECT count(*) FROM holarchelp_incident_cancellations c WHERE c.provider_id=p.id) AS cancels,
-  (SELECT count(*) FROM holarchelp_incident_cancellations c
-     JOIN holarchelp_incidents i ON i.id=c.incident_id
-     WHERE c.provider_id=p.id AND i.severity IN ('high','critical')) AS critical_cancels,
-  (SELECT avg(EXTRACT(EPOCH FROM (i.resolved_at - o.responded_at))/60)
-     FROM holarchelp_incident_offers o
-     JOIN holarchelp_incidents i ON i.id=o.incident_id
-     WHERE o.provider_id=p.id AND o.response='accepted' AND i.resolved_at IS NOT NULL) AS avg_arr_min,
-  (SELECT avg(rating) FROM holarchelp_feedback f
-     JOIN holarchelp_incidents i ON i.id=f.incident_id
-     WHERE i.assigned_provider_id=p.id) AS avg_rating
-FROM holarchelp_hospitals p
-UNION ALL
-SELECT a.id, a.company_name, a.status, a.dispatch_priority, 'ambulance', a.country, a.tier,
-  /* same subqueries with provider_id=a.id */ ...
-FROM holarchelp_ambulance_providers a;
+-- Allow doctors with active access to read their patient's incidents (read-only)
+CREATE POLICY "Doctors with access can read patient incidents"
+ON public.holarchelp_incidents FOR SELECT TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM public.doctor_patient_access dpa
+    WHERE dpa.patient_user_id = holarchelp_incidents.user_id
+      AND dpa.doctor_id = auth.uid()
+      AND dpa.is_active = true
+  )
+);
 ```
-(View is SECURITY INVOKER; admin RLS via wrapper RPC `admin_provider_accountability()` that checks `has_role(auth.uid(),'admin')`.)
+(Existing patient-self and admin policies stay.)
 
-### Tier color tokens (semantic)
-Add to provider rendering: `tier_1`→pink, `tier_2`→orange, `tier_3`→yellow, `tier_4`→blue. Use existing tailwind classes — no theme changes.
+### Out of scope
 
-### Country grouping
-Group providers in TS using `Object.groupBy(rows, r => r.country || 'Unknown')`, then within each country `groupBy(r => r.tier)`.
-
-### SOS + Nearby buttons
-Compact dual-button card:
-```tsx
-<div className="grid grid-cols-2 gap-2">
-  <Link to="/patient/holarchelp">
-    <Button className="h-full w-full bg-gradient-to-br from-red-500 to-red-600 text-white">
-      <Siren /> SOS
-    </Button>
-  </Link>
-  <Link to="/patient/holarchelp/contacts">
-    <Button variant="outline" className="h-full w-full">
-      <MapPin /> Nearby
-    </Button>
-  </Link>
-</div>
-```
-
----
-
-## Files changed
-
-- `supabase/migrations/<new>.sql` — view + admin RPC
-- `src/pages/admin/HolarcHelpProviders.tsx` — country/tier grouping, voice clip card, white tabs, "Ambulance" rename, link to Accountability
-- `src/pages/admin/HolarcHelpAccountability.tsx` — NEW
-- `src/App.tsx` — register accountability route
-- `src/components/layout/Sidebar.tsx` — add nav link
-- `src/pages/patient/PatientDashboard.tsx` — SOS + Nearby row
-
-No changes to existing approval/RLS logic; voice clip schema/bucket already exist.
+- No changes to incident creation flow, voice clip schema, or accountability RPC.
+- No design system changes — uses existing teal/red tokens, accordion, sheet, tabs.

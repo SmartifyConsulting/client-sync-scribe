@@ -8,7 +8,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Loader2, ShieldAlert, AlertTriangle, ArrowLeft } from "lucide-react";
+import { Loader2, ShieldAlert, AlertTriangle, ArrowLeft, History } from "lucide-react";
 
 type Row = {
   provider_id: string;
@@ -27,8 +27,8 @@ type Row = {
   flags: number;
 };
 
-export default function HolarcHelpAccountability() {
-  const { isAdmin, loading: roleLoading } = useUserRole();
+export function AccountabilityPanel() {
+  const { isAdmin } = useUserRole();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"hospitals" | "ambulances">("ambulances");
@@ -42,18 +42,6 @@ export default function HolarcHelpAccountability() {
   };
 
   useEffect(() => { if (isAdmin) load(); }, [isAdmin]);
-
-  if (roleLoading) {
-    return <div className="flex h-64 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>;
-  }
-  if (!isAdmin) {
-    return (
-      <div className="mx-auto max-w-md p-8 text-center">
-        <ShieldAlert className="mx-auto h-10 w-10 text-destructive" />
-        <p className="mt-4 font-semibold">Admin access required</p>
-      </div>
-    );
-  }
 
   const lower = async (table: string, id: string, current: number) => {
     const next = Math.max(0, (current ?? 0) - 10);
@@ -106,6 +94,9 @@ export default function HolarcHelpAccountability() {
                 <TableCell>{r.flags}</TableCell>
                 <TableCell className="font-semibold">{r.dispatch_priority}</TableCell>
                 <TableCell className="text-right space-x-1">
+                  <Link to={`/admin/holarchelp-providers/${kind}/${r.provider_id}/incidents`}>
+                    <Button size="sm" variant="outline" className="gap-1"><History className="h-3 w-3" />Incidents</Button>
+                  </Link>
                   <Button size="sm" variant="outline" onClick={() => lower(table, r.provider_id, r.dispatch_priority)}>Lower</Button>
                   <Button size="sm" variant="outline" className="text-destructive border-destructive/30" onClick={() => suspend(table, r.provider_id)}>Suspend</Button>
                 </TableCell>
@@ -117,6 +108,33 @@ export default function HolarcHelpAccountability() {
     );
   };
 
+  if (loading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin h-5 w-5" /></div>;
+
+  return (
+    <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
+      <TabsList className="bg-primary">
+        <TabsTrigger value="ambulances" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">Ambulance</TabsTrigger>
+        <TabsTrigger value="hospitals" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">Hospitals</TabsTrigger>
+      </TabsList>
+      <TabsContent value="ambulances" className="mt-4">{renderTable("ambulance")}</TabsContent>
+      <TabsContent value="hospitals" className="mt-4">{renderTable("hospital")}</TabsContent>
+    </Tabs>
+  );
+}
+
+export default function HolarcHelpAccountability() {
+  const { isAdmin, loading: roleLoading } = useUserRole();
+  if (roleLoading) {
+    return <div className="flex h-64 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>;
+  }
+  if (!isAdmin) {
+    return (
+      <div className="mx-auto max-w-md p-8 text-center">
+        <ShieldAlert className="mx-auto h-10 w-10 text-destructive" />
+        <p className="mt-4 font-semibold">Admin access required</p>
+      </div>
+    );
+  }
   return (
     <div className="container mx-auto p-4 sm:p-6 space-y-5">
       <div className="flex items-start justify-between gap-3">
@@ -128,19 +146,7 @@ export default function HolarcHelpAccountability() {
           <Button size="sm" variant="ghost" className="text-primary"><ArrowLeft className="mr-1 h-4 w-4" /> Admin</Button>
         </Link>
       </div>
-
-      <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
-        <TabsList className="bg-primary">
-          <TabsTrigger value="ambulances" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">Ambulance</TabsTrigger>
-          <TabsTrigger value="hospitals" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">Hospitals</TabsTrigger>
-        </TabsList>
-        <TabsContent value="ambulances" className="mt-4">
-          {loading ? <div className="flex justify-center p-8"><Loader2 className="animate-spin h-5 w-5" /></div> : renderTable("ambulance")}
-        </TabsContent>
-        <TabsContent value="hospitals" className="mt-4">
-          {loading ? <div className="flex justify-center p-8"><Loader2 className="animate-spin h-5 w-5" /></div> : renderTable("hospital")}
-        </TabsContent>
-      </Tabs>
+      <AccountabilityPanel />
     </div>
   );
 }

@@ -47,8 +47,7 @@ const patientNavItems: NavItem[] = [
 const adminNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Home", to: "/doctor-dashboard" },
   { icon: Users, label: "Users", to: "/admin/users" },
-  { icon: Shield, label: "HolarcHelp Providers", to: "/admin/holarchelp-providers" },
-  { icon: Shield, label: "Accountability", to: "/admin/holarchelp-accountability" },
+  { icon: Shield, label: "HolarcHelp Admin", to: "/admin/holarchelp-providers" },
   { icon: DollarSign, label: "Pricing", to: "/admin/pricing" },
   { icon: Gift, label: "Rewards", to: "/admin/gamification" },
 ];
