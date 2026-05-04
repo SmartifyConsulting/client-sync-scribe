@@ -202,6 +202,9 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
           </Route>
           
+          {/* HolarcHelp provider portal (its own layout, gated by hospital_staff/ambulance_staff role) */}
+          <Route path="/provider/*" element={<ProtectedRoute><ProviderRoutes /></ProtectedRoute>} />
+
           {/* Role-based redirect for /dashboard */}
           <Route path="/dashboard" element={<ProtectedRoute><RoleBasedRedirect /></ProtectedRoute>} />
           
