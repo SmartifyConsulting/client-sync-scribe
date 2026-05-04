@@ -10,6 +10,7 @@ import { SeverityPicker, type SeverityResult } from "../components/SeverityPicke
 import { ProviderMap, type ProviderMarker } from "../components/ProviderMap";
 import hospitalIcon from "@/assets/marker-hospital.png";
 import ambulanceIcon from "@/assets/marker-ambulance.png";
+import { cn } from "@/lib/utils";
 
 type Coords = { lat: number; lng: number };
 
