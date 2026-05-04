@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
@@ -13,11 +11,22 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Hospital, Ambulance, ShieldAlert, Loader2, Download, Upload, BarChart3, Mic2, Building2 } from "lucide-react";
+import { Hospital, Ambulance, ShieldAlert, Loader2, Upload, BarChart3, Mic2, Building2, Plus, Pencil, Trash2 } from "lucide-react";
 import { AccountabilityPanel } from "./HolarcHelpAccountability";
 
-type Status = "all" | "pending" | "approved" | "rejected" | "suspended";
+type Status = "all" | "active" | "inactive";
+type Kind = "hospital" | "ambulance";
 
 const COUNTRY_FLAGS: Record<string, string> = {
   "South Africa": "🇿🇦", "ZA": "🇿🇦", "RSA": "🇿🇦",
@@ -59,30 +68,37 @@ function sortedCountries(grouped: Record<string, any>) {
   return [...pinned, ...rest];
 }
 
+const isActive = (s: string) => s === "approved";
+const tableFor = (k: Kind) => k === "hospital" ? "holarchelp_hospitals" : "holarchelp_ambulance_providers";
+const nameField = (k: Kind) => k === "hospital" ? "name" : "company_name";
+
+type EditState = { kind: Kind; row: any | null } | null;
+
 export default function HolarcHelpProviders() {
   const { isAdmin, loading: roleLoading } = useUserRole();
-  const [tab, setTab] = useState<"hospitals" | "ambulances">("hospitals");
+  const [tab, setTab] = useState<Kind>("hospital");
   const [status, setStatus] = useState<Status>("all");
   const [hospitals, setHospitals] = useState<any[]>([]);
   const [ambulances, setAmbulances] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [importing, setImporting] = useState(false);
+  const [edit, setEdit] = useState<EditState>(null);
+  const [confirmDelete, setConfirmDelete] = useState<{ kind: Kind; id: string; name: string } | null>(null);
 
-  // Voice clip state
   const [voiceClipPath, setVoiceClipPath] = useState<string | null>(null);
   const [clipFile, setClipFile] = useState<File | null>(null);
   const [uploadingClip, setUploadingClip] = useState(false);
 
+  const filterByStatus = (rows: any[]) =>
+    status === "all" ? rows : status === "active" ? rows.filter((r) => isActive(r.status)) : rows.filter((r) => !isActive(r.status));
+
   const load = async () => {
     setLoading(true);
-    const baseH = supabase.from("holarchelp_hospitals" as any).select("*").order("created_at", { ascending: false });
-    const baseA = supabase.from("holarchelp_ambulance_providers" as any).select("*").order("created_at", { ascending: false });
     const [{ data: h }, { data: a }] = await Promise.all([
-      status === "all" ? baseH : baseH.eq("status", status),
-      status === "all" ? baseA : baseA.eq("status", status),
+      supabase.from("holarchelp_hospitals" as any).select("*").order("created_at", { ascending: false }),
+      supabase.from("holarchelp_ambulance_providers" as any).select("*").order("created_at", { ascending: false }),
     ]);
-    setHospitals((h as any) ?? []);
-    setAmbulances((a as any) ?? []);
+    setHospitals(filterByStatus((h as any) ?? []));
+    setAmbulances(filterByStatus((a as any) ?? []));
     setLoading(false);
   };
 
@@ -110,27 +126,28 @@ export default function HolarcHelpProviders() {
     );
   }
 
-  const approveHospital = async (id: string) => {
-    const { error } = await supabase.rpc("holarchelp_approve_hospital" as any, { _hospital_id: id });
+  const setActiveFlag = async (kind: Kind, id: string, active: boolean) => {
+    const patch: any = { status: active ? "approved" : "suspended" };
+    if (active) patch.approved_at = new Date().toISOString();
+    const { error } = await supabase.from(tableFor(kind) as any).update(patch).eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("Hospital approved"); load();
+    toast.success(active ? "Activated" : "Deactivated"); load();
   };
-  const approveAmbulance = async (id: string) => {
-    const { error } = await supabase.rpc("holarchelp_approve_ambulance" as any, { _provider_id: id });
+  const setAccepting = async (kind: Kind, id: string, accepting: boolean) => {
+    const { error } = await supabase.from(tableFor(kind) as any).update({ accepting_patients: accepting } as any).eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("Ambulance provider approved"); load();
+    toast.success(accepting ? "Accepting patients" : "Marked full capacity"); load();
   };
-  const setStatusOn = async (table: string, id: string, newStatus: string) => {
-    const patch: any = { status: newStatus };
-    if (newStatus === "approved") patch.approved_at = new Date().toISOString();
-    const { error } = await supabase.from(table as any).update(patch).eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success("Updated"); load();
-  };
-  const setTier = async (table: string, id: string, tier: string) => {
-    const { error } = await supabase.from(table as any).update({ tier } as any).eq("id", id);
+  const setTier = async (kind: Kind, id: string, tier: string) => {
+    const { error } = await supabase.from(tableFor(kind) as any).update({ tier } as any).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Tier updated"); load();
+  };
+  const removeRow = async () => {
+    if (!confirmDelete) return;
+    const { error } = await supabase.from(tableFor(confirmDelete.kind) as any).delete().eq("id", confirmDelete.id);
+    if (error) return toast.error(error.message);
+    toast.success("Deleted"); setConfirmDelete(null); load();
   };
 
   const uploadClip = async () => {
@@ -150,60 +167,53 @@ export default function HolarcHelpProviders() {
     loadVoiceClip();
   };
 
-  const renderHospitalRow = (h: any) => (
-    <TableRow key={h.id}>
-      <TableCell className="font-medium">{h.name}</TableCell>
-      <TableCell className="text-xs">{h.contact_email}<br /><span className="text-muted-foreground">{h.contact_phone}</span></TableCell>
-      <TableCell className="text-xs">{h.city ?? "—"}</TableCell>
-      <TableCell>
-        <Select value={h.tier} onValueChange={(v) => setTier("holarchelp_hospitals", h.id, v)}>
-          <SelectTrigger className="h-8 w-28"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {["tier_1","tier_2","tier_3"].map((t) => <SelectItem key={t} value={t}>{t.replace("_", " ")}</SelectItem>)}
-          </SelectContent>
-        </Select>
-      </TableCell>
-      <TableCell><StatusBadge s={h.status} /></TableCell>
-      <TableCell className="text-xs">{h.beds_available}/{h.bed_capacity}</TableCell>
-      <TableCell className="text-right space-x-1">
-        {h.status === "pending" && <Button size="sm" onClick={() => approveHospital(h.id)}>Approve</Button>}
-        {h.status === "pending" && <Button size="sm" variant="outline" onClick={() => setStatusOn("holarchelp_hospitals", h.id, "rejected")}>Reject</Button>}
-        {h.status === "approved" && <Button size="sm" variant="outline" onClick={() => setStatusOn("holarchelp_hospitals", h.id, "suspended")}>Suspend</Button>}
-        {h.status === "suspended" && <Button size="sm" onClick={() => setStatusOn("holarchelp_hospitals", h.id, "approved")}>Reactivate</Button>}
-      </TableCell>
-    </TableRow>
-  );
+  const renderRow = (kind: Kind, r: any) => {
+    const active = isActive(r.status);
+    return (
+      <TableRow key={r.id}>
+        <TableCell className="font-medium">{r[nameField(kind)]}</TableCell>
+        <TableCell className="text-xs">{r.contact_email}<br /><span className="text-muted-foreground">{r.contact_phone}</span></TableCell>
+        <TableCell className="text-xs">{r.city ?? "—"}</TableCell>
+        <TableCell>
+          <Select value={r.tier ?? "tier_3"} onValueChange={(v) => setTier(kind, r.id, v)}>
+            <SelectTrigger className="h-8 w-28"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {(kind === "hospital" ? ["tier_1","tier_2","tier_3"] : ["tier_1","tier_2","tier_3","tier_4"]).map((t) =>
+                <SelectItem key={t} value={t}>{t.replace("_", " ")}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center gap-2">
+            <Switch checked={active} onCheckedChange={(v) => setActiveFlag(kind, r.id, v)} />
+            <span className={`text-[11px] font-semibold ${active ? "text-emerald-700" : "text-muted-foreground"}`}>
+              {active ? "Active" : "Inactive"}
+            </span>
+          </div>
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center gap-2">
+            <Switch checked={r.accepting_patients !== false} onCheckedChange={(v) => setAccepting(kind, r.id, v)} />
+            <span className={`text-[11px] font-semibold ${r.accepting_patients !== false ? "text-emerald-700" : "text-red-600"}`}>
+              {r.accepting_patients !== false ? "Yes" : "Full"}
+            </span>
+          </div>
+        </TableCell>
+        <TableCell className="text-right space-x-1">
+          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEdit({ kind, row: r })}>
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+          <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => setConfirmDelete({ kind, id: r.id, name: r[nameField(kind)] })}>
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </TableCell>
+      </TableRow>
+    );
+  };
 
-  const renderAmbulanceRow = (a: any) => (
-    <TableRow key={a.id}>
-      <TableCell className="font-medium">{a.company_name}</TableCell>
-      <TableCell className="text-xs">{a.contact_email}<br /><span className="text-muted-foreground">{a.contact_phone}</span></TableCell>
-      <TableCell className="text-xs">{a.city ?? "—"}</TableCell>
-      <TableCell>
-        <Select value={a.tier} onValueChange={(v) => setTier("holarchelp_ambulance_providers", a.id, v)}>
-          <SelectTrigger className="h-8 w-28"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {["tier_1","tier_2","tier_3","tier_4"].map((t) => <SelectItem key={t} value={t}>{t.replace("_", " ")}</SelectItem>)}
-          </SelectContent>
-        </Select>
-      </TableCell>
-      <TableCell><StatusBadge s={a.status} /></TableCell>
-      <TableCell className="text-xs">{a.fleet_size}</TableCell>
-      <TableCell className="text-right space-x-1">
-        {a.status === "pending" && <Button size="sm" onClick={() => approveAmbulance(a.id)}>Approve</Button>}
-        {a.status === "pending" && <Button size="sm" variant="outline" onClick={() => setStatusOn("holarchelp_ambulance_providers", a.id, "rejected")}>Reject</Button>}
-        {a.status === "approved" && <Button size="sm" variant="outline" onClick={() => setStatusOn("holarchelp_ambulance_providers", a.id, "suspended")}>Suspend</Button>}
-        {a.status === "suspended" && <Button size="sm" onClick={() => setStatusOn("holarchelp_ambulance_providers", a.id, "approved")}>Reactivate</Button>}
-      </TableCell>
-    </TableRow>
-  );
+  const headers = ["Name", "Contact", "City", "Tier", "Status", "Accepting", "Actions"];
 
-  const renderGroupedTable = (
-    rows: any[],
-    kind: "hospital" | "ambulance",
-    headers: string[],
-    rowFn: (r: any) => JSX.Element,
-  ) => {
+  const renderGroupedTable = (rows: any[], kind: Kind) => {
     if (rows.length === 0) return <Empty label={`No ${status === "all" ? "" : status + " "}${kind === "hospital" ? "hospitals" : "ambulances"}`} />;
     const grouped = groupByCountryTier(rows);
     const countries = sortedCountries(grouped);
@@ -245,7 +255,7 @@ export default function HolarcHelpProviders() {
                                 ))}
                               </TableRow>
                             </TableHeader>
-                            <TableBody>{tiers[t].map(rowFn)}</TableBody>
+                            <TableBody>{tiers[t].map((r: any) => renderRow(kind, r))}</TableBody>
                           </Table>
                         </div>
                       </AccordionContent>
@@ -262,13 +272,12 @@ export default function HolarcHelpProviders() {
 
   const seedTestProviders = async () => {
     try {
-      const { data, error } = await (await import("@/integrations/supabase/client")).supabase.functions.invoke("seed-test-providers");
+      const { data, error } = await supabase.functions.invoke("seed-test-providers");
       if (error) throw error;
-      const { toast } = await import("sonner");
       toast.success("Test providers seeded");
       console.log("seed-test-providers result", data);
+      load();
     } catch (e: any) {
-      const { toast } = await import("sonner");
       toast.error(e?.message ?? "Seeding failed");
     }
   };
@@ -299,72 +308,45 @@ export default function HolarcHelpProviders() {
           </TabsTrigger>
         </TabsList>
 
-        {/* Providers tab */}
         <TabsContent value="providers" className="mt-4 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              {(["pending", "approved", "suspended", "rejected", "all"] as Status[]).map((s) => (
+              {(["active", "inactive", "all"] as Status[]).map((s) => (
                 <Button key={s} size="sm" variant={status === s ? "default" : "outline"} onClick={() => setStatus(s)} className="rounded-full capitalize">
                   {s}
                 </Button>
               ))}
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={importing}
-              onClick={async () => {
-                setImporting(true);
-                const { data, error } = await supabase.functions.invoke("import-guardian-providers", { body: {} });
-                setImporting(false);
-                if (error) return toast.error(error.message);
-                toast.success(`Imported ${data?.hospitals_imported ?? 0} hospitals, ${data?.ambulances_imported ?? 0} ambulances`);
-                load();
-              }}
-            >
-              {importing ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Download className="mr-1.5 h-4 w-4" />}
-              Import from Holarc Guardian
+            <Button size="sm" onClick={() => setEdit({ kind: tab, row: null })}>
+              <Plus className="mr-1.5 h-4 w-4" />
+              Add {tab === "hospital" ? "Hospital" : "Ambulance"}
             </Button>
           </div>
 
-          <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
+          <Tabs value={tab} onValueChange={(v) => setTab(v as Kind)}>
             <TabsList className="bg-primary">
-              <TabsTrigger value="hospitals" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
+              <TabsTrigger value="hospital" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
                 <Hospital className="mr-1.5 h-4 w-4" />Hospitals
               </TabsTrigger>
-              <TabsTrigger value="ambulances" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
+              <TabsTrigger value="ambulance" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
                 <Ambulance className="mr-1.5 h-4 w-4" />Ambulance
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="hospitals" className="mt-4">
-              {loading ? <Loader />
-                : renderGroupedTable(
-                    hospitals,
-                    "hospital",
-                    ["Name", "Contact", "City", "Tier", "Status", "Beds", "Actions"],
-                    renderHospitalRow,
-                  )}
+            <TabsContent value="hospital" className="mt-4">
+              {loading ? <Loader /> : renderGroupedTable(hospitals, "hospital")}
             </TabsContent>
 
-            <TabsContent value="ambulances" className="mt-4">
-              {loading ? <Loader />
-                : renderGroupedTable(
-                    ambulances,
-                    "ambulance",
-                    ["Company", "Contact", "City", "Tier", "Status", "Fleet", "Actions"],
-                    renderAmbulanceRow,
-                  )}
+            <TabsContent value="ambulance" className="mt-4">
+              {loading ? <Loader /> : renderGroupedTable(ambulances, "ambulance")}
             </TabsContent>
           </Tabs>
         </TabsContent>
 
-        {/* Accountability tab */}
         <TabsContent value="accountability" className="mt-4">
           <AccountabilityPanel />
         </TabsContent>
 
-        {/* SOS voice clip tab */}
         <TabsContent value="voice-clip" className="mt-4">
           <Card>
             <CardHeader className="pb-2">
@@ -398,17 +380,147 @@ export default function HolarcHelpProviders() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <ProviderDialog
+        state={edit}
+        onClose={() => setEdit(null)}
+        onSaved={() => { setEdit(null); load(); }}
+      />
+
+      <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete provider?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDelete?.name} will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={removeRow} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
 
-const StatusBadge = ({ s }: { s: string }) => {
-  const tone = s === "approved" ? "bg-emerald-500/15 text-emerald-700"
-    : s === "pending" ? "bg-amber-500/15 text-amber-700"
-    : s === "suspended" ? "bg-orange-500/15 text-orange-700"
-    : "bg-red-500/15 text-red-700";
-  return <Badge className={`${tone} border-0 capitalize`}>{s}</Badge>;
-};
+function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose: () => void; onSaved: () => void }) {
+  const open = !!state;
+  const kind = state?.kind ?? "hospital";
+  const row = state?.row ?? null;
+  const isEdit = !!row;
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState<any>({});
+
+  useEffect(() => {
+    if (!state) return;
+    setForm(row ?? {
+      [nameField(kind)]: "",
+      contact_email: "",
+      contact_phone: "",
+      city: "",
+      country: "South Africa",
+      tier: "tier_3",
+      accepting_patients: true,
+    });
+  }, [state]);
+
+  const update = (k: string, v: any) => setForm((f: any) => ({ ...f, [k]: v }));
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      const payload: any = {
+        [nameField(kind)]: form[nameField(kind)],
+        contact_email: form.contact_email || null,
+        contact_phone: form.contact_phone || null,
+        city: form.city || null,
+        country: form.country || null,
+        tier: form.tier || "tier_3",
+        accepting_patients: form.accepting_patients !== false,
+      };
+      if (!isEdit) {
+        payload.status = "approved";
+        payload.approved_at = new Date().toISOString();
+        const { data: u } = await supabase.auth.getUser();
+        if (u?.user?.id) payload.owner_id = u.user.id;
+      }
+      const q = supabase.from(tableFor(kind) as any);
+      const { error } = isEdit ? await q.update(payload).eq("id", row.id) : await q.insert(payload);
+      if (error) throw error;
+      toast.success(isEdit ? "Updated" : "Created");
+      onSaved();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Save failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{isEdit ? "Edit" : "Add"} {kind === "hospital" ? "Hospital" : "Ambulance Provider"}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <Label>{kind === "hospital" ? "Name" : "Company name"}</Label>
+            <Input value={form[nameField(kind)] ?? ""} onChange={(e) => update(nameField(kind), e.target.value)} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>Email</Label>
+              <Input type="email" value={form.contact_email ?? ""} onChange={(e) => update("contact_email", e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Phone</Label>
+              <Input value={form.contact_phone ?? ""} onChange={(e) => update("contact_phone", e.target.value)} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>City</Label>
+              <Input value={form.city ?? ""} onChange={(e) => update("city", e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Country</Label>
+              <Input value={form.country ?? ""} onChange={(e) => update("country", e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Tier</Label>
+            <Select value={form.tier ?? "tier_3"} onValueChange={(v) => update("tier", v)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {(kind === "hospital" ? ["tier_1","tier_2","tier_3"] : ["tier_1","tier_2","tier_3","tier_4"]).map((t) =>
+                  <SelectItem key={t} value={t}>{t.replace("_", " ")}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center justify-between rounded-lg border p-3">
+            <div>
+              <p className="text-sm font-semibold">Accepting patients</p>
+              <p className="text-[11px] text-muted-foreground">Turn off when at full capacity. Greys this provider out on the patient map.</p>
+            </div>
+            <Switch checked={form.accepting_patients !== false} onCheckedChange={(v) => update("accepting_patients", v)} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={save} disabled={saving || !form[nameField(kind)]}>
+            {saving && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
+            {isEdit ? "Save" : "Create"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 const Empty = ({ label }: { label: string }) => (
   <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">{label}</div>
 );
