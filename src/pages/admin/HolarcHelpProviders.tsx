@@ -543,8 +543,8 @@ type PlaceDetails = {
   phone?: string | null; website?: string | null;
 };
 
-function LocationPicker({ onPick }: { onPick: (d: PlaceDetails) => void }) {
-  const [q, setQ] = useState("");
+function LocationPicker({ onPick, initialQuery }: { onPick: (d: PlaceDetails) => void; initialQuery?: string }) {
+  const [q, setQ] = useState(initialQuery ?? "");
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<{ description: string; place_id: string }[]>([]);
   const [searching, setSearching] = useState(false);
@@ -564,9 +564,23 @@ function LocationPicker({ onPick }: { onPick: (d: PlaceDetails) => void }) {
     if (input.trim().length < 3) { setItems([]); return; }
     setSearching(true);
     try {
-      const { data } = await supabase.functions.invoke("google-places-autocomplete", { body: { input, types: "establishment" } });
-      setItems((data?.predictions ?? []).map((p: any) => ({ description: p.description, place_id: p.place_id })));
+      const { data, error } = await supabase.functions.invoke("google-places-autocomplete", { body: { input, types: "any" } });
+      if (error) {
+        console.error("Places autocomplete invoke error:", error);
+        toast.error("Location search failed — check API settings");
+        setItems([]);
+        return;
+      }
+      if (data?.status && data.status !== "OK" && data.status !== "ZERO_RESULTS") {
+        console.error("Google Places status:", data.status, data.error_message);
+        toast.error(`Google Places: ${data.status}`);
+      }
+      const preds = (data?.predictions ?? []).map((p: any) => ({ description: p.description, place_id: p.place_id }));
+      setItems(preds);
       setOpen(true);
+    } catch (e: any) {
+      console.error("Places autocomplete failed:", e);
+      toast.error(e?.message ?? "Location search failed");
     } finally { setSearching(false); }
   };
 
@@ -582,7 +596,7 @@ function LocationPicker({ onPick }: { onPick: (d: PlaceDetails) => void }) {
       const { data, error } = await supabase.functions.invoke("google-place-details", { body: { place_id } });
       if (error) throw error;
       onPick(data as PlaceDetails);
-      setQ(data?.name || label);
+      setQ(data?.formatted_address || label);
       setOpen(false);
       toast.success("Location pinned — fields auto-filled");
     } catch (e: any) {
@@ -592,12 +606,12 @@ function LocationPicker({ onPick }: { onPick: (d: PlaceDetails) => void }) {
 
   return (
     <div className="space-y-1.5" ref={boxRef}>
-      <Label>Search location (auto-fills below)</Label>
+      <Label>Search address {initialQuery ? `for "${initialQuery}"` : ""}</Label>
       <div className="relative">
         <Input
           value={q}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Search hospital or address…"
+          placeholder="Type the provider name or address…"
           onFocus={() => items.length > 0 && setOpen(true)}
         />
         {searching && <Loader2 className="absolute right-2 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />}
@@ -618,6 +632,7 @@ function LocationPicker({ onPick }: { onPick: (d: PlaceDetails) => void }) {
           </div>
         )}
       </div>
+      <p className="text-[11px] text-muted-foreground">Selecting a result auto-fills city, country, phone, and pins the location on the map.</p>
     </div>
   );
 }
