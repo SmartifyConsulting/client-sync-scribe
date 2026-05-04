@@ -558,7 +558,7 @@ function LocationPicker({ onPick }: { onPick: (d: PlaceDetails) => void }) {
     if (input.trim().length < 3) { setItems([]); return; }
     setSearching(true);
     try {
-      const { data } = await supabase.functions.invoke("google-places-autocomplete", { body: { input } });
+      const { data } = await supabase.functions.invoke("google-places-autocomplete", { body: { input, types: "establishment" } });
       setItems((data?.predictions ?? []).map((p: any) => ({ description: p.description, place_id: p.place_id })));
       setOpen(true);
     } finally { setSearching(false); }
