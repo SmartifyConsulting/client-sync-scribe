@@ -405,6 +405,39 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Doctor Details (credentials + About Me) */}
+      <Dialog open={!!detailsDoctor} onOpenChange={(o) => !o && setDetailsDoctor(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={detailsDoctor?.avatar_url || undefined} />
+                <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                  {detailsDoctor?.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
+                </AvatarFallback>
+              </Avatar>
+              <span>{detailsDoctor?.full_name || "Provider"}</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 text-xs">
+            {detailsDoctor?.specialty && <div><span className="text-muted-foreground">Specialty:</span> {detailsDoctor.specialty}</div>}
+            {detailsDoctor?.practice_number && <div><span className="text-muted-foreground">Practice #:</span> {detailsDoctor.practice_number}</div>}
+            {detailsDoctor?.doctor_number && <div><span className="text-muted-foreground">Registration #:</span> {detailsDoctor.doctor_number}</div>}
+            {detailsDoctor?.preferred_language && (
+              <div><span className="text-muted-foreground">Language:</span> {LANGUAGES.find(l => l.code === detailsDoctor.preferred_language)?.name || detailsDoctor.preferred_language}</div>
+            )}
+            {detailsDoctor?.practice_address && <div><span className="text-muted-foreground">Address:</span> {detailsDoctor.practice_address}</div>}
+            {detailsDoctor?.mobile_number && <div><span className="text-muted-foreground">Mobile:</span> {detailsDoctor.mobile_number}</div>}
+            {detailsDoctor?.about_me && (
+              <div className="pt-2 border-t">
+                <div className="text-muted-foreground mb-1 font-medium">About Me</div>
+                <p className="whitespace-pre-wrap leading-relaxed">{detailsDoctor.about_me}</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
