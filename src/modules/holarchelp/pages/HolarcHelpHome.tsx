@@ -37,6 +37,7 @@ export default function HolarcHelpHome() {
   const [severityOpen, setSeverityOpen] = useState(false);
   const [requesting, setRequesting] = useState<string | null>(null);
   const [hasEmergency, setHasEmergency] = useState<boolean | null>(null);
+  const [incidentCoverage, setIncidentCoverage] = useState<"public" | "private">("public");
   const channelRef = useRef<any>(null);
 
   useEffect(() => {
