@@ -60,7 +60,7 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
       supabase.from("approved_daily_medications").select("id, name, category, default_with_food").eq("active", true).order("name"),
       supabase
         .from("prescriptions")
-        .select("id, medication, dosage, frequency, reminder_times, with_food, status, approved_medication_id")
+        .select("id, medication, dosage, frequency, reminder_times, with_food, status, approved_medication_id, reminders_enabled")
         .eq("patient_id", patientId)
         .eq("source", "self")
         .order("created_at", { ascending: false }),
