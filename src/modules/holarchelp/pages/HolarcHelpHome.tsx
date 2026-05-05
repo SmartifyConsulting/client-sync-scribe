@@ -223,17 +223,17 @@ export default function HolarcHelpHome() {
     <div className="mx-auto max-w-md">
       <SeverityPicker open={severityOpen} onSubmit={finishSeverity} onSkip={() => finishSeverity(null)} />
 
-      {hasNok === false && (
+      {hasEmergency === false && (
         <Card className="mb-4 border-amber-500/40 bg-amber-50">
           <CardContent className="p-4 space-y-2 text-sm">
             <div className="flex items-center gap-2 font-semibold text-amber-800">
-              <AlertTriangle className="h-4 w-4" /> Add a Next of Kin to enable SOS
+              <AlertTriangle className="h-4 w-4" /> Add an Emergency Contact to enable SOS
             </div>
             <p className="text-amber-900/80 text-xs">
-              Your Next of Kin <strong>is</strong> your Emergency Contact. We need their details to notify them when you trigger an SOS.
+              Your Emergency Contact will be notified by default when you trigger an SOS. You can also opt your Next of Kin in.
             </p>
             <Button size="sm" className="mt-1" onClick={() => navigate("/patient/details?section=health")}>
-              Add Next of Kin
+              Add Emergency Contact
             </Button>
           </CardContent>
         </Card>
