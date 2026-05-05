@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { AlertCircle, AlertTriangle, Crosshair, Loader2, Shield, Siren } from "lucide-react";
 import { SeverityPicker, type SeverityResult } from "../components/SeverityPicker";
 import { ProviderMap, type ProviderMarker } from "../components/ProviderMap";
+import { SosVoiceNoteDialog } from "../components/SosVoiceNoteDialog";
 import hospitalIcon from "@/assets/marker-hospital.png";
 import ambulanceIcon from "@/assets/marker-ambulance.png";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,7 @@ export default function HolarcHelpHome() {
   const [incidentId, setIncidentId] = useState<string | null>(null);
   const [helpOnTheWay, setHelpOnTheWay] = useState(false);
   const [severityOpen, setSeverityOpen] = useState(false);
+  const [voiceNoteOpen, setVoiceNoteOpen] = useState(false);
   const [requesting, setRequesting] = useState<string | null>(null);
   const [hasEmergency, setHasEmergency] = useState<boolean | null>(null);
   const [incidentCoverage, setIncidentCoverage] = useState<"public" | "private">("public");
@@ -185,7 +187,7 @@ export default function HolarcHelpHome() {
       supabase.functions.invoke("share-incident-with-contacts", {
         body: { incident_id: (incident as any).id, tracking_token: (incident as any).tracking_token },
       }).catch((e) => console.warn("share-incident-with-contacts failed", e));
-      setSeverityOpen(true);
+      setVoiceNoteOpen(true);
     } catch (e: any) {
       toast.error(e?.message ?? "Could not trigger SOS");
     } finally {
@@ -249,6 +251,11 @@ export default function HolarcHelpHome() {
   return (
     <div className="mx-auto max-w-md">
       <SeverityPicker open={severityOpen} onSubmit={finishSeverity} onSkip={() => finishSeverity(null)} />
+      <SosVoiceNoteDialog
+        open={voiceNoteOpen}
+        incidentId={incidentId}
+        onClose={() => { setVoiceNoteOpen(false); setSeverityOpen(true); }}
+      />
 
       {hasEmergency === false && (
         <Card className="mb-4 border-amber-500/40 bg-amber-50">

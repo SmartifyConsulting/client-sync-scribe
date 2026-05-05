@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { LiveMap } from "../components/LiveMap";
+import { VoiceNoteAudio } from "../components/VoiceNoteAudio";
 import { Button } from "@/components/ui/button";
 import { Copy, CheckCircle2, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -72,6 +73,16 @@ export default function HolarcHelpIncidentDetail() {
       <p className="mb-3 text-xs text-muted-foreground">Started {new Date(incident.created_at).toLocaleString()}</p>
 
       <LiveMap points={locations} />
+
+      {(incident.voice_note_transcript || incident.voice_note_audio_url) && (
+        <div className="mt-4 rounded-2xl border-2 border-red-600/40 bg-red-50 dark:bg-red-950/20 p-4">
+          <p className="mb-2 text-xs font-bold uppercase tracking-wider text-red-700 dark:text-red-400">Your voice note</p>
+          {incident.voice_note_transcript && (
+            <p className="text-sm whitespace-pre-wrap mb-2">{incident.voice_note_transcript}</p>
+          )}
+          {incident.voice_note_audio_url && <VoiceNoteAudio path={incident.voice_note_audio_url} />}
+        </div>
+      )}
 
       {incident.status === "active" && contacts.length > 0 && (
         <div className="mt-4 rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)]">

@@ -15,7 +15,7 @@ import {
   Gift,
   UserCog,
   FolderOpen,
-  
+  Siren,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
@@ -27,6 +27,7 @@ interface NavItem {
   icon: LucideIcon;
   label: string;
   to: string;
+  danger?: boolean;
 }
 
 const doctorNavItems: NavItem[] = [
@@ -35,6 +36,7 @@ const doctorNavItems: NavItem[] = [
   { icon: Settings2, label: "My Practice", to: "/practice" },
   { icon: UserCog, label: "My Admin", to: "/admin" },
   { icon: Gift, label: "My Rewards", to: "/doctor/rewards" },
+  { icon: Siren, label: "SOS", to: "/doctor/holarchelp", danger: true },
 ];
 
 const patientNavItems: NavItem[] = [
@@ -42,6 +44,7 @@ const patientNavItems: NavItem[] = [
   { icon: Users, label: "My Holarchy", to: "/patient/details?section=care" },
   { icon: FolderOpen, label: "My Desk", to: "/patient/details?section=admin" },
   { icon: Gift, label: "My Rewards", to: "/patient/rewards" },
+  { icon: Siren, label: "SOS", to: "/patient/holarchelp", danger: true },
 ];
 
 const adminNavItems: NavItem[] = [
@@ -136,8 +139,12 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                     cn(
                       "flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium transition-all duration-200",
                       isItemActive
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                        ? item.danger
+                          ? "bg-red-600 text-white shadow-sm"
+                          : "bg-primary text-primary-foreground shadow-sm"
+                        : item.danger
+                          ? "text-red-600 hover:bg-red-600/10"
+                          : "text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                     )
                   }
                 >

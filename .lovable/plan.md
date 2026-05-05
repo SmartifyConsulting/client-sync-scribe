@@ -1,63 +1,50 @@
 # Plan
 
-## 1. Fix "invite error" on re-accept (root cause)
+## 1. Add HolarcHelp / SOS to desktop & tablet sidebar
 
-`doctor_patient_access` has `UNIQUE (doctor_id, patient_user_id)`. When a patient removes a doctor we set `is_active = false` but keep the row. On re-invite + accept, `DoctorAccessRequests.handleAcceptRequest` does a plain `INSERT` → unique-violation → toast error.
+`src/components/layout/Sidebar.tsx`:
+- Append a 6th item to **`doctorNavItems`**: `{ icon: Siren, label: "SOS", to: "/doctor/holarchelp" }` rendered with red text/red bg on hover (mirroring BottomNav `danger` style).
+- Append a 5th item to **`patientNavItems`**: `{ icon: Siren, label: "SOS", to: "/patient/holarchelp" }` with the same danger styling.
+- Pass a `danger` flag through the existing render loop so the sidebar treats the SOS item the way `BottomNav` already does.
 
-Fix in `src/components/doctor/DoctorAccessRequests.tsx`:
+## 2. Make the mobile SOS button more prominent
 
-- Replace the `.insert(...)` with `.upsert({...}, { onConflict: 'doctor_id,patient_user_id' })`, setting `is_active: true`, refreshed `permissions`, and clearing `revoked_at`.
-- Same defensive upsert (`onConflict: 'user_id,patient_user_id'`) for the `patients` row creation, since a stale inactive `patients` row from the prior connection can also collide.
+In `src/components/layout/BottomNav.tsx`:
+- Render the SOS item as an oversized **solid red circle** (~52px) with a white `Siren` icon and the white text "SOS" beneath, breaking out of the normal cell so it visually pops above the bar (negative top margin, soft red glow).
+- Keep all other items unchanged.
 
-## 2. SOS — per-severity emergency-contact escalation
+## 3. Voice note + transcription when SOS is triggered
 
-Patients choose, per emergency contact, the **minimum incident severity** that triggers notifying them.
+After the incident is created in `HolarcHelpHome.tsx → triggerSOS`, open a new dialog **`SosVoiceNoteDialog`** (in `src/modules/holarchelp/components/`) with:
+- A loud prompt: "Describe the incident — what happened, how many people are injured, and how serious."
+- Two buttons: **Start Recording** / **Cancel** (Cancel just dismisses; the SOS continues without a note).
+- Once recording, a single **Stop & Send** button. Recording uses `MediaRecorder` (audio/webm). Auto-stop after 60s.
+- On stop → upload the blob to the existing `transcribe-audio` edge function → write the resulting text into `holarchelp_incidents.notes` (column already exists) plus a new column `voice_note_audio_url` for the playback (storage bucket `session-audio`, signed URL).
 
-Schema (migration):
+Schema migration: add `voice_note_audio_url text`, `voice_note_transcript text` to `holarchelp_incidents` (the existing `notes` is already used for other purposes by some flows, so we keep the transcript in its own column for clarity).
 
-- `ALTER TABLE public.holarchelp_emergency_contacts ADD COLUMN notify_min_severity text NOT NULL DEFAULT 'low' CHECK (notify_min_severity IN ('low','medium','high','critical'));`
+Visibility for responders: `HolarcHelpIncidentDetail.tsx` and `provider/ProviderIncidentDetail.tsx` already render incident fields — add a "Patient voice note" panel showing the transcript + a play button for the audio. RLS on `holarchelp_incidents` already grants the assigned provider read access.
 
-UI — `src/modules/holarchelp/pages/HolarcHelpContacts.tsx`:
+Hospital admission summary: when an incident is converted into a hospital admission (existing `hospital_admissions` flow), pre-fill the admission `presenting_complaint` / `clinical_notes` field with a short Gemini summary of the transcript via `summarize-session` (or a small inline call to `summarize-patient-history`). Implementation: from `HolarcHelpIncidentDetail`'s "Convert to admission" path, call `summarize-session` with the transcript and inject the result.
 
-- Add a Select (Low / Medium / High / Critical only) to the add form and to each list item, persisted via update.
-- Helper text: "Contact will only be alerted for incidents at this severity or higher."
+## 4. Connect Vula APIs to 6dot50 portal
 
-Edge function — `supabase/functions/share-incident-with-contacts/index.ts`:
+`https://portal.6dot50.com/` is a login portal only — no public API documentation surfaces. To proceed I need:
 
-- Accept incident severity (already in payload / fetch from `holarchelp_incidents`).
-- Filter contacts by `severityRank(contact.notify_min_severity) <= severityRank(incident.severity)` before sending email/SMS/WhatsApp.
+- The 6dot50 **API base URL** and any auth method (API key vs. OAuth client id/secret).
+- Sample endpoint(s) you want to call from the Vula referral/quote flow (e.g. partner verification, claim submission, member lookup).
+- Whether traffic should originate from a Lovable Cloud edge function (server-to-server with a stored API key) or per-doctor OAuth.
 
-## 3. SOS — public vs private routing
+Once you share the docs / credentials I will:
+- Add a `vula-6dot50-proxy` edge function that accepts a Vula request payload and forwards to the relevant 6dot50 endpoint with the stored API key.
+- Store the 6dot50 API key as a Lovable Cloud secret (will trigger the `add_secret` prompt at that point).
+- Wire the existing Vula integration call sites to invoke the proxy.
 
-When a patient triggers SOS (or a provider triggers on the patient's behalf) the dispatcher must know whether to alert public-only or all hospitals/ambulances based on whether the patient has medical aid.
-
-- Reuse existing `patients.medical_aid_name` (treat blank/null = public-only).
-- Update `src/modules/holarchelp/pages/HolarcHelpHome.tsx` SOS submit: include `coverage: 'public' | 'private'` in the new `holarchelp_incidents` row (add column `coverage text` via migration, default `'public'`).
-- Update `src/modules/holarchelp/components/ProviderMap.tsx` and provider dispatch lists to filter:
-  - `coverage = 'public'` → only `holarchelp_hospitals.ownership = 'public'` and ambulances flagged public.
-  - `coverage = 'private'` → all approved providers.
-- Confirm the red SOS button on bottom nav works with zero manual input (it already does — incident is created with current geo + auto coverage).
-
-## 4. Data-sharing transparency dialog for doctor → patient invites
-
-Mirror the existing patient-invites-doctor flow. Reuse `PermissionTransparencyModal` with a new variant.
-
-- Extend `src/components/permissions/PermissionTransparencyModal.tsx`:
-  - Accept `mode: 'patient_invites_doctor' | 'doctor_invites_patient'` (default existing behaviour).
-  - In `doctor_invites_patient` mode, swap the two columns to show what is shared **with the wider care team** vs. **kept private to this practice**:
-    - Shared with other doctors on the patient's profile: AI session summary contribution, timeline visit summary, prescriptions, items relevant to ailments / medical history, this doctor's credentials and "About me".
-    - Private — not shared: full session history details, audio recordings, transcriptions, invoices/billing, medical certificates, draft notes.
-  - Header copy: "Shared with Patient's Care Team"
-- Wire it into the doctor's invite flow in `src/components/patient/InviteDoctorDialog.tsx`'s sibling for doctor side — i.e. `src/components/patients/InvitePatientDialog.tsx` (re-export at `src/features/patients/components/InvitePatientDialog.tsx`). Show the modal as a confirmation step before the invite is actually sent (button label: "Send Invitation"). Doctor must click "I Understand" to proceed.
-
-## Technical notes
-
-- Migration adds `notify_min_severity` to `holarchelp_emergency_contacts` and `coverage` to `holarchelp_incidents`; backfill defaults; no destructive change.
-- Upsert fix is the only behavioural change to the accept flow — notifications/patient-record creation logic preserved.
-- All RLS policies remain unchanged (columns added are in already-secured tables).
+I'll surface the secret prompt and create the proxy function in the same loop, but only after you confirm the endpoint URLs / credentials format.
 
 ## Files
 
-- **Edit:** `src/components/doctor/DoctorAccessRequests.tsx`, `src/modules/holarchelp/pages/HolarcHelpContacts.tsx`, `src/modules/holarchelp/pages/HolarcHelpHome.tsx`, `src/modules/holarchelp/components/ProviderMap.tsx`, `src/components/permissions/PermissionTransparencyModal.tsx`, `src/features/patients/components/InvitePatientDialog.tsx`, `supabase/functions/share-incident-with-contacts/index.ts`
-- **Migration:** add `notify_min_severity`, `coverage` columns
-- **No new components**; reuse `PermissionTransparencyModal`.
+- **Edit:** `src/components/layout/Sidebar.tsx`, `src/components/layout/BottomNav.tsx`, `src/modules/holarchelp/pages/HolarcHelpHome.tsx`, `src/modules/holarchelp/pages/HolarcHelpIncidentDetail.tsx`, `src/modules/holarchelp/pages/provider/ProviderIncidentDetail.tsx`
+- **New:** `src/modules/holarchelp/components/SosVoiceNoteDialog.tsx`
+- **Migration:** add `voice_note_audio_url`, `voice_note_transcript` to `holarchelp_incidents`
+- **6dot50 integration:** deferred until you provide API docs / credentials

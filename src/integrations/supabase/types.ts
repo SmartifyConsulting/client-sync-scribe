@@ -1540,6 +1540,8 @@ export type Database = {
           status: string
           tracking_token: string
           user_id: string
+          voice_note_audio_url: string | null
+          voice_note_transcript: string | null
         }
         Insert: {
           accepted_at?: string | null
@@ -1562,6 +1564,8 @@ export type Database = {
           status?: string
           tracking_token?: string
           user_id: string
+          voice_note_audio_url?: string | null
+          voice_note_transcript?: string | null
         }
         Update: {
           accepted_at?: string | null
@@ -1584,6 +1588,8 @@ export type Database = {
           status?: string
           tracking_token?: string
           user_id?: string
+          voice_note_audio_url?: string | null
+          voice_note_transcript?: string | null
         }
         Relationships: []
       }
