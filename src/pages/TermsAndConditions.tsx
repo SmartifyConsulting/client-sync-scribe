@@ -1,29 +1,12 @@
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { LegalDocLayout } from "@/components/legal/LegalDocLayout";
 
 export default function TermsAndConditions() {
-  const navigate = useNavigate();
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-background border-b border-border">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-xl font-semibold text-foreground">Terms and Conditions</h1>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="prose prose-sm dark:prose-invert max-w-none">
-          <p className="text-muted-foreground mb-8">
-            <strong>Last Updated: {new Date().toLocaleDateString()}</strong>
-          </p>
+    <LegalDocLayout
+      title="Terms and Conditions"
+      subtitle="The legally binding agreement governing your use of the Holarc platform."
+    >
+      <>
 
           <h2>1. Acceptance of Terms</h2>
           <p>
@@ -407,13 +390,10 @@ export default function TermsAndConditions() {
             <strong>IF YOU DO NOT AGREE TO THESE TERMS, DO NOT USE THE PLATFORM.</strong>
           </p>
 
-          <hr className="my-8" />
-
           <p className="text-muted-foreground">
             Your continued use of the Platform constitutes ongoing acceptance of these Terms as they may be modified from time to time.
           </p>
-        </div>
-      </div>
-    </div>
+      </>
+    </LegalDocLayout>
   );
 }
