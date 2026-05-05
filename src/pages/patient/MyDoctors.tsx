@@ -241,27 +241,44 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
       <Card>
         <CardHeader className="pb-1 pt-3 px-4">
           <CardTitle className="text-sm">Find a Healthcare Provider on Holarc</CardTitle>
-          <CardDescription className="text-xs">Search by full name, practice number, or registration number</CardDescription>
+          <CardDescription className="text-xs">Filter by name, specialty, language — or any combination</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-2">
-            <div className="relative flex-1">
+          <div className="grid gap-2 md:grid-cols-3">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search by name, practice number, or registration number..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Doctor name, practice or registration #"
+                value={nameQuery}
+                onChange={(e) => setNameQuery(e.target.value)}
                 className="pl-10"
               />
             </div>
-            <Button onClick={() => handleSearch(searchQuery)} disabled={isSearching || !searchQuery.trim()}>
-              {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
-            </Button>
+            <Select value={specialtyQuery} onValueChange={setSpecialtyQuery}>
+              <SelectTrigger><SelectValue placeholder="Any specialty" /></SelectTrigger>
+              <SelectContent className="max-h-72">
+                <SelectItem value="any">Any specialty</SelectItem>
+                {COMMON_SPECIALTIES.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={languageQuery} onValueChange={setLanguageQuery}>
+              <SelectTrigger><SelectValue placeholder="Any language" /></SelectTrigger>
+              <SelectContent className="max-h-72">
+                <SelectItem value="any">Any language</SelectItem>
+                {LANGUAGES.map((l) => (
+                  <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {hasSearched && (
             <div className="mt-4">
-              {searchResults.length === 0 ? (
+              {isSearching ? (
+                <div className="flex justify-center py-4"><Loader2 className="h-4 w-4 animate-spin text-primary" /></div>
+              ) : searchResults.length === 0 ? (
                  <p className="text-sm text-muted-foreground text-center py-4">
                    {totalFound > 0
                      ? "All matching providers are already on your profile."
@@ -272,8 +289,8 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                    <TableHeader>
                       <TableRow>
                         <TableHead className="w-[45%]">Provider</TableHead>
-                        <TableHead className="w-[35%]">Specialty</TableHead>
-                        <TableHead className="w-[20%]">Action</TableHead>
+                        <TableHead className="w-[30%]">Specialty</TableHead>
+                        <TableHead className="w-[25%]">Action</TableHead>
                       </TableRow>
                    </TableHeader>
                    <TableBody>
@@ -303,13 +320,24 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                             )}
                           </TableCell>
                           <TableCell className="p-2">
-                           <InviteDoctorDialog
-                             prefillPracticeNumber={doctor.practice_number || ""}
-                             prefillRegistrationNumber={doctor.doctor_number || ""}
-                             prefillDoctorName={doctor.full_name || ""}
-                             prefillAvatarUrl={doctor.avatar_url || ""}
-                             prefillSpecialty={doctor.specialty || ""}
-                           />
+                           <div className="flex items-center gap-1">
+                             <InviteDoctorDialog
+                               prefillPracticeNumber={doctor.practice_number || ""}
+                               prefillRegistrationNumber={doctor.doctor_number || ""}
+                               prefillDoctorName={doctor.full_name || ""}
+                               prefillAvatarUrl={doctor.avatar_url || ""}
+                               prefillSpecialty={doctor.specialty || ""}
+                             />
+                             <Button
+                               variant="ghost"
+                               size="icon"
+                               className="h-7 w-7"
+                               onClick={() => setDetailsDoctor(doctor)}
+                               aria-label="View details"
+                             >
+                               <MoreVertical className="h-3.5 w-3.5" />
+                             </Button>
+                           </div>
                          </TableCell>
                        </TableRow>
                      ))}
