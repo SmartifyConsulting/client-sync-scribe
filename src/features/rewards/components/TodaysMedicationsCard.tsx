@@ -26,6 +26,8 @@ interface Props {
 }
 
 export function TodaysMedicationsCard({ patientId, onTakeMedication }: Props) {
+  const today = new Date().toISOString().slice(0, 10);
+
   const { data: prescriptions = [], isLoading } = useQuery({
     queryKey: ["chronic-prescriptions", patientId],
     queryFn: async () => {
@@ -50,6 +52,21 @@ export function TodaysMedicationsCard({ patientId, onTakeMedication }: Props) {
         .in("prescription_id", prescriptions.map((p) => p.id));
       if (error) throw error;
       return (data || []) as PillRef[];
+    },
+    enabled: prescriptions.length > 0,
+  });
+
+  const { data: takenToday = [] } = useQuery({
+    queryKey: ["adherence-today", patientId, today, prescriptions.map((p) => p.id).join(",")],
+    queryFn: async () => {
+      if (!prescriptions.length) return [] as { prescription_id: string; status: string; taken_at: string | null }[];
+      const { data } = await supabase
+        .from("medication_adherence")
+        .select("prescription_id, status, taken_at")
+        .eq("patient_id", patientId)
+        .eq("scheduled_date", today)
+        .in("prescription_id", prescriptions.map((p) => p.id));
+      return (data ?? []) as any;
     },
     enabled: prescriptions.length > 0,
   });
@@ -81,6 +98,7 @@ export function TodaysMedicationsCard({ patientId, onTakeMedication }: Props) {
               const baseline = hasBaseline(rx.id);
               const dosage = rx.dosage?.trim() || "—";
               const frequency = rx.frequency?.trim() || "once daily";
+              const taken = takenToday.find((t) => t.prescription_id === rx.id && t.status !== "pending");
               return (
                 <div
                   key={rx.id}
@@ -91,29 +109,23 @@ export function TodaysMedicationsCard({ patientId, onTakeMedication }: Props) {
                     <p className="text-xs text-muted-foreground truncate">
                       {dosage} · {frequency}
                     </p>
-                    <div className="flex gap-1.5 mt-1">
-                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Active</Badge>
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">Chronic</Badge>
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    onClick={() => onTakeMedication(rx.id)}
-                    className="shrink-0 gap-1"
-                  >
-                    {baseline ? (
-                      <>
-                        <Video className="h-3.5 w-3.5" />
-                        Take
-                      </>
+                    {taken ? (
+                      <p className="text-xs text-emerald-600 mt-1">
+                        ✅ Already taken today{taken.taken_at ? ` at ${new Date(taken.taken_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : ""}
+                      </p>
                     ) : (
-                      <>
-                        <Camera className="h-3.5 w-3.5" />
-                        Set up
-                      </>
+                      <div className="flex gap-1.5 mt-1">
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Active</Badge>
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">Chronic</Badge>
+                      </div>
                     )}
-                    <ChevronRight className="h-3 w-3" />
-                  </Button>
+                  </div>
+                  {!taken && (
+                    <Button size="sm" onClick={() => onTakeMedication(rx.id)} className="shrink-0 gap-1">
+                      {baseline ? (<><Video className="h-3.5 w-3.5" />Take</>) : (<><Camera className="h-3.5 w-3.5" />Set up</>)}
+                      <ChevronRight className="h-3 w-3" />
+                    </Button>
+                  )}
                 </div>
               );
             })}

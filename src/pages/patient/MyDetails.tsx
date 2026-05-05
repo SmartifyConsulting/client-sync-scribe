@@ -6,6 +6,10 @@ import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor
 import { Patient } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
 import { useMyRewards } from "@/hooks/usePatientRewards";
+import { EmergencyContactsSection, EmergencyContact } from "@/features/patients/components/EmergencyContactsSection";
+import { ProfileSharesSection } from "@/features/patients/components/ProfileSharesSection";
+import { PatientDailyMedsSection } from "@/features/patients/components/PatientDailyMedsSection";
+import { PatientSelfAdmissionsSection } from "@/features/patients/components/PatientSelfAdmissionsSection";
 
 
 export default function MyDetails() {
@@ -15,6 +19,8 @@ export default function MyDetails() {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string>("");
+  const [userId, setUserId] = useState<string>("");
+  const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([]);
   const { toast } = useToast();
   const { lollipopCount, loading: rewardsLoading } = useMyRewards();
 
@@ -28,6 +34,7 @@ export default function MyDetails() {
       if (!user) return;
 
       setUserEmail(user.email || "");
+      setUserId(user.id);
 
       const { data, error } = await supabase
         .from("patients")
@@ -47,6 +54,8 @@ export default function MyDetails() {
           next_of_kin_members: Array.isArray(data.next_of_kin_members) ? data.next_of_kin_members as unknown as Patient["next_of_kin_members"] : [],
           current_medications: Array.isArray(data.current_medications) ? data.current_medications as unknown as Patient["current_medications"] : [],
         } as unknown as Patient);
+        const ec = (data as any).emergency_contacts;
+        setEmergencyContacts(Array.isArray(ec) ? ec : []);
       }
     } catch (err) {
       console.error("Error fetching patient record:", err);
@@ -107,6 +116,19 @@ export default function MyDetails() {
       </div>
 
       <PatientDetailsEditor patient={patient} onSave={handleSave} isSelfService userEmail={userEmail} lollipopCount={lollipopCount} rewardsLoading={rewardsLoading} section={section} />
+
+      {section === "health" && (
+        <>
+          <EmergencyContactsSection
+            patientId={patient.id}
+            contacts={emergencyContacts}
+            onChange={setEmergencyContacts}
+          />
+          <ProfileSharesSection ownerUserId={userId} />
+          <PatientDailyMedsSection patientId={patient.id} patientUserId={userId} />
+          <PatientSelfAdmissionsSection patientId={patient.id} userId={userId} />
+        </>
+      )}
     </div>
   );
 }

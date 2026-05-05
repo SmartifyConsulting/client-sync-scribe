@@ -400,6 +400,39 @@ export type Database = {
           },
         ]
       }
+      approved_daily_medications: {
+        Row: {
+          active: boolean
+          category: string
+          created_at: string
+          default_with_food: string | null
+          id: string
+          name: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          default_with_food?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          default_with_food?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bug_reports: {
         Row: {
           created_at: string
@@ -1469,42 +1502,51 @@ export type Database = {
         Row: {
           admission_date: string
           created_at: string
+          created_by: string | null
           diagnosis: string | null
           discharge_date: string | null
-          doctor_id: string
+          doctor_id: string | null
           document_id: string | null
           hospital: string | null
+          hospital_provider_id: string | null
           id: string
           patient_id: string
           procedure_description: string | null
+          source: string
           status: string
           updated_at: string
         }
         Insert: {
           admission_date?: string
           created_at?: string
+          created_by?: string | null
           diagnosis?: string | null
           discharge_date?: string | null
-          doctor_id: string
+          doctor_id?: string | null
           document_id?: string | null
           hospital?: string | null
+          hospital_provider_id?: string | null
           id?: string
           patient_id: string
           procedure_description?: string | null
+          source?: string
           status?: string
           updated_at?: string
         }
         Update: {
           admission_date?: string
           created_at?: string
+          created_by?: string | null
           diagnosis?: string | null
           discharge_date?: string | null
-          doctor_id?: string
+          doctor_id?: string | null
           document_id?: string | null
           hospital?: string | null
+          hospital_provider_id?: string | null
           id?: string
           patient_id?: string
           procedure_description?: string | null
+          source?: string
           status?: string
           updated_at?: string
         }
@@ -1514,6 +1556,13 @@ export type Database = {
             columns: ["document_id"]
             isOneToOne: false
             referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hospital_admissions_hospital_provider_id_fkey"
+            columns: ["hospital_provider_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals"
             referencedColumns: ["id"]
           },
           {
@@ -1904,6 +1953,51 @@ export type Database = {
           },
         ]
       }
+      patient_profile_shares: {
+        Row: {
+          can_view_live_tracking: boolean
+          can_view_profile: boolean
+          created_at: string
+          id: string
+          linked_contact_id: string | null
+          owner_user_id: string
+          relationship: string | null
+          shared_with_email: string | null
+          shared_with_user_id: string | null
+          shared_with_username: string | null
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          can_view_live_tracking?: boolean
+          can_view_profile?: boolean
+          created_at?: string
+          id?: string
+          linked_contact_id?: string | null
+          owner_user_id: string
+          relationship?: string | null
+          shared_with_email?: string | null
+          shared_with_user_id?: string | null
+          shared_with_username?: string | null
+          source?: string
+          updated_at?: string
+        }
+        Update: {
+          can_view_live_tracking?: boolean
+          can_view_profile?: boolean
+          created_at?: string
+          id?: string
+          linked_contact_id?: string | null
+          owner_user_id?: string
+          relationship?: string | null
+          shared_with_email?: string | null
+          shared_with_user_id?: string | null
+          shared_with_username?: string | null
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       patient_rewards: {
         Row: {
           awarded_at: string
@@ -2018,6 +2112,13 @@ export type Database = {
           current_medications: Json | null
           dob: string | null
           email: string | null
+          emergency_can_view_live_tracking: boolean | null
+          emergency_can_view_profile: boolean | null
+          emergency_contact_email: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          emergency_contact_relationship: string | null
+          emergency_contacts: Json | null
           employer: string | null
           family_history: Json | null
           first_name: string | null
@@ -2038,6 +2139,8 @@ export type Database = {
           next_of_kin_name: string | null
           next_of_kin_phone: string | null
           next_of_kin_relationship: string | null
+          nok_can_view_live_tracking: boolean | null
+          nok_can_view_profile: boolean | null
           notes: string | null
           occupation: string | null
           organ_donor: boolean | null
@@ -2070,6 +2173,13 @@ export type Database = {
           current_medications?: Json | null
           dob?: string | null
           email?: string | null
+          emergency_can_view_live_tracking?: boolean | null
+          emergency_can_view_profile?: boolean | null
+          emergency_contact_email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relationship?: string | null
+          emergency_contacts?: Json | null
           employer?: string | null
           family_history?: Json | null
           first_name?: string | null
@@ -2090,6 +2200,8 @@ export type Database = {
           next_of_kin_name?: string | null
           next_of_kin_phone?: string | null
           next_of_kin_relationship?: string | null
+          nok_can_view_live_tracking?: boolean | null
+          nok_can_view_profile?: boolean | null
           notes?: string | null
           occupation?: string | null
           organ_donor?: boolean | null
@@ -2122,6 +2234,13 @@ export type Database = {
           current_medications?: Json | null
           dob?: string | null
           email?: string | null
+          emergency_can_view_live_tracking?: boolean | null
+          emergency_can_view_profile?: boolean | null
+          emergency_contact_email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relationship?: string | null
+          emergency_contacts?: Json | null
           employer?: string | null
           family_history?: Json | null
           first_name?: string | null
@@ -2142,6 +2261,8 @@ export type Database = {
           next_of_kin_name?: string | null
           next_of_kin_phone?: string | null
           next_of_kin_relationship?: string | null
+          nok_can_view_live_tracking?: boolean | null
+          nok_can_view_profile?: boolean | null
           notes?: string | null
           occupation?: string | null
           organ_donor?: boolean | null
@@ -2401,6 +2522,7 @@ export type Database = {
       }
       prescriptions: {
         Row: {
+          approved_medication_id: string | null
           created_at: string
           doctor_id: string
           dosage: string
@@ -2410,13 +2532,18 @@ export type Database = {
           instructions: string | null
           medication: string
           patient_id: string
+          refill_reminder_days: number | null
           refills_remaining: number | null
+          reminder_times: string[] | null
           session_id: string | null
+          source: string
           start_date: string
           status: string
           updated_at: string
+          with_food: string | null
         }
         Insert: {
+          approved_medication_id?: string | null
           created_at?: string
           doctor_id: string
           dosage: string
@@ -2426,13 +2553,18 @@ export type Database = {
           instructions?: string | null
           medication: string
           patient_id: string
+          refill_reminder_days?: number | null
           refills_remaining?: number | null
+          reminder_times?: string[] | null
           session_id?: string | null
+          source?: string
           start_date?: string
           status?: string
           updated_at?: string
+          with_food?: string | null
         }
         Update: {
+          approved_medication_id?: string | null
           created_at?: string
           doctor_id?: string
           dosage?: string
@@ -2442,13 +2574,24 @@ export type Database = {
           instructions?: string | null
           medication?: string
           patient_id?: string
+          refill_reminder_days?: number | null
           refills_remaining?: number | null
+          reminder_times?: string[] | null
           session_id?: string | null
+          source?: string
           start_date?: string
           status?: string
           updated_at?: string
+          with_food?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "prescriptions_approved_med_fk"
+            columns: ["approved_medication_id"]
+            isOneToOne: false
+            referencedRelation: "approved_daily_medications"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "prescriptions_patient_id_fkey"
             columns: ["patient_id"]
@@ -3238,6 +3381,10 @@ export type Database = {
           status: string
           user_id: string
         }[]
+      }
+      has_profile_share: {
+        Args: { _live_tracking?: boolean; _owner: string; _viewer: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
