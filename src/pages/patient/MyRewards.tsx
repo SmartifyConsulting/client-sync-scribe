@@ -353,6 +353,7 @@ export default function MyRewards() {
                   <SelectValue placeholder="Select destination app" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="vault">Vula Vault</SelectItem>
                   {partnerApps.map((app) => (
                     <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
                   ))}
