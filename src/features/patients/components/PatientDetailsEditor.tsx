@@ -732,6 +732,7 @@ export function PatientDetailsEditor({
         organ_donor: data.organ_donor,
         organ_donor_organs: organDonorOrgans,
         preferred_language: data.preferred_language || null,
+      } as any);
         next_of_kin_members: nokMembers,
         current_medications: currentMedications,
         conditions_diagnoses: conditionsDiagnoses,
@@ -1133,6 +1134,7 @@ export function PatientDetailsEditor({
       notes: patient.notes || "",
       blood_type: patient.blood_type || "",
       organ_donor: patient.organ_donor || false,
+      preferred_language: (patient as any).preferred_language || "",
     });
     setOrganDonorOrgans(patient.organ_donor_organs || []);
     setSurgeries(patient.surgeries || []);
