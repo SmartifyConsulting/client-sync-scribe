@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { AlertCircle, AlertTriangle, Crosshair, Loader2, Shield, Siren } from "lucide-react";
 import { SeverityPicker, type SeverityResult } from "../components/SeverityPicker";
 import { ProviderMap, type ProviderMarker } from "../components/ProviderMap";
+import { SosVoiceNoteDialog } from "../components/SosVoiceNoteDialog";
 import hospitalIcon from "@/assets/marker-hospital.png";
 import ambulanceIcon from "@/assets/marker-ambulance.png";
 import { cn } from "@/lib/utils";
