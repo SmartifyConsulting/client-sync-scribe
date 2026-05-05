@@ -474,6 +474,113 @@ export type Database = {
         }
         Relationships: []
       }
+      blood_bank_providers: {
+        Row: {
+          address: string | null
+          approved_at: string | null
+          city: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          country: string | null
+          created_at: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          name: string
+          owner_id: string
+          registration_number: string | null
+          state: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          approved_at?: string | null
+          city?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          owner_id: string
+          registration_number?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          approved_at?: string | null
+          city?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          owner_id?: string
+          registration_number?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      blood_donations: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          blood_bank_id: string
+          created_at: string
+          donated_at: string
+          id: string
+          notes: string | null
+          patient_user_id: string
+          rewarded: boolean
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          blood_bank_id: string
+          created_at?: string
+          donated_at?: string
+          id?: string
+          notes?: string | null
+          patient_user_id: string
+          rewarded?: boolean
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          blood_bank_id?: string
+          created_at?: string
+          donated_at?: string
+          id?: string
+          notes?: string | null
+          patient_user_id?: string
+          rewarded?: boolean
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blood_donations_blood_bank_id_fkey"
+            columns: ["blood_bank_id"]
+            isOneToOne: false
+            referencedRelation: "blood_bank_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bug_reports: {
         Row: {
           created_at: string
@@ -684,6 +791,30 @@ export type Database = {
           permissions?: Database["public"]["Enums"]["access_permission"][]
           revoked_at?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      doctor_patient_checkins: {
+        Row: {
+          created_at: string
+          doctor_id: string
+          id: string
+          note: string | null
+          patient_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_id: string
+          id?: string
+          note?: string | null
+          patient_user_id: string
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string
+          id?: string
+          note?: string | null
+          patient_user_id?: string
         }
         Relationships: []
       }
@@ -1002,6 +1133,7 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           owner_id: string
+          ownership: string
           registration_number: string | null
           sos_voice_clip_path: string | null
           state: string | null
@@ -1027,6 +1159,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           owner_id: string
+          ownership?: string
           registration_number?: string | null
           sos_voice_clip_path?: string | null
           state?: string | null
@@ -1052,6 +1185,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           owner_id?: string
+          ownership?: string
           registration_number?: string | null
           sos_voice_clip_path?: string | null
           state?: string | null
@@ -1145,6 +1279,7 @@ export type Database = {
           longitude: number | null
           name: string
           owner_id: string
+          ownership: string
           registration_number: string | null
           services: string[] | null
           state: string | null
@@ -1173,6 +1308,7 @@ export type Database = {
           longitude?: number | null
           name: string
           owner_id: string
+          ownership?: string
           registration_number?: string | null
           services?: string[] | null
           state?: string | null
@@ -1201,6 +1337,7 @@ export type Database = {
           longitude?: number | null
           name?: string
           owner_id?: string
+          ownership?: string
           registration_number?: string | null
           services?: string[] | null
           state?: string | null
@@ -3517,6 +3654,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_blood_donation: { Args: { _donation_id: string }; Returns: Json }
+      award_doctor_checkin: {
+        Args: { _note?: string; _patient_user_id: string }
+        Returns: Json
+      }
       can_access_admission: {
         Args: { _admission_id: string }
         Returns: boolean
@@ -3553,6 +3695,10 @@ export type Database = {
         Returns: boolean
       }
       holarchelp_approve_ambulance: {
+        Args: { _provider_id: string }
+        Returns: undefined
+      }
+      holarchelp_approve_blood_bank: {
         Args: { _provider_id: string }
         Returns: undefined
       }
@@ -3631,6 +3777,7 @@ export type Database = {
           full_name: string
           id: string
           kind: string
+          ownership: string
           phone: string
           preferred_language: string
           registration: string
@@ -3668,6 +3815,7 @@ export type Database = {
         | "admin"
         | "hospital_staff"
         | "ambulance_staff"
+        | "blood_bank"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3822,6 +3970,7 @@ export const Constants = {
         "admin",
         "hospital_staff",
         "ambulance_staff",
+        "blood_bank",
       ],
     },
   },
