@@ -27,6 +27,35 @@ interface Prescription {
   dosage: string;
   frequency: string;
   status: string;
+  quantity_per_dose?: number | null;
+}
+
+// Pick the best supported MediaRecorder mime type for cross-browser playback
+function pickRecorderMime(): string | undefined {
+  const candidates = [
+    "video/mp4;codecs=avc1",
+    "video/mp4",
+    "video/webm;codecs=vp9",
+    "video/webm;codecs=vp8",
+    "video/webm",
+  ];
+  for (const c of candidates) {
+    if (typeof MediaRecorder !== "undefined" && (MediaRecorder as any).isTypeSupported?.(c)) return c;
+  }
+  return undefined;
+}
+
+// Parse "2 tablets", "two capsules", "1 tab", etc. Returns 1 if not parseable.
+function parseQuantity(dosage?: string | null, fallback = 1): number {
+  if (!dosage) return fallback;
+  const s = dosage.toLowerCase();
+  const num = s.match(/(\d+)\s*(tab|tabs|tablet|tablets|cap|caps|capsule|capsules|pill|pills|x)/);
+  if (num) return Math.max(1, parseInt(num[1], 10));
+  const words: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6 };
+  for (const [w, n] of Object.entries(words)) {
+    if (new RegExp(`\\b${w}\\b\\s*(tab|cap|pill)`).test(s)) return n;
+  }
+  return fallback;
 }
 
 interface AdherenceRecord {
