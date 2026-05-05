@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { LANGUAGES } from "@/lib/languages";
 import { PatientSessionRecorder } from "@/features/patients/components/PatientSessionRecorder";
+import { EmergencyContactsInline } from "@/features/patients/components/EmergencyContactsInline";
+import { DailyMedsInline } from "@/features/patients/components/DailyMedsInline";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn, emitMedicationsUpdated } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
@@ -94,6 +96,9 @@ interface PatientDetailsEditorProps {
   onSave: (updates: Partial<Patient>) => Promise<any>;
   isSelfService?: boolean;
   userEmail?: string;
+  userId?: string;
+  emergencyContacts?: import("./EmergencyContactsSection").EmergencyContact[];
+  onEmergencyContactsChange?: (next: import("./EmergencyContactsSection").EmergencyContact[]) => void;
   lollipopCount?: number;
   rewardsLoading?: boolean;
   section?: string;
@@ -347,6 +352,9 @@ export function PatientDetailsEditor({
   onSave,
   isSelfService = false,
   userEmail,
+  userId,
+  emergencyContacts,
+  onEmergencyContactsChange,
   lollipopCount = 0,
   rewardsLoading = false,
   section,
@@ -2382,6 +2390,22 @@ export function PatientDetailsEditor({
               </CollapsibleContent>
             </Collapsible>
 
+            {/* Emergency Contacts (linked to NOK) */}
+            {isSelfService && emergencyContacts && onEmergencyContactsChange && (
+              <EmergencyContactsInline
+                patientId={patient.id}
+                contacts={emergencyContacts}
+                onChange={onEmergencyContactsChange}
+                nokMembers={nokMembers}
+                legacyNok={{
+                  name: formData.next_of_kin_name,
+                  phone: formData.next_of_kin_phone,
+                  email: formData.next_of_kin_email,
+                  relationship: formData.next_of_kin_relationship,
+                }}
+              />
+            )}
+
             <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
               <SectionHeader icon={Briefcase} label="Employer" />
               <CollapsibleContent className="p-3">
@@ -2722,6 +2746,11 @@ export function PatientDetailsEditor({
                         </div>
                       )}
                     </div>
+
+                    {/* Daily vitamins / supplements / OTC — earns reduced Vulas */}
+                    {isSelfService && (
+                      <DailyMedsInline patientId={patient.id} patientUserId={userId} />
+                    )}
 
                     {/* Conditions & Diagnoses */}
                     <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
