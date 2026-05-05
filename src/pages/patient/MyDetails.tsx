@@ -127,9 +127,6 @@ export default function MyDetails() {
         section={section}
       />
 
-      {section === "health" && (
-        <ProfileSharesSection ownerUserId={userId} />
-      )}
     </div>
   );
 }
