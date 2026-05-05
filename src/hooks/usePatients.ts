@@ -53,6 +53,8 @@ export interface CurrentMedication {
   status?: 'current' | 'past';
   start_date?: string;
   end_date?: string;
+  reminder_time?: string;
+  reminders_enabled?: boolean;
 }
 
 export interface ConditionDiagnosis {

@@ -499,6 +499,8 @@ export function PatientDetailsEditor({
     status: "current" as "current" | "past",
     start_date: "",
     end_date: "",
+    reminder_time: "08:00",
+    reminders_enabled: true,
   });
   const [editingMedId, setEditingMedId] = useState<string | null>(null);
   const [showAddCondition, setShowAddCondition] = useState(false);
@@ -662,11 +664,13 @@ export function PatientDetailsEditor({
         for (const m of chronicMeds) {
           const key = norm(m.name);
           const existing = existingByName.get(key);
-          const payload = {
+          const payload: any = {
             medication: m.name.trim(),
             dosage: composeDosage(m),
             frequency: composeFrequency(m),
             status: "active",
+            reminder_times: m.reminder_time ? [m.reminder_time] : null,
+            reminders_enabled: m.reminders_enabled ?? true,
           };
           if (existing) {
             await supabase.from("prescriptions").update(payload).eq("id", existing.id);
@@ -1002,6 +1006,8 @@ export function PatientDetailsEditor({
       status: newMed.status,
       start_date: newMed.start_date || undefined,
       end_date: newMed.end_date || undefined,
+      reminder_time: newMed.reminder_time || undefined,
+      reminders_enabled: newMed.reminders_enabled,
     };
     if (editingMedId) {
       setCurrentMedications((prev) =>
@@ -1014,6 +1020,7 @@ export function PatientDetailsEditor({
     setNewMed({
       name: "", dosage: "", quantity: "1", strength: "", units: "mg",
       times_per_day: "1", is_chronic: false, status: "current", start_date: "", end_date: "",
+      reminder_time: "08:00", reminders_enabled: true,
     });
     setShowAddMed(false);
     setHasChanges(true);
@@ -1031,6 +1038,8 @@ export function PatientDetailsEditor({
       status: m.status || "current",
       start_date: m.start_date || "",
       end_date: m.end_date || "",
+      reminder_time: (m as any).reminder_time || "08:00",
+      reminders_enabled: (m as any).reminders_enabled ?? true,
     });
     setEditingMedId(m.id);
     setShowAddMed(true);
@@ -2692,6 +2701,24 @@ export function PatientDetailsEditor({
                             />
                             <Label className="text-xs">This is a chronic medication</Label>
                           </div>
+                          <div className="grid gap-2 sm:grid-cols-2 pt-2 border-t border-border/40">
+                            <div className="space-y-1.5">
+                              <Label className="text-xs">Take at</Label>
+                              <Input
+                                type="time"
+                                className="text-sm h-8"
+                                value={newMed.reminder_time}
+                                onChange={(e) => setNewMed((p) => ({ ...p, reminder_time: e.target.value }))}
+                              />
+                            </div>
+                            <div className="flex items-center gap-2 pt-5">
+                              <Switch
+                                checked={newMed.reminders_enabled}
+                                onCheckedChange={(v) => setNewMed((p) => ({ ...p, reminders_enabled: v }))}
+                              />
+                              <Label className="text-xs">Remind me 5 min before</Label>
+                            </div>
+                          </div>
                           <div className="flex justify-end gap-2">
                             <Button
                               variant="ghost"
@@ -2711,6 +2738,8 @@ export function PatientDetailsEditor({
                                   status: "current",
                                   start_date: "",
                                   end_date: "",
+                                  reminder_time: "08:00",
+                                  reminders_enabled: true,
                                 });
                               }}
                             >
@@ -2760,7 +2789,18 @@ export function PatientDetailsEditor({
                                   </span>
                                 )}
                               </div>
-                              <div className="flex gap-1 shrink-0">
+                              <div className="flex gap-1 shrink-0 items-center">
+                                <Bell className={`h-3 w-3 ${(m.reminders_enabled ?? true) ? "text-primary" : "text-muted-foreground"}`} />
+                                <Switch
+                                  className="scale-75"
+                                  checked={m.reminders_enabled ?? true}
+                                  onCheckedChange={(v) => {
+                                    setCurrentMedications((prev) =>
+                                      prev.map((x) => (x.id === m.id ? { ...x, reminders_enabled: v } : x)),
+                                    );
+                                    setHasChanges(true);
+                                  }}
+                                />
                                 <Button
                                   variant="ghost"
                                   size="icon"
