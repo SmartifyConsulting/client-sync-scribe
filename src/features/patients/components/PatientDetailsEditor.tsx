@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { LANGUAGES } from "@/lib/languages";
 import { PatientSessionRecorder } from "@/features/patients/components/PatientSessionRecorder";
+import { EmergencyContactsInline } from "@/features/patients/components/EmergencyContactsInline";
+import { DailyMedsInline } from "@/features/patients/components/DailyMedsInline";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn, emitMedicationsUpdated } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
