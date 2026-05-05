@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { Session } from "@/hooks/useSessions";
 import { medicationSyncBus } from "@/lib/utils";
+import { format } from "date-fns";
 
 interface PatientOverviewProps {
   patient: {
@@ -31,6 +32,7 @@ interface StatusItem {
   name: string;
   date: string;
   status: "active" | "inactive";
+  end_date?: string;
 }
 
 interface MedicationItem extends StatusItem {}
@@ -226,12 +228,26 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
+      // Lookup table of patient.current_medications keyed by lowercased name
+      const medMeta: Record<string, { end_date?: string; status?: string }> = {};
+      const pmedSrc: any[] = Array.isArray((patient as any).current_medications)
+        ? (patient as any).current_medications
+        : [];
+      for (const pm of pmedSrc) {
+        if (pm?.name) medMeta[String(pm.name).toLowerCase()] = { end_date: pm.end_date, status: pm.status };
+      }
+
       const processedData: SummaryData = {
         summary: data.summary || "",
-        medications: (data.medications || []).map((m: any) => ({
-          ...m,
-          status: m.status || "active",
-        })),
+        medications: (data.medications || []).map((m: any) => {
+          const meta = medMeta[String(m.name || "").toLowerCase()] || {};
+          const status = m.status || (meta.status === "past" ? "inactive" : "active");
+          return {
+            ...m,
+            status,
+            end_date: m.end_date || meta.end_date,
+          };
+        }),
         symptoms: (data.symptoms || data.conditions || []).map((s: any) => ({
           ...s,
           status: s.status || "active",
@@ -726,6 +742,11 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
                       <div className={med.status === "inactive" ? "text-muted-foreground line-through decoration-muted-foreground/50" : ""}>
                         <span className={med.status === "inactive" ? "text-muted-foreground" : "text-foreground font-medium"}>{med.name}</span>
                         <span className="text-muted-foreground ml-2 text-xs no-underline">({med.date})</span>
+                        {med.status === "inactive" && med.end_date && (
+                          <span className="text-muted-foreground ml-2 text-xs no-underline italic">
+                            Stopped {(() => { try { return format(new Date(med.end_date), "d MMM yyyy"); } catch { return med.end_date; } })()}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <Button

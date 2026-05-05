@@ -1,48 +1,84 @@
-## 1. Remove top-left logo from landing page
+## Overview
 
-In `src/pages/Landing.tsx`, remove the `<img src={holarcLogo}>` element (and unused import) from the top-left of the header. Leave the rest of the landing layout intact.
+Eight related changes across patient/doctor profiles, search, medication adherence, and sessions.
 
-## 2. Deactivate HolarcHelp (SOS)
+---
 
-**Global kill-switch (DB):**
-- Migration: `UPDATE public.app_modules SET enabled = false WHERE module_key = 'holarchelp';` (insert row first if missing). This makes `useHolarcHelpAccess()` return `false` for everyone, so all HolarcHelp routes show the "Not enabled" gate screen.
+### 1. Enhanced doctor search (patients)
 
-**UI hide (so users don't see disabled CTAs):**
-- `src/components/layout/BottomNav.tsx` — remove the `SOS` item from `patientSections` and drop the `useHolarcHelpAccess` import.
-- `src/pages/patient/PatientDashboard.tsx` — remove the two SOS / "Nearby" cards that link to `/patient/holarchelp*` (lines around 403 and 412).
-- `src/components/layout/Sidebar.tsx` — remove the "HolarcHelp Admin" admin nav entry.
-- `src/modules/holarchelp/pages/HolarcHelpHome.tsx` — leave file as-is; the gate handles it.
+**DB**: Replace `public.search_doctor_profiles(_query text)` with a version that accepts optional `_name`, `_specialty`, `_language` parameters and matches across `full_name`, `practice_number`, `doctor_number`, `specialty`, and `preferred_language`/`preferred_languages`. Returns extra columns: `about_me`, `preferred_language`, `preferred_languages`.
 
-**Keep intact:** module folder, routes, edge functions, tables, `share-incident-with-contacts`, storage bucket. Re-enabling later = flip `app_modules.enabled` back to true and restore the nav entries.
+**UI** (`src/pages/patient/MyDoctors.tsx`):
+- Add three inputs: Name, Specialty (dropdown of common specialties), Language (dropdown using existing `LANGUAGES` list). Combine into single RPC call.
+- Search results table gets an ellipsis (MoreVertical) action that opens a popover/dialog showing full credentials (practice #, registration #, languages, address, mobile) and the doctor's About Me pitch. Pitch is hidden by default — only shown via the ellipsis.
 
-## 3. 6dot50 partner API integration (Moola)
+### 2. Doctor "About Me" pitch
 
-**Secret:** request `MOOLA_PARTNER_API_KEY` via the secret tool (already referenced in current empty-state copy).
+**DB**: Add `about_me text` to `profiles` (nullable, max 600 words enforced client-side and via a CHECK using `array_length(regexp_split_to_array(...))`).
 
-**Edge function:** create `supabase/functions/sync-moola-partner-apps/index.ts`:
-- Validates JWT, requires admin role.
-- Calls 6dot50 partner endpoint (default `https://api.6dot50.com/v1/partners`, overridable via `MOOLA_PARTNER_API_URL` secret) with `Authorization: Bearer ${MOOLA_PARTNER_API_KEY}`.
-- Maps response → upserts into `public.moola_partner_apps` (`name`, `logo_url`, `partner_code`, `category`, `is_active`).
-- Returns count synced. CORS + error handling per house style.
+**UI** (`src/pages/MyPractice.tsx`): New accordion `AboutMeSection` placed **immediately above** the existing "Personal Information" accordion. Textarea + live word count (e.g. `423 / 600`); save disabled when over limit. Saves to `profiles.about_me` via `updateProfile`.
 
-**DB migration:** add `partner_code text unique`, `category text`, `is_active boolean default true`, `last_synced_at timestamptz` to `moola_partner_apps` if not present.
+### 3. Rename "Certificates" → "Credentials"
 
-**Frontend (`src/pages/patient/MyRewards.tsx`):**
-- When `partnerApps.length === 0`, replace the static "Ask your admin" message with an "Activate retailers" card that calls `supabase.functions.invoke('sync-moola-partner-apps')` (admin-only button; non-admins see "Coming soon").
-- After sync, invalidate the `partnerApps` query so the carousel populates.
+In `src/pages/MyPractice.tsx`:
+- Tab `value="certificates"` keeps its key but display label becomes "Credentials".
+- Section heading "Certificates" → "Credentials".
+- Description copy updated: "Track your professional credentials and CPD points".
+- Dialog/form labels "Certificate Name" → "Credential Name", "Choose File" stays.
+- Storage bucket name (`cpd-certificates`) and DB table (`cpd_certificates`) stay unchanged — internal only.
 
-**Admin trigger:** add the same "Sync 6dot50 retailers" button on `src/features/admin/pages/GamificationAdmin.tsx` (or PricingAdmin) so admins can refresh on demand.
+### 4. Block intake when wrong medication detected
 
-## Technical summary
+In `src/features/rewards/components/MedicationAdherenceTab.tsx`:
+- After `capturePillImage()` returns a `pillCheckResult` with `isMatch === false` (or `isPillVisible === false`), the "Continue / Take medication" button is disabled. Only "Retry" is offered.
+- `proceedToIngestion()` guarded: refuses when `!pillCheckResult?.isMatch`.
+- Update the on-screen warning to: "This does not match your prescribed medication. You cannot record intake until the correct pill is shown."
 
-| Area | Change |
-|------|--------|
-| Landing | Drop holarc logo from header |
-| BottomNav / Dashboard / Sidebar | Hide SOS + HolarcHelp Admin nav items |
-| DB migration | `app_modules.holarchelp.enabled = false`; extend `moola_partner_apps` columns |
-| Secret | `MOOLA_PARTNER_API_KEY` |
-| New edge fn | `sync-moola-partner-apps` (admin-gated, calls 6dot50, upserts table) |
-| MyRewards | Empty-state activation button → invokes sync function |
-| Admin page | Manual "Sync retailers" button |
+### 5. Show stop date for stopped medications
 
-No files deleted; SOS module remains dormant for future re-enable.
+In `src/features/patients/components/PatientOverview.tsx` medication list (around line 720-734):
+- For meds with `status === "inactive"` (or `"past"`), append the `end_date` next to the name as muted text: `Stopped 12 Apr 2026`. Format with `date-fns`. Keep the existing line-through styling.
+- Also reflect in `PatientDetailsEditor.tsx` summary chips (lines 1683, 2667): badge text becomes `Past · 12 Apr 2026` when end_date present.
+
+### 6. Offline / external doctor sessions (patient side)
+
+Patients without a connected doctor should still record consultations attributed to a named-but-not-on-platform doctor.
+
+**DB** migration on `sessions`: add nullable `external_doctor_name text`, `external_doctor_specialty text`, `external_doctor_practice text`. (No FK — this is free text.)
+
+**UI**: New page `src/pages/patient/PatientSessions.tsx` (or extend existing patient session view) with:
+- "New session" button → dialog asking for doctor name, optional specialty, optional practice/clinic, then creates a `sessions` row with `user_id = patient.user_id`, `patient_id = own patient record`, and the three external_doctor_* fields filled in.
+- Adds RLS update so a patient (whose `patients.patient_user_id = auth.uid()`) can insert/select sessions where `user_id = auth.uid()` and `patient_id` is their own record.
+- Session detail view shows the external doctor name in place of the practitioner profile when `external_doctor_name IS NOT NULL`.
+- Recording flow reuses existing audio capture (`useAudioRecording`) and transcription pipeline.
+
+Add a route `/patient/sessions` and a sidebar entry under My Holarchy.
+
+### 7. Patient language preference
+
+In `src/features/patients/components/PatientDetailsEditor.tsx` profile section:
+- Add a Language dropdown bound to `profiles.preferred_language` for the logged-in patient. Reuses `LANGUAGES` constant from `src/pages/MyPractice.tsx` (extract to `src/lib/languages.ts`).
+- Save via `supabase.from('profiles').update({ preferred_language }).eq('id', userId)`.
+
+### 8. Remove secondary languages
+
+- Remove the "Additional Languages" block in `src/pages/MyPractice.tsx` (lines 1188-1220).
+- Stop reading/writing `preferred_languages` anywhere in the app.
+- Migration: `ALTER TABLE profiles DROP COLUMN preferred_languages;` (and remove the auto-set logic in `Sessions.tsx` if present).
+
+---
+
+## Technical notes
+
+```text
+Migration files
+├─ alter profiles add about_me text
+├─ alter profiles drop column preferred_languages
+├─ alter sessions add external_doctor_{name,specialty,practice} text
+├─ recreate function search_doctor_profiles(_name, _specialty, _language)
+└─ update RLS on sessions for patient self-authored rows
+```
+
+Word-count enforcement for About Me uses `regexp_split_to_array(trim(about_me), '\s+')` length ≤ 600 in a CHECK.
+
+Doctor RPC signature change: keep old single-arg overload as wrapper for callers that haven't been updated, or update both call sites (`MyDoctors.tsx` is the only caller).

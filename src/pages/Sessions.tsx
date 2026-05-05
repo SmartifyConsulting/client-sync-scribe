@@ -96,14 +96,14 @@ export default function Sessions() {
       if (user) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('full_name, preferred_languages')
+          .select('full_name, preferred_language')
           .eq('id', user.id)
           .maybeSingle();
         if (profile?.full_name) {
           setDoctorName(profile.full_name);
         }
-        if (profile?.preferred_languages && profile.preferred_languages.length > 0) {
-          setDoctorLanguage(profile.preferred_languages[0]);
+        if (profile?.preferred_language) {
+          setDoctorLanguage(profile.preferred_language);
         }
       }
     };

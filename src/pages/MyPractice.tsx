@@ -28,6 +28,7 @@ import {
   PenTool,
   Calendar as CalendarIcon,
   Palette,
+  Sparkles,
 } from "lucide-react";
 import ReferralDoctors from "@/pages/ReferralDoctors";
 
@@ -353,6 +354,55 @@ function MailboxSection({ userId }: { userId?: string }) {
         </div>
       </div>
     </div>
+  );
+}
+
+// ── About Me accordion (doctor pitch, max 600 words) ──
+function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string) => Promise<void> }) {
+  const [draft, setDraft] = useState(value);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => { setDraft(value); }, [value]);
+  const wordCount = draft.trim() ? draft.trim().split(/\s+/).length : 0;
+  const overLimit = wordCount > 600;
+  const dirty = draft !== value;
+  return (
+    <Accordion type="single" collapsible className="space-y-4">
+      <AccordionItem value="about-me" className="rounded-xl border border-primary bg-card shadow-sm">
+        <AccordionTrigger className="px-4 py-3 hover:no-underline">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-semibold text-foreground">About Me</h3>
+          </div>
+        </AccordionTrigger>
+        <AccordionContent className="px-4 pb-4 space-y-2">
+          <p className="text-xs text-muted-foreground">
+            Share a short pitch about your practice and approach. Patients see this when viewing your profile. Maximum 600 words.
+          </p>
+          <Textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            rows={6}
+            placeholder="Tell patients about your background, philosophy of care, and what makes your practice unique…"
+          />
+          <div className="flex items-center justify-between">
+            <span className={cn("text-[11px]", overLimit ? "text-destructive" : "text-muted-foreground")}>
+              {wordCount} / 600 words
+            </span>
+            <Button
+              size="sm"
+              disabled={!dirty || overLimit || saving}
+              onClick={async () => {
+                setSaving(true);
+                try { await onSave(draft); } finally { setSaving(false); }
+              }}
+            >
+              {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <Save className="h-3.5 w-3.5 mr-2" />}
+              Save
+            </Button>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 }
 
@@ -1089,12 +1139,16 @@ export default function MyPractice() {
             value="certificates"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs"
           >
-            Certificates{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}
+            Credentials{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}
           </TabsTrigger>
         </TabsList>
 
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
         <TabsContent value="practice" className="mt-4 space-y-4">
+          <AboutMeAccordion
+            value={(profile as any)?.about_me || ""}
+            onSave={async (v) => { await updateProfile({ about_me: v } as any); }}
+          />
           {/* Personal Information Accordion */}
           <Accordion type="multiple" className="space-y-4">
             <AccordionItem value="personal" className="rounded-xl border border-primary bg-card shadow-sm">
@@ -1184,39 +1238,6 @@ export default function MyPractice() {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="space-y-1.5 col-span-2">
-                <Label>Additional Languages</Label>
-                <div className="flex flex-wrap gap-1.5 justify-start">
-                  {LANGUAGES.filter((l) => l.code !== ((profile as any)?.preferred_language || "en")).map((l) => {
-                    const selectedLangs: string[] = (profile as any)?.preferred_languages || [];
-                    const isSelected = selectedLangs.includes(l.code);
-                    return (
-                      <button
-                        key={l.code}
-                        type="button"
-                        onClick={async () => {
-                          const current: string[] = (profile as any)?.preferred_languages || [];
-                          let updated: string[];
-                          if (isSelected) {
-                            updated = current.filter((c: string) => c !== l.code);
-                          } else {
-                            updated = [...current, l.code];
-                          }
-                          await updateProfile({ preferred_languages: updated } as any);
-                        }}
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-[11px] font-medium border transition-colors",
-                          isSelected
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50",
-                        )}
-                      >
-                        {l.name}
-                      </button>
-                    );
-                  })}
-                </div>
               </div>
             </div>
             <MailboxSection userId={user?.id} />
@@ -2075,11 +2096,11 @@ export default function MyPractice() {
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <GraduationCap className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">Certificates</h3>
+              <h3 className="text-sm font-semibold text-foreground">Credentials</h3>
             </div>
             <div className="flex items-center justify-between">
               <p className="text-muted-foreground text-[12px]">
-                Track your continuing professional development certificates and CPD points.
+                Track your professional credentials and CPD points.
               </p>
               <Button
                 size="sm"
@@ -2092,15 +2113,15 @@ export default function MyPractice() {
                 className="gap-1.5 shrink-0"
               >
                 <Plus className="h-3.5 w-3.5" />
-                Add Certificate
+                Add Credential
               </Button>
             </div>
             {showCertForm && (
               <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
-                <p className="text-sm font-medium">{editingCertId ? "Edit" : "Add"} Certificate</p>
+                <p className="text-sm font-medium">{editingCertId ? "Edit" : "Add"} Credential</p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label>Certificate Name *</Label>
+                    <Label>Credential Name *</Label>
                     <Input
                       value={certForm.certificate_name}
                       onChange={(e) => setCertForm({ ...certForm, certificate_name: e.target.value })}

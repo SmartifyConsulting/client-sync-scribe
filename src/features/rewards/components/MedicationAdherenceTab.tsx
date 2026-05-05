@@ -498,6 +498,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
   };
 
   const proceedToIngestion = () => {
+    if (!pillCheckResult?.isMatch) return;
     setPillCheckResult(null);
     setStage("ingestion");
   };
@@ -883,7 +884,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                             ? `We saw ${pillCheckResult.detectedCount} of ${pillCheckResult.expectedCount} tablets — please show them all`
                             : pillCheckResult.isMatch
                             ? "Looks right — proceed to take it"
-                            : "Couldn't confirm exact pill — proceeding"}
+                            : "This does not match your prescribed medication. You cannot record intake until the correct pill is shown."}
                         </p>
                         <p className="opacity-80 mt-0.5">{pillCheckResult.matchReason}</p>
                       </div>
@@ -902,7 +903,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                         Capture Pill
                       </Button>
                     </>
-                  ) : !pillCheckResult.isPillVisible ? (
+                  ) : !pillCheckResult.isPillVisible || !pillCheckResult.isMatch ? (
                     <>
                       <Button variant="outline" onClick={handleCloseRecording}>Cancel</Button>
                       <Button onClick={retryPillCheck} className="gap-2">

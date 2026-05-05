@@ -6,12 +6,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, Stethoscope, Search, Lock, UserMinus } from "lucide-react";
+import { Loader2, Stethoscope, Search, Lock, UserMinus, MoreVertical } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { InviteDoctorDialog } from "@/components/patient/InviteDoctorDialog";
 import { useToast } from "@/hooks/use-toast";
+import { LANGUAGES, COMMON_SPECIALTIES } from "@/lib/languages";
 
 interface DoctorProfile {
   id: string;
@@ -22,6 +24,8 @@ interface DoctorProfile {
   avatar_url: string | null;
   practice_number: string | null;
   doctor_number: string | null;
+  about_me?: string | null;
+  preferred_language?: string | null;
 }
 
 interface DoctorAccess {
@@ -34,13 +38,16 @@ interface DoctorAccess {
 }
 
 export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean }) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [nameQuery, setNameQuery] = useState("");
+  const [specialtyQuery, setSpecialtyQuery] = useState<string>("any");
+  const [languageQuery, setLanguageQuery] = useState<string>("any");
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<DoctorProfile[]>([]);
   const [totalFound, setTotalFound] = useState(0);
   const [hasSearched, setHasSearched] = useState(false);
   const [uninviteTarget, setUninviteTarget] = useState<DoctorAccess | null>(null);
   const [uninviteLoading, setUninviteLoading] = useState(false);
+  const [detailsDoctor, setDetailsDoctor] = useState<DoctorProfile | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -62,7 +69,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
       const doctorIds = accessData.map((a) => a.doctor_id);
       const { data: profilesData, error: profilesError } = await supabase
         .from("profiles")
-        .select("id, full_name, specialty, practice_address, mobile_number, avatar_url, practice_number, doctor_number")
+        .select("id, full_name, specialty, practice_address, mobile_number, avatar_url, practice_number, doctor_number, about_me, preferred_language")
         .in("id", doctorIds);
 
       if (profilesError) throw profilesError;
@@ -74,18 +81,26 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
     },
   });
 
-  const handleSearch = useCallback(async (query: string) => {
-    if (!query.trim() || query.trim().length < 2) return;
+  const handleSearch = useCallback(async () => {
+    const name = nameQuery.trim();
+    const spec = specialtyQuery === "any" ? "" : specialtyQuery;
+    const lang = languageQuery === "any" ? "" : languageQuery;
+    if (!name && !spec && !lang) {
+      setSearchResults([]);
+      setTotalFound(0);
+      setHasSearched(false);
+      return;
+    }
     setIsSearching(true);
     setHasSearched(true);
 
     try {
       const { data, error } = await supabase
-        .rpc("search_doctor_profiles", { _query: query });
+        .rpc("search_doctor_profiles", { _name: name, _specialty: spec, _language: lang });
 
       if (error) throw error;
 
-      const allResults = data || [];
+      const allResults = (data || []) as DoctorProfile[];
       setTotalFound(allResults.length);
       const connectedIds = doctors?.map((d) => d.doctor_id) || [];
       setSearchResults(allResults.filter((d) => !connectedIds.includes(d.id)));
@@ -94,19 +109,13 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
     } finally {
       setIsSearching(false);
     }
-  }, [doctors]);
+  }, [nameQuery, specialtyQuery, languageQuery, doctors]);
 
   // Debounced auto-search
   useEffect(() => {
-    if (searchQuery.trim().length < 2) {
-      setSearchResults([]);
-      setTotalFound(0);
-      setHasSearched(false);
-      return;
-    }
-    const timeout = setTimeout(() => handleSearch(searchQuery), 300);
+    const timeout = setTimeout(() => handleSearch(), 350);
     return () => clearTimeout(timeout);
-  }, [searchQuery, handleSearch]);
+  }, [handleSearch]);
 
   const getSpecialtyColor = (specialty: string): string => {
     const s = specialty.toLowerCase();
@@ -232,27 +241,44 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
       <Card>
         <CardHeader className="pb-1 pt-3 px-4">
           <CardTitle className="text-sm">Find a Healthcare Provider on Holarc</CardTitle>
-          <CardDescription className="text-xs">Search by full name, practice number, or registration number</CardDescription>
+          <CardDescription className="text-xs">Filter by name, specialty, language — or any combination</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-2">
-            <div className="relative flex-1">
+          <div className="grid gap-2 md:grid-cols-3">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search by name, practice number, or registration number..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Doctor name, practice or registration #"
+                value={nameQuery}
+                onChange={(e) => setNameQuery(e.target.value)}
                 className="pl-10"
               />
             </div>
-            <Button onClick={() => handleSearch(searchQuery)} disabled={isSearching || !searchQuery.trim()}>
-              {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
-            </Button>
+            <Select value={specialtyQuery} onValueChange={setSpecialtyQuery}>
+              <SelectTrigger><SelectValue placeholder="Any specialty" /></SelectTrigger>
+              <SelectContent className="max-h-72">
+                <SelectItem value="any">Any specialty</SelectItem>
+                {COMMON_SPECIALTIES.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={languageQuery} onValueChange={setLanguageQuery}>
+              <SelectTrigger><SelectValue placeholder="Any language" /></SelectTrigger>
+              <SelectContent className="max-h-72">
+                <SelectItem value="any">Any language</SelectItem>
+                {LANGUAGES.map((l) => (
+                  <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {hasSearched && (
             <div className="mt-4">
-              {searchResults.length === 0 ? (
+              {isSearching ? (
+                <div className="flex justify-center py-4"><Loader2 className="h-4 w-4 animate-spin text-primary" /></div>
+              ) : searchResults.length === 0 ? (
                  <p className="text-sm text-muted-foreground text-center py-4">
                    {totalFound > 0
                      ? "All matching providers are already on your profile."
@@ -263,8 +289,8 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                    <TableHeader>
                       <TableRow>
                         <TableHead className="w-[45%]">Provider</TableHead>
-                        <TableHead className="w-[35%]">Specialty</TableHead>
-                        <TableHead className="w-[20%]">Action</TableHead>
+                        <TableHead className="w-[30%]">Specialty</TableHead>
+                        <TableHead className="w-[25%]">Action</TableHead>
                       </TableRow>
                    </TableHeader>
                    <TableBody>
@@ -294,13 +320,24 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                             )}
                           </TableCell>
                           <TableCell className="p-2">
-                           <InviteDoctorDialog
-                             prefillPracticeNumber={doctor.practice_number || ""}
-                             prefillRegistrationNumber={doctor.doctor_number || ""}
-                             prefillDoctorName={doctor.full_name || ""}
-                             prefillAvatarUrl={doctor.avatar_url || ""}
-                             prefillSpecialty={doctor.specialty || ""}
-                           />
+                           <div className="flex items-center gap-1">
+                             <InviteDoctorDialog
+                               prefillPracticeNumber={doctor.practice_number || ""}
+                               prefillRegistrationNumber={doctor.doctor_number || ""}
+                               prefillDoctorName={doctor.full_name || ""}
+                               prefillAvatarUrl={doctor.avatar_url || ""}
+                               prefillSpecialty={doctor.specialty || ""}
+                             />
+                             <Button
+                               variant="ghost"
+                               size="icon"
+                               className="h-7 w-7"
+                               onClick={() => setDetailsDoctor(doctor)}
+                               aria-label="View details"
+                             >
+                               <MoreVertical className="h-3.5 w-3.5" />
+                             </Button>
+                           </div>
                          </TableCell>
                        </TableRow>
                      ))}
@@ -366,6 +403,39 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
               Remove
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Doctor Details (credentials + About Me) */}
+      <Dialog open={!!detailsDoctor} onOpenChange={(o) => !o && setDetailsDoctor(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={detailsDoctor?.avatar_url || undefined} />
+                <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                  {detailsDoctor?.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
+                </AvatarFallback>
+              </Avatar>
+              <span>{detailsDoctor?.full_name || "Provider"}</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 text-xs">
+            {detailsDoctor?.specialty && <div><span className="text-muted-foreground">Specialty:</span> {detailsDoctor.specialty}</div>}
+            {detailsDoctor?.practice_number && <div><span className="text-muted-foreground">Practice #:</span> {detailsDoctor.practice_number}</div>}
+            {detailsDoctor?.doctor_number && <div><span className="text-muted-foreground">Registration #:</span> {detailsDoctor.doctor_number}</div>}
+            {detailsDoctor?.preferred_language && (
+              <div><span className="text-muted-foreground">Language:</span> {LANGUAGES.find(l => l.code === detailsDoctor.preferred_language)?.name || detailsDoctor.preferred_language}</div>
+            )}
+            {detailsDoctor?.practice_address && <div><span className="text-muted-foreground">Address:</span> {detailsDoctor.practice_address}</div>}
+            {detailsDoctor?.mobile_number && <div><span className="text-muted-foreground">Mobile:</span> {detailsDoctor.mobile_number}</div>}
+            {detailsDoctor?.about_me && (
+              <div className="pt-2 border-t">
+                <div className="text-muted-foreground mb-1 font-medium">About Me</div>
+                <p className="whitespace-pre-wrap leading-relaxed">{detailsDoctor.about_me}</p>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
