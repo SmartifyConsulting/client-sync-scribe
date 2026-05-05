@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
       <p style="color:#666;font-size:12px">You're receiving this because you are listed as a trusted contact.</p>
     `;
 
-    for (const r of recipients) {
+    for (const r of filtered) {
       if (r.email && RESEND) {
         try {
           const resp = await fetch("https://api.resend.com/emails", {
@@ -170,11 +170,11 @@ Deno.serve(async (req) => {
         recipient_email: r.email ?? null,
         channel: r.email ? "email" : "pending",
         status: r.email && RESEND ? "sent" : "queued",
-        metadata: { tracking_url: trackUrl, via: r.via },
+        metadata: { tracking_url: trackUrl, via: r.via, severity: incident.severity, min_severity: r.min_severity },
       } as any).then(() => {}, () => {});
     }
 
-    return new Response(JSON.stringify({ ok: true, sent, recipient_count: recipients.length }), {
+    return new Response(JSON.stringify({ ok: true, sent, recipient_count: filtered.length, skipped: recipients.length - filtered.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
