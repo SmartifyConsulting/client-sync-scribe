@@ -9,10 +9,8 @@ import {
   Briefcase,
   UserCog,
   Gift,
-  Shield,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
-import { useHolarcHelpAccess } from "@/modules/holarchelp/hooks/useHolarcHelpAccess";
 
 const doctorNavItems = [
   { icon: LayoutDashboard, label: "Home", to: "/doctor-dashboard" },
@@ -27,12 +25,10 @@ const patientSections = [
   { icon: Handshake, label: "My Holarchy", section: "care", to: "/patient/details?section=care" },
   { icon: FolderOpen, label: "My Desk", section: "admin", to: "/patient/details?section=admin" },
   { icon: Gift, label: "My Rewards", section: "rewards", to: "/patient/rewards" },
-  { icon: Shield, label: "SOS", section: "sos", to: "/patient/holarchelp", danger: true },
 ];
 
 export function BottomNav() {
   const { isPatient, loading } = useUserRole();
-  const { enabled: holarchelpEnabled } = useHolarcHelpAccess();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -77,7 +73,6 @@ export function BottomNav() {
   // Patient nav - section-based
   const currentSection = searchParams.get("section") || "health";
   const isOnDetails = location.pathname === "/patient/details";
-  const isOnHolarcHelp = location.pathname.startsWith("/patient/holarchelp");
 
   const items = patientSections;
 
@@ -86,9 +81,7 @@ export function BottomNav() {
       <div className="flex items-center justify-around px-2 py-2">
         {items.map((item) => {
           const isActive =
-            item.section === "sos"
-              ? isOnHolarcHelp
-              : item.section === "rewards"
+            item.section === "rewards"
               ? location.pathname === "/patient/rewards"
               : isOnDetails && currentSection === item.section;
           const danger = (item as any).danger;

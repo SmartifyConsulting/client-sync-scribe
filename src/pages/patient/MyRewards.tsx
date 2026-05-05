@@ -747,16 +747,25 @@ export default function MyRewards() {
               {partnerApps.length === 0 ? (
                 <div className="text-center py-6 space-y-3">
                   <p className="text-sm text-muted-foreground">
-                    No retailers connected yet. Activate the Vula rewards network to see all retailers where you can spend your vouchers.
+                    No retailers connected yet. Sync the 6dot50 partner network to see all the retailers where you can spend your Vulas.
                   </p>
                   <Button
-                    onClick={() => toast({
-                      title: "Activate Vula rewards network",
-                      description: "We need a partner API key to fetch the retailer list. Ask your admin to add MOOLA_PARTNER_API_KEY in backend secrets, then refresh this page.",
-                    })}
+                    onClick={async () => {
+                      const { data, error } = await supabase.functions.invoke("sync-moola-partner-apps");
+                      if (error || (data as any)?.error) {
+                        toast({
+                          title: "Couldn't sync retailers",
+                          description: (data as any)?.error ?? error?.message ?? "An admin must run the sync from the admin Rewards page.",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      toast({ title: "Retailers synced", description: `${(data as any)?.synced ?? 0} partners loaded from 6dot50.` });
+                      queryClient.invalidateQueries({ queryKey: ["moola-partner-apps"] });
+                    }}
                     className="gap-2"
                   >
-                    <Gift className="h-4 w-4" /> Activate now
+                    <Gift className="h-4 w-4" /> Sync 6dot50 retailers
                   </Button>
                 </div>
               ) : (

@@ -15,7 +15,7 @@ import {
   Gift,
   UserCog,
   FolderOpen,
-  Shield,
+  
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
@@ -47,7 +47,6 @@ const patientNavItems: NavItem[] = [
 const adminNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Home", to: "/doctor-dashboard" },
   { icon: Users, label: "Users", to: "/admin/users" },
-  { icon: Shield, label: "HolarcHelp Admin", to: "/admin/holarchelp-providers" },
   { icon: DollarSign, label: "Pricing", to: "/admin/pricing" },
   { icon: Gift, label: "Rewards", to: "/admin/gamification" },
 ];
