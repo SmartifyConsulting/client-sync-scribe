@@ -146,10 +146,35 @@ export function PillBaselineCapture({
 
   const handleCaptureTablet = async () => {
     const b = await captureStill();
-    if (b) {
-      setTabletBlob(b);
-      stream?.getTracks().forEach((t) => t.stop());
-      setStream(null);
+    if (!b) return;
+    setTabletBlob(b);
+    setTabletWarning(null);
+    stream?.getTracks().forEach((t) => t.stop());
+    setStream(null);
+
+    // Quick AI sanity check that pill markings are visible (skip for gummy/dissolve)
+    if (intakeMethod === "gummy" || intakeMethod === "dissolve") return;
+    try {
+      setCheckingMarkings(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const ts = Date.now();
+      const path = `pill-references/${user.id}/${prescriptionId}-${ts}-marking-check.jpg`;
+      const { error: upErr } = await supabase.storage.from("patient-media").upload(path, b, { contentType: "image/jpeg", upsert: true });
+      if (upErr) return;
+      const { data: urlData } = supabase.storage.from("patient-media").getPublicUrl(path);
+      const { data } = await supabase.functions.invoke("validate-medication-video", {
+        body: { mode: "baseline_tablet_check", imageUrl: urlData.publicUrl, expectedQuantity: quantity },
+      });
+      // Best-effort cleanup of the marking-check still
+      supabase.storage.from("patient-media").remove([path]).catch(() => {});
+      if (data && data.markingsVisible === false) {
+        setTabletWarning(data.suggestion || "We can't see any printed letters, numbers or score lines. Try flipping the tablet and retaking.");
+      }
+    } catch (e) {
+      console.error("markings check failed", e);
+    } finally {
+      setCheckingMarkings(false);
     }
   };
 
