@@ -24,6 +24,8 @@ interface DoctorProfile {
   avatar_url: string | null;
   practice_number: string | null;
   doctor_number: string | null;
+  about_me?: string | null;
+  preferred_language?: string | null;
 }
 
 interface DoctorAccess {
