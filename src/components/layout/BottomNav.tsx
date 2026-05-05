@@ -73,7 +73,6 @@ export function BottomNav() {
   // Patient nav - section-based
   const currentSection = searchParams.get("section") || "health";
   const isOnDetails = location.pathname === "/patient/details";
-  const isOnHolarcHelp = location.pathname.startsWith("/patient/holarchelp");
 
   const items = patientSections;
 
@@ -82,9 +81,7 @@ export function BottomNav() {
       <div className="flex items-center justify-around px-2 py-2">
         {items.map((item) => {
           const isActive =
-            item.section === "sos"
-              ? isOnHolarcHelp
-              : item.section === "rewards"
+            item.section === "rewards"
               ? location.pathname === "/patient/rewards"
               : isOnDetails && currentSection === item.section;
           const danger = (item as any).danger;
