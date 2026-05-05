@@ -17,6 +17,7 @@ interface Props {
 export function ManualLogAdmissionDialog({ open, onOpenChange, patientId }: Props) {
   const { toast } = useToast();
   const qc = useQueryClient();
+  const [title, setTitle] = useState("");
   const [hospital, setHospital] = useState("");
   const [admDate, setAdmDate] = useState(new Date().toISOString().slice(0, 10));
   const [discDate, setDiscDate] = useState("");
@@ -24,15 +25,16 @@ export function ManualLogAdmissionDialog({ open, onOpenChange, patientId }: Prop
   const [saving, setSaving] = useState(false);
 
   const submit = async () => {
-    if (!hospital.trim()) {
-      toast({ title: "Hospital required", variant: "destructive" });
+    if (!title.trim() && !diagnosis.trim()) {
+      toast({ title: "Add a title or reason", variant: "destructive" });
       return;
     }
     setSaving(true);
     const { data: u } = await supabase.auth.getUser();
     const { error } = await supabase.from("hospital_admissions").insert({
       patient_id: patientId,
-      hospital,
+      title: title.trim() || null,
+      hospital: hospital || null,
       admission_date: admDate,
       discharge_date: discDate || null,
       diagnosis: diagnosis || null,
