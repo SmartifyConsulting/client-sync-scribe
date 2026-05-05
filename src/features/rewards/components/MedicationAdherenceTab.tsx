@@ -793,8 +793,19 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
             </p>
 
             <div className="relative rounded-lg overflow-hidden bg-black aspect-video">
-              {recordedBlob ? (
-                <video src={URL.createObjectURL(recordedBlob)} controls className="w-full h-full object-cover" />
+              {recordedBlob && recordedUrl ? (
+                <video
+                  src={recordedUrl}
+                  controls
+                  playsInline
+                  className="w-full h-full object-contain bg-black"
+                  onError={() =>
+                    toast({
+                      title: "Replay not supported on this device",
+                      description: "Don't worry — the recording was sent for verification.",
+                    })
+                  }
+                />
               ) : (
                 <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover mirror" />
               )}
