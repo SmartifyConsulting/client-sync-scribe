@@ -971,6 +971,10 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
           patientId={patientId}
           medicationName={baselineCapture.medication}
           dosage={baselineCapture.dosage}
+          quantity={(() => {
+            const rx = prescriptions.find((p) => p.id === baselineCapture.rxId);
+            return Math.max(1, Number(rx?.quantity_per_dose) || parseQuantity(rx?.dosage));
+          })()}
         />
       )}
     </div>
