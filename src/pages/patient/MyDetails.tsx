@@ -19,6 +19,8 @@ export default function MyDetails() {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string>("");
+  const [userId, setUserId] = useState<string>("");
+  const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([]);
   const { toast } = useToast();
   const { lollipopCount, loading: rewardsLoading } = useMyRewards();
 
