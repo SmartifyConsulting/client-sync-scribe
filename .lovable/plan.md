@@ -1,43 +1,50 @@
-## Changes
+## 1. Rename pricing tiers + add Emergency Services
 
-### 1. Spacing on Accept Patient Request dialog
-`src/components/doctor/DoctorAccessRequests.tsx` (line 364): give the `DialogFooter` a `gap-2` so the **Cancel** and **Accept Request** buttons don't touch on mobile (where they stack/wrap).
+`src/features/admin/pages/PricingAdmin.tsx`:
+- Tier 01 title `Practitioners` → **`Tier 01: Healthcare Providers`**, badge stays `Doctor` (internal role key).
+- Tier 02 title `Healthcare Seekers` → **`Tier 02: Patient`**.
+- Add **`Tier 03: Emergency Services`** section (badge `Emergency`) — same RoleSection component, role key `emergency`.
+- Update header copy: "Define the financial structure for healthcare providers, patients, and emergency services."
+- Extend `calculateSavings` calls + `pricing.find` lookups to include the `emergency` role.
 
-### 2. SOS button fits within the nav bar
-`src/components/layout/BottomNav.tsx`: replace the oversized "breakout" SOS treatment with a button that sits inside the nav bar like the others. It will be a solid red circle (~40px) with a small white siren icon and the white text "SOS" rendered **inside** the circle. Drop the `-mt-6`, the outer ring shadow, and the bold red label below the bar — both doctor and patient nav arrays use the same `danger` render path so this fix covers both.
+## 2. Database migration
 
-### 3. Rename "Transfers" tab → "Redeem" and rework the tab content
+New migration to support the 3rd tier:
+- `pricing_config`: drop existing `pricing_config_role_check`, recreate as `CHECK (role IN ('doctor','patient','emergency'))`.
+- `subscriptions`: drop `subscriptions_plan_type_check`, recreate as `CHECK (plan_type IN ('doctor','patient','emergency'))`.
+- Seed two rows for `emergency`: monthly + annual (e.g. $19.99 / $199.99 placeholders — admin can edit).
 
-**Patient (`src/pages/patient/MyRewards.tsx`)** and **Doctor (`src/pages/doctor/DoctorRewards.tsx`)**:
+## 3. PayPal subscription edge function (mirror SnappyNDA architecture)
 
-- Tab trigger label changes from `Vulas` / `Transfers` to **`Redeem`** (keep `value="transfers"` internally so existing state/links keep working).
-- Inside the `transfers` TabsContent, restructure to **three** sections in this order:
-  1. **Redeem from 6Dot50 with Vula Vouchers** (new, placed **above** Partner Apps)
-     - Card with short copy: "Redeem your Vulas at retailers in the 6Dot50 network."
-     - Primary button **Redeem** that opens `https://portal.6dot50.com/` in a new tab (`window.open(url, "_blank", "noopener")`).
-  2. **Approved Vula Partner Apps** (existing card, unchanged content)
-  3. **Transfer to Vula Vault** (new card)
-     - Short copy: "Move your Vulas to the Vula Vault for safekeeping."
-     - Button **Transfer to Vault** opens the existing transfer dialog with a synthetic `transferToAppId = "vault"`. `handleTransfer` will branch: when id === "vault", insert a `patient_rewards` ledger row with `visit_category: "Vula Vault"` and skip the partner-app FK. Doctor version mirrors the same logic.
-- **Remove the Transfer History card** entirely from both pages.
+Refactor `supabase/functions/paypal-subscription/index.ts`:
+- Add `PAYPAL_ENV` env var (`sandbox` default, `live` allowed) → `PAYPAL_BASE = sandbox.paypal.com | api-m.paypal.com`. Currently hardcoded to sandbox.
+- Replace hardcoded `PLANS` constant with **DB lookup against `pricing_config`** by `(role, billing_cycle)` so admin price edits apply immediately and the new `emergency` tier works automatically.
+- Add `zod` body validation for the three actions (`create-trial`, `cancel`, `reactivate`, default new-subscription) — `planType ∈ {doctor,patient,emergency}`, `billingCycle ∈ {monthly,annual}`.
+- Keep existing auth check (`auth.getUser` against caller's JWT, enforce `userId === caller.id`).
+- Keep capture/return + email + referral logic intact.
 
-### 4. Rename "Transferred" balance card → "Redeemed"
-- `src/pages/patient/MyRewards.tsx` line 431: change the label `Transferred` → `Redeemed` (variable `totalTransferred` keeps its name internally).
-- `src/pages/doctor/DoctorRewards.tsx` line 197: same change.
-- The "Transfer Vulas" small action link below each card stays but its label becomes **"Redeem Vulas"** and opens the same transfer dialog (so users can redeem from the balance card too).
+## 4. Subscription UI
 
-### 5. Memory
-Add a small new memory `mem://features/vula-redemption` noting: Vula redemption tab is "Redeem"; Redeem button deep-links to `https://portal.6dot50.com/`; Vula Vault is a virtual partner app id `"vault"` recorded as a `patient_rewards` ledger entry; "Transferred" card is labeled "Redeemed".
+`src/components/settings/SettingsContent.tsx`:
+- Replace `const planType = role === "patient" ? "patient" : "doctor"` with a mapper that returns `"emergency"` for emergency-services roles (ambulance_staff / hospital_staff / blood_bank), `"patient"` for patient, else `"doctor"`.
+- `fetchPricing` already pulls from `pricing_config` — extend to handle emergency.
+- `Subscription.plan_type` typing already `string`; copy in dialog updates to "your {planType} subscription" (already dynamic).
+
+`src/components/auth/SubscriptionGateModal.tsx` & `TrialSignupSection.tsx`: copy unchanged (still says "from $9.99"); no change needed for this task.
+
+## 5. Memory
+
+Add `mem://features/subscription-tiers` noting the three role keys (`doctor` = Healthcare Providers, `patient` = Patient, `emergency` = Emergency Services), DB-driven pricing, and `PAYPAL_ENV` switch.
 
 ## Files
 
-- **Edit:** `src/components/doctor/DoctorAccessRequests.tsx`
-- **Edit:** `src/components/layout/BottomNav.tsx`
-- **Edit:** `src/pages/patient/MyRewards.tsx`
-- **Edit:** `src/pages/doctor/DoctorRewards.tsx`
-- **Memory:** new `mem://features/vula-redemption` + index update
+- Edit: `src/features/admin/pages/PricingAdmin.tsx`
+- Edit: `supabase/functions/paypal-subscription/index.ts`
+- Edit: `src/components/settings/SettingsContent.tsx`
+- New migration: pricing_config + subscriptions check constraints + emergency seed rows
+- New memory file + index update
 
 ## Out of scope
-
-- No real 6Dot50 API integration — still awaiting endpoint URL/credentials. The Redeem button just deep-links to the portal for now.
-- No DB migration: the Vault transfer is recorded as a `patient_rewards` ledger entry; no new table.
+- No PayPal webhook listener (still relies on capture-on-return).
+- No live PayPal credentials swap — `PAYPAL_ENV` defaults to sandbox; flip to `live` via secret when ready.
+- Emergency-services price defaults are placeholders; admin tunes in /admin/pricing.
