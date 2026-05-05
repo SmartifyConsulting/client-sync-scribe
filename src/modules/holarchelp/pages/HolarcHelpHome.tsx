@@ -36,6 +36,7 @@ export default function HolarcHelpHome() {
   const [incidentId, setIncidentId] = useState<string | null>(null);
   const [helpOnTheWay, setHelpOnTheWay] = useState(false);
   const [severityOpen, setSeverityOpen] = useState(false);
+  const [voiceNoteOpen, setVoiceNoteOpen] = useState(false);
   const [requesting, setRequesting] = useState<string | null>(null);
   const [hasEmergency, setHasEmergency] = useState<boolean | null>(null);
   const [incidentCoverage, setIncidentCoverage] = useState<"public" | "private">("public");
