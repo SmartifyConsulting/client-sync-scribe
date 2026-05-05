@@ -47,26 +47,39 @@ export function BottomNav() {
           {doctorNavItems.map((item) => {
             const isActive = location.pathname.startsWith(item.to);
             const danger = (item as any).danger;
+            if (danger) {
+              return (
+                <button
+                  key={item.to}
+                  onClick={() => navigate(item.to)}
+                  className="flex flex-col items-center justify-end -mt-6 px-1"
+                  aria-label="SOS"
+                >
+                  <div className="flex items-center justify-center h-14 w-14 rounded-full bg-red-600 shadow-[0_0_0_4px_hsl(var(--background)),0_8px_20px_-4px_rgba(220,38,38,0.6)] active:scale-95 transition-transform">
+                    <item.icon className="h-7 w-7 text-white" strokeWidth={2.5} />
+                  </div>
+                  <span className="text-[10px] font-bold text-red-600 mt-0.5">SOS</span>
+                </button>
+              );
+            }
             return (
               <button
                 key={item.to}
                 onClick={() => navigate(item.to)}
                 className={cn(
                   "flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 min-w-[64px]",
-                  danger
-                    ? isActive ? "text-red-600" : "text-red-600 hover:text-red-700"
-                    : isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 <div
                   className={cn(
                     "flex items-center justify-center h-8 w-8 rounded-xl transition-all duration-200",
-                    isActive && (danger ? "bg-red-600/15 scale-110" : "bg-primary/15 scale-110"),
+                    isActive && "bg-primary/15 scale-110",
                   )}
                 >
-                  <item.icon className={cn("h-5 w-5", danger && "text-red-600", isActive && !danger && "text-primary")} />
+                  <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
                 </div>
-                <span className={cn("text-[10px] font-medium", danger ? "text-red-600" : isActive && "text-primary")}>{item.label}</span>
+                <span className={cn("text-[10px] font-medium", isActive && "text-primary")}>{item.label}</span>
               </button>
             );
           })}
