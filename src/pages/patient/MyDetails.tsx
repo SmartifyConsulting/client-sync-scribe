@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMyRewards } from "@/hooks/usePatientRewards";
 import { EmergencyContact } from "@/features/patients/components/EmergencyContactsSection";
 import { ProfileSharesSection } from "@/features/patients/components/ProfileSharesSection";
-import { PatientSelfAdmissionsSection } from "@/features/patients/components/PatientSelfAdmissionsSection";
+
 
 
 export default function MyDetails() {
