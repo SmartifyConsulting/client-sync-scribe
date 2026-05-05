@@ -78,8 +78,8 @@ Deno.serve(async (req) => {
       }
       if (!userId) continue;
 
-      // Profile
-      await admin.from("profiles").upsert({ id: userId, full_name: s.name, role: "doctor" } as any, { onConflict: "id" });
+      // Profile (no doctor role — these are facility/ambulance accounts)
+      await admin.from("profiles").upsert({ id: userId, full_name: s.name } as any, { onConflict: "id" });
 
       // Provider row
       if (s.type === "hospital") {

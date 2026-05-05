@@ -299,75 +299,89 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                      : "No healthcare providers found matching your search."}
                  </p>
               ) : (
-                 <Table className="table-fixed w-full">
-                   <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[45%]">Provider</TableHead>
-                        <TableHead className="w-[30%]">Specialty</TableHead>
-                        <TableHead className="w-[25%]">Action</TableHead>
-                      </TableRow>
-                   </TableHeader>
-                   <TableBody>
-                     {searchResults.map((doctor) => {
-                        const KindIcon = doctor.kind === 'hospital' ? Building2 : doctor.kind === 'ambulance' ? Ambulance : Stethoscope;
-                        return (
-                        <TableRow key={`${doctor.kind}-${doctor.id}`}>
-                          <TableCell className="p-2">
-                            <div className="flex items-center gap-2">
-                              <Avatar className="h-7 w-7 shrink-0">
-                                <AvatarImage src={doctor.avatar_url || undefined} />
-                                <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
-                                  <KindIcon className="h-3.5 w-3.5" />
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex flex-col min-w-0">
-                                <span className="font-medium text-foreground text-xs truncate flex items-center gap-1">
-                                  {doctor.full_name || "Unknown"}
-                                </span>
-                                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                                  {Array.from({ length: Math.min(5, Math.max(0, Math.round(Number(doctor.stars) || 0))) }).map((_, i) => (
-                                    <Star key={i} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
-                                  ))}
-                                </span>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="p-2">
-                            {doctor.kind === 'doctor' && doctor.specialty ? (
-                              <Badge className={`text-[10px] font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
-                                {doctor.specialty}
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline" className="text-[10px] capitalize">{doctor.kind}</Badge>
-                            )}
-                          </TableCell>
-                          <TableCell className="p-2">
-                           <div className="flex items-center gap-1">
-                             {doctor.kind === 'doctor' && (
-                               <InviteDoctorDialog
-                                 prefillPracticeNumber={doctor.registration || ""}
-                                 prefillRegistrationNumber={doctor.registration || ""}
-                                 prefillDoctorName={doctor.full_name || ""}
-                                 prefillAvatarUrl={doctor.avatar_url || ""}
-                                 prefillSpecialty={doctor.specialty || ""}
-                               />
-                             )}
-                             <Button
-                               variant="ghost"
-                               size="icon"
-                               className="h-7 w-7"
-                               onClick={() => setDetailsDoctor(doctor)}
-                               aria-label="View details"
-                             >
-                               <MoreVertical className="h-3.5 w-3.5" />
-                             </Button>
-                           </div>
-                         </TableCell>
-                       </TableRow>
-                       );
-                     })}
-                   </TableBody>
-                 </Table>
+                <div className="space-y-4">
+                  {(['doctor','hospital','ambulance'] as const).map((groupKind) => {
+                    const groupRows = searchResults.filter((r) => r.kind === groupKind);
+                    if (groupRows.length === 0) return null;
+                    const groupLabel = groupKind === 'doctor' ? 'Doctors' : groupKind === 'hospital' ? 'Hospitals' : 'Ambulances';
+                    const GroupIcon = groupKind === 'hospital' ? Building2 : groupKind === 'ambulance' ? Ambulance : Stethoscope;
+                    return (
+                      <div key={groupKind} className="space-y-1">
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+                          <GroupIcon className="h-3.5 w-3.5 text-primary" />
+                          {groupLabel} <span className="text-muted-foreground font-normal">({groupRows.length})</span>
+                        </div>
+                        <Table className="table-fixed w-full">
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-[45%]">Provider</TableHead>
+                              <TableHead className="w-[30%]">{groupKind === 'doctor' ? 'Specialty' : 'Type'}</TableHead>
+                              <TableHead className="w-[25%]">Action</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {groupRows.map((doctor) => {
+                              const KindIcon = doctor.kind === 'hospital' ? Building2 : doctor.kind === 'ambulance' ? Ambulance : Stethoscope;
+                              return (
+                                <TableRow key={`${doctor.kind}-${doctor.id}`}>
+                                  <TableCell className="p-2">
+                                    <div className="flex items-center gap-2">
+                                      <Avatar className="h-7 w-7 shrink-0">
+                                        <AvatarImage src={doctor.avatar_url || undefined} />
+                                        <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
+                                          <KindIcon className="h-3.5 w-3.5" />
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div className="flex flex-col min-w-0">
+                                        <span className="font-medium text-foreground text-xs truncate">{doctor.full_name || "Unknown"}</span>
+                                        <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                          {Array.from({ length: Math.min(5, Math.max(0, Math.round(Number(doctor.stars) || 0))) }).map((_, i) => (
+                                            <Star key={i} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
+                                          ))}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="p-2">
+                                    {doctor.kind === 'doctor' && doctor.specialty ? (
+                                      <Badge className={`text-[10px] font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
+                                        {doctor.specialty}
+                                      </Badge>
+                                    ) : (
+                                      <Badge variant="outline" className="text-[10px] capitalize">{doctor.kind}</Badge>
+                                    )}
+                                  </TableCell>
+                                  <TableCell className="p-2">
+                                    <div className="flex items-center gap-1">
+                                      {doctor.kind === 'doctor' && (
+                                        <InviteDoctorDialog
+                                          prefillPracticeNumber={doctor.registration || ""}
+                                          prefillRegistrationNumber={doctor.registration || ""}
+                                          prefillDoctorName={doctor.full_name || ""}
+                                          prefillAvatarUrl={doctor.avatar_url || ""}
+                                          prefillSpecialty={doctor.specialty || ""}
+                                        />
+                                      )}
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7"
+                                        onClick={() => setDetailsDoctor(doctor)}
+                                        aria-label="View details"
+                                      >
+                                        <MoreVertical className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
           )}
@@ -459,12 +473,14 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
             )}
             {detailsDoctor?.address && <div><span className="text-muted-foreground">Address:</span> {detailsDoctor.address}</div>}
             {detailsDoctor?.phone && <div><span className="text-muted-foreground">Phone:</span> {detailsDoctor.phone}</div>}
-            {detailsDoctor?.about_me && (
-              <div className="pt-2 border-t">
-                <div className="text-muted-foreground mb-1 font-medium">About Me</div>
+            <div className="pt-2 border-t">
+              <div className="text-muted-foreground mb-1 font-medium">About Me</div>
+              {detailsDoctor?.about_me ? (
                 <p className="whitespace-pre-wrap leading-relaxed">{detailsDoctor.about_me}</p>
-              </div>
-            )}
+              ) : (
+                <p className="italic text-muted-foreground">Not provided yet.</p>
+              )}
+            </div>
           </div>
         </DialogContent>
       </Dialog>

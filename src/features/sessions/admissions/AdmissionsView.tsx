@@ -167,14 +167,9 @@ export function AdmissionsView({ patientId, patientHeight, patientWeight, canEdi
         <Card className="p-8 text-center">
           <Hospital className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
           <p className="text-sm text-muted-foreground">No hospital admissions on record.</p>
-          <p className="text-xs text-muted-foreground mt-1 mb-4">
+          <p className="text-xs text-muted-foreground mt-1">
             Entries are created automatically when a doctor saves a Hospital Admission Form, or you can upload one yourself.
           </p>
-          {canEdit && (
-            <Button size="sm" onClick={() => setShowUpload(true)} className="gap-1">
-              <Upload className="h-3 w-3" /> Upload Admission Form
-            </Button>
-          )}
         </Card>
       ) : (
         admissions.map((a) => (
