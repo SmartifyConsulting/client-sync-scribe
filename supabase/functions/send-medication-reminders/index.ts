@@ -21,8 +21,9 @@ Deno.serve(async (req) => {
     // Pull active prescriptions with reminder_times
     const { data: rxs } = await supabase
       .from("prescriptions")
-      .select("id, patient_id, medication, dosage, with_food, reminder_times, refills_remaining, refill_reminder_days, end_date")
+      .select("id, patient_id, medication, dosage, with_food, reminder_times, refills_remaining, refill_reminder_days, end_date, reminders_enabled")
       .eq("status", "active")
+      .eq("reminders_enabled", true)
       .not("reminder_times", "is", null);
 
     let created = 0;
