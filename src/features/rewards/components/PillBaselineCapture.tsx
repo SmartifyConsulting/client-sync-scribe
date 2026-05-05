@@ -559,14 +559,21 @@ export function PillBaselineCapture({
               Record yourself taking the dose. {INGEST_SECONDS} seconds, front camera. Video isn't saved.
             </div>
             <div className="relative rounded-xl overflow-hidden bg-black aspect-video">
-              {recordedBlob ? (
+              {recordedBlob && recordedUrl ? (
                 <video
-                  src={URL.createObjectURL(recordedBlob)}
+                  src={recordedUrl}
                   controls
-                  className="w-full h-full object-cover"
+                  playsInline
+                  className="w-full h-full object-contain bg-black"
+                  onError={() =>
+                    toast({
+                      title: "Replay not supported on this device",
+                      description: "Don't worry — your baseline will still be processed.",
+                    })
+                  }
                 />
               ) : (
-                <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover mirror" />
               )}
               {isRecording && (
                 <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground px-2 py-1 rounded-full text-xs font-bold animate-pulse">
