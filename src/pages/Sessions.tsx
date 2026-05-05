@@ -36,6 +36,7 @@ import {
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
 import { VisitCategoryDialog } from "@/components/sessions/VisitCategoryDialog";
+import { FollowUpAppointmentDialog } from "@/features/sessions/components/FollowUpAppointmentDialog";
 import { MedicalCertificateEditor } from "@/components/sessions/MedicalCertificateEditor";
 import { ReferralLetterEditor } from "@/components/sessions/ReferralLetterEditor";
 import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
