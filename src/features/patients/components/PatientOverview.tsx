@@ -31,6 +31,7 @@ interface StatusItem {
   name: string;
   date: string;
   status: "active" | "inactive";
+  end_date?: string;
 }
 
 interface MedicationItem extends StatusItem {}
