@@ -1096,6 +1096,10 @@ export default function MyPractice() {
 
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
         <TabsContent value="practice" className="mt-4 space-y-4">
+          <AboutMeAccordion
+            value={(profile as any)?.about_me || ""}
+            onSave={async (v) => { await updateProfile({ about_me: v } as any); }}
+          />
           {/* Personal Information Accordion */}
           <Accordion type="multiple" className="space-y-4">
             <AccordionItem value="personal" className="rounded-xl border border-primary bg-card shadow-sm">
