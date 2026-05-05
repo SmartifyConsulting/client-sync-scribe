@@ -242,7 +242,7 @@ serve(async (req) => {
         }
 
         const accessToken = await getPayPalAccessToken();
-        const order = await createPayPalOrder(accessToken, planType, billingCycle);
+        const order = await createPayPalOrder(supabase, accessToken, planType, billingCycle);
 
         console.log("PayPal trial order created:", order.id);
 
@@ -348,7 +348,7 @@ serve(async (req) => {
         }
 
         const accessToken = await getPayPalAccessToken();
-        const order = await createPayPalOrder(accessToken, planType, billingCycle);
+        const order = await createPayPalOrder(supabase, accessToken, planType, billingCycle);
 
         console.log("PayPal reactivation order created:", order.id);
 
@@ -388,7 +388,7 @@ serve(async (req) => {
       }
 
       const accessToken = await getPayPalAccessToken();
-      const order = await createPayPalOrder(accessToken, planType, billingCycle);
+      const order = await createPayPalOrder(supabase, accessToken, planType, billingCycle);
 
       console.log("PayPal order created:", order.id);
 
