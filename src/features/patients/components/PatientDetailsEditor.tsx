@@ -664,11 +664,13 @@ export function PatientDetailsEditor({
         for (const m of chronicMeds) {
           const key = norm(m.name);
           const existing = existingByName.get(key);
-          const payload = {
+          const payload: any = {
             medication: m.name.trim(),
             dosage: composeDosage(m),
             frequency: composeFrequency(m),
             status: "active",
+            reminder_times: m.reminder_time ? [m.reminder_time] : null,
+            reminders_enabled: m.reminders_enabled ?? true,
           };
           if (existing) {
             await supabase.from("prescriptions").update(payload).eq("id", existing.id);
