@@ -27,6 +27,7 @@ interface ProviderResult {
   about_me: string | null;
   preferred_language: string | null;
   stars: number;
+  ownership?: string | null;
 }
 
 interface DoctorProfile {
