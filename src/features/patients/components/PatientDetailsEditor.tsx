@@ -2789,7 +2789,18 @@ export function PatientDetailsEditor({
                                   </span>
                                 )}
                               </div>
-                              <div className="flex gap-1 shrink-0">
+                              <div className="flex gap-1 shrink-0 items-center">
+                                <Bell className={`h-3 w-3 ${(m.reminders_enabled ?? true) ? "text-primary" : "text-muted-foreground"}`} />
+                                <Switch
+                                  className="scale-75"
+                                  checked={m.reminders_enabled ?? true}
+                                  onCheckedChange={(v) => {
+                                    setCurrentMedications((prev) =>
+                                      prev.map((x) => (x.id === m.id ? { ...x, reminders_enabled: v } : x)),
+                                    );
+                                    setHasChanges(true);
+                                  }}
+                                />
                                 <Button
                                   variant="ghost"
                                   size="icon"
