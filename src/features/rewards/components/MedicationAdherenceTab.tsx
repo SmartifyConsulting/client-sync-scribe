@@ -114,8 +114,17 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
   const today = format(new Date(), "yyyy-MM-dd");
 
 
+  // Manage replay object URL: create when blob set, revoke when replaced/unmounted
+  useEffect(() => {
+    if (!recordedBlob) {
+      setRecordedUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(recordedBlob);
+    setRecordedUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [recordedBlob]);
 
-  // Fetch active prescriptions for this chronic patient
   const { data: prescriptions = [], isLoading: prescriptionsLoading } = useQuery({
     queryKey: ["chronic-prescriptions", patientId],
     queryFn: async () => {
