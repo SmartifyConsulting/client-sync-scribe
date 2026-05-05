@@ -496,22 +496,26 @@ This clip covers TABLET ${tabletIdx} OF ${tabletTot} for this dose.
 REQUIRED signals for this intake method: ${required}
 DISQUALIFYING signals for this intake method: ${disqualifying}
 
-Also COUNT the number of distinct tablets/capsules/pills visible in the close-up frames at any point during the clip. If multiple tablets were taken together, count all of them. Return that integer in detectedTabletCount (0 if none visible).
+A SWALLOW ACTION means jaw/throat movement, the head tilting back, OR the mouth visibly closing then relaxing across at least 2 frames after the tablet enters the mouth. For methods "swallow", "crush", "chew" and "dissolve" a swallow action MUST be observed — if you cannot see it, set swallowDetected=false and isValid=false.
+
+Also COUNT the number of distinct tablets/capsules/pills visible in the close-up frames at any point during the clip. Return that integer in detectedTabletCount (0 if none visible).
 
 Analyse the SEQUENCE and respond with JSON ONLY:
 {
   "isValid": true or false,
   "confidence": number 0-100,
   "pattern_match_score": number 0-100,
-  "description": "brief description of what the sequence shows",
+  "description": "brief description of what the sequence shows. If swallow not detected, say so plainly.",
   "person_detected": true or false,
   "ingestion_detected": true or false,
+  "swallowDetected": true or false,
+  "chewingDetected": true or false,
   "disqualifying_signal": true or false,
   "detectedTabletCount": integer,
   "detected_elements": ["list", "of", "relevant", "elements"]
 }
 
-Set isValid=true only if person_detected AND ingestion_detected AND the required signals are present AND no disqualifying signal is observed. Set confidence based on overall certainty. Only return JSON.`;
+Set isValid=true only if person_detected AND ingestion_detected AND the required signals are present AND no disqualifying signal is observed AND (for swallow/crush/dissolve/chew) swallowDetected is true. Only return JSON.`;
 
     const content: any[] = [{ type: 'text', text: validationPrompt }];
     urls.forEach((url, i) => {
