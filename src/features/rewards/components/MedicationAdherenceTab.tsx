@@ -498,6 +498,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
   };
 
   const proceedToIngestion = () => {
+    if (!pillCheckResult?.isMatch) return;
     setPillCheckResult(null);
     setStage("ingestion");
   };
