@@ -351,3 +351,8 @@
 .admin-tab-scope .text-xl.font-bold {
   font-size: 14px !important;
 }
+
+/* Mirror utility — used for selfie-style camera previews so the user's hand movements feel natural */
+.mirror {
+  transform: scaleX(-1);
+}

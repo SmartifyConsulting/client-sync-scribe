@@ -91,7 +91,7 @@ export function VulaExplainerDialog({ open, onOpenChange, onCta }: VulaExplainer
             className="w-full rounded-xl bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white gap-2 shadow-md h-10 text-sm font-semibold"
           >
             <Ticket className="h-4 w-4" />
-            Earn Vulas
+            See where I can use my Vulas
           </Button>
 
           {/* Footer tagline */}

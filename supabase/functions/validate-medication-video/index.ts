@@ -80,6 +80,51 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // ============================================================
+    // BASELINE TABLET CHECK — quick AI check that markings are visible
+    // ============================================================
+    if (body.mode === 'baseline_tablet_check') {
+      const { imageUrl, expectedQuantity } = body;
+      if (!imageUrl) {
+        return new Response(JSON.stringify({ error: 'Missing imageUrl' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      const expectedQty = Number(expectedQuantity) > 0 ? Number(expectedQuantity) : 1;
+      const prompt = `Look at this close-up photo of a tablet/capsule. Reply in JSON ONLY:
+{
+  "markingsVisible": true or false,
+  "tabletCount": integer (number of distinct tablets/capsules visible),
+  "suggestion": "if markingsVisible is false, give one short sentence telling the patient how to retake (e.g. flip the tablet, get closer). If true, empty string."
+}
+Markings means any printed letters, numbers, brand logo or scored line. A plain unmarked tablet still counts as markingsVisible=false. Only return JSON.`;
+      let markingsVisible = true;
+      let tabletCount = expectedQty;
+      let suggestion = '';
+      try {
+        const r = await callGemini(LOVABLE_API_KEY, [
+          { type: 'text', text: prompt },
+          { type: 'image_url', image_url: { url: imageUrl } },
+        ]);
+        if (r.ok) {
+          const d = await r.json();
+          const c = d.choices?.[0]?.message?.content || '';
+          const m = c.match(/\{[\s\S]*\}/);
+          if (m) {
+            const parsed = JSON.parse(m[0]);
+            markingsVisible = parsed.markingsVisible !== false;
+            if (typeof parsed.tabletCount === 'number') tabletCount = Math.max(0, Math.floor(parsed.tabletCount));
+            suggestion = parsed.suggestion || '';
+          }
+        }
+      } catch (e) {
+        console.error('baseline_tablet_check failed', e);
+      }
+      if (tabletCount < expectedQty && markingsVisible) {
+        suggestion = `We only saw ${tabletCount} of ${expectedQty} tablets — show them all together.`;
+        markingsVisible = false;
+      }
+      return new Response(JSON.stringify({ ok: true, markingsVisible, tabletCount, expectedQuantity: expectedQty, suggestion }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    // ============================================================
     // BASELINE CAPTURE — full first-dose video (frames only)
     // Persists tablet description + ingestion-pattern summary
     // ============================================================
@@ -300,16 +345,18 @@ Only return JSON.`;
         );
       }
 
+      const expectedQty = Number(body.expectedQuantity) > 0 ? Number(body.expectedQuantity) : 1;
       const matchPrompt = `Image A is the patient's REFERENCE photo of their prescribed medication (${rx.medication} ${rx.dosage || ''}).
-Image B is the pill they're about to take RIGHT NOW.
+Image B is the pill they're about to take RIGHT NOW. The patient is expected to take ${expectedQty} tablet(s).
 
-Compare colour, shape, size, surface texture and any visible markings or score lines. Generic unmarked tablets only need to share colour and shape — be lenient on those. Pills with distinctive markings should match those markings.
+Compare colour, shape, size, surface texture and any visible markings or score lines. Generic unmarked tablets only need to share colour and shape — be lenient on those. Pills with distinctive markings should match those markings. Also COUNT how many distinct tablets/capsules are visible in image B.
 
 Reply in JSON ONLY:
 {
   "isPillVisible": true or false,
   "isMatch": true or false,
   "confidence": number 0-100,
+  "detectedTabletCount": integer,
   "matchReason": "one short sentence explaining the verdict"
 }
 Only return JSON.`;
@@ -364,6 +411,7 @@ Only return JSON.`;
           isPillVisible: true,
           isMatch: !!matched.isMatch,
           confidence: matched.confidence ?? null,
+          detectedTabletCount: typeof matched.detectedTabletCount === 'number' ? Math.max(0, Math.floor(matched.detectedTabletCount)) : null,
           matchReason: matched.matchReason || (matched.isMatch
             ? "Matches your reference pill."
             : "This doesn't look like your usual pill — please double-check before taking it."),
@@ -451,22 +499,26 @@ This clip covers TABLET ${tabletIdx} OF ${tabletTot} for this dose.
 REQUIRED signals for this intake method: ${required}
 DISQUALIFYING signals for this intake method: ${disqualifying}
 
-Also COUNT the number of distinct tablets/capsules/pills visible in the close-up frames at any point during the clip. If multiple tablets were taken together, count all of them. Return that integer in detectedTabletCount (0 if none visible).
+A SWALLOW ACTION means jaw/throat movement, the head tilting back, OR the mouth visibly closing then relaxing across at least 2 frames after the tablet enters the mouth. For methods "swallow", "crush", "chew" and "dissolve" a swallow action MUST be observed — if you cannot see it, set swallowDetected=false and isValid=false.
+
+Also COUNT the number of distinct tablets/capsules/pills visible in the close-up frames at any point during the clip. Return that integer in detectedTabletCount (0 if none visible).
 
 Analyse the SEQUENCE and respond with JSON ONLY:
 {
   "isValid": true or false,
   "confidence": number 0-100,
   "pattern_match_score": number 0-100,
-  "description": "brief description of what the sequence shows",
+  "description": "brief description of what the sequence shows. If swallow not detected, say so plainly.",
   "person_detected": true or false,
   "ingestion_detected": true or false,
+  "swallowDetected": true or false,
+  "chewingDetected": true or false,
   "disqualifying_signal": true or false,
   "detectedTabletCount": integer,
   "detected_elements": ["list", "of", "relevant", "elements"]
 }
 
-Set isValid=true only if person_detected AND ingestion_detected AND the required signals are present AND no disqualifying signal is observed. Set confidence based on overall certainty. Only return JSON.`;
+Set isValid=true only if person_detected AND ingestion_detected AND the required signals are present AND no disqualifying signal is observed AND (for swallow/crush/dissolve/chew) swallowDetected is true. Only return JSON.`;
 
     const content: any[] = [{ type: 'text', text: validationPrompt }];
     urls.forEach((url, i) => {

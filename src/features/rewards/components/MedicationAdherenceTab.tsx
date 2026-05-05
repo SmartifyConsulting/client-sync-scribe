@@ -19,6 +19,8 @@ interface PillCheckResult {
   isMatch: boolean;
   matchReason: string;
   observedDescription?: string;
+  detectedCount?: number;
+  expectedCount?: number;
 }
 
 interface Prescription {
@@ -27,6 +29,35 @@ interface Prescription {
   dosage: string;
   frequency: string;
   status: string;
+  quantity_per_dose?: number | null;
+}
+
+// Pick the best supported MediaRecorder mime type for cross-browser playback
+function pickRecorderMime(): string | undefined {
+  const candidates = [
+    "video/mp4;codecs=avc1",
+    "video/mp4",
+    "video/webm;codecs=vp9",
+    "video/webm;codecs=vp8",
+    "video/webm",
+  ];
+  for (const c of candidates) {
+    if (typeof MediaRecorder !== "undefined" && (MediaRecorder as any).isTypeSupported?.(c)) return c;
+  }
+  return undefined;
+}
+
+// Parse "2 tablets", "two capsules", "1 tab", etc. Returns 1 if not parseable.
+function parseQuantity(dosage?: string | null, fallback = 1): number {
+  if (!dosage) return fallback;
+  const s = dosage.toLowerCase();
+  const num = s.match(/(\d+)\s*(tab|tabs|tablet|tablets|cap|caps|capsule|capsules|pill|pills|x)/);
+  if (num) return Math.max(1, parseInt(num[1], 10));
+  const words: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6 };
+  for (const [w, n] of Object.entries(words)) {
+    if (new RegExp(`\\b${w}\\b\\s*(tab|cap|pill)`).test(s)) return n;
+  }
+  return fallback;
 }
 
 interface AdherenceRecord {
@@ -65,6 +96,8 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
   const [isCheckingPill, setIsCheckingPill] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
+  const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
+  const [recordedMime, setRecordedMime] = useState<string>("video/webm");
   const [isUploading, setIsUploading] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [countdown, setCountdown] = useState(30);
@@ -82,14 +115,23 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
   const today = format(new Date(), "yyyy-MM-dd");
 
 
+  // Manage replay object URL: create when blob set, revoke when replaced/unmounted
+  useEffect(() => {
+    if (!recordedBlob) {
+      setRecordedUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(recordedBlob);
+    setRecordedUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [recordedBlob]);
 
-  // Fetch active prescriptions for this chronic patient
   const { data: prescriptions = [], isLoading: prescriptionsLoading } = useQuery({
     queryKey: ["chronic-prescriptions", patientId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("prescriptions")
-        .select("id, medication, dosage, frequency, status")
+        .select("id, medication, dosage, frequency, status, quantity_per_dose")
         .eq("patient_id", patientId)
         .eq("status", "active");
       if (error) throw error;
@@ -308,9 +350,12 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
   const startRecording = () => {
     if (!stream) return;
     chunksRef.current = [];
-    const mr = new MediaRecorder(stream, { mimeType: "video/webm" });
+    const mime = pickRecorderMime();
+    const mr = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+    const finalMime = mr.mimeType || mime || "video/webm";
+    setRecordedMime(finalMime);
     mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-    mr.onstop = () => setRecordedBlob(new Blob(chunksRef.current, { type: "video/webm" }));
+    mr.onstop = () => setRecordedBlob(new Blob(chunksRef.current, { type: finalMime }));
     mr.start();
     mediaRecorderRef.current = mr;
     setIsRecording(true);
@@ -416,8 +461,19 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
       if (upErr) throw upErr;
       const { data: urlData } = supabase.storage.from("patient-media").getPublicUrl(filePath);
 
+      const rxForCheck = prescriptions.find((p) => p.id === recordingPrescriptionId);
+      const expectedQuantity = Math.max(
+        1,
+        Number(rxForCheck?.quantity_per_dose) || parseQuantity(rxForCheck?.dosage),
+      );
+
       const { data, error: fnError } = await supabase.functions.invoke("validate-medication-video", {
-        body: { mode: "pill_check", imageUrl: urlData.publicUrl, prescriptionId: recordingPrescriptionId },
+        body: {
+          mode: "pill_check",
+          imageUrl: urlData.publicUrl,
+          prescriptionId: recordingPrescriptionId,
+          expectedQuantity,
+        },
       });
       if (fnError) throw fnError;
 
@@ -429,6 +485,8 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
         isMatch: !!data?.isMatch,
         matchReason: data?.matchReason || "",
         observedDescription: data?.observedDescription,
+        detectedCount: typeof data?.detectedTabletCount === "number" ? data.detectedTabletCount : undefined,
+        expectedCount: expectedQuantity,
       };
       setPillCheckResult(result);
     } catch (e: any) {
@@ -483,11 +541,21 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
       const filePaths = uploads.map((u) => u.path);
 
       // 3. Call AI validation edge function
-      const rxName = prescriptions.find((p) => p.id === recordingPrescriptionId)?.medication || "";
+      const rxObj = prescriptions.find((p) => p.id === recordingPrescriptionId);
+      const rxName = rxObj?.medication || "";
+      const expectedQuantity = Math.max(1, Number(rxObj?.quantity_per_dose) || parseQuantity(rxObj?.dosage));
       const { data, error: fnError } = await supabase.functions.invoke(
         "validate-medication-video",
         {
-          body: { imageUrls, filePaths, prescriptionId: recordingPrescriptionId, patientId },
+          body: {
+            imageUrls,
+            filePaths,
+            prescriptionId: recordingPrescriptionId,
+            patientId,
+            expectedQuantity,
+            tabletTotal: expectedQuantity,
+            tabletIndex: expectedQuantity,
+          },
         }
       );
 
@@ -739,6 +807,19 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            {(() => {
+              const rxNow = prescriptions.find((p) => p.id === recordingPrescriptionId);
+              const expectedQty = Math.max(1, Number(rxNow?.quantity_per_dose) || parseQuantity(rxNow?.dosage));
+              if (stage === "pill_check" && expectedQty > 1) {
+                return (
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-2 text-xs text-foreground flex items-center gap-2">
+                    <Pill className="h-4 w-4 text-primary" />
+                    Show <strong>all {expectedQty} tablets</strong> together in the frame.
+                  </div>
+                );
+              }
+              return null;
+            })()}
             <p className="text-sm text-muted-foreground">
               {stage === "pill_check"
                 ? "Hold your pill close to the camera so we can confirm it matches your prescription."
@@ -749,8 +830,19 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
             </p>
 
             <div className="relative rounded-lg overflow-hidden bg-black aspect-video">
-              {recordedBlob ? (
-                <video src={URL.createObjectURL(recordedBlob)} controls className="w-full h-full object-cover" />
+              {recordedBlob && recordedUrl ? (
+                <video
+                  src={recordedUrl}
+                  controls
+                  playsInline
+                  className="w-full h-full object-contain bg-black"
+                  onError={() =>
+                    toast({
+                      title: "Replay not supported on this device",
+                      description: "Don't worry — the recording was sent for verification.",
+                    })
+                  }
+                />
               ) : (
                 <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover mirror" />
               )}
@@ -787,6 +879,8 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                         <p className="font-medium">
                           {!pillCheckResult.isPillVisible
                             ? "No pill detected"
+                            : pillCheckResult.expectedCount && pillCheckResult.detectedCount !== undefined && pillCheckResult.detectedCount < pillCheckResult.expectedCount
+                            ? `We saw ${pillCheckResult.detectedCount} of ${pillCheckResult.expectedCount} tablets — please show them all`
                             : pillCheckResult.isMatch
                             ? "Looks right — proceed to take it"
                             : "Couldn't confirm exact pill — proceeding"}
@@ -813,6 +907,13 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                       <Button variant="outline" onClick={handleCloseRecording}>Cancel</Button>
                       <Button onClick={retryPillCheck} className="gap-2">
                         <RefreshCw className="h-4 w-4" /> Try again
+                      </Button>
+                    </>
+                  ) : pillCheckResult.expectedCount && pillCheckResult.detectedCount !== undefined && pillCheckResult.detectedCount < pillCheckResult.expectedCount ? (
+                    <>
+                      <Button variant="outline" onClick={handleCloseRecording}>Cancel</Button>
+                      <Button onClick={retryPillCheck} className="gap-2">
+                        <RefreshCw className="h-4 w-4" /> Retake with all tablets
                       </Button>
                     </>
                   ) : (
@@ -879,6 +980,10 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
           patientId={patientId}
           medicationName={baselineCapture.medication}
           dosage={baselineCapture.dosage}
+          quantity={(() => {
+            const rx = prescriptions.find((p) => p.id === baselineCapture.rxId);
+            return Math.max(1, Number(rx?.quantity_per_dose) || parseQuantity(rx?.dosage));
+          })()}
         />
       )}
     </div>

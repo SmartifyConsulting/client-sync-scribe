@@ -53,13 +53,34 @@ export function PillBaselineCapture({
   // Stills (packaging + tablet close-up)
   const [packagingBlob, setPackagingBlob] = useState<Blob | null>(null);
   const [tabletBlob, setTabletBlob] = useState<Blob | null>(null);
+  const [tabletWarning, setTabletWarning] = useState<string | null>(null);
+  const [checkingMarkings, setCheckingMarkings] = useState(false);
 
   // Ingestion video
   const [isRecording, setIsRecording] = useState(false);
   const [countdown, setCountdown] = useState(INGEST_SECONDS);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
+  const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
+  const [recordedMime, setRecordedMime] = useState<string>("video/webm");
 
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Manage replay object URL lifecycle
+  useEffect(() => {
+    if (!recordedBlob) { setRecordedUrl(null); return; }
+    const url = URL.createObjectURL(recordedBlob);
+    setRecordedUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [recordedBlob]);
+
+  // Pick the best supported MediaRecorder mime type
+  const pickRecorderMime = (): string | undefined => {
+    const candidates = ["video/mp4;codecs=avc1", "video/mp4", "video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"];
+    for (const c of candidates) {
+      if (typeof MediaRecorder !== "undefined" && (MediaRecorder as any).isTypeSupported?.(c)) return c;
+    }
+    return undefined;
+  };
 
   // ----- Camera lifecycle -----
   // packaging + tablet steps use rear camera; ingest uses front
@@ -125,10 +146,35 @@ export function PillBaselineCapture({
 
   const handleCaptureTablet = async () => {
     const b = await captureStill();
-    if (b) {
-      setTabletBlob(b);
-      stream?.getTracks().forEach((t) => t.stop());
-      setStream(null);
+    if (!b) return;
+    setTabletBlob(b);
+    setTabletWarning(null);
+    stream?.getTracks().forEach((t) => t.stop());
+    setStream(null);
+
+    // Quick AI sanity check that pill markings are visible (skip for gummy/dissolve)
+    if (intakeMethod === "gummy" || intakeMethod === "dissolve") return;
+    try {
+      setCheckingMarkings(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const ts = Date.now();
+      const path = `pill-references/${user.id}/${prescriptionId}-${ts}-marking-check.jpg`;
+      const { error: upErr } = await supabase.storage.from("patient-media").upload(path, b, { contentType: "image/jpeg", upsert: true });
+      if (upErr) return;
+      const { data: urlData } = supabase.storage.from("patient-media").getPublicUrl(path);
+      const { data } = await supabase.functions.invoke("validate-medication-video", {
+        body: { mode: "baseline_tablet_check", imageUrl: urlData.publicUrl, expectedQuantity: quantity },
+      });
+      // Best-effort cleanup of the marking-check still
+      supabase.storage.from("patient-media").remove([path]).catch(() => {});
+      if (data && data.markingsVisible === false) {
+        setTabletWarning(data.suggestion || "We can't see any printed letters, numbers or score lines. Try flipping the tablet and retaking.");
+      }
+    } catch (e) {
+      console.error("markings check failed", e);
+    } finally {
+      setCheckingMarkings(false);
     }
   };
 
@@ -136,9 +182,12 @@ export function PillBaselineCapture({
   const startRecording = () => {
     if (!stream) return;
     chunksRef.current = [];
-    const mr = new MediaRecorder(stream, { mimeType: "video/webm" });
+    const mime = pickRecorderMime();
+    const mr = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+    const finalMime = mr.mimeType || mime || "video/webm";
+    setRecordedMime(finalMime);
     mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-    mr.onstop = () => setRecordedBlob(new Blob(chunksRef.current, { type: "video/webm" }));
+    mr.onstop = () => setRecordedBlob(new Blob(chunksRef.current, { type: finalMime }));
     mr.start();
     mediaRecorderRef.current = mr;
     setIsRecording(true);
@@ -486,8 +535,8 @@ export function PillBaselineCapture({
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Pill className="h-4 w-4 text-primary" />
               {quantity > 1
-                ? `Show all ${quantity} tablets together on your palm or a plain surface.`
-                : "Place the tablet on your palm or a plain surface and fill the frame."}
+                ? `Show all ${quantity} tablets together with any printed letters, numbers or score lines facing the camera.`
+                : "Place the tablet on your palm and turn it so any printed letters, numbers or score lines are clearly visible."}
             </div>
             {quantity > 1 && (
               <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
@@ -505,6 +554,12 @@ export function PillBaselineCapture({
                 <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
               )}
             </div>
+            {tabletBlob && tabletWarning && (
+              <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2">
+                <Info className="h-4 w-4 mt-0.5 shrink-0" />
+                <p>{tabletWarning}</p>
+              </div>
+            )}
             <div className="flex justify-between gap-2">
               {!tabletBlob ? (
                 <>
@@ -515,11 +570,11 @@ export function PillBaselineCapture({
                 </>
               ) : (
                 <>
-                  <Button variant="outline" onClick={() => { setTabletBlob(null); startCamera("environment"); }} className="gap-2">
+                  <Button variant="outline" onClick={() => { setTabletBlob(null); setTabletWarning(null); startCamera("environment"); }} className="gap-2">
                     <RefreshCw className="h-4 w-4" /> Retake
                   </Button>
-                  <Button onClick={() => setStep("ingest")} className="gap-2">
-                    <Check className="h-4 w-4" /> Use photo
+                  <Button onClick={() => setStep("ingest")} disabled={checkingMarkings} className="gap-2">
+                    <Check className="h-4 w-4" /> {tabletWarning ? "Use anyway" : "Use photo"}
                   </Button>
                 </>
               )}
@@ -535,14 +590,21 @@ export function PillBaselineCapture({
               Record yourself taking the dose. {INGEST_SECONDS} seconds, front camera. Video isn't saved.
             </div>
             <div className="relative rounded-xl overflow-hidden bg-black aspect-video">
-              {recordedBlob ? (
+              {recordedBlob && recordedUrl ? (
                 <video
-                  src={URL.createObjectURL(recordedBlob)}
+                  src={recordedUrl}
                   controls
-                  className="w-full h-full object-cover"
+                  playsInline
+                  className="w-full h-full object-contain bg-black"
+                  onError={() =>
+                    toast({
+                      title: "Replay not supported on this device",
+                      description: "Don't worry — your baseline will still be processed.",
+                    })
+                  }
                 />
               ) : (
-                <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover mirror" />
               )}
               {isRecording && (
                 <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground px-2 py-1 rounded-full text-xs font-bold animate-pulse">

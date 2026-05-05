@@ -2532,6 +2532,7 @@ export type Database = {
           instructions: string | null
           medication: string
           patient_id: string
+          quantity_per_dose: number
           refill_reminder_days: number | null
           refills_remaining: number | null
           reminder_times: string[] | null
@@ -2553,6 +2554,7 @@ export type Database = {
           instructions?: string | null
           medication: string
           patient_id: string
+          quantity_per_dose?: number
           refill_reminder_days?: number | null
           refills_remaining?: number | null
           reminder_times?: string[] | null
@@ -2574,6 +2576,7 @@ export type Database = {
           instructions?: string | null
           medication?: string
           patient_id?: string
+          quantity_per_dose?: number
           refill_reminder_days?: number | null
           refills_remaining?: number | null
           reminder_times?: string[] | null
