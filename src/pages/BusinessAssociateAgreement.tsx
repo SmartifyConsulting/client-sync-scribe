@@ -356,10 +356,10 @@ const BusinessAssociateAgreement = () => {
             Smartify Solutions<br />
             Email: privacy@smartifysolutions.com
           </p>
-        </div>
-      </div>
-    </div>
+      </>
+    </LegalDocLayout>
   );
 };
 
 export default BusinessAssociateAgreement;
+
