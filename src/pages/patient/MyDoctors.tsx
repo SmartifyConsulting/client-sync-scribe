@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, Stethoscope, Search, Lock, UserMinus, MoreVertical } from "lucide-react";
+import { Loader2, Stethoscope, Search, Lock, UserMinus, MoreVertical, Building2, Ambulance, Star } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -14,6 +14,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { InviteDoctorDialog } from "@/components/patient/InviteDoctorDialog";
 import { useToast } from "@/hooks/use-toast";
 import { LANGUAGES, COMMON_SPECIALTIES } from "@/lib/languages";
+
+interface ProviderResult {
+  id: string;
+  kind: 'doctor' | 'hospital' | 'ambulance';
+  full_name: string | null;
+  specialty: string | null;
+  address: string | null;
+  phone: string | null;
+  avatar_url: string | null;
+  registration: string | null;
+  about_me: string | null;
+  preferred_language: string | null;
+  stars: number;
+}
 
 interface DoctorProfile {
   id: string;
