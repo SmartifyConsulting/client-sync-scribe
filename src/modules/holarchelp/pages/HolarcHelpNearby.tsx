@@ -25,8 +25,25 @@ export default function HolarcHelpNearby() {
   const [coords, setCoords] = useState<Coords | null>(null);
   const [permState, setPermState] = useState<PermissionState | "unknown">("unknown");
   const [loadingLoc, setLoadingLoc] = useState(false);
-  const [providers, setProviders] = useState<ProviderMarker[]>([]);
+  const [providers, setProviders] = useState<(ProviderMarker & { ownership?: string | null })[]>([]);
   const [loadingProviders, setLoadingProviders] = useState(false);
+  const [hasMedicalAid, setHasMedicalAid] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setHasMedicalAid(false); return; }
+      const { data } = await supabase
+        .from("patients")
+        .select("medical_aid, medical_aid_number")
+        .eq("patient_user_id", user.id)
+        .order("created_at")
+        .limit(1)
+        .maybeSingle();
+      const has = !!(data?.medical_aid?.trim() || data?.medical_aid_number?.trim());
+      setHasMedicalAid(has);
+    })();
+  }, []);
 
   useEffect(() => {
     if (!("permissions" in navigator)) {
