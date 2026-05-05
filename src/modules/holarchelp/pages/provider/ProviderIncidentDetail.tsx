@@ -68,6 +68,20 @@ export default function ProviderIncidentDetail() {
 
       <LiveMap points={locations} height={320} />
 
+      {(incident.voice_note_transcript || incident.voice_note_audio_url) && (
+        <div className="rounded-2xl border-2 border-red-600/40 bg-red-50 dark:bg-red-950/20 p-4">
+          <p className="mb-2 text-xs font-bold uppercase tracking-wider text-red-700 dark:text-red-400">
+            Patient voice note
+          </p>
+          {incident.voice_note_transcript && (
+            <p className="text-sm whitespace-pre-wrap mb-2">{incident.voice_note_transcript}</p>
+          )}
+          {incident.voice_note_audio_url && (
+            <VoiceNoteAudio path={incident.voice_note_audio_url} />
+          )}
+        </div>
+      )}
+
       <div className="rounded-2xl border bg-card p-4">
         <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status updates</p>
         <div className="grid gap-2 sm:grid-cols-2">
