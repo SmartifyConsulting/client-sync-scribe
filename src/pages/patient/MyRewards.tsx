@@ -735,7 +735,28 @@ export default function MyRewards() {
         </TabsContent>
 
         <TabsContent value="transfers" className="space-y-6">
-          {/* Partner Apps - at top */}
+          {/* Redeem from 6Dot50 with Vula Vouchers */}
+          <Card className="border-primary/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Gift className="h-5 w-5 text-primary" />
+                Redeem from 6Dot50 with Vula Vouchers
+              </CardTitle>
+              <CardDescription>
+                Redeem your Vulas at retailers in the 6Dot50 network.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={() => window.open("https://portal.6dot50.com/", "_blank", "noopener")}
+                className="gap-2"
+              >
+                <Gift className="h-4 w-4" /> Redeem
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Partner Apps */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -796,60 +817,22 @@ export default function MyRewards() {
             </CardContent>
           </Card>
 
-          {/* Transfer History */}
-          <Card>
+          {/* Transfer to Vula Vault */}
+          <Card className="border-indigo-300">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ArrowRightLeft className="h-5 w-5 text-blue-500" />
-                Transfer History
+                <ArrowRightLeft className="h-5 w-5 text-indigo-600" />
+                Transfer to Vula Vault
               </CardTitle>
-              <CardDescription>
-                Record of all Vula transfers to partner apps
-              </CardDescription>
+              <CardDescription>Move your Vulas to the Vula Vault for safekeeping.</CardDescription>
             </CardHeader>
             <CardContent>
-              {transfers.length === 0 ? (
-                <div className="text-center py-8">
-                  <ArrowRightLeft className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No transfers yet</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Partner App</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {transfers.map((transfer) => (
-                      <TableRow key={transfer.id}>
-                        <TableCell>
-                          <div>{format(parseISO(transfer.created_at), "MMM d, yyyy")}</div>
-                          <span className="text-xs text-muted-foreground">
-                            {format(parseISO(transfer.created_at), "h:mm a")}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                            {transfer.moola_partner_apps?.name || "Unknown App"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <span className="text-blue-600 font-semibold">
-                            -{transfer.amount} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-auto object-contain inline-block ml-0.5" />
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
+              <Button
+                onClick={() => { setTransferToAppId("vault"); setShowTransferDialog(true); }}
+                className="gap-2"
+              >
+                <ArrowRightLeft className="h-4 w-4" /> Transfer to Vault
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
