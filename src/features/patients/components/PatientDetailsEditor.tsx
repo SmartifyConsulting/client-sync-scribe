@@ -2390,6 +2390,22 @@ export function PatientDetailsEditor({
               </CollapsibleContent>
             </Collapsible>
 
+            {/* Emergency Contacts (linked to NOK) */}
+            {isSelfService && emergencyContacts && onEmergencyContactsChange && (
+              <EmergencyContactsInline
+                patientId={patient.id}
+                contacts={emergencyContacts}
+                onChange={onEmergencyContactsChange}
+                nokMembers={nokMembers}
+                legacyNok={{
+                  name: formData.next_of_kin_name,
+                  phone: formData.next_of_kin_phone,
+                  email: formData.next_of_kin_email,
+                  relationship: formData.next_of_kin_relationship,
+                }}
+              />
+            )}
+
             <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
               <SectionHeader icon={Briefcase} label="Employer" />
               <CollapsibleContent className="p-3">
