@@ -1763,6 +1763,7 @@ export function PatientDetailsEditor({
                                 </div>
                               </div>
                             ))}
+                          </div>
                         )}
                       </div>
                     </CollapsibleContent>
