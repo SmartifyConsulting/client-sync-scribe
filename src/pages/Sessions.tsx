@@ -302,23 +302,32 @@ export default function Sessions() {
     notesRef.current = notes;
   }, [notes]);
 
+  // Helper: chain to next post-session step (after all doc dialogs are processed)
+  const advanceToFollowUp = useCallback(() => {
+    if (currentPatient && doctorIdRef.current) {
+      setShowFollowUpDialog(true);
+    } else {
+      // No patient context — skip directly to vula
+      setShowVisitCategoryDialog(true);
+    }
+  }, [currentPatient]);
+
+  const handleFollowUpDone = useCallback(() => {
+    setShowVisitCategoryDialog(true);
+  }, []);
+
   // Callback to handle session completion after transcription
   const handleSessionComplete = useCallback(async (transcriptText: string, visitCategories?: string[] | null) => {
     console.log("=== handleSessionComplete START ===");
-    console.log("transcriptText length:", transcriptText?.length);
-    console.log("visitCategories:", visitCategories);
-    
     setSessionState("processing");
     
     const currentNotes = notesRef.current;
     const fullContent = [transcriptText, currentNotes].filter(Boolean).join('\n\n');
     
-    console.log("fullContent length:", fullContent?.length);
-    
+    let hasDocs = false;
     try {
-      // Create session and complete it in one flow (no in_progress state persisted)
       const result = await completeSession(
-        null, // no existing session ID
+        null,
         fullContent || '',
         currentNotes,
         visitCategories?.[0] || undefined,
@@ -335,20 +344,23 @@ export default function Sessions() {
         setSummary(result.summary || "Session completed successfully.");
         setActionPoints(result.action_points || []);
         
-        // Process AI-extracted documents
         const docs = (result as any)._extractedDocuments;
         if (docs?.medical_certificate) {
           setExtractedMedCert(docs.medical_certificate);
           setShowMedCertReview(true);
+          hasDocs = true;
         }
         if (docs?.prescription) {
           setExtractedPrescription(docs.prescription);
+          if (!hasDocs) { setShowPrescriptionReview(true); hasDocs = true; }
         }
         if (docs?.invoice) {
           setExtractedInvoice(docs.invoice);
+          if (!hasDocs) { setShowInvoiceReview(true); hasDocs = true; }
         }
         if (docs?.referral) {
           setExtractedReferral(docs.referral);
+          if (!hasDocs) { setShowReferralReview(true); hasDocs = true; }
         }
       } else {
         setSummary("Session completed. No content was recorded or noted.");
@@ -362,14 +374,21 @@ export default function Sessions() {
     
     setSessionState("completed");
     pendingCompletionRef.current = false;
-    console.log("=== handleSessionComplete END ===");
-  }, [completeSession, patientId]);
+    
+    // If no documents to review, jump straight to follow-up dialog
+    if (!hasDocs) {
+      setTimeout(() => advanceToFollowUp(), 300);
+    }
+  }, [completeSession, patientId, advanceToFollowUp]);
 
-  // Handle visit category selection (multi-select)
+  // Visit-category dialog now runs at the END of the post-session chain (Vula award)
   const handleVisitCategoryConfirm = async (categories: string[] | null) => {
     setShowVisitCategoryDialog(false);
-    await handleSessionComplete(pendingTranscript, categories);
-    setPendingTranscript("");
+    if (!categories || categories.length === 0 || !currentSessionId) return;
+    // Persist visit categories to the already-created session
+    try {
+      await (supabase.from('sessions').update({ visit_category: categories[0] } as any) as any).eq('id', currentSessionId);
+    } catch (e) { console.error(e); }
   };
 
   const { 
