@@ -2747,6 +2747,11 @@ export function PatientDetailsEditor({
                       )}
                     </div>
 
+                    {/* Daily vitamins / supplements / OTC — earns reduced Vulas */}
+                    {isSelfService && (
+                      <DailyMedsInline patientId={patient.id} patientUserId={userId} />
+                    )}
+
                     {/* Conditions & Diagnoses */}
                     <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
                       <div className="flex items-center justify-between mb-2">
