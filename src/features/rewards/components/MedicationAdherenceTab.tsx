@@ -19,6 +19,8 @@ interface PillCheckResult {
   isMatch: boolean;
   matchReason: string;
   observedDescription?: string;
+  detectedCount?: number;
+  expectedCount?: number;
 }
 
 interface Prescription {
