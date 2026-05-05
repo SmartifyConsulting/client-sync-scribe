@@ -462,8 +462,19 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
       if (upErr) throw upErr;
       const { data: urlData } = supabase.storage.from("patient-media").getPublicUrl(filePath);
 
+      const rxForCheck = prescriptions.find((p) => p.id === recordingPrescriptionId);
+      const expectedQuantity = Math.max(
+        1,
+        Number(rxForCheck?.quantity_per_dose) || parseQuantity(rxForCheck?.dosage),
+      );
+
       const { data, error: fnError } = await supabase.functions.invoke("validate-medication-video", {
-        body: { mode: "pill_check", imageUrl: urlData.publicUrl, prescriptionId: recordingPrescriptionId },
+        body: {
+          mode: "pill_check",
+          imageUrl: urlData.publicUrl,
+          prescriptionId: recordingPrescriptionId,
+          expectedQuantity,
+        },
       });
       if (fnError) throw fnError;
 
@@ -475,6 +486,8 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
         isMatch: !!data?.isMatch,
         matchReason: data?.matchReason || "",
         observedDescription: data?.observedDescription,
+        detectedCount: typeof data?.detectedTabletCount === "number" ? data.detectedTabletCount : undefined,
+        expectedCount: expectedQuantity,
       };
       setPillCheckResult(result);
     } catch (e: any) {
