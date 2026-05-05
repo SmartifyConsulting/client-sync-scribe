@@ -6,12 +6,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, Stethoscope, Search, Lock, UserMinus } from "lucide-react";
+import { Loader2, Stethoscope, Search, Lock, UserMinus, MoreVertical } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { InviteDoctorDialog } from "@/components/patient/InviteDoctorDialog";
 import { useToast } from "@/hooks/use-toast";
+import { LANGUAGES, COMMON_SPECIALTIES } from "@/lib/languages";
 
 interface DoctorProfile {
   id: string;
