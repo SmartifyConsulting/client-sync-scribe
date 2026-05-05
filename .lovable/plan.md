@@ -1,77 +1,63 @@
-# Doctor profile + post-session flow rework
+# Plan
 
-## 1. Doctor bottom nav: Rewards → SOS
+## 1. Fix "invite error" on re-accept (root cause)
 
-`src/components/layout/BottomNav.tsx` (`doctorNavItems`):
-- Replace the 5th item (Gift "Rewards" → `/doctor/rewards`) with `{ icon: Siren, label: "SOS", to: "/doctor/holarchelp", danger: true }`.
-- Mirror the patient `danger` styling so the SOS icon/label render in red.
+`doctor_patient_access` has `UNIQUE (doctor_id, patient_user_id)`. When a patient removes a doctor we set `is_active = false` but keep the row. On re-invite + accept, `DoctorAccessRequests.handleAcceptRequest` does a plain `INSERT` → unique-violation → toast error.
 
-Routing:
-- `src/App.tsx`: add `<Route path="/doctor/holarchelp/*" element={<HolarcHelpRoutes />} />` (same component the patient route uses).
-- `useHolarcHelpAccess()` already returns `enabled: true` for everyone, so the SOS module just works for doctors too.
+Fix in `src/components/doctor/DoctorAccessRequests.tsx`:
 
-## 2. Move "Rewards" into My HolaPrac as a 4th tab
+- Replace the `.insert(...)` with `.upsert({...}, { onConflict: 'doctor_id,patient_user_id' })`, setting `is_active: true`, refreshed `permissions`, and clearing `revoked_at`.
+- Same defensive upsert (`onConflict: 'user_id,patient_user_id'`) for the `patients` row creation, since a stale inactive `patients` row from the prior connection can also collide.
 
-`src/pages/MyPractice.tsx`:
-- Add a 4th `<TabsTrigger value="rewards">My Rewards</TabsTrigger>` to the right of Credentials.
-- Add matching `<TabsContent value="rewards">` that renders `<DoctorRewards embedded />`.
-- Update `DoctorRewards.tsx` to accept an optional `embedded` prop that suppresses its own page header / outer padding when shown inside the tab.
+## 2. SOS — per-severity emergency-contact escalation
 
-Sidebar (desktop) + TopBarIcons: keep the `/doctor/rewards` link working as a deep-link, but the primary entry point becomes the tab. No nav change for desktop.
+Patients choose, per emergency contact, the **minimum incident severity** that triggers notifying them.
 
-## 3. Re-sequence "session complete" flow
+Schema (migration):
 
-Current order on `Sessions.tsx` end of session: Visit-category (Vula award) → AI doc review dialogs (Med cert / Prescription / Invoice / Referral).
+- `ALTER TABLE public.holarchelp_emergency_contacts ADD COLUMN notify_min_severity text NOT NULL DEFAULT 'low' CHECK (notify_min_severity IN ('low','medium','high','critical'));`
 
-New order:
-1. **Documents first.** After `handleSessionComplete()` succeeds, immediately show the AI-extracted document review dialogs (Med Cert → Prescription → Invoice → Referral) — same dialogs as today, but no Visit-category gate in front of them.
-2. **Follow-up appointment placeholder dialog** opens after the last document is approved/skipped.
-3. **Vula award dialog** (`VisitCategoryDialog`) opens after the follow-up dialog closes.
+UI — `src/modules/holarchelp/pages/HolarcHelpContacts.tsx`:
 
-Implementation:
-- `Sessions.tsx`: introduce a small queue/state-machine (`postSessionStep: 'docs' | 'followup' | 'vula' | 'done'`). Trigger `setPostSessionStep('docs')` inside `handleSessionComplete`. When all available doc dialogs have been handled, advance to `'followup'`, then `'vula'`.
-- Remove the current call to `setShowVisitCategoryDialog(true)` from the recording-end handlers; that dialog is now driven by the queue.
+- Add a Select (Low / Medium / High / Critical only) to the add form and to each list item, persisted via update.
+- Helper text: "Contact will only be alerted for incidents at this severity or higher."
 
-## 4. New `FollowUpAppointmentDialog`
+Edge function — `supabase/functions/share-incident-with-contacts/index.ts`:
 
-New file: `src/features/sessions/components/FollowUpAppointmentDialog.tsx`.
+- Accept incident severity (already in payload / fetch from `holarchelp_incidents`).
+- Filter contacts by `severityRank(contact.notify_min_severity) <= severityRank(incident.severity)` before sending email/SMS/WhatsApp.
 
-Behaviour:
-- Header: "Schedule follow-up with {patientName}".
-- Calendar picker (date) + 30-min slot grid (7am–6pm) reusing the slot logic from `BookAppointmentDialog`.
-- Pulls **the doctor's own busy slots** from `appointments` where `user_id = doctor`.
-- Two action buttons:
-  - **Set follow-up** — primary, disabled until a slot is chosen.
-  - **Ignore** — secondary; closes the dialog without booking and advances the queue. Tooltip: "No follow-up needed."
-- "Set follow-up" creates an appointment row in `public.appointments`:
-  - `user_id = doctor.id`, `patient_id = currentPatient.id`,
-  - `start_time` / `end_time` for the slot,
-  - `title = 'Follow-up — {patient name}'`, `type = 'follow_up'`.
-- Both parties see it as accepted because it is written directly into `appointments` (not `appointment_requests`). Patient calendar already reads `appointments`.
-- On success we also insert a `notifications` row for the patient: "Follow-up booked for {date} at {time}".
+## 3. SOS — public vs private routing
 
-## 5. Patient can see doctor's calendar when (re)scheduling
+When a patient triggers SOS (or a provider triggers on the patient's behalf) the dispatcher must know whether to alert public-only or all hospitals/ambulances based on whether the patient has medical aid.
 
-`src/features/appointments/components/BookAppointmentDialog.tsx`:
-- The `fetchBusySlots` call already greys out busy slots — it queries `appointments.user_id = doctorId`. RLS already lets the patient read appointments where they're the patient or where the row exposes only `start_time`/`end_time` aggregates? **Add migration** if needed:
-  - Policy: `CREATE POLICY "patients see doctor busy slots" ON public.appointments FOR SELECT USING (auth.uid() IS NOT NULL);` — restricted to authenticated and only the columns we read (`start_time`, `end_time`, `user_id`).  Since RLS is row-level (not column-level), use a view: `public.doctor_busy_slots` with `(doctor_id uuid, start_time, end_time)` and grant select to authenticated.
-  - Update `fetchBusySlots` to query `doctor_busy_slots` instead of `appointments`.
-- Add a sub-header in step 3: "Greyed-out times are already booked. Pick any open slot to request a reschedule."
-- The reschedule path (already existing in `BookAppointmentDialog`) inherits this same view.
+- Reuse existing `patients.medical_aid_name` (treat blank/null = public-only).
+- Update `src/modules/holarchelp/pages/HolarcHelpHome.tsx` SOS submit: include `coverage: 'public' | 'private'` in the new `holarchelp_incidents` row (add column `coverage text` via migration, default `'public'`).
+- Update `src/modules/holarchelp/components/ProviderMap.tsx` and provider dispatch lists to filter:
+  - `coverage = 'public'` → only `holarchelp_hospitals.ownership = 'public'` and ambulances flagged public.
+  - `coverage = 'private'` → all approved providers.
+- Confirm the red SOS button on bottom nav works with zero manual input (it already does — incident is created with current geo + auto coverage).
 
-## 6. Files touched
+## 4. Data-sharing transparency dialog for doctor → patient invites
 
-- `src/components/layout/BottomNav.tsx` — replace doctor Rewards with SOS.
-- `src/App.tsx` — add `/doctor/holarchelp/*` route.
-- `src/pages/MyPractice.tsx` — add Rewards tab.
-- `src/pages/doctor/DoctorRewards.tsx` — accept `embedded` prop.
-- `src/pages/Sessions.tsx` — post-session step machine; reorder dialogs.
-- `src/features/sessions/components/FollowUpAppointmentDialog.tsx` — NEW.
-- `src/features/appointments/components/BookAppointmentDialog.tsx` — query the new view, add helper text.
-- New migration: `doctor_busy_slots` view + grant.
+Mirror the existing patient-invites-doctor flow. Reuse `PermissionTransparencyModal` with a new variant.
 
-## 7. Out of scope
+- Extend `src/components/permissions/PermissionTransparencyModal.tsx`:
+  - Accept `mode: 'patient_invites_doctor' | 'doctor_invites_patient'` (default existing behaviour).
+  - In `doctor_invites_patient` mode, swap the two columns to show what is shared **with the wider care team** vs. **kept private to this practice**:
+    - Shared with other doctors on the patient's profile: AI session summary contribution, timeline visit summary, prescriptions, items relevant to ailments / medical history, this doctor's credentials and "About me".
+    - Private — not shared: full session history details, audio recordings, transcriptions, invoices/billing, medical certificates, draft notes.
+  - Header copy: "Shared with Patient's Care Team"
+- Wire it into the doctor's invite flow in `src/components/patient/InviteDoctorDialog.tsx`'s sibling for doctor side — i.e. `src/components/patients/InvitePatientDialog.tsx` (re-export at `src/features/patients/components/InvitePatientDialog.tsx`). Show the modal as a confirmation step before the invite is actually sent (button label: "Send Invitation"). Doctor must click "I Understand" to proceed.
 
-- No changes to `VisitCategoryDialog` itself (only its trigger order moves).
-- Existing patient/calendar pages don't need changes beyond reading the new view (they already display `appointments`).
-- Notifications wording for follow-up cancellations is unchanged in this round.
+## Technical notes
+
+- Migration adds `notify_min_severity` to `holarchelp_emergency_contacts` and `coverage` to `holarchelp_incidents`; backfill defaults; no destructive change.
+- Upsert fix is the only behavioural change to the accept flow — notifications/patient-record creation logic preserved.
+- All RLS policies remain unchanged (columns added are in already-secured tables).
+
+## Files
+
+- **Edit:** `src/components/doctor/DoctorAccessRequests.tsx`, `src/modules/holarchelp/pages/HolarcHelpContacts.tsx`, `src/modules/holarchelp/pages/HolarcHelpHome.tsx`, `src/modules/holarchelp/components/ProviderMap.tsx`, `src/components/permissions/PermissionTransparencyModal.tsx`, `src/features/patients/components/InvitePatientDialog.tsx`, `supabase/functions/share-incident-with-contacts/index.ts`
+- **Migration:** add `notify_min_severity`, `coverage` columns
+- **No new components**; reuse `PermissionTransparencyModal`.
