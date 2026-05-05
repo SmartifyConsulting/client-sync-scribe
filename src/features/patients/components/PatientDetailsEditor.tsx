@@ -1004,6 +1004,8 @@ export function PatientDetailsEditor({
       status: newMed.status,
       start_date: newMed.start_date || undefined,
       end_date: newMed.end_date || undefined,
+      reminder_time: newMed.reminder_time || undefined,
+      reminders_enabled: newMed.reminders_enabled,
     };
     if (editingMedId) {
       setCurrentMedications((prev) =>
@@ -1016,6 +1018,7 @@ export function PatientDetailsEditor({
     setNewMed({
       name: "", dosage: "", quantity: "1", strength: "", units: "mg",
       times_per_day: "1", is_chronic: false, status: "current", start_date: "", end_date: "",
+      reminder_time: "08:00", reminders_enabled: true,
     });
     setShowAddMed(false);
     setHasChanges(true);
