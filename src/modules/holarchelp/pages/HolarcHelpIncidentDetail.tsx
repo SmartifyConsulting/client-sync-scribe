@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { LiveMap } from "../components/LiveMap";
+import { VoiceNoteAudio } from "../components/VoiceNoteAudio";
 import { Button } from "@/components/ui/button";
 import { Copy, CheckCircle2, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
