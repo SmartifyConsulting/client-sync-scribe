@@ -183,7 +183,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
       .lte("start_time", dayEnd.toISOString());
 
     setBusySlots(
-      (data || []).map((a) => ({
+      ((data as any[]) || []).map((a: any) => ({
         start: parseISO(a.start_time),
         end: parseISO(a.end_time),
       }))
