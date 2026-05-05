@@ -46,24 +46,27 @@ export function BottomNav() {
         <div className="flex items-center justify-around px-2 py-2">
           {doctorNavItems.map((item) => {
             const isActive = location.pathname.startsWith(item.to);
+            const danger = (item as any).danger;
             return (
               <button
                 key={item.to}
                 onClick={() => navigate(item.to)}
                 className={cn(
                   "flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 min-w-[64px]",
-                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                  danger
+                    ? isActive ? "text-red-600" : "text-red-600 hover:text-red-700"
+                    : isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 <div
                   className={cn(
                     "flex items-center justify-center h-8 w-8 rounded-xl transition-all duration-200",
-                    isActive && "bg-primary/15 scale-110",
+                    isActive && (danger ? "bg-red-600/15 scale-110" : "bg-primary/15 scale-110"),
                   )}
                 >
-                  <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
+                  <item.icon className={cn("h-5 w-5", danger && "text-red-600", isActive && !danger && "text-primary")} />
                 </div>
-                <span className={cn("text-[10px] font-medium", isActive && "text-primary")}>{item.label}</span>
+                <span className={cn("text-[10px] font-medium", danger ? "text-red-600" : isActive && "text-primary")}>{item.label}</span>
               </button>
             );
           })}
