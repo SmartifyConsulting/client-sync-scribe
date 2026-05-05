@@ -52,13 +52,13 @@ export function BottomNav() {
                 <button
                   key={item.to}
                   onClick={() => navigate(item.to)}
-                  className="flex flex-col items-center justify-end -mt-6 px-1"
+                  className="flex flex-col items-center gap-1 px-3 py-2 min-w-[64px]"
                   aria-label="SOS"
                 >
-                  <div className="flex items-center justify-center h-14 w-14 rounded-full bg-red-600 shadow-[0_0_0_4px_hsl(var(--background)),0_8px_20px_-4px_rgba(220,38,38,0.6)] active:scale-95 transition-transform">
-                    <item.icon className="h-7 w-7 text-white" strokeWidth={2.5} />
+                  <div className="flex flex-col items-center justify-center h-11 w-11 rounded-full bg-red-600 active:scale-95 transition-transform">
+                    <item.icon className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
+                    <span className="text-[8px] font-bold text-white leading-none mt-0.5">SOS</span>
                   </div>
-                  <span className="text-[10px] font-bold text-red-600 mt-0.5">SOS</span>
                 </button>
               );
             }
@@ -110,13 +110,13 @@ export function BottomNav() {
               <button
                 key={item.section}
                 onClick={() => navigate(item.to)}
-                className="flex flex-1 flex-col items-center justify-end -mt-6 px-1 min-w-0"
+                className="flex flex-1 flex-col items-center gap-1 px-1 py-2 min-w-0"
                 aria-label="SOS"
               >
-                <div className="flex items-center justify-center h-14 w-14 rounded-full bg-red-600 shadow-[0_0_0_4px_hsl(var(--background)),0_8px_20px_-4px_rgba(220,38,38,0.6)] active:scale-95 transition-transform">
-                  <item.icon className="h-7 w-7 text-white" strokeWidth={2.5} />
+                <div className="flex flex-col items-center justify-center h-11 w-11 rounded-full bg-red-600 active:scale-95 transition-transform">
+                  <item.icon className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
+                  <span className="text-[8px] font-bold text-white leading-none mt-0.5">SOS</span>
                 </div>
-                <span className="text-[10px] font-bold text-red-600 mt-0.5">SOS</span>
               </button>
             );
           }

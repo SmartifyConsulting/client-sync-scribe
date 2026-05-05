@@ -361,7 +361,7 @@ export function DoctorAccessRequests() {
               </div>
             ))}
           </div>
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-2">
             <Button variant="outline" onClick={() => setAcceptingRequest(null)}>
               Cancel
             </Button>

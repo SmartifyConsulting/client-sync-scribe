@@ -174,11 +174,14 @@ export default function MyRewards() {
         .maybeSingle();
       if (!patient) throw new Error("No patient record found");
 
-      // Insert transfer record
-      const { error: transferError } = await supabase
-        .from("moola_transfers")
-        .insert({ user_id: user.id, partner_app_id: appId, amount });
-      if (transferError) throw transferError;
+      const isVault = appId === "vault";
+      // Insert transfer record (skip FK for vault)
+      if (!isVault) {
+        const { error: transferError } = await supabase
+          .from("moola_transfers")
+          .insert({ user_id: user.id, partner_app_id: appId, amount });
+        if (transferError) throw transferError;
+      }
 
       // Insert negative reward to deduct balance
       const { error: deductError } = await supabase
@@ -187,7 +190,7 @@ export default function MyRewards() {
           patient_id: patient.id,
           awarded_by: user.id,
           lollipops_count: -amount,
-          visit_category: "Vula Transfer",
+          visit_category: isVault ? "Vula Vault" : "Vula Transfer",
           reward_type: "transfer",
         });
       if (deductError) throw deductError;
@@ -350,6 +353,7 @@ export default function MyRewards() {
                   <SelectValue placeholder="Select destination app" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="vault">Vula Vault</SelectItem>
                   {partnerApps.map((app) => (
                     <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
                   ))}
@@ -428,16 +432,14 @@ export default function MyRewards() {
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] md:text-sm font-medium text-indigo-100">Transferred</p>
+                <p className="text-[10px] md:text-sm font-medium text-indigo-100">Redeemed</p>
                 <p className="text-2xl md:text-4xl font-bold text-white">{totalTransferred}</p>
               </div>
               <ArrowRightLeft className="h-8 w-8 md:h-12 md:w-12 text-white/90" />
             </div>
-            {partnerApps.length > 0 && (
-              <Button variant="ghost" size="sm" className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-[10px] md:text-xs flex items-center gap-1 mt-1 md:mt-2" onClick={() => setShowTransferDialog(true)}>
-                Transfer Vulas <Send className="h-3 w-3" />
-              </Button>
-            )}
+            <Button variant="ghost" size="sm" className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-[10px] md:text-xs flex items-center gap-1 mt-1 md:mt-2" onClick={() => setShowTransferDialog(true)}>
+              Redeem Vulas <Send className="h-3 w-3" />
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -458,7 +460,7 @@ export default function MyRewards() {
             Wins and Streaks
           </TabsTrigger>
           <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-             Vulas
+             Redeem
            </TabsTrigger>
          </TabsList>
 
@@ -734,7 +736,28 @@ export default function MyRewards() {
         </TabsContent>
 
         <TabsContent value="transfers" className="space-y-6">
-          {/* Partner Apps - at top */}
+          {/* Redeem from 6Dot50 with Vula Vouchers */}
+          <Card className="border-primary/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Gift className="h-5 w-5 text-primary" />
+                Redeem from 6Dot50 with Vula Vouchers
+              </CardTitle>
+              <CardDescription>
+                Redeem your Vulas at retailers in the 6Dot50 network.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={() => window.open("https://portal.6dot50.com/", "_blank", "noopener")}
+                className="gap-2"
+              >
+                <Gift className="h-4 w-4" /> Redeem
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Partner Apps */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -795,56 +818,22 @@ export default function MyRewards() {
             </CardContent>
           </Card>
 
-          {/* Transfer History */}
-          <Card>
+          {/* Transfer to Vula Vault */}
+          <Card className="border-indigo-300">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ArrowRightLeft className="h-5 w-5 text-blue-500" />
-                Transfer History
+                <ArrowRightLeft className="h-5 w-5 text-indigo-600" />
+                Transfer to Vula Vault
               </CardTitle>
-              <CardDescription>
-                Record of all Vula transfers to partner apps
-              </CardDescription>
+              <CardDescription>Move your Vulas to the Vula Vault for safekeeping.</CardDescription>
             </CardHeader>
             <CardContent>
-              {transfers.length === 0 ? (
-                <div className="text-center py-8">
-                  <ArrowRightLeft className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No transfers yet</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Partner App</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {transfers.map((transfer) => (
-                      <TableRow key={transfer.id}>
-                        <TableCell>
-                          <div>{format(parseISO(transfer.created_at), "MMM d, yyyy")}</div>
-                          <span className="text-xs text-muted-foreground">
-                            {format(parseISO(transfer.created_at), "h:mm a")}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                            {transfer.moola_partner_apps?.name || "Unknown App"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <span className="text-blue-600 font-semibold">
-                            -{transfer.amount} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-auto object-contain inline-block ml-0.5" />
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
+              <Button
+                onClick={() => { setTransferToAppId("vault"); setShowTransferDialog(true); }}
+                className="gap-2"
+              >
+                <ArrowRightLeft className="h-4 w-4" /> Transfer to Vault
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -852,3 +841,4 @@ export default function MyRewards() {
     </div>
   );
 }
+
