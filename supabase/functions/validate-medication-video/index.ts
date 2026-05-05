@@ -411,6 +411,7 @@ Only return JSON.`;
           isPillVisible: true,
           isMatch: !!matched.isMatch,
           confidence: matched.confidence ?? null,
+          detectedTabletCount: typeof matched.detectedTabletCount === 'number' ? Math.max(0, Math.floor(matched.detectedTabletCount)) : null,
           matchReason: matched.matchReason || (matched.isMatch
             ? "Matches your reference pill."
             : "This doesn't look like your usual pill — please double-check before taking it."),
