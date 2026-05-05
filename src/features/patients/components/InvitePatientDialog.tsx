@@ -106,7 +106,16 @@ export function InvitePatientDialog({ patientId, patientName }: InvitePatientDia
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSendInvitation} disabled={isLoading}>
+          <Button
+            onClick={() => {
+              if (!email) {
+                toast({ title: "Email required", description: "Please enter the patient's email address.", variant: "destructive" });
+                return;
+              }
+              setShowTransparency(true);
+            }}
+            disabled={isLoading}
+          >
             {isLoading ? (
               "Sending..."
             ) : (
@@ -118,6 +127,16 @@ export function InvitePatientDialog({ patientId, patientName }: InvitePatientDia
           </Button>
         </DialogFooter>
       </DialogContent>
+      <PermissionTransparencyModal
+        open={showTransparency}
+        onOpenChange={setShowTransparency}
+        mode="doctor_invites_patient"
+        confirmLabel="I Understand — Send Invitation"
+        onConfirm={async () => {
+          setShowTransparency(false);
+          await handleSendInvitation();
+        }}
+      />
     </Dialog>
   );
 }
