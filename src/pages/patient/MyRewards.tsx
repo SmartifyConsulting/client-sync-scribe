@@ -174,11 +174,14 @@ export default function MyRewards() {
         .maybeSingle();
       if (!patient) throw new Error("No patient record found");
 
-      // Insert transfer record
-      const { error: transferError } = await supabase
-        .from("moola_transfers")
-        .insert({ user_id: user.id, partner_app_id: appId, amount });
-      if (transferError) throw transferError;
+      const isVault = appId === "vault";
+      // Insert transfer record (skip FK for vault)
+      if (!isVault) {
+        const { error: transferError } = await supabase
+          .from("moola_transfers")
+          .insert({ user_id: user.id, partner_app_id: appId, amount });
+        if (transferError) throw transferError;
+      }
 
       // Insert negative reward to deduct balance
       const { error: deductError } = await supabase
@@ -187,7 +190,7 @@ export default function MyRewards() {
           patient_id: patient.id,
           awarded_by: user.id,
           lollipops_count: -amount,
-          visit_category: "Vula Transfer",
+          visit_category: isVault ? "Vula Vault" : "Vula Transfer",
           reward_type: "transfer",
         });
       if (deductError) throw deductError;
