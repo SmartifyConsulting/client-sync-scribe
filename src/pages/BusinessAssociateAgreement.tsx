@@ -1,25 +1,17 @@
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { LegalDocLayout } from "@/components/legal/LegalDocLayout";
 
 const BusinessAssociateAgreement = () => {
-  const navigate = useNavigate();
-
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/")}
-          className="mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
-
-        <div className="prose prose-sm max-w-none dark:prose-invert">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Business Associate Agreement (HIPAA)</h1>
-          <p className="text-muted-foreground mb-8"><strong>Last Updated: December 2024</strong></p>
+    <LegalDocLayout
+      title="HIPAA Business Associate Agreement"
+      subtitle="Required agreement between Holarc and HIPAA Covered Entities using the platform to handle PHI."
+      lastUpdated="December 2024"
+    >
+      <>
+          <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-8">
+            <h2 className="text-lg font-semibold text-primary mt-0">AUTOMATIC ACCEPTANCE BY USE</h2>
+            <p className="mb-0"><strong>IF YOU ARE A HEALTHCARE PROVIDER WHO IS A HIPAA COVERED ENTITY, BY CREATING A PROVIDER ACCOUNT OR USING THE PLATFORM TO ACCESS PROTECTED HEALTH INFORMATION, YOU AUTOMATICALLY ACCEPT AND AGREE TO THIS BUSINESS ASSOCIATE AGREEMENT.</strong></p>
+          </div>
 
           <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-8">
             <h2 className="text-lg font-semibold text-primary mt-0">AUTOMATIC ACCEPTANCE BY USE</h2>
@@ -364,10 +356,10 @@ const BusinessAssociateAgreement = () => {
             Smartify Solutions<br />
             Email: privacy@smartifysolutions.com
           </p>
-        </div>
-      </div>
-    </div>
+      </>
+    </LegalDocLayout>
   );
 };
 
 export default BusinessAssociateAgreement;
+

@@ -156,15 +156,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
         .update({ is_active: false, revoked_at: new Date().toISOString() } as any)
         .eq("id", uninviteTarget.id);
 
-      // Notify the doctor
-      await supabase.from("notifications").insert({
-        user_id: uninviteTarget.doctor_id,
-        type: "access_revoked",
-        title: "Patient Removed Access",
-        description: "A patient has removed you from their healthcare providers.",
-        is_read: false,
-      });
-
+      // Intentionally do NOT notify the doctor when a patient revokes access.
       toast({ title: "Doctor removed", description: "Access has been revoked." });
       queryClient.invalidateQueries({ queryKey: ["patient-doctors"] });
       setUninviteTarget(null);

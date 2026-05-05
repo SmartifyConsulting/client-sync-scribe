@@ -124,14 +124,6 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
 
   return (
     <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
-      <div className="flex items-center gap-1.5 mb-1">
-        <Sparkles className="h-3.5 w-3.5 text-primary" />
-        <Label className="text-xs font-semibold tracking-wide">Daily vitamins, supplements & OTC</Label>
-      </div>
-      <p className="text-[10px] text-muted-foreground">
-        Earn Vulas (reduced rate) for staying consistent with vitamins and supplements.
-      </p>
-
       <div className="rounded-md border border-dashed border-border p-2 space-y-2">
         {!showCustom ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
