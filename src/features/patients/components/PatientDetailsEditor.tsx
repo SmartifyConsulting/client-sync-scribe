@@ -1036,6 +1036,8 @@ export function PatientDetailsEditor({
       status: m.status || "current",
       start_date: m.start_date || "",
       end_date: m.end_date || "",
+      reminder_time: (m as any).reminder_time || "08:00",
+      reminders_enabled: (m as any).reminders_enabled ?? true,
     });
     setEditingMedId(m.id);
     setShowAddMed(true);
