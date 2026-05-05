@@ -85,6 +85,8 @@ export function BottomNav() {
           const isActive =
             item.section === "rewards"
               ? location.pathname === "/patient/rewards"
+              : item.section === "sos"
+              ? location.pathname.startsWith("/patient/holarchelp")
               : isOnDetails && currentSection === item.section;
           const danger = (item as any).danger;
           return (
