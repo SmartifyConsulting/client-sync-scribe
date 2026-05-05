@@ -6,9 +6,8 @@ import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor
 import { Patient } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
 import { useMyRewards } from "@/hooks/usePatientRewards";
-import { EmergencyContactsSection, EmergencyContact } from "@/features/patients/components/EmergencyContactsSection";
+import { EmergencyContact } from "@/features/patients/components/EmergencyContactsSection";
 import { ProfileSharesSection } from "@/features/patients/components/ProfileSharesSection";
-import { PatientDailyMedsSection } from "@/features/patients/components/PatientDailyMedsSection";
 import { PatientSelfAdmissionsSection } from "@/features/patients/components/PatientSelfAdmissionsSection";
 
 
@@ -115,17 +114,22 @@ export default function MyDetails() {
         <p className="text-muted-foreground text-[12px]">{heading.subtitle}</p>
       </div>
 
-      <PatientDetailsEditor patient={patient} onSave={handleSave} isSelfService userEmail={userEmail} lollipopCount={lollipopCount} rewardsLoading={rewardsLoading} section={section} />
+      <PatientDetailsEditor
+        patient={patient}
+        onSave={handleSave}
+        isSelfService
+        userEmail={userEmail}
+        userId={userId}
+        emergencyContacts={emergencyContacts}
+        onEmergencyContactsChange={setEmergencyContacts}
+        lollipopCount={lollipopCount}
+        rewardsLoading={rewardsLoading}
+        section={section}
+      />
 
       {section === "health" && (
         <>
-          <EmergencyContactsSection
-            patientId={patient.id}
-            contacts={emergencyContacts}
-            onChange={setEmergencyContacts}
-          />
           <ProfileSharesSection ownerUserId={userId} />
-          <PatientDailyMedsSection patientId={patient.id} patientUserId={userId} />
           <PatientSelfAdmissionsSection patientId={patient.id} userId={userId} />
         </>
       )}
