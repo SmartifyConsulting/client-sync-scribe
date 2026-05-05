@@ -2169,6 +2169,7 @@ export function PatientDetailsEditor({
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="referred_by">Referred By</Label>
                     <Input
