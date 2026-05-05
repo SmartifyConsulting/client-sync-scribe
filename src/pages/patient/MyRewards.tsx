@@ -745,7 +745,20 @@ export default function MyRewards() {
             </CardHeader>
             <CardContent>
               {partnerApps.length === 0 ? (
-                <p className="text-center text-muted-foreground text-sm py-4">No partner apps available yet.</p>
+                <div className="text-center py-6 space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    No retailers connected yet. Activate the Vula rewards network to see all retailers where you can spend your vouchers.
+                  </p>
+                  <Button
+                    onClick={() => toast({
+                      title: "Activate Vula rewards network",
+                      description: "We need a partner API key to fetch the retailer list. Ask your admin to add MOOLA_PARTNER_API_KEY in backend secrets, then refresh this page.",
+                    })}
+                    className="gap-2"
+                  >
+                    <Gift className="h-4 w-4" /> Activate now
+                  </Button>
+                </div>
               ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {partnerApps.map((app) => (
