@@ -1141,6 +1141,12 @@ export default function MyPractice() {
           >
             Credentials{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}
           </TabsTrigger>
+          <TabsTrigger
+            value="rewards"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs"
+          >
+            My Rewards
+          </TabsTrigger>
         </TabsList>
 
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
@@ -2262,6 +2268,11 @@ export default function MyPractice() {
               </Table>
             )}
           </div>
+        </TabsContent>
+
+        {/* === REWARDS TAB === */}
+        <TabsContent value="rewards" className="mt-4">
+          <DoctorRewards embedded />
         </TabsContent>
 
       </Tabs>
