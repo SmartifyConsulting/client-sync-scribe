@@ -56,12 +56,12 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
   const [specialtyQuery, setSpecialtyQuery] = useState<string>("any");
   const [languageQuery, setLanguageQuery] = useState<string>("any");
   const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<DoctorProfile[]>([]);
+  const [searchResults, setSearchResults] = useState<ProviderResult[]>([]);
   const [totalFound, setTotalFound] = useState(0);
   const [hasSearched, setHasSearched] = useState(false);
   const [uninviteTarget, setUninviteTarget] = useState<DoctorAccess | null>(null);
   const [uninviteLoading, setUninviteLoading] = useState(false);
-  const [detailsDoctor, setDetailsDoctor] = useState<DoctorProfile | null>(null);
+  const [detailsDoctor, setDetailsDoctor] = useState<ProviderResult | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
