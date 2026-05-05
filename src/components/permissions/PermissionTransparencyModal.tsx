@@ -45,6 +45,25 @@ const privateItems: PermissionItem[] = [
   { label: "Medical Certificates" },
 ];
 
+// What other doctors on the patient's profile will see vs. what stays private to this practice
+const doctorSharedItems: PermissionItem[] = [
+  { label: "Your contribution to the patient's AI Summary" },
+  { label: "Your visit summary on the patient's timeline" },
+  { label: "Prescriptions you issue" },
+  { label: "Information relevant to the patient's ailments and medical history" },
+  { label: "Your Credentials" },
+  { label: "Your About Me" },
+];
+
+const doctorPrivateItems: PermissionItem[] = [
+  { label: "Full Session History details" },
+  { label: "Raw Audio Recordings" },
+  { label: "Full Transcriptions" },
+  { label: "Invoices & Billing for your practice" },
+  { label: "Medical Certificates you issue" },
+  { label: "Your Draft Notes" },
+];
+
 interface PermissionTransparencyModalProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
