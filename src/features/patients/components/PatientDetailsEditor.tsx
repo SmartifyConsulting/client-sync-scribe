@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
+import { LANGUAGES } from "@/lib/languages";
+import { PatientSessionRecorder } from "@/features/patients/components/PatientSessionRecorder";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn, emitMedicationsUpdated } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
@@ -449,6 +451,7 @@ export function PatientDetailsEditor({
     notes: "",
     blood_type: "",
     organ_donor: false,
+    preferred_language: "",
   });
   const [organDonorOrgans, setOrganDonorOrgans] = useState<string[]>([]);
   const [surgeries, setSurgeries] = useState<Surgery[]>([]);
@@ -574,6 +577,7 @@ export function PatientDetailsEditor({
         notes: patient.notes || "",
         blood_type: patient.blood_type || "",
         organ_donor: patient.organ_donor || false,
+        preferred_language: (patient as any).preferred_language || "",
       });
       setOrganDonorOrgans(patient.organ_donor_organs || []);
       setSurgeries(patient.surgeries || []);
@@ -729,11 +733,12 @@ export function PatientDetailsEditor({
         family_history: familyHistory,
         organ_donor: data.organ_donor,
         organ_donor_organs: organDonorOrgans,
+        preferred_language: data.preferred_language || null,
         next_of_kin_members: nokMembers,
         current_medications: currentMedications,
         conditions_diagnoses: conditionsDiagnoses,
         is_chronic: isChronic,
-      });
+      } as any);
       // Sync chronic meds → prescriptions so they appear under Rewards
       await syncChronicMedsToPrescriptions(currentMedications);
       setSaving(false);
@@ -1130,6 +1135,7 @@ export function PatientDetailsEditor({
       notes: patient.notes || "",
       blood_type: patient.blood_type || "",
       organ_donor: patient.organ_donor || false,
+      preferred_language: (patient as any).preferred_language || "",
     });
     setOrganDonorOrgans(patient.organ_donor_organs || []);
     setSurgeries(patient.surgeries || []);
@@ -1521,7 +1527,7 @@ export function PatientDetailsEditor({
                     <ViewField label="Email" value={patient.email} />
                     <ViewField label="Phone" value={patient.phone} />
                     <ViewField label="Marital Status" value={patient.marital_status} />
-                    <ViewField label="Language" value="English" />
+                    <ViewField label="Language" value={LANGUAGES.find(l => l.code === (patient as any).preferred_language)?.name || (patient as any).preferred_language || "—"} />
                     <ViewField label="Referred By" value={patient.referred_by} />
                   </div>
                 </CollapsibleContent>
@@ -1904,17 +1910,9 @@ export function PatientDetailsEditor({
               <TabsContent value="sessions" className="mt-4">
                 <div className="mb-4">
                   <h2 className="text-lg font-semibold text-foreground">My Sessions</h2>
-                  <p className="text-xs text-muted-foreground">History of your consultations</p>
+                  <p className="text-xs text-muted-foreground">History of your consultations. Record sessions with doctors not on the platform.</p>
                 </div>
-                <Suspense
-                  fallback={
-                    <div className="flex items-center justify-center py-12">
-                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                    </div>
-                  }
-                >
-                  <SessionHistoryTableLazy sessions={[]} patientId={patient.id} patientName={patient.name} />
-                </Suspense>
+                <PatientSessionRecorder patientId={patient.id} patientName={patient.name} />
               </TabsContent>
             )}
 
@@ -2146,6 +2144,22 @@ export function PatientDetailsEditor({
                         <SelectItem value="Married">Married</SelectItem>
                         <SelectItem value="Divorced">Divorced</SelectItem>
                         <SelectItem value="Widowed">Widowed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="preferred_language">Language</Label>
+                    <Select
+                      value={formData.preferred_language}
+                      onValueChange={(value) => updateFormData({ preferred_language: value })}
+                    >
+                      <SelectTrigger id="preferred_language" className="text-sm">
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LANGUAGES.map((l) => (
+                          <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>

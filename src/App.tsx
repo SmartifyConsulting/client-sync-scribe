@@ -163,6 +163,7 @@ const App = () => (
             <Route path="/patient/documents" element={<PatientDocuments />} />
             <Route path="/patient/round-table" element={<PatientRoundTable />} />
             <Route path="/patient/details" element={<MyDetails />} />
+            <Route path="/sessions/:id" element={<SessionDetail />} />
             <Route path="/patient/holarchelp/*" element={<HolarcHelpRoutes />} />
             <Route path="/settings" element={<Settings />} />
           </Route>

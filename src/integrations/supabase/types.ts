@@ -2161,6 +2161,7 @@ export type Database = {
           phone: string | null
           physical_address: string | null
           postal_address: string | null
+          preferred_language: string | null
           primary_member: string | null
           referred_by: string | null
           reporting_to_email: string | null
@@ -2222,6 +2223,7 @@ export type Database = {
           phone?: string | null
           physical_address?: string | null
           postal_address?: string | null
+          preferred_language?: string | null
           primary_member?: string | null
           referred_by?: string | null
           reporting_to_email?: string | null
@@ -2283,6 +2285,7 @@ export type Database = {
           phone?: string | null
           physical_address?: string | null
           postal_address?: string | null
+          preferred_language?: string | null
           primary_member?: string | null
           referred_by?: string | null
           reporting_to_email?: string | null
