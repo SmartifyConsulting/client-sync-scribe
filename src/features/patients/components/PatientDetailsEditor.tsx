@@ -2718,6 +2718,8 @@ export function PatientDetailsEditor({
                                   status: "current",
                                   start_date: "",
                                   end_date: "",
+                                  reminder_time: "08:00",
+                                  reminders_enabled: true,
                                 });
                               }}
                             >
