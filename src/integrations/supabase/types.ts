@@ -167,6 +167,47 @@ export type Database = {
           },
         ]
       }
+      admission_progress_notes: {
+        Row: {
+          admission_id: string
+          category: string
+          content: string
+          created_at: string
+          id: string
+          recorded_by: string | null
+          recorded_by_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          admission_id: string
+          category?: string
+          content: string
+          created_at?: string
+          id?: string
+          recorded_by?: string | null
+          recorded_by_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admission_id?: string
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          recorded_by?: string | null
+          recorded_by_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_progress_notes_admission_id_fkey"
+            columns: ["admission_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_admissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admission_vitals: {
         Row: {
           admission_id: string
@@ -1520,6 +1561,7 @@ export type Database = {
           procedure_description: string | null
           source: string
           status: string
+          title: string | null
           updated_at: string
         }
         Insert: {
@@ -1537,6 +1579,7 @@ export type Database = {
           procedure_description?: string | null
           source?: string
           status?: string
+          title?: string | null
           updated_at?: string
         }
         Update: {
@@ -1554,6 +1597,7 @@ export type Database = {
           procedure_description?: string | null
           source?: string
           status?: string
+          title?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -2560,6 +2604,7 @@ export type Database = {
           refill_reminder_days: number | null
           refills_remaining: number | null
           reminder_times: string[] | null
+          reminders_enabled: boolean
           session_id: string | null
           source: string
           start_date: string
@@ -2582,6 +2627,7 @@ export type Database = {
           refill_reminder_days?: number | null
           refills_remaining?: number | null
           reminder_times?: string[] | null
+          reminders_enabled?: boolean
           session_id?: string | null
           source?: string
           start_date?: string
@@ -2604,6 +2650,7 @@ export type Database = {
           refill_reminder_days?: number | null
           refills_remaining?: number | null
           reminder_times?: string[] | null
+          reminders_enabled?: boolean
           session_id?: string | null
           source?: string
           start_date?: string
