@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
+import { LANGUAGES } from "@/lib/languages";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn, emitMedicationsUpdated } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
@@ -1525,7 +1526,7 @@ export function PatientDetailsEditor({
                     <ViewField label="Email" value={patient.email} />
                     <ViewField label="Phone" value={patient.phone} />
                     <ViewField label="Marital Status" value={patient.marital_status} />
-                    <ViewField label="Language" value="English" />
+                    <ViewField label="Language" value={LANGUAGES.find(l => l.code === (patient as any).preferred_language)?.name || (patient as any).preferred_language || "—"} />
                     <ViewField label="Referred By" value={patient.referred_by} />
                   </div>
                 </CollapsibleContent>
