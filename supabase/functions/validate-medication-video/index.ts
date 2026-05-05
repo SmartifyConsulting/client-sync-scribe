@@ -725,7 +725,7 @@ Set isValid=true only if person_detected AND ingestion_detected AND the required
           confidence: aggregateConfidence,
           detectedTabletCount: tabletDetectedFinal,
           tabletExpected: tabletTot,
-          molesAwarded: 5,
+          molesAwarded: VULA_AWARD,
           streak: currentStreak,
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -764,7 +764,7 @@ Set isValid=true only if person_detected AND ingestion_detected AND the required
           detectedTabletCount: tabletDetectedFinal,
           tabletExpected: tabletTot,
           validation: validationResult,
-          molesAwarded: 5,
+          molesAwarded: VULA_AWARD,
           message: shortfall
             ? `Only ${tabletDetectedFinal} of ${tabletTot} tablets seen on camera — provisional, reviewed at month-end.`
             : `Confidence ${Math.round(aggregateConfidence)}% — provisional. Will be confirmed at month-end if your average stays above 50%.`,
