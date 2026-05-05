@@ -518,6 +518,7 @@ export default function Sessions() {
     setShowPrescriptionReview(false);
     if (extractedInvoice) setShowInvoiceReview(true);
     else if (extractedReferral) setShowReferralReview(true);
+    else advanceToFollowUp();
   };
 
   const handleApproveInvoice = async (data: InvoiceData) => {
