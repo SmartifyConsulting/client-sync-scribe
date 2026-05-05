@@ -59,6 +59,10 @@ export function ManualLogAdmissionDialog({ open, onOpenChange, patientId }: Prop
         <DialogHeader><DialogTitle>Log a hospital admission</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div>
+            <Label className="text-[11px]">Admission title (e.g. "Knee surgery", "Pneumonia")</Label>
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Short label for this admission" />
+          </div>
+          <div>
             <Label className="text-[11px]">Hospital</Label>
             <Input value={hospital} onChange={(e) => setHospital(e.target.value)} />
           </div>
