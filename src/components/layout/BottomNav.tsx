@@ -18,7 +18,7 @@ const doctorNavItems = [
   { icon: Users, label: "Patients", to: "/patients" },
   { icon: Briefcase, label: "Practice", to: "/practice" },
   { icon: UserCog, label: "Admin", to: "/admin" },
-  { icon: Gift, label: "Rewards", to: "/doctor/rewards" },
+  { icon: Siren, label: "SOS", to: "/doctor/holarchelp", danger: true },
 ];
 
 const patientSections = [
