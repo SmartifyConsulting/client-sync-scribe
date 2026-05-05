@@ -52,7 +52,7 @@ async function getPayPalAccessToken(): Promise<string> {
   }
 
   const auth = btoa(`${clientId}:${clientSecret}`);
-  const response = await fetch("${PAYPAL_BASE}/v1/oauth2/token", {
+  const response = await fetch(`${PAYPAL_BASE}/v1/oauth2/token`, {
     method: "POST",
     headers: {
       Authorization: `Basic ${auth}`,
