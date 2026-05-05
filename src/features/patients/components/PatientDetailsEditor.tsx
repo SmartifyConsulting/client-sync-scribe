@@ -2699,6 +2699,24 @@ export function PatientDetailsEditor({
                             />
                             <Label className="text-xs">This is a chronic medication</Label>
                           </div>
+                          <div className="grid gap-2 sm:grid-cols-2 pt-2 border-t border-border/40">
+                            <div className="space-y-1.5">
+                              <Label className="text-xs">Take at</Label>
+                              <Input
+                                type="time"
+                                className="text-sm h-8"
+                                value={newMed.reminder_time}
+                                onChange={(e) => setNewMed((p) => ({ ...p, reminder_time: e.target.value }))}
+                              />
+                            </div>
+                            <div className="flex items-center gap-2 pt-5">
+                              <Switch
+                                checked={newMed.reminders_enabled}
+                                onCheckedChange={(v) => setNewMed((p) => ({ ...p, reminders_enabled: v }))}
+                              />
+                              <Label className="text-xs">Remind me 5 min before</Label>
+                            </div>
+                          </div>
                           <div className="flex justify-end gap-2">
                             <Button
                               variant="ghost"
