@@ -1,22 +1,47 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { z } from "https://esm.sh/zod@3.23.8";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Plan pricing in USD
-const PLANS = {
-  doctor: {
-    monthly: { price: 49.99, name: "Doctor Monthly Plan" },
-    annual: { price: 499.99, name: "Doctor Annual Plan" },
-  },
-  patient: {
-    monthly: { price: 9.99, name: "Patient Monthly Plan" },
-    annual: { price: 99.99, name: "Patient Annual Plan" },
-  },
-};
+const PAYPAL_ENV = (Deno.env.get("PAYPAL_ENV") || "sandbox").toLowerCase();
+const PAYPAL_BASE = PAYPAL_ENV === "live"
+  ? "https://api-m.paypal.com"
+  : "https://api-m.sandbox.paypal.com";
+
+const PLAN_TYPES = ["doctor", "patient", "emergency"] as const;
+const BILLING_CYCLES = ["monthly", "annual"] as const;
+
+const BodySchema = z.object({
+  action: z.enum(["create-trial", "cancel", "reactivate"]).optional(),
+  planType: z.enum(PLAN_TYPES).optional(),
+  billingCycle: z.enum(BILLING_CYCLES).optional(),
+  userId: z.string().uuid().optional(),
+});
+
+interface Plan { price: number; name: string; }
+
+async function getPlan(
+  supabase: any,
+  planType: string,
+  billingCycle: string,
+): Promise<Plan | null> {
+  const { data, error } = await supabase
+    .from("pricing_config")
+    .select("price, name")
+    .eq("role", planType)
+    .eq("billing_cycle", billingCycle)
+    .maybeSingle();
+  if (error || !data) {
+    console.error("Pricing lookup failed", { planType, billingCycle, error });
+    return null;
+  }
+  return { price: Number(data.price), name: data.name };
+}
+
 
 async function getPayPalAccessToken(): Promise<string> {
   const clientId = Deno.env.get("PAYPAL_CLIENT_ID");
