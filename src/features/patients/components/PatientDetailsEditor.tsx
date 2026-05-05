@@ -2912,6 +2912,16 @@ export function PatientDetailsEditor({
                   </CollapsibleContent>
                 </Collapsible>
 
+                {/* Daily Vitamins, Supplements & OTC — own accordion */}
+                {isSelfService && (
+                  <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                    <SectionHeader icon={Sparkles} label="Daily Vitamins, Supplements & OTC" />
+                    <CollapsibleContent className="px-3 pb-3">
+                      <DailyMedsInline patientId={patient.id} patientUserId={userId} />
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+
                 {/* Surgeries & Dates */}
                 <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
                   <SectionHeader icon={Scissors} label="Surgeries & Dates" />
