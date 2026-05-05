@@ -158,14 +158,14 @@ export default function Landing() {
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-[1.05] mb-5">
               A revolutionary healthcare ecosystem
-              <span className="block text-gradient pb-3">built around you”.</span>
+              <span className="block text-gradient pb-3">built around you.</span>
             </h1>
 
             <p className="text-base sm:text-lg text-muted-foreground mb-7 max-w-2xl lg:mx-0 mx-auto">
               Holarc is one connected platform where doctors run their entire practice and patients own their entire
               360° health story — from voice-recorded consultations and AI summaries, to video-verified medication
-              adherence rewarded with Vulas, cross-specialist Round Tables, hospital admissions, prescriptions, billing,
-              and a unified care calendar.
+              adherence rewards, cross-specialist Round Tables, hospital admissions, prescriptions, billing, and a
+              unified care calendar.
             </p>
 
             {/* Capability pills */}
