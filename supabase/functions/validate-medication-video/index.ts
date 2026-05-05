@@ -345,16 +345,18 @@ Only return JSON.`;
         );
       }
 
+      const expectedQty = Number(body.expectedQuantity) > 0 ? Number(body.expectedQuantity) : 1;
       const matchPrompt = `Image A is the patient's REFERENCE photo of their prescribed medication (${rx.medication} ${rx.dosage || ''}).
-Image B is the pill they're about to take RIGHT NOW.
+Image B is the pill they're about to take RIGHT NOW. The patient is expected to take ${expectedQty} tablet(s).
 
-Compare colour, shape, size, surface texture and any visible markings or score lines. Generic unmarked tablets only need to share colour and shape — be lenient on those. Pills with distinctive markings should match those markings.
+Compare colour, shape, size, surface texture and any visible markings or score lines. Generic unmarked tablets only need to share colour and shape — be lenient on those. Pills with distinctive markings should match those markings. Also COUNT how many distinct tablets/capsules are visible in image B.
 
 Reply in JSON ONLY:
 {
   "isPillVisible": true or false,
   "isMatch": true or false,
   "confidence": number 0-100,
+  "detectedTabletCount": integer,
   "matchReason": "one short sentence explaining the verdict"
 }
 Only return JSON.`;
