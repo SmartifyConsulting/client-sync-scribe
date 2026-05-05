@@ -1089,7 +1089,7 @@ export default function MyPractice() {
             value="certificates"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs"
           >
-            Certificates{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}
+            Credentials{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}
           </TabsTrigger>
         </TabsList>
 
