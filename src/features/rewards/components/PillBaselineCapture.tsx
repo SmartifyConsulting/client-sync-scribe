@@ -510,8 +510,8 @@ export function PillBaselineCapture({
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Pill className="h-4 w-4 text-primary" />
               {quantity > 1
-                ? `Show all ${quantity} tablets together on your palm or a plain surface.`
-                : "Place the tablet on your palm or a plain surface and fill the frame."}
+                ? `Show all ${quantity} tablets together with any printed letters, numbers or score lines facing the camera.`
+                : "Place the tablet on your palm and turn it so any printed letters, numbers or score lines are clearly visible."}
             </div>
             {quantity > 1 && (
               <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
@@ -529,6 +529,12 @@ export function PillBaselineCapture({
                 <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
               )}
             </div>
+            {tabletBlob && tabletWarning && (
+              <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2">
+                <Info className="h-4 w-4 mt-0.5 shrink-0" />
+                <p>{tabletWarning}</p>
+              </div>
+            )}
             <div className="flex justify-between gap-2">
               {!tabletBlob ? (
                 <>
@@ -539,11 +545,11 @@ export function PillBaselineCapture({
                 </>
               ) : (
                 <>
-                  <Button variant="outline" onClick={() => { setTabletBlob(null); startCamera("environment"); }} className="gap-2">
+                  <Button variant="outline" onClick={() => { setTabletBlob(null); setTabletWarning(null); startCamera("environment"); }} className="gap-2">
                     <RefreshCw className="h-4 w-4" /> Retake
                   </Button>
-                  <Button onClick={() => setStep("ingest")} className="gap-2">
-                    <Check className="h-4 w-4" /> Use photo
+                  <Button onClick={() => setStep("ingest")} disabled={checkingMarkings} className="gap-2">
+                    <Check className="h-4 w-4" /> {tabletWarning ? "Use anyway" : "Use photo"}
                   </Button>
                 </>
               )}
