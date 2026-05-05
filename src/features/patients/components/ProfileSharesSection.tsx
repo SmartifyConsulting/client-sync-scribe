@@ -13,6 +13,8 @@ interface Share {
   shared_with_username: string | null;
   shared_with_email: string | null;
   shared_with_user_id: string | null;
+  shared_with_first_name: string | null;
+  shared_with_last_name: string | null;
   relationship: string | null;
   can_view_profile: boolean;
   can_view_live_tracking: boolean;
@@ -23,6 +25,8 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
   const [shares, setShares] = useState<Share[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [relationship, setRelationship] = useState("");
   const [allowTracking, setAllowTracking] = useState(false);
@@ -71,6 +75,8 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
       shared_with_user_id: resolvedUserId,
       shared_with_username: username,
       shared_with_email: email,
+      shared_with_first_name: firstName.trim() || null,
+      shared_with_last_name: lastName.trim() || null,
       relationship: relationship || null,
       can_view_profile: true,
       can_view_live_tracking: allowTracking,
@@ -81,6 +87,8 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
       toast({ title: "Could not add share", description: error.message, variant: "destructive" });
       return;
     }
+    setFirstName("");
+    setLastName("");
     setUsernameOrEmail("");
     setRelationship("");
     setAllowTracking(false);
