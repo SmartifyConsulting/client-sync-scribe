@@ -155,6 +155,12 @@ export default function Sessions() {
   const [extractedInvoice, setExtractedInvoice] = useState<InvoiceData | null>(null);
   const [extractedReferral, setExtractedReferral] = useState<ReferralData | null>(null);
   const [reviewLoading, setReviewLoading] = useState(false);
+  const [showFollowUpDialog, setShowFollowUpDialog] = useState(false);
+  const doctorIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => { doctorIdRef.current = data.user?.id || null; });
+  }, []);
 
   const navigate = useNavigate();
   const { patients, loading: patientsLoading } = usePatients();
