@@ -2676,6 +2676,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          about_me: string | null
           auto_email_certificate_to_employer: boolean | null
           auto_email_invoice_to_insurance: boolean | null
           auto_email_prescription_to_pharmacy: boolean | null
@@ -2697,7 +2698,6 @@ export type Database = {
           practice_color: string | null
           practice_number: string | null
           preferred_language: string | null
-          preferred_languages: string[] | null
           role: Database["public"]["Enums"]["user_role"] | null
           round_table_enabled: boolean | null
           signature_bold: boolean | null
@@ -2711,6 +2711,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          about_me?: string | null
           auto_email_certificate_to_employer?: boolean | null
           auto_email_invoice_to_insurance?: boolean | null
           auto_email_prescription_to_pharmacy?: boolean | null
@@ -2732,7 +2733,6 @@ export type Database = {
           practice_color?: string | null
           practice_number?: string | null
           preferred_language?: string | null
-          preferred_languages?: string[] | null
           role?: Database["public"]["Enums"]["user_role"] | null
           round_table_enabled?: boolean | null
           signature_bold?: boolean | null
@@ -2746,6 +2746,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          about_me?: string | null
           auto_email_certificate_to_employer?: boolean | null
           auto_email_invoice_to_insurance?: boolean | null
           auto_email_prescription_to_pharmacy?: boolean | null
@@ -2767,7 +2768,6 @@ export type Database = {
           practice_color?: string | null
           practice_number?: string | null
           preferred_language?: string | null
-          preferred_languages?: string[] | null
           role?: Database["public"]["Enums"]["user_role"] | null
           round_table_enabled?: boolean | null
           signature_bold?: boolean | null
@@ -2988,6 +2988,9 @@ export type Database = {
           created_at: string
           duration_minutes: number | null
           ended_at: string | null
+          external_doctor_name: string | null
+          external_doctor_practice: string | null
+          external_doctor_specialty: string | null
           id: string
           notes: string | null
           patient_id: string
@@ -3006,6 +3009,9 @@ export type Database = {
           created_at?: string
           duration_minutes?: number | null
           ended_at?: string | null
+          external_doctor_name?: string | null
+          external_doctor_practice?: string | null
+          external_doctor_specialty?: string | null
           id?: string
           notes?: string | null
           patient_id: string
@@ -3024,6 +3030,9 @@ export type Database = {
           created_at?: string
           duration_minutes?: number | null
           ended_at?: string | null
+          external_doctor_name?: string | null
+          external_doctor_practice?: string | null
+          external_doctor_specialty?: string | null
           id?: string
           notes?: string | null
           patient_id?: string
@@ -3461,8 +3470,9 @@ export type Database = {
         Returns: boolean
       }
       search_doctor_profiles: {
-        Args: { _query: string }
+        Args: { _language?: string; _name?: string; _specialty?: string }
         Returns: {
+          about_me: string
           avatar_url: string
           doctor_number: string
           full_name: string
@@ -3470,6 +3480,7 @@ export type Database = {
           mobile_number: string
           practice_address: string
           practice_number: string
+          preferred_language: string
           specialty: string
         }[]
       }
