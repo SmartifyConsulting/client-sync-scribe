@@ -3651,7 +3651,24 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      doctor_busy_slots: {
+        Row: {
+          doctor_id: string | null
+          end_time: string | null
+          start_time: string | null
+        }
+        Insert: {
+          doctor_id?: string | null
+          end_time?: string | null
+          start_time?: string | null
+        }
+        Update: {
+          doctor_id?: string | null
+          end_time?: string | null
+          start_time?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       approve_blood_donation: { Args: { _donation_id: string }; Returns: Json }

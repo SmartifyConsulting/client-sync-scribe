@@ -176,14 +176,14 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
     dayEnd.setHours(23, 59, 59, 999);
 
     const { data } = await supabase
-      .from("appointments")
+      .from("doctor_busy_slots" as any)
       .select("start_time, end_time")
-      .eq("user_id", doctorId)
+      .eq("doctor_id", doctorId)
       .gte("start_time", dayStart.toISOString())
       .lte("start_time", dayEnd.toISOString());
 
     setBusySlots(
-      (data || []).map((a) => ({
+      ((data as any[]) || []).map((a: any) => ({
         start: parseISO(a.start_time),
         end: parseISO(a.end_time),
       }))

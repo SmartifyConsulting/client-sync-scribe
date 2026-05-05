@@ -165,6 +165,7 @@ const App = () => (
             <Route path="/patient/details" element={<MyDetails />} />
             <Route path="/sessions/:id" element={<SessionDetail />} />
             <Route path="/patient/holarchelp/*" element={<HolarcHelpRoutes />} />
+            <Route path="/doctor/holarchelp/*" element={<HolarcHelpRoutes />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
 

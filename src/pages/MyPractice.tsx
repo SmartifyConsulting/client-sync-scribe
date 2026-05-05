@@ -31,6 +31,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import ReferralDoctors from "@/pages/ReferralDoctors";
+import DoctorRewards from "@/pages/doctor/DoctorRewards";
 
 import Patients from "@/pages/Patients";
 import DoctorInvoices from "@/pages/doctor/Invoices";
@@ -1140,6 +1141,12 @@ export default function MyPractice() {
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs"
           >
             Credentials{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}
+          </TabsTrigger>
+          <TabsTrigger
+            value="rewards"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs"
+          >
+            My Rewards
           </TabsTrigger>
         </TabsList>
 
@@ -2262,6 +2269,11 @@ export default function MyPractice() {
               </Table>
             )}
           </div>
+        </TabsContent>
+
+        {/* === REWARDS TAB === */}
+        <TabsContent value="rewards" className="mt-4">
+          <DoctorRewards embedded />
         </TabsContent>
 
       </Tabs>

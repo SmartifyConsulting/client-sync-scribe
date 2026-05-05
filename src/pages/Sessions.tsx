@@ -36,6 +36,7 @@ import {
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
 import { VisitCategoryDialog } from "@/components/sessions/VisitCategoryDialog";
+import { FollowUpAppointmentDialog } from "@/features/sessions/components/FollowUpAppointmentDialog";
 import { MedicalCertificateEditor } from "@/components/sessions/MedicalCertificateEditor";
 import { ReferralLetterEditor } from "@/components/sessions/ReferralLetterEditor";
 import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
@@ -155,6 +156,12 @@ export default function Sessions() {
   const [extractedInvoice, setExtractedInvoice] = useState<InvoiceData | null>(null);
   const [extractedReferral, setExtractedReferral] = useState<ReferralData | null>(null);
   const [reviewLoading, setReviewLoading] = useState(false);
+  const [showFollowUpDialog, setShowFollowUpDialog] = useState(false);
+  const doctorIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => { doctorIdRef.current = data.user?.id || null; });
+  }, []);
 
   const navigate = useNavigate();
   const { patients, loading: patientsLoading } = usePatients();
@@ -296,23 +303,32 @@ export default function Sessions() {
     notesRef.current = notes;
   }, [notes]);
 
+  // Helper: chain to next post-session step (after all doc dialogs are processed)
+  const advanceToFollowUp = useCallback(() => {
+    if (currentPatient && doctorIdRef.current) {
+      setShowFollowUpDialog(true);
+    } else {
+      // No patient context — skip directly to vula
+      setShowVisitCategoryDialog(true);
+    }
+  }, [currentPatient]);
+
+  const handleFollowUpDone = useCallback(() => {
+    setShowVisitCategoryDialog(true);
+  }, []);
+
   // Callback to handle session completion after transcription
   const handleSessionComplete = useCallback(async (transcriptText: string, visitCategories?: string[] | null) => {
     console.log("=== handleSessionComplete START ===");
-    console.log("transcriptText length:", transcriptText?.length);
-    console.log("visitCategories:", visitCategories);
-    
     setSessionState("processing");
     
     const currentNotes = notesRef.current;
     const fullContent = [transcriptText, currentNotes].filter(Boolean).join('\n\n');
     
-    console.log("fullContent length:", fullContent?.length);
-    
+    let hasDocs = false;
     try {
-      // Create session and complete it in one flow (no in_progress state persisted)
       const result = await completeSession(
-        null, // no existing session ID
+        null,
         fullContent || '',
         currentNotes,
         visitCategories?.[0] || undefined,
@@ -329,20 +345,23 @@ export default function Sessions() {
         setSummary(result.summary || "Session completed successfully.");
         setActionPoints(result.action_points || []);
         
-        // Process AI-extracted documents
         const docs = (result as any)._extractedDocuments;
         if (docs?.medical_certificate) {
           setExtractedMedCert(docs.medical_certificate);
           setShowMedCertReview(true);
+          hasDocs = true;
         }
         if (docs?.prescription) {
           setExtractedPrescription(docs.prescription);
+          if (!hasDocs) { setShowPrescriptionReview(true); hasDocs = true; }
         }
         if (docs?.invoice) {
           setExtractedInvoice(docs.invoice);
+          if (!hasDocs) { setShowInvoiceReview(true); hasDocs = true; }
         }
         if (docs?.referral) {
           setExtractedReferral(docs.referral);
+          if (!hasDocs) { setShowReferralReview(true); hasDocs = true; }
         }
       } else {
         setSummary("Session completed. No content was recorded or noted.");
@@ -356,14 +375,21 @@ export default function Sessions() {
     
     setSessionState("completed");
     pendingCompletionRef.current = false;
-    console.log("=== handleSessionComplete END ===");
-  }, [completeSession, patientId]);
+    
+    // If no documents to review, jump straight to follow-up dialog
+    if (!hasDocs) {
+      setTimeout(() => advanceToFollowUp(), 300);
+    }
+  }, [completeSession, patientId, advanceToFollowUp]);
 
-  // Handle visit category selection (multi-select)
+  // Visit-category dialog now runs at the END of the post-session chain (Vula award)
   const handleVisitCategoryConfirm = async (categories: string[] | null) => {
     setShowVisitCategoryDialog(false);
-    await handleSessionComplete(pendingTranscript, categories);
-    setPendingTranscript("");
+    if (!categories || categories.length === 0 || !currentSessionId) return;
+    // Persist visit categories to the already-created session
+    try {
+      await (supabase.from('sessions').update({ visit_category: categories[0] } as any) as any).eq('id', currentSessionId);
+    } catch (e) { console.error(e); }
   };
 
   const { 
@@ -390,35 +416,29 @@ export default function Sessions() {
         pendingCompletionRef.current = true;
         setPendingTranscript(latestTranscriptRef.current);
         setTimeout(() => { if (isRecording) stopRecording(); }, 100);
+        // Documents-first flow: kick off completion now; follow-up + Vula chained after docs.
         setTimeout(() => {
-          setShowVisitCategoryDialog(true);
+          handleSessionComplete(latestTranscriptRef.current);
           pendingCompletionRef.current = false;
         }, 2000);
       }
     },
     onTranscriptionComplete: (text) => {
-      console.log("=== onTranscriptionComplete ===");
-      console.log("text length:", text?.length);
-      console.log("pendingCompletionRef:", pendingCompletionRef.current);
-      
-      // Store transcript — set directly, don't append (hook already returns full text)
       latestTranscriptRef.current = text;
       setNotes(text);
       
       // Whisper fallback: check transcript for end session phrases
       const endPhrases = ['end session', 'end of session', 'end the session', 'conclude the session', 'session ended'];
       if (!pendingCompletionRef.current && isRecording && endPhrases.some(phrase => text.toLowerCase().includes(phrase))) {
-        console.log('End session detected via Whisper transcript fallback');
         pendingCompletionRef.current = true;
         stopRecording();
         toast({ title: "Session Ending", description: "End session detected in transcript" });
       }
       
-      // If pending completion (from voice detection), show visit category dialog
+      // If pending completion (from voice detection), trigger session-complete (documents first)
       if (pendingCompletionRef.current) {
-        console.log("Pending completion - showing visit category dialog");
         setPendingTranscript(text);
-        setShowVisitCategoryDialog(true);
+        handleSessionComplete(text);
         pendingCompletionRef.current = false;
       }
     },
@@ -472,6 +492,7 @@ export default function Sessions() {
     if (extractedPrescription) setShowPrescriptionReview(true);
     else if (extractedInvoice) setShowInvoiceReview(true);
     else if (extractedReferral) setShowReferralReview(true);
+    else advanceToFollowUp();
   };
 
   const handleApprovePrescription = async (data: PrescriptionData) => {
@@ -498,6 +519,7 @@ export default function Sessions() {
     setShowPrescriptionReview(false);
     if (extractedInvoice) setShowInvoiceReview(true);
     else if (extractedReferral) setShowReferralReview(true);
+    else advanceToFollowUp();
   };
 
   const handleApproveInvoice = async (data: InvoiceData) => {
@@ -525,6 +547,7 @@ export default function Sessions() {
     setReviewLoading(false);
     setShowInvoiceReview(false);
     if (extractedReferral) setShowReferralReview(true);
+    else advanceToFollowUp();
   };
 
   const handleApproveReferral = async (data: ReferralData) => {
@@ -560,6 +583,7 @@ export default function Sessions() {
     } catch (e) { console.error(e); }
     setReviewLoading(false);
     setShowReferralReview(false);
+    advanceToFollowUp();
   };
 
 
@@ -597,24 +621,15 @@ export default function Sessions() {
   };
 
   const endSession = async () => {
-    console.log("=== endSession called ===");
-    console.log("isRecording:", isRecording, "isTranscribing:", isTranscribing);
-    
     if (isRecording || isTranscribing) {
-      // Set pending flag - onTranscriptionComplete will show dialog
-      console.log("Recording/transcribing in progress, setting pending flag...");
       pendingCompletionRef.current = true;
-      if (isRecording) {
-        stopRecording();
-      }
+      if (isRecording) stopRecording();
       return;
     }
-    
-    // No recording/transcription in progress - show visit category dialog
-    console.log("No recording in progress, showing visit category dialog");
+    // No recording in progress — go straight to documents-first flow
     const fullContent = latestTranscriptRef.current || transcript || notes;
     setPendingTranscript(fullContent || '');
-    setShowVisitCategoryDialog(true);
+    handleSessionComplete(fullContent || '');
   };
 
   return (
@@ -627,6 +642,20 @@ export default function Sessions() {
         patientName={currentPatient?.name}
         transcript={pendingTranscript}
       />
+
+      {/* Follow-up Appointment Dialog (after documents, before Vula award) */}
+      {currentPatient && doctorIdRef.current && (
+        <FollowUpAppointmentDialog
+          open={showFollowUpDialog}
+          onOpenChange={setShowFollowUpDialog}
+          doctorId={doctorIdRef.current}
+          doctorName={doctorName}
+          patientId={currentPatient.id}
+          patientUserId={(currentPatient as any).patient_user_id || null}
+          patientName={currentPatient.name}
+          onDone={handleFollowUpDone}
+        />
+      )}
 
 
       {/* AI-Extracted Document Review Dialogs */}

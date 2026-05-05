@@ -17,6 +17,7 @@ import { format, parseISO, differenceInDays } from "date-fns";
 import { useMyRewards, useMyStreaks } from "@/hooks/usePatientRewards";
 import { VulaExplainerDialog } from "@/components/rewards/VulaExplainerDialog";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v2.png";
+import { cn } from "@/lib/utils";
 
 const MILESTONES = [
   { count: 5, label: "First Steps", icon: "🌟", color: "text-yellow-500" },
@@ -26,7 +27,7 @@ const MILESTONES = [
   { count: 100, label: "Health Legend", icon: "👑", color: "text-pink-500" },
 ];
 
-export default function DoctorRewards() {
+export default function DoctorRewards({ embedded = false }: { embedded?: boolean } = {}) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [showTransferDialog, setShowTransferDialog] = useState(false);
@@ -124,27 +125,29 @@ export default function DoctorRewards() {
   const activeStreaks = streaks.filter(s => s.current_streak > 0);
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-3xl">
+    <div className={cn("space-y-6 animate-fade-in", !embedded && "max-w-3xl")}>
       <VulaExplainerDialog open={showVulaExplainer} onOpenChange={setShowVulaExplainer} />
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-foreground">My Rewards</h1>
-            <button
-              onClick={() => setShowVulaExplainer(true)}
-              className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
-              title="Learn about Vulas"
-            >
-              <Info className="h-3.5 w-3.5" />
-              What are Vulas?
-            </button>
+      {!embedded && (
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-foreground">My Rewards</h1>
+              <button
+                onClick={() => setShowVulaExplainer(true)}
+                className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+                title="Learn about Vulas"
+              >
+                <Info className="h-3.5 w-3.5" />
+                What are Vulas?
+              </button>
+            </div>
+            <p className="text-muted-foreground text-[12px]">Manage your Vulas balance, milestones, and streaks</p>
           </div>
-          <p className="text-muted-foreground text-[12px]">Manage your Vulas balance, milestones, and streaks</p>
+          {partnerApps.length > 0 && (
+            <Button onClick={() => setShowTransferDialog(true)} className="gap-2"><Send className="h-4 w-4" /> Transfer Vulas</Button>
+          )}
         </div>
-        {partnerApps.length > 0 && (
-          <Button onClick={() => setShowTransferDialog(true)} className="gap-2"><Send className="h-4 w-4" /> Transfer Vulas</Button>
-        )}
-      </div>
+      )}
 
       {/* Balance Cards - 2x2 grid: Doctor/Patient top, Combined/Transferred bottom */}
       <div className="grid grid-cols-2 gap-4">
