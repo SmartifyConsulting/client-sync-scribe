@@ -357,6 +357,55 @@ function MailboxSection({ userId }: { userId?: string }) {
   );
 }
 
+// ── About Me accordion (doctor pitch, max 600 words) ──
+function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string) => Promise<void> }) {
+  const [draft, setDraft] = useState(value);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => { setDraft(value); }, [value]);
+  const wordCount = draft.trim() ? draft.trim().split(/\s+/).length : 0;
+  const overLimit = wordCount > 600;
+  const dirty = draft !== value;
+  return (
+    <Accordion type="single" collapsible className="space-y-4">
+      <AccordionItem value="about-me" className="rounded-xl border border-primary bg-card shadow-sm">
+        <AccordionTrigger className="px-4 py-3 hover:no-underline">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-semibold text-foreground">About Me</h3>
+          </div>
+        </AccordionTrigger>
+        <AccordionContent className="px-4 pb-4 space-y-2">
+          <p className="text-xs text-muted-foreground">
+            Share a short pitch about your practice and approach. Patients see this when viewing your profile. Maximum 600 words.
+          </p>
+          <Textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            rows={6}
+            placeholder="Tell patients about your background, philosophy of care, and what makes your practice unique…"
+          />
+          <div className="flex items-center justify-between">
+            <span className={cn("text-[11px]", overLimit ? "text-destructive" : "text-muted-foreground")}>
+              {wordCount} / 600 words
+            </span>
+            <Button
+              size="sm"
+              disabled={!dirty || overLimit || saving}
+              onClick={async () => {
+                setSaving(true);
+                try { await onSave(draft); } finally { setSaving(false); }
+              }}
+            >
+              {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <Save className="h-3.5 w-3.5 mr-2" />}
+              Save
+            </Button>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  );
+}
+
 // ── Main Component ──────────────────────────────────────────────────
 export default function MyPractice() {
   const { toast } = useToast();
