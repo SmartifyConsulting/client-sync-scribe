@@ -1811,35 +1811,44 @@ export type Database = {
       moola_partner_apps: {
         Row: {
           app_store_url: string | null
+          category: string | null
           created_at: string
           creator: string | null
           google_play_url: string | null
           id: string
           is_active: boolean
+          last_synced_at: string | null
           logo_url: string | null
           name: string
+          partner_code: string | null
           signup_url: string | null
         }
         Insert: {
           app_store_url?: string | null
+          category?: string | null
           created_at?: string
           creator?: string | null
           google_play_url?: string | null
           id?: string
           is_active?: boolean
+          last_synced_at?: string | null
           logo_url?: string | null
           name: string
+          partner_code?: string | null
           signup_url?: string | null
         }
         Update: {
           app_store_url?: string | null
+          category?: string | null
           created_at?: string
           creator?: string | null
           google_play_url?: string | null
           id?: string
           is_active?: boolean
+          last_synced_at?: string | null
           logo_url?: string | null
           name?: string
+          partner_code?: string | null
           signup_url?: string | null
         }
         Relationships: []
