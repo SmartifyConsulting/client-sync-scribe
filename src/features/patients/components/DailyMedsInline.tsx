@@ -25,6 +25,7 @@ interface SelfMed {
   with_food: string | null;
   status: string;
   approved_medication_id: string | null;
+  reminders_enabled?: boolean;
 }
 
 const FREQUENCY_OPTIONS = [
