@@ -415,35 +415,29 @@ export default function Sessions() {
         pendingCompletionRef.current = true;
         setPendingTranscript(latestTranscriptRef.current);
         setTimeout(() => { if (isRecording) stopRecording(); }, 100);
+        // Documents-first flow: kick off completion now; follow-up + Vula chained after docs.
         setTimeout(() => {
-          setShowVisitCategoryDialog(true);
+          handleSessionComplete(latestTranscriptRef.current);
           pendingCompletionRef.current = false;
         }, 2000);
       }
     },
     onTranscriptionComplete: (text) => {
-      console.log("=== onTranscriptionComplete ===");
-      console.log("text length:", text?.length);
-      console.log("pendingCompletionRef:", pendingCompletionRef.current);
-      
-      // Store transcript — set directly, don't append (hook already returns full text)
       latestTranscriptRef.current = text;
       setNotes(text);
       
       // Whisper fallback: check transcript for end session phrases
       const endPhrases = ['end session', 'end of session', 'end the session', 'conclude the session', 'session ended'];
       if (!pendingCompletionRef.current && isRecording && endPhrases.some(phrase => text.toLowerCase().includes(phrase))) {
-        console.log('End session detected via Whisper transcript fallback');
         pendingCompletionRef.current = true;
         stopRecording();
         toast({ title: "Session Ending", description: "End session detected in transcript" });
       }
       
-      // If pending completion (from voice detection), show visit category dialog
+      // If pending completion (from voice detection), trigger session-complete (documents first)
       if (pendingCompletionRef.current) {
-        console.log("Pending completion - showing visit category dialog");
         setPendingTranscript(text);
-        setShowVisitCategoryDialog(true);
+        handleSessionComplete(text);
         pendingCompletionRef.current = false;
       }
     },
