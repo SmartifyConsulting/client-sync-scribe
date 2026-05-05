@@ -162,7 +162,12 @@ export default function HolarcHelpNearby() {
 
       {coords && (
         <>
-          <ProviderMap center={coords} providers={providers} height={320} />
+          {hasMedicalAid === false && (
+            <div className="rounded-xl border border-green-500/40 bg-green-50 p-3 text-xs text-green-900">
+              Showing <strong>public</strong> providers only. Add medical aid details to your profile to also see private providers.
+            </div>
+          )}
+          <ProviderMap center={coords} providers={filteredProviders} height={320} />
           <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
             <span className="flex items-center gap-1.5"><img src={hospitalIcon} alt="" className="h-4 w-4" /> Hospital</span>
             <span className="flex items-center gap-1.5"><img src={ambulanceIcon} alt="" className="h-4 w-4" /> Ambulance</span>
