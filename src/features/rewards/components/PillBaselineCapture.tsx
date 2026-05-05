@@ -53,13 +53,34 @@ export function PillBaselineCapture({
   // Stills (packaging + tablet close-up)
   const [packagingBlob, setPackagingBlob] = useState<Blob | null>(null);
   const [tabletBlob, setTabletBlob] = useState<Blob | null>(null);
+  const [tabletWarning, setTabletWarning] = useState<string | null>(null);
+  const [checkingMarkings, setCheckingMarkings] = useState(false);
 
   // Ingestion video
   const [isRecording, setIsRecording] = useState(false);
   const [countdown, setCountdown] = useState(INGEST_SECONDS);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
+  const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
+  const [recordedMime, setRecordedMime] = useState<string>("video/webm");
 
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Manage replay object URL lifecycle
+  useEffect(() => {
+    if (!recordedBlob) { setRecordedUrl(null); return; }
+    const url = URL.createObjectURL(recordedBlob);
+    setRecordedUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [recordedBlob]);
+
+  // Pick the best supported MediaRecorder mime type
+  const pickRecorderMime = (): string | undefined => {
+    const candidates = ["video/mp4;codecs=avc1", "video/mp4", "video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"];
+    for (const c of candidates) {
+      if (typeof MediaRecorder !== "undefined" && (MediaRecorder as any).isTypeSupported?.(c)) return c;
+    }
+    return undefined;
+  };
 
   // ----- Camera lifecycle -----
   // packaging + tablet steps use rear camera; ingest uses front
