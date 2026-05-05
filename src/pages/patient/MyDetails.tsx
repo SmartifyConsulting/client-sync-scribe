@@ -128,10 +128,7 @@ export default function MyDetails() {
       />
 
       {section === "health" && (
-        <>
-          <ProfileSharesSection ownerUserId={userId} />
-          <PatientSelfAdmissionsSection patientId={patient.id} userId={userId} />
-        </>
+        <ProfileSharesSection ownerUserId={userId} />
       )}
     </div>
   );
