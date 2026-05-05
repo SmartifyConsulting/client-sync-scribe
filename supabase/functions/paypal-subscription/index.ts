@@ -467,8 +467,7 @@ serve(async (req) => {
             .eq("paypal_subscription_id", orderId);
 
           // Get plan details for payment history (only record if not trial)
-          const plan =
-            PLANS[subscription.plan_type as keyof typeof PLANS]?.[subscription.billing_cycle as "monthly" | "annual"];
+          const plan = await getPlan(supabase, subscription.plan_type, subscription.billing_cycle);
 
           // Get transaction ID from capture result
           const transactionId = captureResult.purchase_units?.[0]?.payments?.captures?.[0]?.id;
