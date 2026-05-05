@@ -202,6 +202,10 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
               </SelectContent>
             </Select>
           </div>
+          <label className="flex items-center gap-1 text-[11px] text-muted-foreground">
+            <Switch checked={remindMe} onCheckedChange={setRemindMe} className="scale-75" />
+            Remind me
+          </label>
           <Button variant="ghost" size="sm" className="h-7 text-[11px]" onClick={() => setShowCustom((s) => !s)}>
             {showCustom ? "Pick from list" : "+ Add custom"}
           </Button>
