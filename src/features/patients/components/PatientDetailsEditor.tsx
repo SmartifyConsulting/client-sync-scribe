@@ -499,6 +499,8 @@ export function PatientDetailsEditor({
     status: "current" as "current" | "past",
     start_date: "",
     end_date: "",
+    reminder_time: "08:00",
+    reminders_enabled: true,
   });
   const [editingMedId, setEditingMedId] = useState<string | null>(null);
   const [showAddCondition, setShowAddCondition] = useState(false);
