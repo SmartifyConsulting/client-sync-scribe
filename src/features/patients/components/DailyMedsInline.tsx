@@ -96,6 +96,7 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
       status: "active",
       source: "self",
       approved_medication_id: approvedId,
+      reminders_enabled: remindMe,
     } as any);
     if (error) {
       toast({ title: "Couldn't add", description: error.message, variant: "destructive" });
