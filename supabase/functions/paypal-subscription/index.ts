@@ -10,7 +10,7 @@ const corsHeaders = {
 const PAYPAL_ENV = (Deno.env.get("PAYPAL_ENV") || "sandbox").toLowerCase();
 const PAYPAL_BASE = PAYPAL_ENV === "live"
   ? "https://api-m.paypal.com"
-  : "${PAYPAL_BASE}";
+  : "https://api-m.sandbox.paypal.com";
 
 const PLAN_TYPES = ["doctor", "patient", "emergency"] as const;
 const BILLING_CYCLES = ["monthly", "annual"] as const;
