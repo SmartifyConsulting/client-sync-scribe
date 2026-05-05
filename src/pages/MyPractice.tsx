@@ -1190,39 +1190,6 @@ export default function MyPractice() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1.5 col-span-2">
-                <Label>Additional Languages</Label>
-                <div className="flex flex-wrap gap-1.5 justify-start">
-                  {LANGUAGES.filter((l) => l.code !== ((profile as any)?.preferred_language || "en")).map((l) => {
-                    const selectedLangs: string[] = (profile as any)?.preferred_languages || [];
-                    const isSelected = selectedLangs.includes(l.code);
-                    return (
-                      <button
-                        key={l.code}
-                        type="button"
-                        onClick={async () => {
-                          const current: string[] = (profile as any)?.preferred_languages || [];
-                          let updated: string[];
-                          if (isSelected) {
-                            updated = current.filter((c: string) => c !== l.code);
-                          } else {
-                            updated = [...current, l.code];
-                          }
-                          await updateProfile({ preferred_languages: updated } as any);
-                        }}
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-[11px] font-medium border transition-colors",
-                          isSelected
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-muted/50 text-muted-foreground border-border hover:border-primary/50",
-                        )}
-                      >
-                        {l.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
             </div>
             <MailboxSection userId={user?.id} />
               </AccordionContent>
