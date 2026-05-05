@@ -308,40 +308,50 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                       </TableRow>
                    </TableHeader>
                    <TableBody>
-                     {searchResults.map((doctor) => (
-                        <TableRow key={doctor.id}>
+                     {searchResults.map((doctor) => {
+                        const KindIcon = doctor.kind === 'hospital' ? Building2 : doctor.kind === 'ambulance' ? Ambulance : Stethoscope;
+                        return (
+                        <TableRow key={`${doctor.kind}-${doctor.id}`}>
                           <TableCell className="p-2">
                             <div className="flex items-center gap-2">
                               <Avatar className="h-7 w-7 shrink-0">
                                 <AvatarImage src={doctor.avatar_url || undefined} />
                                 <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
-                                  {doctor.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
+                                  <KindIcon className="h-3.5 w-3.5" />
                                 </AvatarFallback>
                               </Avatar>
                               <div className="flex flex-col min-w-0">
-                                <span className="font-medium text-foreground text-xs truncate">{doctor.full_name || "Unknown"}</span>
-                                {doctor.practice_number && (
-                                  <span className="text-[10px] text-muted-foreground">PR#: {doctor.practice_number}</span>
-                                )}
+                                <span className="font-medium text-foreground text-xs truncate flex items-center gap-1">
+                                  {doctor.full_name || "Unknown"}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                  {Array.from({ length: Math.min(5, Math.max(0, Math.round(Number(doctor.stars) || 0))) }).map((_, i) => (
+                                    <Star key={i} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
+                                  ))}
+                                </span>
                               </div>
                             </div>
                           </TableCell>
                           <TableCell className="p-2">
-                            {doctor.specialty && (
+                            {doctor.kind === 'doctor' && doctor.specialty ? (
                               <Badge className={`text-[10px] font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
                                 {doctor.specialty}
                               </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-[10px] capitalize">{doctor.kind}</Badge>
                             )}
                           </TableCell>
                           <TableCell className="p-2">
                            <div className="flex items-center gap-1">
-                             <InviteDoctorDialog
-                               prefillPracticeNumber={doctor.practice_number || ""}
-                               prefillRegistrationNumber={doctor.doctor_number || ""}
-                               prefillDoctorName={doctor.full_name || ""}
-                               prefillAvatarUrl={doctor.avatar_url || ""}
-                               prefillSpecialty={doctor.specialty || ""}
-                             />
+                             {doctor.kind === 'doctor' && (
+                               <InviteDoctorDialog
+                                 prefillPracticeNumber={doctor.registration || ""}
+                                 prefillRegistrationNumber={doctor.registration || ""}
+                                 prefillDoctorName={doctor.full_name || ""}
+                                 prefillAvatarUrl={doctor.avatar_url || ""}
+                                 prefillSpecialty={doctor.specialty || ""}
+                               />
+                             )}
                              <Button
                                variant="ghost"
                                size="icon"
@@ -354,7 +364,8 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                            </div>
                          </TableCell>
                        </TableRow>
-                     ))}
+                       );
+                     })}
                    </TableBody>
                  </Table>
               )}
