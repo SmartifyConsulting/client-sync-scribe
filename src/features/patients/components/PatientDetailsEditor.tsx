@@ -1909,17 +1909,9 @@ export function PatientDetailsEditor({
               <TabsContent value="sessions" className="mt-4">
                 <div className="mb-4">
                   <h2 className="text-lg font-semibold text-foreground">My Sessions</h2>
-                  <p className="text-xs text-muted-foreground">History of your consultations</p>
+                  <p className="text-xs text-muted-foreground">History of your consultations. Record sessions with doctors not on the platform.</p>
                 </div>
-                <Suspense
-                  fallback={
-                    <div className="flex items-center justify-center py-12">
-                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                    </div>
-                  }
-                >
-                  <SessionHistoryTableLazy sessions={[]} patientId={patient.id} patientName={patient.name} />
-                </Suspense>
+                <PatientSessionRecorder patientId={patient.id} patientName={patient.name} />
               </TabsContent>
             )}
 
