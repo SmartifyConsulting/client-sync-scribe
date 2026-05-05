@@ -2830,6 +2830,41 @@ export type Database = {
         }
         Relationships: []
       }
+      round_table_messages: {
+        Row: {
+          content: string
+          created_at: string
+          doctor_id: string
+          doctor_name: string
+          id: string
+          topic_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          doctor_id: string
+          doctor_name: string
+          id?: string
+          topic_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          doctor_id?: string
+          doctor_name?: string
+          id?: string
+          topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "round_table_messages_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "round_table_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       round_table_notes: {
         Row: {
           content: string
@@ -2893,6 +2928,47 @@ export type Database = {
             columns: ["note_id"]
             isOneToOne: false
             referencedRelation: "round_table_notes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      round_table_topics: {
+        Row: {
+          body: string
+          created_at: string
+          doctor_id: string
+          doctor_name: string
+          id: string
+          patient_id: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          doctor_id: string
+          doctor_name: string
+          id?: string
+          patient_id: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          doctor_id?: string
+          doctor_name?: string
+          id?: string
+          patient_id?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "round_table_topics_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
             referencedColumns: ["id"]
           },
         ]
@@ -3486,6 +3562,26 @@ export type Database = {
           preferred_language: string
           specialty: string
         }[]
+      }
+      search_providers: {
+        Args: { _language?: string; _name?: string; _specialty?: string }
+        Returns: {
+          about_me: string
+          address: string
+          avatar_url: string
+          full_name: string
+          id: string
+          kind: string
+          phone: string
+          preferred_language: string
+          registration: string
+          specialty: string
+          stars: number
+        }[]
+      }
+      user_can_access_patient_rt: {
+        Args: { _patient_id: string }
+        Returns: boolean
       }
     }
     Enums: {
