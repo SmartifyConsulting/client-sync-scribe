@@ -9,10 +9,8 @@ import {
   Briefcase,
   UserCog,
   Gift,
-  Shield,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
-import { useHolarcHelpAccess } from "@/modules/holarchelp/hooks/useHolarcHelpAccess";
 
 const doctorNavItems = [
   { icon: LayoutDashboard, label: "Home", to: "/doctor-dashboard" },
@@ -31,7 +29,6 @@ const patientSections = [
 
 export function BottomNav() {
   const { isPatient, loading } = useUserRole();
-  const { enabled: holarchelpEnabled } = useHolarcHelpAccess();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
