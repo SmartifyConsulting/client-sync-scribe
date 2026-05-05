@@ -110,14 +110,14 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
 
     try {
       const { data, error } = await supabase
-        .rpc("search_doctor_profiles", { _name: name, _specialty: spec, _language: lang });
+        .rpc("search_providers", { _name: name, _specialty: spec, _language: lang });
 
       if (error) throw error;
 
-      const allResults = (data || []) as DoctorProfile[];
+      const allResults = (data || []) as ProviderResult[];
       setTotalFound(allResults.length);
       const connectedIds = doctors?.map((d) => d.doctor_id) || [];
-      setSearchResults(allResults.filter((d) => !connectedIds.includes(d.id)));
+      setSearchResults(allResults.filter((d) => !(d.kind === 'doctor' && connectedIds.includes(d.id))));
     } catch (err) {
       console.error("Search error:", err);
     } finally {
