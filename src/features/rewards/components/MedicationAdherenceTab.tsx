@@ -870,6 +870,8 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                         <p className="font-medium">
                           {!pillCheckResult.isPillVisible
                             ? "No pill detected"
+                            : pillCheckResult.expectedCount && pillCheckResult.detectedCount !== undefined && pillCheckResult.detectedCount < pillCheckResult.expectedCount
+                            ? `We saw ${pillCheckResult.detectedCount} of ${pillCheckResult.expectedCount} tablets — please show them all`
                             : pillCheckResult.isMatch
                             ? "Looks right — proceed to take it"
                             : "Couldn't confirm exact pill — proceeding"}
