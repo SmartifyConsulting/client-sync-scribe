@@ -349,9 +349,12 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
   const startRecording = () => {
     if (!stream) return;
     chunksRef.current = [];
-    const mr = new MediaRecorder(stream, { mimeType: "video/webm" });
+    const mime = pickRecorderMime();
+    const mr = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+    const finalMime = mr.mimeType || mime || "video/webm";
+    setRecordedMime(finalMime);
     mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-    mr.onstop = () => setRecordedBlob(new Blob(chunksRef.current, { type: "video/webm" }));
+    mr.onstop = () => setRecordedBlob(new Blob(chunksRef.current, { type: finalMime }));
     mr.start();
     mediaRecorderRef.current = mr;
     setIsRecording(true);
