@@ -162,6 +162,10 @@ export default function HolarcHelpHome() {
       if ("vibrate" in navigator) navigator.vibrate?.([200, 100, 200]);
       setIncidentId((incident as any).id);
       setActiveIncidentId((incident as any).id);
+      // Fire-and-forget: notify emergency contacts (and any opt-in NOK / share recipients) with live tracking link
+      supabase.functions.invoke("share-incident-with-contacts", {
+        body: { incident_id: (incident as any).id, tracking_token: (incident as any).tracking_token },
+      }).catch((e) => console.warn("share-incident-with-contacts failed", e));
       setSeverityOpen(true);
     } catch (e: any) {
       toast.error(e?.message ?? "Could not trigger SOS");
