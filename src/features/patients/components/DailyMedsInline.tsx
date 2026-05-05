@@ -75,17 +75,8 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
     let medName = "";
     if (showCustom) {
       if (!customName.trim() || !patientUserId) return;
-      const { data: created, error: cErr } = await supabase
-        .from("approved_daily_medications")
-        .insert({ name: customName.trim(), category: customCategory, active: true })
-        .select("id, name, category, default_with_food")
-        .single();
-      if (cErr) {
-        toast({ title: "Couldn't add custom item", description: cErr.message, variant: "destructive" });
-        return;
-      }
-      approvedId = created.id;
-      medName = created.name;
+      medName = `${customName.trim()} (${customCategory})`;
+      approvedId = null;
     } else {
       const med = approved.find((a) => a.id === pickedId);
       if (!med || !patientUserId) return;
