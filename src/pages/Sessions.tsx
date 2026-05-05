@@ -546,6 +546,7 @@ export default function Sessions() {
     setReviewLoading(false);
     setShowInvoiceReview(false);
     if (extractedReferral) setShowReferralReview(true);
+    else advanceToFollowUp();
   };
 
   const handleApproveReferral = async (data: ReferralData) => {
