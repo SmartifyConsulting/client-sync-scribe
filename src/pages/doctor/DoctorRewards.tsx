@@ -102,11 +102,14 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
     if (amount <= 0 || amount > totalVulas) { toast({ title: "Invalid amount", variant: "destructive" }); return; }
     const { data: patient } = await supabase.from("patients").select("id").eq("patient_user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
     if (!patient) { toast({ title: "No patient record found", variant: "destructive" }); return; }
-    const { error: transferError } = await supabase.from("moola_transfers").insert({ user_id: user.id, partner_app_id: transferToAppId, amount });
-    if (transferError) { toast({ title: "Transfer failed", variant: "destructive" }); return; }
+    const isVault = transferToAppId === "vault";
+    if (!isVault) {
+      const { error: transferError } = await supabase.from("moola_transfers").insert({ user_id: user.id, partner_app_id: transferToAppId, amount });
+      if (transferError) { toast({ title: "Transfer failed", variant: "destructive" }); return; }
+    }
     const { error: deductError } = await supabase.from("patient_rewards").insert({
       patient_id: patient.id, awarded_by: user.id, lollipops_count: -amount,
-      visit_category: "Vula Transfer", reward_type: "transfer",
+      visit_category: isVault ? "Vula Vault" : "Vula Transfer", reward_type: "transfer",
     });
     if (deductError) { toast({ title: "Deduction failed", variant: "destructive" }); return; }
     toast({ title: "Transfer successful", description: `${amount} Vulas transferred.` });
@@ -194,16 +197,14 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-sky-100">Transferred</p>
+                <p className="text-sm font-medium text-sky-100">Redeemed</p>
                 <p className="text-2xl font-bold text-white">{totalTransferred}</p>
               </div>
               <ArrowRightLeft className="h-10 w-10 text-white/90" />
             </div>
-            {partnerApps.length > 0 && (
-              <Button variant="ghost" size="sm" className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-xs flex items-center gap-1 mt-2" onClick={() => setShowTransferDialog(true)}>
-                Transfer Vulas <Send className="h-3 w-3" />
-              </Button>
-            )}
+            <Button variant="ghost" size="sm" className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-xs flex items-center gap-1 mt-2" onClick={() => setShowTransferDialog(true)}>
+              Redeem Vulas <Send className="h-3 w-3" />
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -215,7 +216,7 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
           <TabsTrigger value="milestones" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Milestones</TabsTrigger>
           <TabsTrigger value="streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Streaks</TabsTrigger>
           <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">History</TabsTrigger>
-          <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Transfers</TabsTrigger>
+          <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Redeem</TabsTrigger>
          </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -366,7 +367,20 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
         </TabsContent>
 
         <TabsContent value="transfers" className="space-y-6">
-          {/* Partner Apps at top */}
+          {/* Redeem from 6Dot50 */}
+          <Card className="border-primary/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Gift className="h-5 w-5 text-primary" />Redeem from 6Dot50 with Vula Vouchers</CardTitle>
+              <CardDescription>Redeem your Vulas at retailers in the 6Dot50 network.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={() => window.open("https://portal.6dot50.com/", "_blank", "noopener")} className="gap-2">
+                <Gift className="h-4 w-4" /> Redeem
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Partner Apps */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><Gift className="h-5 w-5 text-primary" />Vula Partner Apps</CardTitle>
@@ -402,29 +416,16 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
             </CardContent>
           </Card>
 
-          {/* Transfer History */}
-          <Card>
+          {/* Transfer to Vula Vault */}
+          <Card className="border-indigo-300">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><ArrowRightLeft className="h-5 w-5 text-blue-500" />Transfer History</CardTitle>
-              <CardDescription>Record of all Vula transfers to partner apps</CardDescription>
+              <CardTitle className="flex items-center gap-2"><ArrowRightLeft className="h-5 w-5 text-indigo-600" />Transfer to Vula Vault</CardTitle>
+              <CardDescription>Move your Vulas to the Vula Vault for safekeeping.</CardDescription>
             </CardHeader>
             <CardContent>
-              {transfers.length === 0 ? (
-                <div className="text-center py-8"><ArrowRightLeft className="h-12 w-12 text-muted-foreground mx-auto mb-4" /><p className="text-muted-foreground">No transfers yet</p></div>
-              ) : (
-                <Table>
-                  <TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Partner App</TableHead><TableHead className="text-right">Amount</TableHead></TableRow></TableHeader>
-                  <TableBody>
-                    {transfers.map((t: any) => (
-                      <TableRow key={t.id}>
-                        <TableCell>{format(new Date(t.created_at), "MMM d, yyyy")}</TableCell>
-                        <TableCell><Badge variant="secondary">{t.moola_partner_apps?.name || "Partner App"}</Badge></TableCell>
-                        <TableCell className="text-right"><span className="text-blue-600 font-semibold">-{t.amount} <img src={vulaVouchersLogo} alt="Vula" className="h-5 w-auto object-contain inline-block" /></span></TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
+              <Button onClick={() => { setTransferToAppId("vault"); setShowTransferDialog(true); }} className="gap-2">
+                <ArrowRightLeft className="h-4 w-4" /> Transfer to Vault
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
