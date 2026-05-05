@@ -732,12 +732,11 @@ export function PatientDetailsEditor({
         organ_donor: data.organ_donor,
         organ_donor_organs: organDonorOrgans,
         preferred_language: data.preferred_language || null,
-      } as any);
         next_of_kin_members: nokMembers,
         current_medications: currentMedications,
         conditions_diagnoses: conditionsDiagnoses,
         is_chronic: isChronic,
-      });
+      } as any);
       // Sync chronic meds → prescriptions so they appear under Rewards
       await syncChronicMedsToPrescriptions(currentMedications);
       setSaving(false);
