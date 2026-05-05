@@ -34,6 +34,7 @@ export default function MyDetails() {
       if (!user) return;
 
       setUserEmail(user.email || "");
+      setUserId(user.id);
 
       const { data, error } = await supabase
         .from("patients")
