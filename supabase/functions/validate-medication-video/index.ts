@@ -749,8 +749,8 @@ Set isValid=true only if person_detected AND ingestion_detected AND the required
         await supabase.from('patient_rewards').insert({
           patient_id: patientId,
           awarded_by: patient.patient_user_id,
-          lollipops_count: 5,
-          visit_category: 'Medication Adherence',
+          lollipops_count: VULA_AWARD,
+          visit_category: isSupplement ? 'Supplement Adherence' : 'Medication Adherence',
           reward_type: 'medication_adherence',
         });
       }
