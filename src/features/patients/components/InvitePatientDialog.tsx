@@ -24,6 +24,7 @@ interface InvitePatientDialogProps {
 
 export function InvitePatientDialog({ patientId, patientName }: InvitePatientDialogProps) {
   const [open, setOpen] = useState(false);
+  const [showTransparency, setShowTransparency] = useState(false);
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
