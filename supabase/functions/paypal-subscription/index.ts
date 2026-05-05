@@ -71,14 +71,19 @@ async function getPayPalAccessToken(): Promise<string> {
   return data.access_token;
 }
 
-async function createPayPalOrder(accessToken: string, planType: string, billingCycle: string): Promise<any> {
-  const plan = PLANS[planType as keyof typeof PLANS]?.[billingCycle as "monthly" | "annual"];
+async function createPayPalOrder(
+  supabase: any,
+  accessToken: string,
+  planType: string,
+  billingCycle: string,
+): Promise<any> {
+  const plan = await getPlan(supabase, planType, billingCycle);
 
   if (!plan) {
     throw new Error("Invalid plan configuration");
   }
 
-  const response = await fetch("${PAYPAL_BASE}/v2/checkout/orders", {
+  const response = await fetch(`${PAYPAL_BASE}/v2/checkout/orders`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
