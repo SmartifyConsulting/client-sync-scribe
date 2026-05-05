@@ -80,6 +80,51 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // ============================================================
+    // BASELINE TABLET CHECK — quick AI check that markings are visible
+    // ============================================================
+    if (body.mode === 'baseline_tablet_check') {
+      const { imageUrl, expectedQuantity } = body;
+      if (!imageUrl) {
+        return new Response(JSON.stringify({ error: 'Missing imageUrl' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      const expectedQty = Number(expectedQuantity) > 0 ? Number(expectedQuantity) : 1;
+      const prompt = `Look at this close-up photo of a tablet/capsule. Reply in JSON ONLY:
+{
+  "markingsVisible": true or false,
+  "tabletCount": integer (number of distinct tablets/capsules visible),
+  "suggestion": "if markingsVisible is false, give one short sentence telling the patient how to retake (e.g. flip the tablet, get closer). If true, empty string."
+}
+Markings means any printed letters, numbers, brand logo or scored line. A plain unmarked tablet still counts as markingsVisible=false. Only return JSON.`;
+      let markingsVisible = true;
+      let tabletCount = expectedQty;
+      let suggestion = '';
+      try {
+        const r = await callGemini(LOVABLE_API_KEY, [
+          { type: 'text', text: prompt },
+          { type: 'image_url', image_url: { url: imageUrl } },
+        ]);
+        if (r.ok) {
+          const d = await r.json();
+          const c = d.choices?.[0]?.message?.content || '';
+          const m = c.match(/\{[\s\S]*\}/);
+          if (m) {
+            const parsed = JSON.parse(m[0]);
+            markingsVisible = parsed.markingsVisible !== false;
+            if (typeof parsed.tabletCount === 'number') tabletCount = Math.max(0, Math.floor(parsed.tabletCount));
+            suggestion = parsed.suggestion || '';
+          }
+        }
+      } catch (e) {
+        console.error('baseline_tablet_check failed', e);
+      }
+      if (tabletCount < expectedQty && markingsVisible) {
+        suggestion = `We only saw ${tabletCount} of ${expectedQty} tablets — show them all together.`;
+        markingsVisible = false;
+      }
+      return new Response(JSON.stringify({ ok: true, markingsVisible, tabletCount, expectedQuantity: expectedQty, suggestion }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    // ============================================================
     // BASELINE CAPTURE — full first-dose video (frames only)
     // Persists tablet description + ingestion-pattern summary
     // ============================================================
