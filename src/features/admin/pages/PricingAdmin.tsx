@@ -169,6 +169,7 @@ export default function PricingAdmin() {
       let result = (data || []) as PricingConfig[];
       result = calculateSavings(result, "doctor");
       result = calculateSavings(result, "patient");
+      result = calculateSavings(result, "emergency");
       setPricing(result);
     } catch (error) {
       console.error("Error fetching pricing:", error);
