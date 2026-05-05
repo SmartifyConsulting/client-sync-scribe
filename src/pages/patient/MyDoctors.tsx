@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, Stethoscope, Search, Lock, UserMinus, MoreVertical } from "lucide-react";
+import { Loader2, Stethoscope, Search, Lock, UserMinus, MoreVertical, Building2, Ambulance, Star } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -14,6 +14,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { InviteDoctorDialog } from "@/components/patient/InviteDoctorDialog";
 import { useToast } from "@/hooks/use-toast";
 import { LANGUAGES, COMMON_SPECIALTIES } from "@/lib/languages";
+
+interface ProviderResult {
+  id: string;
+  kind: 'doctor' | 'hospital' | 'ambulance';
+  full_name: string | null;
+  specialty: string | null;
+  address: string | null;
+  phone: string | null;
+  avatar_url: string | null;
+  registration: string | null;
+  about_me: string | null;
+  preferred_language: string | null;
+  stars: number;
+}
 
 interface DoctorProfile {
   id: string;
@@ -42,12 +56,12 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
   const [specialtyQuery, setSpecialtyQuery] = useState<string>("any");
   const [languageQuery, setLanguageQuery] = useState<string>("any");
   const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<DoctorProfile[]>([]);
+  const [searchResults, setSearchResults] = useState<ProviderResult[]>([]);
   const [totalFound, setTotalFound] = useState(0);
   const [hasSearched, setHasSearched] = useState(false);
   const [uninviteTarget, setUninviteTarget] = useState<DoctorAccess | null>(null);
   const [uninviteLoading, setUninviteLoading] = useState(false);
-  const [detailsDoctor, setDetailsDoctor] = useState<DoctorProfile | null>(null);
+  const [detailsDoctor, setDetailsDoctor] = useState<ProviderResult | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -96,14 +110,14 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
 
     try {
       const { data, error } = await supabase
-        .rpc("search_doctor_profiles", { _name: name, _specialty: spec, _language: lang });
+        .rpc("search_providers", { _name: name, _specialty: spec, _language: lang });
 
       if (error) throw error;
 
-      const allResults = (data || []) as DoctorProfile[];
+      const allResults = (data || []) as ProviderResult[];
       setTotalFound(allResults.length);
       const connectedIds = doctors?.map((d) => d.doctor_id) || [];
-      setSearchResults(allResults.filter((d) => !connectedIds.includes(d.id)));
+      setSearchResults(allResults.filter((d) => !(d.kind === 'doctor' && connectedIds.includes(d.id))));
     } catch (err) {
       console.error("Search error:", err);
     } finally {
@@ -294,40 +308,50 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                       </TableRow>
                    </TableHeader>
                    <TableBody>
-                     {searchResults.map((doctor) => (
-                        <TableRow key={doctor.id}>
+                     {searchResults.map((doctor) => {
+                        const KindIcon = doctor.kind === 'hospital' ? Building2 : doctor.kind === 'ambulance' ? Ambulance : Stethoscope;
+                        return (
+                        <TableRow key={`${doctor.kind}-${doctor.id}`}>
                           <TableCell className="p-2">
                             <div className="flex items-center gap-2">
                               <Avatar className="h-7 w-7 shrink-0">
                                 <AvatarImage src={doctor.avatar_url || undefined} />
                                 <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
-                                  {doctor.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
+                                  <KindIcon className="h-3.5 w-3.5" />
                                 </AvatarFallback>
                               </Avatar>
                               <div className="flex flex-col min-w-0">
-                                <span className="font-medium text-foreground text-xs truncate">{doctor.full_name || "Unknown"}</span>
-                                {doctor.practice_number && (
-                                  <span className="text-[10px] text-muted-foreground">PR#: {doctor.practice_number}</span>
-                                )}
+                                <span className="font-medium text-foreground text-xs truncate flex items-center gap-1">
+                                  {doctor.full_name || "Unknown"}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                  {Array.from({ length: Math.min(5, Math.max(0, Math.round(Number(doctor.stars) || 0))) }).map((_, i) => (
+                                    <Star key={i} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
+                                  ))}
+                                </span>
                               </div>
                             </div>
                           </TableCell>
                           <TableCell className="p-2">
-                            {doctor.specialty && (
+                            {doctor.kind === 'doctor' && doctor.specialty ? (
                               <Badge className={`text-[10px] font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
                                 {doctor.specialty}
                               </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-[10px] capitalize">{doctor.kind}</Badge>
                             )}
                           </TableCell>
                           <TableCell className="p-2">
                            <div className="flex items-center gap-1">
-                             <InviteDoctorDialog
-                               prefillPracticeNumber={doctor.practice_number || ""}
-                               prefillRegistrationNumber={doctor.doctor_number || ""}
-                               prefillDoctorName={doctor.full_name || ""}
-                               prefillAvatarUrl={doctor.avatar_url || ""}
-                               prefillSpecialty={doctor.specialty || ""}
-                             />
+                             {doctor.kind === 'doctor' && (
+                               <InviteDoctorDialog
+                                 prefillPracticeNumber={doctor.registration || ""}
+                                 prefillRegistrationNumber={doctor.registration || ""}
+                                 prefillDoctorName={doctor.full_name || ""}
+                                 prefillAvatarUrl={doctor.avatar_url || ""}
+                                 prefillSpecialty={doctor.specialty || ""}
+                               />
+                             )}
                              <Button
                                variant="ghost"
                                size="icon"
@@ -340,7 +364,8 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                            </div>
                          </TableCell>
                        </TableRow>
-                     ))}
+                       );
+                     })}
                    </TableBody>
                  </Table>
               )}
@@ -421,14 +446,19 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-2 text-xs">
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, Math.max(0, Math.round(Number(detailsDoctor?.stars) || 0))) }).map((_, i) => (
+                <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
+              ))}
+              <span className="text-muted-foreground ml-1 capitalize">({detailsDoctor?.kind})</span>
+            </div>
             {detailsDoctor?.specialty && <div><span className="text-muted-foreground">Specialty:</span> {detailsDoctor.specialty}</div>}
-            {detailsDoctor?.practice_number && <div><span className="text-muted-foreground">Practice #:</span> {detailsDoctor.practice_number}</div>}
-            {detailsDoctor?.doctor_number && <div><span className="text-muted-foreground">Registration #:</span> {detailsDoctor.doctor_number}</div>}
+            {detailsDoctor?.registration && <div><span className="text-muted-foreground">Registration #:</span> {detailsDoctor.registration}</div>}
             {detailsDoctor?.preferred_language && (
               <div><span className="text-muted-foreground">Language:</span> {LANGUAGES.find(l => l.code === detailsDoctor.preferred_language)?.name || detailsDoctor.preferred_language}</div>
             )}
-            {detailsDoctor?.practice_address && <div><span className="text-muted-foreground">Address:</span> {detailsDoctor.practice_address}</div>}
-            {detailsDoctor?.mobile_number && <div><span className="text-muted-foreground">Mobile:</span> {detailsDoctor.mobile_number}</div>}
+            {detailsDoctor?.address && <div><span className="text-muted-foreground">Address:</span> {detailsDoctor.address}</div>}
+            {detailsDoctor?.phone && <div><span className="text-muted-foreground">Phone:</span> {detailsDoctor.phone}</div>}
             {detailsDoctor?.about_me && (
               <div className="pt-2 border-t">
                 <div className="text-muted-foreground mb-1 font-medium">About Me</div>

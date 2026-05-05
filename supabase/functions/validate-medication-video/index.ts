@@ -446,6 +446,24 @@ Only return JSON.`;
       .eq('prescription_id', prescriptionId)
       .maybeSingle();
 
+    // Determine if this is a vitamin/supplement (reduced Vula award)
+    const { data: rxMeta } = await supabase
+      .from('prescriptions')
+      .select('source, approved_medication_id')
+      .eq('id', prescriptionId)
+      .maybeSingle();
+    let isSupplement = false;
+    if (rxMeta?.approved_medication_id) {
+      const { data: appr } = await supabase
+        .from('approved_daily_medications')
+        .select('category')
+        .eq('id', rxMeta.approved_medication_id)
+        .maybeSingle();
+      const cat = (appr?.category || '').toLowerCase();
+      if (cat === 'vitamin' || cat === 'supplement') isSupplement = true;
+    }
+    const VULA_AWARD = isSupplement ? 2 : 5;
+
     const intakeMethod = (ref?.intake_method as IntakeMethod) || 'swallow';
     const { required, disqualifying } = methodSignals(intakeMethod);
 
@@ -662,8 +680,8 @@ Set isValid=true only if person_detected AND ingestion_detected AND the required
         await supabase.from('patient_rewards').insert({
           patient_id: patientId,
           awarded_by: patient.patient_user_id,
-          lollipops_count: 5,
-          visit_category: 'Medication Adherence',
+          lollipops_count: VULA_AWARD,
+          visit_category: isSupplement ? 'Supplement Adherence' : 'Medication Adherence',
           reward_type: 'medication_adherence',
         });
       }
@@ -707,7 +725,7 @@ Set isValid=true only if person_detected AND ingestion_detected AND the required
           confidence: aggregateConfidence,
           detectedTabletCount: tabletDetectedFinal,
           tabletExpected: tabletTot,
-          molesAwarded: 5,
+          molesAwarded: VULA_AWARD,
           streak: currentStreak,
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -731,8 +749,8 @@ Set isValid=true only if person_detected AND ingestion_detected AND the required
         await supabase.from('patient_rewards').insert({
           patient_id: patientId,
           awarded_by: patient.patient_user_id,
-          lollipops_count: 5,
-          visit_category: 'Medication Adherence',
+          lollipops_count: VULA_AWARD,
+          visit_category: isSupplement ? 'Supplement Adherence' : 'Medication Adherence',
           reward_type: 'medication_adherence',
         });
       }
@@ -746,7 +764,7 @@ Set isValid=true only if person_detected AND ingestion_detected AND the required
           detectedTabletCount: tabletDetectedFinal,
           tabletExpected: tabletTot,
           validation: validationResult,
-          molesAwarded: 5,
+          molesAwarded: VULA_AWARD,
           message: shortfall
             ? `Only ${tabletDetectedFinal} of ${tabletTot} tablets seen on camera — provisional, reviewed at month-end.`
             : `Confidence ${Math.round(aggregateConfidence)}% — provisional. Will be confirmed at month-end if your average stays above 50%.`,
