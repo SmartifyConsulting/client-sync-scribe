@@ -542,11 +542,21 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
       const filePaths = uploads.map((u) => u.path);
 
       // 3. Call AI validation edge function
-      const rxName = prescriptions.find((p) => p.id === recordingPrescriptionId)?.medication || "";
+      const rxObj = prescriptions.find((p) => p.id === recordingPrescriptionId);
+      const rxName = rxObj?.medication || "";
+      const expectedQuantity = Math.max(1, Number(rxObj?.quantity_per_dose) || parseQuantity(rxObj?.dosage));
       const { data, error: fnError } = await supabase.functions.invoke(
         "validate-medication-video",
         {
-          body: { imageUrls, filePaths, prescriptionId: recordingPrescriptionId, patientId },
+          body: {
+            imageUrls,
+            filePaths,
+            prescriptionId: recordingPrescriptionId,
+            patientId,
+            expectedQuantity,
+            tabletTotal: expectedQuantity,
+            tabletIndex: expectedQuantity,
+          },
         }
       );
 
