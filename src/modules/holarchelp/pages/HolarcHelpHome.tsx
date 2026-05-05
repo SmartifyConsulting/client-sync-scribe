@@ -36,17 +36,20 @@ export default function HolarcHelpHome() {
   const [helpOnTheWay, setHelpOnTheWay] = useState(false);
   const [severityOpen, setSeverityOpen] = useState(false);
   const [requesting, setRequesting] = useState<string | null>(null);
-  const [hasNok, setHasNok] = useState<boolean | null>(null);
+  const [hasEmergency, setHasEmergency] = useState<boolean | null>(null);
   const channelRef = useRef<any>(null);
 
   useEffect(() => {
     if (!user) return;
     supabase.from("patients" as any)
-      .select("next_of_kin_name, next_of_kin_phone")
+      .select("emergency_contact_name, emergency_contact_phone, emergency_contacts, next_of_kin_name, next_of_kin_phone")
       .eq("patient_user_id", user.id)
       .order("created_at", { ascending: false }).limit(1).maybeSingle()
       .then(({ data }: any) => {
-        setHasNok(!!(data?.next_of_kin_name && data?.next_of_kin_phone));
+        const ecList = Array.isArray(data?.emergency_contacts) ? data.emergency_contacts : [];
+        const hasEC = !!(data?.emergency_contact_name && data?.emergency_contact_phone) || ecList.length > 0;
+        const hasNok = !!(data?.next_of_kin_name && data?.next_of_kin_phone);
+        setHasEmergency(hasEC || hasNok);
       });
     supabase.from("holarchelp_incidents" as any).select("id, assigned_provider_id, accepted_at")
       .eq("user_id", user.id).eq("status", "active")
