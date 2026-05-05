@@ -139,8 +139,12 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                     cn(
                       "flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium transition-all duration-200",
                       isItemActive
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                        ? item.danger
+                          ? "bg-red-600 text-white shadow-sm"
+                          : "bg-primary text-primary-foreground shadow-sm"
+                        : item.danger
+                          ? "text-red-600 hover:bg-red-600/10"
+                          : "text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                     )
                   }
                 >
