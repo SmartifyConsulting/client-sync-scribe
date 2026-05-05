@@ -53,6 +53,7 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
   const [showCustom, setShowCustom] = useState(false);
   const [customName, setCustomName] = useState("");
   const [customCategory, setCustomCategory] = useState<"vitamin" | "supplement" | "otc">("vitamin");
+  const [remindMe, setRemindMe] = useState(true);
 
   const load = async () => {
     setLoading(true);
