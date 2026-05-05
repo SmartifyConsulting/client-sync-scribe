@@ -251,6 +251,11 @@ export default function HolarcHelpHome() {
   return (
     <div className="mx-auto max-w-md">
       <SeverityPicker open={severityOpen} onSubmit={finishSeverity} onSkip={() => finishSeverity(null)} />
+      <SosVoiceNoteDialog
+        open={voiceNoteOpen}
+        incidentId={incidentId}
+        onClose={() => { setVoiceNoteOpen(false); setSeverityOpen(true); }}
+      />
 
       {hasEmergency === false && (
         <Card className="mb-4 border-amber-500/40 bg-amber-50">
