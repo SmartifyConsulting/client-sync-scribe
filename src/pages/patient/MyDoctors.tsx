@@ -446,14 +446,19 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-2 text-xs">
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, Math.max(0, Math.round(Number(detailsDoctor?.stars) || 0))) }).map((_, i) => (
+                <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
+              ))}
+              <span className="text-muted-foreground ml-1 capitalize">({detailsDoctor?.kind})</span>
+            </div>
             {detailsDoctor?.specialty && <div><span className="text-muted-foreground">Specialty:</span> {detailsDoctor.specialty}</div>}
-            {detailsDoctor?.practice_number && <div><span className="text-muted-foreground">Practice #:</span> {detailsDoctor.practice_number}</div>}
-            {detailsDoctor?.doctor_number && <div><span className="text-muted-foreground">Registration #:</span> {detailsDoctor.doctor_number}</div>}
+            {detailsDoctor?.registration && <div><span className="text-muted-foreground">Registration #:</span> {detailsDoctor.registration}</div>}
             {detailsDoctor?.preferred_language && (
               <div><span className="text-muted-foreground">Language:</span> {LANGUAGES.find(l => l.code === detailsDoctor.preferred_language)?.name || detailsDoctor.preferred_language}</div>
             )}
-            {detailsDoctor?.practice_address && <div><span className="text-muted-foreground">Address:</span> {detailsDoctor.practice_address}</div>}
-            {detailsDoctor?.mobile_number && <div><span className="text-muted-foreground">Mobile:</span> {detailsDoctor.mobile_number}</div>}
+            {detailsDoctor?.address && <div><span className="text-muted-foreground">Address:</span> {detailsDoctor.address}</div>}
+            {detailsDoctor?.phone && <div><span className="text-muted-foreground">Phone:</span> {detailsDoctor.phone}</div>}
             {detailsDoctor?.about_me && (
               <div className="pt-2 border-t">
                 <div className="text-muted-foreground mb-1 font-medium">About Me</div>
