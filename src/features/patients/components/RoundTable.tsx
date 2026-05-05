@@ -1,20 +1,30 @@
-import { useState, useEffect } from "react";
-import { Users, Send, Loader2, Trash2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Users, Send, Loader2, Trash2, MessageCircle, Plus, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
-interface RoundTableNote {
+interface RTTopic {
   id: string;
   patient_id: string;
   doctor_id: string;
   doctor_name: string;
-  doctor_specialty: string | null;
+  subject: string;
+  body: string;
+  created_at: string;
+}
+
+interface RTMessage {
+  id: string;
+  topic_id: string;
+  doctor_id: string;
+  doctor_name: string;
   content: string;
   created_at: string;
-  isRead: boolean;
 }
 
 interface RoundTableProps {
@@ -24,310 +34,210 @@ interface RoundTableProps {
   hideHeader?: boolean;
 }
 
-export function RoundTable({ patientId, patientName, onUnreadCountChange, hideHeader = false }: RoundTableProps) {
+export function RoundTable({ patientId, patientName, hideHeader = false }: RoundTableProps) {
   const { toast } = useToast();
-  const [notes, setNotes] = useState<RoundTableNote[]>([]);
+  const [topics, setTopics] = useState<RTTopic[]>([]);
+  const [messagesByTopic, setMessagesByTopic] = useState<Record<string, RTMessage[]>>({});
   const [loading, setLoading] = useState(true);
-  const [newNote, setNewNote] = useState("");
-  const [submitting, setSubmitting] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [currentUserName, setCurrentUserName] = useState<string>("");
-  const [currentUserSpecialty, setCurrentUserSpecialty] = useState<string | null>(null);
+  const [currentUserName, setCurrentUserName] = useState<string>("Doctor");
+  const [onlineDoctors, setOnlineDoctors] = useState<Record<string, string>>({});
+  const [showCompose, setShowCompose] = useState(false);
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [chatInput, setChatInput] = useState<Record<string, string>>({});
+  const presenceRef = useRef<any>(null);
 
   useEffect(() => {
-    fetchNotes();
-    fetchCurrentUser();
-  }, [patientId]);
-
-  // Real-time subscription for round table notes
-  useEffect(() => {
-    const channel = supabase
-      .channel(`round_table_${patientId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'round_table_notes',
-          filter: `patient_id=eq.${patientId}`
-        },
-        (payload) => {
-          console.log('Round table realtime update:', payload);
-          fetchNotes();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [patientId]);
-
-  const fetchCurrentUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      setCurrentUserId(user.id);
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name, specialty')
-        .eq('id', user.id)
-        .maybeSingle();
-      setCurrentUserName(profile?.full_name || 'Doctor');
-      setCurrentUserSpecialty((profile as any)?.specialty || null);
-    }
-  };
-
-  const fetchNotes = async () => {
-    try {
+    (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+      setCurrentUserId(user.id);
+      const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).maybeSingle();
+      setCurrentUserName(profile?.full_name || 'Doctor');
+    })();
+  }, []);
 
-      // Fetch all notes for this patient
-      const { data: notesData, error: notesError } = await supabase
-        .from('round_table_notes')
-        .select('*')
-        .eq('patient_id', patientId)
-        .order('created_at', { ascending: false });
-
-      if (notesError) throw notesError;
-
-      // Fetch read status for current user
-      const { data: readsData } = await supabase
-        .from('round_table_reads')
-        .select('note_id')
-        .eq('doctor_id', user.id);
-
-      const readNoteIds = new Set(readsData?.map(r => r.note_id) || []);
-
-      // Fetch specialties for all doctors who wrote notes
-      const doctorIds = [...new Set((notesData || []).map(n => n.doctor_id))];
-      const { data: doctorProfiles } = await supabase
-        .from('profiles')
-        .select('id, specialty')
-        .in('id', doctorIds);
-      
-      const doctorSpecialties = new Map(
-        (doctorProfiles || []).map(p => [p.id, (p as any).specialty])
-      );
-
-      const notesWithReadStatus = (notesData || []).map(note => ({
-        ...note,
-        doctor_specialty: doctorSpecialties.get(note.doctor_id) || null,
-        isRead: readNoteIds.has(note.id) || note.doctor_id === user.id
-      }));
-
-      setNotes(notesWithReadStatus);
-      
-      // Count unread notes (excluding own notes)
-      const unreadCount = notesWithReadStatus.filter(n => !n.isRead && n.doctor_id !== user.id).length;
-      onUnreadCountChange?.(unreadCount);
-
-      // Mark notes as read when viewing
-      const unreadNoteIds = notesWithReadStatus
-        .filter(n => !n.isRead && n.doctor_id !== user.id)
-        .map(n => n.id);
-
-      if (unreadNoteIds.length > 0) {
-        for (const noteId of unreadNoteIds) {
-          await supabase
-            .from('round_table_reads')
-            .upsert({ note_id: noteId, doctor_id: user.id }, { onConflict: 'note_id,doctor_id' });
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching round table notes:', error);
-    } finally {
-      setLoading(false);
-    }
+  const loadTopics = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('round_table_topics')
+      .select('*')
+      .eq('patient_id', patientId)
+      .order('created_at', { ascending: false });
+    if (!error) setTopics((data || []) as RTTopic[]);
+    setLoading(false);
   };
 
-  const handleSubmit = async () => {
-    if (!newNote.trim() || !currentUserId) return;
+  const loadMessages = async (topicId: string) => {
+    const { data } = await supabase
+      .from('round_table_messages')
+      .select('*')
+      .eq('topic_id', topicId)
+      .order('created_at', { ascending: true });
+    setMessagesByTopic((m) => ({ ...m, [topicId]: (data || []) as RTMessage[] }));
+  };
 
+  useEffect(() => {
+    loadTopics();
+  }, [patientId]);
+
+  // Realtime: topics + messages + presence
+  useEffect(() => {
+    if (!currentUserId) return;
+    const channel = supabase.channel(`rt_${patientId}`, { config: { presence: { key: currentUserId } } })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'round_table_topics', filter: `patient_id=eq.${patientId}` }, () => loadTopics())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'round_table_messages' }, (payload: any) => {
+        const tId = payload.new?.topic_id || payload.old?.topic_id;
+        if (tId) loadMessages(tId);
+      })
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState() as Record<string, Array<{ name: string }>>;
+        const online: Record<string, string> = {};
+        Object.entries(state).forEach(([uid, metas]) => { online[uid] = metas[0]?.name || 'Doctor'; });
+        setOnlineDoctors(online);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({ name: currentUserName });
+        }
+      });
+    presenceRef.current = channel;
+    return () => { supabase.removeChannel(channel); };
+  }, [patientId, currentUserId, currentUserName]);
+
+  const createTopic = async () => {
+    if (!subject.trim() || !body.trim() || !currentUserId) return;
     setSubmitting(true);
     try {
-      const { error } = await supabase
-        .from('round_table_notes')
-        .insert({
-          patient_id: patientId,
-          doctor_id: currentUserId,
-          doctor_name: currentUserName,
-          content: newNote.trim()
-        });
-
+      const { error } = await supabase.from('round_table_topics').insert({
+        patient_id: patientId, doctor_id: currentUserId, doctor_name: currentUserName,
+        subject: subject.trim(), body: body.trim(),
+      });
       if (error) throw error;
-
-      // Notify other doctors who have contributed to this round table
-      const { data: otherDoctors } = await supabase
-        .from('round_table_notes')
-        .select('doctor_id')
-        .eq('patient_id', patientId)
-        .neq('doctor_id', currentUserId);
-
-      if (otherDoctors) {
-        const uniqueDoctorIds = [...new Set(otherDoctors.map(d => d.doctor_id))];
-        for (const doctorId of uniqueDoctorIds) {
-          await supabase.from('notifications').insert({
-            user_id: doctorId,
-            title: `New Round Table note for ${patientName}`,
-            description: `${currentUserName} added a note to ${patientName}'s Round Table`,
-            type: 'round_table',
-            reference_id: patientId,
-            is_read: false,
-          });
-        }
-      }
-
-      toast({
-        title: "Note added",
-        description: "Your note has been added to the Round Table",
-      });
-
-      setNewNote("");
-      fetchNotes();
-    } catch (error: any) {
-      console.error('Error adding note:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to add note",
-        variant: "destructive",
-      });
-    } finally {
-      setSubmitting(false);
-    }
+      setSubject(""); setBody(""); setShowCompose(false);
+      toast({ title: "Topic created", description: "Other doctors will be notified." });
+      loadTopics();
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally { setSubmitting(false); }
   };
 
-  const handleDelete = async (noteId: string) => {
-    try {
-      const { error } = await supabase
-        .from('round_table_notes')
-        .delete()
-        .eq('id', noteId);
+  const sendMessage = async (topicId: string) => {
+    const text = (chatInput[topicId] || "").trim();
+    if (!text || !currentUserId) return;
+    const { error } = await supabase.from('round_table_messages').insert({
+      topic_id: topicId, doctor_id: currentUserId, doctor_name: currentUserName, content: text,
+    });
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    setChatInput((c) => ({ ...c, [topicId]: "" }));
+  };
 
-      if (error) throw error;
-
-      toast({
-        title: "Note deleted",
-        description: "Your note has been removed",
-      });
-
-      fetchNotes();
-    } catch (error: any) {
-      console.error('Error deleting note:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete note",
-        variant: "destructive",
-      });
-    }
+  const deleteTopic = async (id: string) => {
+    await supabase.from('round_table_topics').delete().eq('id', id);
+    loadTopics();
   };
 
   if (loading) {
-    return (
-      <div className="flex h-32 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-      </div>
-    );
+    return <div className="flex h-32 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   }
 
+  const onlineCount = Object.keys(onlineDoctors).length;
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-4">
       {!hideHeader && (
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-            <Users className="h-5 w-5 text-primary" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-semibold">Round Table — {patientName}</h3>
           </div>
-          <div>
-            <h3 className="text-[12px] font-semibold text-foreground">Round Table</h3>
-            <p className="text-[11px] text-muted-foreground">
-              Collaborative notes from all doctors on {patientName}'s care team
-            </p>
+          <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+            <Circle className="h-2 w-2 fill-emerald-500 text-emerald-500" />
+            {onlineCount} online
           </div>
         </div>
       )}
 
-      {/* New Note Input */}
-      <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
-        <Textarea
-          placeholder="Add a note for the care team..."
-          value={newNote}
-          onChange={(e) => setNewNote(e.target.value)}
-          className="min-h-[100px] resize-none bg-background text-[12px]"
-        />
-        <div className="flex justify-end">
-          <Button 
-            onClick={handleSubmit} 
-            disabled={submitting || !newNote.trim()}
-            className="gap-2"
-          >
-            {submitting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-            Add Note
-          </Button>
+      {!showCompose ? (
+        <Button size="sm" variant="outline" onClick={() => setShowCompose(true)} className="w-full gap-2">
+          <Plus className="h-4 w-4" /> New Topic
+        </Button>
+      ) : (
+        <div className="space-y-2 rounded-lg border border-primary/40 bg-muted/30 p-3">
+          <Input placeholder="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} />
+          <Textarea placeholder="Describe the case for the team..." value={body} onChange={(e) => setBody(e.target.value)} className="min-h-[90px]" />
+          <div className="flex justify-end gap-2">
+            <Button size="sm" variant="ghost" onClick={() => { setShowCompose(false); setSubject(""); setBody(""); }}>Cancel</Button>
+            <Button size="sm" onClick={createTopic} disabled={submitting || !subject.trim() || !body.trim()}>
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Post"}
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Notes List */}
-      {notes.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border p-8 text-center text-[11px] text-muted-foreground">
-          No notes yet. Be the first to add a note to the Round Table!
+      {topics.length === 0 ? (
+        <div className="rounded-lg border border-dashed p-6 text-center text-xs text-muted-foreground">
+          No round table topics yet.
         </div>
       ) : (
-        <div className="space-y-4">
-          {notes.map((note) => (
-            <div
-              key={note.id}
-              className={`rounded-lg border p-4 transition-colors ${
-                !note.isRead 
-                  ? 'border-primary/50 bg-primary/5' 
-                  : 'border-border bg-card'
-              }`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-[11px] font-medium">
-                    {note.doctor_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-[12px] font-semibold text-foreground">{note.doctor_name}</p>
-                      {note.doctor_specialty && (
-                        <span className="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-1.5 py-0 text-[10px] font-medium text-blue-700 dark:text-blue-300">
-                          {note.doctor_specialty}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-muted-foreground">
-                      {format(new Date(note.created_at), "MMM d, yyyy 'at' h:mm a")}
-                    </p>
-                  </div>
+        <Accordion type="multiple" className="space-y-2">
+          {topics.map((t) => (
+            <AccordionItem key={t.id} value={t.id} className="rounded-lg border border-primary/30 bg-card px-3">
+              <AccordionTrigger
+                onClick={() => { if (!messagesByTopic[t.id]) loadMessages(t.id); }}
+                className="hover:no-underline"
+              >
+                <div className="flex flex-col items-start text-left">
+                  <span className="text-sm font-semibold">{t.subject}</span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {t.doctor_name} • {format(new Date(t.created_at), "MMM d, yyyy 'at' h:mm a")}
+                  </span>
                 </div>
-                {note.doctor_id === currentUserId && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                    onClick={() => handleDelete(note.id)}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                )}
-              </div>
-              <p className="mt-3 text-[12px] text-foreground whitespace-pre-wrap">
-                {note.content}
-              </p>
-              {!note.isRead && (
-                <span className="mt-2 inline-block text-[10px] text-primary font-medium">
-                  New
-                </span>
-              )}
-            </div>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-3">
+                <p className="whitespace-pre-wrap text-xs text-foreground">{t.body}</p>
+                <div className="border-t pt-3 space-y-2">
+                  <div className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+                    <MessageCircle className="h-3 w-3" /> Live discussion
+                  </div>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {(messagesByTopic[t.id] || []).map((m) => (
+                      <div key={m.id} className={`rounded-md p-2 text-xs ${m.doctor_id === currentUserId ? 'bg-primary/10 ml-6' : 'bg-muted mr-6'}`}>
+                        <div className="flex items-center gap-1 mb-0.5">
+                          <span className="font-semibold text-[11px]">{m.doctor_name}</span>
+                          {onlineDoctors[m.doctor_id] && <Circle className="h-1.5 w-1.5 fill-emerald-500 text-emerald-500" />}
+                          <span className="text-[10px] text-muted-foreground ml-auto">
+                            {format(new Date(m.created_at), "MMM d, h:mm a")}
+                          </span>
+                        </div>
+                        <p className="whitespace-pre-wrap">{m.content}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-1">
+                    <Input
+                      placeholder="Reply..."
+                      value={chatInput[t.id] || ""}
+                      onChange={(e) => setChatInput((c) => ({ ...c, [t.id]: e.target.value }))}
+                      onKeyDown={(e) => { if (e.key === 'Enter') sendMessage(t.id); }}
+                      className="text-xs h-8"
+                    />
+                    <Button size="icon" className="h-8 w-8" onClick={() => sendMessage(t.id)}>
+                      <Send className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                  {t.doctor_id === currentUserId && (
+                    <Button size="sm" variant="ghost" className="text-destructive h-7 text-xs" onClick={() => deleteTopic(t.id)}>
+                      <Trash2 className="h-3 w-3 mr-1" /> Delete topic
+                    </Button>
+                  )}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       )}
     </div>
   );
