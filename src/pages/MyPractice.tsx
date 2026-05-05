@@ -31,6 +31,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import ReferralDoctors from "@/pages/ReferralDoctors";
+import DoctorRewards from "@/pages/doctor/DoctorRewards";
 
 import Patients from "@/pages/Patients";
 import DoctorInvoices from "@/pages/doctor/Invoices";
