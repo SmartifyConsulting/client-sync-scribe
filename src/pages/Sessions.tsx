@@ -643,6 +643,20 @@ export default function Sessions() {
         transcript={pendingTranscript}
       />
 
+      {/* Follow-up Appointment Dialog (after documents, before Vula award) */}
+      {currentPatient && doctorIdRef.current && (
+        <FollowUpAppointmentDialog
+          open={showFollowUpDialog}
+          onOpenChange={setShowFollowUpDialog}
+          doctorId={doctorIdRef.current}
+          doctorName={doctorName}
+          patientId={currentPatient.id}
+          patientUserId={(currentPatient as any).patient_user_id || null}
+          patientName={currentPatient.name}
+          onDone={handleFollowUpDone}
+        />
+      )}
+
 
       {/* AI-Extracted Document Review Dialogs */}
       {extractedMedCert && (
