@@ -582,6 +582,7 @@ export default function Sessions() {
     } catch (e) { console.error(e); }
     setReviewLoading(false);
     setShowReferralReview(false);
+    advanceToFollowUp();
   };
 
 
@@ -619,24 +620,15 @@ export default function Sessions() {
   };
 
   const endSession = async () => {
-    console.log("=== endSession called ===");
-    console.log("isRecording:", isRecording, "isTranscribing:", isTranscribing);
-    
     if (isRecording || isTranscribing) {
-      // Set pending flag - onTranscriptionComplete will show dialog
-      console.log("Recording/transcribing in progress, setting pending flag...");
       pendingCompletionRef.current = true;
-      if (isRecording) {
-        stopRecording();
-      }
+      if (isRecording) stopRecording();
       return;
     }
-    
-    // No recording/transcription in progress - show visit category dialog
-    console.log("No recording in progress, showing visit category dialog");
+    // No recording in progress — go straight to documents-first flow
     const fullContent = latestTranscriptRef.current || transcript || notes;
     setPendingTranscript(fullContent || '');
-    setShowVisitCategoryDialog(true);
+    handleSessionComplete(fullContent || '');
   };
 
   return (
