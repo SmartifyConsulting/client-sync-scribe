@@ -26,6 +26,8 @@ interface Props {
 }
 
 export function TodaysMedicationsCard({ patientId, onTakeMedication }: Props) {
+  const today = new Date().toISOString().slice(0, 10);
+
   const { data: prescriptions = [], isLoading } = useQuery({
     queryKey: ["chronic-prescriptions", patientId],
     queryFn: async () => {
@@ -50,6 +52,21 @@ export function TodaysMedicationsCard({ patientId, onTakeMedication }: Props) {
         .in("prescription_id", prescriptions.map((p) => p.id));
       if (error) throw error;
       return (data || []) as PillRef[];
+    },
+    enabled: prescriptions.length > 0,
+  });
+
+  const { data: takenToday = [] } = useQuery({
+    queryKey: ["adherence-today", patientId, today, prescriptions.map((p) => p.id).join(",")],
+    queryFn: async () => {
+      if (!prescriptions.length) return [] as { prescription_id: string; status: string; taken_at: string | null }[];
+      const { data } = await supabase
+        .from("medication_adherence")
+        .select("prescription_id, status, taken_at")
+        .eq("patient_id", patientId)
+        .eq("scheduled_date", today)
+        .in("prescription_id", prescriptions.map((p) => p.id));
+      return (data ?? []) as any;
     },
     enabled: prescriptions.length > 0,
   });
