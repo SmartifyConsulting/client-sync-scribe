@@ -91,21 +91,21 @@ export default function HolarcHelpNearby() {
       setLoadingProviders(true);
       const [{ data: hs }, { data: as_ }] = await Promise.all([
         supabase.from("holarchelp_hospitals" as any)
-          .select("id, name, latitude, longitude, city, status")
+          .select("id, name, latitude, longitude, city, status, ownership")
           .eq("status", "approved").not("latitude", "is", null).not("longitude", "is", null),
         supabase.from("holarchelp_ambulance_providers" as any)
-          .select("id, company_name, latitude, longitude, city, status")
+          .select("id, company_name, latitude, longitude, city, status, ownership")
           .eq("status", "approved").not("latitude", "is", null).not("longitude", "is", null),
       ]);
       if (cancelled) return;
-      const list: ProviderMarker[] = [
+      const list = [
         ...((hs as any[]) ?? []).map((h) => ({
           id: h.id, name: h.name, latitude: h.latitude, longitude: h.longitude,
-          type: "hospital" as const, subtitle: h.city ?? undefined,
+          type: "hospital" as const, subtitle: h.city ?? undefined, ownership: h.ownership ?? 'private',
         })),
         ...((as_ as any[]) ?? []).map((a) => ({
           id: a.id, name: a.company_name, latitude: a.latitude, longitude: a.longitude,
-          type: "ambulance" as const, subtitle: a.city ?? undefined,
+          type: "ambulance" as const, subtitle: a.city ?? undefined, ownership: a.ownership ?? 'private',
         })),
       ];
       setProviders(list);
@@ -114,8 +114,12 @@ export default function HolarcHelpNearby() {
     return () => { cancelled = true; };
   }, [coords?.lat, coords?.lng]);
 
+  const filteredProviders = hasMedicalAid === false
+    ? providers.filter((p) => (p.ownership ?? 'private') === 'public')
+    : providers;
+
   const sorted = coords
-    ? [...providers]
+    ? [...filteredProviders]
         .map((p) => ({ ...p, _d: distanceKm(coords, { lat: p.latitude, lng: p.longitude }) }))
         .sort((a, b) => a._d - b._d).slice(0, 30)
     : [];
