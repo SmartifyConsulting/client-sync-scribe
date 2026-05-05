@@ -45,6 +45,7 @@ import {
   Bell,
   LayoutDashboard,
   CheckSquare,
+  Sparkles,
 } from "lucide-react";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
