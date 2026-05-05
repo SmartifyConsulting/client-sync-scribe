@@ -761,7 +761,7 @@ export default function MyRewards() {
                         return;
                       }
                       toast({ title: "Retailers synced", description: `${(data as any)?.synced ?? 0} partners loaded from 6dot50.` });
-                      queryClient.invalidateQueries({ queryKey: ["partner-apps"] });
+                      queryClient.invalidateQueries({ queryKey: ["moola-partner-apps"] });
                     }}
                     className="gap-2"
                   >
