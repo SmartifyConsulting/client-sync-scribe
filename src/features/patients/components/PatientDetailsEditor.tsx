@@ -2155,6 +2155,21 @@ export function PatientDetailsEditor({
                     </Select>
                   </div>
                   <div className="space-y-1.5">
+                    <Label htmlFor="preferred_language">Language</Label>
+                    <Select
+                      value={formData.preferred_language}
+                      onValueChange={(value) => updateFormData({ preferred_language: value })}
+                    >
+                      <SelectTrigger id="preferred_language" className="text-sm">
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LANGUAGES.map((l) => (
+                          <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  <div className="space-y-1.5">
                     <Label htmlFor="referred_by">Referred By</Label>
                     <Input
                       id="referred_by"
