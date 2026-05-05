@@ -37,6 +37,7 @@ export default function HolarcHelpHome() {
   const [severityOpen, setSeverityOpen] = useState(false);
   const [requesting, setRequesting] = useState<string | null>(null);
   const [hasEmergency, setHasEmergency] = useState<boolean | null>(null);
+  const [incidentCoverage, setIncidentCoverage] = useState<"public" | "private">("public");
   const channelRef = useRef<any>(null);
 
   useEffect(() => {
@@ -93,16 +94,21 @@ export default function HolarcHelpHome() {
     (async () => {
       const [{ data: hs }, { data: as_ }] = await Promise.all([
         supabase.from("holarchelp_hospitals" as any)
-          .select("id, name, latitude, longitude, city, status, accepting_patients, tier")
+          .select("id, name, latitude, longitude, city, status, accepting_patients, tier, ownership")
           .eq("status", "approved").not("latitude", "is", null).not("longitude", "is", null),
         supabase.from("holarchelp_ambulance_providers" as any)
-          .select("id, company_name, latitude, longitude, city, status, accepting_patients, tier")
+          .select("id, company_name, latitude, longitude, city, status, accepting_patients, tier, ownership")
           .eq("status", "approved").not("latitude", "is", null).not("longitude", "is", null),
       ]);
       if (cancelled) return;
+      const isPublicOnly = incidentCoverage === "public";
       const list = [
-        ...((hs as any[]) ?? []).map((h) => ({ id: h.id, name: h.name, latitude: h.latitude, longitude: h.longitude, type: "hospital" as const, subtitle: h.city ?? undefined, accepting: h.accepting_patients !== false, tier: h.tier ?? undefined })),
-        ...((as_ as any[]) ?? []).map((a) => ({ id: a.id, name: a.company_name, latitude: a.latitude, longitude: a.longitude, type: "ambulance" as const, subtitle: a.city ?? undefined, accepting: a.accepting_patients !== false, tier: a.tier ?? undefined })),
+        ...((hs as any[]) ?? [])
+          .filter((h) => !isPublicOnly || String(h.ownership ?? "").toLowerCase() === "public")
+          .map((h) => ({ id: h.id, name: h.name, latitude: h.latitude, longitude: h.longitude, type: "hospital" as const, subtitle: h.city ?? undefined, accepting: h.accepting_patients !== false, tier: h.tier ?? undefined })),
+        ...((as_ as any[]) ?? [])
+          .filter((a) => !isPublicOnly || String(a.ownership ?? "").toLowerCase() === "public")
+          .map((a) => ({ id: a.id, name: a.company_name, latitude: a.latitude, longitude: a.longitude, type: "ambulance" as const, subtitle: a.city ?? undefined, accepting: a.accepting_patients !== false, tier: a.tier ?? undefined })),
       ];
       const sorted = list
         .map((p) => {
@@ -116,7 +122,7 @@ export default function HolarcHelpHome() {
       setProviders(sorted);
     })();
     return () => { cancelled = true; };
-  }, [coords?.lat, coords?.lng]);
+  }, [coords?.lat, coords?.lng, incidentCoverage]);
 
   const triggerSOS = async () => {
     if (!user || triggering) return;
@@ -146,9 +152,22 @@ export default function HolarcHelpHome() {
       setPermDenied(false);
       setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
 
+      // Determine coverage based on patient medical aid (no aid → public-only routing)
+      let coverage: "public" | "private" = "public";
+      try {
+        const { data: pat } = await supabase
+          .from("patients")
+          .select("medical_aid")
+          .eq("patient_user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (pat?.medical_aid && String(pat.medical_aid).trim() !== "") coverage = "private";
+      } catch { /* default public */ }
+
       const { data: incident, error } = await supabase
         .from("holarchelp_incidents" as any)
-        .insert({ user_id: user.id, status: "active" } as any)
+        .insert({ user_id: user.id, status: "active", coverage } as any)
         .select("id, tracking_token").single();
       if (error || !incident) throw error ?? new Error("Failed to create incident");
 
@@ -182,6 +201,10 @@ export default function HolarcHelpHome() {
       conscious: severity.conscious,
       breathing: severity.breathing,
     } as any).eq("id", incidentId);
+    // Re-notify contacts now that severity is known so per-contact severity thresholds apply
+    supabase.functions.invoke("share-incident-with-contacts", {
+      body: { incident_id: incidentId },
+    }).catch((e) => console.warn("share-incident-with-contacts (severity) failed", e));
   };
 
   const requestProvider = async (p: ProviderMarker & { _d: number }) => {

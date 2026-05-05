@@ -125,15 +125,19 @@ export function DoctorAccessRequests() {
     setProcessing(true);
 
     try {
-      // Create the access grant
+      // Create or re-activate the access grant (handles re-invite after revoke)
       const { error: accessError } = await supabase
         .from("doctor_patient_access")
-        .insert({
-          doctor_id: user.id,
-          patient_user_id: acceptingRequest.patient_user_id,
-          permissions: selectedPermissions,
-          is_active: true,
-        });
+        .upsert(
+          {
+            doctor_id: user.id,
+            patient_user_id: acceptingRequest.patient_user_id,
+            permissions: selectedPermissions,
+            is_active: true,
+            revoked_at: null,
+          } as any,
+          { onConflict: "doctor_id,patient_user_id" }
+        );
 
       if (accessError) throw accessError;
 

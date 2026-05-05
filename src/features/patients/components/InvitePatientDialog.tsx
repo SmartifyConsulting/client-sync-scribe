@@ -15,6 +15,7 @@ import { Mail, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
+import { PermissionTransparencyModal } from "@/components/permissions/PermissionTransparencyModal";
 
 interface InvitePatientDialogProps {
   patientId: string;
@@ -23,6 +24,7 @@ interface InvitePatientDialogProps {
 
 export function InvitePatientDialog({ patientId, patientName }: InvitePatientDialogProps) {
   const [open, setOpen] = useState(false);
+  const [showTransparency, setShowTransparency] = useState(false);
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -104,7 +106,16 @@ export function InvitePatientDialog({ patientId, patientName }: InvitePatientDia
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSendInvitation} disabled={isLoading}>
+          <Button
+            onClick={() => {
+              if (!email) {
+                toast({ title: "Email required", description: "Please enter the patient's email address.", variant: "destructive" });
+                return;
+              }
+              setShowTransparency(true);
+            }}
+            disabled={isLoading}
+          >
             {isLoading ? (
               "Sending..."
             ) : (
@@ -116,6 +127,16 @@ export function InvitePatientDialog({ patientId, patientName }: InvitePatientDia
           </Button>
         </DialogFooter>
       </DialogContent>
+      <PermissionTransparencyModal
+        open={showTransparency}
+        onOpenChange={setShowTransparency}
+        mode="doctor_invites_patient"
+        confirmLabel="I Understand — Send Invitation"
+        onConfirm={async () => {
+          setShowTransparency(false);
+          await handleSendInvitation();
+        }}
+      />
     </Dialog>
   );
 }

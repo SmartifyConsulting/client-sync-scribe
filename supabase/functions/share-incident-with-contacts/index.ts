@@ -32,12 +32,23 @@ Deno.serve(async (req) => {
 
     const { data: incident } = await supabase
       .from("holarchelp_incidents")
-      .select("id, user_id, tracking_token")
+      .select("id, user_id, tracking_token, severity")
       .eq("id", incident_id)
       .maybeSingle();
     if (!incident || incident.user_id !== user.id) {
       return new Response(JSON.stringify({ error: "not found" }), { status: 404, headers: corsHeaders });
     }
+
+    const sevRank = (s?: string | null) => {
+      switch ((s ?? "low").toLowerCase()) {
+        case "critical": return 4;
+        case "high": return 3;
+        case "medium": return 2;
+        default: return 1;
+      }
+    };
+    const incidentRank = sevRank(incident.severity);
+    const passes = (minSev?: string | null) => incidentRank >= sevRank(minSev ?? "low");
 
     const token = tracking_token ?? incident.tracking_token;
     const trackUrl = `${Deno.env.get("SUPABASE_URL")!.replace("supabase.co", "lovable.app")}/track/${token}`;
@@ -49,24 +60,25 @@ Deno.serve(async (req) => {
       .eq("patient_user_id", user.id)
       .order("created_at", { ascending: false }).limit(1).maybeSingle();
 
-    type Recip = { name: string; phone?: string; email?: string; via: string };
+    type Recip = { name: string; phone?: string; email?: string; via: string; min_severity?: string };
     const recipients: Recip[] = [];
 
     if (patient) {
-      // primary EC (default true)
+      // primary EC (default true) — legacy fields, treat as low threshold
       if (patient.emergency_can_view_live_tracking !== false && patient.emergency_contact_name) {
         recipients.push({
           name: patient.emergency_contact_name,
           phone: patient.emergency_contact_phone || undefined,
           email: patient.emergency_contact_email || undefined,
           via: "emergency_contact",
+          min_severity: "low",
         });
       }
-      // additional EC list
+      // additional EC list embedded on patient row
       const ecList = Array.isArray(patient.emergency_contacts) ? patient.emergency_contacts : [];
       for (const c of ecList as any[]) {
         if (c.can_view_live_tracking !== false && c.name) {
-          recipients.push({ name: c.name, phone: c.phone, email: c.email, via: "emergency_contact" });
+          recipients.push({ name: c.name, phone: c.phone, email: c.email, via: "emergency_contact", min_severity: c.notify_min_severity ?? "low" });
         }
       }
       // NOK only if explicit
@@ -76,13 +88,31 @@ Deno.serve(async (req) => {
           phone: patient.next_of_kin_phone || undefined,
           email: patient.next_of_kin_email || undefined,
           via: "next_of_kin",
+          min_severity: "low",
         });
       }
       const nokList = Array.isArray(patient.next_of_kin_members) ? patient.next_of_kin_members : [];
       for (const c of nokList as any[]) {
         if (c.can_view_live_tracking === true && c.name) {
-          recipients.push({ name: c.name, phone: c.phone, email: c.email, via: "next_of_kin" });
+          recipients.push({ name: c.name, phone: c.phone, email: c.email, via: "next_of_kin", min_severity: c.notify_min_severity ?? "low" });
         }
+      }
+    }
+
+    // Standalone HolarcHelp emergency contacts table (with per-contact severity threshold)
+    const { data: ecRows } = await supabase
+      .from("holarchelp_emergency_contacts")
+      .select("name, phone, email, notify_min_severity")
+      .eq("user_id", user.id);
+    for (const c of ecRows ?? []) {
+      if ((c as any).name) {
+        recipients.push({
+          name: (c as any).name,
+          phone: (c as any).phone ?? undefined,
+          email: (c as any).email ?? undefined,
+          via: "emergency_contact",
+          min_severity: (c as any).notify_min_severity ?? "low",
+        });
       }
     }
 
@@ -94,9 +124,12 @@ Deno.serve(async (req) => {
       .eq("can_view_live_tracking", true);
     for (const s of shares ?? []) {
       if ((s as any).shared_with_email) {
-        recipients.push({ name: (s as any).shared_with_username ?? "Trusted contact", email: (s as any).shared_with_email, via: "profile_share" });
+        recipients.push({ name: (s as any).shared_with_username ?? "Trusted contact", email: (s as any).shared_with_email, via: "profile_share", min_severity: "low" });
       }
     }
+
+    // Apply severity threshold filter
+    const filtered = recipients.filter((r) => passes(r.min_severity));
 
     // Send: prefer Resend for email; SMS provider not wired here — just log.
     const RESEND = Deno.env.get("RESEND_API_KEY");
@@ -110,7 +143,7 @@ Deno.serve(async (req) => {
       <p style="color:#666;font-size:12px">You're receiving this because you are listed as a trusted contact.</p>
     `;
 
-    for (const r of recipients) {
+    for (const r of filtered) {
       if (r.email && RESEND) {
         try {
           const resp = await fetch("https://api.resend.com/emails", {
@@ -137,11 +170,11 @@ Deno.serve(async (req) => {
         recipient_email: r.email ?? null,
         channel: r.email ? "email" : "pending",
         status: r.email && RESEND ? "sent" : "queued",
-        metadata: { tracking_url: trackUrl, via: r.via },
+        metadata: { tracking_url: trackUrl, via: r.via, severity: incident.severity, min_severity: r.min_severity },
       } as any).then(() => {}, () => {});
     }
 
-    return new Response(JSON.stringify({ ok: true, sent, recipient_count: recipients.length }), {
+    return new Response(JSON.stringify({ ok: true, sent, recipient_count: filtered.length, skipped: recipients.length - filtered.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {

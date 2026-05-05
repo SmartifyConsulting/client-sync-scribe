@@ -1202,6 +1202,7 @@ export type Database = {
           email: string | null
           id: string
           name: string
+          notify_min_severity: string
           phone: string | null
           relationship: string | null
           user_id: string
@@ -1211,6 +1212,7 @@ export type Database = {
           email?: string | null
           id?: string
           name: string
+          notify_min_severity?: string
           phone?: string | null
           relationship?: string | null
           user_id: string
@@ -1220,6 +1222,7 @@ export type Database = {
           email?: string | null
           id?: string
           name?: string
+          notify_min_severity?: string
           phone?: string | null
           relationship?: string | null
           user_id?: string
@@ -1523,6 +1526,7 @@ export type Database = {
           at_risk: boolean
           breathing: boolean | null
           conscious: boolean | null
+          coverage: string
           created_at: string
           en_route_at: string | null
           eta_minutes: number | null
@@ -1544,6 +1548,7 @@ export type Database = {
           at_risk?: boolean
           breathing?: boolean | null
           conscious?: boolean | null
+          coverage?: string
           created_at?: string
           en_route_at?: string | null
           eta_minutes?: number | null
@@ -1565,6 +1570,7 @@ export type Database = {
           at_risk?: boolean
           breathing?: boolean | null
           conscious?: boolean | null
+          coverage?: string
           created_at?: string
           en_route_at?: string | null
           eta_minutes?: number | null
