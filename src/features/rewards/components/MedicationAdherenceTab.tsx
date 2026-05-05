@@ -900,6 +900,13 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                         <RefreshCw className="h-4 w-4" /> Try again
                       </Button>
                     </>
+                  ) : pillCheckResult.expectedCount && pillCheckResult.detectedCount !== undefined && pillCheckResult.detectedCount < pillCheckResult.expectedCount ? (
+                    <>
+                      <Button variant="outline" onClick={handleCloseRecording}>Cancel</Button>
+                      <Button onClick={retryPillCheck} className="gap-2">
+                        <RefreshCw className="h-4 w-4" /> Retake with all tablets
+                      </Button>
+                    </>
                   ) : (
                     <>
                       <Button variant="outline" onClick={retryPillCheck}>Retake pill photo</Button>
