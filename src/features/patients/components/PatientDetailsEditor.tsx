@@ -45,6 +45,7 @@ import {
   Bell,
   LayoutDashboard,
   CheckSquare,
+  Sparkles,
 } from "lucide-react";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
@@ -1733,11 +1734,7 @@ export function PatientDetailsEditor({
                         )}
                       </div>
 
-                      {/* Vitamins / Supplements / OTC — visible in view mode too */}
-                      {isSelfService && (
-                        <DailyMedsInline patientId={patient.id} patientUserId={userId} />
-                      )}
-
+                      {/* Conditions moved to its own block below */}
                       {/* Conditions & Diagnoses */}
                       <div className="rounded-lg border border-border/50 p-2.5 space-y-1">
                         <h4 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5">
@@ -1772,6 +1769,16 @@ export function PatientDetailsEditor({
                       </div>
                     </CollapsibleContent>
                   </Collapsible>
+
+                  {/* Daily Vitamins, Supplements & OTC — own accordion */}
+                  {isSelfService && (
+                    <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                      <SectionHeader icon={Sparkles} label="Daily Vitamins, Supplements & OTC" />
+                      <CollapsibleContent className="px-3 pb-3">
+                        <DailyMedsInline patientId={patient.id} patientUserId={userId} />
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )}
 
                   {/* Surgeries & Dates */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
@@ -2768,11 +2775,6 @@ export function PatientDetailsEditor({
                       )}
                     </div>
 
-                    {/* Daily vitamins / supplements / OTC — earns reduced Vulas */}
-                    {isSelfService && (
-                      <DailyMedsInline patientId={patient.id} patientUserId={userId} />
-                    )}
-
                     {/* Conditions & Diagnoses */}
                     <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
                       <div className="flex items-center justify-between mb-2">
@@ -2909,6 +2911,16 @@ export function PatientDetailsEditor({
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
+
+                {/* Daily Vitamins, Supplements & OTC — own accordion */}
+                {isSelfService && (
+                  <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
+                    <SectionHeader icon={Sparkles} label="Daily Vitamins, Supplements & OTC" />
+                    <CollapsibleContent className="px-3 pb-3">
+                      <DailyMedsInline patientId={patient.id} patientUserId={userId} />
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
 
                 {/* Surgeries & Dates */}
                 <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">

@@ -28,15 +28,15 @@ Deno.serve(async (req) => {
     let created = 0;
     for (const rx of rxs ?? []) {
       const times: string[] = (rx as any).reminder_times ?? [];
+      // Fire when scheduled time is ~5 minutes ahead of "now" (cron runs every 5 min)
       const matches = times.some((t) => {
         const [h, m] = t.split(":").map((n) => parseInt(n, 10));
         if (Number.isNaN(h)) return false;
-        const diff = Math.abs((h - parseInt(hh)) * 60 + (m - mm));
-        return diff <= 5;
+        const ahead = (h - parseInt(hh)) * 60 + (m - mm);
+        return ahead >= 3 && ahead <= 7;
       });
       if (!matches) continue;
 
-      // Already taken today?
       const { data: adh } = await supabase
         .from("medication_adherence")
         .select("id, status")
@@ -45,7 +45,6 @@ Deno.serve(async (req) => {
         .maybeSingle();
       if (adh && (adh as any).status !== "pending") continue;
 
-      // Look up patient_user_id
       const { data: p } = await supabase
         .from("patients").select("patient_user_id").eq("id", (rx as any).patient_id).maybeSingle();
       const userId = (p as any)?.patient_user_id;
@@ -59,9 +58,9 @@ Deno.serve(async (req) => {
       await supabase.from("notifications").insert({
         user_id: userId,
         type: "medication_reminder",
-        title: `Time to take ${(rx as any).medication}`,
-        body: `${(rx as any).dosage ?? ""}${food}`,
-        metadata: { prescription_id: (rx as any).id },
+        title: `Take ${(rx as any).medication} in 5 minutes`,
+        body: `${(rx as any).dosage ?? ""}${food}`.trim(),
+        metadata: { prescription_id: (rx as any).id, lead_minutes: 5 },
       } as any).then(() => { created++; }, () => {});
     }
 

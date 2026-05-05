@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMyRewards } from "@/hooks/usePatientRewards";
 import { EmergencyContact } from "@/features/patients/components/EmergencyContactsSection";
 import { ProfileSharesSection } from "@/features/patients/components/ProfileSharesSection";
-import { PatientSelfAdmissionsSection } from "@/features/patients/components/PatientSelfAdmissionsSection";
+
 
 
 export default function MyDetails() {
@@ -128,10 +128,7 @@ export default function MyDetails() {
       />
 
       {section === "health" && (
-        <>
-          <ProfileSharesSection ownerUserId={userId} />
-          <PatientSelfAdmissionsSection patientId={patient.id} userId={userId} />
-        </>
+        <ProfileSharesSection ownerUserId={userId} />
       )}
     </div>
   );
