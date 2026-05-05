@@ -798,6 +798,19 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            {(() => {
+              const rxNow = prescriptions.find((p) => p.id === recordingPrescriptionId);
+              const expectedQty = Math.max(1, Number(rxNow?.quantity_per_dose) || parseQuantity(rxNow?.dosage));
+              if (stage === "pill_check" && expectedQty > 1) {
+                return (
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-2 text-xs text-foreground flex items-center gap-2">
+                    <Pill className="h-4 w-4 text-primary" />
+                    Show <strong>all {expectedQty} tablets</strong> together in the frame.
+                  </div>
+                );
+              }
+              return null;
+            })()}
             <p className="text-sm text-muted-foreground">
               {stage === "pill_check"
                 ? "Hold your pill close to the camera so we can confirm it matches your prescription."
