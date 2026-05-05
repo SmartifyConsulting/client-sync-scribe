@@ -727,6 +727,11 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
                       <div className={med.status === "inactive" ? "text-muted-foreground line-through decoration-muted-foreground/50" : ""}>
                         <span className={med.status === "inactive" ? "text-muted-foreground" : "text-foreground font-medium"}>{med.name}</span>
                         <span className="text-muted-foreground ml-2 text-xs no-underline">({med.date})</span>
+                        {med.status === "inactive" && med.end_date && (
+                          <span className="text-muted-foreground ml-2 text-xs no-underline italic">
+                            Stopped {(() => { try { return format(new Date(med.end_date), "d MMM yyyy"); } catch { return med.end_date; } })()}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <Button
