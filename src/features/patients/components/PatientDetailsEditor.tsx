@@ -94,6 +94,9 @@ interface PatientDetailsEditorProps {
   onSave: (updates: Partial<Patient>) => Promise<any>;
   isSelfService?: boolean;
   userEmail?: string;
+  userId?: string;
+  emergencyContacts?: import("./EmergencyContactsSection").EmergencyContact[];
+  onEmergencyContactsChange?: (next: import("./EmergencyContactsSection").EmergencyContact[]) => void;
   lollipopCount?: number;
   rewardsLoading?: boolean;
   section?: string;
@@ -347,6 +350,9 @@ export function PatientDetailsEditor({
   onSave,
   isSelfService = false,
   userEmail,
+  userId,
+  emergencyContacts,
+  onEmergencyContactsChange,
   lollipopCount = 0,
   rewardsLoading = false,
   section,
