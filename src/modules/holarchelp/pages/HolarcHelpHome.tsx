@@ -201,6 +201,10 @@ export default function HolarcHelpHome() {
       conscious: severity.conscious,
       breathing: severity.breathing,
     } as any).eq("id", incidentId);
+    // Re-notify contacts now that severity is known so per-contact severity thresholds apply
+    supabase.functions.invoke("share-incident-with-contacts", {
+      body: { incident_id: incidentId },
+    }).catch((e) => console.warn("share-incident-with-contacts (severity) failed", e));
   };
 
   const requestProvider = async (p: ProviderMarker & { _d: number }) => {
