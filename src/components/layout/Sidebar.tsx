@@ -15,7 +15,7 @@ import {
   Gift,
   UserCog,
   FolderOpen,
-  Shield,
+  
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
