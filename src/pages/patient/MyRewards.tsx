@@ -428,16 +428,14 @@ export default function MyRewards() {
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] md:text-sm font-medium text-indigo-100">Transferred</p>
+                <p className="text-[10px] md:text-sm font-medium text-indigo-100">Redeemed</p>
                 <p className="text-2xl md:text-4xl font-bold text-white">{totalTransferred}</p>
               </div>
               <ArrowRightLeft className="h-8 w-8 md:h-12 md:w-12 text-white/90" />
             </div>
-            {partnerApps.length > 0 && (
-              <Button variant="ghost" size="sm" className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-[10px] md:text-xs flex items-center gap-1 mt-1 md:mt-2" onClick={() => setShowTransferDialog(true)}>
-                Transfer Vulas <Send className="h-3 w-3" />
-              </Button>
-            )}
+            <Button variant="ghost" size="sm" className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-[10px] md:text-xs flex items-center gap-1 mt-1 md:mt-2" onClick={() => setShowTransferDialog(true)}>
+              Redeem Vulas <Send className="h-3 w-3" />
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -458,7 +456,7 @@ export default function MyRewards() {
             Wins and Streaks
           </TabsTrigger>
           <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-             Vulas
+             Redeem
            </TabsTrigger>
          </TabsList>
 
