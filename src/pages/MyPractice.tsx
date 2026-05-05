@@ -2047,11 +2047,11 @@ export default function MyPractice() {
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <GraduationCap className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">Certificates</h3>
+              <h3 className="text-sm font-semibold text-foreground">Credentials</h3>
             </div>
             <div className="flex items-center justify-between">
               <p className="text-muted-foreground text-[12px]">
-                Track your continuing professional development certificates and CPD points.
+                Track your professional credentials and CPD points.
               </p>
               <Button
                 size="sm"
@@ -2064,15 +2064,15 @@ export default function MyPractice() {
                 className="gap-1.5 shrink-0"
               >
                 <Plus className="h-3.5 w-3.5" />
-                Add Certificate
+                Add Credential
               </Button>
             </div>
             {showCertForm && (
               <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
-                <p className="text-sm font-medium">{editingCertId ? "Edit" : "Add"} Certificate</p>
+                <p className="text-sm font-medium">{editingCertId ? "Edit" : "Add"} Credential</p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label>Certificate Name *</Label>
+                    <Label>Credential Name *</Label>
                     <Input
                       value={certForm.certificate_name}
                       onChange={(e) => setCertForm({ ...certForm, certificate_name: e.target.value })}
