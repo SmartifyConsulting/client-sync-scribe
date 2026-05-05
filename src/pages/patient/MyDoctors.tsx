@@ -38,13 +38,16 @@ interface DoctorAccess {
 }
 
 export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean }) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [nameQuery, setNameQuery] = useState("");
+  const [specialtyQuery, setSpecialtyQuery] = useState<string>("any");
+  const [languageQuery, setLanguageQuery] = useState<string>("any");
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<DoctorProfile[]>([]);
   const [totalFound, setTotalFound] = useState(0);
   const [hasSearched, setHasSearched] = useState(false);
   const [uninviteTarget, setUninviteTarget] = useState<DoctorAccess | null>(null);
   const [uninviteLoading, setUninviteLoading] = useState(false);
+  const [detailsDoctor, setDetailsDoctor] = useState<DoctorProfile | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -66,7 +69,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
       const doctorIds = accessData.map((a) => a.doctor_id);
       const { data: profilesData, error: profilesError } = await supabase
         .from("profiles")
-        .select("id, full_name, specialty, practice_address, mobile_number, avatar_url, practice_number, doctor_number")
+        .select("id, full_name, specialty, practice_address, mobile_number, avatar_url, practice_number, doctor_number, about_me, preferred_language")
         .in("id", doctorIds);
 
       if (profilesError) throw profilesError;
@@ -78,18 +81,26 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
     },
   });
 
-  const handleSearch = useCallback(async (query: string) => {
-    if (!query.trim() || query.trim().length < 2) return;
+  const handleSearch = useCallback(async () => {
+    const name = nameQuery.trim();
+    const spec = specialtyQuery === "any" ? "" : specialtyQuery;
+    const lang = languageQuery === "any" ? "" : languageQuery;
+    if (!name && !spec && !lang) {
+      setSearchResults([]);
+      setTotalFound(0);
+      setHasSearched(false);
+      return;
+    }
     setIsSearching(true);
     setHasSearched(true);
 
     try {
       const { data, error } = await supabase
-        .rpc("search_doctor_profiles", { _query: query });
+        .rpc("search_doctor_profiles", { _name: name, _specialty: spec, _language: lang });
 
       if (error) throw error;
 
-      const allResults = data || [];
+      const allResults = (data || []) as DoctorProfile[];
       setTotalFound(allResults.length);
       const connectedIds = doctors?.map((d) => d.doctor_id) || [];
       setSearchResults(allResults.filter((d) => !connectedIds.includes(d.id)));
@@ -98,19 +109,13 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
     } finally {
       setIsSearching(false);
     }
-  }, [doctors]);
+  }, [nameQuery, specialtyQuery, languageQuery, doctors]);
 
   // Debounced auto-search
   useEffect(() => {
-    if (searchQuery.trim().length < 2) {
-      setSearchResults([]);
-      setTotalFound(0);
-      setHasSearched(false);
-      return;
-    }
-    const timeout = setTimeout(() => handleSearch(searchQuery), 300);
+    const timeout = setTimeout(() => handleSearch(), 350);
     return () => clearTimeout(timeout);
-  }, [searchQuery, handleSearch]);
+  }, [handleSearch]);
 
   const getSpecialtyColor = (specialty: string): string => {
     const s = specialty.toLowerCase();
