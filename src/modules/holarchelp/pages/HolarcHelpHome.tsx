@@ -187,7 +187,7 @@ export default function HolarcHelpHome() {
       supabase.functions.invoke("share-incident-with-contacts", {
         body: { incident_id: (incident as any).id, tracking_token: (incident as any).tracking_token },
       }).catch((e) => console.warn("share-incident-with-contacts failed", e));
-      setSeverityOpen(true);
+      setVoiceNoteOpen(true);
     } catch (e: any) {
       toast.error(e?.message ?? "Could not trigger SOS");
     } finally {
