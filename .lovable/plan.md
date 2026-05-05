@@ -1,38 +1,39 @@
-## Fixes
+## Plan
 
-### 1. Emergency Contacts missing in view mode
-`EmergencyContactsInline` is only rendered inside the edit-mode branch of `PatientDetailsEditor` (line 2394). In view mode (default state) it never appears.
+### 1. Vitamins/Supplements/OTC as its own accordion
+Currently `DailyMedsInline` is rendered **inside** the "Allergies, Medication & Conditions" collapsible.
 
-**Fix:** Render `EmergencyContactsInline` inside the view-mode "Personal Information" tab, directly after the Next of Kin accordion (around line 1610), so it always shows for self-service patients.
+**Fix:** Move it out into its own teal-bordered `Collapsible` (icon: `Sparkles`, label: "Daily Vitamins, Supplements & OTC") placed directly **after** the Allergies/Medication/Conditions accordion in both view-mode (~line 1755) and edit-mode (~line 2774) branches of `PatientDetailsEditor.tsx`.
 
-### 2. Vitamins & Supplements (Daily Meds) missing in view mode
-Same root cause: `DailyMedsInline` is only rendered inside the edit-mode branch (line 2752). In view mode the section is invisible, so patients can't see or add vitamins/supplements unless they enter edit mode.
+### 2. Emergency Contacts accordion styling parity
+`EmergencyContactsInline.tsx` currently uses a custom non-clickable header (no chevron, no font parity).
 
-**Fix:** Render `DailyMedsInline` inside the view-mode "Medical" tab — placed within the "Allergies, Medications & Conditions" area so it mirrors edit-mode placement and is always visible.
+**Fix:** Replace the static header with a real `CollapsibleTrigger` that mirrors the shared `SectionHeader` style used elsewhere (teal border, `text-xs font-semibold`, chevron rotation, click-to-toggle). Keep the "Same as Next of Kin" toggle inside the content.
 
-### 3. About Me not visible in provider details dialog
-Details dialog in `MyDoctors.tsx` (lines 434–470) only renders the About Me block when `about_me` is truthy. When a doctor hasn't filled it in, the section is silently hidden.
+### 3. Remove Hospital Admissions duplicates from MyDetails
+- Remove `<PatientSelfAdmissionsSection>` from `src/pages/patient/MyDetails.tsx` (it duplicates what now lives in the Care → Hospital Admissions tab).
+- The empty-state "Upload" duplicate in `AdmissionsView` was already removed.
 
-**Fix:** Always render the "About Me" section in the details dialog with a "Not provided yet" fallback for empty values, so users always see the section is supported.
+### 4. Manual log buttons in Admissions / Emergency Incidents tabs (under "My Holarchy")
+- **Admissions sub-tab:** `AdmissionsView` already has "Upload Admission Form". Add a sibling **"+ Log Admission"** button that opens a small dialog (hospital, admission/discharge dates, diagnosis) and inserts into `hospital_admissions` with `source: "patient"`. Reuse logic from `PatientSelfAdmissionsSection`.
+- **Emergency Incidents sub-tab:** `PatientIncidentHistory` is currently read-only. Add a **"+ Log Incident"** button at top-right that opens a dialog (severity, summary/notes, date) and inserts a row into `holarchelp_incidents` with `user_id`, status `resolved`, `source: "manual"` (or similar field that exists). I'll inspect schema first; if there isn't a clean manual-source path I'll store summary in a notes/description column or use the existing `severity` + `created_at`.
 
-### 4. Mediclinic shown as "doctor" / Emergency ER duplicated
-Root cause: `seed-test-providers` edge function creates each provider's `profiles` row with `role: 'doctor'` (line 82). The `search_providers` RPC matches them under the doctors UNION branch via `profiles.role = 'doctor'`, so they appear as doctors in addition to their proper hospital/ambulance rows.
+### 5. First & Last name on profile shares
+Update `ProfileSharesSection.tsx`: replace the single "Username or email" input with **First name**, **Last name**, **Username or email** fields. New columns `shared_with_first_name`, `shared_with_last_name` on `patient_profile_shares`. List view shows "First Last" prominently.
 
-**Fix:**
-- Remove `role: "doctor"` from the upsert in `seed-test-providers/index.ts`.
-- Migration to clear `role` on existing seeded provider profiles (Mediclinic Sandton `1474d918-...`, Emergency ER `3e602516-...`) so they stop showing as doctors.
+### 6. Cell phone medication reminder 5 minutes before time
+Existing `send-medication-reminders` edge function runs every 5 min and currently fires when |scheduled − now| ≤ 5 min, which can fire after the dose time.
 
-### 5. Search results not grouped
-`MyDoctors.tsx` renders all results in a single flat table. Group by `kind` into three labeled sub-sections — **Doctors**, **Hospitals**, **Ambulances** — each rendered as its own subheader + table, only when it has results.
+**Fix:** Change matching window so it fires only when scheduled time is **5 minutes in the future** (i.e. `scheduledMinutes - nowMinutes` is in [3, 7] given the every-5-minute cron drift). Update the notification title/body to "in 5 minutes". The existing cron job (`send-medication-reminders-every-5min`, `*/5 * * * *`) is already in place.
 
-### 6. Duplicate "Upload Admission Form" button
-`AdmissionsView.tsx` shows the button both in the header (line 161) and again in the empty-state card (line 175). Remove the empty-state duplicate; keep only the header button.
-
-## Technical Summary
+### Technical Summary
 
 Files to edit:
-- `src/features/patients/components/PatientDetailsEditor.tsx` — Add `EmergencyContactsInline` and `DailyMedsInline` rendering inside the view-mode tabs (Personal Info / Medical), not only edit mode.
-- `src/pages/patient/MyDoctors.tsx` — Group `searchResults` by `kind` into three labeled sub-tables; always render "About Me" in the details dialog with a fallback.
-- `src/features/sessions/admissions/AdmissionsView.tsx` — Remove the duplicate `<Button>` inside the empty-state `<Card>`.
-- `supabase/functions/seed-test-providers/index.ts` — Remove `role: "doctor"` from the profile upsert.
-- New SQL migration — `UPDATE profiles SET role = NULL WHERE id IN ('1474d918-3d23-44ce-8e6d-ea6f6c7ba395', '3e602516-a69a-48be-ab5e-9ddba4ed8524');` to fix existing seeded data.
+- `src/features/patients/components/PatientDetailsEditor.tsx` — move `DailyMedsInline` out of the meds collapsible into its own accordion (view + edit branches).
+- `src/features/patients/components/EmergencyContactsInline.tsx` — switch header to `CollapsibleTrigger` with shared font/chevron pattern.
+- `src/pages/patient/MyDetails.tsx` — remove `PatientSelfAdmissionsSection` rendering (and its import).
+- `src/features/sessions/admissions/AdmissionsView.tsx` — add "+ Log Admission" button + dialog (manual entry) when `canEdit`.
+- `src/components/holarchelp/PatientIncidentHistory.tsx` — add "+ Log Incident" button + dialog when viewing one's own history; insert into `holarchelp_incidents`.
+- `src/features/patients/components/ProfileSharesSection.tsx` — add first/last name inputs and display.
+- New SQL migration: `ALTER TABLE patient_profile_shares ADD COLUMN shared_with_first_name text, ADD COLUMN shared_with_last_name text;`
+- `supabase/functions/send-medication-reminders/index.ts` — change matching condition from |diff|≤5 to "scheduled is 3–7 minutes ahead of now"; reword title to "Take {med} in 5 min".

@@ -1972,6 +1972,8 @@ export type Database = {
           owner_user_id: string
           relationship: string | null
           shared_with_email: string | null
+          shared_with_first_name: string | null
+          shared_with_last_name: string | null
           shared_with_user_id: string | null
           shared_with_username: string | null
           source: string
@@ -1986,6 +1988,8 @@ export type Database = {
           owner_user_id: string
           relationship?: string | null
           shared_with_email?: string | null
+          shared_with_first_name?: string | null
+          shared_with_last_name?: string | null
           shared_with_user_id?: string | null
           shared_with_username?: string | null
           source?: string
@@ -2000,6 +2004,8 @@ export type Database = {
           owner_user_id?: string
           relationship?: string | null
           shared_with_email?: string | null
+          shared_with_first_name?: string | null
+          shared_with_last_name?: string | null
           shared_with_user_id?: string | null
           shared_with_username?: string | null
           source?: string
