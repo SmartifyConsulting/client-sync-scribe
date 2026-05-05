@@ -223,6 +223,7 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
               {m.frequency || "daily"} · {m.reminder_times?.join(", ") || "no time"} · {m.with_food === "with_food" ? "with food" : m.with_food === "without_food" ? "empty" : "either"}
             </p>
             <Badge variant="outline" className="mt-0.5 text-[9px] px-1 py-0">Self-added</Badge>
+          </div>
           <div className="flex items-center gap-1">
             <label className="flex items-center gap-1 text-[10px] text-muted-foreground">
               {(m.reminders_enabled ?? true) ? <Bell className="h-3 w-3 text-primary" /> : <BellOff className="h-3 w-3" />}
