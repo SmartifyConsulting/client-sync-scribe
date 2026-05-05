@@ -131,11 +131,13 @@ Deno.serve(async (req) => {
       // log message for SMS/whatsapp delivery to be implemented
       await supabase.from("holarchelp_messaging_log").insert({
         incident_id,
+        user_id: user.id,
         recipient_name: r.name,
         recipient_phone: r.phone ?? null,
         recipient_email: r.email ?? null,
         channel: r.email ? "email" : "pending",
-        message: `SOS live tracking link sent: ${trackUrl}`,
+        status: r.email && RESEND ? "sent" : "queued",
+        metadata: { tracking_url: trackUrl, via: r.via },
       } as any).then(() => {}, () => {});
     }
 
