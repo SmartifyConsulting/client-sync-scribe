@@ -27,7 +27,6 @@ const patientSections = [
   { icon: Handshake, label: "My Holarchy", section: "care", to: "/patient/details?section=care" },
   { icon: FolderOpen, label: "My Desk", section: "admin", to: "/patient/details?section=admin" },
   { icon: Gift, label: "My Rewards", section: "rewards", to: "/patient/rewards" },
-  { icon: Shield, label: "SOS", section: "sos", to: "/patient/holarchelp", danger: true },
 ];
 
 export function BottomNav() {
