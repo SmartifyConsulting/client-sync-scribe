@@ -349,7 +349,17 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                                         {doctor.specialty}
                                       </Badge>
                                     ) : (
-                                      <Badge variant="outline" className="text-[10px] capitalize">{doctor.kind}</Badge>
+                                      <div className="flex flex-col gap-0.5">
+                                        <Badge variant="outline" className="text-[10px] capitalize">{doctor.kind}</Badge>
+                                        {doctor.ownership && (
+                                          <Badge
+                                            variant="outline"
+                                            className={`text-[9px] capitalize ${doctor.ownership === 'public' ? 'border-green-500 text-green-700' : 'border-blue-500 text-blue-700'}`}
+                                          >
+                                            {doctor.ownership}
+                                          </Badge>
+                                        )}
+                                      </div>
                                     )}
                                   </TableCell>
                                   <TableCell className="p-2">
