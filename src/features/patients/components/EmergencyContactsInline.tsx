@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Trash2, ShieldAlert } from "lucide-react";
-import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { Plus, Trash2, ShieldAlert, ChevronDown } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { EmergencyContact } from "./EmergencyContactsSection";
@@ -105,12 +105,13 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
 
   return (
     <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
-      <div className="flex items-center justify-between p-3 border-b border-border">
+      <CollapsibleTrigger className="group flex w-full items-center justify-between p-3 border-b border-border hover:bg-muted/40 transition-colors">
         <div className="flex items-center gap-2">
           <ShieldAlert className="h-4 w-4 text-primary" />
-          <span className="text-sm font-semibold">Emergency Contacts</span>
+          <span className="text-xs font-semibold tracking-wide">Emergency Contacts</span>
         </div>
-      </div>
+        <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+      </CollapsibleTrigger>
       <CollapsibleContent className="p-3 space-y-3">
         <p className="text-[11px] text-muted-foreground">
           Notified by default when you trigger SOS. They can be the same as your Next of Kin, or someone different entirely.
