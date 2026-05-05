@@ -446,6 +446,24 @@ Only return JSON.`;
       .eq('prescription_id', prescriptionId)
       .maybeSingle();
 
+    // Determine if this is a vitamin/supplement (reduced Vula award)
+    const { data: rxMeta } = await supabase
+      .from('prescriptions')
+      .select('source, approved_medication_id')
+      .eq('id', prescriptionId)
+      .maybeSingle();
+    let isSupplement = false;
+    if (rxMeta?.approved_medication_id) {
+      const { data: appr } = await supabase
+        .from('approved_daily_medications')
+        .select('category')
+        .eq('id', rxMeta.approved_medication_id)
+        .maybeSingle();
+      const cat = (appr?.category || '').toLowerCase();
+      if (cat === 'vitamin' || cat === 'supplement') isSupplement = true;
+    }
+    const VULA_AWARD = isSupplement ? 2 : 5;
+
     const intakeMethod = (ref?.intake_method as IntakeMethod) || 'swallow';
     const { required, disqualifying } = methodSignals(intakeMethod);
 
