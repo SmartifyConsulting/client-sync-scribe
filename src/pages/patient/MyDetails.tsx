@@ -6,6 +6,10 @@ import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor
 import { Patient } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
 import { useMyRewards } from "@/hooks/usePatientRewards";
+import { EmergencyContactsSection, EmergencyContact } from "@/features/patients/components/EmergencyContactsSection";
+import { ProfileSharesSection } from "@/features/patients/components/ProfileSharesSection";
+import { PatientDailyMedsSection } from "@/features/patients/components/PatientDailyMedsSection";
+import { PatientSelfAdmissionsSection } from "@/features/patients/components/PatientSelfAdmissionsSection";
 
 
 export default function MyDetails() {
