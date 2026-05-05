@@ -13,6 +13,7 @@ import { AddMedicationDialog } from "./AddMedicationDialog";
 import { AddLabResultDialog } from "./AddLabResultDialog";
 import { AddImagingDialog } from "./AddImagingDialog";
 import { UploadAdmissionDialog } from "./UploadAdmissionDialog";
+import { ManualLogAdmissionDialog } from "./ManualLogAdmissionDialog";
 import { Upload } from "lucide-react";
 
 interface Props {
@@ -147,6 +148,7 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
 export function AdmissionsView({ patientId, patientHeight, patientWeight, canEdit = false }: Props) {
   const { data: admissions = [], isLoading } = useHospitalAdmissions(patientId);
   const [showUpload, setShowUpload] = useState(false);
+  const [showManual, setShowManual] = useState(false);
 
   if (isLoading) {
     return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
@@ -157,9 +159,14 @@ export function AdmissionsView({ patientId, patientHeight, patientWeight, canEdi
       <div className="flex items-center justify-between gap-2">
         <h3 className="text-sm font-semibold text-foreground">Hospital Admissions</h3>
         {canEdit && (
-          <Button size="sm" onClick={() => setShowUpload(true)} className="gap-1">
-            <Upload className="h-3 w-3" /> Upload Admission Form
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={() => setShowManual(true)} className="gap-1">
+              <Plus className="h-3 w-3" /> Log Admission
+            </Button>
+            <Button size="sm" onClick={() => setShowUpload(true)} className="gap-1">
+              <Upload className="h-3 w-3" /> Upload Admission Form
+            </Button>
+          </div>
         )}
       </div>
 
@@ -178,6 +185,7 @@ export function AdmissionsView({ patientId, patientHeight, patientWeight, canEdi
       )}
 
       <UploadAdmissionDialog open={showUpload} onOpenChange={setShowUpload} patientId={patientId} />
+      <ManualLogAdmissionDialog open={showManual} onOpenChange={setShowManual} patientId={patientId} />
     </div>
   );
 }
