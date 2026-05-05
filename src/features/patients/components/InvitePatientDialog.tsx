@@ -15,6 +15,7 @@ import { Mail, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
+import { PermissionTransparencyModal } from "@/components/permissions/PermissionTransparencyModal";
 
 interface InvitePatientDialogProps {
   patientId: string;
