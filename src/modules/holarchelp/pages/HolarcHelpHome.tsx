@@ -151,20 +151,19 @@ export default function HolarcHelpHome() {
       try {
         const { data: pat } = await supabase
           .from("patients")
-          .select("medical_aid_name")
+          .select("medical_aid")
           .eq("patient_user_id", user.id)
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle();
-        if (pat?.medical_aid_name && String(pat.medical_aid_name).trim() !== "") coverage = "private";
+        if (pat?.medical_aid && String(pat.medical_aid).trim() !== "") coverage = "private";
       } catch { /* default public */ }
 
       const { data: incident, error } = await supabase
         .from("holarchelp_incidents" as any)
         .insert({ user_id: user.id, status: "active", coverage } as any)
-        .select("id, tracking_token, coverage").single();
+        .select("id, tracking_token").single();
       if (error || !incident) throw error ?? new Error("Failed to create incident");
-      setIncidentCoverage((incident as any).coverage ?? coverage);
 
       await supabase.from("holarchelp_locations" as any).insert({
         incident_id: (incident as any).id,
