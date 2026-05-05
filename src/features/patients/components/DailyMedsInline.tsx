@@ -114,6 +114,12 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
     setMeds((prev) => prev.filter((m) => m.id !== id));
   };
 
+  const toggleReminder = async (id: string, enabled: boolean) => {
+    setMeds((prev) => prev.map((m) => (m.id === id ? { ...m, reminders_enabled: enabled } : m)));
+    const { error } = await supabase.from("prescriptions").update({ reminders_enabled: enabled } as any).eq("id", id);
+    if (error) toast({ title: "Couldn't update", description: error.message, variant: "destructive" });
+  };
+
   return (
     <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
       <div className="flex items-center gap-1.5 mb-1">
