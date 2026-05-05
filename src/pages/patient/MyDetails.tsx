@@ -116,6 +116,19 @@ export default function MyDetails() {
       </div>
 
       <PatientDetailsEditor patient={patient} onSave={handleSave} isSelfService userEmail={userEmail} lollipopCount={lollipopCount} rewardsLoading={rewardsLoading} section={section} />
+
+      {section === "health" && (
+        <>
+          <EmergencyContactsSection
+            patientId={patient.id}
+            contacts={emergencyContacts}
+            onChange={setEmergencyContacts}
+          />
+          <ProfileSharesSection ownerUserId={userId} />
+          <PatientDailyMedsSection patientId={patient.id} patientUserId={userId} />
+          <PatientSelfAdmissionsSection patientId={patient.id} userId={userId} />
+        </>
+      )}
     </div>
   );
 }
