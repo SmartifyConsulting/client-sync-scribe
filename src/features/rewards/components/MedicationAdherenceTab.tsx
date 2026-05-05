@@ -94,6 +94,9 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
   const [isCheckingPill, setIsCheckingPill] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
+  const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
+  const [recordedMime, setRecordedMime] = useState<string>("video/webm");
+  const [pillCheckCount, setPillCheckCount] = useState<number | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [countdown, setCountdown] = useState(30);
