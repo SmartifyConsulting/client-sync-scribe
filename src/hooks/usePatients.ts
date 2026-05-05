@@ -33,6 +33,8 @@ export interface NextOfKinMember {
   relationship: string;
   shared?: boolean;
   notified_at?: string;
+  can_view_profile?: boolean;
+  can_view_live_tracking?: boolean;
 }
 
 export interface CurrentMedication {

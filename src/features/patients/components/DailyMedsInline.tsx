@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Pill, Sparkles } from "lucide-react";
+import { Plus, Trash2, Pill, Sparkles, Bell, BellOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -24,6 +25,7 @@ interface SelfMed {
   with_food: string | null;
   status: string;
   approved_medication_id: string | null;
+  reminders_enabled?: boolean;
 }
 
 const FREQUENCY_OPTIONS = [
@@ -58,7 +60,7 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
       supabase.from("approved_daily_medications").select("id, name, category, default_with_food").eq("active", true).order("name"),
       supabase
         .from("prescriptions")
-        .select("id, medication, dosage, frequency, reminder_times, with_food, status, approved_medication_id")
+        .select("id, medication, dosage, frequency, reminder_times, with_food, status, approved_medication_id, reminders_enabled")
         .eq("patient_id", patientId)
         .eq("source", "self")
         .order("created_at", { ascending: false }),
@@ -110,6 +112,12 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
       return;
     }
     setMeds((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  const toggleReminder = async (id: string, enabled: boolean) => {
+    setMeds((prev) => prev.map((m) => (m.id === id ? { ...m, reminders_enabled: enabled } : m)));
+    const { error } = await supabase.from("prescriptions").update({ reminders_enabled: enabled } as any).eq("id", id);
+    if (error) toast({ title: "Couldn't update", description: error.message, variant: "destructive" });
   };
 
   return (
@@ -216,9 +224,15 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
             </p>
             <Badge variant="outline" className="mt-0.5 text-[9px] px-1 py-0">Self-added</Badge>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => remove(m.id)} className="text-destructive h-7 w-7">
-            <Trash2 className="h-3.5 w-3.5" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <label className="flex items-center gap-1 text-[10px] text-muted-foreground">
+              {(m.reminders_enabled ?? true) ? <Bell className="h-3 w-3 text-primary" /> : <BellOff className="h-3 w-3" />}
+              <Switch checked={m.reminders_enabled ?? true} onCheckedChange={(v) => toggleReminder(m.id, v)} />
+            </label>
+            <Button variant="ghost" size="icon" onClick={() => remove(m.id)} className="text-destructive h-7 w-7">
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </div>
       ))}
     </div>

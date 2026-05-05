@@ -2367,49 +2367,69 @@ export function PatientDetailsEditor({
                     {nokMembers.map((nok) => (
                       <div
                         key={nok.id}
-                        className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50"
+                        className="p-2 rounded-lg bg-muted/30 border border-border/50 space-y-2"
                       >
-                        <div>
-                          <p className="text-xs font-medium text-foreground">
-                            {nok.name}{" "}
-                            {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}
-                          </p>
-                          {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs font-medium text-foreground">
+                              {nok.name}{" "}
+                              {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}
+                            </p>
+                            {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              title="Notify"
+                              onClick={() =>
+                                toast({ title: "Notification sent", description: `${nok.name} has been notified` })
+                              }
+                            >
+                              <Bell className="h-3 w-3 text-primary" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditNOK(nok)}>
+                              <Pencil className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-destructive"
+                              onClick={() => {
+                                setNokMembers((prev) => prev.filter((n) => n.id !== nok.id));
+                                setHasChanges(true);
+                              }}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            title="Notify"
-                            onClick={() =>
-                              toast({ title: "Notification sent", description: `${nok.name} has been notified` })
-                            }
-                          >
-                            <Bell className="h-3 w-3 text-primary" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => handleShareRecord("nok", nok)}
-                          >
-                            <Share2 className={cn("h-3 w-3", nok.shared ? "text-muted-foreground" : "text-primary")} />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditNOK(nok)}>
-                            <Pencil className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-destructive"
-                            onClick={() => {
-                              setNokMembers((prev) => prev.filter((n) => n.id !== nok.id));
-                              setHasChanges(true);
-                            }}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-1 border-t border-border/40">
+                          <label className="flex items-center gap-2 text-[11px]">
+                            <Switch
+                              checked={!!nok.can_view_profile}
+                              onCheckedChange={(v) => {
+                                setNokMembers((prev) =>
+                                  prev.map((n) => (n.id === nok.id ? { ...n, can_view_profile: v } : n)),
+                                );
+                                setHasChanges(true);
+                              }}
+                            />
+                            Can view profile
+                          </label>
+                          <label className="flex items-center gap-2 text-[11px]">
+                            <Switch
+                              checked={!!nok.can_view_live_tracking}
+                              onCheckedChange={(v) => {
+                                setNokMembers((prev) =>
+                                  prev.map((n) => (n.id === nok.id ? { ...n, can_view_live_tracking: v } : n)),
+                                );
+                                setHasChanges(true);
+                              }}
+                            />
+                            Live tracking
+                          </label>
                         </div>
                       </div>
                     ))}

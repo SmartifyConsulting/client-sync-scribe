@@ -50,12 +50,17 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
             <Hospital className="h-5 w-5 text-primary" />
           </div>
           <div className="min-w-0">
-            <h3 className="font-semibold text-sm truncate">{admission.hospital || "Hospital"}</h3>
-            <p className="text-xs text-muted-foreground">
+            <h3 className="font-semibold text-sm truncate">
+              {(admission as any).title || admission.diagnosis || admission.hospital || "Admission"}
+            </h3>
+            <p className="text-[11px] text-muted-foreground truncate">
+              {admission.hospital ? `${admission.hospital} · ` : ""}
               Admitted {format(new Date(admission.admission_date), "dd MMM yyyy")}
               {admission.discharge_date && ` · Discharged ${format(new Date(admission.discharge_date), "dd MMM yyyy")}`}
             </p>
-            {admission.diagnosis && <p className="text-xs mt-1 line-clamp-2">{admission.diagnosis}</p>}
+            <p className="text-[10px] text-muted-foreground mt-0.5">
+              Logged {format(new Date((admission as any).created_at || admission.admission_date), "dd MMM yyyy HH:mm")}
+            </p>
           </div>
         </div>
         <Badge variant={admission.status === "admitted" ? "default" : "secondary"} className="shrink-0">{admission.status}</Badge>

@@ -17,6 +17,7 @@ interface Props {
 export function ManualLogAdmissionDialog({ open, onOpenChange, patientId }: Props) {
   const { toast } = useToast();
   const qc = useQueryClient();
+  const [title, setTitle] = useState("");
   const [hospital, setHospital] = useState("");
   const [admDate, setAdmDate] = useState(new Date().toISOString().slice(0, 10));
   const [discDate, setDiscDate] = useState("");
@@ -24,15 +25,16 @@ export function ManualLogAdmissionDialog({ open, onOpenChange, patientId }: Prop
   const [saving, setSaving] = useState(false);
 
   const submit = async () => {
-    if (!hospital.trim()) {
-      toast({ title: "Hospital required", variant: "destructive" });
+    if (!title.trim() && !diagnosis.trim()) {
+      toast({ title: "Add a title or reason", variant: "destructive" });
       return;
     }
     setSaving(true);
     const { data: u } = await supabase.auth.getUser();
     const { error } = await supabase.from("hospital_admissions").insert({
       patient_id: patientId,
-      hospital,
+      title: title.trim() || null,
+      hospital: hospital || null,
       admission_date: admDate,
       discharge_date: discDate || null,
       diagnosis: diagnosis || null,
@@ -56,6 +58,10 @@ export function ManualLogAdmissionDialog({ open, onOpenChange, patientId }: Prop
       <DialogContent>
         <DialogHeader><DialogTitle>Log a hospital admission</DialogTitle></DialogHeader>
         <div className="space-y-3">
+          <div>
+            <Label className="text-[11px]">Admission title (e.g. "Knee surgery", "Pneumonia")</Label>
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Short label for this admission" />
+          </div>
           <div>
             <Label className="text-[11px]">Hospital</Label>
             <Input value={hospital} onChange={(e) => setHospital(e.target.value)} />
