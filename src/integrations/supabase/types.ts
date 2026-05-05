@@ -1350,6 +1350,8 @@ export type Database = {
           eta_minutes: number | null
           id: string
           last_eta_update: string | null
+          manually_logged: boolean
+          notes: string | null
           priority_boost: boolean
           resolved_at: string | null
           severity: string
@@ -1369,6 +1371,8 @@ export type Database = {
           eta_minutes?: number | null
           id?: string
           last_eta_update?: string | null
+          manually_logged?: boolean
+          notes?: string | null
           priority_boost?: boolean
           resolved_at?: string | null
           severity?: string
@@ -1388,6 +1392,8 @@ export type Database = {
           eta_minutes?: number | null
           id?: string
           last_eta_update?: string | null
+          manually_logged?: boolean
+          notes?: string | null
           priority_boost?: boolean
           resolved_at?: string | null
           severity?: string
