@@ -7,7 +7,7 @@ import { Patient } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
 import { useMyRewards } from "@/hooks/usePatientRewards";
 import { EmergencyContact } from "@/features/patients/components/EmergencyContactsSection";
-import { ProfileSharesSection } from "@/features/patients/components/ProfileSharesSection";
+
 
 
 
