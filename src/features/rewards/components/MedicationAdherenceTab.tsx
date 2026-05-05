@@ -118,7 +118,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
     queryFn: async () => {
       const { data, error } = await supabase
         .from("prescriptions")
-        .select("id, medication, dosage, frequency, status")
+        .select("id, medication, dosage, frequency, status, quantity_per_dose")
         .eq("patient_id", patientId)
         .eq("status", "active");
       if (error) throw error;
