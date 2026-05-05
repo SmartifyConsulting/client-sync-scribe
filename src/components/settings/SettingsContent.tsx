@@ -80,13 +80,14 @@ export function SettingsContent() {
     else if (paymentResult === "cancelled") { toast({ title: "Payment Cancelled", description: "Your payment was cancelled." }); }
   }, [searchParams]);
 
-  const planType = role === "patient" ? "patient" : "doctor";
+  const EMERGENCY_ROLES = ["ambulance_staff", "hospital_staff", "blood_bank"];
+  const planType: "doctor" | "patient" | "emergency" =
+    role === "patient" ? "patient" : EMERGENCY_ROLES.includes(role || "") ? "emergency" : "doctor";
 
   const fetchPricing = async () => {
     setLoadingPricing(true);
     try {
-      const roleType = role === "patient" ? "patient" : "doctor";
-      const { data, error } = await supabase.from("pricing_config").select("*").eq("role", roleType);
+      const { data, error } = await supabase.from("pricing_config").select("*").eq("role", planType);
       if (!error && data && data.length > 0) {
         const monthlyPlan = data.find((p) => p.billing_cycle === "monthly");
         const annualPlan = data.find((p) => p.billing_cycle === "annual");

@@ -169,6 +169,7 @@ export default function PricingAdmin() {
       let result = (data || []) as PricingConfig[];
       result = calculateSavings(result, "doctor");
       result = calculateSavings(result, "patient");
+      result = calculateSavings(result, "emergency");
       setPricing(result);
     } catch (error) {
       console.error("Error fetching pricing:", error);
@@ -254,6 +255,8 @@ export default function PricingAdmin() {
   const doctorAnnual = pricing.find((p) => p.role === "doctor" && p.billing_cycle === "annual");
   const patientMonthly = pricing.find((p) => p.role === "patient" && p.billing_cycle === "monthly");
   const patientAnnual = pricing.find((p) => p.role === "patient" && p.billing_cycle === "annual");
+  const emergencyMonthly = pricing.find((p) => p.role === "emergency" && p.billing_cycle === "monthly");
+  const emergencyAnnual = pricing.find((p) => p.role === "emergency" && p.billing_cycle === "annual");
 
   return (
     <div className="animate-fade-in max-w-6xl mx-auto">
@@ -264,8 +267,8 @@ export default function PricingAdmin() {
             Service Menu
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-[65ch] font-light">
-            Define the financial structure for practitioners and patients. Adjust prices to see the
-            annual discount calculate in real time.
+            Define the financial structure for healthcare providers, patients, and emergency
+            services. Adjust prices to see the annual discount calculate in real time.
           </p>
         </div>
         <Button onClick={handleSave} disabled={saving} size="lg" className="rounded-full">
@@ -276,17 +279,24 @@ export default function PricingAdmin() {
 
       <div className="space-y-12 md:space-y-16">
         <RoleSection
-          title="Tier 01: Practitioners"
+          title="Tier 01: Healthcare Providers"
           badgeLabel="Doctor"
           monthly={doctorMonthly}
           annual={doctorAnnual}
           onChange={handleChange}
         />
         <RoleSection
-          title="Tier 02: Healthcare Seekers"
+          title="Tier 02: Patient"
           badgeLabel="Patient"
           monthly={patientMonthly}
           annual={patientAnnual}
+          onChange={handleChange}
+        />
+        <RoleSection
+          title="Tier 03: Emergency Services"
+          badgeLabel="Emergency"
+          monthly={emergencyMonthly}
+          annual={emergencyAnnual}
           onChange={handleChange}
         />
       </div>
