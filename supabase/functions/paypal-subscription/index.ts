@@ -10,7 +10,7 @@ const corsHeaders = {
 const PAYPAL_ENV = (Deno.env.get("PAYPAL_ENV") || "sandbox").toLowerCase();
 const PAYPAL_BASE = PAYPAL_ENV === "live"
   ? "https://api-m.paypal.com"
-  : "https://api-m.sandbox.paypal.com";
+  : "${PAYPAL_BASE}";
 
 const PLAN_TYPES = ["doctor", "patient", "emergency"] as const;
 const BILLING_CYCLES = ["monthly", "annual"] as const;
@@ -52,7 +52,7 @@ async function getPayPalAccessToken(): Promise<string> {
   }
 
   const auth = btoa(`${clientId}:${clientSecret}`);
-  const response = await fetch("https://api-m.sandbox.paypal.com/v1/oauth2/token", {
+  const response = await fetch("${PAYPAL_BASE}/v1/oauth2/token", {
     method: "POST",
     headers: {
       Authorization: `Basic ${auth}`,
@@ -78,7 +78,7 @@ async function createPayPalOrder(accessToken: string, planType: string, billingC
     throw new Error("Invalid plan configuration");
   }
 
-  const response = await fetch("https://api-m.sandbox.paypal.com/v2/checkout/orders", {
+  const response = await fetch("${PAYPAL_BASE}/v2/checkout/orders", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -115,7 +115,7 @@ async function createPayPalOrder(accessToken: string, planType: string, billingC
 }
 
 async function capturePayPalOrder(accessToken: string, orderId: string): Promise<any> {
-  const response = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderId}/capture`, {
+  const response = await fetch(`${PAYPAL_BASE}/v2/checkout/orders/${orderId}/capture`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
