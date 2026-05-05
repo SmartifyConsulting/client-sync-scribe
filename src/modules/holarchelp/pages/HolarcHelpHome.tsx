@@ -124,8 +124,8 @@ export default function HolarcHelpHome() {
       navigate(`/patient/holarchelp/incident/${activeIncidentId}`);
       return;
     }
-    if (hasNok === false) {
-      toast.error("Add a Next of Kin first — they are your Emergency Contact.");
+    if (hasEmergency === false) {
+      toast.error("Add an Emergency Contact first — they will be notified when you trigger SOS.");
       navigate("/patient/details?section=health");
       return;
     }
