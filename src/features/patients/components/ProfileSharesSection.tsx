@@ -132,6 +132,14 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
         <div className="rounded-lg border border-dashed border-border p-3 space-y-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div>
+              <Label className="text-[11px]">First name</Label>
+              <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Jane" />
+            </div>
+            <div>
+              <Label className="text-[11px]">Last name</Label>
+              <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Doe" />
+            </div>
+            <div>
               <Label className="text-[11px]">Username or email</Label>
               <Input
                 value={usernameOrEmail}
@@ -166,11 +174,16 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="font-medium text-sm">
-                  {s.shared_with_username ?? s.shared_with_email}
+                  {[s.shared_with_first_name, s.shared_with_last_name].filter(Boolean).join(" ")
+                    || s.shared_with_username
+                    || s.shared_with_email}
                   {s.relationship && (
                     <span className="ml-2 text-xs text-muted-foreground">({s.relationship})</span>
                   )}
                 </p>
+                {(s.shared_with_first_name || s.shared_with_last_name) && (s.shared_with_username || s.shared_with_email) && (
+                  <p className="text-[10px] text-muted-foreground">{s.shared_with_username ?? s.shared_with_email}</p>
+                )}
                 {!s.shared_with_user_id && (
                   <p className="text-[11px] text-amber-600">Pending — they'll get access once they sign up.</p>
                 )}
