@@ -27,6 +27,7 @@ interface NavItem {
   icon: LucideIcon;
   label: string;
   to: string;
+  danger?: boolean;
 }
 
 const doctorNavItems: NavItem[] = [
@@ -35,6 +36,7 @@ const doctorNavItems: NavItem[] = [
   { icon: Settings2, label: "My Practice", to: "/practice" },
   { icon: UserCog, label: "My Admin", to: "/admin" },
   { icon: Gift, label: "My Rewards", to: "/doctor/rewards" },
+  { icon: Siren, label: "SOS", to: "/doctor/holarchelp", danger: true },
 ];
 
 const patientNavItems: NavItem[] = [
@@ -42,6 +44,7 @@ const patientNavItems: NavItem[] = [
   { icon: Users, label: "My Holarchy", to: "/patient/details?section=care" },
   { icon: FolderOpen, label: "My Desk", to: "/patient/details?section=admin" },
   { icon: Gift, label: "My Rewards", to: "/patient/rewards" },
+  { icon: Siren, label: "SOS", to: "/patient/holarchelp", danger: true },
 ];
 
 const adminNavItems: NavItem[] = [
