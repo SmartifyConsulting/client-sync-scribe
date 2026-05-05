@@ -452,6 +452,7 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
               <Select value={transferToAppId} onValueChange={setTransferToAppId}>
                 <SelectTrigger><SelectValue placeholder="Select destination app" /></SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="vault">Vula Vault</SelectItem>
                   {partnerApps.map((app: any) => <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>)}
                 </SelectContent>
               </Select>
