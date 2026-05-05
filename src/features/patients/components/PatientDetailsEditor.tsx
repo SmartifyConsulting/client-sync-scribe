@@ -1733,11 +1733,7 @@ export function PatientDetailsEditor({
                         )}
                       </div>
 
-                      {/* Vitamins / Supplements / OTC — visible in view mode too */}
-                      {isSelfService && (
-                        <DailyMedsInline patientId={patient.id} patientUserId={userId} />
-                      )}
-
+                      {/* Conditions moved to its own block below */}
                       {/* Conditions & Diagnoses */}
                       <div className="rounded-lg border border-border/50 p-2.5 space-y-1">
                         <h4 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5">
