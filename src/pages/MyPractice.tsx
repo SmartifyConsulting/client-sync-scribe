@@ -28,6 +28,7 @@ import {
   PenTool,
   Calendar as CalendarIcon,
   Palette,
+  Sparkles,
 } from "lucide-react";
 import ReferralDoctors from "@/pages/ReferralDoctors";
 
