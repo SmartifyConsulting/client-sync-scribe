@@ -54,6 +54,8 @@ export default function MyDetails() {
           next_of_kin_members: Array.isArray(data.next_of_kin_members) ? data.next_of_kin_members as unknown as Patient["next_of_kin_members"] : [],
           current_medications: Array.isArray(data.current_medications) ? data.current_medications as unknown as Patient["current_medications"] : [],
         } as unknown as Patient);
+        const ec = (data as any).emergency_contacts;
+        setEmergencyContacts(Array.isArray(ec) ? ec : []);
       }
     } catch (err) {
       console.error("Error fetching patient record:", err);
