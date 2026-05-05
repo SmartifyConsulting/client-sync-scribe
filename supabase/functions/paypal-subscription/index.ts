@@ -216,7 +216,15 @@ serve(async (req) => {
         });
       }
 
-      const body = await req.json();
+      const rawBody = await req.json();
+      const parsed = BodySchema.safeParse(rawBody);
+      if (!parsed.success) {
+        return new Response(JSON.stringify({ error: parsed.error.flatten().fieldErrors }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const body: any = { ...parsed.data };
 
       // Enforce that userId matches the authenticated caller
       if (body.userId && body.userId !== callerUser.id) {
