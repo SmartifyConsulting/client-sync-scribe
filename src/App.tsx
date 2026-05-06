@@ -28,6 +28,7 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 import PatientConsent from "./pages/PatientConsent";
 import BusinessAssociateAgreement from "./pages/BusinessAssociateAgreement";
 import Legal from "./pages/Legal";
+import VulaWallet from "./pages/VulaWallet";
 
 // Patient pages
 import PatientDashboard from "./pages/patient/PatientDashboard";
