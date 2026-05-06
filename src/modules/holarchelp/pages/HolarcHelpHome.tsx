@@ -169,7 +169,7 @@ export default function HolarcHelpHome() {
 
       const { data: incident, error } = await supabase
         .from("holarchelp_incidents" as any)
-        .insert({ user_id: user.id, status: "active", coverage, severity: "critical" } as any)
+        .insert({ user_id: user.id, status: "open", coverage, severity: "critical" } as any)
         .select("id, tracking_token").single();
       if (error || !incident) throw error ?? new Error("Failed to create incident");
 
@@ -183,7 +183,10 @@ export default function HolarcHelpHome() {
       if ("vibrate" in navigator) navigator.vibrate?.([200, 100, 200]);
       setIncidentId((incident as any).id);
       setActiveIncidentId((incident as any).id);
-      // Fire-and-forget: notify emergency contacts (and any opt-in NOK / share recipients) with live tracking link
+      // Fan-out offers to nearby ambulances (Uber-style dispatch queue)
+      supabase.functions.invoke("dispatch-sos", { body: { incident_id: (incident as any).id } })
+        .catch((e) => console.warn("dispatch-sos failed", e));
+      // Notify emergency contacts with tracking link
       supabase.functions.invoke("share-incident-with-contacts", {
         body: { incident_id: (incident as any).id, tracking_token: (incident as any).tracking_token },
       }).catch((e) => console.warn("share-incident-with-contacts failed", e));
