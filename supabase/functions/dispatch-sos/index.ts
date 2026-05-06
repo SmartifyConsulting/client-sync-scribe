@@ -31,21 +31,22 @@ Deno.serve(async (req) => {
 
     const center = { lat: loc.latitude as number, lng: loc.longitude as number };
 
-    let q = sb.from("holarchelp_ambulance_providers")
-      .select("id, latitude, longitude, ownership, accepting_patients, subscription_status, status")
-      .eq("status", "approved")
-      .eq("accepting_patients", true)
+    const { data: ambulances } = await sb.from("holarchelp_ambulance_providers")
+      .select("id, latitude, longitude, ownership, accepting_patients, status")
+      .eq("status", "approved").eq("accepting_patients", true)
       .not("latitude", "is", null).not("longitude", "is", null);
-    const { data: providers } = await q;
+    const { data: hospitals } = await sb.from("holarchelp_hospitals")
+      .select("id, latitude, longitude, ownership, accepting_patients, status")
+      .eq("status", "approved").eq("accepting_patients", true)
+      .not("latitude", "is", null).not("longitude", "is", null);
 
     const isPublicCoverage = (incident as any).coverage === "public";
-    // Inclusive coverage: both public and private patients see all approved providers.
-    // Public-coverage patients prefer public-ownership providers (sorted first).
-    const all = (providers ?? [])
-      .filter((p: any) => !exclude_provider_ids.includes(p.id))
-      .map((p: any) => ({ ...p, _d: distKm(center, { lat: p.latitude, lng: p.longitude }) }));
+    const tag = (rows: any[] | null, kind: string) =>
+      (rows ?? [])
+        .filter((p: any) => !exclude_provider_ids.includes(p.id))
+        .map((p: any) => ({ ...p, _kind: kind, _d: distKm(center, { lat: p.latitude, lng: p.longitude }) }));
+    const all = [...tag(ambulances, "ambulance"), ...tag(hospitals, "hospital")];
 
-    // Widen radius until we have at least one candidate
     let candidates: any[] = [];
     for (const radius of [50, 150, 500, 5000]) {
       candidates = all.filter((p: any) => p._d <= radius);
@@ -60,7 +61,7 @@ Deno.serve(async (req) => {
         }
         return a._d - b._d;
       })
-      .slice(0, 15);
+      .slice(0, 20);
 
     // Fetch incident user for doctor notification
     const { data: incidentDetail } = await sb.from("holarchelp_incidents")
@@ -93,7 +94,8 @@ Deno.serve(async (req) => {
     }
 
     const rows = candidates.map((p: any) => ({
-      incident_id, provider_id: p.id, response: "pending", distance_km: Number(p._d.toFixed(2)),
+      incident_id, provider_id: p.id, provider_kind: p._kind,
+      response: "pending", distance_km: Number(p._d.toFixed(2)),
     }));
     const { error } = await sb.from("holarchelp_incident_offers").upsert(rows, {
       onConflict: "incident_id,provider_id", ignoreDuplicates: true,

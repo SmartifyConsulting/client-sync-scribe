@@ -1,32 +1,60 @@
-## What's actually happening
+## Goal
 
-You have an SOS incident open since 19:19 (status `open`, no provider has accepted yet — 2 ambulances were offered, both still `pending`). Two separate things are biting you:
+On the active SOS screen, show the patient the **list of providers being notified** (hospitals + ambulances), let them **manually pick one**, and if they don't choose within **3 minutes**, the system **auto-assigns the closest provider or any available provider can grab the call**.
 
-**1. You can't navigate away from the active incident.**
-`HolarcHelpHome` has this rule: if you have any live incident older than 30 seconds, it `navigate(..., { replace: true })` straight to `/patient/holarchelp/incident/<id>`. Your incident is over an hour old, so every time you tap **SOS Home** (or back), the home screen instantly bounces you back to the incident detail. Same loop applies to the Nearby page — you go to home first, get redirected, never reach Nearby.
+## Why your providers aren't "showing"
 
-**2. The Nearby/search page has nothing to show you anyway.**
-The DB has 16 approved ambulances, all `ownership = private`, and 0 approved hospitals (the 67 hospitals I reported earlier were on a different env / since changed — current count is 0 approved). The map is empty for you because there are no approved hospitals at all, and the ambulance dispatch *did* find 2 within 50 km — but neither responder has accepted, so the active incident screen just keeps spinning "Finding nearest ambulance…".
+Your DB is fine — there are 2 approved SA hospitals + 2 approved SA ambulances with valid coordinates, and the current incident already has 2 pending offers out to both ambulances. The problem is purely UX:
 
-## Fix
+- The active SOS screen only shows *"Notified N responders"* — no names, no distance, no way to pick one
+- Hospitals are never offered (dispatch only queries `holarchelp_ambulance_providers`)
+- There is no auto-assign timeout, so if no responder taps "Accept" on their dashboard, the spinner spins forever
 
-### `src/modules/holarchelp/pages/HolarcHelpHome.tsx`
-- Remove the "if incident age > 30s, auto-redirect to detail" block. Instead, when there's a live incident, render the normal home screen with a prominent **"Active SOS in progress — Resume"** banner at the top that links to `/patient/holarchelp/incident/<id>`. This unblocks back-navigation and lets you reach **Find nearby provider** while the SOS is still live.
-- Keep the existing realtime cleanup that clears `activeIncidentId` when the incident is completed/cancelled.
+## Changes
 
-### `src/modules/holarchelp/pages/HolarcHelpIncidentDetail.tsx`
-- The **SOS Home** back button already calls `navigate("/patient/holarchelp")`. With the home fix above, that will now actually land on home instead of bouncing back. No further change needed here.
-- Add a small "Search nearby providers" link in the sticky bar (next to History) so you can jump straight from an active incident to the Nearby map — useful when responders are slow.
+### 1. `dispatch-sos` edge function — also offer hospitals
 
-### `src/modules/holarchelp/pages/HolarcHelpNearby.tsx`
-- Already shows the full approved list with Public/Private badges (last change). Add an explicit empty-state line that distinguishes "no hospitals approved yet" vs "no ambulances approved yet" so it's obvious why a category is missing, instead of just showing one combined empty message.
+- After picking ambulance candidates, run the same nearest-N selection over `holarchelp_hospitals` (approved + accepting + has lat/lng) and insert hospital offers into the same `holarchelp_incident_offers` table.
+- This requires adding a `provider_kind` column (`'ambulance' | 'hospital'`) to `holarchelp_incident_offers` so we know which table the `provider_id` points to. Backfill existing rows to `'ambulance'`.
 
-### Out of scope
-- No DB backfill of public/private ownership.
-- No changes to dispatch-sos logic or auto-accept behaviour. Pending offers staying pending is a responder-side issue (no provider app accepting), not a search bug — separate fix if you want it.
-- No SOS trigger / hold-button changes.
+### 2. New "Available responders" panel on `HolarcHelpIncidentDetail.tsx`
 
-### Verification
-- Open `/patient/holarchelp/incident/df59…` → tap **SOS Home** → land on the SOS home with a "Resume active SOS" banner, **not** redirected back.
-- From home, tap **Find nearby provider** → map loads, list shows the 16 approved ambulances with Private badges, and an explicit "No approved hospitals yet" note where hospitals would appear.
-- Resume banner deep-links back to the incident detail.
+While the incident is `open` and unassigned, replace the "Notified N responders" line with a real list:
+
+```text
+Available responders                                         03:00 ⏳
+─────────────────────────────────────────────────────────
+🚑  Netcare ER24            Private · 2.1 km        [ Pick ]
+🚑  Emergency ER (JHN)      Private · 4.7 km        [ Pick ]
+🏥  Mediclinic Sandton      Private · 3.4 km        [ Pick ]
+🏥  Olivedale Clinic        Private · 8.9 km        [ Pick ]
+─────────────────────────────────────────────────────────
+Auto-assign closest in 03:00 if you don't pick.
+```
+
+- Pulls rows from `holarchelp_incident_offers` for this incident, joins to provider name/ownership/distance.
+- Each "Pick" button calls a new `holarchelp_patient_pick_provider(_incident_id, _provider_id, _kind)` RPC that locks the assignment (similar to the existing `holarchelp_accept_incident`, but initiated by the patient).
+- A live countdown shows time remaining until auto-assign.
+
+### 3. New `holarchelp_auto_assign_incident` RPC + 3-min timeout
+
+- RPC picks the closest pending offer and assigns it (same atomic update as `holarchelp_accept_incident`).
+- Triggered client-side by a timer in `HolarcHelpIncidentDetail.tsx` once `created_at + 3 min` is reached and incident is still unassigned. (Client trigger is fine because the patient's screen is the one waiting; if they close it, the existing 30-second re-dispatch keeps offers fresh and the next time anyone opens the incident the auto-assign fires.)
+- Logs an `auto_assigned` event to `holarchelp_incident_events`.
+
+### 4. Small copy fix
+
+- Replace the amber "Finding nearest ambulance…" banner with "Choose a responder or wait — auto-assign in mm:ss".
+
+## Out of scope
+
+- No changes to responder-side dashboards.
+- No changes to `HolarcHelpNearby.tsx` (already lists all approved providers).
+- No insurance/medical-aid filtering — current dispatch is inclusive (your medical insurance flag does not currently restrict matching, and we keep it that way).
+- Charlotte Maxeke stays `pending` until you approve it from the admin panel.
+
+## Verification
+
+1. Trigger SOS → within seconds you see 4 entries (2 ambulances + 2 hospitals) with distances and a 3:00 countdown.
+2. Tap "Pick" on Mediclinic Sandton → incident becomes `assigned`, "Responding: Mediclinic Sandton" card appears, other offers become `superseded`.
+3. Trigger another SOS, wait 3 min without tapping → closest provider gets auto-assigned and the same Responding card appears.
