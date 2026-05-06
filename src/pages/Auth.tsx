@@ -534,20 +534,30 @@ export default function Auth() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>I am a...</Label>
-              <RadioGroup value={userRole} onValueChange={(v) => setUserRole(v as UserRole)} className="grid grid-cols-2 gap-3">
+              <RadioGroup value={userRole} onValueChange={(v) => setUserRole(v as UserRole)} className="grid grid-cols-3 gap-2">
                 <div className="relative">
                   <RadioGroupItem value="doctor" id="doctor" className="peer sr-only" />
-                  <Label htmlFor="doctor" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer">
-                    <Stethoscope className="mb-2 h-6 w-6" />
-                    <span className="text-sm font-medium">Healthcare Provider</span>
+                  <Label htmlFor="doctor" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center">
+                    <Stethoscope className="mb-1 h-5 w-5" />
+                    <span className="text-[11px] font-medium leading-tight">Healthcare Provider</span>
                   </Label>
                 </div>
                 <div className="relative">
                   <RadioGroupItem value="patient" id="patient" className="peer sr-only" />
-                  <Label htmlFor="patient" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer">
-                    <UserCircle className="mb-2 h-6 w-6" />
-                    <span className="text-sm font-medium">Patient</span>
+                  <Label htmlFor="patient" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center">
+                    <UserCircle className="mb-1 h-5 w-5" />
+                    <span className="text-[11px] font-medium leading-tight">Patient</span>
                   </Label>
+                </div>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => navigate("/provider-signup")}
+                    className="w-full flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground hover:border-primary cursor-pointer text-center"
+                  >
+                    <Building2 className="mb-1 h-5 w-5" />
+                    <span className="text-[11px] font-medium leading-tight">Emergency Service Provider</span>
+                  </button>
                 </div>
               </RadioGroup>
             </div>
