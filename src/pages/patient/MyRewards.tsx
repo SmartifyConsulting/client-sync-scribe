@@ -396,8 +396,8 @@ export default function MyRewards() {
                 <p className="text-[10px] md:text-sm font-medium text-blue-100">Vula Vouchers</p>
                 <p className="text-2xl md:text-4xl font-bold text-white">{lollipopCount}</p>
               </div>
-              <div className="h-12 w-12 md:h-11 md:w-11 rounded-full bg-white shadow-sm flex items-center justify-center">
-                <img src={vulaVouchersLogo} alt="Vulas" className="h-9 w-9 md:h-8 md:w-8 object-contain" />
+              <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0">
+                <img src={vulaVouchersLogo} alt="Vulas" className="h-8 w-8 object-contain" />
               </div>
             </div>
           </CardContent>
@@ -424,7 +424,7 @@ export default function MyRewards() {
                 <p className="text-[10px] md:text-sm font-medium text-sky-100">Active Streaks</p>
                 <p className="text-2xl md:text-4xl font-bold text-white">{activeStreaks.length}</p>
               </div>
-              <Flame className="h-8 w-8 md:h-12 md:w-12 text-white/90" />
+              <Flame className="h-8 w-8 text-white/90 shrink-0" />
             </div>
           </CardContent>
         </Card>
@@ -436,7 +436,7 @@ export default function MyRewards() {
                 <p className="text-[10px] md:text-sm font-medium text-indigo-100">Vula Vault</p>
                 <p className="text-2xl md:text-4xl font-bold text-white">{totalTransferred}</p>
               </div>
-              <Vault className="h-8 w-8 md:h-12 md:w-12 text-white/90" />
+              <Vault className="h-8 w-8 text-white/90 shrink-0" />
             </div>
             <Button
               variant="ghost"

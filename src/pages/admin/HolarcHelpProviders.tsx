@@ -22,12 +22,12 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Hospital, Ambulance, ShieldAlert, Loader2, Upload, BarChart3, Mic2, Building2, Plus, Pencil, Trash2, Users } from "lucide-react";
+import { Hospital, Ambulance, ShieldAlert, Loader2, Upload, BarChart3, Mic2, Building2, Plus, Pencil, Trash2, Users, Pill } from "lucide-react";
 import { AccountabilityPanel } from "./HolarcHelpAccountability";
 import UsersTab from "@/features/admin/components/UsersTab";
 
 type Status = "all" | "active" | "inactive";
-type Kind = "hospital" | "ambulance";
+type Kind = "hospital" | "ambulance" | "pharmacy";
 
 const COUNTRY_FLAGS: Record<string, string> = {
   "South Africa": "🇿🇦", "ZA": "🇿🇦", "RSA": "🇿🇦",
@@ -70,8 +70,9 @@ function sortedCountries(grouped: Record<string, any>) {
 }
 
 const isActive = (s: string) => s === "approved";
-const tableFor = (k: Kind) => k === "hospital" ? "holarchelp_hospitals" : "holarchelp_ambulance_providers";
-const nameField = (k: Kind) => k === "hospital" ? "name" : "company_name";
+const tableFor = (k: Kind) => k === "hospital" ? "holarchelp_hospitals" : k === "ambulance" ? "holarchelp_ambulance_providers" : "holarchelp_pharmacies";
+const nameField = (k: Kind) => k === "ambulance" ? "company_name" : "name";
+const nounFor = (k: Kind) => k === "hospital" ? "hospitals" : k === "ambulance" ? "ambulances" : "pharmacies";
 
 type EditState = { kind: Kind; row: any | null } | null;
 
@@ -81,6 +82,7 @@ export default function HolarcHelpProviders() {
   const [status, setStatus] = useState<Status>("all");
   const [hospitals, setHospitals] = useState<any[]>([]);
   const [ambulances, setAmbulances] = useState<any[]>([]);
+  const [pharmacies, setPharmacies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [edit, setEdit] = useState<EditState>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ kind: Kind; id: string; name: string } | null>(null);
@@ -95,12 +97,14 @@ export default function HolarcHelpProviders() {
 
   const load = async () => {
     setLoading(true);
-    const [{ data: h }, { data: a }] = await Promise.all([
+    const [{ data: h }, { data: a }, { data: p }] = await Promise.all([
       supabase.from("holarchelp_hospitals" as any).select("*").order("created_at", { ascending: false }),
       supabase.from("holarchelp_ambulance_providers" as any).select("*").order("created_at", { ascending: false }),
+      supabase.from("holarchelp_pharmacies" as any).select("*").order("created_at", { ascending: false }),
     ]);
     setHospitals(filterByStatus((h as any) ?? []));
     setAmbulances(filterByStatus((a as any) ?? []));
+    setPharmacies(filterByStatus((p as any) ?? []));
     setLoading(false);
   };
 
@@ -203,10 +207,10 @@ export default function HolarcHelpProviders() {
   const headers = ["Name", "Contact", "City", "Tier", "Status", "Actions"];
 
   const renderGroupedTable = (rows: any[], kind: Kind) => {
-    if (rows.length === 0) return <Empty label={`No ${status === "all" ? "" : status + " "}${kind === "hospital" ? "hospitals" : "ambulances"}`} />;
+    const noun = nounFor(kind);
+    if (rows.length === 0) return <Empty label={`No ${status === "all" ? "" : status + " "}${noun}`} />;
     const grouped = groupByCountryTier(rows);
     const countries = sortedCountries(grouped);
-    const noun = kind === "hospital" ? "hospitals" : "ambulances";
     return (
       <Accordion type="multiple" defaultValue={countries.slice(0, 2)} className="space-y-2">
         {countries.map((country) => {
@@ -306,6 +310,9 @@ export default function HolarcHelpProviders() {
                 <TabsTrigger value="ambulance" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
                   <Ambulance className="mr-1.5 h-4 w-4" />Ambulance
                 </TabsTrigger>
+                <TabsTrigger value="pharmacy" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
+                  <Pill className="mr-1.5 h-4 w-4" />Pharmacies
+                </TabsTrigger>
               </TabsList>
               <Button size="sm" onClick={() => setChooserOpen(true)}>
                 <Plus className="mr-1.5 h-4 w-4" />
@@ -319,6 +326,10 @@ export default function HolarcHelpProviders() {
 
             <TabsContent value="ambulance" className="mt-4">
               {loading ? <Loader /> : renderGroupedTable(ambulances, "ambulance")}
+            </TabsContent>
+
+            <TabsContent value="pharmacy" className="mt-4">
+              {loading ? <Loader /> : renderGroupedTable(pharmacies, "pharmacy")}
             </TabsContent>
           </Tabs>
         </TabsContent>
@@ -372,7 +383,7 @@ export default function HolarcHelpProviders() {
           <DialogHeader>
             <DialogTitle>Add provider</DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-3 py-2">
+          <div className="grid grid-cols-3 gap-3 py-2">
             <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("hospital"); setEdit({ kind: "hospital", row: null }); }}>
               <Hospital className="h-6 w-6" />
               <span className="text-xs font-semibold">Hospital</span>
@@ -380,6 +391,10 @@ export default function HolarcHelpProviders() {
             <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("ambulance"); setEdit({ kind: "ambulance", row: null }); }}>
               <Ambulance className="h-6 w-6" />
               <span className="text-xs font-semibold">Ambulance</span>
+            </Button>
+            <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("pharmacy"); setEdit({ kind: "pharmacy", row: null }); }}>
+              <Pill className="h-6 w-6" />
+              <span className="text-xs font-semibold">Pharmacy</span>
             </Button>
           </div>
         </DialogContent>
@@ -463,15 +478,15 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit" : "Add"} {kind === "hospital" ? "Hospital" : "Ambulance Provider"}</DialogTitle>
+          <DialogTitle>{isEdit ? "Edit" : "Add"} {kind === "hospital" ? "Hospital" : kind === "ambulance" ? "Ambulance Provider" : "Pharmacy"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           <div className="space-y-1.5">
-            <Label>{kind === "hospital" ? "Hospital name" : "Company name"}</Label>
+            <Label>{kind === "ambulance" ? "Company name" : kind === "pharmacy" ? "Pharmacy name" : "Hospital name"}</Label>
             <Input
               value={form[nameField(kind)] ?? ""}
               onChange={(e) => update(nameField(kind), e.target.value)}
-              placeholder={kind === "hospital" ? "e.g. Netcare Milpark Hospital" : "e.g. ER24"}
+              placeholder={kind === "hospital" ? "e.g. Netcare Milpark Hospital" : kind === "ambulance" ? "e.g. ER24" : "e.g. Clicks Pharmacy Sandton"}
               autoFocus
             />
           </div>

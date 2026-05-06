@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { Loader2, Pencil, Save, X, Shield, Hospital, Ambulance, Droplet } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Loader2, Pencil, Save, X, Shield, Hospital, Ambulance, Droplet, Users, Stethoscope } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InviteUserDialog } from "@/components/InviteUserDialog";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,11 +17,11 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
-type RoleEnum = "doctor" | "patient" | "admin" | "hospital_staff" | "ambulance_staff" | "blood_bank" | "none";
+type RoleEnum = "doctor" | "patient" | "admin" | "hospital_staff" | "ambulance_staff" | "blood_bank" | "pharmacy_staff" | "none";
 type Category = "patient" | "provider" | "emergency" | "admin" | "none";
 type EmergencyKind = "hospital_staff" | "ambulance_staff" | "blood_bank";
 
-const EMERGENCY_ROLES: RoleEnum[] = ["hospital_staff", "ambulance_staff", "blood_bank"];
+const EMERGENCY_ROLES: RoleEnum[] = ["hospital_staff", "ambulance_staff", "blood_bank", "pharmacy_staff"];
 
 const roleToCategory = (role: string): Category => {
   if (role === "patient") return "patient";
@@ -241,121 +242,144 @@ export default function UsersTab() {
     );
   }
 
+  const patients = useMemo(
+    () => users.filter(u => u.role === "patient" || u.role === "admin" || u.role === "none"),
+    [users],
+  );
+  const providers = useMemo(() => users.filter(u => u.role === "doctor"), [users]);
+
+  const renderTable = (rows: UserRecord[]) => (
+    <div className="rounded-lg border border-primary bg-card overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>First Name</TableHead>
+            <TableHead>Last Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Category</TableHead>
+            <TableHead>Company / Practice</TableHead>
+            <TableHead><span className="inline-flex items-center gap-1.5"><Shield className="h-4 w-4" />HolarcHelp</span></TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Joined</TableHead>
+            <TableHead className="w-[100px]">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((u) => {
+            const { first, last } = splitName(u.full_name);
+            const isEditing = editingId === u.user_id;
+            return (
+              <TableRow key={u.user_id}>
+                <TableCell>
+                  {isEditing ? (
+                    <Input value={editState.first_name} onChange={(e) => setEditState(s => ({ ...s, first_name: e.target.value }))} className="h-8 w-32" />
+                  ) : (
+                    <span className="font-medium">{first || "—"}</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {isEditing ? (
+                    <Input value={editState.last_name} onChange={(e) => setEditState(s => ({ ...s, last_name: e.target.value }))} className="h-8 w-32" />
+                  ) : (
+                    <span>{last || "—"}</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {isEditing ? (
+                    <Input value={editState.email} onChange={(e) => setEditState(s => ({ ...s, email: e.target.value }))} className="h-8 w-48" />
+                  ) : (
+                    u.email
+                  )}
+                </TableCell>
+                <TableCell>
+                  {isEditing ? (
+                    <div className="flex flex-col gap-1">
+                      <Select value={editState.category} onValueChange={(v) => setEditState(s => ({ ...s, category: v as Category }))}>
+                        <SelectTrigger className="h-8 w-44"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="patient">Patient</SelectItem>
+                          <SelectItem value="provider">Healthcare Provider</SelectItem>
+                          <SelectItem value="emergency">Emergency Service</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="none">None</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {editState.category === "emergency" && (
+                        <Select value={editState.emergency_kind} onValueChange={(v) => setEditState(s => ({ ...s, emergency_kind: v as EmergencyKind }))}>
+                          <SelectTrigger className="h-8 w-44"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="hospital_staff">Hospital</SelectItem>
+                            <SelectItem value="ambulance_staff">Ambulance</SelectItem>
+                            <SelectItem value="blood_bank">Blood Bank</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+                  ) : (
+                    categoryBadge(u.role)
+                  )}
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm">{u.company || "—"}</span>
+                </TableCell>
+                <TableCell>
+                  <Switch
+                    checked={!!u.holarchelp_enabled}
+                    onCheckedChange={() => toggleHolarcHelp(u.user_id, !!u.holarchelp_enabled)}
+                    aria-label="Toggle HolarcHelp module"
+                  />
+                </TableCell>
+                <TableCell>{statusBadge(u.status)}</TableCell>
+                <TableCell>{format(new Date(u.created_at), "dd MMM yyyy")}</TableCell>
+                <TableCell>
+                  {isEditing ? (
+                    <div className="flex gap-1">
+                      <Button size="icon" variant="ghost" onClick={() => saveUser(u.user_id)} disabled={saving}>
+                        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                      </Button>
+                      <Button size="icon" variant="ghost" onClick={cancelEditing} disabled={saving}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button size="icon" variant="ghost" onClick={() => startEditing(u)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  )}
+                </TableCell>
+              </TableRow>
+            );
+          })}
+          {rows.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={9} className="text-center text-muted-foreground py-8">No users found</TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
         <InviteUserDialog />
       </div>
 
-      <div className="rounded-lg border border-primary bg-card overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>First Name</TableHead>
-              <TableHead>Last Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Company / Practice</TableHead>
-              <TableHead><span className="inline-flex items-center gap-1"><Shield className="h-3.5 w-3.5" />HolarcHelp</span></TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Joined</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.map((u) => {
-              const { first, last } = splitName(u.full_name);
-              const isEditing = editingId === u.user_id;
-              return (
-                <TableRow key={u.user_id}>
-                  <TableCell>
-                    {isEditing ? (
-                      <Input value={editState.first_name} onChange={(e) => setEditState(s => ({ ...s, first_name: e.target.value }))} className="h-8 w-32" />
-                    ) : (
-                      <span className="font-medium">{first || "—"}</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {isEditing ? (
-                      <Input value={editState.last_name} onChange={(e) => setEditState(s => ({ ...s, last_name: e.target.value }))} className="h-8 w-32" />
-                    ) : (
-                      <span>{last || "—"}</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {isEditing ? (
-                      <Input value={editState.email} onChange={(e) => setEditState(s => ({ ...s, email: e.target.value }))} className="h-8 w-48" />
-                    ) : (
-                      u.email
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {isEditing ? (
-                      <div className="flex flex-col gap-1">
-                        <Select value={editState.category} onValueChange={(v) => setEditState(s => ({ ...s, category: v as Category }))}>
-                          <SelectTrigger className="h-8 w-44"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="patient">Patient</SelectItem>
-                            <SelectItem value="provider">Healthcare Provider</SelectItem>
-                            <SelectItem value="emergency">Emergency Service</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="none">None</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {editState.category === "emergency" && (
-                          <Select value={editState.emergency_kind} onValueChange={(v) => setEditState(s => ({ ...s, emergency_kind: v as EmergencyKind }))}>
-                            <SelectTrigger className="h-8 w-44"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="hospital_staff">Hospital</SelectItem>
-                              <SelectItem value="ambulance_staff">Ambulance</SelectItem>
-                              <SelectItem value="blood_bank">Blood Bank</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        )}
-                      </div>
-                    ) : (
-                      categoryBadge(u.role)
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-sm">{u.company || "—"}</span>
-                  </TableCell>
-                  <TableCell>
-                    <Switch
-                      checked={!!u.holarchelp_enabled}
-                      onCheckedChange={() => toggleHolarcHelp(u.user_id, !!u.holarchelp_enabled)}
-                      aria-label="Toggle HolarcHelp module"
-                    />
-                  </TableCell>
-                  <TableCell>{statusBadge(u.status)}</TableCell>
-                  <TableCell>{format(new Date(u.created_at), "dd MMM yyyy")}</TableCell>
-                  <TableCell>
-                    {isEditing ? (
-                      <div className="flex gap-1">
-                        <Button size="icon" variant="ghost" onClick={() => saveUser(u.user_id)} disabled={saving}>
-                          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                        </Button>
-                        <Button size="icon" variant="ghost" onClick={cancelEditing} disabled={saving}>
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button size="icon" variant="ghost" onClick={() => startEditing(u)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-            {users.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={9} className="text-center text-muted-foreground py-8">No users found</TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <Tabs defaultValue="patients">
+        <TabsList className="bg-primary">
+          <TabsTrigger value="patients" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white gap-1.5">
+            <Users className="h-4 w-4" />Patients
+            <span className="ml-1 rounded-full bg-white/20 px-1.5 text-xs">{patients.length}</span>
+          </TabsTrigger>
+          <TabsTrigger value="providers" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white gap-1.5">
+            <Stethoscope className="h-4 w-4" />Healthcare Providers
+            <span className="ml-1 rounded-full bg-white/20 px-1.5 text-xs">{providers.length}</span>
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="patients" className="mt-4">{renderTable(patients)}</TabsContent>
+        <TabsContent value="providers" className="mt-4">{renderTable(providers)}</TabsContent>
+      </Tabs>
     </div>
   );
 }
