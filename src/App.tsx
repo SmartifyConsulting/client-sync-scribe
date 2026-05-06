@@ -62,6 +62,7 @@ import PublicTrack from "./modules/holarchelp/pages/PublicTrack";
 import HolarcHelpProviders from "./pages/admin/HolarcHelpProviders";
 import HolarcHelpAccountability from "./pages/admin/HolarcHelpAccountability";
 import HolarcHelpProviderIncidents from "./pages/admin/HolarcHelpProviderIncidents";
+import NigeriaProvidersMap from "./pages/demo/NigeriaProvidersMap";
 
 const queryClient = new QueryClient();
 
@@ -150,6 +151,7 @@ const App = () => (
           <Route path="/legal" element={<Legal />} />
           <Route path="/vula/wallet" element={<VulaWallet />} />
           <Route path="/track/:token" element={<PublicTrack />} />
+          <Route path="/demo/nigeria-map" element={<NigeriaProvidersMap />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           
