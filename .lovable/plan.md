@@ -1,101 +1,87 @@
-# Plan: Rename moola → vula + Vula-brand the 6Dot50 launch
+# Plan: 6Dot50 link, Legal page spacing, Doctor SOS chooser
 
-## Part A — Rename moola → vula everywhere
+## 1. Wire Vula Wallet to `secure.6dot50.com/lite/default`
 
-### Database migration (single migration, ALTERs only — preserves data)
+Single one-line change in `src/pages/VulaWallet.tsx`:
+- `PARTNER_URL` → `https://secure.6dot50.com/lite/default`
 
-**Tables renamed:**
-- `moola_partner_apps` → `vula_partner_apps`
-- `moola_transfers` → `vula_transfers`
-- `moola_adherence_configs` → `vula_adherence_configs`
+The interstitial already opens it in a new tab (their own origin owns the login).
 
-**Columns renamed (where they exist):**
-- `doctor_rewards.moolas_count` → `vulas_count`
-- `*.moolas_awarded` → `vulas_awarded`
-- `*.moolas_reward` → `vulas_reward`
+## 2. Reformat the Legal Terms page so cards aren't touching
 
-RLS policies, indexes, triggers, FKs and constraint names that embed `moola` are renamed in the same migration. After it runs, `src/integrations/supabase/types.ts` regenerates automatically.
+In `src/pages/Legal.tsx`:
+- Increase vertical gap between agreement cards (`space-y-3` → `space-y-4`)
+- Add inner padding (`p-4` → `p-5`), rounded corners (`rounded-md` → `rounded-lg`)
+- Subtle shadow on hover so cards visually separate from the page background
 
-### Code rename (mechanical, ~17 files)
+No changes to the legal documents themselves — only the index page that lists them.
 
-- All identifiers: `moola*` → `vula*`, `Moola*` → `Vula*`, `MOOLA*` → `VULA*`
-- All UI strings: "Moola"/"Moolas" → "Vula"/"Vulas"
-- Edge function directory: `supabase/functions/sync-moola-partner-apps/` → `sync-vula-partner-apps/`, plus `supabase/config.toml` and any `functions.invoke()` callers
-- Secrets renamed: `MOOLA_PARTNER_API_KEY` → `VULA_PARTNER_API_KEY`, `MOOLA_PARTNER_API_URL` → `VULA_PARTNER_API_URL` (you'll need to re-add the secret values once)
-- README updates in `src/features/README.md` and `src/features/rewards/README.md`
+## 3. Doctor SOS chooser: "SOS for Patient" vs "SOS for Me"
 
-**Files touched:** `GamificationAdmin.tsx`, `EmoticonSender.tsx`, `ActivityProofCapture.tsx`, `PrescriptionEditor.tsx`, `StarRatingDialog.tsx`, `useSessions.ts`, `Dashboard.tsx`, `TodoList.tsx`, `DoctorRewards.tsx`, `MyRewards.tsx`, `PatientDashboard.tsx`, `PatientTasks.tsx`, `paypal-subscription/index.ts`, `summarize-session/index.ts`, `sync-moola-partner-apps/index.ts` (renamed), 2× README, 1 migration.
+When a logged-in **doctor** opens `/doctor/holarchelp`, the SOS Home should first present a two-button modal:
+
+```
+┌─────────────────────────────────┐
+│      Who needs help?            │
+│                                 │
+│  [ 🚨 SOS for a Patient ]       │  red
+│  [ 🚨 SOS for Me ]              │  red
+│                                 │
+│         [ Cancel ]              │
+└─────────────────────────────────┘
+```
+
+### "SOS for Me" (default today)
+- Existing flow: incident is created with `user_id = auth.uid()` (the doctor)
+- Logged in the **doctor's own profile** — already works because RLS `Users insert own incidents` requires `user_id = auth.uid()`
+
+### "SOS for a Patient"
+- Open a quick patient search (existing patient list filtered by the doctor's `doctor_patient_access` roster)
+- On select → call new edge function `dispatch-sos-for-patient` (service role) that:
+  - Verifies the doctor has active access to that patient (`doctor_patient_access.is_active = true`)
+  - Inserts `holarchelp_incidents` with `user_id = patient.user_id`, plus a new column `triggered_by_user_id = doctor.id` and `triggered_by_role = 'doctor'`
+  - Logs an `holarchelp_incident_events` row `sos_triggered_by_doctor` with the doctor's id
+  - Fans out provider offers via the existing dispatch logic
+  - Pushes notifications to: the patient, all the patient's connected doctors, and the patient's NOK
+- Incident appears in the **patient's** profile/incident list (not the doctor's), with a small "Triggered by Dr X" badge
+
+Why an edge function: the RLS check `WITH CHECK (user_id = auth.uid())` blocks a doctor from inserting on a patient's behalf from the client. Service-role bypass + explicit access verification keeps it secure.
+
+### Schema migration
+Add to `holarchelp_incidents`:
+- `triggered_by_user_id uuid` (nullable; existing rows = self-triggered)
+- `triggered_by_role text` (nullable; 'self' | 'doctor' | 'caregiver')
+
+Index `(user_id, created_at desc)` already exists for patient timeline queries.
+
+### UI
+- New file: `src/modules/holarchelp/components/DoctorSosChooser.tsx` (modal with two big red buttons + patient picker step)
+- `HolarcHelpHome.tsx`: detect `useUserRole() === 'doctor'`. On first SOS press, show chooser instead of going straight to `SeverityPicker`
+- "SOS for Me" → continues to existing severity flow
+- "SOS for a Patient" → patient picker → severity → invokes `dispatch-sos-for-patient`
+
+### What we do NOT change
+- Existing patient SOS flow (mobile bottom-nav SOS, patient app) is untouched
+- Doctor's own incident audit, ETA, voice-note recording — unchanged
+- 6Dot50 integration is read-only (still no login bypass)
 
 ---
 
-## Part B — Present 6Dot50 as "Vula" (no login bypass)
+## Files
 
-You want the partner portal to **feel like Vula** while the actual login still happens on `secure.6dot50.com` / `portal.6dot50.com`. We do NOT touch their login form, credentials, or session — we just wrap the launch in Vula branding.
+**Edits**
+- `src/pages/VulaWallet.tsx` — URL constant
+- `src/pages/Legal.tsx` — spacing/padding
+- `src/modules/holarchelp/pages/HolarcHelpHome.tsx` — doctor branch + chooser hook-in
+- `src/components/holarchelp/PatientIncidentHistory.tsx` — show "Triggered by Dr X" badge
 
-### Honest capability check (so the demo story is accurate)
-
-`secure.6dot50.com/lite` ships:
-```
-X-Frame-Options: SAMEORIGIN
-Content-Security-Policy: frame-ancestors *.6dot50.com;
-```
-
-That means:
-- ❌ We **cannot** iframe their page inside Holarc (browser blocks it)
-- ❌ We **cannot** inject CSS/JS into their page (cross-origin policy)
-- ❌ We **cannot** hide their logo on their domain
-- ✅ We **can** brand everything *up to and around* the handoff
-- ✅ We **can** open their site in a fresh, chromeless tab so the user lands on it after seeing only Vula branding
-
-### What we'll build
-
-**1. `VulaPortalLaunch.tsx` — full-page branded interstitial** at route `/vula/portal`:
-
-```
-┌──────────────────────────────────────┐
-│  [Vula symbol]                       │
-│                                      │
-│        Vula Wallet                   │
-│        Powered by 6Dot50             │
-│                                      │
-│  Sign in to redeem your Vulas at     │
-│  participating retailers.            │
-│                                      │
-│  [ Continue to secure sign-in → ]    │
-│                                      │
-│  🔒 You'll be taken to our partner's │
-│     secure login page.               │
-└──────────────────────────────────────┘
-```
-
-- Uses Vula symbol (`@/assets/vula-symbol.png`) and teal primary tokens
-- Single CTA opens `https://portal.6dot50.com/` in `target="_blank"` (mobile: same tab is fine, controlled by a viewport check)
-- Discrete "Powered by 6Dot50" line keeps it legally honest
-- The 6Dot50 login itself is unchanged — your credentials, their session, their security
-
-**2. Replace existing direct 6Dot50 buttons** in `DoctorRewards.tsx` and `MyRewards.tsx`:
-- "Redeem from 6Dot50 with Vula Vouchers" → "Open Vula Wallet"
-- Buttons now route to `/vula/portal` instead of opening `portal.6dot50.com` directly
-- Card copy reworded to lead with "Vula"; 6Dot50 demoted to small partner credit
-- Toast/copy on the partner-sync button: "Sync Vula retailers" (back-end still calls 6dot50)
-
-**3. Route + nav**
-- Add `/vula/portal` route in `src/App.tsx`
-- No new nav item — entry stays via the Redeem section in the existing rewards pages
-
-### What we are deliberately NOT doing
-
-- Not proxying or rehosting 6Dot50 (would handle credentials = liability + ToS violation)
-- Not skinning their actual login form (impossible without their cooperation)
-- Not removing 6Dot50's name from their own page
-
----
-
-## Files affected
-
-**Part A:** 1 migration · 12 source files · 2 edge functions · 1 directory rename · `supabase/config.toml` · 2 READMEs · secrets re-add.
-**Part B:** `src/pages/VulaPortalLaunch.tsx` (new) · `src/App.tsx` · `src/pages/doctor/DoctorRewards.tsx` · `src/pages/patient/MyRewards.tsx`.
+**New**
+- `src/modules/holarchelp/components/DoctorSosChooser.tsx`
+- `src/modules/holarchelp/components/PatientPickerForSos.tsx` (small)
+- `supabase/functions/dispatch-sos-for-patient/index.ts`
+- 1 migration: add `triggered_by_user_id`, `triggered_by_role` to `holarchelp_incidents`
 
 ## Out of scope
-- Renaming the user-visible "Vula" currency (already correct in UI; this cleanup just aligns code/DB)
-- Any modification to the 6Dot50 login flow itself
+- Doctor-initiated SOS from outside `/doctor/holarchelp` (e.g. from a patient profile page) — flagged as a possible follow-up
+- Removing 6Dot50 branding from their own login page (browser cross-origin policy makes this impossible)
+- Caregiver/family SOS triggers (would reuse the same scaffolding)
