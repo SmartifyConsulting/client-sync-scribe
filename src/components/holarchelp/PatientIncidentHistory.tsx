@@ -73,7 +73,7 @@ export default function PatientIncidentHistory({ userId, title = "Emergency inci
     const createdAt = new Date(whenDate).toISOString();
     const { error } = await supabase.from("holarchelp_incidents" as any).insert({
       user_id: userId,
-      status: "resolved",
+      status: "completed",
       tracking_token: token,
       severity,
       manually_logged: true,
