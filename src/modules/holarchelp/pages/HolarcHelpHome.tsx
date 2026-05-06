@@ -236,15 +236,21 @@ export default function HolarcHelpHome() {
 
   if (helpOnTheWay && incidentId) {
     return (
-      <div className="mx-auto max-w-md py-12 text-center">
-        <button
-          onClick={() => navigate(`/patient/holarchelp/incident/${incidentId}`)}
-          className="inline-flex flex-col items-center justify-center gap-3 rounded-3xl bg-emerald-500 hover:bg-emerald-600 transition-colors px-10 py-10 text-white shadow-2xl active:scale-95"
-        >
-          <Shield className="h-16 w-16" />
-          <p className="text-2xl font-extrabold tracking-tight">Help is on the way.</p>
-          <p className="text-xs opacity-90">Tap to view live status</p>
-        </button>
+      <div className="mx-auto max-w-md py-10 px-2">
+        <div className="rounded-3xl border border-emerald-200 bg-gradient-to-b from-emerald-50 to-white p-8 text-center shadow-[var(--shadow-card)]">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30">
+            <Shield className="h-10 w-10 text-white" />
+          </div>
+          <p className="mt-5 text-2xl font-extrabold tracking-tight text-emerald-900">Help is on the way</p>
+          <p className="mt-1 text-sm text-emerald-800/70">Your live location is being shared with the responder.</p>
+          <Button
+            size="lg"
+            className="mt-6 w-full rounded-2xl"
+            onClick={() => navigate(`/patient/holarchelp/incident/${incidentId}`)}
+          >
+            View live tracking
+          </Button>
+        </div>
       </div>
     );
   }
@@ -268,76 +274,105 @@ export default function HolarcHelpHome() {
       />
 
       {hasEmergency === false && (
-        <Card className="mb-4 border-amber-500/40 bg-amber-50">
-          <CardContent className="p-4 space-y-2 text-sm">
-            <div className="flex items-center gap-2 font-semibold text-amber-800">
-              <AlertTriangle className="h-4 w-4" /> Add an Emergency Contact to enable SOS
+        <div className="mb-5 rounded-2xl border border-amber-300/70 bg-amber-50/80 p-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-200/80">
+              <AlertTriangle className="h-4 w-4 text-amber-800" />
             </div>
-            <p className="text-amber-900/80 text-xs">
-              Your Emergency Contact will be notified by default when you trigger an SOS. You can also opt your Next of Kin in.
-            </p>
-            <Button size="sm" className="mt-1" onClick={() => navigate("/patient/details?section=health")}>
-              Add Emergency Contact
-            </Button>
-          </CardContent>
-        </Card>
+            <div className="flex-1 space-y-1.5">
+              <p className="text-sm font-semibold text-amber-900">Add an Emergency Contact to enable SOS</p>
+              <p className="text-xs leading-relaxed text-amber-900/80">
+                Your Emergency Contact will be notified by default when you trigger an SOS. You can also opt your Next of Kin in.
+              </p>
+              <Button
+                size="sm"
+                className="mt-2 w-full sm:w-auto rounded-xl"
+                onClick={() => navigate("/patient/details?section=health")}
+              >
+                Add Emergency Contact
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {permDenied && (
-        <Card className="mb-4 border-amber-500/40 bg-amber-50">
-          <CardContent className="p-4 space-y-2 text-sm">
-            <div className="flex items-center gap-2 font-semibold text-amber-800">
-              <AlertTriangle className="h-4 w-4" /> Location access required
+        <div className="mb-5 rounded-2xl border border-amber-300/70 bg-amber-50/80 p-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-200/80">
+              <AlertTriangle className="h-4 w-4 text-amber-800" />
             </div>
-            <p className="text-amber-900/80 text-xs">
-              SOS needs your location to find the closest emergency services. Enable it for this site:
-            </p>
-            <ul className="list-disc pl-5 text-xs text-amber-900/80 space-y-0.5">
-              <li>Tap the lock/info icon in the address bar</li>
-              <li>Find <strong>Location</strong> permission and set to <strong>Allow</strong></li>
-              <li>Reload this page and try again</li>
-            </ul>
-            <Button size="sm" onClick={triggerSOS} className="mt-1">Try again</Button>
-          </CardContent>
-        </Card>
+            <div className="flex-1 space-y-1.5 text-sm">
+              <p className="font-semibold text-amber-900">Location access required</p>
+              <p className="text-xs text-amber-900/80">
+                SOS needs your location to find the closest emergency services. Enable it for this site:
+              </p>
+              <ul className="ml-4 list-disc space-y-0.5 text-xs text-amber-900/80">
+                <li>Tap the lock/info icon in the address bar</li>
+                <li>Find <strong>Location</strong> permission and set to <strong>Allow</strong></li>
+                <li>Reload this page and try again</li>
+              </ul>
+              <Button size="sm" onClick={triggerSOS} className="mt-2 rounded-xl">Try again</Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {coords && incidentId && !helpOnTheWay ? (
-        <div className="space-y-3">
-          <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-900">
-            <Siren className="h-4 w-4 shrink-0 mt-0.5" />
+        <div className="space-y-4">
+          <div className="flex items-start gap-3 rounded-2xl border-2 border-red-300 bg-red-50 p-4 text-sm text-red-900">
+            <Siren className="h-5 w-5 shrink-0 mt-0.5 text-red-600 animate-pulse" />
             <div>
-              <p className="font-semibold">SOS active — pick a provider or wait for one to accept</p>
-              <p className="opacity-80">Your live location is being shared.</p>
+              <p className="font-bold">SOS active</p>
+              <p className="text-xs opacity-80">Pick a provider or wait for one to accept. Your live location is being shared.</p>
             </div>
           </div>
-          <ProviderMap center={coords} providers={providers} height={260} />
+          <div className="overflow-hidden rounded-2xl border shadow-sm">
+            <ProviderMap center={coords} providers={providers} height={260} />
+          </div>
           <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
             <span className="flex items-center gap-1.5"><img src={hospitalIcon} alt="" className="h-4 w-4" /> Hospital</span>
             <span className="flex items-center gap-1.5"><img src={ambulanceIcon} alt="" className="h-4 w-4" /> Ambulance</span>
           </div>
           <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nearest providers</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Nearest providers</p>
             {providers.map((p) => {
               const dimmed = !p.accepting;
               return (
-                <div key={p.id} className={cn("flex items-center gap-3 rounded-xl border bg-card p-3", dimmed && "opacity-50 grayscale")}>
-                  <img src={p.type === "hospital" ? hospitalIcon : ambulanceIcon} alt="" className="h-9 w-9 object-contain" />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold truncate">{p.name}</p>
-                    <p className="text-[11px] text-muted-foreground capitalize">
-                      {p.type} {p.subtitle && `· ${p.subtitle}`} · {p._d.toFixed(1)} km
-                      {dimmed && <span className="ml-1 text-red-600 font-semibold">· Full capacity</span>}
-                    </p>
+                <div
+                  key={p.id}
+                  className={cn(
+                    "flex items-center gap-3 rounded-2xl border bg-card p-3 shadow-sm transition",
+                    dimmed && "opacity-60",
+                  )}
+                >
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary/60">
+                    <img src={p.type === "hospital" ? hospitalIcon : ambulanceIcon} alt="" className="h-7 w-7 object-contain" />
                   </div>
-                  <Button size="sm" disabled={!!requesting || dimmed} onClick={() => requestProvider(p)}>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold truncate">{p.name}</p>
+                    <p className="text-[11px] text-muted-foreground capitalize">
+                      {p.type}{p.subtitle && ` · ${p.subtitle}`} · {p._d.toFixed(1)} km
+                    </p>
+                    {dimmed && (
+                      <span className="mt-1 inline-block rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700">
+                        Full capacity
+                      </span>
+                    )}
+                  </div>
+                  <Button
+                    size="sm"
+                    className="rounded-xl"
+                    disabled={!!requesting || dimmed}
+                    onClick={() => requestProvider(p)}
+                  >
                     {requesting === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : dimmed ? "Full" : "Request"}
                   </Button>
                 </div>
               );
             })}
             {providers.length === 0 && (
-              <p className="rounded-xl border border-dashed p-4 text-center text-xs text-muted-foreground">
+              <p className="rounded-2xl border border-dashed p-4 text-center text-xs text-muted-foreground">
                 No approved providers nearby. Waiting for someone to respond…
               </p>
             )}
@@ -346,46 +381,96 @@ export default function HolarcHelpHome() {
       ) : (
         <>
           {activeIncidentId && (
-            <div className="mb-4 flex items-start gap-3 rounded-2xl border border-red-300 bg-red-50 p-4">
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
-              <div className="flex-1 text-sm">
-                <p className="font-semibold text-red-700">Active emergency</p>
-                <p className="text-muted-foreground">Tap to view live tracking.</p>
+            <button
+              onClick={() => navigate(`/patient/holarchelp/incident/${activeIncidentId}`)}
+              className="mb-5 flex w-full items-center gap-3 rounded-2xl border-2 border-red-300 bg-red-50 p-4 text-left transition hover:bg-red-100/60"
+            >
+              <span className="relative flex h-3 w-3 shrink-0">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75"></span>
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
+              </span>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-red-700">Active emergency in progress</p>
+                <p className="text-xs text-red-700/70">Tap to view live tracking.</p>
               </div>
-              <Button size="sm" variant="outline" onClick={() => navigate(`/patient/holarchelp/incident/${activeIncidentId}`)}>View</Button>
-            </div>
+              <span className="text-xs font-semibold text-red-700">View →</span>
+            </button>
           )}
 
-          <div className="mt-4 text-center">
-            <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">Tap to send</p>
-            <h1 className="mt-1 text-3xl font-extrabold tracking-tight">SOS</h1>
+          <div className="mt-2 text-center">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Tap to send</p>
+            <h1 className="mt-1 text-4xl font-black tracking-tight">SOS</h1>
           </div>
 
-          <div className="mt-8 flex justify-center">
+          <div className="mt-6 flex justify-center">
+            <div className="relative">
+              <span
+                aria-hidden
+                className="absolute inset-0 -z-0 animate-ping rounded-full bg-red-500/30"
+                style={{ animationDuration: "2.5s" }}
+              />
+              <span
+                aria-hidden
+                className="absolute -inset-3 -z-0 rounded-full bg-red-500/15 blur-2xl"
+              />
+              <button
+                onClick={() => {
+                  if (role === "doctor" && !activeIncidentId) {
+                    setChooserOpen(true);
+                  } else {
+                    triggerSOS();
+                  }
+                }}
+                disabled={triggering}
+                className="relative z-10 flex h-64 w-64 flex-col items-center justify-center rounded-full font-black text-white transition active:scale-95"
+                style={{
+                  background: "radial-gradient(circle at 30% 25%, hsl(354,90%,62%) 0%, hsl(354,84%,52%) 45%, hsl(0,80%,38%) 100%)",
+                  boxShadow: "0 20px 60px -15px hsl(0 80% 40% / 0.6), inset 0 -10px 30px hsl(0 80% 25% / 0.4), inset 0 6px 12px hsl(0 100% 80% / 0.3)",
+                }}
+                aria-label="Send SOS"
+              >
+                {triggering ? (
+                  <>
+                    <Loader2 className="h-10 w-10 animate-spin" />
+                    <span className="mt-2 text-sm font-bold tracking-widest">SENDING…</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-5xl tracking-[0.15em]">SOS</span>
+                    <span className="mt-2 text-[10px] font-semibold uppercase tracking-[0.3em] opacity-80">Tap to send</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-10 grid gap-2.5">
             <button
-              onClick={() => {
-                if (role === "doctor" && !activeIncidentId) {
-                  setChooserOpen(true);
-                } else {
-                  triggerSOS();
-                }
-              }}
-              disabled={triggering}
-              className="relative flex h-60 w-60 items-center justify-center rounded-full text-3xl font-extrabold tracking-[0.2em] text-white transition active:scale-95 shadow-2xl"
-              style={{ background: "linear-gradient(135deg, hsl(354,84%,54%), hsl(0,75%,42%))" }}
-              aria-label="Send SOS"
+              onClick={() => navigate("/patient/holarchelp/nearby")}
+              className="group flex items-center gap-3 rounded-2xl border bg-card p-3.5 text-left shadow-sm transition hover:border-primary/40 hover:shadow-md"
             >
-              {triggering ? "SENDING…" : "SOS"}
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                <Crosshair className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-bold">Find nearby provider</p>
+                <p className="text-[11px] text-muted-foreground">Hospitals & ambulance services around you</p>
+              </div>
+              <span className="text-muted-foreground transition group-hover:translate-x-0.5">›</span>
             </button>
-          </div>
-
-          <div className="mt-10 grid gap-3">
-            <Button variant="outline" className="h-14 justify-start gap-3 rounded-2xl text-base" onClick={() => navigate("/patient/holarchelp/nearby")}>
-              <Crosshair className="h-5 w-5 text-primary" /> Find nearby provider
-            </Button>
-            <Button variant="outline" className="h-14 justify-start gap-3 rounded-2xl text-base" onClick={() => navigate("/patient/holarchelp/incidents")}>
-              <AlertCircle className="h-5 w-5 text-primary" /> Incident history
-            </Button>
+            <button
+              onClick={() => navigate("/patient/holarchelp/incidents")}
+              className="group flex items-center gap-3 rounded-2xl border bg-card p-3.5 text-left shadow-sm transition hover:border-primary/40 hover:shadow-md"
+            >
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                <AlertCircle className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-bold">Incident history</p>
+                <p className="text-[11px] text-muted-foreground">Review past emergencies and outcomes</p>
+              </div>
+              <span className="text-muted-foreground transition group-hover:translate-x-0.5">›</span>
+            </button>
           </div>
         </>
       )}

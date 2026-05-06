@@ -1,52 +1,78 @@
-# Fix: Emergency provider lands on doctor dashboard
+# SOS Revamp + Incident Photos
 
-## Root cause
+## 1. Visual revamp — `HolarcHelpHome.tsx` (idle state)
 
-`nonastasia@gmail.com` (user `7d6c9029…`) **owns an ambulance provider record** (`Charlotte Maxeke…`, status `pending`) but has **no row in `user_roles`** and `profiles.role` is `null`.
+Keep the existing brand colours (red `#E01837` SOS, teal primary, cream warning). Tighten the screen so the SOS button is unmistakably the hero element on mobile and looks more polished:
 
-So in `RoleBasedRedirect`:
-- `isPatient` = false
-- `isEmergency` = false (no `hospital_staff` / `ambulance_staff` / `blood_bank` role row exists)
-- → falls through to `/doctor-dashboard`
+- **Header band**: keep the existing top bar; no change.
+- **Emergency Contact warning card**: replace the plain amber card with a softer rounded `2xl` cream card (`bg-secondary/40` + `border-amber-300/60`), warning icon in a circular badge, slightly tighter copy, and the CTA button styled `bg-primary` (teal) with full width on mobile.
+- **"Tap to send / SOS" label**: smaller, more refined — uppercase tracked label in muted-foreground, then `SOS` in bold display weight.
+- **Hero SOS button**:
+  - Bigger circular button with a layered look: outer pulsing ring (animate-ping at low opacity, red), a soft red glow shadow, and the solid red gradient core.
+  - Inside: stacked "SOS" wordmark with a tiny "Hold or tap to send" hint.
+  - Active/triggering state: spinner + "Sending…".
+  - Subtle hover/active scale.
+- **Quick actions row** below the button: two equal pill cards (Find nearby provider / Incident history) using `Card` with icon-in-circle on the left, title + one-line description, chevron on the right. Touch target ≥ 56px.
+- **Active emergency banner** (when there's an existing incident): keep but restyle to match — red rounded card with pulsing dot, and a primary "View live status" button.
+- **"Help is on the way" full-screen state**: keep functionality, restyle the green button into a card with checkmark badge, status text, and a teal "View live tracking" button.
 
-The previous fix only worked for users who already had an emergency role row. The `register-emergency-provider` edge function never inserts that role row, so brand-new providers always look like "doctors" to the redirect.
+All restyling uses existing semantic tokens (`bg-card`, `border`, `text-muted-foreground`, `bg-primary`, etc.) — no new colours, no new fonts.
 
-`/provider` itself uses `ProviderGate`, which checks `holarchelp_hospitals.owner_id` / `holarchelp_ambulance_providers.owner_id` — that's the source of truth for "is this account an emergency provider".
+## 2. SOS-active provider list — same screen
 
-## Plan
+Tighten the list: each provider row becomes a `Card` with rounded-2xl, larger icon tile, name + meta on two lines, and a teal `Request` button. "Full capacity" badge becomes a small red pill chip rather than greyed-out text.
 
-### 1. Grant the staff role on provider signup
+## 3. Photo capture & upload on an incident
 
-`supabase/functions/register-emergency-provider/index.ts` — after the hospital/ambulance row is inserted, also insert into `user_roles`:
-- hospital → `hospital_staff`
-- ambulance → `ambulance_staff`
+### Database (migration)
 
-Use upsert / `on conflict do nothing` against `(user_id, role)` so re-runs are safe.
+New table `public.holarchelp_incident_photos`:
+- `id uuid PK`
+- `incident_id uuid not null references holarchelp_incidents(id) on delete cascade`
+- `uploaded_by uuid not null` (the user who uploaded)
+- `storage_path text not null`
+- `caption text`
+- `created_at timestamptz default now()`
+- Index on `incident_id`.
 
-### 2. Backfill the existing user
+RLS:
+- Patient who owns the incident: full insert/select/delete on their incident's photos.
+- Assigned provider staff (via `is_ambulance_staff` / `is_hospital_staff`) and admins: select only.
+- Triggering user (`triggered_by_user_id`, e.g. doctor who started SOS for a patient): select + insert.
 
-One-off migration: insert `('7d6c9029-…','ambulance_staff')` into `user_roles` (idempotent), so Claire is routed to `/provider` on her next sign-in.
+### Storage bucket
 
-### 3. Make `RoleBasedRedirect` robust to missing role rows
+New private bucket `holarchelp-incident-photos`. Policies on `storage.objects`:
+- Path convention: `{incident_id}/{uuid}.{ext}`
+- Insert allowed if user can insert into `holarchelp_incident_photos` for that incident (same access rules above).
+- Select allowed if user is patient owner / assigned provider staff / admin.
+- Files served via signed URL (1 hour) since bucket is private (medical context).
 
-`src/App.tsx` `RoleBasedRedirect` — in addition to checking `isEmergency`, also check provider ownership directly via the same query `ProviderGate` uses (or extract `useProviderAccess`). If `providerType` is set and user is not a doctor/patient → `<Navigate to="/provider" replace />`.
+### UI — `HolarcHelpIncidentDetail.tsx`
 
-This guarantees that even if a provider's role row is somehow missing, ownership of a hospital/ambulance record alone is enough to route them correctly.
+Add an **"Incident photos"** section between the voice note and the timeline:
+- Reusable `IncidentPhotoCapture` component.
+- Capture button that uses a hidden `<input type="file" accept="image/*" capture="environment" multiple>` so mobile browsers open the camera by default; desktop falls back to file picker.
+- Optional caption per upload.
+- Thumbnail grid (3 columns on mobile) with click-to-enlarge dialog.
+- 5MB-per-image cap (project-wide upload constraint), client-side validation with toast.
+- Compress / resize down to max 1600px on the long edge before upload (browser canvas) to keep things fast.
+- Upload via `supabase.storage.from('holarchelp-incident-photos').upload(...)`, then insert row into `holarchelp_incident_photos`. List re-fetched on success.
+- Provider portal `ProviderIncidentDetail.tsx` gets the same gallery in **read-only** mode (no upload control).
 
-### 4. Verify
+### Out of scope
 
-- Sign in as `nonastasia@gmail.com` → expect to land on `/provider` (will see "pending approval" gate content if status is still `pending`, which is correct).
-- Doctor accounts unaffected (no provider row, no emergency role).
-- Patient accounts unaffected.
+- AI analysis of photos.
+- Annotation / drawing on photos.
+- Sharing photos in the timeline events feed (they already appear in the dedicated section).
+- Changes to the SOS dispatch / severity / voice-note flows.
+- Provider-side photo upload (read-only for now).
 
-## Out of scope
+## Files touched
 
-- Admin approval UI for `status: 'pending'` providers (already lives at `/admin/holarchelp-providers`).
-- Any change to `ProviderGate` itself or the provider portal pages.
-- No schema changes (uses existing `user_roles` + `app_role` enum values).
-
-## Files to touch
-
-- `supabase/functions/register-emergency-provider/index.ts` (insert role)
-- `supabase/migrations/<new>.sql` (backfill Claire's role)
-- `src/App.tsx` (`RoleBasedRedirect` ownership check)
+- `src/modules/holarchelp/pages/HolarcHelpHome.tsx` — visual revamp
+- `src/modules/holarchelp/pages/HolarcHelpIncidentDetail.tsx` — embed photo gallery
+- `src/modules/holarchelp/pages/provider/ProviderIncidentDetail.tsx` — embed read-only gallery
+- `src/modules/holarchelp/components/IncidentPhotoCapture.tsx` — new
+- `src/modules/holarchelp/components/IncidentPhotoGallery.tsx` — new (shared, supports `readOnly`)
+- `supabase/migrations/<new>.sql` — table + RLS + bucket + storage policies

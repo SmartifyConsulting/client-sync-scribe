@@ -5,6 +5,7 @@ import { LiveMap } from "../../components/LiveMap";
 import { IncidentTimeline } from "../../components/IncidentTimeline";
 import { IncidentVoiceNoteRecorder } from "../../components/IncidentVoiceNoteRecorder";
 import { EtaCountdown } from "../../components/EtaCountdown";
+import { IncidentPhotos } from "../../components/IncidentPhotos";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -152,6 +153,7 @@ export default function ProviderIncidentDetail() {
       )}
 
       <IncidentVoiceNoteRecorder incidentId={id!} providerId={providerId} />
+      <IncidentPhotos incidentId={id!} readOnly />
       <IncidentTimeline incidentId={id!} />
     </div>
   );
