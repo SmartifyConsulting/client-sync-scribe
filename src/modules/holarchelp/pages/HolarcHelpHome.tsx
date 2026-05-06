@@ -49,11 +49,17 @@ export default function HolarcHelpHome() {
         const hasNok = !!(data?.next_of_kin_name && data?.next_of_kin_phone);
         setHasEmergency(hasEC || hasNok);
       });
-    supabase.from("holarchelp_incidents" as any).select("id, assigned_provider_id, accepted_at")
+    supabase.from("holarchelp_incidents" as any).select("id, assigned_provider_id, accepted_at, created_at")
       .eq("user_id", user.id).in("status", ["open", "assigned", "en_route", "arrived", "patient_collected", "at_hospital", "reopened"])
       .order("created_at", { ascending: false }).limit(1).maybeSingle()
       .then(({ data }: any) => {
         if (data?.id) {
+          // Stale rehydrated incident → send straight to live tracking, never trap user on confirmation screen
+          const ageMs = Date.now() - new Date(data.created_at).getTime();
+          if (ageMs > 30_000) {
+            navigate(`/patient/holarchelp/incident/${data.id}`, { replace: true });
+            return;
+          }
           setIncidentId(data.id);
           setActiveIncidentId(data.id);
           if (data.assigned_provider_id || data.accepted_at) {
@@ -62,7 +68,23 @@ export default function HolarcHelpHome() {
           }
         }
       });
-  }, [user]);
+  }, [user, navigate]);
+
+  // Safety timeouts so confirmation spinners can never hang
+  useEffect(() => {
+    if (!incidentId) return;
+    const t1 = setTimeout(() => setContactsNotified(true), 8000);
+    const t2 = setTimeout(() => setProviderAssigned((v) => v || false) /* noop */, 0);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [incidentId]);
+
+  const [searchTimedOut, setSearchTimedOut] = useState(false);
+  useEffect(() => {
+    if (!incidentId || providerAssigned) return;
+    setSearchTimedOut(false);
+    const t = setTimeout(() => setSearchTimedOut(true), 30000);
+    return () => clearTimeout(t);
+  }, [incidentId, providerAssigned]);
 
   // Realtime subscription for the active incident
   useEffect(() => {
