@@ -1,14 +1,11 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Building2, ArrowLeft } from "lucide-react";
+import { Loader2, Building2, ArrowLeft, MapPin } from "lucide-react";
 import hospitalIcon from "@/assets/marker-hospital.png";
 import ambulanceIcon from "@/assets/marker-ambulance.png";
 import { toast } from "sonner";
@@ -16,8 +13,27 @@ import { toast } from "sonner";
 type ProviderType = "hospital" | "ambulance";
 type Ownership = "public" | "private";
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+
+async function callFn(name: string, body: unknown) {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/${name}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: SUPABASE_ANON,
+      Authorization: `Bearer ${SUPABASE_ANON}`,
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.error ?? `HTTP ${res.status}`);
+  return data;
+}
+
+interface Suggestion { description: string; place_id: string }
+
 export default function ProviderSignup() {
-  const { signUp } = useAuth();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [type, setType] = useState<ProviderType>("ambulance");
@@ -25,9 +41,17 @@ export default function ProviderSignup() {
 
   const [companyName, setCompanyName] = useState("");
   const [registration, setRegistration] = useState("");
-  const [address, setAddress] = useState("");
+
+  const [addressInput, setAddressInput] = useState("");
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("South Africa");
+  const [coords, setCoords] = useState<{ lat: number | null; lng: number | null }>({ lat: null, lng: null });
+
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [showSug, setShowSug] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -35,39 +59,64 @@ export default function ProviderSignup() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
 
+  useEffect(() => {
+    const click = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setShowSug(false);
+    };
+    document.addEventListener("mousedown", click);
+    return () => document.removeEventListener("mousedown", click);
+  }, []);
+
+  const onAddressChange = (v: string) => {
+    setAddressInput(v);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (v.trim().length < 3) { setSuggestions([]); return; }
+    debounceRef.current = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const data = await callFn("places-autocomplete-public", { input: v });
+        setSuggestions(data.predictions ?? []);
+        setShowSug(true);
+      } catch (e) {
+        console.error(e);
+      } finally { setSearching(false); }
+    }, 350);
+  };
+
+  const pickSuggestion = async (s: Suggestion) => {
+    setShowSug(false);
+    setAddressInput(s.description);
+    try {
+      const d = await callFn("place-details-public", { place_id: s.place_id });
+      if (d.formatted_address) setAddressInput(d.formatted_address);
+      if (d.city) setCity(d.city);
+      if (d.country) setCountry(d.country);
+      if (typeof d.lat === "number" && typeof d.lng === "number") setCoords({ lat: d.lat, lng: d.lng });
+      if (d.name && !companyName) setCompanyName(d.name);
+      if (d.phone && !phone) setPhone(d.phone);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!companyName || !email || !password || !firstName || !lastName) {
-      toast.error("Company name, contact name, email and password are required");
+    if (!companyName || !email || !password || !firstName || !lastName || !addressInput) {
+      toast.error("Please fill in all required fields including address");
       return;
     }
     setSubmitting(true);
     try {
-      const { data, error } = await signUp(email, password);
-      if (error) throw error;
-      const userId = data?.user?.id;
-      if (!userId) throw new Error("Sign-up did not return a user");
-
-      const fullName = `${firstName} ${lastName}`.trim();
-      await supabase.from("profiles").update({ full_name: fullName, mobile_number: phone || null } as any).eq("id", userId);
-
-      if (type === "hospital") {
-        const { error: e2 } = await supabase.from("holarchelp_hospitals" as any).insert({
-          owner_id: userId, name: companyName, registration_number: registration || null,
-          contact_email: email, contact_phone: phone || null,
-          address: address || null, city: city || null, country, ownership, status: "pending",
-        } as any);
-        if (e2) throw e2;
-      } else {
-        const { error: e2 } = await supabase.from("holarchelp_ambulance_providers" as any).insert({
-          owner_id: userId, company_name: companyName, registration_number: registration || null,
-          contact_email: email, contact_phone: phone || null,
-          base_address: address || null, city: city || null, country, ownership, status: "pending",
-        } as any);
-        if (e2) throw e2;
-      }
-
-      toast.success("Application submitted! Awaiting admin approval.");
+      await callFn("register-emergency-provider", {
+        type, ownership,
+        company_name: companyName,
+        registration_number: registration,
+        address: addressInput, city, country,
+        latitude: coords.lat, longitude: coords.lng,
+        first_name: firstName, last_name: lastName,
+        email, phone, password,
+      });
+      toast.success("Application submitted! Please verify your email, then sign in.");
       navigate("/auth");
     } catch (err: any) {
       toast.error(err?.message ?? "Sign-up failed");
@@ -115,9 +164,31 @@ export default function ProviderSignup() {
                 <Input value={registration} onChange={(e) => setRegistration(e.target.value)} placeholder="e.g. 2019/123456/07" />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1.5" ref={wrapRef}>
                 <Label>Address</Label>
-                <Textarea value={address} onChange={(e) => setAddress(e.target.value)} rows={2} placeholder="Street address" />
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    value={addressInput}
+                    onChange={(e) => onAddressChange(e.target.value)}
+                    placeholder="Search hospital or company address"
+                    className="pl-10"
+                    required
+                  />
+                  {searching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
+                  {showSug && suggestions.length > 0 && (
+                    <div className="absolute z-20 top-full left-0 right-0 bg-card border border-border rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
+                      {suggestions.map((s) => (
+                        <button key={s.place_id} type="button"
+                          className="w-full text-left px-3 py-2 text-xs hover:bg-muted/50 text-foreground border-b border-border/30 last:border-0"
+                          onClick={() => pickSuggestion(s)}>
+                          {s.description}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <p className="text-[10px] text-muted-foreground">Pick from suggestions to auto-fill city, country and coordinates.</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
