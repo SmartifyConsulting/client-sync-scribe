@@ -142,6 +142,7 @@ const App = () => (
           <Route path="/patient-consent" element={<PatientConsent />} />
           <Route path="/business-associate-agreement" element={<BusinessAssociateAgreement />} />
           <Route path="/legal" element={<Legal />} />
+          <Route path="/vula/wallet" element={<VulaWallet />} />
           <Route path="/track/:token" element={<PublicTrack />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
