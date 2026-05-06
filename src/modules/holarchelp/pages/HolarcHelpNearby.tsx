@@ -97,12 +97,8 @@ export default function HolarcHelpNearby() {
     return () => { cancelled = true; };
   }, [coords?.lat, coords?.lng]);
 
-  const filteredProviders = hasMedicalAid === false
-    ? providers.filter((p) => (p.ownership ?? 'private') === 'public')
-    : providers;
-
   const sorted = coords
-    ? [...filteredProviders]
+    ? [...providers]
         .map((p) => ({ ...p, _d: distanceKm(coords, { lat: p.latitude, lng: p.longitude }) }))
         .sort((a, b) => a._d - b._d).slice(0, 30)
     : [];
