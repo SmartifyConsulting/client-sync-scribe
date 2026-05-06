@@ -49,7 +49,7 @@ import DoctorRewards from "./pages/doctor/DoctorRewards";
 import MyPractice from "./pages/MyPractice";
 import PricingAdmin from "./pages/admin/PricingAdmin";
 import GamificationAdmin from "./pages/admin/GamificationAdmin";
-import UserManagement from "./pages/admin/UserManagement";
+
 import ReferralDoctors from "./pages/ReferralDoctors";
 import ExpiringRecordings from "./pages/ExpiringRecordings";
 import Admin from "./pages/Admin";
