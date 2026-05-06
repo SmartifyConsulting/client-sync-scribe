@@ -424,7 +424,7 @@ export default function MyRewards() {
                 <p className="text-[10px] md:text-sm font-medium text-sky-100">Active Streaks</p>
                 <p className="text-2xl md:text-4xl font-bold text-white">{activeStreaks.length}</p>
               </div>
-              <Flame className="h-8 w-8 md:h-12 md:w-12 text-white/90" />
+              <Flame className="h-8 w-8 text-white/90 shrink-0" />
             </div>
           </CardContent>
         </Card>
