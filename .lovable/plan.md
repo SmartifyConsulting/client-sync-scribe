@@ -1,38 +1,35 @@
 ## Goal
 
-Eliminate the duplication between `/admin/users` and `/admin/holarchelp-providers` by merging them into a single **User Management** screen at `/admin/users`, where the existing HolarcHelp Providers UI gains a new **Users** tab.
+Tighten the User Management screen so it matches the rest of the app and stops duplicating providers between the **Users** and **Providers** tabs.
 
-## Changes
+## Changes (all in `src/features/admin/components/UsersTab.tsx`)
 
-### 1. `src/pages/admin/HolarcHelpProviders.tsx` → becomes the unified User Management screen
-- Rename page heading to **"User Management"**.
-- Tabs become: **Users** | **Hospitals** | **Ambulance Providers** (Users is the default tab).
-- The **Users** tab renders the full content currently in `src/features/admin/pages/UserManagement.tsx` (search, filters, inline editing, role toggles, etc.) — extracted into a `<UsersTab />` component so this file stays manageable.
-- The Hospitals and Ambulance tabs keep their current behavior unchanged.
+### 1. Filter out emergency/provider accounts from the Users tab
+- After `fetchUsers()`, exclude rows where `role` is `hospital_staff`, `ambulance_staff`, or `blood_bank`. Those belong on the **Providers** tab.
+- Patients, doctors, admins, and `none` continue to show.
 
-### 2. Routing (`src/App.tsx`)
-- `/admin/users` → renders the merged screen (the page formerly known as `HolarcHelpProviders`).
-- Remove the separate `/admin/holarchelp-providers` route, OR keep it as a redirect to `/admin/users` so existing back-links from `HolarcHelpAccountability` and `HolarcHelpProviderIncidents` still work. Plan: **redirect** to avoid breaking those back buttons.
-- Drop the `HolarcHelpProviders` import in favor of importing the renamed component.
+### 2. Category column — icon-only for emergency roles
+- Replace the stacked "Emergency Service / Hospital" badge with a single small badge that shows just the icon:
+  - `hospital_staff` → `Hospital` icon
+  - `ambulance_staff` → `Ambulance` icon
+  - `blood_bank` → `Droplet` icon
+- Tooltip (`title` attr) gives the readable name. (These rows will normally be filtered out per #1, but kept for safety so any leftover doesn't break.)
+- Keep Patient / Healthcare Provider / Admin badges as text — they're the real categories users still see.
 
-### 3. Sidebar (`src/components/layout/Sidebar.tsx`)
-- The existing single "Users" entry pointing to `/admin/users` is kept. No new entry needed (the providers page no longer has its own sidebar link — confirmed: it isn't in the sidebar today, only reached via Admin hub / accountability links).
+### 3. Consistent typography
+- Standardise every cell to `text-sm` (matches the rest of the admin tables).
+- Drop the one-off `text-[11px]` muted line under emergency badges.
+- Header row stays `TableHead` default.
+- Edit-mode inputs stay `h-8` but use `text-sm` (no shrinking).
 
-### 4. Cleanup
-- Delete `src/features/admin/pages/UserManagement.tsx` after extracting its content into `src/features/admin/components/UsersTab.tsx` (used by the merged page).
-- Delete the shim `src/pages/admin/UserManagement.tsx` (no longer needed once `/admin/users` points to the merged page).
-- Update internal back-links in `HolarcHelpAccountability.tsx` and `HolarcHelpProviderIncidents.tsx` from `/admin/holarchelp-providers` → `/admin/users`.
-- Update `src/modules/holarchelp/README.md` references.
+### 4. Misc consistency
+- Remove the now-unused `emergencyKindLabel` helper.
+- Heading/spacing on the page wrapper unchanged — already matches other admin pages.
 
 ## Out of scope
-- No changes to user role logic, RLS, edge functions, or provider data model.
-- No visual redesign beyond renaming the heading and reordering tabs.
+- No DB or RLS changes.
+- No changes to the Providers / Accountability / Voice Clip tabs.
+- No change to the role-edit dropdown options (admin can still re-assign anyone to an emergency role from inside an existing patient/doctor row if needed).
 
 ## Files touched
-- `src/pages/admin/HolarcHelpProviders.tsx` (rename heading, add Users tab) — or rename file to `UserManagementPage.tsx`; will keep filename for minimal churn and just update import.
-- `src/features/admin/components/UsersTab.tsx` (new, extracted from current UserManagement)
-- `src/features/admin/pages/UserManagement.tsx` (deleted)
-- `src/pages/admin/UserManagement.tsx` (deleted)
-- `src/App.tsx` (route swap + redirect)
-- `src/pages/admin/HolarcHelpAccountability.tsx`, `src/pages/admin/HolarcHelpProviderIncidents.tsx` (back-link path update)
-- `src/modules/holarchelp/README.md` (doc update)
+- `src/features/admin/components/UsersTab.tsx`

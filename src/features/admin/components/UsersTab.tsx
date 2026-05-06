@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Loader2, Pencil, Save, X, Shield } from "lucide-react";
+import { Loader2, Pencil, Save, X, Shield, Hospital, Ambulance, Droplet } from "lucide-react";
 import { InviteUserDialog } from "@/components/InviteUserDialog";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,11 +30,11 @@ const roleToCategory = (role: string): Category => {
   return "none";
 };
 
-const emergencyKindLabel = (k: string) => {
-  if (k === "hospital_staff") return "Hospital";
-  if (k === "ambulance_staff") return "Ambulance";
-  if (k === "blood_bank") return "Blood Bank";
-  return "";
+const emergencyIcon = (k: string) => {
+  if (k === "hospital_staff") return { Icon: Hospital, label: "Hospital" };
+  if (k === "ambulance_staff") return { Icon: Ambulance, label: "Ambulance" };
+  if (k === "blood_bank") return { Icon: Droplet, label: "Blood Bank" };
+  return null;
 };
 
 interface UserRecord {
@@ -107,11 +107,13 @@ export default function UsersTab() {
       (ambRes.data || []).forEach((a: any) => companyMap.set(a.owner_id, a.company_name));
       (bloodRes.data || []).forEach((b: any) => companyMap.set(b.owner_id, b.name));
 
-      setUsers(baseUsers.map(u => ({
+      const merged = baseUsers.map(u => ({
         ...u,
         holarchelp_enabled: helpMap.get(u.user_id) || false,
         company: companyMap.get(u.user_id) || (u.role === "doctor" ? docCompanyMap.get(u.user_id) || null : null),
-      })));
+      }));
+      // Emergency provider accounts live on the Providers tab
+      setUsers(merged.filter(u => !EMERGENCY_ROLES.includes(u.role as RoleEnum)));
     } else {
       setUsers(baseUsers);
     }
@@ -209,24 +211,27 @@ export default function UsersTab() {
   const categoryBadge = (role: string) => {
     const cat = roleToCategory(role);
     switch (cat) {
-      case "admin": return <Badge variant="destructive">Admin</Badge>;
-      case "provider": return <Badge className="bg-blue-600 text-white hover:bg-blue-700">Healthcare Provider</Badge>;
-      case "patient": return <Badge className="bg-teal-600 text-white hover:bg-teal-700">Patient</Badge>;
-      case "emergency":
+      case "admin": return <Badge variant="destructive" className="text-sm">Admin</Badge>;
+      case "provider": return <Badge className="bg-blue-600 text-white hover:bg-blue-700 text-sm">Healthcare Provider</Badge>;
+      case "patient": return <Badge className="bg-teal-600 text-white hover:bg-teal-700 text-sm">Patient</Badge>;
+      case "emergency": {
+        const ei = emergencyIcon(role);
+        if (!ei) return <Badge variant="outline" className="text-sm">None</Badge>;
+        const { Icon, label } = ei;
         return (
-          <div className="flex flex-col gap-0.5">
-            <Badge className="bg-primary text-primary-foreground hover:bg-primary/90 w-fit">Emergency Service</Badge>
-            <span className="text-[11px] text-muted-foreground">{emergencyKindLabel(role)}</span>
-          </div>
+          <Badge className="bg-primary text-primary-foreground hover:bg-primary/90 w-fit p-1.5" title={label} aria-label={label}>
+            <Icon className="h-4 w-4" />
+          </Badge>
         );
-      default: return <Badge variant="outline">None</Badge>;
+      }
+      default: return <Badge variant="outline" className="text-sm">None</Badge>;
     }
   };
 
   const statusBadge = (status: string) =>
     status === "pending"
-      ? <Badge variant="outline" className="border-amber-500 text-amber-600">Pending</Badge>
-      : <Badge variant="outline" className="border-green-500 text-green-600">Active</Badge>;
+      ? <Badge variant="outline" className="border-amber-500 text-amber-600 text-sm">Pending</Badge>
+      : <Badge variant="outline" className="border-green-500 text-green-600 text-sm">Active</Badge>;
 
   if (loading) {
     return (
