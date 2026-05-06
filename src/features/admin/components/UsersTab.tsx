@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { Loader2, Pencil, Save, X, Shield, Hospital, Ambulance, Droplet } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Loader2, Pencil, Save, X, Shield, Hospital, Ambulance, Droplet, Users, Stethoscope } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InviteUserDialog } from "@/components/InviteUserDialog";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
