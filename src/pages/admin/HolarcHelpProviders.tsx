@@ -22,8 +22,9 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Hospital, Ambulance, ShieldAlert, Loader2, Upload, BarChart3, Mic2, Building2, Plus, Pencil, Trash2 } from "lucide-react";
+import { Hospital, Ambulance, ShieldAlert, Loader2, Upload, BarChart3, Mic2, Building2, Plus, Pencil, Trash2, Users } from "lucide-react";
 import { AccountabilityPanel } from "./HolarcHelpAccountability";
+import UsersTab from "@/features/admin/components/UsersTab";
 
 type Status = "all" | "active" | "inactive";
 type Kind = "hospital" | "ambulance";
@@ -262,12 +263,15 @@ export default function HolarcHelpProviders() {
     <div className="container mx-auto p-4 sm:p-6 space-y-5">
       <div>
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Admin</p>
-        <h1 className="text-2xl font-extrabold">HolarcHelp Admin</h1>
-        <p className="text-sm text-muted-foreground">Manage providers, accountability, and the SOS voice clip.</p>
+        <h1 className="text-2xl font-extrabold">User Management</h1>
+        <p className="text-sm text-muted-foreground">Manage users, HolarcHelp providers, accountability, and the SOS voice clip.</p>
       </div>
 
-      <Tabs defaultValue="providers">
+      <Tabs defaultValue="users">
         <TabsList className="bg-primary w-full sm:w-auto">
+          <TabsTrigger value="users" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white gap-1.5">
+            <Users className="h-4 w-4" />Users
+          </TabsTrigger>
           <TabsTrigger value="providers" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white gap-1.5">
             <Building2 className="h-4 w-4" />Providers
           </TabsTrigger>
@@ -278,6 +282,11 @@ export default function HolarcHelpProviders() {
             <Mic2 className="h-4 w-4" />SOS Voice Clip
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="users" className="mt-4">
+          <UsersTab />
+        </TabsContent>
+
 
         <TabsContent value="providers" className="mt-4 space-y-4">
           <div className="flex flex-wrap items-center gap-2">

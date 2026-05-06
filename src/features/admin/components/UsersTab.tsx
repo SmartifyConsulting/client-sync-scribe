@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Loader2, ShieldAlert, Users, Pencil, Save, X, Shield } from "lucide-react";
+import { Loader2, Pencil, Save, X, Shield } from "lucide-react";
 import { InviteUserDialog } from "@/components/InviteUserDialog";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
@@ -56,8 +56,8 @@ interface EditState {
   emergency_kind: EmergencyKind;
 }
 
-export default function UserManagement() {
-  const { isAdmin, loading: roleLoading } = useUserRole();
+export default function UsersTab() {
+  const { isAdmin } = useUserRole();
   const { toast } = useToast();
   const [users, setUsers] = useState<UserRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -150,9 +150,7 @@ export default function UserManagement() {
     });
   };
 
-  const cancelEditing = () => {
-    setEditingId(null);
-  };
+  const cancelEditing = () => setEditingId(null);
 
   const resolveTargetRole = (s: EditState): RoleEnum => {
     switch (s.category) {
@@ -208,24 +206,6 @@ export default function UserManagement() {
     }
   };
 
-  if (roleLoading || loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-        <ShieldAlert className="h-16 w-16 text-destructive" />
-        <h1 className="text-2xl font-bold text-foreground">Access Denied</h1>
-        <p className="text-muted-foreground">You don't have permission to access this page.</p>
-      </div>
-    );
-  }
-
   const categoryBadge = (role: string) => {
     const cat = roleToCategory(role);
     switch (cat) {
@@ -243,25 +223,23 @@ export default function UserManagement() {
     }
   };
 
-  const statusBadge = (status: string) => {
-    return status === "pending"
+  const statusBadge = (status: string) =>
+    status === "pending"
       ? <Badge variant="outline" className="border-amber-500 text-amber-600">Pending</Badge>
       : <Badge variant="outline" className="border-green-500 text-green-600">Active</Badge>;
-  };
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-6xl">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
-            <Users className="h-7 w-7 text-primary" />
-            User Management
-          </h1>
-          <p className="mt-1 text-muted-foreground text-[12px]">View and edit registered users and their roles</p>
-        </div>
-        <div className="flex gap-2">
-          <InviteUserDialog />
-        </div>
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <InviteUserDialog />
       </div>
 
       <div className="rounded-lg border border-primary bg-card overflow-x-auto">

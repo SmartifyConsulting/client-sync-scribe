@@ -142,7 +142,7 @@ export default function HolarcHelpAccountability() {
           <h1 className="text-2xl font-extrabold">Accountability</h1>
           <p className="text-sm text-muted-foreground">Provider performance based on objective signals.</p>
         </div>
-        <Link to="/admin/holarchelp-providers">
+        <Link to="/admin/users">
           <Button size="sm" variant="ghost" className="text-primary"><ArrowLeft className="mr-1 h-4 w-4" /> Admin</Button>
         </Link>
       </div>
