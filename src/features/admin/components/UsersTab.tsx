@@ -107,11 +107,13 @@ export default function UsersTab() {
       (ambRes.data || []).forEach((a: any) => companyMap.set(a.owner_id, a.company_name));
       (bloodRes.data || []).forEach((b: any) => companyMap.set(b.owner_id, b.name));
 
-      setUsers(baseUsers.map(u => ({
+      const merged = baseUsers.map(u => ({
         ...u,
         holarchelp_enabled: helpMap.get(u.user_id) || false,
         company: companyMap.get(u.user_id) || (u.role === "doctor" ? docCompanyMap.get(u.user_id) || null : null),
-      })));
+      }));
+      // Emergency provider accounts live on the Providers tab
+      setUsers(merged.filter(u => !EMERGENCY_ROLES.includes(u.role as RoleEnum)));
     } else {
       setUsers(baseUsers);
     }
