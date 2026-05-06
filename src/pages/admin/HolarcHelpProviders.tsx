@@ -70,8 +70,9 @@ function sortedCountries(grouped: Record<string, any>) {
 }
 
 const isActive = (s: string) => s === "approved";
-const tableFor = (k: Kind) => k === "hospital" ? "holarchelp_hospitals" : "holarchelp_ambulance_providers";
-const nameField = (k: Kind) => k === "hospital" ? "name" : "company_name";
+const tableFor = (k: Kind) => k === "hospital" ? "holarchelp_hospitals" : k === "ambulance" ? "holarchelp_ambulance_providers" : "holarchelp_pharmacies";
+const nameField = (k: Kind) => k === "ambulance" ? "company_name" : "name";
+const nounFor = (k: Kind) => k === "hospital" ? "hospitals" : k === "ambulance" ? "ambulances" : "pharmacies";
 
 type EditState = { kind: Kind; row: any | null } | null;
 
