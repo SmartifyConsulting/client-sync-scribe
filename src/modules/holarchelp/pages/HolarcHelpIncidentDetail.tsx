@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { useLocationTracking } from "../hooks/useLocationTracking";
 import { useAuth } from "@/hooks/useAuth";
 import { buildSosMessage, waLink } from "../lib/whatsapp";
+import { getPublicTrackUrl } from "../lib/public-track-url";
 
 type Loc = { latitude: number; longitude: number; recorded_at: string };
 
@@ -112,7 +113,7 @@ export default function HolarcHelpIncidentDetail() {
     toast.success("Tracking link copied — share it with your contacts");
   };
 
-  const trackingUrl = incident ? `${window.location.origin}/track/${incident.tracking_token}` : "";
+  const trackingUrl = incident ? getPublicTrackUrl(incident.tracking_token) : "";
   const message = buildSosMessage(profileName, trackingUrl);
 
   const copy = async () => { await navigator.clipboard.writeText(trackingUrl); toast.success("Tracking link copied"); };
