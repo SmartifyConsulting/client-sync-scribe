@@ -112,7 +112,7 @@ export default function HolarcHelpIncidentDetail() {
     toast.success("Tracking link copied — share it with your contacts");
   };
 
-  const trackingUrl = incident ? `${window.location.origin}/track/${incident.tracking_token}` : "";
+  const trackingUrl = incident ? getPublicTrackUrl(incident.tracking_token) : "";
   const message = buildSosMessage(profileName, trackingUrl);
 
   const copy = async () => { await navigator.clipboard.writeText(trackingUrl); toast.success("Tracking link copied"); };

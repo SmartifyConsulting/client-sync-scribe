@@ -69,13 +69,40 @@ export default function PublicTrack() {
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
           Started {new Date(incident.created_at).toLocaleString()}
-          {latest && <> · Last update <strong>{formatAgo(latest.recorded_at)}</strong></>}
+          {latest && <> · Last update <strong>{formatAgo(latest.recorded_at)}</strong> · refreshing every 7s</>}
         </p>
-        <div className="mt-4"><LiveMap points={locations} height={460} /></div>
         {latest && (
-          <p className="mt-3 text-center text-xs text-muted-foreground">
+          <p className="mt-3 text-sm font-medium">
             Last position: {latest.latitude.toFixed(5)}, {latest.longitude.toFixed(5)}
           </p>
+        )}
+        <div className="mt-3"><LiveMap points={locations} height={460} /></div>
+        {latest && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            <a
+              className="rounded-full border px-3 py-1.5 text-xs font-semibold hover:bg-muted"
+              href={`https://maps.google.com/?q=${latest.latitude},${latest.longitude}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open in Google Maps
+            </a>
+            <a
+              className="rounded-full border px-3 py-1.5 text-xs font-semibold hover:bg-muted"
+              href={`https://maps.apple.com/?ll=${latest.latitude},${latest.longitude}&q=Live%20location`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open in Apple Maps
+            </a>
+            <button
+              type="button"
+              className="rounded-full border px-3 py-1.5 text-xs font-semibold hover:bg-muted"
+              onClick={() => navigator.clipboard?.writeText(`${latest.latitude}, ${latest.longitude}`)}
+            >
+              Copy coordinates
+            </button>
+          </div>
         )}
       </div>
     </div>
