@@ -338,7 +338,7 @@ export default function HolarcHelpHome() {
 
       {/* Header */}
       <div className="flex justify-center pt-6">
-        <img src={logo} alt="Holarc Help" className="h-12 w-auto" />
+        <img src={logo} alt="Holarc Help" className="h-24 w-auto" />
       </div>
 
       {/* Title */}
