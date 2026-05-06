@@ -1,16 +1,37 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, ArrowLeft, ShieldCheck } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ArrowRight, ArrowLeft, ShieldCheck, Download, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 import vulaSymbol from "@/assets/vula-symbol.png";
 
 const PARTNER_URL = "https://secure.6dot50.com/lite/default";
+const OVERLAY_ZIP = "/vula-vault-overlay.zip";
 
 export default function VulaWallet() {
   const navigate = useNavigate();
 
   const open = () => {
     window.open(PARTNER_URL, "_blank", "noopener,noreferrer");
+  };
+
+  const downloadOverlay = async () => {
+    try {
+      const res = await fetch(OVERLAY_ZIP);
+      if (!res.ok) throw new Error(`Download failed: ${res.status}`);
+      const blob = await res.blob();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "vula-vault-overlay.zip";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+      toast.success("Overlay downloaded — see install steps below.");
+    } catch (err: any) {
+      toast.error(err?.message || "Download failed");
+    }
   };
 
   return (
@@ -39,6 +60,43 @@ export default function VulaWallet() {
               You'll be taken to our secure partner's login page in a new tab. Your
               credentials are never stored by Holarc Health.
             </span>
+          </div>
+
+          <div className="border-t pt-5 space-y-3 text-left">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <h2 className="text-sm font-semibold">Demo Branding Overlay</h2>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              For live demos, install the Vula Vault branding overlay. It visually
+              rebrands the partner login page in your browser without changing any
+              functionality.
+            </p>
+            <Button
+              onClick={downloadOverlay}
+              variant="outline"
+              size="sm"
+              className="w-full gap-2"
+            >
+              <Download className="h-4 w-4" /> Download Demo Branding Overlay
+            </Button>
+
+            <Accordion type="single" collapsible>
+              <AccordionItem value="install" className="border-primary/20">
+                <AccordionTrigger className="text-xs py-2">
+                  How to install (Chrome / Edge / Brave)
+                </AccordionTrigger>
+                <AccordionContent>
+                  <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal pl-4">
+                    <li>Unzip the downloaded <code>vula-vault-overlay.zip</code>.</li>
+                    <li>Open <code>chrome://extensions</code> in your browser.</li>
+                    <li>Enable <strong>Developer mode</strong> (top-right toggle).</li>
+                    <li>Click <strong>Load unpacked</strong> and select the unzipped folder.</li>
+                    <li>Visit the partner login — branding appears automatically.</li>
+                  </ol>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
 
           <Button

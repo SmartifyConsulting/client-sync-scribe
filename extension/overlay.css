@@ -1,0 +1,80 @@
+/* Vula Vault branding overlay */
+.vv-overlay {
+  position: fixed;
+  z-index: 2147483647;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .25s ease, transform .25s ease, box-shadow .2s ease, filter .2s ease;
+  pointer-events: none;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
+}
+.vv-overlay.vv-show { opacity: 1; transform: translateY(0); }
+
+.vv-top {
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: rgba(255,255,255,0.92);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  padding: 10px 22px;
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(8, 47, 73, 0.12), 0 1px 0 rgba(255,255,255,0.7) inset;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+}
+.vv-top.vv-show { transform: translateX(-50%) translateY(0); }
+.vv-top img { height: 34px; width: auto; display: block; }
+.vv-top .vv-word {
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  color: #0b3b5e;
+  background: linear-gradient(135deg, #1e6fb8 0%, #14b8a6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.vv-bl {
+  bottom: 14px;
+  left: 14px;
+  background: rgba(255,255,255,0.85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  padding: 6px 12px;
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(8,47,73,0.12);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+.vv-bl img { height: 22px; width: auto; }
+.vv-bl span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0b3b5e;
+  letter-spacing: .02em;
+}
+
+.vv-next {
+  position: absolute; /* positioned via JS */
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1e6fb8 0%, #2596d1 55%, #14b8a6 100%);
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: .08em;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(30,111,184,.35), inset 0 1px 0 rgba(255,255,255,.25);
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.vv-next:hover { filter: brightness(1.05); box-shadow: 0 10px 28px rgba(30,111,184,.45); }
+.vv-next:active { transform: translateY(1px); }

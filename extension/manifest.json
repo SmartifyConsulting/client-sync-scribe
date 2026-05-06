@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Vula Vault Branding Overlay",
+  "version": "1.0.0",
+  "description": "Demo overlay that rebrands the 6Dot50 lite login as Vula Vault. Does not modify form data or submission.",
+  "icons": { "48": "icon.png", "128": "icon.png" },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://secure.6dot50.com/lite/*",
+        "https://*.6dot50.com/lite/*"
+      ],
+      "js": ["overlay.js"],
+      "css": ["overlay.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["vula-logo.png", "vula-symbol.png"],
+      "matches": ["https://*.6dot50.com/*"]
+    }
+  ]
+}
