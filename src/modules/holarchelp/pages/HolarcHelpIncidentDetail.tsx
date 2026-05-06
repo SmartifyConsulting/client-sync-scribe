@@ -7,7 +7,7 @@ import { IncidentTimeline } from "../components/IncidentTimeline";
 import { IncidentVoiceNoteRecorder } from "../components/IncidentVoiceNoteRecorder";
 import { EtaCountdown } from "../components/EtaCountdown";
 import { Button } from "@/components/ui/button";
-import { Copy, CheckCircle2, MessageCircle, Loader2, AlertTriangle } from "lucide-react";
+import { Copy, CheckCircle2, MessageCircle, Loader2, AlertTriangle, ArrowLeft, Phone, Bell, History, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLocationTracking } from "../hooks/useLocationTracking";
 import { useAuth } from "@/hooks/useAuth";
@@ -82,6 +82,36 @@ export default function HolarcHelpIncidentDetail() {
   const isLive = !!incident && liveStatuses.includes(incident.status);
   useLocationTracking(id ?? null, isLive);
 
+  // Periodic re-dispatch while open and unassigned (idempotent)
+  const isUnassignedOpen = isLive && !incident?.assigned_provider_id;
+  useEffect(() => {
+    if (!id || !isUnassignedOpen) return;
+    const tick = () => supabase.functions.invoke("dispatch-sos", { body: { incident_id: id } }).catch(() => {});
+    const t = setInterval(tick, 30000);
+    return () => clearInterval(t);
+  }, [id, isUnassignedOpen]);
+
+  // Elapsed seconds since incident created (for "no responders yet" fallback after 90 s)
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    if (!incident?.created_at) return;
+    const update = () => setElapsed(Math.floor((Date.now() - new Date(incident.created_at).getTime()) / 1000));
+    update();
+    const t = setInterval(update, 5000);
+    return () => clearInterval(t);
+  }, [incident?.created_at]);
+  const showNoResponders = isUnassignedOpen && pendingOffers === 0 && elapsed > 90;
+
+  const callEmergency = () => { window.location.href = "tel:10177"; };
+  const goHome = () => navigate("/patient/holarchelp");
+  const shareLink = async () => {
+    if (navigator.share) {
+      try { await navigator.share({ title: "Live emergency tracking", url: trackingUrl }); return; } catch { /* user cancelled */ }
+    }
+    await navigator.clipboard.writeText(trackingUrl);
+    toast.success("Tracking link copied — share it with your contacts");
+  };
+
   const trackingUrl = incident ? `${window.location.origin}/track/${incident.tracking_token}` : "";
   const message = buildSosMessage(profileName, trackingUrl);
 
@@ -103,7 +133,25 @@ export default function HolarcHelpIncidentDetail() {
     : [];
 
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md pb-6">
+      {/* Sticky quick-action bar */}
+      <div className="sticky top-0 z-30 -mx-4 mb-3 border-b bg-background/95 px-4 py-2 backdrop-blur md:mx-0 md:rounded-b-xl">
+        <div className="flex items-center gap-1.5 overflow-x-auto">
+          <Button size="sm" variant="ghost" className="shrink-0 gap-1" onClick={goHome}>
+            <ArrowLeft className="h-4 w-4" /> SOS Home
+          </Button>
+          <Button size="sm" variant="destructive" className="shrink-0 gap-1" onClick={callEmergency}>
+            <Phone className="h-4 w-4" /> Call 10177
+          </Button>
+          <Button size="sm" variant="outline" className="shrink-0 gap-1" onClick={shareLink}>
+            <Share2 className="h-4 w-4" /> Share
+          </Button>
+          <Button size="sm" variant="outline" className="shrink-0 gap-1" onClick={() => navigate("/patient/holarchelp/incidents")}>
+            <History className="h-4 w-4" /> History
+          </Button>
+        </div>
+      </div>
+
       <div className="mb-3 flex items-center justify-between">
         <h1 className="text-xl font-bold">{isLive ? "Active emergency" : "Incident closed"}</h1>
         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${isLive ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>
@@ -112,7 +160,20 @@ export default function HolarcHelpIncidentDetail() {
       </div>
       <p className="mb-3 text-xs text-muted-foreground">Started {new Date(incident.created_at).toLocaleString()}</p>
 
-      {incident.status === "open" && !incident.assigned_provider_id && (
+      {showNoResponders && (
+        <div className="mb-3 flex items-start gap-3 rounded-2xl border-2 border-red-500/50 bg-red-50 p-3 text-sm dark:bg-red-950/20">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+          <div className="flex-1">
+            <p className="font-semibold text-red-700">No ambulance has accepted yet.</p>
+            <p className="text-xs text-red-700/80">We're still searching. Please consider calling an emergency line directly.</p>
+            <Button size="sm" variant="destructive" className="mt-2 gap-1" onClick={callEmergency}>
+              <Phone className="h-4 w-4" /> Call 10177 now
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {incident.status === "open" && !incident.assigned_provider_id && !showNoResponders && (
         <div className="mb-3 flex items-center gap-3 rounded-2xl border-2 border-amber-500/40 bg-amber-50 p-3 dark:bg-amber-950/20">
           <Loader2 className="h-5 w-5 animate-spin text-amber-700" />
           <div className="text-sm">
@@ -181,9 +242,13 @@ export default function HolarcHelpIncidentDetail() {
       )}
 
       <div className="mt-4 rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)]">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Live tracking link</p>
-        <p className="mt-1 break-all text-sm">{trackingUrl}</p>
-        <Button onClick={copy} variant="outline" size="sm" className="mt-3 gap-2 rounded-xl"><Copy className="h-4 w-4" /> Copy link</Button>
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Public tracking link — share with anyone</p>
+        <p className="mt-1 text-[11px] text-muted-foreground">Recipients can view your live location and status without signing in.</p>
+        <p className="mt-2 break-all text-sm">{trackingUrl}</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Button onClick={copy} variant="outline" size="sm" className="gap-2 rounded-xl"><Copy className="h-4 w-4" /> Copy link</Button>
+          <Button onClick={shareLink} variant="outline" size="sm" className="gap-2 rounded-xl"><Share2 className="h-4 w-4" /> Share</Button>
+        </div>
       </div>
 
       {isLive && (
