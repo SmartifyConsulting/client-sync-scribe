@@ -234,6 +234,12 @@ export default function UsersTab() {
       ? <Badge variant="outline" className="border-amber-500 text-amber-600 text-sm">Pending</Badge>
       : <Badge variant="outline" className="border-green-500 text-green-600 text-sm">Active</Badge>;
 
+  const patients = useMemo(
+    () => users.filter(u => u.role === "patient" || u.role === "admin" || u.role === "none"),
+    [users],
+  );
+  const providers = useMemo(() => users.filter(u => u.role === "doctor"), [users]);
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -241,12 +247,6 @@ export default function UsersTab() {
       </div>
     );
   }
-
-  const patients = useMemo(
-    () => users.filter(u => u.role === "patient" || u.role === "admin" || u.role === "none"),
-    [users],
-  );
-  const providers = useMemo(() => users.filter(u => u.role === "doctor"), [users]);
 
   const renderTable = (rows: UserRecord[]) => (
     <div className="rounded-lg border border-primary bg-card overflow-x-auto">
