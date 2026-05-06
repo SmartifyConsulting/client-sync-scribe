@@ -307,7 +307,7 @@ export default function HolarcHelpHome() {
   }
 
   // Landing state
-  const ringR = 132;
+  const ringR = 114;
   const ringC = 2 * Math.PI * ringR;
 
   return (
@@ -338,7 +338,7 @@ export default function HolarcHelpHome() {
 
       {/* Header */}
       <div className="flex justify-center pt-6">
-        <img src={logo} alt="Holarc Help" className="h-12 w-auto" />
+        <img src={logo} alt="Holarc Help" className="h-24 w-auto" />
       </div>
 
       {/* Title */}
@@ -355,10 +355,10 @@ export default function HolarcHelpHome() {
           <span aria-hidden className="absolute inset-0 -m-1 animate-ping rounded-full bg-red-500/25" style={{ animationDuration: "2.6s" }} />
 
           {/* Progress ring */}
-          <svg className="absolute -rotate-90" width={300} height={300} aria-hidden>
-            <circle cx={150} cy={150} r={ringR} stroke="hsl(0 0% 100% / 0.4)" strokeWidth={6} fill="none" />
+          <svg className="absolute -rotate-90" width={260} height={260} aria-hidden>
+            <circle cx={130} cy={130} r={ringR} stroke="hsl(0 0% 100% / 0.4)" strokeWidth={6} fill="none" />
             <circle
-              cx={150} cy={150} r={ringR}
+              cx={130} cy={130} r={ringR}
               stroke="white" strokeWidth={6} fill="none" strokeLinecap="round"
               strokeDasharray={ringC}
               strokeDashoffset={ringC * (1 - holdProgress)}
@@ -374,7 +374,7 @@ export default function HolarcHelpHome() {
             onContextMenu={(e) => e.preventDefault()}
             disabled={triggering}
             aria-label="Hold for help"
-            className="relative z-10 flex h-60 w-60 select-none flex-col items-center justify-center rounded-full font-black text-white transition active:scale-[.98] touch-none"
+            className="relative z-10 flex h-52 w-52 select-none flex-col items-center justify-center rounded-full font-black text-white transition active:scale-[.98] touch-none"
             style={{
               background: "radial-gradient(circle at 30% 25%, hsl(354,90%,62%) 0%, hsl(354,84%,52%) 45%, hsl(0,80%,38%) 100%)",
               boxShadow: "0 24px 60px -14px hsl(0 80% 40% / 0.55), inset 0 -10px 30px hsl(0 80% 25% / 0.35), inset 0 6px 14px hsl(0 100% 80% / 0.3)",

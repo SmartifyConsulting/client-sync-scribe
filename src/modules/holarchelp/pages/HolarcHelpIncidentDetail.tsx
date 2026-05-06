@@ -9,7 +9,7 @@ import { EtaCountdown } from "../components/EtaCountdown";
 import { IncidentPhotos } from "../components/IncidentPhotos";
 import { AvailableResponders } from "../components/AvailableResponders";
 import { Button } from "@/components/ui/button";
-import { Copy, CheckCircle2, MessageCircle, Loader2, AlertTriangle, ArrowLeft, Phone, History, Share2, FileText, MapPin } from "lucide-react";
+import { CheckCircle2, MessageCircle, Loader2, AlertTriangle, ArrowLeft, Phone, History, Share2, FileText, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -121,7 +121,7 @@ export default function HolarcHelpIncidentDetail() {
   const trackingUrl = incident ? getPublicTrackUrl(incident.tracking_token) : "";
   const message = buildSosMessage(profileName, trackingUrl);
 
-  const copy = async () => { await navigator.clipboard.writeText(trackingUrl); toast.success("Tracking link copied"); };
+  
 
   const [closeOpen, setCloseOpen] = useState(false);
   const [closureNote, setClosureNote] = useState("");
@@ -268,16 +268,6 @@ export default function HolarcHelpIncidentDetail() {
           </ul>
         </div>
       )}
-
-      <div className="mt-4 rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)]">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Public tracking link — share with anyone</p>
-        <p className="mt-1 text-[11px] text-muted-foreground">Recipients can view your live location and status without signing in.</p>
-        <p className="mt-2 break-all text-sm">{trackingUrl}</p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <Button onClick={copy} variant="outline" size="sm" className="gap-2 rounded-xl"><Copy className="h-4 w-4" /> Copy link</Button>
-          <Button onClick={shareLink} variant="outline" size="sm" className="gap-2 rounded-xl"><Share2 className="h-4 w-4" /> Share</Button>
-        </div>
-      </div>
 
       {isLive && (
         <Button onClick={() => setCloseOpen(true)} className="mt-6 h-14 w-full gap-2 rounded-2xl bg-primary text-base font-semibold">
