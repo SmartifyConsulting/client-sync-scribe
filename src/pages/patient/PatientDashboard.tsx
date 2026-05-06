@@ -19,7 +19,7 @@ interface AssignedTask {
   id: string;
   title: string;
   description: string | null;
-  moolas_reward: number;
+  vulas_reward: number;
   due_date: string | null;
   status: string;
 }
@@ -88,7 +88,7 @@ export default function PatientDashboard() {
       if (!patientRecord?.id) return [];
       const { data } = await supabase
         .from("todos")
-        .select("id, title, description, moolas_reward, due_date, status")
+        .select("id, title, description, vulas_reward, due_date, status")
         .eq("patient_id", patientRecord.id)
         .eq("status", "pending")
         .order("due_date", { ascending: true })
@@ -533,9 +533,9 @@ export default function PatientDashboard() {
                       </p>
                     )}
                   </div>
-                  {task.moolas_reward > 0 && (
+                  {task.vulas_reward > 0 && (
                     <Badge className="ml-2 bg-primary/10 text-primary border-0 text-[8px] font-bold">
-                      +{task.moolas_reward} Ⓜ️
+                      +{task.vulas_reward} Ⓜ️
                     </Badge>
                   )}
                 </div>

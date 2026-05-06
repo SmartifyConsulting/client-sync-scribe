@@ -301,7 +301,7 @@ Signature: ___________________
               title: `Take ${med.medication} - ${med.dosage}`,
               description: `Daily medication: ${med.frequency}. ${med.instructions || ''}`.trim(),
               task_type: 'medication',
-              moolas_reward: 5,
+              vulas_reward: 5,
               priority: 'high',
             });
           }

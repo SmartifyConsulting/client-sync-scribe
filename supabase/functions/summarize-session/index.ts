@@ -106,7 +106,7 @@ Your task is to analyze the session transcript or notes and provide:
    - **Prescription**: If medications are prescribed or discussed for the patient, extract medication details.
    - **Invoice / Billing**: If billing, fees, or invoice amounts are discussed, extract the details.
    - **Referral Letter**: If a referral to another specialist or doctor is discussed, extract the details.
-   - **Patient Tasks / Exercises**: If exercises, homework, lifestyle changes, or daily tasks are assigned to the patient, extract each task with title, description, frequency, and suggested moolas reward (1-5).
+   - **Patient Tasks / Exercises**: If exercises, homework, lifestyle changes, or daily tasks are assigned to the patient, extract each task with title, description, frequency, and suggested vulas reward (1-5).
 
 IMPORTANT GUIDELINES:
 - Actually read and analyze the transcript content thoroughly
@@ -231,7 +231,7 @@ Respond using the provided tool/function schema.`,
                             title: { type: "string", description: "Short task title" },
                             description: { type: "string", description: "Detailed task description" },
                             frequency: { type: "string", description: "How often (e.g., daily, twice daily, weekly)" },
-                            moolas_reward: { type: "number", description: "Suggested moolas reward 1-5" },
+                            vulas_reward: { type: "number", description: "Suggested vulas reward 1-5" },
                           },
                           required: ["title", "description"],
                         },

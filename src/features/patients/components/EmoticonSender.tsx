@@ -57,7 +57,7 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
         recipient_id: recipientId,
         patient_id: patientId,
         emoticon,
-        moolas_awarded: vulasAwarded,
+        vulas_awarded: vulasAwarded,
         is_ai_flagged: isAiFlagged,
         profile_viewed: profileViewed,
       });
@@ -71,13 +71,13 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
         is_read: false,
       });
 
-      // Award doctor moolas if not flagged
+      // Award doctor vulas if not flagged
       if (!isAiFlagged) {
         await supabase.from('doctor_rewards' as any).insert({
           doctor_id: user.id,
           reward_type: 'emoticon_checkin',
           description: `Sent ${emoticon} to ${recipientName}`,
-          moolas_count: vulasAwarded,
+          vulas_count: vulasAwarded,
           reference_id: patientId,
         });
       }

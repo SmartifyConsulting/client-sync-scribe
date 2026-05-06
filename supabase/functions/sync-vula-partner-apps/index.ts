@@ -40,14 +40,14 @@ Deno.serve(async (req) => {
       });
     }
 
-    const apiKey = Deno.env.get("MOOLA_PARTNER_API_KEY");
+    const apiKey = Deno.env.get("VULA_PARTNER_API_KEY");
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: "MOOLA_PARTNER_API_KEY not configured" }), {
+      return new Response(JSON.stringify({ error: "VULA_PARTNER_API_KEY not configured" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const url = Deno.env.get("MOOLA_PARTNER_API_URL") ?? "https://api.6dot50.com/v1/partners";
+    const url = Deno.env.get("VULA_PARTNER_API_URL") ?? "https://api.6dot50.com/v1/partners";
     const resp = await fetch(url, {
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
     let synced = 0;
     if (rows.length) {
       const { error } = await admin
-        .from("moola_partner_apps")
+        .from("vula_partner_apps")
         .upsert(rows, { onConflict: "partner_code" });
       if (error) {
         return new Response(JSON.stringify({ error: error.message }), {

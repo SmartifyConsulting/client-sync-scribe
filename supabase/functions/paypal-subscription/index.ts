@@ -495,7 +495,7 @@ serve(async (req) => {
 
           console.log("Subscription updated:", isTrial ? "trial_active" : "active");
 
-          // Award referral Moolas if this user was referred
+          // Award referral Vulas if this user was referred
           if (!isTrial) {
             try {
               const userEmail = await getUserEmail(supabase, subscription.user_id);
@@ -512,7 +512,7 @@ serve(async (req) => {
 
                 if (invitation?.sender_id) {
                   const referrerId = invitation.sender_id;
-                  const REFERRAL_MOOLAS = 50;
+                  const REFERRAL_VULAS = 50;
 
                   // Check referrer's role
                   const { data: referrerRole } = await supabase
@@ -534,7 +534,7 @@ serve(async (req) => {
                       await supabase.from("patient_rewards").insert({
                         patient_id: referrerPatient.id,
                         awarded_by: referrerId,
-                        lollipops_count: REFERRAL_MOOLAS,
+                        lollipops_count: REFERRAL_VULAS,
                         reward_type: "referral",
                         visit_category: "app_referral",
                       });
@@ -542,7 +542,7 @@ serve(async (req) => {
                   } else {
                     await supabase.from("doctor_rewards").insert({
                       doctor_id: referrerId,
-                      moolas_count: REFERRAL_MOOLAS,
+                      vulas_count: REFERRAL_VULAS,
                       reward_type: "referral",
                       description: `Referral reward: ${userEmail} subscribed`,
                     });
@@ -555,11 +555,11 @@ serve(async (req) => {
                     .eq("sender_id", referrerId)
                     .eq("recipient_email", userEmail);
 
-                  console.log("Referral Moolas awarded to:", referrerId);
+                  console.log("Referral Vulas awarded to:", referrerId);
                 }
               }
             } catch (refErr) {
-              console.error("Error awarding referral Moolas:", refErr);
+              console.error("Error awarding referral Vulas:", refErr);
             }
           }
 

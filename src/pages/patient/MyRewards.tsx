@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { Loader2, Trophy, Target, Flame, Gift, Star, Video, Send, ArrowRightLeft, Pill, ArrowLeft, Info, History } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -73,7 +74,7 @@ interface VulaTransfer {
   amount: number;
   created_at: string;
   partner_app_id: string;
-  moola_partner_apps?: { name: string; logo_url: string | null };
+  vula_partner_apps?: { name: string; logo_url: string | null };
 }
 
 export default function MyRewards() {
@@ -129,10 +130,10 @@ export default function MyRewards() {
 
 
   const { data: partnerApps = [] } = useQuery({
-    queryKey: ["moola-partner-apps"],
+    queryKey: ["vula-partner-apps"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("moola_partner_apps")
+        .from("vula_partner_apps")
         .select("*")
         .eq("is_active", true)
         .order("name");
@@ -142,13 +143,13 @@ export default function MyRewards() {
   });
 
   const { data: transfers = [] } = useQuery({
-    queryKey: ["moola-transfers"],
+    queryKey: ["vula-transfers"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
       const { data, error } = await supabase
-        .from("moola_transfers")
-        .select("*, moola_partner_apps(name, logo_url)")
+        .from("vula_transfers")
+        .select("*, vula_partner_apps(name, logo_url)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -178,7 +179,7 @@ export default function MyRewards() {
       // Insert transfer record (skip FK for vault)
       if (!isVault) {
         const { error: transferError } = await supabase
-          .from("moola_transfers")
+          .from("vula_transfers")
           .insert({ user_id: user.id, partner_app_id: appId, amount });
         if (transferError) throw transferError;
       }
@@ -197,7 +198,7 @@ export default function MyRewards() {
     },
     onSuccess: () => {
       toast({ title: "Transfer successful", description: "Your Vulas have been transferred." });
-      queryClient.invalidateQueries({ queryKey: ["moola-transfers"] });
+      queryClient.invalidateQueries({ queryKey: ["vula-transfers"] });
       queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
       setShowTransferDialog(false);
       setTransferFromAppId("");
@@ -235,8 +236,8 @@ export default function MyRewards() {
       items.push({
         id: `t-${t.id}`,
         date: parseISO(t.created_at),
-        label: t.moola_partner_apps?.name
-          ? `Transfer to ${t.moola_partner_apps.name}`
+        label: t.vula_partner_apps?.name
+          ? `Transfer to ${t.vula_partner_apps.name}`
           : "Vula Transfer",
         amount: -Math.abs(t.amount),
         kind: "transfer",
@@ -736,23 +737,20 @@ export default function MyRewards() {
         </TabsContent>
 
         <TabsContent value="transfers" className="space-y-6">
-          {/* Redeem from 6Dot50 with Vula Vouchers */}
+          {/* Vula Wallet */}
           <Card className="border-primary/30">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Gift className="h-5 w-5 text-primary" />
-                Redeem from 6Dot50 with Vula Vouchers
+                Vula Wallet
               </CardTitle>
               <CardDescription>
-                Redeem your Vulas at retailers in the 6Dot50 network.
+                Sign in to your Vula Wallet to redeem your Vulas at participating retailers.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button
-                onClick={() => window.open("https://portal.6dot50.com/", "_blank", "noopener")}
-                className="gap-2"
-              >
-                <Gift className="h-4 w-4" /> Redeem
+              <Button asChild className="gap-2">
+                <Link to="/vula/wallet"><Gift className="h-4 w-4" /> Open Vula Wallet</Link>
               </Button>
             </CardContent>
           </Card>
@@ -770,11 +768,11 @@ export default function MyRewards() {
               {partnerApps.length === 0 ? (
                 <div className="text-center py-6 space-y-3">
                   <p className="text-sm text-muted-foreground">
-                    No retailers connected yet. Sync the 6dot50 partner network to see all the retailers where you can spend your Vulas.
+                    No retailers connected yet. Sync the Vula partner network to see all the retailers where you can spend your Vulas.
                   </p>
                   <Button
                     onClick={async () => {
-                      const { data, error } = await supabase.functions.invoke("sync-moola-partner-apps");
+                      const { data, error } = await supabase.functions.invoke("sync-vula-partner-apps");
                       if (error || (data as any)?.error) {
                         toast({
                           title: "Couldn't sync retailers",
@@ -783,12 +781,12 @@ export default function MyRewards() {
                         });
                         return;
                       }
-                      toast({ title: "Retailers synced", description: `${(data as any)?.synced ?? 0} partners loaded from 6dot50.` });
-                      queryClient.invalidateQueries({ queryKey: ["moola-partner-apps"] });
+                      toast({ title: "Retailers synced", description: `${(data as any)?.synced ?? 0} partners loaded from the Vula network.` });
+                      queryClient.invalidateQueries({ queryKey: ["vula-partner-apps"] });
                     }}
                     className="gap-2"
                   >
-                    <Gift className="h-4 w-4" /> Sync 6dot50 retailers
+                    <Gift className="h-4 w-4" /> Sync Vula retailers
                   </Button>
                 </div>
               ) : (

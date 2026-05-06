@@ -108,7 +108,7 @@ export default function GamificationAdmin() {
     queryKey: ["admin-partner-apps"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("moola_partner_apps")
+        .from("vula_partner_apps")
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -120,7 +120,7 @@ export default function GamificationAdmin() {
     queryKey: ["admin-adherence-configs"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("moola_adherence_configs")
+        .from("vula_adherence_configs")
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -147,7 +147,7 @@ export default function GamificationAdmin() {
       }
 
       const { error } = await supabase
-        .from("moola_partner_apps")
+        .from("vula_partner_apps")
         .insert({
           name: newAppName,
           logo_url: logoUrl,
@@ -179,7 +179,7 @@ export default function GamificationAdmin() {
   const updateAppMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<PartnerApp> }) => {
       const { error } = await supabase
-        .from("moola_partner_apps")
+        .from("vula_partner_apps")
         .update(updates as any)
         .eq("id", id);
       if (error) throw error;
@@ -198,7 +198,7 @@ export default function GamificationAdmin() {
   const toggleAppMutation = useMutation({
     mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
       const { error } = await supabase
-        .from("moola_partner_apps")
+        .from("vula_partner_apps")
         .update({ is_active })
         .eq("id", id);
       if (error) throw error;
@@ -211,7 +211,7 @@ export default function GamificationAdmin() {
   const deleteAppMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("moola_partner_apps")
+        .from("vula_partner_apps")
         .delete()
         .eq("id", id);
       if (error) throw error;
@@ -229,7 +229,7 @@ export default function GamificationAdmin() {
   const addAdherenceMutation = useMutation({
     mutationFn: async () => {
       const { error } = await supabase
-        .from("moola_adherence_configs")
+        .from("vula_adherence_configs")
         .insert({
           medication_category: newAdherenceConfig.medication_category,
           lollipops_awarded: newAdherenceConfig.lollipops_awarded,
@@ -252,7 +252,7 @@ export default function GamificationAdmin() {
   const updateAdherenceMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<AdherenceConfig> }) => {
       const { error } = await supabase
-        .from("moola_adherence_configs")
+        .from("vula_adherence_configs")
         .update(updates as any)
         .eq("id", id);
       if (error) throw error;
@@ -271,7 +271,7 @@ export default function GamificationAdmin() {
   const deleteAdherenceMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("moola_adherence_configs")
+        .from("vula_adherence_configs")
         .delete()
         .eq("id", id);
       if (error) throw error;
@@ -288,7 +288,7 @@ export default function GamificationAdmin() {
   const toggleAdherenceMutation = useMutation({
     mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
       const { error } = await supabase
-        .from("moola_adherence_configs")
+        .from("vula_adherence_configs")
         .update({ is_active } as any)
         .eq("id", id);
       if (error) throw error;

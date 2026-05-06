@@ -169,7 +169,7 @@ export default function Dashboard() {
     refetchInterval: 60000,
   });
 
-  // Query for doctor moolas (from doctor_rewards)
+  // Query for doctor vulas (from doctor_rewards)
   const { data: doctorVulas = 0 } = useQuery({
     queryKey: ["doctor-vulas-dashboard"],
     queryFn: async () => {
@@ -177,15 +177,15 @@ export default function Dashboard() {
       if (!user) return 0;
       const { data, error } = await supabase
         .from("doctor_rewards")
-        .select("moolas_count")
+        .select("vulas_count")
         .eq("doctor_id", user.id);
       if (error || !data) return 0;
-      return data.reduce((sum, r) => sum + (r.moolas_count || 0), 0);
+      return data.reduce((sum, r) => sum + (r.vulas_count || 0), 0);
     },
     refetchInterval: 60000,
   });
 
-  // Query for patient moolas (from patient_rewards where patient is linked to this user)
+  // Query for patient vulas (from patient_rewards where patient is linked to this user)
   const { data: patientVulas = 0 } = useQuery({
     queryKey: ["patient-vulas-dashboard"],
     queryFn: async () => {

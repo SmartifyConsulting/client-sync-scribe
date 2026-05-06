@@ -975,7 +975,7 @@ const completeSession = async (
           const today = new Date().toISOString().split('T')[0];
 
           const tasksHtml = tasks.map((t: any, i: number) => 
-            `<p><strong>${i + 1}. ${t.title}</strong></p><p>${t.description || ''}</p><p><em>Frequency: ${t.frequency || 'As needed'}</em> | <em>Moolas: ${t.moolas_reward || 1}</em></p><br/>`
+            `<p><strong>${i + 1}. ${t.title}</strong></p><p>${t.description || ''}</p><p><em>Frequency: ${t.frequency || 'As needed'}</em> | <em>Vulas: ${t.vulas_reward || 1}</em></p><br/>`
           ).join('');
           const taskDocContent = `<h2>Patient Task Assignment</h2>
 <p><strong>Date:</strong> ${today}</p>

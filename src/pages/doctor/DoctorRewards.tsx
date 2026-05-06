@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Send, Loader2, Trophy, Target, Flame, Gift, Star, ArrowRightLeft, Calendar as CalendarIcon, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,9 +56,9 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
     queryKey: ["doctor-vulas-profile"],
     queryFn: async () => {
       if (!user?.id) return 0;
-      const { data, error } = await supabase.from("doctor_rewards").select("moolas_count").eq("doctor_id", user.id);
+      const { data, error } = await supabase.from("doctor_rewards").select("vulas_count").eq("doctor_id", user.id);
       if (error || !data) return 0;
-      return data.reduce((sum, r) => sum + (r.moolas_count || 0), 0);
+      return data.reduce((sum, r) => sum + (r.vulas_count || 0), 0);
     },
   });
 
@@ -76,19 +77,19 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
   const totalVulas = doctorVulas + patientVulas;
 
   const { data: partnerApps = [] } = useQuery({
-    queryKey: ["moola-partner-apps-doctor"],
+    queryKey: ["vula-partner-apps-doctor"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("moola_partner_apps").select("*").eq("is_active", true).order("name");
+      const { data, error } = await supabase.from("vula_partner_apps").select("*").eq("is_active", true).order("name");
       if (error) return [];
       return data || [];
     },
   });
 
   const { data: transfers = [] } = useQuery({
-    queryKey: ["moola-transfers-doctor"],
+    queryKey: ["vula-transfers-doctor"],
     queryFn: async () => {
       if (!user?.id) return [];
-      const { data, error } = await supabase.from("moola_transfers").select("*, moola_partner_apps(name, logo_url)").eq("user_id", user.id).order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("vula_transfers").select("*, vula_partner_apps(name, logo_url)").eq("user_id", user.id).order("created_at", { ascending: false });
       if (error) return [];
       return data || [];
     },
@@ -104,7 +105,7 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
     if (!patient) { toast({ title: "No patient record found", variant: "destructive" }); return; }
     const isVault = transferToAppId === "vault";
     if (!isVault) {
-      const { error: transferError } = await supabase.from("moola_transfers").insert({ user_id: user.id, partner_app_id: transferToAppId, amount });
+      const { error: transferError } = await supabase.from("vula_transfers").insert({ user_id: user.id, partner_app_id: transferToAppId, amount });
       if (transferError) { toast({ title: "Transfer failed", variant: "destructive" }); return; }
     }
     const { error: deductError } = await supabase.from("patient_rewards").insert({
@@ -113,7 +114,7 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
     });
     if (deductError) { toast({ title: "Deduction failed", variant: "destructive" }); return; }
     toast({ title: "Transfer successful", description: `${amount} Vulas transferred.` });
-    queryClient.invalidateQueries({ queryKey: ["moola-transfers-doctor"] });
+    queryClient.invalidateQueries({ queryKey: ["vula-transfers-doctor"] });
     queryClient.invalidateQueries({ queryKey: ["patient-vulas-profile"] });
     queryClient.invalidateQueries({ queryKey: ["doctor-vulas-profile"] });
     setShowTransferDialog(false);
@@ -367,15 +368,15 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
         </TabsContent>
 
         <TabsContent value="transfers" className="space-y-6">
-          {/* Redeem from 6Dot50 */}
+          {/* Vula Wallet */}
           <Card className="border-primary/30">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Gift className="h-5 w-5 text-primary" />Redeem from 6Dot50 with Vula Vouchers</CardTitle>
-              <CardDescription>Redeem your Vulas at retailers in the 6Dot50 network.</CardDescription>
+              <CardTitle className="flex items-center gap-2"><Gift className="h-5 w-5 text-primary" />Vula Wallet</CardTitle>
+              <CardDescription>Sign in to your Vula Wallet to redeem your Vulas at participating retailers.</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={() => window.open("https://portal.6dot50.com/", "_blank", "noopener")} className="gap-2">
-                <Gift className="h-4 w-4" /> Redeem
+              <Button asChild className="gap-2">
+                <Link to="/vula/wallet"><Gift className="h-4 w-4" /> Open Vula Wallet</Link>
               </Button>
             </CardContent>
           </Card>
