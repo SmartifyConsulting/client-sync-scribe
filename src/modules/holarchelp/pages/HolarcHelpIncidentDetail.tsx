@@ -7,7 +7,7 @@ import { IncidentTimeline } from "../components/IncidentTimeline";
 import { IncidentVoiceNoteRecorder } from "../components/IncidentVoiceNoteRecorder";
 import { EtaCountdown } from "../components/EtaCountdown";
 import { Button } from "@/components/ui/button";
-import { Copy, CheckCircle2, MessageCircle, Loader2, AlertTriangle } from "lucide-react";
+import { Copy, CheckCircle2, MessageCircle, Loader2, AlertTriangle, ArrowLeft, Phone, Bell, History, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLocationTracking } from "../hooks/useLocationTracking";
 import { useAuth } from "@/hooks/useAuth";
