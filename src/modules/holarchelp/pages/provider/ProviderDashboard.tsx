@@ -40,7 +40,7 @@ export default function ProviderDashboard() {
   const load = async () => {
     setLoading(true);
     const { data } = await supabase.from("holarchelp_incidents" as any)
-      .select("*").in("status", ["active"])
+      .select("*").in("status", ["open", "assigned", "en_route", "arrived", "patient_collected", "at_hospital", "reopened"])
       .order("created_at", { ascending: false }).limit(50);
     setIncidents((data as any) ?? []);
     setLoading(false);
@@ -50,32 +50,36 @@ export default function ProviderDashboard() {
     load();
     const ch = supabase.channel("provider-dispatch")
       .on("postgres_changes", { event: "*", schema: "public", table: "holarchelp_incidents" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "holarchelp_incident_offers" }, () => load())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
 
   const accept = async (incidentId: string) => {
     if (!providerId || !user) return;
-    const { error: offerErr } = await supabase.from("holarchelp_incident_offers" as any).insert({
-      incident_id: incidentId, provider_id: providerId, response: "accepted",
-      responded_at: new Date().toISOString(),
-    } as any);
-    if (offerErr) return toast.error(offerErr.message);
-    const { error } = await supabase.from("holarchelp_incidents" as any)
-      .update({ assigned_provider_id: providerId } as any).eq("id", incidentId);
-    if (error) return toast.error(error.message);
-    toast.success("Incident accepted");
+    const { error } = await supabase.rpc("holarchelp_accept_incident" as any, {
+      _incident_id: incidentId, _provider_id: providerId,
+    });
+    if (error) {
+      toast.error(error.message === "Incident already taken" ? "Another responder accepted first" : error.message);
+      load();
+      return;
+    }
+    toast.success("Incident locked — you are the responder");
     load();
   };
 
   const decline = async (incidentId: string) => {
     if (!providerId) return;
     const reason = window.prompt("Reason for declining?") || "Not available";
-    const { error } = await supabase.from("holarchelp_incident_cancellations" as any).insert({
+    await supabase.from("holarchelp_incident_offers" as any).upsert({
+      incident_id: incidentId, provider_id: providerId, response: "declined",
+      responded_at: new Date().toISOString(),
+    } as any, { onConflict: "incident_id,provider_id" });
+    await supabase.from("holarchelp_incident_cancellations" as any).insert({
       incident_id: incidentId, provider_id: providerId,
       reason_code: "declined", reason_text: reason,
     } as any);
-    if (error) return toast.error(error.message);
     toast.success("Declined");
   };
 
