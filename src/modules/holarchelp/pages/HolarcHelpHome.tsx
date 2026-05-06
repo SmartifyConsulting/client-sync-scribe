@@ -367,6 +367,9 @@ export default function HolarcHelpHome() {
             <Button variant="outline" className="h-14 justify-start gap-3 rounded-2xl text-base" onClick={() => navigate("/patient/holarchelp/nearby")}>
               <Crosshair className="h-5 w-5 text-primary" /> Find nearby provider
             </Button>
+            <Button variant="outline" className="h-14 justify-start gap-3 rounded-2xl text-base" onClick={() => navigate("/patient/holarchelp/incidents")}>
+              <AlertCircle className="h-5 w-5 text-primary" /> Incident history
+            </Button>
           </div>
         </>
       )}
