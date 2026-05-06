@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -9,6 +10,7 @@ import { AlertCircle, AlertTriangle, Crosshair, Loader2, Shield, Siren } from "l
 import { SeverityPicker, type SeverityResult } from "../components/SeverityPicker";
 import { ProviderMap, type ProviderMarker } from "../components/ProviderMap";
 import { SosVoiceNoteDialog } from "../components/SosVoiceNoteDialog";
+import { DoctorSosChooser } from "../components/DoctorSosChooser";
 import hospitalIcon from "@/assets/marker-hospital.png";
 import ambulanceIcon from "@/assets/marker-ambulance.png";
 import { cn } from "@/lib/utils";
