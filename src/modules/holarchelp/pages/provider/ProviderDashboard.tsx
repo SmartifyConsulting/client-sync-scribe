@@ -84,7 +84,8 @@ export default function ProviderDashboard() {
   };
 
   const myActive = incidents.filter((i) => i.assigned_provider_id === providerId);
-  const open = incidents.filter((i) => !i.assigned_provider_id);
+  const open = incidents.filter((i) => !i.assigned_provider_id && (i.status === "open" || i.status === "reopened"));
+  const lockedByOthers = incidents.filter((i) => i.assigned_provider_id && i.assigned_provider_id !== providerId);
 
   return (
     <div className="space-y-6">
@@ -98,7 +99,7 @@ export default function ProviderDashboard() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <SummaryCard icon={AlertCircle} label="Open SOS" value={open.length} tone="text-sos" />
         <SummaryCard icon={Activity} label="Accepted by us" value={myActive.length} tone="text-primary" />
-        <SummaryCard icon={CheckCircle2} label="Resolved today" value={0} tone="text-emerald-600" />
+        <SummaryCard icon={CheckCircle2} label="Locked by others" value={lockedByOthers.length} tone="text-muted-foreground" />
       </div>
 
       <Section title="Your active incidents" empty="No active incidents you've accepted.">
@@ -107,12 +108,24 @@ export default function ProviderDashboard() {
         } />)}
       </Section>
 
-      <Section title="Open incidents" empty={loading ? "Loading…" : "No open SOS in your area right now."}>
+      <Section title="Open incidents — first to accept locks it" empty={loading ? "Loading…" : "No open SOS in your area right now."}>
         {open.map((i) => (
           <IncidentCard key={i.id} i={i} primaryAction={
             <div className="flex gap-2">
               <Button size="sm" onClick={() => accept(i.id)}>Accept</Button>
               <Button size="sm" variant="outline" onClick={() => decline(i.id)}>Decline</Button>
+            </div>
+          } />
+        ))}
+      </Section>
+
+      <Section title="Locked by other responders" empty="None right now.">
+        {lockedByOthers.map((i) => (
+          <IncidentCard key={i.id} i={i} primaryAction={
+            <div className="text-right text-xs text-muted-foreground">
+              <p className="font-semibold text-foreground">🚑 Responded</p>
+              {i.accepted_at && <p>Accepted {new Date(i.accepted_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>}
+              {i.eta_minutes != null && <p>ETA {i.eta_minutes} min</p>}
             </div>
           } />
         ))}
