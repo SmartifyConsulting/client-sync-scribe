@@ -562,7 +562,7 @@ export function useGamificationAdmin() {
       toast({ title: 'Created', description: 'New reward category added' });
       return data;
     } catch (error: any) {
-      toast({ title: 'Error', description: 'Failed to create config', variant: 'destructive' });
+      toast({ title: 'Error', description: error?.message || 'Failed to create config', variant: 'destructive' });
       return null;
     }
   };

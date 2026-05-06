@@ -23,8 +23,10 @@ export default function HolarcHelpIncidentDetail() {
 
   useEffect(() => {
     if (!id) return;
-    supabase.from("holarchelp_incidents" as any).select("*").eq("id", id).maybeSingle()
-      .then(({ data }) => setIncident(data));
+    const refetchIncident = () =>
+      supabase.from("holarchelp_incidents" as any).select("*").eq("id", id).maybeSingle()
+        .then(({ data }) => setIncident(data));
+    refetchIncident();
     supabase.from("holarchelp_locations" as any).select("latitude, longitude, recorded_at")
       .eq("incident_id", id).order("recorded_at", { ascending: false }).limit(200)
       .then(({ data }) => setLocations((data as any) ?? []));
@@ -41,7 +43,15 @@ export default function HolarcHelpIncidentDetail() {
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "holarchelp_incidents", filter: `id=eq.${id}` },
         (p) => setIncident((prev: any) => ({ ...(prev ?? {}), ...(p.new as any) })))
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+
+    const onFocus = () => refetchIncident();
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      supabase.removeChannel(ch);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
   }, [id, user]);
 
   useLocationTracking(id ?? null, !!incident && incident.status === "active");
