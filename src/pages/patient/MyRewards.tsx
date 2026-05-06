@@ -760,49 +760,6 @@ export default function MyRewards() {
             </CardContent>
           </Card>
 
-          {/* Partner Apps */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Gift className="h-5 w-5 text-primary" />
-                Approved Vula Partner Apps
-              </CardTitle>
-              <CardDescription>Apps that accept Vulas. Transfer directly below.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {partnerApps.length === 0 ? (
-                <div className="text-center py-6">
-                  <p className="text-sm text-muted-foreground">
-                    No partner retailers connected yet. Check back soon.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {partnerApps.map((app) => (
-                    <div key={app.id} className="p-4 rounded-xl border border-border hover:border-primary/30 hover:shadow-md transition-all">
-                      <div className="flex items-center gap-3">
-                        {app.logo_url ? (
-                          <img src={app.logo_url} alt={app.name} className="h-10 w-10 rounded-lg object-contain" />
-                        ) : (
-                          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                            <Gift className="h-5 w-5 text-primary" />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-foreground">{app.name}</p>
-                          {app.creator && <p className="text-xs text-muted-foreground">by {app.creator}</p>}
-                        </div>
-                      </div>
-                      <Button size="sm" className="w-full mt-3 gap-1 text-xs" onClick={() => { setTransferToAppId(app.id); setShowTransferDialog(true); }}>
-                        <Send className="h-3 w-3" /> Transfer Vulas
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
         </TabsContent>
       </Tabs>
     </div>
