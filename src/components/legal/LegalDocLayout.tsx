@@ -35,12 +35,19 @@ export function LegalDocLayout({
   const navigate = useNavigate();
   const [toc, setToc] = useState<{ id: string; text: string }[]>([]);
   const [signedSince, setSignedSince] = useState<string | null>(null);
-  const updated = lastUpdated || new Date().toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric" });
+  const updated =
+    lastUpdated || new Date().toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric" });
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user?.created_at) {
-        setSignedSince(new Date(data.user.created_at).toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric" }));
+        setSignedSince(
+          new Date(data.user.created_at).toLocaleDateString("en-ZA", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }),
+        );
       }
     });
   }, []);
@@ -71,7 +78,6 @@ export function LegalDocLayout({
     });
     setToc(items);
   }, [children, signedSince]);
-
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -163,18 +169,23 @@ export function LegalDocLayout({
               <div className="mb-6 flex items-start gap-2 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm">
                 <ShieldCheck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                 <p className="!m-0 text-foreground">
-                  You have agreed to and are bound by these terms since <strong>{signedSince}</strong>.
+                  By signing up for this application, you have acknowledged and agreed to the following legal
+                  agreements: <strong>{signedSince}</strong>.
                 </p>
               </div>
             )}
             {/* TOC */}
             {toc.length > 1 && (
               <nav className="no-print mb-8 rounded-md border border-border bg-muted/30 p-4">
-                <p className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-2">Contents</p>
+                <p className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-2">
+                  Contents
+                </p>
                 <ul className="list-none space-y-1 text-sm">
                   {toc.map((t) => (
                     <li key={t.id}>
-                      <a href={`#${t.id}`} className="text-foreground hover:text-primary hover:underline">{t.text}</a>
+                      <a href={`#${t.id}`} className="text-foreground hover:text-primary hover:underline">
+                        {t.text}
+                      </a>
                     </li>
                   ))}
                 </ul>
@@ -188,7 +199,9 @@ export function LegalDocLayout({
               <p className="font-semibold text-foreground">{owner}</p>
               <p>contact@holarchealth.com · legal@holarchealth.com</p>
               <p>This document is governed by the laws of the Republic of South Africa.</p>
-              <p>© {new Date().getFullYear()} {owner}. All rights reserved.</p>
+              <p>
+                © {new Date().getFullYear()} {owner}. All rights reserved.
+              </p>
             </div>
           </div>
         </div>
