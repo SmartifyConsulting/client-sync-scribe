@@ -116,7 +116,7 @@ export default function ProviderSignup() {
         first_name: firstName, last_name: lastName,
         email, phone, password,
       });
-      toast.success("Application submitted! Please verify your email, then sign in.");
+      toast.success("Application submitted! Verify your email, then sign in. An administrator must also activate your account before you can access the dispatch portal.");
       navigate("/auth");
     } catch (err: any) {
       toast.error(err?.message ?? "Sign-up failed");
