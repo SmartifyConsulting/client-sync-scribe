@@ -319,9 +319,17 @@ export default function GamificationAdmin() {
   };
 
   const handleAdd = async () => {
-    if (!newConfig.visit_category) return;
-    
-    await createConfig(newConfig as any);
+    const category = newConfig.visit_category.trim().toLowerCase().replace(/\s+/g, "_");
+    if (!category) {
+      toast({ title: "Category required", description: "Enter a unique category name.", variant: "destructive" });
+      return;
+    }
+    if (configs.some((c) => c.visit_category.toLowerCase() === category)) {
+      toast({ title: "Duplicate category", description: `"${category}" already exists.`, variant: "destructive" });
+      return;
+    }
+    const created = await createConfig({ ...newConfig, visit_category: category } as any);
+    if (!created) return;
     setShowAddDialog(false);
     setNewConfig({
       visit_category: "",
