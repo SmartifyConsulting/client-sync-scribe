@@ -207,10 +207,10 @@ export default function HolarcHelpProviders() {
   const headers = ["Name", "Contact", "City", "Tier", "Status", "Actions"];
 
   const renderGroupedTable = (rows: any[], kind: Kind) => {
-    if (rows.length === 0) return <Empty label={`No ${status === "all" ? "" : status + " "}${kind === "hospital" ? "hospitals" : "ambulances"}`} />;
+    const noun = nounFor(kind);
+    if (rows.length === 0) return <Empty label={`No ${status === "all" ? "" : status + " "}${noun}`} />;
     const grouped = groupByCountryTier(rows);
     const countries = sortedCountries(grouped);
-    const noun = kind === "hospital" ? "hospitals" : "ambulances";
     return (
       <Accordion type="multiple" defaultValue={countries.slice(0, 2)} className="space-y-2">
         {countries.map((country) => {
