@@ -216,16 +216,10 @@ export default function HolarcHelpHome() {
     if (!incidentId || requesting) return;
     setRequesting(p.id);
     try {
-      const { error: upErr } = await supabase.from("holarchelp_incidents" as any).update({
-        assigned_provider_id: p.id,
-        accepted_at: new Date().toISOString(),
-      } as any).eq("id", incidentId);
-      if (upErr) throw upErr;
-      await supabase.from("holarchelp_incident_offers" as any).insert({
-        incident_id: incidentId, provider_id: p.id, response: "accepted",
-        responded_at: new Date().toISOString(), distance_km: p._d,
-      });
-      setHelpOnTheWay(true);
+      // Insert pending offer for this provider so they see it; first responder still wins via accept lock.
+      await supabase.from("holarchelp_incident_offers" as any).upsert({
+        incident_id: incidentId, provider_id: p.id, response: "pending", distance_km: p._d,
+      } as any, { onConflict: "incident_id,provider_id" });
       toast.success(`Request sent to ${p.name}`);
     } catch (e: any) {
       toast.error(e?.message ?? "Could not request provider");
