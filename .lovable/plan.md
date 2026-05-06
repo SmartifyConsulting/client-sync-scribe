@@ -1,52 +1,44 @@
-## Goal
+## Problem
 
-When a new emergency service provider signs up, they should receive a verification email and only be able to sign in after clicking the link. Admin still approves the provider record separately at `/admin/holarchelp-providers`.
+Emergency Service Providers (hospitals, ambulance services, blood banks) already have their own dedicated portal at `/provider/*` (`ProviderLayout`, `ProviderDashboard`, `ProviderProfile`, `ProviderIncidentDetail`) — but after sign-in they land on `/doctor-dashboard` and see the doctor sidebar, because the routing logic only knows about `doctor`, `patient`, and `admin`.
 
-## Where admin approves providers
+Root cause is in two places:
 
-Admin approval already exists at **`/admin/holarchelp-providers`** (`src/pages/admin/HolarcHelpProviders.tsx`). New signups appear there with `status: 'pending'`. Approving calls `holarchelp_approve_hospital` / `holarchelp_approve_ambulance`, which sets the record to `approved` and grants the `hospital_staff` / `ambulance_staff` role. No change needed here — just clarifying for the user.
+1. `src/hooks/useUserRole.ts` — `UserRole` type is `'doctor' | 'patient' | 'admin' | null`. It ignores `hospital_staff`, `ambulance_staff`, and `blood_bank` rows in `user_roles`.
+2. `src/App.tsx` → `RoleBasedRedirect` — falls through to `<Navigate to="/doctor-dashboard" />` for anyone who is not a patient.
 
-## Why no email arrived
+The provider portal itself is already built and gated by `ProviderGate`, so this is purely a routing/role-resolution fix plus a small UX polish.
 
-`supabase/functions/register-emergency-provider/index.ts` currently calls `auth.admin.createUser({ email_confirm: false })`. That creates the account silently and does **not** send any verification email. That's why `nonastasia@gmail.com` got nothing.
+## Plan
 
-## Fix
+### 1. Extend role resolution (`src/hooks/useUserRole.ts`)
+- Add `'emergency'` to `UserRole` (a derived umbrella role for `hospital_staff | ambulance_staff | blood_bank`).
+- When fetching `user_roles`, treat any of those three rows as `isEmergency = true`.
+- Resolution priority becomes: explicit `profiles.role` → `doctor` → `patient` → `emergency` → `admin`.
+- Export `isEmergency` and `hasEmergencyRole` from the hook.
 
-### 1. Edge function: send a verification email on signup
-In `supabase/functions/register-emergency-provider/index.ts`:
-- After `auth.admin.createUser` succeeds, generate a signup confirmation link with `auth.admin.generateLink({ type: 'signup', email, password, options: { redirectTo: '<app>/auth?mode=login' } })`.
-- Send that link to the provider's email. Two options — pick one based on what's already wired up:
-  - **Preferred:** use `inviteUserByEmail` instead of `createUser` + `generateLink`. It creates the user and triggers Supabase's built-in confirmation email in one call. We pass `password` separately by updating the user after invite acceptance — OR switch the flow to "invite → set password on first login". Simpler but changes UX.
-  - **Cleaner for current UX (keep password from form):** keep `createUser`, then call `generateLink` and send the link via the existing email infrastructure (Lovable Emails / `send-document-email`-style helper). Requires that the project's email domain is set up so Gmail accepts it.
-- Recommended path: **`createUser` + `generateLink({ type: 'signup' })` + send email via Lovable Emails**, because it preserves the password the provider just typed.
+### 2. Fix post-login redirect (`src/App.tsx` → `RoleBasedRedirect`)
+- If `isEmergency` and not also a doctor/patient → `<Navigate to="/provider" replace />`.
+- Keep existing patient and doctor branches unchanged.
 
-### 2. Email delivery
-The project has `RESEND_API_KEY` and a custom domain (`holarchealth.com`), but no auth email templates are scaffolded yet. To make Gmail reliably accept the verification email:
-- Set up the Lovable Emails domain (subdomain like `notify.holarchealth.com`) and scaffold auth email templates so Supabase's confirmation email is sent through the verified sender. This will be triggered via the email-setup dialog in the implementation step.
-- Once set up, the `generateLink` URL is wrapped in a branded "Confirm your email" template and sent automatically.
+### 3. Auth page polish (`src/pages/Auth.tsx`)
+- After successful sign-in, if the user has only an emergency role, route to `/provider` instead of `/doctor-dashboard`.
+- (The "Sign in" handler currently hard-codes `/doctor-dashboard` in some paths — switch those to `/dashboard` so `RoleBasedRedirect` decides.)
 
-### 3. Login gate
-`src/pages/Auth.tsx` already surfaces "Email not confirmed" errors from Supabase, so no change is required — once verification is enforced, unverified providers attempting to log in will see that message.
+### 4. Provider signup confirmation (`src/pages/ProviderSignup.tsx`)
+- After successful signup, redirect to `/auth?mode=login&verify=1` with a clear "Check your email to verify, then sign in — your account also needs admin activation" message. (Already partly there; just ensure copy mentions both verification + admin approval.)
 
-### 4. Resend verification (small UX add)
-On the `ProviderSignup` success screen, add a "Didn't get the email? Resend" button that calls a small new edge function (`resend-provider-verification`) which re-runs `generateLink` for the email and re-sends it. Prevents support tickets like this one.
+### 5. Profile switcher safety (`src/components/layout/ProfileSwitcher` if present)
+- Hide the "Switch to Doctor / Patient" toggle for emergency-only users so they cannot accidentally land on the doctor UI. (Read-only check — only edit if the component exists.)
 
-### 5. Admin visibility (tiny polish)
-On `/admin/holarchelp-providers`, show an "Email verified ✓ / Pending ✉️" badge next to each pending provider so admin knows whether the contact has confirmed their email before approving. Pulled from `auth.users.email_confirmed_at` via a small SECURITY DEFINER RPC (admin-only).
+### Out of scope
+- No changes to the `/provider/*` portal UI itself (already built).
+- No changes to admin approval flow at `/admin/holarchelp-providers`.
+- No DB migrations — `hospital_staff`, `ambulance_staff`, `blood_bank` already exist in the `app_role` enum and are written by the admin "Activate" action.
 
-## Files touched
-
-- `supabase/functions/register-emergency-provider/index.ts` — generate + send verification link
-- `supabase/functions/resend-provider-verification/index.ts` — **new**, public, rate-limited
-- `supabase/functions/_shared/email-templates/signup.tsx` — branded confirmation email (created by auth-template scaffold)
-- `supabase/functions/auth-email-hook/index.ts` — created by scaffold
-- `supabase/config.toml` — register the new functions with `verify_jwt = false`
-- `src/pages/ProviderSignup.tsx` — add "Resend verification" button on success state
-- `src/pages/admin/HolarcHelpProviders.tsx` — show email-verified badge per pending row
-- New SECURITY DEFINER RPC `get_provider_email_status(provider_id, type)` (admin-only) for the badge
-
-## Out of scope
-
-- Changing how admin approval works (it already exists at `/admin/holarchelp-providers`).
-- Migrating to magic-link / invite flow (would lose the password the provider typed).
-- Marketing emails or non-auth provider notifications.
+### Files touched
+- `src/hooks/useUserRole.ts` (extend types + flags)
+- `src/App.tsx` (redirect branch)
+- `src/pages/Auth.tsx` (post-login route)
+- `src/pages/ProviderSignup.tsx` (success copy)
+- `src/components/layout/ProfileSwitcher.tsx` *(only if it exists and exposes role switching)*
