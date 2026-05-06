@@ -1,7 +1,8 @@
 import { ReactNode, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Printer, FileText } from "lucide-react";
+import { ArrowLeft, Printer, FileText, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LegalDocLayoutProps {
   title: string;
@@ -12,6 +13,15 @@ interface LegalDocLayoutProps {
   owner?: string;
   children: ReactNode;
 }
+
+const FUTURE_TO_PRESENT: [RegExp, string][] = [
+  [/\byou will be bound\b/gi, "you are bound"],
+  [/\byou will be required\b/gi, "you are required"],
+  [/\byou will agree\b/gi, "you have agreed"],
+  [/\byou will accept\b/gi, "you have accepted"],
+  [/\bby signing up,?\s+you agree\b/gi, "You have agreed"],
+  [/\bby creating an account,?\s+you agree\b/gi, "You have agreed"],
+];
 
 export function LegalDocLayout({
   title,
@@ -24,18 +34,44 @@ export function LegalDocLayout({
 }: LegalDocLayoutProps) {
   const navigate = useNavigate();
   const [toc, setToc] = useState<{ id: string; text: string }[]>([]);
+  const [signedSince, setSignedSince] = useState<string | null>(null);
   const updated = lastUpdated || new Date().toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric" });
 
   useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user?.created_at) {
+        setSignedSince(new Date(data.user.created_at).toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric" }));
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     // Build TOC from rendered h2 elements and assign ids
-    const headers = Array.from(document.querySelectorAll("article.legal-body h2")) as HTMLHeadingElement[];
+    const article = document.querySelector("article.legal-body");
+    if (!article) return;
+
+    // Apply present-tense rewrites for signed-in users (text nodes only)
+    if (signedSince) {
+      const walker = document.createTreeWalker(article, NodeFilter.SHOW_TEXT);
+      const nodes: Text[] = [];
+      let n: Node | null;
+      while ((n = walker.nextNode())) nodes.push(n as Text);
+      for (const node of nodes) {
+        let txt = node.nodeValue ?? "";
+        for (const [re, rep] of FUTURE_TO_PRESENT) txt = txt.replace(re, rep);
+        if (txt !== node.nodeValue) node.nodeValue = txt;
+      }
+    }
+
+    const headers = Array.from(article.querySelectorAll("h2")) as HTMLHeadingElement[];
     const items = headers.map((h, i) => {
-      const id = `sec-${i + 1}`;
+      const id = h.id || `sec-${i + 1}`;
       h.id = id;
       return { id, text: h.textContent || `Section ${i + 1}` };
     });
     setToc(items);
-  }, [children]);
+  }, [children, signedSince]);
+
 
   return (
     <div className="min-h-screen bg-muted/30">
