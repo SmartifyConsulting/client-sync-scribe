@@ -24,8 +24,8 @@ export default function HolarcHelpIncidents() {
                 <p className="font-semibold">{new Date(i.created_at).toLocaleString()}</p>
                 <p className="text-xs text-muted-foreground">{i.resolved_at ? `Resolved ${new Date(i.resolved_at).toLocaleString()}` : "In progress"}</p>
               </div>
-              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${i.status === "active" ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>
-                {i.status.toUpperCase()}
+              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${["completed","cancelled"].includes(i.status) ? "bg-secondary text-primary" : "bg-sos/10 text-sos"}`}>
+                {(i.status ?? "").toUpperCase().replace(/_/g, " ")}
               </span>
             </Link>
           </li>
