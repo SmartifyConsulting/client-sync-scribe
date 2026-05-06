@@ -76,7 +76,7 @@ export default function HolarcHelpHome() {
         (payload: any) => {
           const row = payload.new;
           if (row.assigned_provider_id || row.accepted_at) setHelpOnTheWay(true);
-          if (row.status && row.status !== "active") {
+          if (row.status && ["completed", "cancelled"].includes(row.status)) {
             setIncidentId(null);
             setHelpOnTheWay(false);
             setCoords(null);
