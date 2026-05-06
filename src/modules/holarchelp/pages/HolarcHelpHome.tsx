@@ -54,14 +54,14 @@ export default function HolarcHelpHome() {
       .order("created_at", { ascending: false }).limit(1).maybeSingle()
       .then(({ data }: any) => {
         if (data?.id) {
-          // Stale rehydrated incident → send straight to live tracking, never trap user on confirmation screen
+          // Track active incident so user can resume — but don't trap them on this page.
           const ageMs = Date.now() - new Date(data.created_at).getTime();
+          setActiveIncidentId(data.id);
           if (ageMs > 30_000) {
-            navigate(`/patient/holarchelp/incident/${data.id}`, { replace: true });
+            // Older incident: just surface a Resume banner, leave user free to navigate.
             return;
           }
           setIncidentId(data.id);
-          setActiveIncidentId(data.id);
           if (data.assigned_provider_id || data.accepted_at) {
             setHelpOnTheWay(true);
             setProviderAssigned(true);
@@ -321,6 +321,20 @@ export default function HolarcHelpHome() {
           navigate(`/patient/holarchelp/incident/${id}`);
         }}
       />
+
+      {/* Resume active SOS banner */}
+      {activeIncidentId && !incidentId && (
+        <button
+          onClick={() => navigate(`/patient/holarchelp/incident/${activeIncidentId}`)}
+          className="mt-4 flex w-full items-center justify-between gap-3 rounded-2xl border-2 border-red-500/50 bg-red-50 px-4 py-3 text-left dark:bg-red-950/20"
+        >
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-red-700">Active SOS in progress</p>
+            <p className="text-sm font-semibold text-red-900">Tap to resume live tracking</p>
+          </div>
+          <span className="text-red-700">→</span>
+        </button>
+      )}
 
       {/* Header */}
       <div className="flex justify-center pt-6">
