@@ -1,102 +1,101 @@
-# Plan — 7 fixes
+# Plan: Rename moola → vula + Vula-brand the 6Dot50 launch
 
-## 1. AI auto-determine credential stars
+## Part A — Rename moola → vula everywhere
 
-Today `search_providers` computes `stars` with a hard-coded heuristic (3 + specialty + practice/doctor numbers). Replace with an AI-derived score:
+### Database migration (single migration, ALTERs only — preserves data)
 
-- Add `credential_score` (numeric, 1–5) and `credential_score_updated_at` to `profiles`, `holarchelp_hospitals`, `holarchelp_ambulance_providers` via migration.
-- New edge function `score-credentials` calls Lovable AI (`google/gemini-2.5-flash`) with a structured-output prompt evaluating: license fields present/valid format, specialty, about_me richness, address completeness, accreditation/registration. Returns 1–5.
-- Triggered on profile update (debounced via `pg_notify` or simple "stale if older than 30 days") and via a "Recalculate" button in the admin Provider tab.
-- Update `search_providers` to read `coalesce(credential_score, 3)` instead of the heuristic. `MyDoctors` keeps rendering `stars`.
+**Tables renamed:**
+- `moola_partner_apps` → `vula_partner_apps`
+- `moola_transfers` → `vula_transfers`
+- `moola_adherence_configs` → `vula_adherence_configs`
 
-## 2. Legal contracts — duplicated numbering
+**Columns renamed (where they exist):**
+- `doctor_rewards.moolas_count` → `vulas_count`
+- `*.moolas_awarded` → `vulas_awarded`
+- `*.moolas_reward` → `vulas_reward`
 
-`LegalDocLayout` renders the TOC with `<ol class="list-decimal list-inside">` while every `<h2>` already begins with "1.", "2."… → user sees "1. 1. Acceptance…".
+RLS policies, indexes, triggers, FKs and constraint names that embed `moola` are renamed in the same migration. After it runs, `src/integrations/supabase/types.ts` regenerates automatically.
 
-Fix: change the TOC list to `list-none` (no auto numbering) and rely on the heading's own number. Apply to all six legal pages — no per-page edits required.
+### Code rename (mechanical, ~17 files)
 
-## 3. Live tracking link opens in old HolarcHelp app
+- All identifiers: `moola*` → `vula*`, `Moola*` → `Vula*`, `MOOLA*` → `VULA*`
+- All UI strings: "Moola"/"Moolas" → "Vula"/"Vulas"
+- Edge function directory: `supabase/functions/sync-moola-partner-apps/` → `sync-vula-partner-apps/`, plus `supabase/config.toml` and any `functions.invoke()` callers
+- Secrets renamed: `MOOLA_PARTNER_API_KEY` → `VULA_PARTNER_API_KEY`, `MOOLA_PARTNER_API_URL` → `VULA_PARTNER_API_URL` (you'll need to re-add the secret values once)
+- README updates in `src/features/README.md` and `src/features/rewards/README.md`
 
-Root cause in `share-incident-with-contacts/index.ts`:
+**Files touched:** `GamificationAdmin.tsx`, `EmoticonSender.tsx`, `ActivityProofCapture.tsx`, `PrescriptionEditor.tsx`, `StarRatingDialog.tsx`, `useSessions.ts`, `Dashboard.tsx`, `TodoList.tsx`, `DoctorRewards.tsx`, `MyRewards.tsx`, `PatientDashboard.tsx`, `PatientTasks.tsx`, `paypal-subscription/index.ts`, `summarize-session/index.ts`, `sync-moola-partner-apps/index.ts` (renamed), 2× README, 1 migration.
+
+---
+
+## Part B — Present 6Dot50 as "Vula" (no login bypass)
+
+You want the partner portal to **feel like Vula** while the actual login still happens on `secure.6dot50.com` / `portal.6dot50.com`. We do NOT touch their login form, credentials, or session — we just wrap the launch in Vula branding.
+
+### Honest capability check (so the demo story is accurate)
+
+`secure.6dot50.com/lite` ships:
 ```
-const trackUrl = `${SUPABASE_URL.replace("supabase.co","lovable.app")}/track/${token}`;
+X-Frame-Options: SAMEORIGIN
+Content-Security-Policy: frame-ancestors *.6dot50.com;
 ```
-This produces `https://<project-ref>.lovable.app/track/...` — a stale Supabase preview host that resolves to the legacy HolarcHelp deployment.
 
-Fix:
-- Add a `PUBLIC_APP_URL` env var (default `https://holarchealth.com`).
-- Build `trackUrl` from that constant (fallback to request `Origin` header if unset).
-- Audit all edge functions for the same `replace("supabase.co","lovable.app")` pattern and replace.
-- Confirm `/track/:token` route still loads `PublicTrack` on the new domain (it does — already in `App.tsx`). Remove stale `holarchelp.app` references from `README.md`.
-- Verify nothing else still points at the old app: grep `holarchelp.app`, `holarc-help`, deep links — none found in app code, but README references to be cleaned.
+That means:
+- ❌ We **cannot** iframe their page inside Holarc (browser blocks it)
+- ❌ We **cannot** inject CSS/JS into their page (cross-origin policy)
+- ❌ We **cannot** hide their logo on their domain
+- ✅ We **can** brand everything *up to and around* the handoff
+- ✅ We **can** open their site in a fresh, chromeless tab so the user lands on it after seeing only Vula branding
 
-## 4. Notify connected doctors of patient incidents
+### What we'll build
 
-Augment `dispatch-sos` edge function (called when SOS is created):
-- After fanning offers to ambulance providers, query `doctor_patient_access` where `patient_user_id = incident.user_id AND is_active = true`.
-- For each doctor, insert into `notifications` (service-role bypasses RLS):
-  ```
-  type='patient_incident', title='Patient SOS', description='<patient name> triggered an SOS', reference_id=incident.id, user_id=doctor_id
-  ```
-- Existing realtime notifications subscription will surface a toast/badge in the doctor app immediately.
-- Clicking the notification routes to `/patient/<patient_user_id>/holarchelp/incident/<id>` (read-only doctor view) — add this route mapping to `App.tsx`.
+**1. `VulaPortalLaunch.tsx` — full-page branded interstitial** at route `/vula/portal`:
 
-## 5. "Legal Terms" menu item in avatar popover
-
-In `TopBarIcons.tsx`, insert a new menu item directly above Share App:
 ```
-<Link to="/legal"> <Scale className="h-3.5 w-3.5"/> Legal Terms </Link>
+┌──────────────────────────────────────┐
+│  [Vula symbol]                       │
+│                                      │
+│        Vula Wallet                   │
+│        Powered by 6Dot50             │
+│                                      │
+│  Sign in to redeem your Vulas at     │
+│  participating retailers.            │
+│                                      │
+│  [ Continue to secure sign-in → ]    │
+│                                      │
+│  🔒 You'll be taken to our partner's │
+│     secure login page.               │
+└──────────────────────────────────────┘
 ```
-Create new page `src/pages/Legal.tsx` listing the agreements with short descriptions:
-- Terms and Conditions
-- Privacy Policy
-- Healthcare Provider Agreement (BAA)
-- Patient Consent and Authorization
-- Cookie Policy
 
-Use the existing `LegalDocLayout`-style card grid. Add `/legal` route to `App.tsx`.
+- Uses Vula symbol (`@/assets/vula-symbol.png`) and teal primary tokens
+- Single CTA opens `https://portal.6dot50.com/` in `target="_blank"` (mobile: same tab is fine, controlled by a viewport check)
+- Discrete "Powered by 6Dot50" line keeps it legally honest
+- The 6Dot50 login itself is unchanged — your credentials, their session, their security
 
-## 6. Present-tense legal copy for signed-in users
+**2. Replace existing direct 6Dot50 buttons** in `DoctorRewards.tsx` and `MyRewards.tsx`:
+- "Redeem from 6Dot50 with Vula Vouchers" → "Open Vula Wallet"
+- Buttons now route to `/vula/portal` instead of opening `portal.6dot50.com` directly
+- Card copy reworded to lead with "Vula"; 6Dot50 demoted to small partner credit
+- Toast/copy on the partner-sync button: "Sync Vula retailers" (back-end still calls 6dot50)
 
-`LegalDocLayout` accepts a `tense` already implicitly via raw children. Approach:
-- Add a hook `useLegalTense()` returning `"signed"` when `supabase.auth.getUser()` resolves with a user.
-- Pass that into `LegalDocLayout`; layout exposes a `<LegalTenseProvider>` context.
-- Wrap key acceptance phrases in a small helper `<T future="you will be bound" present="you are bound" />` across the six legal pages. Specific replacements:
-  - "By creating an account … you agree to be bound" → "you are bound"
-  - "you will be required to" → "you are required to"
-  - Acceptance banner at top swaps "By signing up you agree" → "You have agreed to these terms" with the user's signup date when available.
-- No content rewrite — only the verb forms in acceptance/binding clauses.
+**3. Route + nav**
+- Add `/vula/portal` route in `src/App.tsx`
+- No new nav item — entry stays via the Redeem section in the existing rewards pages
 
-## 7. Merge Intellectual Property into Terms & Conditions
+### What we are deliberately NOT doing
 
-- Append the full IP content as a new top-level section "Intellectual Property" inside `TermsAndConditions.tsx` (renumbered to fit existing flow, becomes section 12).
-- Delete `src/pages/IntellectualProperty.tsx`.
-- In `App.tsx`, redirect `/intellectual-property` → `/terms-and-conditions#intellectual-property`.
-- Update every `<Link to="/intellectual-property">` to use the new anchor (footer, signup, settings, etc.).
-- Remove the IP entry from the new `/legal` index page (step 5).
+- Not proxying or rehosting 6Dot50 (would handle credentials = liability + ToS violation)
+- Not skinning their actual login form (impossible without their cooperation)
+- Not removing 6Dot50's name from their own page
 
-## Files
+---
 
-**Migration**
-- `supabase/migrations/<ts>_credential_scores.sql`
+## Files affected
 
-**Edge functions**
-- new `supabase/functions/score-credentials/index.ts`
-- edited `supabase/functions/share-incident-with-contacts/index.ts`
-- edited `supabase/functions/dispatch-sos/index.ts`
-
-**Frontend**
-- `src/components/legal/LegalDocLayout.tsx` (TOC fix + tense context)
-- `src/pages/TermsAndConditions.tsx` (merge IP, present tense)
-- `src/pages/PrivacyPolicy.tsx`, `BusinessAssociateAgreement.tsx`, `PatientConsent.tsx`, `CookiePolicy.tsx` (present tense)
-- delete `src/pages/IntellectualProperty.tsx`
-- new `src/pages/Legal.tsx`
-- `src/components/layout/TopBarIcons.tsx` (Legal Terms menu item)
-- `src/App.tsx` (add `/legal`, redirect `/intellectual-property`, doctor incident route)
-- `src/pages/patient/MyDoctors.tsx` — no change (consumes `stars` field)
-- `src/modules/holarchelp/README.md` (cleanup stale URLs)
+**Part A:** 1 migration · 12 source files · 2 edge functions · 1 directory rename · `supabase/config.toml` · 2 READMEs · secrets re-add.
+**Part B:** `src/pages/VulaPortalLaunch.tsx` (new) · `src/App.tsx` · `src/pages/doctor/DoctorRewards.tsx` · `src/pages/patient/MyRewards.tsx`.
 
 ## Out of scope
-- Visual redesign of legal pages
-- Per-jurisdiction localisation of legal copy
-- Doctor mobile push notifications (SMS/email) — only in-app notifications
+- Renaming the user-visible "Vula" currency (already correct in UI; this cleanup just aligns code/DB)
+- Any modification to the 6Dot50 login flow itself
