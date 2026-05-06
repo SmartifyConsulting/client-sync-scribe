@@ -1,5 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
-import { Loader2, Pencil, Save, X, Shield, Hospital, Ambulance, Droplet, Users, Stethoscope } from "lucide-react";
+import { Loader2, Pencil, Save, X, Shield, Hospital, Ambulance, Droplet, Users, Stethoscope, Trash2 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InviteUserDialog } from "@/components/InviteUserDialog";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -67,6 +71,8 @@ export default function UsersTab() {
     first_name: "", last_name: "", email: "", category: "none", emergency_kind: "hospital_staff",
   });
   const [saving, setSaving] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<UserRecord | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (isAdmin) fetchUsers();
@@ -113,8 +119,16 @@ export default function UsersTab() {
         holarchelp_enabled: helpMap.get(u.user_id) || false,
         company: companyMap.get(u.user_id) || (u.role === "doctor" ? docCompanyMap.get(u.user_id) || null : null),
       }));
+      // Dedupe by user_id, preferring highest-priority role
+      const priority = (r: string) => ({ admin: 4, doctor: 3, patient: 2, none: 1 } as any)[r] ?? 0;
+      const byId = new Map<string, UserRecord>();
+      for (const u of merged) {
+        const existing = byId.get(u.user_id);
+        if (!existing || priority(u.role) > priority(existing.role)) byId.set(u.user_id, u);
+      }
+      const deduped = Array.from(byId.values());
       // Emergency provider accounts live on the Providers tab
-      setUsers(merged.filter(u => !EMERGENCY_ROLES.includes(u.role as RoleEnum)));
+      setUsers(deduped.filter(u => !EMERGENCY_ROLES.includes(u.role as RoleEnum)));
     } else {
       setUsers(baseUsers);
     }
@@ -209,30 +223,49 @@ export default function UsersTab() {
     }
   };
 
+  const deleteUser = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-delete-user", {
+        body: { userId: pendingDelete.user_id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setUsers(prev => prev.filter(u => u.user_id !== pendingDelete.user_id));
+      toast({ title: "User deleted" });
+      setPendingDelete(null);
+    } catch (e: any) {
+      toast({ title: "Failed to delete user", description: e.message, variant: "destructive" });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const categoryBadge = (role: string) => {
     const cat = roleToCategory(role);
     switch (cat) {
-      case "admin": return <Badge variant="destructive" className="text-sm">Admin</Badge>;
-      case "provider": return <Badge className="bg-blue-600 text-white hover:bg-blue-700 text-sm">Healthcare Provider</Badge>;
-      case "patient": return <Badge className="bg-teal-600 text-white hover:bg-teal-700 text-sm">Patient</Badge>;
+      case "admin": return <Badge variant="destructive">Admin</Badge>;
+      case "provider": return <Badge className="bg-blue-600 text-white hover:bg-blue-700">Provider</Badge>;
+      case "patient": return <Badge className="bg-teal-600 text-white hover:bg-teal-700">Patient</Badge>;
       case "emergency": {
         const ei = emergencyIcon(role);
-        if (!ei) return <Badge variant="outline" className="text-sm">None</Badge>;
+        if (!ei) return <Badge variant="outline">None</Badge>;
         const { Icon, label } = ei;
         return (
-          <Badge className="bg-primary text-primary-foreground hover:bg-primary/90 w-fit p-1.5" title={label} aria-label={label}>
-            <Icon className="h-4 w-4" />
+          <Badge className="bg-primary text-primary-foreground hover:bg-primary/90 gap-1" title={label}>
+            <Icon className="h-3 w-3" />{label}
           </Badge>
         );
       }
-      default: return <Badge variant="outline" className="text-sm">None</Badge>;
+      default: return <Badge variant="outline">None</Badge>;
     }
   };
 
   const statusBadge = (status: string) =>
     status === "pending"
-      ? <Badge variant="outline" className="border-amber-500 text-amber-600 text-sm">Pending</Badge>
-      : <Badge variant="outline" className="border-green-500 text-green-600 text-sm">Active</Badge>;
+      ? <Badge variant="outline" className="border-amber-500 text-amber-600">Pending</Badge>
+      : <Badge variant="outline" className="border-green-500 text-green-600">Active</Badge>;
 
   const patients = useMemo(
     () => users.filter(u => u.role === "patient" || u.role === "admin" || u.role === "none"),
@@ -256,12 +289,11 @@ export default function UsersTab() {
             <TableHead>First Name</TableHead>
             <TableHead>Last Name</TableHead>
             <TableHead>Email</TableHead>
-            <TableHead>Category</TableHead>
             <TableHead>Company / Practice</TableHead>
             <TableHead><span className="inline-flex items-center gap-1.5"><Shield className="h-4 w-4" />HolarcHelp</span></TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Joined</TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
+            <TableHead className="w-[120px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -292,34 +324,6 @@ export default function UsersTab() {
                   )}
                 </TableCell>
                 <TableCell>
-                  {isEditing ? (
-                    <div className="flex flex-col gap-1">
-                      <Select value={editState.category} onValueChange={(v) => setEditState(s => ({ ...s, category: v as Category }))}>
-                        <SelectTrigger className="h-8 w-44"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="patient">Patient</SelectItem>
-                          <SelectItem value="provider">Healthcare Provider</SelectItem>
-                          <SelectItem value="emergency">Emergency Service</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="none">None</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {editState.category === "emergency" && (
-                        <Select value={editState.emergency_kind} onValueChange={(v) => setEditState(s => ({ ...s, emergency_kind: v as EmergencyKind }))}>
-                          <SelectTrigger className="h-8 w-44"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="hospital_staff">Hospital</SelectItem>
-                            <SelectItem value="ambulance_staff">Ambulance</SelectItem>
-                            <SelectItem value="blood_bank">Blood Bank</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )}
-                    </div>
-                  ) : (
-                    categoryBadge(u.role)
-                  )}
-                </TableCell>
-                <TableCell>
                   <span className="text-sm">{u.company || "—"}</span>
                 </TableCell>
                 <TableCell>
@@ -342,9 +346,14 @@ export default function UsersTab() {
                       </Button>
                     </div>
                   ) : (
-                    <Button size="icon" variant="ghost" onClick={() => startEditing(u)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button size="icon" variant="ghost" onClick={() => startEditing(u)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => setPendingDelete(u)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   )}
                 </TableCell>
               </TableRow>
@@ -352,7 +361,7 @@ export default function UsersTab() {
           })}
           {rows.length === 0 && (
             <TableRow>
-              <TableCell colSpan={9} className="text-center text-muted-foreground py-8">No users found</TableCell>
+              <TableCell colSpan={8} className="text-center text-muted-foreground py-8">No users found</TableCell>
             </TableRow>
           )}
         </TableBody>
@@ -380,6 +389,23 @@ export default function UsersTab() {
         <TabsContent value="patients" className="mt-4">{renderTable(patients)}</TabsContent>
         <TabsContent value="providers" className="mt-4">{renderTable(providers)}</TabsContent>
       </Tabs>
+
+      <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !deleting && !o && setPendingDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete user permanently?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This removes <strong>{pendingDelete?.email}</strong>'s account and profile. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteUser} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

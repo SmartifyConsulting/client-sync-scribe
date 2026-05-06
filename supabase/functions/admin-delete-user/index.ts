@@ -1,0 +1,43 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  try {
+    const auth = req.headers.get("Authorization") ?? "";
+    const token = auth.replace(/^Bearer\s+/i, "");
+    if (!token) throw new Error("Missing auth");
+
+    const url = Deno.env.get("SUPABASE_URL")!;
+    const service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const sb = createClient(url, service);
+
+    const { data: userData, error: userErr } = await sb.auth.getUser(token);
+    if (userErr || !userData?.user) throw new Error("Invalid auth");
+    const callerId = userData.user.id;
+
+    const { data: isAdmin } = await sb.rpc("has_role", { _user_id: callerId, _role: "admin" });
+    if (!isAdmin) throw new Error("Admin role required");
+
+    const { userId } = await req.json();
+    if (!userId || typeof userId !== "string") throw new Error("userId required");
+    if (userId === callerId) throw new Error("You cannot delete your own account");
+
+    await sb.from("user_roles").delete().eq("user_id", userId);
+    await sb.from("profiles").delete().eq("id", userId);
+    const { error: delErr } = await sb.auth.admin.deleteUser(userId);
+    if (delErr) throw delErr;
+
+    return new Response(JSON.stringify({ ok: true }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (e: any) {
+    return new Response(JSON.stringify({ error: e.message }), {
+      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});
