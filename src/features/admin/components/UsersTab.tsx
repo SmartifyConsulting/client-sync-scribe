@@ -230,8 +230,8 @@ export default function UsersTab() {
 
   const statusBadge = (status: string) =>
     status === "pending"
-      ? <Badge variant="outline" className="border-amber-500 text-amber-600">Pending</Badge>
-      : <Badge variant="outline" className="border-green-500 text-green-600">Active</Badge>;
+      ? <Badge variant="outline" className="border-amber-500 text-amber-600 text-sm">Pending</Badge>
+      : <Badge variant="outline" className="border-green-500 text-green-600 text-sm">Active</Badge>;
 
   if (loading) {
     return (
