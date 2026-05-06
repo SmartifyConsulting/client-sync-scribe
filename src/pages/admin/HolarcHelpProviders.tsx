@@ -383,7 +383,7 @@ export default function HolarcHelpProviders() {
           <DialogHeader>
             <DialogTitle>Add provider</DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-3 py-2">
+          <div className="grid grid-cols-3 gap-3 py-2">
             <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("hospital"); setEdit({ kind: "hospital", row: null }); }}>
               <Hospital className="h-6 w-6" />
               <span className="text-xs font-semibold">Hospital</span>
@@ -391,6 +391,10 @@ export default function HolarcHelpProviders() {
             <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("ambulance"); setEdit({ kind: "ambulance", row: null }); }}>
               <Ambulance className="h-6 w-6" />
               <span className="text-xs font-semibold">Ambulance</span>
+            </Button>
+            <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("pharmacy"); setEdit({ kind: "pharmacy", row: null }); }}>
+              <Pill className="h-6 w-6" />
+              <span className="text-xs font-semibold">Pharmacy</span>
             </Button>
           </div>
         </DialogContent>
