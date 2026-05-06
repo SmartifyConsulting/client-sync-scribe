@@ -289,12 +289,11 @@ export default function UsersTab() {
             <TableHead>First Name</TableHead>
             <TableHead>Last Name</TableHead>
             <TableHead>Email</TableHead>
-            <TableHead>Category</TableHead>
             <TableHead>Company / Practice</TableHead>
             <TableHead><span className="inline-flex items-center gap-1.5"><Shield className="h-4 w-4" />HolarcHelp</span></TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Joined</TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
+            <TableHead className="w-[120px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
