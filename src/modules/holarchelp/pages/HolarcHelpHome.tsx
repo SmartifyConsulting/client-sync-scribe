@@ -322,6 +322,20 @@ export default function HolarcHelpHome() {
         }}
       />
 
+      {/* Resume active SOS banner */}
+      {activeIncidentId && !incidentId && (
+        <button
+          onClick={() => navigate(`/patient/holarchelp/incident/${activeIncidentId}`)}
+          className="mt-4 flex w-full items-center justify-between gap-3 rounded-2xl border-2 border-red-500/50 bg-red-50 px-4 py-3 text-left dark:bg-red-950/20"
+        >
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-red-700">Active SOS in progress</p>
+            <p className="text-sm font-semibold text-red-900">Tap to resume live tracking</p>
+          </div>
+          <span className="text-red-700">→</span>
+        </button>
+      )}
+
       {/* Header */}
       <div className="flex justify-center pt-6">
         <img src={logo} alt="Holarc Help" className="h-12 w-auto" />
