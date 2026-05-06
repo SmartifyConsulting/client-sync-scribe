@@ -128,7 +128,7 @@ export function StarRatingDialog({
       const { error } = await supabase.from('visit_ratings' as any).insert(insertData);
       if (error) throw error;
 
-      // Award moolas
+      // Award vulas
       if (raterRole === "doctor") {
         const { data: session } = await supabase
           .from('sessions')
@@ -150,7 +150,7 @@ export function StarRatingDialog({
           doctor_id: ratedUserId,
           reward_type: 'visit_rating',
           description: `Rated ${overallRating} stars by patient`,
-          moolas_count: overallRating,
+          vulas_count: overallRating,
           reference_id: sessionId,
         });
       }

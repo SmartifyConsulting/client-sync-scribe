@@ -73,7 +73,7 @@ interface VulaTransfer {
   amount: number;
   created_at: string;
   partner_app_id: string;
-  moola_partner_apps?: { name: string; logo_url: string | null };
+  vula_partner_apps?: { name: string; logo_url: string | null };
 }
 
 export default function MyRewards() {
@@ -129,10 +129,10 @@ export default function MyRewards() {
 
 
   const { data: partnerApps = [] } = useQuery({
-    queryKey: ["moola-partner-apps"],
+    queryKey: ["vula-partner-apps"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("moola_partner_apps")
+        .from("vula_partner_apps")
         .select("*")
         .eq("is_active", true)
         .order("name");
@@ -142,13 +142,13 @@ export default function MyRewards() {
   });
 
   const { data: transfers = [] } = useQuery({
-    queryKey: ["moola-transfers"],
+    queryKey: ["vula-transfers"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
       const { data, error } = await supabase
-        .from("moola_transfers")
-        .select("*, moola_partner_apps(name, logo_url)")
+        .from("vula_transfers")
+        .select("*, vula_partner_apps(name, logo_url)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -178,7 +178,7 @@ export default function MyRewards() {
       // Insert transfer record (skip FK for vault)
       if (!isVault) {
         const { error: transferError } = await supabase
-          .from("moola_transfers")
+          .from("vula_transfers")
           .insert({ user_id: user.id, partner_app_id: appId, amount });
         if (transferError) throw transferError;
       }
@@ -197,7 +197,7 @@ export default function MyRewards() {
     },
     onSuccess: () => {
       toast({ title: "Transfer successful", description: "Your Vulas have been transferred." });
-      queryClient.invalidateQueries({ queryKey: ["moola-transfers"] });
+      queryClient.invalidateQueries({ queryKey: ["vula-transfers"] });
       queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
       setShowTransferDialog(false);
       setTransferFromAppId("");
@@ -235,8 +235,8 @@ export default function MyRewards() {
       items.push({
         id: `t-${t.id}`,
         date: parseISO(t.created_at),
-        label: t.moola_partner_apps?.name
-          ? `Transfer to ${t.moola_partner_apps.name}`
+        label: t.vula_partner_apps?.name
+          ? `Transfer to ${t.vula_partner_apps.name}`
           : "Vula Transfer",
         amount: -Math.abs(t.amount),
         kind: "transfer",
@@ -774,7 +774,7 @@ export default function MyRewards() {
                   </p>
                   <Button
                     onClick={async () => {
-                      const { data, error } = await supabase.functions.invoke("sync-moola-partner-apps");
+                      const { data, error } = await supabase.functions.invoke("sync-vula-partner-apps");
                       if (error || (data as any)?.error) {
                         toast({
                           title: "Couldn't sync retailers",
@@ -784,7 +784,7 @@ export default function MyRewards() {
                         return;
                       }
                       toast({ title: "Retailers synced", description: `${(data as any)?.synced ?? 0} partners loaded from 6dot50.` });
-                      queryClient.invalidateQueries({ queryKey: ["moola-partner-apps"] });
+                      queryClient.invalidateQueries({ queryKey: ["vula-partner-apps"] });
                     }}
                     className="gap-2"
                   >

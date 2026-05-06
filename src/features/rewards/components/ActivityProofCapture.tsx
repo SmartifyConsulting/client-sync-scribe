@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface Task {
   id: string;
   title: string;
-  moolas_reward: number;
+  vulas_reward: number;
   patient_id: string | null;
   task_type: string;
 }
@@ -114,18 +114,18 @@ export function ActivityProofCapture({ tasks, onProofSubmitted }: ActivityProofC
         completed_at: new Date().toISOString(),
       }).eq("id", selectedTaskId);
 
-      // Award moolas if configured
-      if (task && task.moolas_reward > 0 && task.patient_id) {
+      // Award vulas if configured
+      if (task && task.vulas_reward > 0 && task.patient_id) {
         await supabase.from("patient_rewards").insert({
           patient_id: task.patient_id,
           awarded_by: user.id,
           visit_category: "Activity Completion",
-          lollipops_count: task.moolas_reward,
+          lollipops_count: task.vulas_reward,
           reward_type: "activity",
         });
       }
 
-      toast({ title: "Proof submitted!", description: `Task completed${task?.moolas_reward ? ` — earned ${task.moolas_reward} Moolas!` : ""}` });
+      toast({ title: "Proof submitted!", description: `Task completed${task?.vulas_reward ? ` — earned ${task.vulas_reward} Vulas!` : ""}` });
       handleClose();
       onProofSubmitted();
     } catch (error) {
@@ -176,7 +176,7 @@ export function ActivityProofCapture({ tasks, onProofSubmitted }: ActivityProofC
               <SelectContent>
                 {pendingTasks.map((t) => (
                   <SelectItem key={t.id} value={t.id}>
-                    {t.title} {t.moolas_reward > 0 && `(+${t.moolas_reward} Ⓜ)`}
+                    {t.title} {t.vulas_reward > 0 && `(+${t.vulas_reward} Ⓜ)`}
                   </SelectItem>
                 ))}
               </SelectContent>

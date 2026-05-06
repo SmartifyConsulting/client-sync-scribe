@@ -19,7 +19,7 @@ interface PatientTodo {
   status: string;
   priority: string;
   due_date: string | null;
-  moolas_reward: number;
+  vulas_reward: number;
   created_at: string;
   completed_at: string | null;
   proof_url: string | null;
@@ -230,7 +230,7 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isCompleted = todo.status === "completed";
-  const hasVulasReward = todo.moolas_reward > 0;
+  const hasVulasReward = todo.vulas_reward > 0;
   const isMedicationType = todo.task_type === "medication" || todo.title.toLowerCase().includes("medication") || todo.title.toLowerCase().includes("medic");
 
   // Recording state
@@ -425,17 +425,17 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
           .eq("id", todo.id);
         if (updateError) throw updateError;
 
-        if (todo.moolas_reward > 0) {
+        if (todo.vulas_reward > 0) {
           await supabase.from("patient_rewards").insert({
             patient_id: todo.patient_id,
             awarded_by: user.id,
-            lollipops_count: todo.moolas_reward,
+            lollipops_count: todo.vulas_reward,
             visit_category: "Task Completion",
             reward_type: "task_proof",
           });
         }
 
-        toast({ title: "✅ Task verified!", description: `AI confirmed your proof. +${todo.moolas_reward} Vulas earned!` });
+        toast({ title: "✅ Task verified!", description: `AI confirmed your proof. +${todo.vulas_reward} Vulas earned!` });
         handleCloseRecording();
         queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
         onComplete();
@@ -489,9 +489,9 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
                   Due {format(new Date(todo.due_date), "MMM d, yyyy")}
                 </span>
               )}
-              {todo.moolas_reward > 0 && (
+              {todo.vulas_reward > 0 && (
                 <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
-                  🪙 {todo.moolas_reward} Moolas
+                  🪙 {todo.vulas_reward} Vulas
                 </Badge>
               )}
             </div>
