@@ -6,6 +6,7 @@ import { VoiceNoteAudio } from "../components/VoiceNoteAudio";
 import { IncidentTimeline } from "../components/IncidentTimeline";
 import { IncidentVoiceNoteRecorder } from "../components/IncidentVoiceNoteRecorder";
 import { EtaCountdown } from "../components/EtaCountdown";
+import { IncidentPhotos } from "../components/IncidentPhotos";
 import { Button } from "@/components/ui/button";
 import { Copy, CheckCircle2, MessageCircle, Loader2, AlertTriangle, ArrowLeft, Phone, Bell, History, Share2 } from "lucide-react";
 import { toast } from "sonner";
@@ -220,6 +221,7 @@ export default function HolarcHelpIncidentDetail() {
       )}
 
       <div className="mt-4"><IncidentVoiceNoteRecorder incidentId={id!} providerId={null} /></div>
+      <div className="mt-4"><IncidentPhotos incidentId={id!} /></div>
       <div className="mt-4"><IncidentTimeline incidentId={id!} /></div>
 
       {isLive && contacts.length > 0 && (
