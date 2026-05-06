@@ -90,6 +90,12 @@ serve(async (req) => {
 
     await supabase.from("profiles").update({ full_name: fullName, mobile_number: phone }).eq("id", userId);
 
+    const staffRole = type === "hospital" ? "hospital_staff" : "ambulance_staff";
+    await supabase.from("user_roles").upsert(
+      { user_id: userId, role: staffRole },
+      { onConflict: "user_id,role", ignoreDuplicates: true },
+    );
+
     if (type === "hospital") {
       const { error } = await supabase.from("holarchelp_hospitals").insert({
         owner_id: userId,
