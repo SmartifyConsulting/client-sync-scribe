@@ -14,10 +14,12 @@ export const LiveMap = ({ points, height = 360 }: { points: Point[]; height?: nu
   const latest = points[0];
 
   useEffect(() => {
+    console.log("[LiveMap] mount effect", { hasKey: !!GOOGLE_MAPS_API_KEY, hasContainer: !!containerRef.current, hasMap: !!mapRef.current, failed, latest });
     if (!GOOGLE_MAPS_API_KEY || !containerRef.current || mapRef.current || failed) return;
     let cancelled = false;
     loadGoogleMaps()
       .then(() => {
+        console.log("[LiveMap] loadGoogleMaps resolved");
         if (cancelled || !containerRef.current) return;
         try {
           mapRef.current = new google.maps.Map(containerRef.current, {
@@ -29,6 +31,7 @@ export const LiveMap = ({ points, height = 360 }: { points: Point[]; height?: nu
             mapId: GOOGLE_MAPS_MAP_ID,
           });
           setReady(true);
+          console.log("[LiveMap] map created");
         } catch (e) {
           console.warn("[LiveMap] Google Maps init failed, falling back to OSM", e);
           setFailed(true);
