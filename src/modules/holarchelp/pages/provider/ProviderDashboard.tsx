@@ -15,6 +15,8 @@ type Incident = {
   breathing: boolean | null;
   created_at: string;
   assigned_provider_id: string | null;
+  accepted_at?: string | null;
+  eta_minutes?: number | null;
   full_name?: string | null;
 };
 
