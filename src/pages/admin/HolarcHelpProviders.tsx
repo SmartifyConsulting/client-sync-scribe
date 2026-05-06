@@ -82,6 +82,7 @@ export default function HolarcHelpProviders() {
   const [status, setStatus] = useState<Status>("all");
   const [hospitals, setHospitals] = useState<any[]>([]);
   const [ambulances, setAmbulances] = useState<any[]>([]);
+  const [pharmacies, setPharmacies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [edit, setEdit] = useState<EditState>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ kind: Kind; id: string; name: string } | null>(null);
