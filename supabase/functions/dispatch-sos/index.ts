@@ -94,7 +94,8 @@ Deno.serve(async (req) => {
     }
 
     const rows = candidates.map((p: any) => ({
-      incident_id, provider_id: p.id, response: "pending", distance_km: Number(p._d.toFixed(2)),
+      incident_id, provider_id: p.id, provider_kind: p._kind,
+      response: "pending", distance_km: Number(p._d.toFixed(2)),
     }));
     const { error } = await sb.from("holarchelp_incident_offers").upsert(rows, {
       onConflict: "incident_id,provider_id", ignoreDuplicates: true,
