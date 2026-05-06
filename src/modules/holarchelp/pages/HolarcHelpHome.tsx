@@ -257,6 +257,15 @@ export default function HolarcHelpHome() {
         incidentId={incidentId}
         onClose={() => { setVoiceNoteOpen(false); setSeverityOpen(true); }}
       />
+      <DoctorSosChooser
+        open={chooserOpen}
+        onClose={() => setChooserOpen(false)}
+        onSelectSelf={() => triggerSOS()}
+        onPatientIncidentCreated={(id) => {
+          setChooserOpen(false);
+          navigate(`/patient/holarchelp/incident/${id}`);
+        }}
+      />
 
       {hasEmergency === false && (
         <Card className="mb-4 border-amber-500/40 bg-amber-50">
