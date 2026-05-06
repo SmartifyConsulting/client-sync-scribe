@@ -197,13 +197,7 @@ export default function HolarcHelpIncidentDetail() {
       )}
 
       {incident.status === "open" && !incident.assigned_provider_id && !showNoResponders && (
-        <div className="mb-3 flex items-center gap-3 rounded-2xl border-2 border-amber-500/40 bg-amber-50 p-3 dark:bg-amber-950/20">
-          <Loader2 className="h-5 w-5 animate-spin text-amber-700" />
-          <div className="text-sm">
-            <p className="font-semibold text-amber-800 dark:text-amber-300">Finding nearest ambulance…</p>
-            <p className="text-xs text-amber-700/80">Notified {pendingOffers} responder{pendingOffers === 1 ? "" : "s"}.</p>
-          </div>
-        </div>
+        <AvailableResponders incidentId={id!} createdAt={incident.created_at} />
       )}
 
       {incident.status === "reopened" && (
