@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Mic, Square, X, Loader2 } from "lucide-react";
+import { Mic, Send, X, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const MAX_SECONDS = 60;
+const SILENCE_MS = 4000;
+const MIN_RECORD_MS = 2000;
+const SILENCE_RMS = 0.015; // amplitude threshold
 
 interface Props {
   open: boolean;
@@ -25,40 +28,78 @@ const blobToBase64 = (blob: Blob) =>
   });
 
 export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
-  const [phase, setPhase] = useState<"prompt" | "recording" | "uploading">("prompt");
+  const [phase, setPhase] = useState<"recording" | "uploading">("recording");
   const [seconds, setSeconds] = useState(0);
+  const [level, setLevel] = useState(0);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const rafRef = useRef<number | null>(null);
   const timerRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (!open) {
-      cleanup();
-      setPhase("prompt");
-      setSeconds(0);
-    }
-  }, [open]);
+  const startedAtRef = useRef<number>(0);
+  const lastVoiceAtRef = useRef<number>(0);
 
   const cleanup = () => {
     try { recorderRef.current?.state === "recording" && recorderRef.current.stop(); } catch {}
     streamRef.current?.getTracks().forEach((t) => t.stop());
+    try { audioCtxRef.current?.close(); } catch {}
     streamRef.current = null;
     recorderRef.current = null;
-    chunksRef.current = [];
+    audioCtxRef.current = null;
+    analyserRef.current = null;
+    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
     if (timerRef.current) { window.clearInterval(timerRef.current); timerRef.current = null; }
+  };
+
+  const stopAndSend = () => {
+    try { recorderRef.current?.state === "recording" && recorderRef.current.stop(); } catch {}
+    if (timerRef.current) { window.clearInterval(timerRef.current); timerRef.current = null; }
+    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
   };
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
+
+      // Audio analyser for silence detection
+      const Ctx = (window as any).AudioContext || (window as any).webkitAudioContext;
+      const ctx: AudioContext = new Ctx();
+      audioCtxRef.current = ctx;
+      const src = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 1024;
+      src.connect(analyser);
+      analyserRef.current = analyser;
+      const buf = new Float32Array(analyser.fftSize);
+
+      const tick = () => {
+        if (!analyserRef.current) return;
+        analyserRef.current.getFloatTimeDomainData(buf);
+        let sum = 0;
+        for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+        const rms = Math.sqrt(sum / buf.length);
+        setLevel(Math.min(1, rms * 8));
+        const now = Date.now();
+        if (rms > SILENCE_RMS) lastVoiceAtRef.current = now;
+        if (now - startedAtRef.current >= MIN_RECORD_MS &&
+            now - lastVoiceAtRef.current >= SILENCE_MS) {
+          stopAndSend();
+          return;
+        }
+        rafRef.current = requestAnimationFrame(tick);
+      };
+
       const mr = new MediaRecorder(stream, { mimeType: "audio/webm" });
       recorderRef.current = mr;
       chunksRef.current = [];
       mr.ondataavailable = (e) => e.data.size > 0 && chunksRef.current.push(e.data);
       mr.onstop = handleStop;
       mr.start();
+      startedAtRef.current = Date.now();
+      lastVoiceAtRef.current = Date.now();
       setPhase("recording");
       setSeconds(0);
       timerRef.current = window.setInterval(() => {
@@ -69,16 +110,26 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
           return s + 1;
         });
       }, 1000);
+      rafRef.current = requestAnimationFrame(tick);
     } catch (e: any) {
       toast.error("Microphone access denied");
       onClose();
     }
   };
 
-  const stopRecording = () => {
-    try { recorderRef.current?.state === "recording" && recorderRef.current.stop(); } catch {}
-    if (timerRef.current) { window.clearInterval(timerRef.current); timerRef.current = null; }
-  };
+  useEffect(() => {
+    if (open) {
+      setPhase("recording");
+      setSeconds(0);
+      setLevel(0);
+      // Auto-start mic
+      startRecording();
+    } else {
+      cleanup();
+    }
+    return () => cleanup();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const handleStop = async () => {
     setPhase("uploading");
@@ -87,6 +138,14 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
       streamRef.current?.getTracks().forEach((t) => t.stop());
 
       if (!incidentId) throw new Error("No incident");
+      if (blob.size < 500) {
+        // Practically empty — keep critical default and skip
+        toast.message("No voice note captured — severity kept as Critical");
+        cleanup();
+        onClose();
+        return;
+      }
+
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
       if (!uid) throw new Error("Not authenticated");
@@ -97,23 +156,33 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
         .upload(path, blob, { contentType: "audio/webm", upsert: false });
       if (upErr) throw upErr;
 
-      // Transcribe
-      const base64 = await blobToBase64(blob);
-      const { data: trData, error: trErr } = await supabase.functions.invoke("transcribe-audio", {
-        body: { audio: base64, patientName: "Patient", doctorName: "Responder" },
-      });
-      const transcript = (!trErr && (trData as any)?.text) ? String((trData as any).text) : "";
-
+      // Save audio path immediately so responders see it
       await supabase.from("holarchelp_incidents" as any).update({
         voice_note_audio_url: path,
-        voice_note_transcript: transcript || null,
       } as any).eq("id", incidentId);
 
-      toast.success(transcript ? "Voice note shared with responders" : "Voice note saved");
+      toast.success("Voice note shared with responders");
+      cleanup();
+      onClose();
+
+      // Transcribe in the background; UPDATE will surface via realtime
+      try {
+        const base64 = await blobToBase64(blob);
+        const { data: trData, error: trErr } = await supabase.functions.invoke("transcribe-audio", {
+          body: { audio: base64, patientName: "Patient", doctorName: "Responder" },
+        });
+        const transcript = (!trErr && (trData as any)?.text) ? String((trData as any).text) : "";
+        if (transcript) {
+          await supabase.from("holarchelp_incidents" as any).update({
+            voice_note_transcript: transcript,
+          } as any).eq("id", incidentId);
+        }
+      } catch (err) {
+        console.error("Transcription failed (audio still saved)", err);
+      }
     } catch (e: any) {
       console.error(e);
       toast.error(e?.message || "Failed to save voice note");
-    } finally {
       cleanup();
       onClose();
     }
@@ -132,38 +201,38 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
             <Mic className="h-5 w-5" /> Describe the emergency
           </DialogTitle>
           <DialogDescription className="text-base text-foreground pt-2">
-            Please describe what happened, <strong>how many people are injured</strong>, and{" "}
-            <strong>how serious</strong> it is. Responders will see your transcript.
+            Recording started automatically. Tell us what happened, <strong>how many people are injured</strong>, and{" "}
+            <strong>how serious</strong> it is. We'll auto-send after 4 seconds of silence.
           </DialogDescription>
         </DialogHeader>
 
-        {phase === "prompt" && (
-          <div className="flex flex-col gap-3 mt-4">
-            <Button onClick={startRecording} className="bg-red-600 hover:bg-red-700 text-white h-12">
-              <Mic className="h-5 w-5 mr-2" /> Start Recording
-            </Button>
-            <Button onClick={cancel} variant="outline" className="h-11">
-              <X className="h-4 w-4 mr-2" /> Skip / Cancel
-            </Button>
-          </div>
-        )}
-
         {phase === "recording" && (
           <div className="flex flex-col items-center gap-4 mt-4">
-            <div className="h-16 w-16 rounded-full bg-red-600 flex items-center justify-center animate-pulse">
-              <Mic className="h-8 w-8 text-white" />
+            <div
+              className="h-20 w-20 rounded-full bg-red-600 flex items-center justify-center"
+              style={{ transform: `scale(${1 + level * 0.5})`, transition: "transform 80ms linear" }}
+            >
+              <Mic className="h-9 w-9 text-white" />
             </div>
             <div className="text-2xl font-mono">{seconds}s / {MAX_SECONDS}s</div>
-            <Button onClick={stopRecording} className="w-full bg-red-600 hover:bg-red-700 text-white h-12">
-              <Square className="h-5 w-5 mr-2" /> Stop & Send
-            </Button>
+            <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
+              <div className="h-full bg-red-600 transition-all" style={{ width: `${level * 100}%` }} />
+            </div>
+            <div className="grid grid-cols-2 gap-2 w-full">
+              <Button onClick={cancel} variant="outline" className="h-11">
+                <X className="h-4 w-4 mr-2" /> Cancel
+              </Button>
+              <Button onClick={stopAndSend} className="bg-red-600 hover:bg-red-700 text-white h-11">
+                <Send className="h-4 w-4 mr-2" /> Send now
+              </Button>
+            </div>
           </div>
         )}
 
         {phase === "uploading" && (
           <div className="flex flex-col items-center gap-3 py-6">
             <Loader2 className="h-8 w-8 animate-spin text-red-600" />
-            <div className="text-sm text-muted-foreground">Transcribing & sharing…</div>
+            <div className="text-sm text-muted-foreground">Sharing voice note…</div>
           </div>
         )}
       </DialogContent>
