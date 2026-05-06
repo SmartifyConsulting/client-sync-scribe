@@ -15,12 +15,12 @@ export default function Legal() {
         <p>
           The following agreements set out your rights and obligations on the platform. Each opens in a focused reading view.
         </p>
-        <ul className="list-none p-0 m-0 space-y-4">
+        <ul className="list-none p-0 m-0 flex flex-col gap-5 [&>li]:before:hidden">
           {docs.map((d) => (
-            <li key={d.to} className="!m-0">
+            <li key={d.to} className="!m-0 list-none">
               <Link
                 to={d.to}
-                className="flex items-start gap-3 rounded-lg border border-border bg-card p-5 shadow-sm hover:shadow-md hover:border-primary hover:bg-accent transition-all no-underline"
+                className="flex items-start gap-3 rounded-xl border border-border bg-card p-5 md:p-6 shadow-sm hover:shadow-md hover:border-primary hover:bg-accent transition-all no-underline"
               >
                 <FileText className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div className="flex-1 min-w-0">

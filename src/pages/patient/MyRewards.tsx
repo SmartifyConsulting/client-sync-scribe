@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Loader2, Trophy, Target, Flame, Gift, Star, Video, Send, ArrowRightLeft, Pill, ArrowLeft, Info, History } from "lucide-react";
+import { Loader2, Trophy, Target, Flame, Gift, Star, Video, Send, ArrowRightLeft, Pill, ArrowLeft, Info, History, Vault } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -433,13 +433,18 @@ export default function MyRewards() {
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] md:text-sm font-medium text-indigo-100">Redeemed</p>
+                <p className="text-[10px] md:text-sm font-medium text-indigo-100">Vula Vault</p>
                 <p className="text-2xl md:text-4xl font-bold text-white">{totalTransferred}</p>
               </div>
-              <ArrowRightLeft className="h-8 w-8 md:h-12 md:w-12 text-white/90" />
+              <Vault className="h-8 w-8 md:h-12 md:w-12 text-white/90" />
             </div>
-            <Button variant="ghost" size="sm" className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-[10px] md:text-xs flex items-center gap-1 mt-1 md:mt-2" onClick={() => setShowTransferDialog(true)}>
-              Redeem Vulas <Send className="h-3 w-3" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-[10px] md:text-xs flex items-center gap-1 mt-1 md:mt-2"
+              onClick={() => { setTransferToAppId("vault"); setShowTransferDialog(true); }}
+            >
+              Transfer to Vault <ArrowRightLeft className="h-3 w-3" />
             </Button>
           </CardContent>
         </Card>
@@ -766,28 +771,10 @@ export default function MyRewards() {
             </CardHeader>
             <CardContent>
               {partnerApps.length === 0 ? (
-                <div className="text-center py-6 space-y-3">
+                <div className="text-center py-6">
                   <p className="text-sm text-muted-foreground">
-                    No retailers connected yet. Sync the Vula partner network to see all the retailers where you can spend your Vulas.
+                    No partner retailers connected yet. Check back soon.
                   </p>
-                  <Button
-                    onClick={async () => {
-                      const { data, error } = await supabase.functions.invoke("sync-vula-partner-apps");
-                      if (error || (data as any)?.error) {
-                        toast({
-                          title: "Couldn't sync retailers",
-                          description: (data as any)?.error ?? error?.message ?? "An admin must run the sync from the admin Rewards page.",
-                          variant: "destructive",
-                        });
-                        return;
-                      }
-                      toast({ title: "Retailers synced", description: `${(data as any)?.synced ?? 0} partners loaded from the Vula network.` });
-                      queryClient.invalidateQueries({ queryKey: ["vula-partner-apps"] });
-                    }}
-                    className="gap-2"
-                  >
-                    <Gift className="h-4 w-4" /> Sync Vula retailers
-                  </Button>
                 </div>
               ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -816,24 +803,6 @@ export default function MyRewards() {
             </CardContent>
           </Card>
 
-          {/* Transfer to Vula Vault */}
-          <Card className="border-indigo-300">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ArrowRightLeft className="h-5 w-5 text-indigo-600" />
-                Transfer to Vula Vault
-              </CardTitle>
-              <CardDescription>Move your Vulas to the Vula Vault for safekeeping.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button
-                onClick={() => { setTransferToAppId("vault"); setShowTransferDialog(true); }}
-                className="gap-2"
-              >
-                <ArrowRightLeft className="h-4 w-4" /> Transfer to Vault
-              </Button>
-            </CardContent>
-          </Card>
         </TabsContent>
       </Tabs>
     </div>
