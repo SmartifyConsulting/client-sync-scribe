@@ -121,7 +121,7 @@ export default function HolarcHelpIncidentDetail() {
   const trackingUrl = incident ? getPublicTrackUrl(incident.tracking_token) : "";
   const message = buildSosMessage(profileName, trackingUrl);
 
-  const copy = async () => { await navigator.clipboard.writeText(trackingUrl); toast.success("Tracking link copied"); };
+  
 
   const [closeOpen, setCloseOpen] = useState(false);
   const [closureNote, setClosureNote] = useState("");
