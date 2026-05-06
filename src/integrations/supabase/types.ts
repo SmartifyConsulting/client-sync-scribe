@@ -3946,6 +3946,10 @@ export type Database = {
         Args: { _provider_id: string }
         Returns: undefined
       }
+      holarchelp_auto_assign_incident: {
+        Args: { _incident_id: string }
+        Returns: Json
+      }
       holarchelp_get_tracking_incident: {
         Args: { _token: string }
         Returns: {
