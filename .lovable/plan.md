@@ -1,87 +1,96 @@
-# Plan: 6Dot50 link, Legal page spacing, Doctor SOS chooser
+# Plan: SOS dispatch fix, tracking link explainer, Active Emergency nav, footer reorder
 
-## 1. Wire Vula Wallet to `secure.6dot50.com/lite/default`
+## 1. Fix the "Finding nearest ambulance…" infinite spinner
 
-Single one-line change in `src/pages/VulaWallet.tsx`:
-- `PARTNER_URL` → `https://secure.6dot50.com/lite/default`
+**Root cause** in `supabase/functions/dispatch-sos/index.ts`:
 
-The interstitial already opens it in a new tab (their own origin owns the login).
-
-## 2. Reformat the Legal Terms page so cards aren't touching
-
-In `src/pages/Legal.tsx`:
-- Increase vertical gap between agreement cards (`space-y-3` → `space-y-4`)
-- Add inner padding (`p-4` → `p-5`), rounded corners (`rounded-md` → `rounded-lg`)
-- Subtle shadow on hover so cards visually separate from the page background
-
-No changes to the legal documents themselves — only the index page that lists them.
-
-## 3. Doctor SOS chooser: "SOS for Patient" vs "SOS for Me"
-
-When a logged-in **doctor** opens `/doctor/holarchelp`, the SOS Home should first present a two-button modal:
-
-```
-┌─────────────────────────────────┐
-│      Who needs help?            │
-│                                 │
-│  [ 🚨 SOS for a Patient ]       │  red
-│  [ 🚨 SOS for Me ]              │  red
-│                                 │
-│         [ Cancel ]              │
-└─────────────────────────────────┘
+```ts
+const isPublicOnly = (incident as any).coverage === "public";
+const candidates = (providers ?? [])
+  .filter((p: any) => !isPublicOnly || String(p.ownership) === "public")
 ```
 
-### "SOS for Me" (default today)
-- Existing flow: incident is created with `user_id = auth.uid()` (the doctor)
-- Logged in the **doctor's own profile** — already works because RLS `Users insert own incidents` requires `user_id = auth.uid()`
+The user's incident has `coverage = "private"` (auto-set when the patient has medical aid). The filter only restricts to `ownership='public'` when coverage is *public*, but in the DB **all 3 geo-located ambulances are `ownership='private'**` (Netcare ER24, Emergency ER, Abuja). So:
 
-### "SOS for a Patient"
-- Open a quick patient search (existing patient list filtered by the doctor's `doctor_patient_access` roster)
-- On select → call new edge function `dispatch-sos-for-patient` (service role) that:
-  - Verifies the doctor has active access to that patient (`doctor_patient_access.is_active = true`)
-  - Inserts `holarchelp_incidents` with `user_id = patient.user_id`, plus a new column `triggered_by_user_id = doctor.id` and `triggered_by_role = 'doctor'`
-  - Logs an `holarchelp_incident_events` row `sos_triggered_by_doctor` with the doctor's id
-  - Fans out provider offers via the existing dispatch logic
-  - Pushes notifications to: the patient, all the patient's connected doctors, and the patient's NOK
-- Incident appears in the **patient's** profile/incident list (not the doctor's), with a small "Triggered by Dr X" badge
+- `private` patient → all `private` ambulances pass → 3 candidates within 50 km of Joburg → 2 offers (works in theory)
+- BUT for incident `a6181217…`, **0 offers were created**. Re-examining: when coverage is `public`, the filter excludes private providers — so **public-coverage incidents currently get nothing** because no public-ownership ambulances exist yet.
+- And for private-coverage incidents the filter is loose, but the 50 km cap + the requirement `accepting_patients=true` + the requirement of `latitude IS NOT NULL` knocks it down.
 
-Why an edge function: the RLS check `WITH CHECK (user_id = auth.uid())` blocks a doctor from inserting on a patient's behalf from the client. Service-role bypass + explicit access verification keeps it secure.
+Two real bugs:
 
-### Schema migration
-Add to `holarchelp_incidents`:
-- `triggered_by_user_id uuid` (nullable; existing rows = self-triggered)
-- `triggered_by_role text` (nullable; 'self' | 'doctor' | 'caregiver')
+a) **Coverage logic should be inclusive, not exclusive.** A private patient should see private *and* public providers (medical aid covers both). A public-coverage patient should still see private ambulances but not private hospitals if no public ones are near — the current code blocks them entirely. Change to: `public` patients get all providers but public are preferred (sorted first); `private` patients get all providers.
 
-Index `(user_id, created_at desc)` already exists for patient timeline queries.
+b) **No fallback when 0 candidates.** Today the function silently returns `{offered:0}` and the UI loops forever. Add an automatic radius widen (50 → 150 → 500 km) before giving up, and if still 0, write an event row so the UI can show "No responders available — please call 10177" instead of an infinite spinner.
 
-### UI
-- New file: `src/modules/holarchelp/components/DoctorSosChooser.tsx` (modal with two big red buttons + patient picker step)
-- `HolarcHelpHome.tsx`: detect `useUserRole() === 'doctor'`. On first SOS press, show chooser instead of going straight to `SeverityPicker`
-- "SOS for Me" → continues to existing severity flow
-- "SOS for a Patient" → patient picker → severity → invokes `dispatch-sos-for-patient`
+c) **No automatic re-dispatch.** When a patient sits on the active screen, the dispatcher only runs once at SOS-press time. If a new ambulance comes online or a previously full one frees up, nothing re-runs. Add a client-side re-dispatch on a 30 s interval while the incident is `open` and unassigned (calls the same edge function, which is idempotent thanks to `onConflict: ignoreDuplicates`).
 
-### What we do NOT change
-- Existing patient SOS flow (mobile bottom-nav SOS, patient app) is untouched
-- Doctor's own incident audit, ETA, voice-note recording — unchanged
-- 6Dot50 integration is read-only (still no login bypass)
+### UI change in `HolarcHelpIncidentDetail.tsx`
+
+After 90 s of `open`-with-no-offers, replace the spinner with:
+
+> "No ambulance has accepted yet. We're still searching, but please consider calling 10177 / 911 / 112 directly."
+> [ Call emergency line ] [ Cancel SOS ] buttons.
+
+## 2. Explain the `/track/:token` link
+
+This is the **public live-tracking page** (`PublicTrack.tsx`) — anyone who receives the SOS WhatsApp/SMS can open it without logging in to see the patient's live coordinates and status.
+
+The link works (the route is wired in `App.tsx:146`), but the user reported it "doesn't work" earlier — that was when the SOS chooser previously redirected to the legacy HolarcHelp app domain. Now it points to the same origin, so it should resolve.
+
+To make this obvious, in the **Active Emergency screen** rename the section header from
+
+> "Live tracking link"
+
+to
+
+> "Public tracking link — share with anyone"
+
+…and add a small helper line: *"Recipients can view your live location without signing in."* No code change required to the route itself.
+
+## 3. Add navigational elements to the SOS Active Emergency screen
+
+Currently the only nav is "Close incident" at the very bottom. Add a sticky action bar above the live map with these quick actions:
+
+```
+[← Back to SOS Home]  [📞 Call 10177]  [🔔 Notify NOK]  [📋 Incident History]
+```
+
+- **Back to SOS Home** → `/patient/holarchelp` (or `/doctor/holarchelp`)
+- **Call emergency line** → `tel:10177` (country-aware: 10177 ZA / 911 US / 112 EU based on profile country, fall back to a picker)
+- **Notify NOK** → opens existing WhatsApp share with NOK pre-selected (re-uses `buildSosMessage` + `waLink`)
+- **Incident History** → `/patient/holarchelp/incidents`
+
+Also surface the existing **Copy tracking link** and **Close incident** actions in this same sticky bar so users don't have to scroll.
+
+## 4. Footer reorder
+
+In `src/components/layout/Footer.tsx`, change the `links` array order to:
+
+```ts
+const links = [
+  { to: "/terms-and-conditions", label: "Terms and Conditions" },
+  { to: "/patient-consent", label: "Privacy & Consent" },
+  { to: "/business-associate-agreement", label: "Compliance" },
+  { to: "/legal", label: "Legal Center" },
+];
+```
+
+Labels updated to match the requested wording verbatim. Bullet separator (`·`) and layout unchanged.
 
 ---
 
 ## Files
 
 **Edits**
-- `src/pages/VulaWallet.tsx` — URL constant
-- `src/pages/Legal.tsx` — spacing/padding
-- `src/modules/holarchelp/pages/HolarcHelpHome.tsx` — doctor branch + chooser hook-in
-- `src/components/holarchelp/PatientIncidentHistory.tsx` — show "Triggered by Dr X" badge
 
-**New**
-- `src/modules/holarchelp/components/DoctorSosChooser.tsx`
-- `src/modules/holarchelp/components/PatientPickerForSos.tsx` (small)
-- `supabase/functions/dispatch-sos-for-patient/index.ts`
-- 1 migration: add `triggered_by_user_id`, `triggered_by_role` to `holarchelp_incidents`
+- `supabase/functions/dispatch-sos/index.ts` — coverage logic + radius widen + return reason
+- `src/modules/holarchelp/pages/HolarcHelpIncidentDetail.tsx` — sticky nav bar, helper text, periodic re-dispatch, "no responders yet" fallback, tracking-link relabel
+- `src/components/layout/Footer.tsx` — reorder + relabel
+
+**No new files, no migration.**
 
 ## Out of scope
-- Doctor-initiated SOS from outside `/doctor/holarchelp` (e.g. from a patient profile page) — flagged as a possible follow-up
-- Removing 6Dot50 branding from their own login page (browser cross-origin policy makes this impossible)
-- Caregiver/family SOS triggers (would reuse the same scaffolding)
+
+- Onboarding more public ambulance providers (data, not code)
+- Country-aware emergency number table (ship with hardcoded `10177` default + free-text fallback)
+- Doctor-side variant of this page (uses same component, will benefit automatically)

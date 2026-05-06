@@ -38,13 +38,28 @@ Deno.serve(async (req) => {
       .not("latitude", "is", null).not("longitude", "is", null);
     const { data: providers } = await q;
 
-    const isPublicOnly = (incident as any).coverage === "public";
-    const candidates = (providers ?? [])
-      .filter((p: any) => !isPublicOnly || String(p.ownership ?? "").toLowerCase() === "public")
+    const isPublicCoverage = (incident as any).coverage === "public";
+    // Inclusive coverage: both public and private patients see all approved providers.
+    // Public-coverage patients prefer public-ownership providers (sorted first).
+    const all = (providers ?? [])
       .filter((p: any) => !exclude_provider_ids.includes(p.id))
-      .map((p: any) => ({ ...p, _d: distKm(center, { lat: p.latitude, lng: p.longitude }) }))
-      .filter((p: any) => p._d <= 50)
-      .sort((a: any, b: any) => a._d - b._d)
+      .map((p: any) => ({ ...p, _d: distKm(center, { lat: p.latitude, lng: p.longitude }) }));
+
+    // Widen radius until we have at least one candidate
+    let candidates: any[] = [];
+    for (const radius of [50, 150, 500, 5000]) {
+      candidates = all.filter((p: any) => p._d <= radius);
+      if (candidates.length > 0) break;
+    }
+    candidates = candidates
+      .sort((a: any, b: any) => {
+        if (isPublicCoverage) {
+          const ap = String(a.ownership ?? "").toLowerCase() === "public" ? 0 : 1;
+          const bp = String(b.ownership ?? "").toLowerCase() === "public" ? 0 : 1;
+          if (ap !== bp) return ap - bp;
+        }
+        return a._d - b._d;
+      })
       .slice(0, 15);
 
     // Fetch incident user for doctor notification
