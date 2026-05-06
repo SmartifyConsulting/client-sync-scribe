@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,7 +28,16 @@ export default function HolarcHelpNearby() {
   const [providers, setProviders] = useState<(ProviderMarker & { ownership?: string | null })[]>([]);
   const [loadingProviders, setLoadingProviders] = useState(false);
 
+  const [searchParams] = useSearchParams();
+
   useEffect(() => {
+    const qLat = parseFloat(searchParams.get("lat") ?? "");
+    const qLng = parseFloat(searchParams.get("lng") ?? "");
+    if (!isNaN(qLat) && !isNaN(qLng)) {
+      setCoords({ lat: qLat, lng: qLng });
+      setPermState("granted");
+      return;
+    }
     if (!("permissions" in navigator)) {
       requestLocation(true);
       return;
