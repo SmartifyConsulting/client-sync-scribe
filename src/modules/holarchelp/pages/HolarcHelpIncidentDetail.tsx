@@ -148,9 +148,23 @@ export default function HolarcHelpIncidentDetail() {
 
   if (!incident) return <div className="p-5 text-muted-foreground">Loading…</div>;
 
-  const ambulancePoint = incident.provider_latitude && incident.provider_longitude
-    ? [{ latitude: incident.provider_latitude, longitude: incident.provider_longitude, recorded_at: incident.provider_location_updated_at ?? new Date().toISOString() }]
-    : [];
+  const mapPoints: import("../components/LiveMap").LiveMapPoint[] = [];
+  if (locations[0]) {
+    mapPoints.push({
+      kind: "patient",
+      latitude: locations[0].latitude,
+      longitude: locations[0].longitude,
+      label: profileName,
+    });
+  }
+  if (incident.provider_latitude && incident.provider_longitude) {
+    mapPoints.push({
+      kind: "ambulance",
+      latitude: incident.provider_latitude,
+      longitude: incident.provider_longitude,
+      label: responder?.name ?? "Ambulance",
+    });
+  }
 
   return (
     <div className="mx-auto max-w-md pb-6">
@@ -224,7 +238,7 @@ export default function HolarcHelpIncidentDetail() {
         </div>
       )}
 
-      <LiveMap points={[...locations.slice(0, 1), ...ambulancePoint]} />
+      <LiveMap points={mapPoints} />
 
       {(incident.voice_note_transcript || incident.voice_note_audio_url) && (
         <div className="mt-4 rounded-2xl border-2 border-red-600/40 bg-red-50 dark:bg-red-950/20 p-4">
