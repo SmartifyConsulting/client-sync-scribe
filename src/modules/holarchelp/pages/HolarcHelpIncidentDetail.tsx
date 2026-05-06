@@ -8,7 +8,7 @@ import { IncidentVoiceNoteRecorder } from "../components/IncidentVoiceNoteRecord
 import { EtaCountdown } from "../components/EtaCountdown";
 import { IncidentPhotos } from "../components/IncidentPhotos";
 import { Button } from "@/components/ui/button";
-import { Copy, CheckCircle2, MessageCircle, Loader2, AlertTriangle, ArrowLeft, Phone, History, Share2, FileText } from "lucide-react";
+import { Copy, CheckCircle2, MessageCircle, Loader2, AlertTriangle, ArrowLeft, Phone, History, Share2, FileText, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -165,6 +165,9 @@ export default function HolarcHelpIncidentDetail() {
           </Button>
           <Button size="icon" variant="outline" className="h-9 w-9 rounded-full" onClick={shareLink} aria-label="Share tracking link" title="Share">
             <Share2 className="h-4 w-4" />
+          </Button>
+          <Button size="icon" variant="outline" className="h-9 w-9 rounded-full" onClick={() => navigate("/patient/holarchelp/nearby")} aria-label="Search nearby providers" title="Search nearby">
+            <MapPin className="h-4 w-4" />
           </Button>
           <Button size="icon" variant="outline" className="h-9 w-9 rounded-full" onClick={() => navigate("/patient/holarchelp/incidents")} aria-label="Incident history" title="History">
             <History className="h-4 w-4" />

@@ -171,11 +171,23 @@ export default function HolarcHelpNearby() {
               </div>
               );
             })}
-            {!loadingProviders && sorted.length === 0 && (
-              <p className="rounded-xl border border-dashed p-4 text-center text-xs text-muted-foreground">
-                No approved providers with mapped locations yet.
-              </p>
-            )}
+            {!loadingProviders && (() => {
+              const hospCount = sorted.filter((p) => p.type === "hospital").length;
+              const ambCount = sorted.filter((p) => p.type === "ambulance").length;
+              if (sorted.length === 0) {
+                return (
+                  <p className="rounded-xl border border-dashed p-4 text-center text-xs text-muted-foreground">
+                    No approved providers with mapped locations yet.
+                  </p>
+                );
+              }
+              return (
+                <div className="space-y-1 pt-1 text-[11px] text-muted-foreground">
+                  {hospCount === 0 && <p>No approved hospitals in your area yet.</p>}
+                  {ambCount === 0 && <p>No approved ambulance providers in your area yet.</p>}
+                </div>
+              );
+            })()}
           </div>
         </>
       )}
