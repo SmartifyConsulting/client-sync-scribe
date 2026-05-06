@@ -76,7 +76,7 @@ export default function PublicTrack() {
             Last position: {latest.latitude.toFixed(5)}, {latest.longitude.toFixed(5)}
           </p>
         )}
-        <div className="mt-3"><LiveMap points={locations} height={460} /></div>
+        <div className="mt-3"><LiveMap points={locations.slice(0, 1).map((l) => ({ kind: "patient" as const, latitude: l.latitude, longitude: l.longitude }))} height={460} /></div>
         {latest && (
           <div className="mt-3 flex flex-wrap gap-2">
             <a
