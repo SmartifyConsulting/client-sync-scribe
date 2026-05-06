@@ -27,23 +27,6 @@ export default function HolarcHelpNearby() {
   const [loadingLoc, setLoadingLoc] = useState(false);
   const [providers, setProviders] = useState<(ProviderMarker & { ownership?: string | null })[]>([]);
   const [loadingProviders, setLoadingProviders] = useState(false);
-  const [hasMedicalAid, setHasMedicalAid] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { setHasMedicalAid(false); return; }
-      const { data } = await supabase
-        .from("patients")
-        .select("medical_aid, medical_aid_number")
-        .eq("patient_user_id", user.id)
-        .order("created_at")
-        .limit(1)
-        .maybeSingle();
-      const has = !!(data?.medical_aid?.trim() || data?.medical_aid_number?.trim());
-      setHasMedicalAid(has);
-    })();
-  }, []);
 
   useEffect(() => {
     if (!("permissions" in navigator)) {
@@ -114,12 +97,8 @@ export default function HolarcHelpNearby() {
     return () => { cancelled = true; };
   }, [coords?.lat, coords?.lng]);
 
-  const filteredProviders = hasMedicalAid === false
-    ? providers.filter((p) => (p.ownership ?? 'private') === 'public')
-    : providers;
-
   const sorted = coords
-    ? [...filteredProviders]
+    ? [...providers]
         .map((p) => ({ ...p, _d: distanceKm(coords, { lat: p.latitude, lng: p.longitude }) }))
         .sort((a, b) => a._d - b._d).slice(0, 30)
     : [];
@@ -162,12 +141,7 @@ export default function HolarcHelpNearby() {
 
       {coords && (
         <>
-          {hasMedicalAid === false && (
-            <div className="rounded-xl border border-green-500/40 bg-green-50 p-3 text-xs text-green-900">
-              Showing <strong>public</strong> providers only. Add medical aid details to your profile to also see private providers.
-            </div>
-          )}
-          <ProviderMap center={coords} providers={filteredProviders} height={320} />
+          <ProviderMap center={coords} providers={providers} height={320} />
           <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
             <span className="flex items-center gap-1.5"><img src={hospitalIcon} alt="" className="h-4 w-4" /> Hospital</span>
             <span className="flex items-center gap-1.5"><img src={ambulanceIcon} alt="" className="h-4 w-4" /> Ambulance</span>
@@ -177,20 +151,26 @@ export default function HolarcHelpNearby() {
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {loadingProviders ? "Loading providers…" : `${sorted.length} nearest`}
             </p>
-            {sorted.map((p) => (
+            {sorted.map((p) => {
+              const isPublic = (p.ownership ?? 'private') === 'public';
+              return (
               <div key={p.id} className="flex items-center gap-3 rounded-xl border bg-card p-3">
                 <img src={p.type === "hospital" ? hospitalIcon : ambulanceIcon} alt="" className="h-9 w-9 object-contain" />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold truncate">{p.name}</p>
-                  <p className="text-[11px] text-muted-foreground capitalize">
-                    {p.type} {p.subtitle && `· ${p.subtitle}`}
-                  </p>
+                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground capitalize">
+                    <span>{p.type}{p.subtitle && ` · ${p.subtitle}`}</span>
+                    <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${isPublic ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}`}>
+                      {isPublic ? 'Public' : 'Private'}
+                    </span>
+                  </div>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-xs font-bold">{p._d.toFixed(1)} km</p>
                 </div>
               </div>
-            ))}
+              );
+            })}
             {!loadingProviders && sorted.length === 0 && (
               <p className="rounded-xl border border-dashed p-4 text-center text-xs text-muted-foreground">
                 No approved providers with mapped locations yet.
