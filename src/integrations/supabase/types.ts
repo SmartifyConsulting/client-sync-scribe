@@ -1497,6 +1497,7 @@ export type Database = {
           offered_at: string
           priority_boost: boolean
           provider_id: string
+          provider_kind: string
           responded_at: string | null
           response: string
         }
@@ -1507,6 +1508,7 @@ export type Database = {
           offered_at?: string
           priority_boost?: boolean
           provider_id: string
+          provider_kind?: string
           responded_at?: string | null
           response?: string
         }
@@ -1517,6 +1519,7 @@ export type Database = {
           offered_at?: string
           priority_boost?: boolean
           provider_id?: string
+          provider_kind?: string
           responded_at?: string | null
           response?: string
         }
