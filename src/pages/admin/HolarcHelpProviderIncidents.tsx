@@ -71,7 +71,7 @@ export default function HolarcHelpProviderIncidents() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 space-y-5">
-      <Link to="/admin/holarchelp-providers"><Button size="sm" variant="ghost" className="text-primary"><ArrowLeft className="mr-1 h-4 w-4" /> Back to admin</Button></Link>
+      <Link to="/admin/users"><Button size="sm" variant="ghost" className="text-primary"><ArrowLeft className="mr-1 h-4 w-4" /> Back to admin</Button></Link>
       <div>
         <p className="text-xs uppercase tracking-widest text-muted-foreground">Incident history</p>
         <h1 className="text-2xl font-extrabold">{providerName}</h1>
