@@ -436,7 +436,7 @@ export default function MyRewards() {
                 <p className="text-[10px] md:text-sm font-medium text-indigo-100">Vula Vault</p>
                 <p className="text-2xl md:text-4xl font-bold text-white">{totalTransferred}</p>
               </div>
-              <Vault className="h-8 w-8 md:h-12 md:w-12 text-white/90" />
+              <Vault className="h-8 w-8 text-white/90 shrink-0" />
             </div>
             <Button
               variant="ghost"
