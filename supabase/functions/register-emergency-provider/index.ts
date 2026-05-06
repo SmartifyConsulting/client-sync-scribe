@@ -55,24 +55,36 @@ serve(async (req) => {
 
     const fullName = `${first_name} ${last_name}`.trim();
 
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
+      SUPABASE_URL,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    const { data: created, error: signErr } = await supabase.auth.admin.createUser({
+    // Use anon-key client + signUp so Supabase Auth automatically sends
+    // the built-in "Confirm your email" message to the provider. This
+    // requires that email confirmations are enabled in the project.
+    const anonClient = createClient(
+      SUPABASE_URL,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+    );
+
+    const origin = req.headers.get("origin") ?? "https://holarchealth.com";
+    const { data: created, error: signErr } = await anonClient.auth.signUp({
       email,
       password,
-      email_confirm: false,
-      user_metadata: { full_name: fullName },
+      options: {
+        data: { full_name: fullName },
+        emailRedirectTo: `${origin}/auth?mode=login`,
+      },
     });
     if (signErr || !created?.user) {
-      console.error("createUser error", signErr);
-      const code = (signErr as any)?.code;
-      if (code === "email_exists" || /already been registered/i.test(signErr?.message ?? "")) {
+      console.error("signUp error", signErr);
+      const msg = signErr?.message ?? "";
+      if (/already|registered|exists/i.test(msg)) {
         return bad("An account with this email already exists. Please sign in instead, or use a different contact email.", 409);
       }
-      return bad(signErr?.message ?? "signup failed", 400);
+      return bad(msg || "signup failed", 400);
     }
     const userId = created.user.id;
 

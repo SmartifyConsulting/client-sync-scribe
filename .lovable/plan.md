@@ -1,50 +1,52 @@
-## Root cause
+## Goal
 
-The `holarchelp_hospitals` / `holarchelp_ambulance_providers` tables require `auth.uid() = owner_id` to insert. After `supabase.auth.signUp()` with email confirmation enabled, the new user has **no active session**, so `auth.uid()` is null and the insert is rejected by RLS. Same path will fail on hospital and ambulance signups.
+When a new emergency service provider signs up, they should receive a verification email and only be able to sign in after clicking the link. Admin still approves the provider record separately at `/admin/holarchelp-providers`.
 
-## Fix strategy
+## Where admin approves providers
 
-Move the provider creation to a service-role edge function so the row is inserted server-side with the new user's id. This also lets sign-up work even when email confirmation is required. While we are there, add Google-Places autocomplete to the address field and auto-derive city/country/lat/lng/company name (when the picked place looks like the company itself).
+Admin approval already exists at **`/admin/holarchelp-providers`** (`src/pages/admin/HolarcHelpProviders.tsx`). New signups appear there with `status: 'pending'`. Approving calls `holarchelp_approve_hospital` / `holarchelp_approve_ambulance`, which sets the record to `approved` and grants the `hospital_staff` / `ambulance_staff` role. No change needed here — just clarifying for the user.
 
-## Changes
+## Why no email arrived
 
-### 1. New edge function `supabase/functions/register-emergency-provider/index.ts` (service role)
-- Public (no JWT). `verify_jwt = false` in `supabase/config.toml`.
-- Body: `{ type: "hospital"|"ambulance", company_name, registration_number, ownership: "public"|"private", address, city, country, latitude, longitude, first_name, last_name, email, phone, password }`.
-- Validates with zod (lengths, ownership enum, email).
-- Uses service role to:
-  1. `auth.admin.createUser({ email, password, email_confirm: false, user_metadata: { full_name } })`.
-  2. Update `profiles` row created by the `handle_new_user` trigger with `full_name` and `mobile_number`.
-  3. Insert into the appropriate provider table (hospital or ambulance), with `owner_id = newUser.id`, `ownership`, address fields, `latitude/longitude`, and `status = 'pending'`.
-- Returns `{ user_id }` or an error message.
+`supabase/functions/register-emergency-provider/index.ts` currently calls `auth.admin.createUser({ email_confirm: false })`. That creates the account silently and does **not** send any verification email. That's why `nonastasia@gmail.com` got nothing.
 
-### 2. New public edge functions for address lookup during signup
-Reuse logic from `google-places-autocomplete` / `google-place-details` but **without the JWT requirement**, since the user is not yet signed in. Two options:
+## Fix
 
-- **Preferred**: add `?public=1` branch to existing functions that skips `getClaims` but still uses the same `GOOGLE_MAPS_API_KEY`. Add a simple in-memory rate-limit (per-IP, e.g. 30/min) to mitigate abuse.
-- Or new files `places-autocomplete-public` / `place-details-public` mirroring the existing ones with no auth check.
+### 1. Edge function: send a verification email on signup
+In `supabase/functions/register-emergency-provider/index.ts`:
+- After `auth.admin.createUser` succeeds, generate a signup confirmation link with `auth.admin.generateLink({ type: 'signup', email, password, options: { redirectTo: '<app>/auth?mode=login' } })`.
+- Send that link to the provider's email. Two options — pick one based on what's already wired up:
+  - **Preferred:** use `inviteUserByEmail` instead of `createUser` + `generateLink`. It creates the user and triggers Supabase's built-in confirmation email in one call. We pass `password` separately by updating the user after invite acceptance — OR switch the flow to "invite → set password on first login". Simpler but changes UX.
+  - **Cleaner for current UX (keep password from form):** keep `createUser`, then call `generateLink` and send the link via the existing email infrastructure (Lovable Emails / `send-document-email`-style helper). Requires that the project's email domain is set up so Gmail accepts it.
+- Recommended path: **`createUser` + `generateLink({ type: 'signup' })` + send email via Lovable Emails**, because it preserves the password the provider just typed.
 
-Will go with the "new files" approach to avoid touching authenticated paths used elsewhere. Set `verify_jwt = false` for both in `supabase/config.toml`.
+### 2. Email delivery
+The project has `RESEND_API_KEY` and a custom domain (`holarchealth.com`), but no auth email templates are scaffolded yet. To make Gmail reliably accept the verification email:
+- Set up the Lovable Emails domain (subdomain like `notify.holarchealth.com`) and scaffold auth email templates so Supabase's confirmation email is sent through the verified sender. This will be triggered via the email-setup dialog in the implementation step.
+- Once set up, the `generateLink` URL is wrapped in a branded "Confirm your email" template and sent automatically.
 
-### 3. New component `src/modules/holarchelp/components/PublicAddressPicker.tsx`
-Same UX as `AddressAutocomplete` but:
-- Calls the public edge functions directly with `fetch` (no Supabase auth needed) using `VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY` apikey header.
-- Exposes `onSelect({ formatted_address, name, city, country, lat, lng })` in addition to the typed value.
+### 3. Login gate
+`src/pages/Auth.tsx` already surfaces "Email not confirmed" errors from Supabase, so no change is required — once verification is enforced, unverified providers attempting to log in will see that message.
 
-### 4. `src/pages/ProviderSignup.tsx`
-- Replace the address `Textarea` with `<PublicAddressPicker />`.
-- Remove the manual City and Country inputs; show them read-only below the address (auto-filled from selection). Keep editable fallback if the user types a free-text address that wasn't picked from suggestions.
-- Keep the Public/Private toggle (already present).
-- Submit by calling the new `register-emergency-provider` edge function via `fetch` (no authenticated supabase needed). On success: toast and redirect to `/auth?mode=login`.
-- Remove direct `supabase.from(...).insert(...)` calls and the `signUp` call from this page.
+### 4. Resend verification (small UX add)
+On the `ProviderSignup` success screen, add a "Didn't get the email? Resend" button that calls a small new edge function (`resend-provider-verification`) which re-runs `generateLink` for the email and re-sends it. Prevents support tickets like this one.
 
-### 5. Out of scope
-- No RLS policy changes (existing policies are correct; the issue is that signup happens before login).
-- No changes to existing authenticated address autocomplete used elsewhere in the app.
-- Custom domain/Google API key restrictions are unchanged — the edge function already proxies via the server-side key, so the preview domain works.
+### 5. Admin visibility (tiny polish)
+On `/admin/holarchelp-providers`, show an "Email verified ✓ / Pending ✉️" badge next to each pending provider so admin knows whether the contact has confirmed their email before approving. Pulled from `auth.users.email_confirmed_at` via a small SECURITY DEFINER RPC (admin-only).
 
-## Technical notes
+## Files touched
 
-- `auth.admin.createUser` with `email_confirm: false` keeps the existing "verify email before login" flow intact; the user will still need to confirm their email at `/auth` to sign in. The provider record is created immediately so admins can review pending applications regardless of confirmation status.
-- The existing `handle_new_user` trigger inserts the `profiles` row automatically — the edge function only needs to update `full_name` / `mobile_number`.
-- Ownership column already exists on both provider tables (added in the previous migration).
+- `supabase/functions/register-emergency-provider/index.ts` — generate + send verification link
+- `supabase/functions/resend-provider-verification/index.ts` — **new**, public, rate-limited
+- `supabase/functions/_shared/email-templates/signup.tsx` — branded confirmation email (created by auth-template scaffold)
+- `supabase/functions/auth-email-hook/index.ts` — created by scaffold
+- `supabase/config.toml` — register the new functions with `verify_jwt = false`
+- `src/pages/ProviderSignup.tsx` — add "Resend verification" button on success state
+- `src/pages/admin/HolarcHelpProviders.tsx` — show email-verified badge per pending row
+- New SECURITY DEFINER RPC `get_provider_email_status(provider_id, type)` (admin-only) for the badge
+
+## Out of scope
+
+- Changing how admin approval works (it already exists at `/admin/holarchelp-providers`).
+- Migrating to magic-link / invite flow (would lose the password the provider typed).
+- Marketing emails or non-auth provider notifications.
