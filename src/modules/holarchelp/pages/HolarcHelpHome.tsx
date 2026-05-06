@@ -210,11 +210,7 @@ export default function HolarcHelpHome() {
 
   // ============ HOLD-TO-TRIGGER ============
   const startHold = () => {
-    if (triggering || activeIncidentId) {
-      // Allow direct navigate if already active
-      if (activeIncidentId) navigate(`/patient/holarchelp/incident/${activeIncidentId}`);
-      return;
-    }
+    if (triggering) return;
     if ("vibrate" in navigator) navigator.vibrate?.(30);
     holdStartRef.current = performance.now();
     const tick = () => {
@@ -223,8 +219,13 @@ export default function HolarcHelpHome() {
       if (p >= 1) {
         if ("vibrate" in navigator) navigator.vibrate?.([80, 60, 120]);
         cancelHold();
-        if (role === "doctor") setChooserOpen(true);
-        else triggerSOS();
+        if (activeIncidentId) {
+          navigate(`/patient/holarchelp/incident/${activeIncidentId}`);
+        } else if (role === "doctor") {
+          setChooserOpen(true);
+        } else {
+          triggerSOS();
+        }
         return;
       }
       holdTimerRef.current = requestAnimationFrame(tick);
