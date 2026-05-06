@@ -17,11 +17,11 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
-type RoleEnum = "doctor" | "patient" | "admin" | "hospital_staff" | "ambulance_staff" | "blood_bank" | "none";
+type RoleEnum = "doctor" | "patient" | "admin" | "hospital_staff" | "ambulance_staff" | "blood_bank" | "pharmacy_staff" | "none";
 type Category = "patient" | "provider" | "emergency" | "admin" | "none";
 type EmergencyKind = "hospital_staff" | "ambulance_staff" | "blood_bank";
 
-const EMERGENCY_ROLES: RoleEnum[] = ["hospital_staff", "ambulance_staff", "blood_bank"];
+const EMERGENCY_ROLES: RoleEnum[] = ["hospital_staff", "ambulance_staff", "blood_bank", "pharmacy_staff"];
 
 const roleToCategory = (role: string): Category => {
   if (role === "patient") return "patient";
