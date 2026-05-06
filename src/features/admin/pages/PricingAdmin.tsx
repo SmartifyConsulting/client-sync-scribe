@@ -252,19 +252,18 @@ export default function PricingAdmin() {
   return (
     <div className="animate-fade-in max-w-6xl mx-auto">
       {/* Header */}
-      <header className="mb-10 md:mb-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-medium tracking-tight text-foreground mb-2">Subscription Pricing</h1>
-          <p className="text-base md:text-lg text-muted-foreground max-w-[65ch] font-light">
-            Define the financial structure for healthcare providers, patients, and emergency services. Adjust prices to
-            see the annual discount calculate in real time.
+      <div className="flex items-start justify-between gap-3 pb-4 mb-6">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold text-foreground">Subscription Pricing</h1>
+          <p className="text-muted-foreground text-[12px]">
+            Define the financial structure for healthcare providers, patients, and emergency services. Adjust prices to see the annual discount calculate in real time.
           </p>
         </div>
-        <Button onClick={handleSave} disabled={saving} size="lg" className="rounded-full">
+        <Button onClick={handleSave} disabled={saving} className="rounded-xl">
           {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
           Publish Changes
         </Button>
-      </header>
+      </div>
 
       <div className="space-y-12 md:space-y-16">
         <RoleSection
