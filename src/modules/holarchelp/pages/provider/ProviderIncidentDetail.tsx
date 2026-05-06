@@ -91,9 +91,11 @@ export default function ProviderIncidentDetail() {
 
   if (!incident) return <div className="text-muted-foreground">Loading…</div>;
 
-  const ambulancePoint = incident.provider_latitude && incident.provider_longitude
-    ? [{ latitude: incident.provider_latitude, longitude: incident.provider_longitude, recorded_at: incident.provider_location_updated_at ?? new Date().toISOString() }]
-    : [];
+  const mapPoints: import("../../components/LiveMap").LiveMapPoint[] = [];
+  if (locations[0]) mapPoints.push({ kind: "patient", latitude: locations[0].latitude, longitude: locations[0].longitude });
+  if (incident.provider_latitude && incident.provider_longitude) {
+    mapPoints.push({ kind: "ambulance", latitude: incident.provider_latitude, longitude: incident.provider_longitude });
+  }
 
   return (
     <div className="space-y-4">
@@ -113,7 +115,7 @@ export default function ProviderIncidentDetail() {
         </div>
       )}
 
-      <LiveMap points={[...locations.slice(0, 1), ...ambulancePoint]} height={320} />
+      <LiveMap points={mapPoints} height={320} />
 
       {isAssigned && (
         <div className="rounded-2xl border bg-card p-4 space-y-3">
