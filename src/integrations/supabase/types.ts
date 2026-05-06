@@ -1523,18 +1523,25 @@ export type Database = {
           accepted_at: string | null
           arrived_at: string | null
           assigned_provider_id: string | null
+          at_hospital_at: string | null
           at_risk: boolean
           breathing: boolean | null
+          completed_at: string | null
           conscious: boolean | null
           coverage: string
           created_at: string
+          destination_hospital_id: string | null
           en_route_at: string | null
           eta_minutes: number | null
           id: string
           last_eta_update: string | null
           manually_logged: boolean
           notes: string | null
+          patient_collected_at: string | null
           priority_boost: boolean
+          provider_latitude: number | null
+          provider_location_updated_at: string | null
+          provider_longitude: number | null
           resolved_at: string | null
           severity: string
           status: string
@@ -1547,18 +1554,25 @@ export type Database = {
           accepted_at?: string | null
           arrived_at?: string | null
           assigned_provider_id?: string | null
+          at_hospital_at?: string | null
           at_risk?: boolean
           breathing?: boolean | null
+          completed_at?: string | null
           conscious?: boolean | null
           coverage?: string
           created_at?: string
+          destination_hospital_id?: string | null
           en_route_at?: string | null
           eta_minutes?: number | null
           id?: string
           last_eta_update?: string | null
           manually_logged?: boolean
           notes?: string | null
+          patient_collected_at?: string | null
           priority_boost?: boolean
+          provider_latitude?: number | null
+          provider_location_updated_at?: string | null
+          provider_longitude?: number | null
           resolved_at?: string | null
           severity?: string
           status?: string
@@ -1571,18 +1585,25 @@ export type Database = {
           accepted_at?: string | null
           arrived_at?: string | null
           assigned_provider_id?: string | null
+          at_hospital_at?: string | null
           at_risk?: boolean
           breathing?: boolean | null
+          completed_at?: string | null
           conscious?: boolean | null
           coverage?: string
           created_at?: string
+          destination_hospital_id?: string | null
           en_route_at?: string | null
           eta_minutes?: number | null
           id?: string
           last_eta_update?: string | null
           manually_logged?: boolean
           notes?: string | null
+          patient_collected_at?: string | null
           priority_boost?: boolean
+          provider_latitude?: number | null
+          provider_location_updated_at?: string | null
+          provider_longitude?: number | null
           resolved_at?: string | null
           severity?: string
           status?: string
@@ -1591,7 +1612,15 @@ export type Database = {
           voice_note_audio_url?: string | null
           voice_note_transcript?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "holarchelp_incidents_destination_hospital_id_fkey"
+            columns: ["destination_hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       holarchelp_locations: {
         Row: {
@@ -1693,6 +1722,47 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      holarchelp_voice_notes: {
+        Row: {
+          audio_url: string
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          incident_id: string
+          provider_id: string | null
+          transcript: string | null
+          user_id: string
+        }
+        Insert: {
+          audio_url: string
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          incident_id: string
+          provider_id?: string | null
+          transcript?: string | null
+          user_id: string
+        }
+        Update: {
+          audio_url?: string
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          incident_id?: string
+          provider_id?: string | null
+          transcript?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "holarchelp_voice_notes_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       hospital_admissions: {
         Row: {
@@ -3723,6 +3793,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      holarchelp_accept_incident: {
+        Args: { _incident_id: string; _provider_id: string }
+        Returns: Json
+      }
       holarchelp_approve_ambulance: {
         Args: { _provider_id: string }
         Returns: undefined
@@ -3773,7 +3847,27 @@ export type Database = {
           tier: string
         }[]
       }
+      holarchelp_release_incident: {
+        Args: { _incident_id: string; _reason?: string }
+        Returns: Json
+      }
+      holarchelp_set_incident_status: {
+        Args: { _incident_id: string; _payload?: Json; _status: string }
+        Returns: Json
+      }
+      holarchelp_update_provider_location: {
+        Args: { _incident_id: string; _lat: number; _lng: number }
+        Returns: undefined
+      }
       holarchelp_user_enabled: { Args: { _uid: string }; Returns: boolean }
+      is_ambulance_staff: {
+        Args: { _provider_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_hospital_staff: {
+        Args: { _hospital_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_practice_member: {
         Args: { _practice_id: string; _user_id: string }
         Returns: boolean
