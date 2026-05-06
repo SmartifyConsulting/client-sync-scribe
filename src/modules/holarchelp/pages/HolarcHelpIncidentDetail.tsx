@@ -8,8 +8,11 @@ import { IncidentVoiceNoteRecorder } from "../components/IncidentVoiceNoteRecord
 import { EtaCountdown } from "../components/EtaCountdown";
 import { IncidentPhotos } from "../components/IncidentPhotos";
 import { Button } from "@/components/ui/button";
-import { Copy, CheckCircle2, MessageCircle, Loader2, AlertTriangle, ArrowLeft, Phone, Bell, History, Share2 } from "lucide-react";
+import { Copy, CheckCircle2, MessageCircle, Loader2, AlertTriangle, ArrowLeft, Phone, History, Share2, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { useLocationTracking } from "../hooks/useLocationTracking";
 import { useAuth } from "@/hooks/useAuth";
 import { buildSosMessage, waLink } from "../lib/whatsapp";
