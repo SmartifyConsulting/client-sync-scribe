@@ -23,6 +23,8 @@ export default function HolarcHelpIncidentDetail() {
   const [locations, setLocations] = useState<Loc[]>([]);
   const [contacts, setContacts] = useState<{ id: string; name: string; phone: string | null }[]>([]);
   const [profileName, setProfileName] = useState("Your contact");
+  const [responder, setResponder] = useState<{ name: string } | null>(null);
+  const [pendingOffers, setPendingOffers] = useState<number>(0);
 
   useEffect(() => {
     if (!id) return;
@@ -57,7 +59,28 @@ export default function HolarcHelpIncidentDetail() {
     };
   }, [id, user]);
 
-  useLocationTracking(id ?? null, !!incident && incident.status === "active");
+  // Fetch responder name when assigned
+  useEffect(() => {
+    if (!incident?.assigned_provider_id) { setResponder(null); return; }
+    supabase.from("holarchelp_ambulance_providers" as any)
+      .select("company_name").eq("id", incident.assigned_provider_id).maybeSingle()
+      .then(({ data }: any) => setResponder(data ? { name: data.company_name } : null));
+  }, [incident?.assigned_provider_id]);
+
+  // Track pending offers count while open
+  useEffect(() => {
+    if (!id) return;
+    const load = () => supabase.from("holarchelp_incident_offers" as any)
+      .select("id", { count: "exact", head: true }).eq("incident_id", id).eq("response", "pending")
+      .then(({ count }) => setPendingOffers(count ?? 0));
+    load();
+    const t = setInterval(load, 5000);
+    return () => clearInterval(t);
+  }, [id]);
+
+  const liveStatuses = ["open", "assigned", "en_route", "arrived", "patient_collected", "at_hospital", "reopened"];
+  const isLive = !!incident && liveStatuses.includes(incident.status);
+  useLocationTracking(id ?? null, isLive);
 
   const trackingUrl = incident ? `${window.location.origin}/track/${incident.tracking_token}` : "";
   const message = buildSosMessage(profileName, trackingUrl);
@@ -67,29 +90,66 @@ export default function HolarcHelpIncidentDetail() {
   const resolve = async () => {
     if (!id) return;
     const { error } = await supabase.from("holarchelp_incidents" as any)
-      .update({ status: "resolved", resolved_at: new Date().toISOString() } as any).eq("id", id);
+      .update({ status: "completed", resolved_at: new Date().toISOString(), completed_at: new Date().toISOString() } as any).eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("Incident resolved");
+    toast.success("Incident closed");
     navigate("/patient/holarchelp");
   };
 
   if (!incident) return <div className="p-5 text-muted-foreground">Loading…</div>;
 
+  const ambulancePoint = incident.provider_latitude && incident.provider_longitude
+    ? [{ latitude: incident.provider_latitude, longitude: incident.provider_longitude, recorded_at: incident.provider_location_updated_at ?? new Date().toISOString() }]
+    : [];
+
   return (
     <div className="mx-auto max-w-md">
       <div className="mb-3 flex items-center justify-between">
-        <h1 className="text-xl font-bold">{incident.status === "active" ? "Active emergency" : "Resolved incident"}</h1>
-        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${incident.status === "active" ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>
-          {incident.status.toUpperCase()}
+        <h1 className="text-xl font-bold">{isLive ? "Active emergency" : "Incident closed"}</h1>
+        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${isLive ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>
+          {(incident.status ?? "").toUpperCase().replace(/_/g, " ")}
         </span>
       </div>
       <p className="mb-3 text-xs text-muted-foreground">Started {new Date(incident.created_at).toLocaleString()}</p>
 
-      <LiveMap points={locations} />
+      {incident.status === "open" && !incident.assigned_provider_id && (
+        <div className="mb-3 flex items-center gap-3 rounded-2xl border-2 border-amber-500/40 bg-amber-50 p-3 dark:bg-amber-950/20">
+          <Loader2 className="h-5 w-5 animate-spin text-amber-700" />
+          <div className="text-sm">
+            <p className="font-semibold text-amber-800 dark:text-amber-300">Finding nearest ambulance…</p>
+            <p className="text-xs text-amber-700/80">Notified {pendingOffers} responder{pendingOffers === 1 ? "" : "s"}.</p>
+          </div>
+        </div>
+      )}
+
+      {incident.status === "reopened" && (
+        <div className="mb-3 flex items-start gap-2 rounded-2xl border-2 border-red-500/50 bg-red-50 p-3 text-sm dark:bg-red-950/20">
+          <AlertTriangle className="mt-0.5 h-5 w-5 text-red-600" />
+          <div>
+            <p className="font-semibold text-red-700">Your responder is unable to continue.</p>
+            <p className="text-xs text-red-700/80">Finding the next available ambulance…</p>
+          </div>
+        </div>
+      )}
+
+      {responder && incident.assigned_provider_id && (
+        <div className="mb-3 rounded-2xl border-2 border-emerald-500/40 bg-emerald-50 p-4 dark:bg-emerald-950/20">
+          <p className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">🚑 Responding</p>
+          <p className="mt-0.5 text-base font-extrabold text-emerald-900 dark:text-emerald-100">{responder.name}</p>
+          <div className="mt-1 flex items-center gap-4 text-sm text-emerald-900/80 dark:text-emerald-200/80">
+            <span>ETA: <EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} /></span>
+            {incident.accepted_at && (
+              <span className="text-xs">Accepted {new Date(incident.accepted_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+            )}
+          </div>
+        </div>
+      )}
+
+      <LiveMap points={[...locations.slice(0, 1), ...ambulancePoint]} />
 
       {(incident.voice_note_transcript || incident.voice_note_audio_url) && (
         <div className="mt-4 rounded-2xl border-2 border-red-600/40 bg-red-50 dark:bg-red-950/20 p-4">
-          <p className="mb-2 text-xs font-bold uppercase tracking-wider text-red-700 dark:text-red-400">Your voice note</p>
+          <p className="mb-2 text-xs font-bold uppercase tracking-wider text-red-700 dark:text-red-400">Your initial voice note</p>
           {incident.voice_note_transcript && (
             <p className="text-sm whitespace-pre-wrap mb-2">{incident.voice_note_transcript}</p>
           )}
@@ -97,7 +157,10 @@ export default function HolarcHelpIncidentDetail() {
         </div>
       )}
 
-      {incident.status === "active" && contacts.length > 0 && (
+      <div className="mt-4"><IncidentVoiceNoteRecorder incidentId={id!} providerId={null} /></div>
+      <div className="mt-4"><IncidentTimeline incidentId={id!} /></div>
+
+      {isLive && contacts.length > 0 && (
         <div className="mt-4 rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)]">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Notify contacts on WhatsApp</p>
           <ul className="mt-3 space-y-2">
@@ -123,9 +186,9 @@ export default function HolarcHelpIncidentDetail() {
         <Button onClick={copy} variant="outline" size="sm" className="mt-3 gap-2 rounded-xl"><Copy className="h-4 w-4" /> Copy link</Button>
       </div>
 
-      {incident.status === "active" && (
+      {isLive && (
         <Button onClick={resolve} className="mt-6 h-14 w-full gap-2 rounded-2xl bg-primary text-base font-semibold">
-          <CheckCircle2 className="h-5 w-5" /> Mark as resolved
+          <CheckCircle2 className="h-5 w-5" /> Close incident
         </Button>
       )}
     </div>
