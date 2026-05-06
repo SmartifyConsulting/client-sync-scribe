@@ -1,18 +1,25 @@
-Replace the demo `/demo/nigeria-map` route with a screenshot of the **real app** — the existing `/patient/holarchelp/nearby` page — centered on a Nigerian town (Victoria Island, Lagos), so it uses the actual hospital cross icon (`marker-hospital.png`) and ambulance icon (`marker-ambulance.png`) the users see in production.
+## Problem
 
-### Steps
+On `/patient/holarchelp` the red HOLD button rarely completes its 2-second hold. The session replay shows the progress ring starting then resetting repeatedly as the user holds — they never reach the trigger threshold.
 
-1. **Spoof geolocation to Lagos** for the browser session (Victoria Island, lat 6.4281, lng 3.4219) by injecting `navigator.geolocation.getCurrentPosition` override before navigating, OR add a temporary `?lat=6.4281&lng=3.4219` query param support to `HolarcHelpNearby.tsx` (small, reversible — read coords from URL when present).
-2. **Navigate** to `/patient/holarchelp/nearby?lat=6.4281&lng=3.4219` in the browser tool at 390×844.
-3. **Capture** the real-app screenshot — this will render:
-   - The native ProviderMap with hospital + ambulance markers using project icons
-   - The "X nearest" provider list with cross/ambulance thumbnails
-   - All real Nigerian providers seeded earlier (Reddington, EKO, Lagos Emergency Response, Flying Doctors, Critical Rescue, etc.)
-4. **Save** to `/mnt/documents/nigeria/10-nigeria-providers-map.png` (overwrite the previous demo version).
-5. **Remove** the temporary `/demo/nigeria-map` route + page file (`src/pages/demo/NigeriaProvidersMap.tsx` + App.tsx import/route) so we don't ship demo pages.
+Root cause: the button uses `onPointerLeave={cancelHold}` without pointer capture. On touch devices any small finger drift fires `pointerleave`, killing the hold animation. The button also returns early when `activeIncidentId` is set (the user already has an open incident `a6181217…` from earlier), so even a successful hold would just navigate instead of triggering.
 
-No DB changes; only:
-- Tiny patch to `HolarcHelpNearby.tsx` to accept optional `?lat&lng` query params (skip GPS prompt when present)
-- Delete of demo route/file
+## Fix
 
-Result: a real, production-style screenshot of HolarcHelp Nearby in a Nigerian town with the proper iconography.
+Edit `src/modules/holarchelp/pages/HolarcHelpHome.tsx`:
+
+1. **Capture the pointer on press** so movement off the button does not fire `pointerleave`:
+   - In `onPointerDown`, call `e.currentTarget.setPointerCapture(e.pointerId)`.
+   - Remove `onPointerLeave={cancelHold}` (no longer needed once the pointer is captured; `pointerup` / `pointercancel` still release it).
+
+2. **Don't short-circuit when an active incident already exists.** Currently `startHold` immediately navigates to the existing incident on press, which makes the button feel broken (no hold, just an instant route change). Replace that early-return with a tap-vs-hold rule:
+   - If `activeIncidentId` exists, still allow the hold animation to run; on completion, navigate to that incident's live tracking page instead of creating a new one.
+   - Keep the `triggering` guard.
+
+3. **Auto-cleanup stale "active" state.** The active-incident lookup in the initial `useEffect` should ignore incidents older than e.g. 24 hours so the resume banner / early-return logic doesn't get permanently wedged when an incident wasn't closed cleanly. (Optional polish — can keep current behaviour if you prefer.)
+
+No DB changes. No styling changes. Pure interaction fix scoped to `HolarcHelpHome.tsx`.
+
+## Verification
+
+After patching, navigate the preview browser to `/patient/holarchelp`, press and hold the red button for 2.5 s with slight movement, and confirm the ring fills and SOS triggers (or, with an active incident, navigates to live tracking after the full hold).
