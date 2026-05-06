@@ -157,26 +157,26 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
       <div className="grid grid-cols-2 gap-4">
         <Card className="border-border">
           <CardContent className="pt-6">
-            <div className="flex items-center">
-              <div className="w-[76%]">
+            <div className="flex items-center justify-between">
+              <div>
                 <p className="text-xs text-muted-foreground">Doctor Vulas</p>
                 <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{doctorVulas}</p>
               </div>
-               <div className="w-[15%] flex items-center justify-center">
-                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="w-full h-auto object-contain" />
+              <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0">
+                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-8 w-8 object-contain" />
               </div>
             </div>
           </CardContent>
         </Card>
         <Card className="border-border">
           <CardContent className="pt-6">
-            <div className="flex items-center">
-              <div className="w-[76%]">
+            <div className="flex items-center justify-between">
+              <div>
                 <p className="text-xs text-muted-foreground">Patient Vulas</p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{patientVulas}</p>
               </div>
-               <div className="w-[15%] flex items-center justify-center">
-                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="w-full h-auto object-contain" />
+              <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0">
+                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-8 w-8 object-contain" />
               </div>
             </div>
           </CardContent>
@@ -188,8 +188,8 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
                 <p className="text-sm font-medium text-yellow-900 dark:text-yellow-200">Combined</p>
                 <p className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">{totalVulas}</p>
               </div>
-              <div className="h-10 w-10 rounded-full bg-white shadow-sm flex items-center justify-center">
-                <img src={vulaVouchersLogo} alt="Vulas" className="h-6 w-6 object-contain" />
+              <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0">
+                <img src={vulaVouchersLogo} alt="Vulas" className="h-8 w-8 object-contain" />
               </div>
             </div>
           </CardContent>
@@ -201,10 +201,10 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
                 <p className="text-sm font-medium text-sky-100">Redeemed</p>
                 <p className="text-2xl font-bold text-white">{totalTransferred}</p>
               </div>
-              <ArrowRightLeft className="h-10 w-10 text-white/90" />
+              <ArrowRightLeft className="h-8 w-8 text-white/90 shrink-0" />
             </div>
             <Button variant="ghost" size="sm" className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-xs flex items-center gap-1 mt-2" onClick={() => setShowTransferDialog(true)}>
-              Redeem Vulas <Send className="h-3 w-3" />
+              Redeem Vulas <Send className="h-3.5 w-3.5" />
             </Button>
           </CardContent>
         </Card>
