@@ -373,7 +373,7 @@ Signature: ___________________
             <div className="flex items-center justify-between">
               <Label>Medications</Label>
               <Button type="button" variant="outline" size="sm" onClick={addMedication} className="gap-1">
-                <Plus className="h-3 w-3" />
+                <Plus className="h-4 w-4" />
                 Add Medication
               </Button>
             </div>
@@ -448,12 +448,12 @@ Signature: ___________________
               >
                 {isCheckingConflicts ? (
                   <>
-                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                     Checking...
                   </>
                 ) : (
                   <>
-                    <Shield className="h-3 w-3" />
+                    <Shield className="h-4 w-4" />
                     Check Conflicts
                   </>
                 )}

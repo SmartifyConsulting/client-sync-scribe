@@ -281,7 +281,7 @@ export function DoctorsOnProfile({ patientId, patientName }: DoctorsOnProfilePro
                   const Icon = config.icon;
                   return (
                     <Badge key={permission} variant="secondary" className="gap-1">
-                      <Icon className="h-3 w-3" />
+                      <Icon className="h-4 w-4" />
                       {config.label}
                     </Badge>
                   );

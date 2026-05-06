@@ -333,18 +333,18 @@ export default function Invoices() {
                         <div className="text-right">
                           <p className="font-bold text-lg">{formatCurrency(Number(invoice.amount))}</p>
                           <Badge className={config.color}>
-                            <StatusIcon className="h-3 w-3 mr-1" />
+                            <StatusIcon className="h-4 w-4 mr-1" />
                             {config.label}
                           </Badge>
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
+                          <Calendar className="h-4 w-4" />
                           Issued: {format(parseISO(invoice.created_at), "MMM d, yyyy")}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
+                          <Clock className="h-4 w-4" />
                           Due: {format(parseISO(invoice.due_date), "MMM d, yyyy")}
                         </span>
                         {invoice.doctor_profile?.full_name && (

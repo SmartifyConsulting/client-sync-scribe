@@ -505,9 +505,9 @@ export function SettingsContent() {
               <div className="ml-3 flex-1">
                 <Label htmlFor="monthly" className="font-semibold text-foreground cursor-pointer">Monthly <span className="ml-2 text-primary">${plans.monthly.price}/{plans.monthly.period}</span></Label>
                 <ul className="mt-2 text-sm text-muted-foreground space-y-1">
-                  <li className="flex items-center gap-2"><Check className="h-3 w-3 text-primary" />Full access to all features</li>
-                  <li className="flex items-center gap-2"><Check className="h-3 w-3 text-primary" />Cancel anytime</li>
-                  <li className="flex items-center gap-2"><Check className="h-3 w-3 text-primary" />Priority support</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Full access to all features</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Cancel anytime</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Priority support</li>
                 </ul>
               </div>
             </div>
@@ -516,9 +516,9 @@ export function SettingsContent() {
               <div className="ml-3 flex-1">
                 <Label htmlFor="annual" className="font-semibold text-foreground cursor-pointer">Annual <span className="ml-2 text-primary">${plans.annual.price}/{plans.annual.period}</span> <Badge variant="secondary" className="ml-2 bg-green-100 text-green-700">Save ${plans.annual.savings}</Badge></Label>
                 <ul className="mt-2 text-sm text-muted-foreground space-y-1">
-                  <li className="flex items-center gap-2"><Check className="h-3 w-3 text-primary" />Full access to all features</li>
-                  <li className="flex items-center gap-2"><Check className="h-3 w-3 text-primary" />2 months free</li>
-                  <li className="flex items-center gap-2"><Check className="h-3 w-3 text-primary" />Priority support</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Full access to all features</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />2 months free</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Priority support</li>
                 </ul>
               </div>
             </div>

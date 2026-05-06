@@ -285,7 +285,7 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
                           <p className="text-sm text-muted-foreground">{milestone.count} Vulas</p>
                         </div>
                       </div>
-                      {unlocked && <Badge className="mt-3 bg-yellow-500 text-white"><Star className="h-3 w-3 mr-1" /> Unlocked!</Badge>}
+                      {unlocked && <Badge className="mt-3 bg-yellow-500 text-white"><Star className="h-4 w-4 mr-1" /> Unlocked!</Badge>}
                     </div>
                   );
                 })}
@@ -411,7 +411,7 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
                         </div>
                       </div>
                       <Button size="sm" className="w-full mt-3 gap-1 text-xs" onClick={() => { setTransferToAppId(app.id); setShowTransferDialog(true); }}>
-                        <Send className="h-3 w-3" /> Transfer Vulas
+                        <Send className="h-4 w-4" /> Transfer Vulas
                       </Button>
                     </div>
                   ))}

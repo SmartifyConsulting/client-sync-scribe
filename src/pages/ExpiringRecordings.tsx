@@ -148,7 +148,7 @@ export default function ExpiringRecordings() {
                       variant={daysLeft <= 1 ? "destructive" : "secondary"}
                       className="gap-1"
                     >
-                      <AlertTriangle className="h-3 w-3" />
+                      <AlertTriangle className="h-4 w-4" />
                       {daysLeft === 0 ? "Expires today" : `${daysLeft} day${daysLeft !== 1 ? "s" : ""} left`}
                     </Badge>
                     <Button

@@ -48,7 +48,7 @@ export function VulaExplainerDialog({ open, onOpenChange, onCta }: VulaExplainer
           <div className="relative flex items-center">
             <div className="flex-grow border-t border-border" />
             <div className="mx-2 flex h-6 w-6 items-center justify-center rounded-full bg-blue-50">
-              <Droplet className="h-3 w-3 text-blue-500 fill-blue-500" />
+              <Droplet className="h-4 w-4 text-blue-500 fill-blue-500" />
             </div>
             <div className="flex-grow border-t border-border" />
           </div>
@@ -96,7 +96,7 @@ export function VulaExplainerDialog({ open, onOpenChange, onCta }: VulaExplainer
 
           {/* Footer tagline */}
           <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-            <Heart className="h-3 w-3 text-blue-500 fill-blue-500" />
+            <Heart className="h-4 w-4 text-blue-500 fill-blue-500" />
             <span>Earn them. Use them. Keep them.</span>
           </div>
         </div>

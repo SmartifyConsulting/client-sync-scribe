@@ -430,7 +430,7 @@ export default function Notifications() {
                   to={`/patients/${selectedMessage.patient_id}`}
                   className="inline-flex items-center gap-1 mt-2 text-sm text-primary hover:underline"
                 >
-                  <User className="h-3 w-3" />
+                  <User className="h-4 w-4" />
                   Re: {selectedMessage.patient.name}
                 </Link>
               )}

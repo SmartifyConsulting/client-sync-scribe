@@ -142,17 +142,17 @@ export default function PatientCalendar() {
         <p className="font-medium text-sm">{apt.title}</p>
         {apt.doctor_name && (
           <p className="text-xs text-primary font-medium flex items-center gap-1 mt-0.5">
-            <User className="h-3 w-3" />
+            <User className="h-4 w-4" />
             with Dr. {apt.doctor_name}
           </p>
         )}
         <div className="mt-1 flex flex-wrap gap-2 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
+            <Clock className="h-4 w-4" />
             {format(parseISO(apt.start_time), "h:mm a")} - {format(parseISO(apt.end_time), "h:mm a")}
           </span>
           {apt.location && (
-            <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{apt.location}</span>
+            <span className="flex items-center gap-1"><MapPin className="h-4 w-4" />{apt.location}</span>
           )}
         </div>
         <div className="mt-1 flex flex-wrap gap-1">
@@ -161,7 +161,7 @@ export default function PatientCalendar() {
           )}
           {apt.service_price != null && apt.service_price > 0 && (
             <Badge className="text-[10px] bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0">
-              <DollarSign className="h-3 w-3 mr-0.5" />
+              <DollarSign className="h-4 w-4 mr-0.5" />
               {formatCurrency(apt.service_price)}
             </Badge>
           )}

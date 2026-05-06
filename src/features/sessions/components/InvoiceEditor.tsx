@@ -315,7 +315,7 @@ Total: ${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`;
             <div className="flex items-center justify-between">
               <Label>Line Items</Label>
               <Button type="button" variant="outline" size="sm" onClick={addLineItem} className="gap-1">
-                <Plus className="h-3 w-3" />
+                <Plus className="h-4 w-4" />
                 Add Line
               </Button>
             </div>

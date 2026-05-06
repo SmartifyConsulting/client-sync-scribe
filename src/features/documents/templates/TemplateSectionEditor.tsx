@@ -262,7 +262,7 @@ export function TemplateSectionEditor({
             className="absolute -top-2 -right-2 h-5 w-5"
             onClick={removeImage}
           >
-            <X className="h-3 w-3" />
+            <X className="h-4 w-4" />
           </Button>
         </div>
       )}
@@ -287,7 +287,7 @@ export function TemplateSectionEditor({
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mx-auto" />
           ) : (
             <span className="text-muted-foreground flex items-center justify-center gap-1">
-              <Upload className="h-3 w-3" />
+              <Upload className="h-4 w-4" />
               Drop image
             </span>
           )}

@@ -480,7 +480,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                               onClick={handleSendPatientInvite}
                               className="gap-1"
                             >
-                              {invitingPatient ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+                              {invitingPatient ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                               Invite
                             </Button>
                           </div>
@@ -719,7 +719,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                 <h4 className="font-medium">Filters</h4>
                 {hasActiveFilters && (
                   <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 text-xs">
-                    <X className="h-3 w-3 mr-1" />
+                    <X className="h-4 w-4 mr-1" />
                     Clear all
                   </Button>
                 )}
@@ -873,12 +873,12 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                         <div className="space-y-0.5">
                           {mePatient.email && (
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                              <Mail className="h-3 w-3" /> <span className="truncate">{mePatient.email}</span>
+                              <Mail className="h-4 w-4" /> <span className="truncate">{mePatient.email}</span>
                             </div>
                           )}
                           {mePatient.phone && (
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                              <Phone className="h-3 w-3" /> {mePatient.phone}
+                              <Phone className="h-4 w-4" /> {mePatient.phone}
                             </div>
                           )}
                           {!mePatient.email && !mePatient.phone && (
@@ -969,13 +969,13 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                           <div className="space-y-0.5">
                             {patient.email && (
                               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <Mail className="h-3 w-3" />
+                                <Mail className="h-4 w-4" />
                                 <span className="truncate max-w-[160px]">{patient.email}</span>
                               </div>
                             )}
                             {patient.phone && (
                               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <Phone className="h-3 w-3" />
+                                <Phone className="h-4 w-4" />
                                 {patient.phone}
                               </div>
                             )}

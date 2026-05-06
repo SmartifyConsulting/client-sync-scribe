@@ -199,18 +199,18 @@ export default function Documentation() {
                     )}
                     <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
+                        <Calendar className="h-4 w-4" />
                         Started: {format(parseISO(rx.start_date), "MMM d, yyyy")}
                       </span>
                       {rx.doctor_profile?.full_name && (
                         <span className="flex items-center gap-1">
-                          <User className="h-3 w-3" />
+                          <User className="h-4 w-4" />
                           {rx.doctor_profile.full_name}
                         </span>
                       )}
                       {rx.refills_remaining > 0 && (
                         <span className="flex items-center gap-1">
-                          <FileText className="h-3 w-3" />
+                          <FileText className="h-4 w-4" />
                           {rx.refills_remaining} refill(s) remaining
                         </span>
                       )}

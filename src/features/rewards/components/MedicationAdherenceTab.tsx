@@ -685,15 +685,15 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                     <h3 className="font-semibold text-foreground">{rx.medication}</h3>
                     {todayStatus === "completed" ? (
                       <Badge className="bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/30">
-                        <Check className="h-3 w-3 mr-1" /> Taken Today
+                        <Check className="h-4 w-4 mr-1" /> Taken Today
                       </Badge>
                     ) : todayStatus === "missed" ? (
                       <Badge variant="destructive">
-                        <AlertCircle className="h-3 w-3 mr-1" /> Missed
+                        <AlertCircle className="h-4 w-4 mr-1" /> Missed
                       </Badge>
                     ) : (
                       <Badge variant="secondary">
-                        <Clock className="h-3 w-3 mr-1" /> Pending
+                        <Clock className="h-4 w-4 mr-1" /> Pending
                       </Badge>
                     )}
                   </div>
@@ -776,17 +776,17 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                 )}
                 {todayStatus === "provisional" && (
                   <Badge variant="secondary" className="shrink-0 bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30">
-                    <Sparkles className="h-3 w-3 mr-1" /> Provisional
+                    <Sparkles className="h-4 w-4 mr-1" /> Provisional
                   </Badge>
                 )}
                 {todayStatus === "pending_review" && (
                   <Badge variant="secondary" className="shrink-0">
-                    <Clock className="h-3 w-3 mr-1" /> Pending review
+                    <Clock className="h-4 w-4 mr-1" /> Pending review
                   </Badge>
                 )}
                 {todayStatus === "failed_verification" && (
                   <Badge variant="destructive" className="shrink-0">
-                    <AlertCircle className="h-3 w-3 mr-1" /> Not verified
+                    <AlertCircle className="h-4 w-4 mr-1" /> Not verified
                   </Badge>
                 )}
               </div>

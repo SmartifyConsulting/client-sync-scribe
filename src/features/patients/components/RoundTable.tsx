@@ -200,7 +200,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
                 <p className="whitespace-pre-wrap text-xs text-foreground">{t.body}</p>
                 <div className="border-t pt-3 space-y-2">
                   <div className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
-                    <MessageCircle className="h-3 w-3" /> Live discussion
+                    <MessageCircle className="h-4 w-4" /> Live discussion
                   </div>
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {(messagesByTopic[t.id] || []).map((m) => (
@@ -230,7 +230,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
                   </div>
                   {t.doctor_id === currentUserId && (
                     <Button size="sm" variant="ghost" className="text-destructive h-7 text-xs" onClick={() => deleteTopic(t.id)}>
-                      <Trash2 className="h-3 w-3 mr-1" /> Delete topic
+                      <Trash2 className="h-4 w-4 mr-1" /> Delete topic
                     </Button>
                   )}
                 </div>

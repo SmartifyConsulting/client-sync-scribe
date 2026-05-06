@@ -69,16 +69,16 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
       {doc && (
         <Button variant="outline" size="sm" className="mb-3" asChild>
           <a href={doc.media_url || `#doc-${doc.id}`} target="_blank" rel="noreferrer">
-            <FileText className="h-3 w-3 mr-1" /> View Admission Form
+            <FileText className="h-4 w-4 mr-1" /> View Admission Form
           </a>
         </Button>
       )}
 
       <Accordion type="multiple" className="w-full">
         <AccordionItem value="vitals">
-          <AccordionTrigger className="text-xs"><span className="flex items-center gap-2"><Activity className="h-3 w-3" /> Vitals ({vitals.length})</span></AccordionTrigger>
+          <AccordionTrigger className="text-xs"><span className="flex items-center gap-2"><Activity className="h-4 w-4" /> Vitals ({vitals.length})</span></AccordionTrigger>
           <AccordionContent>
-            {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowVitals(true)}><Plus className="h-3 w-3 mr-1" /> Add Vitals</Button>}
+            {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowVitals(true)}><Plus className="h-4 w-4 mr-1" /> Add Vitals</Button>}
             <div className="space-y-2">
               {vitals.map((v: any) => (
                 <div key={v.id} className="text-xs p-2 rounded bg-muted/40">
@@ -92,9 +92,9 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
         </AccordionItem>
 
         <AccordionItem value="meds">
-          <AccordionTrigger className="text-xs"><span className="flex items-center gap-2"><Pill className="h-3 w-3" /> Active Medications ({meds.length})</span></AccordionTrigger>
+          <AccordionTrigger className="text-xs"><span className="flex items-center gap-2"><Pill className="h-4 w-4" /> Active Medications ({meds.length})</span></AccordionTrigger>
           <AccordionContent>
-            {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowMeds(true)}><Plus className="h-3 w-3 mr-1" /> Add Medication</Button>}
+            {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowMeds(true)}><Plus className="h-4 w-4 mr-1" /> Add Medication</Button>}
             <div className="space-y-2">
               {meds.map((m: any) => (
                 <div key={m.id} className="text-xs p-2 rounded bg-muted/40">
@@ -107,9 +107,9 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
         </AccordionItem>
 
         <AccordionItem value="labs">
-          <AccordionTrigger className="text-xs"><span className="flex items-center gap-2"><FlaskConical className="h-3 w-3" /> Lab Results ({labs.length})</span></AccordionTrigger>
+          <AccordionTrigger className="text-xs"><span className="flex items-center gap-2"><FlaskConical className="h-4 w-4" /> Lab Results ({labs.length})</span></AccordionTrigger>
           <AccordionContent>
-            {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowLabs(true)}><Plus className="h-3 w-3 mr-1" /> Add Lab Result</Button>}
+            {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowLabs(true)}><Plus className="h-4 w-4 mr-1" /> Add Lab Result</Button>}
             <div className="space-y-2">
               {labs.map((l: any) => (
                 <div key={l.id} className="text-xs p-2 rounded bg-muted/40">
@@ -124,9 +124,9 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
         </AccordionItem>
 
         <AccordionItem value="imaging">
-          <AccordionTrigger className="text-xs"><span className="flex items-center gap-2"><Scan className="h-3 w-3" /> Imaging ({imaging.length})</span></AccordionTrigger>
+          <AccordionTrigger className="text-xs"><span className="flex items-center gap-2"><Scan className="h-4 w-4" /> Imaging ({imaging.length})</span></AccordionTrigger>
           <AccordionContent>
-            {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowImaging(true)}><Plus className="h-3 w-3 mr-1" /> Add Imaging</Button>}
+            {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowImaging(true)}><Plus className="h-4 w-4 mr-1" /> Add Imaging</Button>}
             <div className="space-y-2">
               {imaging.map((i: any) => (
                 <div key={i.id} className="text-xs p-2 rounded bg-muted/40">
@@ -166,10 +166,10 @@ export function AdmissionsView({ patientId, patientHeight, patientWeight, canEdi
         {canEdit && (
           <div className="flex items-center gap-2">
             <Button size="sm" variant="outline" onClick={() => setShowManual(true)} className="gap-1">
-              <Plus className="h-3 w-3" /> Log Admission
+              <Plus className="h-4 w-4" /> Log Admission
             </Button>
             <Button size="sm" onClick={() => setShowUpload(true)} className="gap-1">
-              <Upload className="h-3 w-3" /> Upload Admission Form
+              <Upload className="h-4 w-4" /> Upload Admission Form
             </Button>
           </div>
         )}

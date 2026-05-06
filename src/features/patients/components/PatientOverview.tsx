@@ -450,9 +450,9 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
           condition: "bg-blue-500/15 text-blue-700 dark:text-blue-400",
         };
         const iconMap = {
-          med: <Pill className="h-3 w-3" />,
-          symptom: <Activity className="h-3 w-3" />,
-          condition: <HeartPulse className="h-3 w-3" />,
+          med: <Pill className="h-4 w-4" />,
+          symptom: <Activity className="h-4 w-4" />,
+          condition: <HeartPulse className="h-4 w-4" />,
         };
 
         parts.push(
@@ -512,7 +512,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
       {patient.blood_type && (
         <div className="flex items-center gap-2 -mt-2">
           <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 border-0 text-xs font-bold">
-            <Droplets className="h-3 w-3 mr-1" />
+            <Droplets className="h-4 w-4 mr-1" />
             Blood Type: {patient.blood_type}
           </Badge>
         </div>
@@ -559,25 +559,25 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
       <div className="flex flex-wrap gap-4 text-sm">
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-red-500/15 text-red-700 dark:text-red-400 font-medium">
-            <AlertTriangle className="h-3 w-3" />
+            <AlertTriangle className="h-4 w-4" />
             Allergy
           </span>
         </div>
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-blue-500/15 text-blue-700 dark:text-blue-400 font-medium">
-            <HeartPulse className="h-3 w-3" />
+            <HeartPulse className="h-4 w-4" />
             Condition
           </span>
         </div>
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-500/15 text-green-700 dark:text-green-400 font-medium">
-            <Pill className="h-3 w-3" />
+            <Pill className="h-4 w-4" />
             Medication
           </span>
         </div>
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-amber-500/15 text-amber-700 dark:text-amber-400 font-medium">
-            <Activity className="h-3 w-3" />
+            <Activity className="h-4 w-4" />
             Symptom
           </span>
         </div>
@@ -622,14 +622,14 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant="outline" className="bg-card border-border text-foreground font-medium">
-                      <Pill className="h-3 w-3 mr-1" />
+                      <Pill className="h-4 w-4 mr-1" />
                       {conflict.medication1}
                     </Badge>
                     {conflict.medication2 && (
                       <>
                         <span className="text-muted-foreground text-xs">+</span>
                         <Badge variant="outline" className="bg-card border-border text-foreground font-medium">
-                          <Pill className="h-3 w-3 mr-1" />
+                          <Pill className="h-4 w-4 mr-1" />
                           {conflict.medication2}
                         </Badge>
                       </>
@@ -709,9 +709,9 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
                       onClick={() => toggleStatus("conditions", i)}
                     >
                       {cond.status === "active" ? (
-                        <span className="flex items-center gap-1 text-xs text-blue-600"><Check className="h-3 w-3" /> Active</span>
+                        <span className="flex items-center gap-1 text-xs text-blue-600"><Check className="h-4 w-4" /> Active</span>
                       ) : (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground"><X className="h-3 w-3" /> Resolved</span>
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground"><X className="h-4 w-4" /> Resolved</span>
                       )}
                     </Button>
                   </div>
@@ -756,9 +756,9 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
                       onClick={() => toggleStatus("medications", i)}
                     >
                       {med.status === "active" ? (
-                        <span className="flex items-center gap-1 text-xs text-green-600"><Check className="h-3 w-3" /> In Use</span>
+                        <span className="flex items-center gap-1 text-xs text-green-600"><Check className="h-4 w-4" /> In Use</span>
                       ) : (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground"><X className="h-3 w-3" /> Not Used</span>
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground"><X className="h-4 w-4" /> Not Used</span>
                       )}
                     </Button>
                   </li>
@@ -795,9 +795,9 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
                       onClick={() => toggleStatus("symptoms", i)}
                     >
                       {symptom.status === "active" ? (
-                        <span className="flex items-center gap-1 text-xs text-amber-600"><Check className="h-3 w-3" /> Active</span>
+                        <span className="flex items-center gap-1 text-xs text-amber-600"><Check className="h-4 w-4" /> Active</span>
                       ) : (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground"><X className="h-3 w-3" /> Resolved</span>
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground"><X className="h-4 w-4" /> Resolved</span>
                       )}
                     </Button>
                   </li>

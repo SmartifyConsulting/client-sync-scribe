@@ -1592,7 +1592,7 @@ export function PatientDetailsEditor({
                                 toast({ title: "Notification sent", description: `${nok.name} has been notified` })
                               }
                             >
-                              <Bell className="h-3 w-3 text-primary" />
+                              <Bell className="h-4 w-4 text-primary" />
                             </Button>
                             <Button
                               variant="ghost"
@@ -1706,7 +1706,7 @@ export function PatientDetailsEditor({
                                 key={m.id}
                                 className="flex items-center gap-2 p-1.5 rounded-lg bg-muted/30 border border-border/50"
                               >
-                                <Pill className="h-3 w-3 text-muted-foreground shrink-0" />
+                                <Pill className="h-4 w-4 text-muted-foreground shrink-0" />
                                 <div className="flex-1 min-w-0">
                                   <p className="text-xs font-medium text-foreground">
                                     {m.name}
@@ -2064,7 +2064,7 @@ export function PatientDetailsEditor({
           {saving && (
             <div className="flex justify-end mt-2">
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Loader2 className="h-3 w-3 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Saving...
               </span>
             </div>
@@ -2072,7 +2072,7 @@ export function PatientDetailsEditor({
           {!saving && !hasChanges && isEditing && (
             <div className="flex justify-end mt-2">
               <span className="flex items-center gap-1.5 text-xs text-green-600">
-                <Save className="h-3 w-3" />
+                <Save className="h-4 w-4" />
                 Saved
               </span>
             </div>
@@ -2272,7 +2272,7 @@ export function PatientDetailsEditor({
                       className="gap-1 text-xs h-7"
                       onClick={() => setShowAddNOK(true)}
                     >
-                      <Plus className="h-3 w-3" />
+                      <Plus className="h-4 w-4" />
                       Add
                     </Button>
                   )}
@@ -2396,10 +2396,10 @@ export function PatientDetailsEditor({
                                 toast({ title: "Notification sent", description: `${nok.name} has been notified` })
                               }
                             >
-                              <Bell className="h-3 w-3 text-primary" />
+                              <Bell className="h-4 w-4 text-primary" />
                             </Button>
                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleEditNOK(nok)}>
-                              <Pencil className="h-3 w-3" />
+                              <Pencil className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="ghost"
@@ -2410,7 +2410,7 @@ export function PatientDetailsEditor({
                                 setHasChanges(true);
                               }}
                             >
-                              <Trash2 className="h-3 w-3" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         </div>
@@ -2632,7 +2632,7 @@ export function PatientDetailsEditor({
                             className="gap-1 text-xs h-7"
                             onClick={() => setShowAddMed(true)}
                           >
-                            <Plus className="h-3 w-3" />
+                            <Plus className="h-4 w-4" />
                             Add
                           </Button>
                         )}
@@ -2790,7 +2790,7 @@ export function PatientDetailsEditor({
                                 )}
                               </div>
                               <div className="flex gap-1 shrink-0 items-center">
-                                <Bell className={`h-3 w-3 ${(m.reminders_enabled ?? true) ? "text-primary" : "text-muted-foreground"}`} />
+                                <Bell className={`h-4 w-4 ${(m.reminders_enabled ?? true) ? "text-primary" : "text-muted-foreground"}`} />
                                 <Switch
                                   className="scale-75"
                                   checked={m.reminders_enabled ?? true}
@@ -2807,7 +2807,7 @@ export function PatientDetailsEditor({
                                   className="h-6 w-6"
                                   onClick={() => handleEditMed(m)}
                                 >
-                                  <Pencil className="h-3 w-3" />
+                                  <Pencil className="h-4 w-4" />
                                 </Button>
                                 <Button
                                   variant="ghost"
@@ -2818,7 +2818,7 @@ export function PatientDetailsEditor({
                                     setHasChanges(true);
                                   }}
                                 >
-                                  <Trash2 className="h-3 w-3" />
+                                  <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
                             </div>
@@ -2848,7 +2848,7 @@ export function PatientDetailsEditor({
                             className="gap-1 text-xs h-7"
                             onClick={() => setShowAddCondition(true)}
                           >
-                            <Plus className="h-3 w-3" />
+                            <Plus className="h-4 w-4" />
                             Add
                           </Button>
                         )}
@@ -2950,7 +2950,7 @@ export function PatientDetailsEditor({
                                   className="h-6 w-6"
                                   onClick={() => handleEditCondition(c)}
                                 >
-                                  <Pencil className="h-3 w-3" />
+                                  <Pencil className="h-4 w-4" />
                                 </Button>
                                 <Button
                                   variant="ghost"
@@ -2961,7 +2961,7 @@ export function PatientDetailsEditor({
                                     setHasChanges(true);
                                   }}
                                 >
-                                  <Trash2 className="h-3 w-3" />
+                                  <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
                             </div>
@@ -2994,7 +2994,7 @@ export function PatientDetailsEditor({
                           className="gap-1 text-xs h-7"
                           onClick={() => setShowAddSurgery(true)}
                         >
-                          <Plus className="h-3 w-3" />
+                          <Plus className="h-4 w-4" />
                           Add
                         </Button>
                       )}
@@ -3113,7 +3113,7 @@ export function PatientDetailsEditor({
                                 className="h-6 w-6"
                                 onClick={() => handleEditSurgery(surgery)}
                               >
-                                <Pencil className="h-3 w-3" />
+                                <Pencil className="h-4 w-4" />
                               </Button>
                               <Button
                                 variant="ghost"
@@ -3121,7 +3121,7 @@ export function PatientDetailsEditor({
                                 className="h-6 w-6 text-destructive"
                                 onClick={() => handleRemoveSurgery(surgery.id)}
                               >
-                                <Trash2 className="h-3 w-3" />
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>
@@ -3143,7 +3143,7 @@ export function PatientDetailsEditor({
                           className="gap-1 text-xs h-7"
                           onClick={() => setShowAddFamily(true)}
                         >
-                          <Plus className="h-3 w-3" />
+                          <Plus className="h-4 w-4" />
                           Add
                         </Button>
                       )}
@@ -3209,7 +3209,7 @@ export function PatientDetailsEditor({
                                 className="h-6 w-6"
                                 onClick={() => handleEditFamilyEntry(entry)}
                               >
-                                <Pencil className="h-3 w-3" />
+                                <Pencil className="h-4 w-4" />
                               </Button>
                               <Button
                                 variant="ghost"
@@ -3217,7 +3217,7 @@ export function PatientDetailsEditor({
                                 className="h-6 w-6 text-destructive"
                                 onClick={() => handleRemoveFamilyEntry(entry.id)}
                               >
-                                <Trash2 className="h-3 w-3" />
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>
@@ -3374,7 +3374,7 @@ export function PatientDetailsEditor({
                                     setGpSearchOpen(false);
                                   }}
                                 >
-                                  <Eye className="h-3 w-3" />
+                                  <Eye className="h-4 w-4" />
                                 </Button>
                                 <Button
                                   variant="ghost"
@@ -3387,7 +3387,7 @@ export function PatientDetailsEditor({
                                     toast({ title: "Connected", description: `${doc.full_name} linked as your GP` });
                                   }}
                                 >
-                                  <Link2 className="h-3 w-3" />
+                                  <Link2 className="h-4 w-4" />
                                 </Button>
                               </div>
                             </div>
@@ -3443,7 +3443,7 @@ export function PatientDetailsEditor({
                           className="gap-1 text-xs h-7"
                           onClick={() => setShowAddPharmacy(true)}
                         >
-                          <Plus className="h-3 w-3" />
+                          <Plus className="h-4 w-4" />
                           Add
                         </Button>
                       )}
@@ -3538,7 +3538,7 @@ export function PatientDetailsEditor({
                                 className="h-6 w-6"
                                 onClick={() => handleEditPharmacy(pharmacy)}
                               >
-                                <Pencil className="h-3 w-3" />
+                                <Pencil className="h-4 w-4" />
                               </Button>
                               <Button
                                 variant="ghost"
@@ -3546,7 +3546,7 @@ export function PatientDetailsEditor({
                                 className="h-6 w-6 text-destructive"
                                 onClick={() => handleRemovePharmacy(pharmacy.id)}
                               >
-                                <Trash2 className="h-3 w-3" />
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>

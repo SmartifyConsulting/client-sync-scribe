@@ -146,7 +146,7 @@ export function PrescriptionReviewDialog({
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Medication {i + 1}</span>
                 <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeMed(i)}>
-                  <Trash2 className="h-3 w-3" />
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
               <Input placeholder="Medication name" value={med.medication} onChange={(e) => updateMed(i, "medication", e.target.value)} />
@@ -161,7 +161,7 @@ export function PrescriptionReviewDialog({
             </div>
           ))}
           <Button variant="outline" size="sm" className="gap-1" onClick={addMed}>
-            <Plus className="h-3 w-3" /> Add Medication
+            <Plus className="h-4 w-4" /> Add Medication
           </Button>
         </div>
         <DialogFooter>
@@ -217,12 +217,12 @@ export function InvoiceReviewDialog({
               <Input className="flex-1" placeholder="Service" value={item.description} onChange={(e) => updateItem(i, "description", e.target.value)} />
               <Input className="w-24" type="number" placeholder="Amount" value={item.amount} onChange={(e) => updateItem(i, "amount", parseFloat(e.target.value) || 0)} />
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeItem(i)}>
-                <Trash2 className="h-3 w-3" />
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           ))}
           <Button variant="outline" size="sm" className="gap-1" onClick={addItem}>
-            <Plus className="h-3 w-3" /> Add Item
+            <Plus className="h-4 w-4" /> Add Item
           </Button>
           <div className="flex justify-between font-semibold pt-2 border-t">
             <span>Total</span>

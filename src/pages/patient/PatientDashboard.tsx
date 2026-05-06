@@ -355,7 +355,7 @@ export default function PatientDashboard() {
                 <div className="space-y-2">
                   <Skeleton className="h-3 w-full" />
                   <Skeleton className="h-3 w-4/5" />
-                  <Skeleton className="h-3 w-3/5" />
+                  <Skeleton className="h-4 w-4/5" />
                 </div>
               ) : aiSummary?.summary ? (
                 <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-4">
@@ -437,7 +437,7 @@ export default function PatientDashboard() {
                       <tip.icon className="h-3.5 w-3.5 text-primary" />
                     </div>
                     <p className="text-[11px] text-foreground group-hover:text-primary transition-colors">{tip.text}</p>
-                    <ArrowRight className="h-3 w-3 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
                   </Link>
                 ))}
               </div>
@@ -458,7 +458,7 @@ export default function PatientDashboard() {
                 </CardTitle>
                 <Link to="/patient/invoices">
                   <Button variant="ghost" size="sm" className="text-[10px] h-6 text-primary gap-1">
-                    All Invoices <ArrowRight className="h-3 w-3" />
+                    All Invoices <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
               </div>
@@ -515,7 +515,7 @@ export default function PatientDashboard() {
               </CardTitle>
               <Link to="/patient/rewards">
                 <Button variant="ghost" size="sm" className="text-[10px] h-6 text-primary gap-1">
-                  View All <ArrowRight className="h-3 w-3" />
+                  View All <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>

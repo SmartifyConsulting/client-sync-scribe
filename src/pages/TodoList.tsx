@@ -446,7 +446,7 @@ export default function TodoList() {
               </div>
             </div>
             <Button onClick={() => handleAiProcess()} disabled={!newTaskText.trim() || isAiProcessing} variant="secondary" className="gap-1 h-7 px-2 text-xs">
-              {isAiProcessing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Brain className="h-3 w-3" />}AI Process
+              {isAiProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4" />}AI Process
             </Button>
           </div>
         </div>
@@ -465,7 +465,7 @@ export default function TodoList() {
                 <span>{actionTypeLabels[result.action_type] || result.action_type}</span>
                 <span className="text-muted-foreground">—</span>
                 <span className="text-muted-foreground truncate">{result.description}</span>
-                {result.auto_executed ? <Badge className="bg-success/10 text-success border-success/20 ml-auto shrink-0"><Zap className="h-3 w-3 mr-1" />Done</Badge> : <Badge variant="outline" className="ml-auto shrink-0">Manual</Badge>}
+                {result.auto_executed ? <Badge className="bg-success/10 text-success border-success/20 ml-auto shrink-0"><Zap className="h-4 w-4 mr-1" />Done</Badge> : <Badge variant="outline" className="ml-auto shrink-0">Manual</Badge>}
               </div>
             ))}
           </div>
@@ -522,8 +522,8 @@ export default function TodoList() {
                                    </p>
                                    {(todo.is_auto_executed || todo.task_type === 'document_review') && (
                                      <span className="inline-flex items-center gap-0.5">
-                                       <Badge className="bg-success/10 text-success border-success/20 text-[10px] px-1.5 py-0"><Zap className="h-3 w-3 mr-0.5" />AI</Badge>
-                                       {todo.document_id && <Send className="h-3 w-3 text-green-600" />}
+                                       <Badge className="bg-success/10 text-success border-success/20 text-[10px] px-1.5 py-0"><Zap className="h-4 w-4 mr-0.5" />AI</Badge>
+                                       {todo.document_id && <Send className="h-4 w-4 text-green-600" />}
                                      </span>
                                    )}
                                 </div>
@@ -535,7 +535,7 @@ export default function TodoList() {
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                       <button className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium cursor-pointer hover:opacity-80", priorityColors[todo.priority])}>
-                                        <Flag className="h-3 w-3" />{priorityLabels[todo.priority]}
+                                        <Flag className="h-4 w-4" />{priorityLabels[todo.priority]}
                                       </button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="start">
@@ -548,12 +548,12 @@ export default function TodoList() {
                                   </DropdownMenu>
                                   {/* Created date */}
                                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                    <Calendar className="h-3 w-3" />
+                                    <Calendar className="h-4 w-4" />
                                     {format(new Date(todo.created_at), "MMM d, h:mm a")}
                                   </span>
                                   {todo.due_date && (
                                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                      <Calendar className="h-3 w-3" />{new Date(todo.due_date).toLocaleDateString()}
+                                      <Calendar className="h-4 w-4" />{new Date(todo.due_date).toLocaleDateString()}
                                     </span>
                                   )}
                                 </div>
