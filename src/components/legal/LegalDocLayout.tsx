@@ -127,13 +127,13 @@ export function LegalDocLayout({
             {toc.length > 1 && (
               <nav className="no-print mb-8 rounded-md border border-border bg-muted/30 p-4">
                 <p className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-2">Contents</p>
-                <ol className="list-decimal list-inside space-y-1 text-sm">
+                <ul className="list-none space-y-1 text-sm">
                   {toc.map((t) => (
                     <li key={t.id}>
                       <a href={`#${t.id}`} className="text-foreground hover:text-primary hover:underline">{t.text}</a>
                     </li>
                   ))}
-                </ol>
+                </ul>
               </nav>
             )}
 

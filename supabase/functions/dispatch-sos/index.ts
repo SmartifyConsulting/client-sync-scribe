@@ -47,6 +47,32 @@ Deno.serve(async (req) => {
       .sort((a: any, b: any) => a._d - b._d)
       .slice(0, 15);
 
+    // Fetch incident user for doctor notification
+    const { data: incidentDetail } = await sb.from("holarchelp_incidents")
+      .select("user_id, severity").eq("id", incident_id).maybeSingle();
+
+    // Notify connected doctors regardless of ambulance candidates
+    if (incidentDetail?.user_id) {
+      const { data: access } = await sb.from("doctor_patient_access")
+        .select("doctor_id")
+        .eq("patient_user_id", incidentDetail.user_id)
+        .eq("is_active", true);
+      const doctorIds = Array.from(new Set((access ?? []).map((a: any) => a.doctor_id))).filter(Boolean);
+      if (doctorIds.length) {
+        const { data: pat } = await sb.from("profiles").select("full_name").eq("id", incidentDetail.user_id).maybeSingle();
+        const patientName = (pat as any)?.full_name ?? "A patient";
+        const sev = (incidentDetail as any).severity ?? "critical";
+        const notifs = doctorIds.map((doctor_id: string) => ({
+          user_id: doctor_id,
+          type: "patient_incident",
+          title: "Patient SOS triggered",
+          description: `${patientName} has triggered an SOS (${sev}).`,
+          reference_id: incident_id,
+        }));
+        await sb.from("notifications").insert(notifs as any).then(() => {}, () => {});
+      }
+    }
+
     if (candidates.length === 0) {
       return new Response(JSON.stringify({ offered: 0 }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
