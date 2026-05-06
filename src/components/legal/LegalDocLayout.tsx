@@ -159,6 +159,14 @@ export function LegalDocLayout({
           </div>
 
           <div className="px-6 md:px-10 py-8">
+            {signedSince && (
+              <div className="mb-6 flex items-start gap-2 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm">
+                <ShieldCheck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <p className="!m-0 text-foreground">
+                  You have agreed to and are bound by these terms since <strong>{signedSince}</strong>.
+                </p>
+              </div>
+            )}
             {/* TOC */}
             {toc.length > 1 && (
               <nav className="no-print mb-8 rounded-md border border-border bg-muted/30 p-4">
