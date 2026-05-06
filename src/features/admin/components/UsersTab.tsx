@@ -30,11 +30,11 @@ const roleToCategory = (role: string): Category => {
   return "none";
 };
 
-const emergencyKindLabel = (k: string) => {
-  if (k === "hospital_staff") return "Hospital";
-  if (k === "ambulance_staff") return "Ambulance";
-  if (k === "blood_bank") return "Blood Bank";
-  return "";
+const emergencyIcon = (k: string) => {
+  if (k === "hospital_staff") return { Icon: Hospital, label: "Hospital" };
+  if (k === "ambulance_staff") return { Icon: Ambulance, label: "Ambulance" };
+  if (k === "blood_bank") return { Icon: Droplet, label: "Blood Bank" };
+  return null;
 };
 
 interface UserRecord {
