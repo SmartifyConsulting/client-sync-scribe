@@ -478,15 +478,15 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit" : "Add"} {kind === "hospital" ? "Hospital" : "Ambulance Provider"}</DialogTitle>
+          <DialogTitle>{isEdit ? "Edit" : "Add"} {kind === "hospital" ? "Hospital" : kind === "ambulance" ? "Ambulance Provider" : "Pharmacy"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           <div className="space-y-1.5">
-            <Label>{kind === "hospital" ? "Hospital name" : "Company name"}</Label>
+            <Label>{kind === "ambulance" ? "Company name" : kind === "pharmacy" ? "Pharmacy name" : "Hospital name"}</Label>
             <Input
               value={form[nameField(kind)] ?? ""}
               onChange={(e) => update(nameField(kind), e.target.value)}
-              placeholder={kind === "hospital" ? "e.g. Netcare Milpark Hospital" : "e.g. ER24"}
+              placeholder={kind === "hospital" ? "e.g. Netcare Milpark Hospital" : kind === "ambulance" ? "e.g. ER24" : "e.g. Clicks Pharmacy Sandton"}
               autoFocus
             />
           </div>
