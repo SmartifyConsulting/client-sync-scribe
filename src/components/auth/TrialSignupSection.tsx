@@ -83,7 +83,7 @@ export function TrialSignupSection({
               className="text-primary hover:underline inline-flex items-center gap-1"
             >
               {primaryConsentDocument.name}
-              <ExternalLink className="h-3 w-3" />
+              <ExternalLink className="h-4 w-4" />
             </Link>
             {" "}and the{" "}
             <Link 
@@ -92,7 +92,7 @@ export function TrialSignupSection({
               className="text-primary hover:underline inline-flex items-center gap-1"
             >
               Terms and Conditions
-              <ExternalLink className="h-3 w-3" />
+              <ExternalLink className="h-4 w-4" />
             </Link>
             . I understand that after the 30-day free access period, a subscription at {monthlyPrice}/month 
             is required to continue using the app.

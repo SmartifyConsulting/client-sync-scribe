@@ -219,13 +219,13 @@ export default function HealthAlbum() {
             <TabsList className="mb-4 bg-primary">
               <TabsTrigger value="all" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">All</TabsTrigger>
               <TabsTrigger value="gym" className="gap-1 data-[state=active]:bg-white data-[state=active]:text-black text-white">
-                <Dumbbell className="h-3 w-3" /> Gym
+                <Dumbbell className="h-4 w-4" /> Gym
               </TabsTrigger>
               <TabsTrigger value="healthy_meal" className="gap-1 data-[state=active]:bg-white data-[state=active]:text-black text-white">
-                <Utensils className="h-3 w-3" /> Meals
+                <Utensils className="h-4 w-4" /> Meals
               </TabsTrigger>
               <TabsTrigger value="medication" className="gap-1 data-[state=active]:bg-white data-[state=active]:text-black text-white">
-                <Pill className="h-3 w-3" /> Medication
+                <Pill className="h-4 w-4" /> Medication
               </TabsTrigger>
             </TabsList>
 
@@ -268,7 +268,7 @@ export default function HealthAlbum() {
                         {/* Category Badge */}
                         <div className="absolute top-2 left-2">
                           <Badge className={cn("gap-1", config?.color)}>
-                            <Icon className="h-3 w-3" />
+                            <Icon className="h-4 w-4" />
                             {config?.label}
                           </Badge>
                         </div>
@@ -277,7 +277,7 @@ export default function HealthAlbum() {
                         {photo.lollipops_awarded > 0 && (
                           <div className="absolute top-2 right-2">
                             <Badge variant="secondary" className="gap-1 bg-yellow-100 text-yellow-800">
-                              <Award className="h-3 w-3" />
+                              <Award className="h-4 w-4" />
                               +{photo.lollipops_awarded}
                             </Badge>
                           </div>
@@ -287,7 +287,7 @@ export default function HealthAlbum() {
                         <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="flex items-center justify-between text-white text-xs">
                             <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
+                              <Calendar className="h-4 w-4" />
                               {format(new Date(photo.captured_at), 'MMM d, yyyy')}
                             </span>
                             <AlertDialog>

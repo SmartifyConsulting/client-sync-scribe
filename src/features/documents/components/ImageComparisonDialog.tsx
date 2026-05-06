@@ -206,7 +206,7 @@ export function ImageComparisonDialog({
                       onClick={() => removeSlot(i)}
                       className="absolute top-1 right-1 p-0.5 rounded-full bg-destructive/10 hover:bg-destructive/20 text-destructive"
                     >
-                      <X className="h-3 w-3" />
+                      <X className="h-4 w-4" />
                     </button>
                   )}
                   <div

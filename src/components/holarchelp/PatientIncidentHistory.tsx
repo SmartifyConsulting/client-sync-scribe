@@ -102,7 +102,7 @@ export default function PatientIncidentHistory({ userId, title = "Emergency inci
         </CardTitle>
         {canLog && (
           <Button size="sm" variant="outline" onClick={() => setOpen(true)} className="gap-1 h-7">
-            <Plus className="h-3 w-3" /> Log Incident
+            <Plus className="h-4 w-4" /> Log Incident
           </Button>
         )}
       </CardHeader>

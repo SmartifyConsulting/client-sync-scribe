@@ -70,7 +70,7 @@ export function AccountabilityPanel() {
               <TableHead>Critical Cancels</TableHead>
               <TableHead>Stalled</TableHead>
               <TableHead>Avg Rating</TableHead>
-              <TableHead><AlertTriangle className="inline h-3 w-3 text-amber-500" /> Flags</TableHead>
+              <TableHead><AlertTriangle className="inline h-4 w-4 text-amber-500" /> Flags</TableHead>
               <TableHead>Priority</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -95,7 +95,7 @@ export function AccountabilityPanel() {
                 <TableCell className="font-semibold">{r.dispatch_priority}</TableCell>
                 <TableCell className="text-right space-x-1">
                   <Link to={`/admin/holarchelp-providers/${kind}/${r.provider_id}/incidents`}>
-                    <Button size="sm" variant="outline" className="gap-1"><History className="h-3 w-3" />Incidents</Button>
+                    <Button size="sm" variant="outline" className="gap-1"><History className="h-4 w-4" />Incidents</Button>
                   </Link>
                   <Button size="sm" variant="outline" onClick={() => lower(table, r.provider_id, r.dispatch_priority)}>Lower</Button>
                   <Button size="sm" variant="outline" className="text-destructive border-destructive/30" onClick={() => suspend(table, r.provider_id)}>Suspend</Button>

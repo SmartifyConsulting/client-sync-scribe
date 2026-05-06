@@ -666,7 +666,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
                     <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.status || "active"} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], status: e.target.value }; setParsedPatients(updated); }} /></TableCell>
                     <TableCell className="px-1">
                       <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => setParsedPatients(parsedPatients.filter((_, i) => i !== index))}>
-                        <X className="h-3 w-3" />
+                        <X className="h-4 w-4" />
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -741,7 +741,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
             ))}
           </div>
           <p className="text-xs text-muted-foreground mt-3">
-            <Sparkles className="h-3 w-3 inline mr-1" />
+            <Sparkles className="h-4 w-4 inline mr-1" />
             AI automatically detects and maps fields from any format, including unstructured text notes.
           </p>
         </div>

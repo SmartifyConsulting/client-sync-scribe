@@ -2241,7 +2241,7 @@ export default function MyPractice() {
                             onClick={() => openCertificate(cert.certificate_url!)}
                             className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
                           >
-                            <ExternalLink className="h-3 w-3" />
+                            <ExternalLink className="h-4 w-4" />
                             View
                           </button>
                         ) : (

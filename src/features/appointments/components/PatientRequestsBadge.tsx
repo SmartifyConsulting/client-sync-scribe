@@ -147,11 +147,11 @@ export function PatientRequestsBadge() {
             </div>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
+                <Calendar className="h-4 w-4" />
                 {req.proposed_start && format(parseISO(req.proposed_start), "MMM d, yyyy")}
               </span>
               <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
+                <Clock className="h-4 w-4" />
                 {req.proposed_start && format(parseISO(req.proposed_start), "h:mm a")}
               </span>
             </div>
@@ -160,11 +160,11 @@ export function PatientRequestsBadge() {
             </p>
             <div className="flex gap-2 pt-1">
               <Button size="sm" onClick={() => handleConfirmProposed(req)} disabled={actionLoading === req.id} className="gap-1">
-                {actionLoading === req.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                {actionLoading === req.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                 Accept
               </Button>
               <Button size="sm" variant="ghost" onClick={() => handleDeclineProposed(req)} disabled={actionLoading === req.id} className="gap-1 text-destructive">
-                <X className="h-3 w-3" /> Decline
+                <X className="h-4 w-4" /> Decline
               </Button>
             </div>
           </div>
@@ -177,11 +177,11 @@ export function PatientRequestsBadge() {
             </div>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
+                <Calendar className="h-4 w-4" />
                 {format(parseISO(req.requested_start), "MMM d, yyyy")}
               </span>
               <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
+                <Clock className="h-4 w-4" />
                 {format(parseISO(req.requested_start), "h:mm a")}
               </span>
             </div>

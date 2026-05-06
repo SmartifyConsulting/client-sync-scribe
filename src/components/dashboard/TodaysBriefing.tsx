@@ -709,7 +709,7 @@ export function TodaysBriefing() {
 
       {isTranslating && (
         <div className="px-4 py-2 flex items-center gap-2 text-xs text-muted-foreground border-b border-border">
-          <Loader2 className="h-3 w-3 animate-spin" />
+          <Loader2 className="h-4 w-4 animate-spin" />
           Translating briefing...
         </div>
       )}
@@ -744,7 +744,7 @@ export function TodaysBriefing() {
                           </span>
                         )}
                         <span className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
-                          <Clock className="h-3 w-3" />
+                          <Clock className="h-4 w-4" />
                           {apt.formattedTime}
                         </span>
                         {apt.allergies && (
@@ -765,7 +765,7 @@ export function TodaysBriefing() {
 
                   {apt.allergies && (
                     <div className="flex items-center gap-1 text-xs text-destructive">
-                      <AlertCircle className="h-3 w-3" />
+                      <AlertCircle className="h-4 w-4" />
                       <span>{translatedLabels['Allergies'] || 'Allergies'}: {apt.allergies}</span>
                     </div>
                   )}
@@ -787,14 +787,14 @@ export function TodaysBriefing() {
 
                   {apt.lastPrescription && (
                     <div className="flex items-center gap-1.5 text-xs">
-                      <Pill className="h-3 w-3 text-green-600" />
+                      <Pill className="h-4 w-4 text-green-600" />
                       <span className="text-muted-foreground">{apt.lastPrescription}</span>
                     </div>
                   )}
 
                   {apt.linkedDoctors.length > 0 && (
                     <div className="flex items-center gap-1.5 text-xs">
-                      <Users className="h-3 w-3 text-blue-600" />
+                      <Users className="h-4 w-4 text-blue-600" />
                       <span className="text-muted-foreground">
                         {apt.linkedDoctors.map(d => 
                           d.specialty ? `${d.name} (${d.specialty})` : d.name
@@ -806,7 +806,7 @@ export function TodaysBriefing() {
                   {apt.unreadRoundTableNotes.length > 0 && (
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-1.5 text-xs">
-                        <MessageCircle className="h-3 w-3 text-amber-600" />
+                        <MessageCircle className="h-4 w-4 text-amber-600" />
                         <span className="font-medium text-amber-600">
                           {apt.unreadRoundTableNotes.length} {apt.unreadRoundTableNotes.length > 1 ? (translatedLabels['unread notes'] || 'unread notes') : (translatedLabels['unread note'] || 'unread note')}
                         </span>

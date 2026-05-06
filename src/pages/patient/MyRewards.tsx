@@ -444,7 +444,7 @@ export default function MyRewards() {
               className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-[10px] md:text-xs flex items-center gap-1 mt-1 md:mt-2"
               onClick={() => { setTransferToAppId("vault"); setShowTransferDialog(true); }}
             >
-              Transfer to Vault <ArrowRightLeft className="h-3 w-3" />
+              Transfer to Vault <ArrowRightLeft className="h-4 w-4" />
             </Button>
           </CardContent>
         </Card>
@@ -651,7 +651,7 @@ export default function MyRewards() {
                       </div>
                       {unlocked && (
                         <Badge className="mt-3 bg-yellow-500 text-white">
-                          <Star className="h-3 w-3 mr-1" /> Unlocked!
+                          <Star className="h-4 w-4 mr-1" /> Unlocked!
                         </Badge>
                       )}
                     </div>

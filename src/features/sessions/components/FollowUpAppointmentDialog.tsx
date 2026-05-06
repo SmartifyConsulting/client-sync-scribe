@@ -163,7 +163,7 @@ export function FollowUpAppointmentDialog({
                           : "bg-card hover:bg-accent border-border"
                     )}
                   >
-                    <Clock className="inline h-3 w-3 mr-1" />
+                    <Clock className="inline h-4 w-4 mr-1" />
                     {s.label}
                   </button>
                 );

@@ -163,7 +163,7 @@ const IncidentCard = ({ i, primaryAction }: { i: Incident; primaryAction: React.
           <span className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${sevColor(i.severity)}`}>
             {(i.severity ?? "unknown").toUpperCase()}
           </span>
-          <span className="flex items-center gap-1 text-xs text-muted-foreground"><Clock className="h-3 w-3" />{ago(i.created_at)}</span>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground"><Clock className="h-4 w-4" />{ago(i.created_at)}</span>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
           {i.conscious === false && "Unconscious · "}

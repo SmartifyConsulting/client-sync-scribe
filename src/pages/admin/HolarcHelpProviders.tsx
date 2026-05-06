@@ -649,7 +649,7 @@ function LocationPicker({ onPick, initialQuery }: { onPick: (d: PlaceDetails) =>
                 disabled={picking === s.place_id}
                 className="block w-full text-left px-3 py-2 text-xs hover:bg-muted disabled:opacity-50"
               >
-                {picking === s.place_id ? <Loader2 className="inline mr-2 h-3 w-3 animate-spin" /> : null}
+                {picking === s.place_id ? <Loader2 className="inline mr-2 h-4 w-4 animate-spin" /> : null}
                 {s.description}
               </button>
             ))}

@@ -692,7 +692,7 @@ export default function Auth() {
                       <p className="font-medium text-foreground">{partner.full_name}</p>
                       <p className="text-xs text-muted-foreground">Reg: {partner.registration_number}{partner.mobile_number && ` · ${partner.mobile_number}`}</p>
                     </div>
-                    <Button type="button" variant="ghost" size="icon" onClick={() => removePartner(index)} className="h-7 w-7 text-destructive"><Trash2 className="h-3 w-3" /></Button>
+                    <Button type="button" variant="ghost" size="icon" onClick={() => removePartner(index)} className="h-7 w-7 text-destructive"><Trash2 className="h-4 w-4" /></Button>
                   </div>
                 ))}
               </div>
@@ -712,7 +712,7 @@ export default function Auth() {
                   <Input value={newPartner.mobile_number} onChange={(e) => setNewPartner({ ...newPartner, mobile_number: e.target.value })} placeholder="082 123 4567" className="h-9" />
                 </div>
               </div>
-              <Button type="button" variant="outline" size="sm" onClick={addPartner} className="w-full gap-1"><Plus className="h-3 w-3" />Add Partner</Button>
+              <Button type="button" variant="outline" size="sm" onClick={addPartner} className="w-full gap-1"><Plus className="h-4 w-4" />Add Partner</Button>
             </div>
           </div>
         );

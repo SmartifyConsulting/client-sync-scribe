@@ -24,7 +24,7 @@ export function PrivacyBadge() {
 
           <div>
             <p className="text-xs font-medium text-foreground mb-1.5 flex items-center gap-1">
-              <CheckCircle className="h-3 w-3 text-green-600" />
+              <CheckCircle className="h-4 w-4 text-green-600" />
               Shared with Care Team
             </p>
             <div className="space-y-1">
@@ -38,7 +38,7 @@ export function PrivacyBadge() {
 
           <div>
             <p className="text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1">
-              <XCircle className="h-3 w-3 text-destructive" />
+              <XCircle className="h-4 w-4 text-destructive" />
               Private — Not Shared
             </p>
             <div className="space-y-1">

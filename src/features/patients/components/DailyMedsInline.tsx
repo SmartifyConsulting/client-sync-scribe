@@ -215,7 +215,7 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
         <div key={m.id} className="flex items-center justify-between rounded-md border border-border p-2 bg-muted/30">
           <div className="min-w-0">
             <p className="text-xs font-medium truncate flex items-center gap-1.5">
-              <Pill className="h-3 w-3 text-primary" /> {m.medication}
+              <Pill className="h-4 w-4 text-primary" /> {m.medication}
             </p>
             <p className="text-[10px] text-muted-foreground">
               {m.frequency || "daily"} · {m.reminder_times?.join(", ") || "no time"} · {m.with_food === "with_food" ? "with food" : m.with_food === "without_food" ? "empty" : "either"}
@@ -224,7 +224,7 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
           </div>
           <div className="flex items-center gap-1">
             <label className="flex items-center gap-1 text-[10px] text-muted-foreground">
-              {(m.reminders_enabled ?? true) ? <Bell className="h-3 w-3 text-primary" /> : <BellOff className="h-3 w-3" />}
+              {(m.reminders_enabled ?? true) ? <Bell className="h-4 w-4 text-primary" /> : <BellOff className="h-4 w-4" />}
               <Switch checked={m.reminders_enabled ?? true} onCheckedChange={(v) => toggleReminder(m.id, v)} />
             </label>
             <Button variant="ghost" size="icon" onClick={() => remove(m.id)} className="text-destructive h-7 w-7">

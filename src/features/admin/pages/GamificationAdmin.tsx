@@ -879,7 +879,7 @@ export default function GamificationAdmin() {
                           />
                         ) : (
                           <span className="inline-flex items-center gap-1">
-                            <Calendar className="h-3 w-3 text-muted-foreground" />
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
                             {config.streak_interval_months} months
                           </span>
                         )}

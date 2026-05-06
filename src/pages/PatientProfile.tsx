@@ -330,14 +330,14 @@ export default function PatientProfile() {
           <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
             <div className="flex items-center justify-between">
               <p className="text-[10px] font-medium text-muted-foreground">Total Sessions</p>
-              <FileText className="h-3 w-3 text-primary" />
+              <FileText className="h-4 w-4 text-primary" />
             </div>
             <p className="mt-1 text-sm font-bold text-foreground">{completedSessions.length}</p>
           </div>
           <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
             <div className="flex items-center justify-between">
               <p className="text-[10px] font-medium text-muted-foreground">Last Seen</p>
-              <Clock className="h-3 w-3 text-primary" />
+              <Clock className="h-4 w-4 text-primary" />
             </div>
             <p className="mt-1 text-sm font-bold text-foreground">
               {patient.last_visit ? (
@@ -350,7 +350,7 @@ export default function PatientProfile() {
           <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
             <div className="flex items-center justify-between">
               <p className="text-[10px] font-medium text-muted-foreground">Since</p>
-              <Calendar className="h-3 w-3 text-primary" />
+              <Calendar className="h-4 w-4 text-primary" />
             </div>
             <p className="mt-1 text-sm font-bold text-foreground">
               {format(new Date(patient.created_at), "MMM yy")}

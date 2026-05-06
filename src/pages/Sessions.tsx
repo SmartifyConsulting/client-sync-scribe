@@ -881,7 +881,7 @@ export default function Sessions() {
                   {currentPatient?.name || "Current Session"}
                 </p>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
+                  <Clock className="h-4 w-4" />
                   <span className="font-mono">{formatDuration(sessionDuration)}</span>
                 </div>
               </div>
@@ -958,7 +958,7 @@ export default function Sessions() {
                     <span className="text-xs bg-success/15 text-success px-1.5 py-0.5 rounded">✓</span>
                   )}
                   {isTranscribing && (
-                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                   )}
                 </div>
                 <div className="max-h-[120px] overflow-y-auto bg-muted/30 rounded p-2">
@@ -1051,22 +1051,22 @@ export default function Sessions() {
               <span className="text-sm font-medium text-foreground">AI detected documents from this session:</span>
               {extractedMedCert && (
                 <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowMedCertReview(true)}>
-                  <FileTextIcon className="h-3 w-3" /> Medical Certificate
+                  <FileTextIcon className="h-4 w-4" /> Medical Certificate
                 </Button>
               )}
               {extractedPrescription && (
                 <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowPrescriptionReview(true)}>
-                  <Pill className="h-3 w-3" /> Prescription
+                  <Pill className="h-4 w-4" /> Prescription
                 </Button>
               )}
               {extractedInvoice && (
                 <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowInvoiceReview(true)}>
-                  <Receipt className="h-3 w-3" /> Invoice
+                  <Receipt className="h-4 w-4" /> Invoice
                 </Button>
               )}
               {extractedReferral && (
                 <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowReferralReview(true)}>
-                  <Users className="h-3 w-3" /> Referral Letter
+                  <Users className="h-4 w-4" /> Referral Letter
                 </Button>
               )}
             </div>
@@ -1143,7 +1143,7 @@ export default function Sessions() {
               {actionPoints.length > 0 && (
                 <div className="mt-2 pt-2 border-t border-border">
                   <p className="text-xs text-green-600 flex items-center gap-1">
-                    <CheckCircle className="h-3 w-3" />
+                    <CheckCircle className="h-4 w-4" />
                     Added to To-Do List
                   </p>
                 </div>
@@ -1187,12 +1187,12 @@ export default function Sessions() {
               <div className="mt-3 flex flex-wrap gap-2">
                 {prescription && (
                   <Badge variant="secondary" className="gap-1">
-                    <CheckCircle className="h-3 w-3 text-success" /> Prescription Saved
+                    <CheckCircle className="h-4 w-4 text-success" /> Prescription Saved
                   </Badge>
                 )}
                 {invoice && (
                   <Badge variant="secondary" className="gap-1">
-                    <CheckCircle className="h-3 w-3 text-success" /> Invoice R {invoice.amount.toFixed(2)}
+                    <CheckCircle className="h-4 w-4 text-success" /> Invoice R {invoice.amount.toFixed(2)}
                   </Badge>
                 )}
               </div>
@@ -1269,7 +1269,7 @@ export default function Sessions() {
                         setIsTranslatingDiagnosis(false);
                       }}
                     >
-                      {isTranslatingDiagnosis ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
+                      {isTranslatingDiagnosis ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                       {showTranslated ? 'Show Original' : `Translate to ${doctorLanguage}`}
                     </Button>
                   )}
@@ -1313,7 +1313,7 @@ export default function Sessions() {
                       }
                     }}
                   >
-                    {isNarrating ? <VolumeX className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
+                    {isNarrating ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                     {isNarrating ? 'Stop' : 'Narrate'}
                   </Button>
                 </div>

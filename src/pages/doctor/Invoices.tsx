@@ -143,28 +143,28 @@ function getStatusBadge(status: "issued" | "paid" | "overdue" | "archived") {
     case "paid":
       return (
         <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/20 gap-1">
-          <CheckCircle className="h-3 w-3" />
+          <CheckCircle className="h-4 w-4" />
           Paid
         </Badge>
       );
     case "overdue":
       return (
         <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/20 gap-1">
-          <AlertTriangle className="h-3 w-3" />
+          <AlertTriangle className="h-4 w-4" />
           Overdue
         </Badge>
       );
     case "archived":
       return (
         <Badge className="bg-muted text-muted-foreground hover:bg-muted gap-1">
-          <Archive className="h-3 w-3" />
+          <Archive className="h-4 w-4" />
           Archived
         </Badge>
       );
     default:
       return (
         <Badge className="bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 gap-1">
-          <Clock className="h-3 w-3" />
+          <Clock className="h-4 w-4" />
           Issued
         </Badge>
       );
@@ -1523,7 +1523,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1 text-sm">
-                        <Calendar className="h-3 w-3 text-muted-foreground" />
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
                         {format(new Date(invoice.due_date), 'dd MMM yyyy')}
                       </div>
                     </TableCell>

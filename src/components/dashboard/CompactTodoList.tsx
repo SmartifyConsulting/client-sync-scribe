@@ -434,16 +434,16 @@ export function CompactTodoList() {
                       autoFocus
                     />
                     <button onClick={() => saveEdit(todo.id)} className="text-success hover:text-success/80">
-                      <Check className="h-3 w-3" />
+                      <Check className="h-4 w-4" />
                     </button>
                     <button onClick={() => { setEditingId(null); setEditText(""); }} className="text-muted-foreground hover:text-foreground">
-                      <X className="h-3 w-3" />
+                      <X className="h-4 w-4" />
                     </button>
                   </div>
                 ) : (
                   <>
                     {todo.is_auto_executed && (
-                      <Sparkles className="h-3 w-3 text-primary shrink-0" />
+                      <Sparkles className="h-4 w-4 text-primary shrink-0" />
                     )}
                     <span
                       className={cn(
@@ -458,7 +458,7 @@ export function CompactTodoList() {
                         onClick={() => toggleComplete(todo.id)}
                         className="flex items-center gap-0.5 text-[10px] font-medium text-success hover:text-success/80 shrink-0 border border-success/30 rounded px-1 py-0.5"
                       >
-                        <ShieldCheck className="h-3 w-3" />
+                        <ShieldCheck className="h-4 w-4" />
                       </button>
                     )}
                     <div className="hidden group-hover:flex gap-0.5">
@@ -471,9 +471,9 @@ export function CompactTodoList() {
                             title="Preview"
                           >
                             {loadingPreview === todo.document_id ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
+                              <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
-                              <Eye className="h-3 w-3" />
+                              <Eye className="h-4 w-4" />
                             )}
                           </button>
                           <button
@@ -495,15 +495,15 @@ export function CompactTodoList() {
                             disabled={todo.completed || sendingDocId === todo.document_id}
                             className={cn(todo.completed ? "text-muted-foreground" : "text-green-600 hover:text-green-700")}
                           >
-                            {sendingDocId === todo.document_id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+                            {sendingDocId === todo.document_id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                           </button>
                         </>
                       )}
                       <button onClick={() => { setEditingId(todo.id); setEditText(todo.title); }} className="text-muted-foreground hover:text-foreground">
-                        <Edit3 className="h-3 w-3" />
+                        <Edit3 className="h-4 w-4" />
                       </button>
                       <button onClick={() => deleteTask(todo.id)} className="text-muted-foreground hover:text-destructive">
-                        <Trash2 className="h-3 w-3" />
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   </>

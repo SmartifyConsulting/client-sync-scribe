@@ -123,7 +123,7 @@ export function TodaysMedicationsCard({ patientId, onTakeMedication }: Props) {
                   {!taken && (
                     <Button size="sm" onClick={() => onTakeMedication(rx.id)} className="shrink-0 gap-1">
                       {baseline ? (<><Video className="h-3.5 w-3.5" />Take</>) : (<><Camera className="h-3.5 w-3.5" />Set up</>)}
-                      <ChevronRight className="h-3 w-3" />
+                      <ChevronRight className="h-4 w-4" />
                     </Button>
                   )}
                 </div>

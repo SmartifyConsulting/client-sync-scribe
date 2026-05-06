@@ -192,7 +192,7 @@ export function PatientHealthPhotoStats({ patientId }: PatientHealthPhotoStatsPr
                       {format(stat.month, 'MMMM yyyy')}
                     </h4>
                     <Badge variant="secondary" className="gap-1">
-                      <Award className="h-3 w-3" />
+                      <Award className="h-4 w-4" />
                       {stat.lollipops} lollipops
                     </Badge>
                   </div>

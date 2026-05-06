@@ -233,7 +233,7 @@ export function PatientSessionRecorder({ patientId, patientName }: Props) {
               <div className="space-y-2">
                 {(isTranscribing || isSavingAudio) && (
                   <p className="text-xs text-muted-foreground flex items-center gap-2">
-                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                     {isSavingAudio ? "Saving audio..." : "Transcribing..."}
                   </p>
                 )}

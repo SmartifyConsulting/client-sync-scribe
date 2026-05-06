@@ -465,7 +465,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
           <div className="space-y-2 text-xs">
             <div className="flex items-center gap-1">
               {Array.from({ length: Math.min(5, Math.max(0, Math.round(Number(detailsDoctor?.stars) || 0))) }).map((_, i) => (
-                <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
+                <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
               ))}
               <span className="text-muted-foreground ml-1 capitalize">({detailsDoctor?.kind})</span>
             </div>
