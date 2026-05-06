@@ -82,6 +82,36 @@ export default function HolarcHelpIncidentDetail() {
   const isLive = !!incident && liveStatuses.includes(incident.status);
   useLocationTracking(id ?? null, isLive);
 
+  // Periodic re-dispatch while open and unassigned (idempotent)
+  const isUnassignedOpen = isLive && !incident?.assigned_provider_id;
+  useEffect(() => {
+    if (!id || !isUnassignedOpen) return;
+    const tick = () => supabase.functions.invoke("dispatch-sos", { body: { incident_id: id } }).catch(() => {});
+    const t = setInterval(tick, 30000);
+    return () => clearInterval(t);
+  }, [id, isUnassignedOpen]);
+
+  // Elapsed seconds since incident created (for "no responders yet" fallback after 90 s)
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    if (!incident?.created_at) return;
+    const update = () => setElapsed(Math.floor((Date.now() - new Date(incident.created_at).getTime()) / 1000));
+    update();
+    const t = setInterval(update, 5000);
+    return () => clearInterval(t);
+  }, [incident?.created_at]);
+  const showNoResponders = isUnassignedOpen && pendingOffers === 0 && elapsed > 90;
+
+  const callEmergency = () => { window.location.href = "tel:10177"; };
+  const goHome = () => navigate("/patient/holarchelp");
+  const shareLink = async () => {
+    if (navigator.share) {
+      try { await navigator.share({ title: "Live emergency tracking", url: trackingUrl }); return; } catch { /* user cancelled */ }
+    }
+    await navigator.clipboard.writeText(trackingUrl);
+    toast.success("Tracking link copied — share it with your contacts");
+  };
+
   const trackingUrl = incident ? `${window.location.origin}/track/${incident.tracking_token}` : "";
   const message = buildSosMessage(profileName, trackingUrl);
 
