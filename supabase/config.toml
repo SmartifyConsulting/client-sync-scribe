@@ -81,3 +81,5 @@ verify_jwt = false
 
 [functions.reconcile-adherence-monthly]
 verify_jwt = false
+[functions.dispatch-sos]
+verify_jwt = false
