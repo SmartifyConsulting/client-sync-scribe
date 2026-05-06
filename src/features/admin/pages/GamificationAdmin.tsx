@@ -500,9 +500,6 @@ export default function GamificationAdmin() {
                       />
                       <p className="text-xs text-muted-foreground">Must be unique. Spaces become underscores.</p>
                     </div>
-                        onChange={(e) => setNewConfig({ ...newConfig, visit_category: e.target.value })}
-                      />
-                    </div>
                     <div className="space-y-2">
                       <Label>Vulas Awarded</Label>
                       <Input
