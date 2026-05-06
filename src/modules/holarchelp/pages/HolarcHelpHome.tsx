@@ -55,7 +55,7 @@ export default function HolarcHelpHome() {
         setHasEmergency(hasEC || hasNok);
       });
     supabase.from("holarchelp_incidents" as any).select("id, assigned_provider_id, accepted_at")
-      .eq("user_id", user.id).eq("status", "active")
+      .eq("user_id", user.id).in("status", ["open", "assigned", "en_route", "arrived", "patient_collected", "at_hospital", "reopened"])
       .order("created_at", { ascending: false }).limit(1).maybeSingle()
       .then(({ data }: any) => {
         if (data?.id) {
@@ -76,7 +76,7 @@ export default function HolarcHelpHome() {
         (payload: any) => {
           const row = payload.new;
           if (row.assigned_provider_id || row.accepted_at) setHelpOnTheWay(true);
-          if (row.status && row.status !== "active") {
+          if (row.status && ["completed", "cancelled"].includes(row.status)) {
             setIncidentId(null);
             setHelpOnTheWay(false);
             setCoords(null);
@@ -169,7 +169,7 @@ export default function HolarcHelpHome() {
 
       const { data: incident, error } = await supabase
         .from("holarchelp_incidents" as any)
-        .insert({ user_id: user.id, status: "active", coverage, severity: "critical" } as any)
+        .insert({ user_id: user.id, status: "open", coverage, severity: "critical" } as any)
         .select("id, tracking_token").single();
       if (error || !incident) throw error ?? new Error("Failed to create incident");
 
@@ -183,7 +183,10 @@ export default function HolarcHelpHome() {
       if ("vibrate" in navigator) navigator.vibrate?.([200, 100, 200]);
       setIncidentId((incident as any).id);
       setActiveIncidentId((incident as any).id);
-      // Fire-and-forget: notify emergency contacts (and any opt-in NOK / share recipients) with live tracking link
+      // Fan-out offers to nearby ambulances (Uber-style dispatch queue)
+      supabase.functions.invoke("dispatch-sos", { body: { incident_id: (incident as any).id } })
+        .catch((e) => console.warn("dispatch-sos failed", e));
+      // Notify emergency contacts with tracking link
       supabase.functions.invoke("share-incident-with-contacts", {
         body: { incident_id: (incident as any).id, tracking_token: (incident as any).tracking_token },
       }).catch((e) => console.warn("share-incident-with-contacts failed", e));
@@ -213,16 +216,10 @@ export default function HolarcHelpHome() {
     if (!incidentId || requesting) return;
     setRequesting(p.id);
     try {
-      const { error: upErr } = await supabase.from("holarchelp_incidents" as any).update({
-        assigned_provider_id: p.id,
-        accepted_at: new Date().toISOString(),
-      } as any).eq("id", incidentId);
-      if (upErr) throw upErr;
-      await supabase.from("holarchelp_incident_offers" as any).insert({
-        incident_id: incidentId, provider_id: p.id, response: "accepted",
-        responded_at: new Date().toISOString(), distance_km: p._d,
-      });
-      setHelpOnTheWay(true);
+      // Insert pending offer for this provider so they see it; first responder still wins via accept lock.
+      await supabase.from("holarchelp_incident_offers" as any).upsert({
+        incident_id: incidentId, provider_id: p.id, response: "pending", distance_km: p._d,
+      } as any, { onConflict: "incident_id,provider_id" });
       toast.success(`Request sent to ${p.name}`);
     } catch (e: any) {
       toast.error(e?.message ?? "Could not request provider");
