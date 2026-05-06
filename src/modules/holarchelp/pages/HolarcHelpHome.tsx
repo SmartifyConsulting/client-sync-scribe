@@ -368,9 +368,12 @@ export default function HolarcHelpHome() {
           </svg>
 
           <button
-            onPointerDown={(e) => { e.preventDefault(); startHold(); }}
+            onPointerDown={(e) => {
+              e.preventDefault();
+              try { (e.currentTarget as HTMLButtonElement).setPointerCapture(e.pointerId); } catch {}
+              startHold();
+            }}
             onPointerUp={cancelHold}
-            onPointerLeave={cancelHold}
             onPointerCancel={cancelHold}
             onContextMenu={(e) => e.preventDefault()}
             disabled={triggering}
