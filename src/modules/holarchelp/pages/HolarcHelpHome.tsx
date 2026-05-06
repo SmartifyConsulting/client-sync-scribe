@@ -169,7 +169,7 @@ export default function HolarcHelpHome() {
 
       const { data: incident, error } = await supabase
         .from("holarchelp_incidents" as any)
-        .insert({ user_id: user.id, status: "active", coverage } as any)
+        .insert({ user_id: user.id, status: "active", coverage, severity: "critical" } as any)
         .select("id, tracking_token").single();
       if (error || !incident) throw error ?? new Error("Failed to create incident");
 
