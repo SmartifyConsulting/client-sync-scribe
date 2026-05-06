@@ -245,7 +245,15 @@ export default function HolarcHelpHome() {
     const steps = [
       { label: "Location shared", done: !!coords },
       { label: "Contacts notified", done: contactsNotified },
-      { label: providerAssigned ? "Responder assigned" : "Searching for nearby providers", done: providerAssigned },
+      {
+        label: providerAssigned
+          ? "Responder assigned"
+          : searchTimedOut
+            ? "Still searching — open live tracking"
+            : "Searching for nearby providers",
+        done: providerAssigned,
+        stopSpin: searchTimedOut && !providerAssigned,
+      },
     ];
     return (
       <div className="mx-auto max-w-md px-5 py-10">
@@ -273,7 +281,7 @@ export default function HolarcHelpHome() {
                 </span>
               ) : (
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
-                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  <Loader2 className={`h-4 w-4 text-muted-foreground ${s.stopSpin ? "" : "animate-spin"}`} />
                 </span>
               )}
               <span className={`text-sm font-semibold ${s.done ? "text-foreground" : "text-muted-foreground"}`}>{s.label}</span>
@@ -282,17 +290,17 @@ export default function HolarcHelpHome() {
         </ul>
 
         <div className="mt-8 space-y-3">
+          <Button
+            className="w-full h-12 rounded-2xl"
+            onClick={() => navigate(`/patient/holarchelp/incident/${incidentId}`)}
+          >
+            View live tracking →
+          </Button>
           {cancelSecondsLeft > 0 && !helpOnTheWay && (
             <Button variant="outline" className="w-full h-12 rounded-2xl" onClick={cancelAlert}>
               Cancel alert ({cancelSecondsLeft}s)
             </Button>
           )}
-          <button
-            onClick={() => navigate(`/patient/holarchelp/incident/${incidentId}`)}
-            className="block w-full text-center text-sm font-semibold text-primary underline-offset-4 hover:underline"
-          >
-            View live tracking →
-          </button>
         </div>
       </div>
     );
