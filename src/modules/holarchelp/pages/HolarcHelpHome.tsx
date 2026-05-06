@@ -307,7 +307,7 @@ export default function HolarcHelpHome() {
   }
 
   // Landing state
-  const ringR = 132;
+  const ringR = 114;
   const ringC = 2 * Math.PI * ringR;
 
   return (
