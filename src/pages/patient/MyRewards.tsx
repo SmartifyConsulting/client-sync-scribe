@@ -737,23 +737,20 @@ export default function MyRewards() {
         </TabsContent>
 
         <TabsContent value="transfers" className="space-y-6">
-          {/* Redeem from 6Dot50 with Vula Vouchers */}
+          {/* Vula Wallet */}
           <Card className="border-primary/30">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Gift className="h-5 w-5 text-primary" />
-                Redeem from 6Dot50 with Vula Vouchers
+                Vula Wallet
               </CardTitle>
               <CardDescription>
-                Redeem your Vulas at retailers in the 6Dot50 network.
+                Sign in to your Vula Wallet to redeem your Vulas at participating retailers.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button
-                onClick={() => window.open("https://portal.6dot50.com/", "_blank", "noopener")}
-                className="gap-2"
-              >
-                <Gift className="h-4 w-4" /> Redeem
+              <Button asChild className="gap-2">
+                <Link to="/vula/wallet"><Gift className="h-4 w-4" /> Open Vula Wallet</Link>
               </Button>
             </CardContent>
           </Card>
