@@ -24,8 +24,7 @@ const calculateSavings = <T extends PricingConfig>(pricing: T[], role: string): 
   return pricing.map((p) => (p.id === annual.id ? { ...p, savings: calculatedSavings } : p));
 };
 
-const formatCurrency = (n: number) =>
-  n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const formatCurrency = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 interface RoleSectionProps {
   title: string;
@@ -38,8 +37,7 @@ interface RoleSectionProps {
 function RoleSection({ title, badgeLabel, monthly, annual, onChange }: RoleSectionProps) {
   const annualLiability = monthly ? monthly.price * 12 : 0;
   const savings = annual?.savings ?? 0;
-  const discountPct =
-    annualLiability > 0 ? ((savings / annualLiability) * 100).toFixed(1) : "0.0";
+  const discountPct = annualLiability > 0 ? ((savings / annualLiability) * 100).toFixed(1) : "0.0";
 
   return (
     <section>
@@ -132,9 +130,7 @@ function RoleSection({ title, badgeLabel, monthly, annual, onChange }: RoleSecti
               </div>
               <div className="flex justify-between items-center pt-2 border-t border-border">
                 <span className="text-sm font-medium text-foreground">Total saved</span>
-                <span className="text-xl font-medium tabular-nums text-primary">
-                  ${formatCurrency(savings)}
-                </span>
+                <span className="text-xl font-medium tabular-nums text-primary">${formatCurrency(savings)}</span>
               </div>
             </div>
           </div>
@@ -159,11 +155,7 @@ export default function PricingAdmin() {
   const fetchPricing = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from("pricing_config")
-        .select("*")
-        .order("role")
-        .order("billing_cycle");
+      const { data, error } = await supabase.from("pricing_config").select("*").order("role").order("billing_cycle");
 
       if (error) throw error;
       let result = (data || []) as PricingConfig[];
@@ -189,8 +181,7 @@ export default function PricingAdmin() {
         p.id === id
           ? {
               ...p,
-              [field]:
-                field === "price" || field === "savings" ? parseFloat(value) || 0 : value,
+              [field]: field === "price" || field === "savings" ? parseFloat(value) || 0 : value,
             }
           : p,
       );
@@ -263,12 +254,10 @@ export default function PricingAdmin() {
       {/* Header */}
       <header className="mb-10 md:mb-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl md:text-4xl font-medium tracking-tight text-foreground mb-2">
-            Service Menu
-          </h1>
+          <h1 className="text-3xl md:text-4xl font-medium tracking-tight text-foreground mb-2">Subscription Pricing</h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-[65ch] font-light">
-            Define the financial structure for healthcare providers, patients, and emergency
-            services. Adjust prices to see the annual discount calculate in real time.
+            Define the financial structure for healthcare providers, patients, and emergency services. Adjust prices to
+            see the annual discount calculate in real time.
           </p>
         </div>
         <Button onClick={handleSave} disabled={saving} size="lg" className="rounded-full">
