@@ -1,24 +1,38 @@
-## Root cause
+## Goal
 
-The "circular processing icons" are stuck because the SOS home screen rehydrates an **existing open incident from earlier** (confirmed in DB: `df59b35f…` opened at 17:19, no responder) and shows the confirmation view with three spinners. The flags that turn those spinners into checkmarks (`coords`, `contactsNotified`, `providerAssigned`) are only set inside the fresh-trigger flow, so on rehydration they spin forever — and the only escape ("View live tracking →") is a small text link that's easy to miss.
+Eliminate the duplication between `/admin/users` and `/admin/holarchelp-providers` by merging them into a single **User Management** screen at `/admin/users`, where the existing HolarcHelp Providers UI gains a new **Users** tab.
 
-## Fix (one file: `src/modules/holarchelp/pages/HolarcHelpHome.tsx`)
+## Changes
 
-1. **Redirect rehydrated incidents to live tracking.** On the initial mount fetch, if an active incident is found, `navigate("/patient/holarchelp/incident/:id", { replace: true })` instead of dropping the user into the confirmation view. This kills the stuck-spinner case entirely for stale incidents.
+### 1. `src/pages/admin/HolarcHelpProviders.tsx` → becomes the unified User Management screen
+- Rename page heading to **"User Management"**.
+- Tabs become: **Users** | **Hospitals** | **Ambulance Providers** (Users is the default tab).
+- The **Users** tab renders the full content currently in `src/features/admin/pages/UserManagement.tsx` (search, filters, inline editing, role toggles, etc.) — extracted into a `<UsersTab />` component so this file stays manageable.
+- The Hospitals and Ambulance tabs keep their current behavior unchanged.
 
-2. **Add safety timeouts on the confirmation view** (so even fresh triggers can never hang):
-   - "Contacts notified" — already flips on the `share-incident-with-contacts` `.then`. Add a fallback `setTimeout(8000)` that marks it done if no signal arrives.
-   - "Searching for nearby providers" — flips on realtime `assigned_provider_id`. After 30s, change the label to "Still searching…" and stop spinning; the live-tracking button below remains the next step.
+### 2. Routing (`src/App.tsx`)
+- `/admin/users` → renders the merged screen (the page formerly known as `HolarcHelpProviders`).
+- Remove the separate `/admin/holarchelp-providers` route, OR keep it as a redirect to `/admin/users` so existing back-links from `HolarcHelpAccountability` and `HolarcHelpProviderIncidents` still work. Plan: **redirect** to avoid breaking those back buttons.
+- Drop the `HolarcHelpProviders` import in favor of importing the renamed component.
 
-3. **Promote the escape route.** Replace the small "View live tracking →" text link with a full-width primary button (`h-12 rounded-2xl`) so the user always has a clear way forward from the confirmation screen.
+### 3. Sidebar (`src/components/layout/Sidebar.tsx`)
+- The existing single "Users" entry pointing to `/admin/users` is kept. No new entry needed (the providers page no longer has its own sidebar link — confirmed: it isn't in the sidebar today, only reached via Admin hub / accountability links).
 
-4. **Gate the cancel countdown on incident age.** Only run the 10-second countdown when `created_at` is within the last 30 seconds (i.e. truly fresh). For older incidents the button is hidden — and after fix #1, those users won't be on this screen anyway.
-
-## Files
-
-- `src/modules/holarchelp/pages/HolarcHelpHome.tsx`
+### 4. Cleanup
+- Delete `src/features/admin/pages/UserManagement.tsx` after extracting its content into `src/features/admin/components/UsersTab.tsx` (used by the merged page).
+- Delete the shim `src/pages/admin/UserManagement.tsx` (no longer needed once `/admin/users` points to the merged page).
+- Update internal back-links in `HolarcHelpAccountability.tsx` and `HolarcHelpProviderIncidents.tsx` from `/admin/holarchelp-providers` → `/admin/users`.
+- Update `src/modules/holarchelp/README.md` references.
 
 ## Out of scope
+- No changes to user role logic, RLS, edge functions, or provider data model.
+- No visual redesign beyond renaming the heading and reordering tabs.
 
-- No DB migrations.
-- No changes to the incident detail page, history, contacts, nearby, or provider screens.
+## Files touched
+- `src/pages/admin/HolarcHelpProviders.tsx` (rename heading, add Users tab) — or rename file to `UserManagementPage.tsx`; will keep filename for minimal churn and just update import.
+- `src/features/admin/components/UsersTab.tsx` (new, extracted from current UserManagement)
+- `src/features/admin/pages/UserManagement.tsx` (deleted)
+- `src/pages/admin/UserManagement.tsx` (deleted)
+- `src/App.tsx` (route swap + redirect)
+- `src/pages/admin/HolarcHelpAccountability.tsx`, `src/pages/admin/HolarcHelpProviderIncidents.tsx` (back-link path update)
+- `src/modules/holarchelp/README.md` (doc update)
