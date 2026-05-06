@@ -374,7 +374,7 @@ export default function HolarcHelpHome() {
             onContextMenu={(e) => e.preventDefault()}
             disabled={triggering}
             aria-label="Hold for help"
-            className="relative z-10 flex h-60 w-60 select-none flex-col items-center justify-center rounded-full font-black text-white transition active:scale-[.98] touch-none"
+            className="relative z-10 flex h-52 w-52 select-none flex-col items-center justify-center rounded-full font-black text-white transition active:scale-[.98] touch-none"
             style={{
               background: "radial-gradient(circle at 30% 25%, hsl(354,90%,62%) 0%, hsl(354,84%,52%) 45%, hsl(0,80%,38%) 100%)",
               boxShadow: "0 24px 60px -14px hsl(0 80% 40% / 0.55), inset 0 -10px 30px hsl(0 80% 25% / 0.35), inset 0 6px 14px hsl(0 100% 80% / 0.3)",
