@@ -54,14 +54,14 @@ export default function HolarcHelpHome() {
       .order("created_at", { ascending: false }).limit(1).maybeSingle()
       .then(({ data }: any) => {
         if (data?.id) {
-          // Stale rehydrated incident → send straight to live tracking, never trap user on confirmation screen
+          // Track active incident so user can resume — but don't trap them on this page.
           const ageMs = Date.now() - new Date(data.created_at).getTime();
+          setActiveIncidentId(data.id);
           if (ageMs > 30_000) {
-            navigate(`/patient/holarchelp/incident/${data.id}`, { replace: true });
+            // Older incident: just surface a Resume banner, leave user free to navigate.
             return;
           }
           setIncidentId(data.id);
-          setActiveIncidentId(data.id);
           if (data.assigned_provider_id || data.accepted_at) {
             setHelpOnTheWay(true);
             setProviderAssigned(true);
