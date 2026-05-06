@@ -7,6 +7,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PatientAppLayout } from "@/components/layout/PatientAppLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useProviderAccess } from "@/modules/holarchelp/components/ProviderGate";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
@@ -110,8 +111,9 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function RoleBasedRedirect() {
   const { isPatient, isEmergency, hasDoctorRole, hasPatientRole, loading } = useUserRole();
-  
-  if (loading) {
+  const { providerType, loading: providerLoading } = useProviderAccess();
+
+  if (loading || providerLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -123,7 +125,7 @@ function RoleBasedRedirect() {
     return <Navigate to="/patient/details" replace />;
   }
 
-  if (isEmergency && !hasDoctorRole && !hasPatientRole) {
+  if ((isEmergency || providerType) && !hasDoctorRole && !hasPatientRole) {
     return <Navigate to="/provider" replace />;
   }
 
