@@ -1530,6 +1530,41 @@ export type Database = {
           },
         ]
       }
+      holarchelp_incident_photos: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          incident_id: string
+          storage_path: string
+          uploaded_by: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          incident_id: string
+          storage_path: string
+          uploaded_by: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          incident_id?: string
+          storage_path?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "holarchelp_incident_photos_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       holarchelp_incidents: {
         Row: {
           accepted_at: string | null
@@ -3786,7 +3821,15 @@ export type Database = {
         Args: { _admission_id: string }
         Returns: boolean
       }
+      can_access_holarchelp_incident: {
+        Args: { _incident_id: string }
+        Returns: boolean
+      }
       can_edit_admission: { Args: { _admission_id: string }; Returns: boolean }
+      can_upload_holarchelp_incident: {
+        Args: { _incident_id: string }
+        Returns: boolean
+      }
       doctor_has_access_request_from: {
         Args: { patient_id: string }
         Returns: boolean
