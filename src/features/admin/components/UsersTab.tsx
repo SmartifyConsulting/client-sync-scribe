@@ -71,6 +71,8 @@ export default function UsersTab() {
     first_name: "", last_name: "", email: "", category: "none", emergency_kind: "hospital_staff",
   });
   const [saving, setSaving] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<UserRecord | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (isAdmin) fetchUsers();
