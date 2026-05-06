@@ -8,8 +8,11 @@ import { IncidentVoiceNoteRecorder } from "../components/IncidentVoiceNoteRecord
 import { EtaCountdown } from "../components/EtaCountdown";
 import { IncidentPhotos } from "../components/IncidentPhotos";
 import { Button } from "@/components/ui/button";
-import { Copy, CheckCircle2, MessageCircle, Loader2, AlertTriangle, ArrowLeft, Phone, Bell, History, Share2 } from "lucide-react";
+import { Copy, CheckCircle2, MessageCircle, Loader2, AlertTriangle, ArrowLeft, Phone, History, Share2, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { useLocationTracking } from "../hooks/useLocationTracking";
 import { useAuth } from "@/hooks/useAuth";
 import { buildSosMessage, waLink } from "../lib/whatsapp";
@@ -119,10 +122,24 @@ export default function HolarcHelpIncidentDetail() {
 
   const copy = async () => { await navigator.clipboard.writeText(trackingUrl); toast.success("Tracking link copied"); };
 
+  const [closeOpen, setCloseOpen] = useState(false);
+  const [closureNote, setClosureNote] = useState("");
+  const [closing, setClosing] = useState(false);
   const resolve = async () => {
     if (!id) return;
+    if (closureNote.trim().length < 10) {
+      toast.error("Please add a brief write-up (at least 10 characters).");
+      return;
+    }
+    setClosing(true);
     const { error } = await supabase.from("holarchelp_incidents" as any)
-      .update({ status: "completed", resolved_at: new Date().toISOString(), completed_at: new Date().toISOString() } as any).eq("id", id);
+      .update({
+        status: "completed",
+        resolved_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+        notes: closureNote.trim(),
+      } as any).eq("id", id);
+    setClosing(false);
     if (error) return toast.error(error.message);
     toast.success("Incident closed");
     navigate("/patient/holarchelp");
@@ -138,18 +155,19 @@ export default function HolarcHelpIncidentDetail() {
     <div className="mx-auto max-w-md pb-6">
       {/* Sticky quick-action bar */}
       <div className="sticky top-0 z-30 -mx-4 mb-3 border-b bg-background/95 px-4 py-2 backdrop-blur md:mx-0 md:rounded-b-xl">
-        <div className="flex items-center gap-1.5 overflow-x-auto">
+        <div className="flex items-center gap-1.5">
           <Button size="sm" variant="ghost" className="shrink-0 gap-1" onClick={goHome}>
             <ArrowLeft className="h-4 w-4" /> SOS Home
           </Button>
-          <Button size="sm" variant="destructive" className="shrink-0 gap-1" onClick={callEmergency}>
-            <Phone className="h-4 w-4" /> Call 10177
+          <div className="flex-1" />
+          <Button size="icon" variant="destructive" className="h-9 w-9 rounded-full" onClick={callEmergency} aria-label="Call 10177" title="Call 10177">
+            <Phone className="h-4 w-4" />
           </Button>
-          <Button size="sm" variant="outline" className="shrink-0 gap-1" onClick={shareLink}>
-            <Share2 className="h-4 w-4" /> Share
+          <Button size="icon" variant="outline" className="h-9 w-9 rounded-full" onClick={shareLink} aria-label="Share tracking link" title="Share">
+            <Share2 className="h-4 w-4" />
           </Button>
-          <Button size="sm" variant="outline" className="shrink-0 gap-1" onClick={() => navigate("/patient/holarchelp/incidents")}>
-            <History className="h-4 w-4" /> History
+          <Button size="icon" variant="outline" className="h-9 w-9 rounded-full" onClick={() => navigate("/patient/holarchelp/incidents")} aria-label="Incident history" title="History">
+            <History className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -220,6 +238,15 @@ export default function HolarcHelpIncidentDetail() {
         </div>
       )}
 
+      {!isLive && incident.notes && (
+        <div className="mt-4 rounded-2xl border-2 border-emerald-500/40 bg-emerald-50 p-4 dark:bg-emerald-950/20">
+          <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+            <FileText className="h-3.5 w-3.5" /> Closure summary
+          </p>
+          <p className="mt-2 whitespace-pre-wrap text-sm text-emerald-900 dark:text-emerald-100">{incident.notes}</p>
+        </div>
+      )}
+
       <div className="mt-4"><IncidentVoiceNoteRecorder incidentId={id!} providerId={null} /></div>
       <div className="mt-4"><IncidentPhotos incidentId={id!} /></div>
       <div className="mt-4"><IncidentTimeline incidentId={id!} /></div>
@@ -255,10 +282,40 @@ export default function HolarcHelpIncidentDetail() {
       </div>
 
       {isLive && (
-        <Button onClick={resolve} className="mt-6 h-14 w-full gap-2 rounded-2xl bg-primary text-base font-semibold">
+        <Button onClick={() => setCloseOpen(true)} className="mt-6 h-14 w-full gap-2 rounded-2xl bg-primary text-base font-semibold">
           <CheckCircle2 className="h-5 w-5" /> Close incident
         </Button>
       )}
+
+      <Dialog open={closeOpen} onOpenChange={(o) => !closing && setCloseOpen(o)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Close incident</DialogTitle>
+            <DialogDescription>
+              Add a brief write-up of the last activity or interaction with the patient before closing.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            <Label htmlFor="closure-note">Last activity / interaction</Label>
+            <Textarea
+              id="closure-note"
+              value={closureNote}
+              onChange={(e) => setClosureNote(e.target.value)}
+              placeholder="e.g. Patient handed over to ER team at 14:52, conscious and stable."
+              rows={5}
+              className="resize-none"
+            />
+            <p className="text-[11px] text-muted-foreground">{closureNote.trim().length}/10 minimum characters</p>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" onClick={() => setCloseOpen(false)} disabled={closing}>Cancel</Button>
+            <Button onClick={resolve} disabled={closing || closureNote.trim().length < 10} className="gap-2">
+              {closing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              Close incident
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

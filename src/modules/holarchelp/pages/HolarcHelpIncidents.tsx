@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 export default function HolarcHelpIncidents() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [items, setItems] = useState<any[]>([]);
   useEffect(() => {
     if (!user) return;
@@ -13,7 +16,12 @@ export default function HolarcHelpIncidents() {
   }, [user]);
 
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md px-4 pb-8">
+      <div className="mb-4 flex items-center gap-2 pt-2">
+        <Button variant="ghost" size="sm" className="gap-1" onClick={() => navigate("/patient/holarchelp")}>
+          <ArrowLeft className="h-4 w-4" /> Back
+        </Button>
+      </div>
       <h1 className="text-2xl font-extrabold">Incident history</h1>
       <ul className="mt-4 space-y-2">
         {items.length === 0 && <li className="rounded-2xl border border-dashed p-5 text-center text-sm text-muted-foreground">No incidents yet</li>}

@@ -4,28 +4,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import { AlertCircle, AlertTriangle, Crosshair, Loader2, Shield, Siren } from "lucide-react";
+import { Check, Loader2, MapPin } from "lucide-react";
 import { SeverityPicker, type SeverityResult } from "../components/SeverityPicker";
-import { ProviderMap, type ProviderMarker } from "../components/ProviderMap";
 import { SosVoiceNoteDialog } from "../components/SosVoiceNoteDialog";
 import { DoctorSosChooser } from "../components/DoctorSosChooser";
-import hospitalIcon from "@/assets/marker-hospital.png";
-import ambulanceIcon from "@/assets/marker-ambulance.png";
-import { cn } from "@/lib/utils";
+import logo from "@/assets/holarc-help-logo.png";
 
 type Coords = { lat: number; lng: number };
 
-const distanceKm = (a: Coords, b: Coords) => {
-  const R = 6371;
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(b.lat - a.lat);
-  const dLng = toRad(b.lng - a.lng);
-  const x = Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(x));
-};
+const HOLD_MS = 2500;
 
 export default function HolarcHelpHome() {
   const { user } = useAuth();
@@ -36,14 +24,17 @@ export default function HolarcHelpHome() {
   const [chooserOpen, setChooserOpen] = useState(false);
   const [permDenied, setPermDenied] = useState(false);
   const [coords, setCoords] = useState<Coords | null>(null);
-  const [providers, setProviders] = useState<(ProviderMarker & { _d: number; accepting: boolean; tier?: string; distanceKm?: number })[]>([]);
   const [incidentId, setIncidentId] = useState<string | null>(null);
   const [helpOnTheWay, setHelpOnTheWay] = useState(false);
   const [severityOpen, setSeverityOpen] = useState(false);
   const [voiceNoteOpen, setVoiceNoteOpen] = useState(false);
-  const [requesting, setRequesting] = useState<string | null>(null);
   const [hasEmergency, setHasEmergency] = useState<boolean | null>(null);
-  const [incidentCoverage, setIncidentCoverage] = useState<"public" | "private">("public");
+  const [contactsNotified, setContactsNotified] = useState(false);
+  const [providerAssigned, setProviderAssigned] = useState(false);
+  const [cancelSecondsLeft, setCancelSecondsLeft] = useState(10);
+  const [holdProgress, setHoldProgress] = useState(0); // 0..1
+  const holdTimerRef = useRef<number | null>(null);
+  const holdStartRef = useRef<number>(0);
   const channelRef = useRef<any>(null);
 
   useEffect(() => {
@@ -65,7 +56,10 @@ export default function HolarcHelpHome() {
         if (data?.id) {
           setIncidentId(data.id);
           setActiveIncidentId(data.id);
-          if (data.assigned_provider_id || data.accepted_at) setHelpOnTheWay(true);
+          if (data.assigned_provider_id || data.accepted_at) {
+            setHelpOnTheWay(true);
+            setProviderAssigned(true);
+          }
         }
       });
   }, [user]);
@@ -79,13 +73,17 @@ export default function HolarcHelpHome() {
         { event: "UPDATE", schema: "public", table: "holarchelp_incidents", filter: `id=eq.${incidentId}` },
         (payload: any) => {
           const row = payload.new;
-          if (row.assigned_provider_id || row.accepted_at) setHelpOnTheWay(true);
+          if (row.assigned_provider_id || row.accepted_at) {
+            setHelpOnTheWay(true);
+            setProviderAssigned(true);
+          }
           if (row.status && ["completed", "cancelled"].includes(row.status)) {
             setIncidentId(null);
             setHelpOnTheWay(false);
             setCoords(null);
-            setProviders([]);
             setActiveIncidentId(null);
+            setProviderAssigned(false);
+            setContactsNotified(false);
           }
         })
       .subscribe();
@@ -93,42 +91,18 @@ export default function HolarcHelpHome() {
     return () => { supabase.removeChannel(ch); };
   }, [incidentId]);
 
-  // Load providers when coords available
+  // Cancel countdown after triggering
   useEffect(() => {
-    if (!coords) return;
-    let cancelled = false;
-    (async () => {
-      const [{ data: hs }, { data: as_ }] = await Promise.all([
-        supabase.from("holarchelp_hospitals" as any)
-          .select("id, name, latitude, longitude, city, status, accepting_patients, tier, ownership")
-          .eq("status", "approved").not("latitude", "is", null).not("longitude", "is", null),
-        supabase.from("holarchelp_ambulance_providers" as any)
-          .select("id, company_name, latitude, longitude, city, status, accepting_patients, tier, ownership")
-          .eq("status", "approved").not("latitude", "is", null).not("longitude", "is", null),
-      ]);
-      if (cancelled) return;
-      const isPublicOnly = incidentCoverage === "public";
-      const list = [
-        ...((hs as any[]) ?? [])
-          .filter((h) => !isPublicOnly || String(h.ownership ?? "").toLowerCase() === "public")
-          .map((h) => ({ id: h.id, name: h.name, latitude: h.latitude, longitude: h.longitude, type: "hospital" as const, subtitle: h.city ?? undefined, accepting: h.accepting_patients !== false, tier: h.tier ?? undefined })),
-        ...((as_ as any[]) ?? [])
-          .filter((a) => !isPublicOnly || String(a.ownership ?? "").toLowerCase() === "public")
-          .map((a) => ({ id: a.id, name: a.company_name, latitude: a.latitude, longitude: a.longitude, type: "ambulance" as const, subtitle: a.city ?? undefined, accepting: a.accepting_patients !== false, tier: a.tier ?? undefined })),
-      ];
-      const sorted = list
-        .map((p) => {
-          const d = distanceKm(coords, { lat: p.latitude, lng: p.longitude });
-          return { ...p, _d: d, distanceKm: d };
-        })
-        .sort((a, b) => {
-          if (a.accepting !== b.accepting) return a.accepting ? -1 : 1;
-          return a._d - b._d;
-        }).slice(0, 10);
-      setProviders(sorted);
-    })();
-    return () => { cancelled = true; };
-  }, [coords?.lat, coords?.lng, incidentCoverage]);
+    if (!incidentId || helpOnTheWay) return;
+    setCancelSecondsLeft(10);
+    const t = setInterval(() => {
+      setCancelSecondsLeft((s) => {
+        if (s <= 1) { clearInterval(t); return 0; }
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(t);
+  }, [incidentId, helpOnTheWay]);
 
   const triggerSOS = async () => {
     if (!user || triggering) return;
@@ -137,13 +111,12 @@ export default function HolarcHelpHome() {
       return;
     }
     if (hasEmergency === false) {
-      toast.error("Add an Emergency Contact first — they will be notified when you trigger SOS.");
+      toast.error("Add someone we can notify first.");
       navigate("/patient/details?section=health");
       return;
     }
     setTriggering(true);
     try {
-      // Get location (required)
       const pos = await new Promise<GeolocationPosition>((res, rej) => {
         if (!("geolocation" in navigator)) return rej(new Error("Geolocation not supported"));
         navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 10000 });
@@ -151,23 +124,16 @@ export default function HolarcHelpHome() {
         if (e?.code === 1) setPermDenied(true);
         return null;
       });
-      if (!pos) {
-        setTriggering(false);
-        return;
-      }
+      if (!pos) { setTriggering(false); return; }
       setPermDenied(false);
       setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
 
-      // Determine coverage based on patient medical aid (no aid → public-only routing)
       let coverage: "public" | "private" = "public";
       try {
         const { data: pat } = await supabase
-          .from("patients")
-          .select("medical_aid")
+          .from("patients").select("medical_aid")
           .eq("patient_user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
+          .order("created_at", { ascending: false }).limit(1).maybeSingle();
         if (pat?.medical_aid && String(pat.medical_aid).trim() !== "") coverage = "private";
       } catch { /* default public */ }
 
@@ -187,13 +153,11 @@ export default function HolarcHelpHome() {
       if ("vibrate" in navigator) navigator.vibrate?.([200, 100, 200]);
       setIncidentId((incident as any).id);
       setActiveIncidentId((incident as any).id);
-      // Fan-out offers to nearby ambulances (Uber-style dispatch queue)
       supabase.functions.invoke("dispatch-sos", { body: { incident_id: (incident as any).id } })
         .catch((e) => console.warn("dispatch-sos failed", e));
-      // Notify emergency contacts with tracking link
       supabase.functions.invoke("share-incident-with-contacts", {
         body: { incident_id: (incident as any).id, tracking_token: (incident as any).tracking_token },
-      }).catch((e) => console.warn("share-incident-with-contacts failed", e));
+      }).then(() => setContactsNotified(true)).catch((e) => console.warn("share-incident-with-contacts failed", e));
       setVoiceNoteOpen(true);
     } catch (e: any) {
       toast.error(e?.message ?? "Could not trigger SOS");
@@ -210,59 +174,114 @@ export default function HolarcHelpHome() {
       conscious: severity.conscious,
       breathing: severity.breathing,
     } as any).eq("id", incidentId);
-    // Re-notify contacts now that severity is known so per-contact severity thresholds apply
     supabase.functions.invoke("share-incident-with-contacts", {
       body: { incident_id: incidentId },
     }).catch((e) => console.warn("share-incident-with-contacts (severity) failed", e));
   };
 
-  const requestProvider = async (p: ProviderMarker & { _d: number }) => {
-    if (!incidentId || requesting) return;
-    setRequesting(p.id);
-    try {
-      // Insert pending offer for this provider so they see it; first responder still wins via accept lock.
-      await supabase.from("holarchelp_incident_offers" as any).upsert({
-        incident_id: incidentId, provider_id: p.id, response: "pending", distance_km: p._d,
-      } as any, { onConflict: "incident_id,provider_id" });
-      toast.success(`Request sent to ${p.name}`);
-    } catch (e: any) {
-      toast.error(e?.message ?? "Could not request provider");
-    } finally {
-      setRequesting(null);
+  const cancelAlert = async () => {
+    if (!incidentId) return;
+    await supabase.from("holarchelp_incidents" as any)
+      .update({ status: "cancelled", resolved_at: new Date().toISOString() } as any).eq("id", incidentId);
+    toast.success("Alert cancelled");
+  };
+
+  // ============ HOLD-TO-TRIGGER ============
+  const startHold = () => {
+    if (triggering || activeIncidentId) {
+      // Allow direct navigate if already active
+      if (activeIncidentId) navigate(`/patient/holarchelp/incident/${activeIncidentId}`);
+      return;
     }
+    if ("vibrate" in navigator) navigator.vibrate?.(30);
+    holdStartRef.current = performance.now();
+    const tick = () => {
+      const p = Math.min(1, (performance.now() - holdStartRef.current) / HOLD_MS);
+      setHoldProgress(p);
+      if (p >= 1) {
+        if ("vibrate" in navigator) navigator.vibrate?.([80, 60, 120]);
+        cancelHold();
+        if (role === "doctor") setChooserOpen(true);
+        else triggerSOS();
+        return;
+      }
+      holdTimerRef.current = requestAnimationFrame(tick);
+    };
+    holdTimerRef.current = requestAnimationFrame(tick);
+  };
+
+  const cancelHold = () => {
+    if (holdTimerRef.current) cancelAnimationFrame(holdTimerRef.current);
+    holdTimerRef.current = null;
+    setHoldProgress(0);
   };
 
   // ============ RENDER ============
 
-  if (helpOnTheWay && incidentId) {
+  // Confirmation state — after trigger
+  if (incidentId) {
+    const steps = [
+      { label: "Location shared", done: !!coords },
+      { label: "Contacts notified", done: contactsNotified },
+      { label: providerAssigned ? "Responder assigned" : "Searching for nearby providers", done: providerAssigned },
+    ];
     return (
-      <div className="mx-auto max-w-md py-10 px-2">
-        <div className="rounded-3xl border border-emerald-200 bg-gradient-to-b from-emerald-50 to-white p-8 text-center shadow-[var(--shadow-card)]">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30">
-            <Shield className="h-10 w-10 text-white" />
+      <div className="mx-auto max-w-md px-5 py-10">
+        <SosVoiceNoteDialog
+          open={voiceNoteOpen}
+          incidentId={incidentId}
+          onClose={() => { setVoiceNoteOpen(false); setSeverityOpen(true); }}
+        />
+        <SeverityPicker open={severityOpen} onSubmit={finishSeverity} onSkip={() => finishSeverity(null)} />
+
+        <div className="text-center">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30 animate-scale-in">
+            <Check className="h-10 w-10 text-white" strokeWidth={3} />
           </div>
-          <p className="mt-5 text-2xl font-extrabold tracking-tight text-emerald-900">Help is on the way</p>
-          <p className="mt-1 text-sm text-emerald-800/70">Your live location is being shared with the responder.</p>
-          <Button
-            size="lg"
-            className="mt-6 w-full rounded-2xl"
+          <h1 className="mt-6 text-3xl font-extrabold tracking-tight">Help is on the way</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Notifying your emergency contacts and nearby responders</p>
+        </div>
+
+        <ul className="mt-8 space-y-3">
+          {steps.map((s, i) => (
+            <li key={i} className="flex items-center gap-3 rounded-2xl border bg-card p-4">
+              {s.done ? (
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+                  <Check className="h-4 w-4 text-emerald-700" strokeWidth={3} />
+                </span>
+              ) : (
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                </span>
+              )}
+              <span className={`text-sm font-semibold ${s.done ? "text-foreground" : "text-muted-foreground"}`}>{s.label}</span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-8 space-y-3">
+          {cancelSecondsLeft > 0 && !helpOnTheWay && (
+            <Button variant="outline" className="w-full h-12 rounded-2xl" onClick={cancelAlert}>
+              Cancel alert ({cancelSecondsLeft}s)
+            </Button>
+          )}
+          <button
             onClick={() => navigate(`/patient/holarchelp/incident/${incidentId}`)}
+            className="block w-full text-center text-sm font-semibold text-primary underline-offset-4 hover:underline"
           >
-            View live tracking
-          </Button>
+            View live tracking →
+          </button>
         </div>
       </div>
     );
   }
 
+  // Landing state
+  const ringR = 132;
+  const ringC = 2 * Math.PI * ringR;
+
   return (
-    <div className="mx-auto max-w-md">
-      <SeverityPicker open={severityOpen} onSubmit={finishSeverity} onSkip={() => finishSeverity(null)} />
-      <SosVoiceNoteDialog
-        open={voiceNoteOpen}
-        incidentId={incidentId}
-        onClose={() => { setVoiceNoteOpen(false); setSeverityOpen(true); }}
-      />
+    <div className="mx-auto flex min-h-[calc(100vh-9rem)] max-w-md flex-col px-5">
       <DoctorSosChooser
         open={chooserOpen}
         onClose={() => setChooserOpen(false)}
@@ -273,207 +292,97 @@ export default function HolarcHelpHome() {
         }}
       />
 
-      {hasEmergency === false && (
-        <div className="mb-5 rounded-2xl border border-amber-300/70 bg-amber-50/80 p-4 shadow-sm">
-          <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-200/80">
-              <AlertTriangle className="h-4 w-4 text-amber-800" />
-            </div>
-            <div className="flex-1 space-y-1.5">
-              <p className="text-sm font-semibold text-amber-900">Add an Emergency Contact to enable SOS</p>
-              <p className="text-xs leading-relaxed text-amber-900/80">
-                Your Emergency Contact will be notified by default when you trigger an SOS. You can also opt your Next of Kin in.
-              </p>
-              <Button
-                size="sm"
-                className="mt-2 w-full sm:w-auto rounded-xl"
-                onClick={() => navigate("/patient/details?section=health")}
-              >
-                Add Emergency Contact
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Header */}
+      <div className="flex justify-center pt-6">
+        <img src={logo} alt="Holarc Help" className="h-12 w-auto" />
+      </div>
 
-      {permDenied && (
-        <div className="mb-5 rounded-2xl border border-amber-300/70 bg-amber-50/80 p-4 shadow-sm">
-          <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-200/80">
-              <AlertTriangle className="h-4 w-4 text-amber-800" />
-            </div>
-            <div className="flex-1 space-y-1.5 text-sm">
-              <p className="font-semibold text-amber-900">Location access required</p>
-              <p className="text-xs text-amber-900/80">
-                SOS needs your location to find the closest emergency services. Enable it for this site:
-              </p>
-              <ul className="ml-4 list-disc space-y-0.5 text-xs text-amber-900/80">
-                <li>Tap the lock/info icon in the address bar</li>
-                <li>Find <strong>Location</strong> permission and set to <strong>Allow</strong></li>
-                <li>Reload this page and try again</li>
-              </ul>
-              <Button size="sm" onClick={triggerSOS} className="mt-2 rounded-xl">Try again</Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Title */}
+      <div className="mt-8 text-center">
+        <h1 className="text-2xl font-extrabold tracking-tight">Emergency Assistance</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">Help will be alerted instantly</p>
+      </div>
 
-      {coords && incidentId && !helpOnTheWay ? (
-        <div className="space-y-4">
-          <div className="flex items-start gap-3 rounded-2xl border-2 border-red-300 bg-red-50 p-4 text-sm text-red-900">
-            <Siren className="h-5 w-5 shrink-0 mt-0.5 text-red-600 animate-pulse" />
-            <div>
-              <p className="font-bold">SOS active</p>
-              <p className="text-xs opacity-80">Pick a provider or wait for one to accept. Your live location is being shared.</p>
-            </div>
-          </div>
-          <div className="overflow-hidden rounded-2xl border shadow-sm">
-            <ProviderMap center={coords} providers={providers} height={260} />
-          </div>
-          <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-            <span className="flex items-center gap-1.5"><img src={hospitalIcon} alt="" className="h-4 w-4" /> Hospital</span>
-            <span className="flex items-center gap-1.5"><img src={ambulanceIcon} alt="" className="h-4 w-4" /> Ambulance</span>
-          </div>
-          <div className="space-y-2">
-            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Nearest providers</p>
-            {providers.map((p) => {
-              const dimmed = !p.accepting;
-              return (
-                <div
-                  key={p.id}
-                  className={cn(
-                    "flex items-center gap-3 rounded-2xl border bg-card p-3 shadow-sm transition",
-                    dimmed && "opacity-60",
-                  )}
-                >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary/60">
-                    <img src={p.type === "hospital" ? hospitalIcon : ambulanceIcon} alt="" className="h-7 w-7 object-contain" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold truncate">{p.name}</p>
-                    <p className="text-[11px] text-muted-foreground capitalize">
-                      {p.type}{p.subtitle && ` · ${p.subtitle}`} · {p._d.toFixed(1)} km
-                    </p>
-                    {dimmed && (
-                      <span className="mt-1 inline-block rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700">
-                        Full capacity
-                      </span>
-                    )}
-                  </div>
-                  <Button
-                    size="sm"
-                    className="rounded-xl"
-                    disabled={!!requesting || dimmed}
-                    onClick={() => requestProvider(p)}
-                  >
-                    {requesting === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : dimmed ? "Full" : "Request"}
-                  </Button>
-                </div>
-              );
-            })}
-            {providers.length === 0 && (
-              <p className="rounded-2xl border border-dashed p-4 text-center text-xs text-muted-foreground">
-                No approved providers nearby. Waiting for someone to respond…
-              </p>
+      {/* CTA */}
+      <div className="mt-10 flex flex-1 flex-col items-center justify-center">
+        <div className="relative flex items-center justify-center">
+          {/* Ambient glow */}
+          <span aria-hidden className="absolute inset-0 -m-6 rounded-full bg-red-500/15 blur-2xl" />
+          <span aria-hidden className="absolute inset-0 -m-1 animate-ping rounded-full bg-red-500/25" style={{ animationDuration: "2.6s" }} />
+
+          {/* Progress ring */}
+          <svg className="absolute -rotate-90" width={300} height={300} aria-hidden>
+            <circle cx={150} cy={150} r={ringR} stroke="hsl(0 0% 100% / 0.4)" strokeWidth={6} fill="none" />
+            <circle
+              cx={150} cy={150} r={ringR}
+              stroke="white" strokeWidth={6} fill="none" strokeLinecap="round"
+              strokeDasharray={ringC}
+              strokeDashoffset={ringC * (1 - holdProgress)}
+              style={{ transition: holdProgress === 0 ? "stroke-dashoffset .25s ease-out" : "none" }}
+            />
+          </svg>
+
+          <button
+            onPointerDown={(e) => { e.preventDefault(); startHold(); }}
+            onPointerUp={cancelHold}
+            onPointerLeave={cancelHold}
+            onPointerCancel={cancelHold}
+            onContextMenu={(e) => e.preventDefault()}
+            disabled={triggering}
+            aria-label="Hold for help"
+            className="relative z-10 flex h-60 w-60 select-none flex-col items-center justify-center rounded-full font-black text-white transition active:scale-[.98] touch-none"
+            style={{
+              background: "radial-gradient(circle at 30% 25%, hsl(354,90%,62%) 0%, hsl(354,84%,52%) 45%, hsl(0,80%,38%) 100%)",
+              boxShadow: "0 24px 60px -14px hsl(0 80% 40% / 0.55), inset 0 -10px 30px hsl(0 80% 25% / 0.35), inset 0 6px 14px hsl(0 100% 80% / 0.3)",
+            }}
+          >
+            {triggering ? (
+              <Loader2 className="h-10 w-10 animate-spin" />
+            ) : (
+              <>
+                <span className="text-3xl tracking-[0.18em]">HOLD</span>
+                <span className="mt-1 text-xs font-bold uppercase tracking-[0.32em] opacity-90">For Help</span>
+              </>
             )}
-          </div>
+          </button>
         </div>
-      ) : (
-        <>
-          {activeIncidentId && (
-            <button
-              onClick={() => navigate(`/patient/holarchelp/incident/${activeIncidentId}`)}
-              className="mb-5 flex w-full items-center gap-3 rounded-2xl border-2 border-red-300 bg-red-50 p-4 text-left transition hover:bg-red-100/60"
-            >
-              <span className="relative flex h-3 w-3 shrink-0">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75"></span>
-                <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
-              </span>
-              <div className="flex-1">
-                <p className="text-sm font-bold text-red-700">Active emergency in progress</p>
-                <p className="text-xs text-red-700/70">Tap to view live tracking.</p>
-              </div>
-              <span className="text-xs font-semibold text-red-700">View →</span>
-            </button>
-          )}
 
-          <div className="mt-2 text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Tap to send</p>
-            <h1 className="mt-1 text-4xl font-black tracking-tight">SOS</h1>
-          </div>
+        {/* Hint */}
+        <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+          Press &amp; hold for 2 seconds
+        </p>
 
-          <div className="mt-6 flex justify-center">
-            <div className="relative">
-              <span
-                aria-hidden
-                className="absolute inset-0 -z-0 animate-ping rounded-full bg-red-500/30"
-                style={{ animationDuration: "2.5s" }}
-              />
-              <span
-                aria-hidden
-                className="absolute -inset-3 -z-0 rounded-full bg-red-500/15 blur-2xl"
-              />
-              <button
-                onClick={() => {
-                  if (role === "doctor" && !activeIncidentId) {
-                    setChooserOpen(true);
-                  } else {
-                    triggerSOS();
-                  }
-                }}
-                disabled={triggering}
-                className="relative z-10 flex h-64 w-64 flex-col items-center justify-center rounded-full font-black text-white transition active:scale-95"
-                style={{
-                  background: "radial-gradient(circle at 30% 25%, hsl(354,90%,62%) 0%, hsl(354,84%,52%) 45%, hsl(0,80%,38%) 100%)",
-                  boxShadow: "0 20px 60px -15px hsl(0 80% 40% / 0.6), inset 0 -10px 30px hsl(0 80% 25% / 0.4), inset 0 6px 12px hsl(0 100% 80% / 0.3)",
-                }}
-                aria-label="Send SOS"
-              >
-                {triggering ? (
-                  <>
-                    <Loader2 className="h-10 w-10 animate-spin" />
-                    <span className="mt-2 text-sm font-bold tracking-widest">SENDING…</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-5xl tracking-[0.15em]">SOS</span>
-                    <span className="mt-2 text-[10px] font-semibold uppercase tracking-[0.3em] opacity-80">Tap to send</span>
-                  </>
-                )}
-              </button>
-            </div>
+        {/* Inline alert pills */}
+        {permDenied && (
+          <div className="mt-4 flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900">
+            <MapPin className="h-3.5 w-3.5" /> Location off — enable to send SOS
           </div>
+        )}
+        {hasEmergency === false && (
+          <button
+            onClick={() => navigate("/patient/details?section=health")}
+            className="mt-4 text-xs font-semibold text-amber-700 underline-offset-4 hover:underline"
+          >
+            Add someone we can notify first
+          </button>
+        )}
+      </div>
 
-          <div className="mt-10 grid gap-2.5">
-            <button
-              onClick={() => navigate("/patient/holarchelp/nearby")}
-              className="group flex items-center gap-3 rounded-2xl border bg-card p-3.5 text-left shadow-sm transition hover:border-primary/40 hover:shadow-md"
-            >
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                <Crosshair className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-bold">Find nearby provider</p>
-                <p className="text-[11px] text-muted-foreground">Hospitals & ambulance services around you</p>
-              </div>
-              <span className="text-muted-foreground transition group-hover:translate-x-0.5">›</span>
-            </button>
-            <button
-              onClick={() => navigate("/patient/holarchelp/incidents")}
-              className="group flex items-center gap-3 rounded-2xl border bg-card p-3.5 text-left shadow-sm transition hover:border-primary/40 hover:shadow-md"
-            >
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                <AlertCircle className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-bold">Incident history</p>
-                <p className="text-[11px] text-muted-foreground">Review past emergencies and outcomes</p>
-              </div>
-              <span className="text-muted-foreground transition group-hover:translate-x-0.5">›</span>
-            </button>
-          </div>
-        </>
-      )}
+      {/* Secondary actions */}
+      <div className="mb-8 mt-6 flex flex-col items-center gap-2">
+        <button
+          onClick={() => navigate("/patient/details?section=health")}
+          className="text-sm font-semibold text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+        >
+          + Add someone we can notify
+        </button>
+        <button
+          onClick={() => navigate("/patient/holarchelp/contacts")}
+          className="text-xs text-muted-foreground/80 underline-offset-4 hover:text-foreground hover:underline"
+        >
+          Set preferred responders
+        </button>
+      </div>
     </div>
   );
 }
