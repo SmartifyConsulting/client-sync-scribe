@@ -76,7 +76,7 @@ export function AvailableResponders({ incidentId, createdAt }: { incidentId: str
   useEffect(() => {
     if (remainingSec > 0) return;
     if (!offers.length) return;
-    supabase.rpc("holarchelp_auto_assign_incident" as any, { _incident_id: incidentId }).catch(() => {});
+    supabase.rpc("holarchelp_auto_assign_incident" as any, { _incident_id: incidentId }).then(() => {}, () => {});
   }, [remainingSec === 0, offers.length, incidentId]);
 
   const pick = async (o: Offer) => {
