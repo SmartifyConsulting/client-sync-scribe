@@ -310,6 +310,9 @@ export default function HolarcHelpProviders() {
                 <TabsTrigger value="ambulance" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
                   <Ambulance className="mr-1.5 h-4 w-4" />Ambulance
                 </TabsTrigger>
+                <TabsTrigger value="pharmacy" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
+                  <Pill className="mr-1.5 h-4 w-4" />Pharmacies
+                </TabsTrigger>
               </TabsList>
               <Button size="sm" onClick={() => setChooserOpen(true)}>
                 <Plus className="mr-1.5 h-4 w-4" />
@@ -323,6 +326,10 @@ export default function HolarcHelpProviders() {
 
             <TabsContent value="ambulance" className="mt-4">
               {loading ? <Loader /> : renderGroupedTable(ambulances, "ambulance")}
+            </TabsContent>
+
+            <TabsContent value="pharmacy" className="mt-4">
+              {loading ? <Loader /> : renderGroupedTable(pharmacies, "pharmacy")}
             </TabsContent>
           </Tabs>
         </TabsContent>
