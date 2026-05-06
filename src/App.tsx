@@ -212,8 +212,8 @@ const App = () => (
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/pricing" element={<PricingAdmin />} />
             <Route path="/admin/gamification" element={<GamificationAdmin />} />
-            <Route path="/admin/users" element={<UserManagement />} />
-            <Route path="/admin/holarchelp-providers" element={<HolarcHelpProviders />} />
+            <Route path="/admin/users" element={<HolarcHelpProviders />} />
+            <Route path="/admin/holarchelp-providers" element={<Navigate to="/admin/users" replace />} />
             <Route path="/admin/holarchelp-accountability" element={<HolarcHelpAccountability />} />
             <Route path="/admin/holarchelp-providers/:type/:id/incidents" element={<HolarcHelpProviderIncidents />} />
             
