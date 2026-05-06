@@ -4,43 +4,50 @@ import { loadGoogleMaps, GOOGLE_MAPS_API_KEY, GOOGLE_MAPS_MAP_ID } from "../conf
 
 type Point = { latitude: number; longitude: number };
 
+// Only attempt Google Maps when a project-specific API key is configured via env.
+// The shared fallback key is referrer-restricted and renders blank tiles on most
+// domains, so we default to the OpenStreetMap embed which works everywhere.
+const envKey = (import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined) ?? "";
+const USE_GOOGLE = envKey.trim().length > 0;
+
 export const LiveMap = ({ points, height = 360 }: { points: Point[]; height?: number }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
-  const markerRef = useRef<google.maps.marker.AdvancedMarkerElement | null>(null);
+  const markerRef = useRef<google.maps.marker.AdvancedMarkerElement | google.maps.Marker | null>(null);
   const [ready, setReady] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState(!USE_GOOGLE);
 
   const latest = points[0];
 
   useEffect(() => {
-    if (!GOOGLE_MAPS_API_KEY || !containerRef.current || mapRef.current || failed) return;
+    if (failed || !GOOGLE_MAPS_API_KEY || !containerRef.current || mapRef.current) return;
     let cancelled = false;
     loadGoogleMaps()
       .then(() => {
         if (cancelled || !containerRef.current) return;
         try {
-          mapRef.current = new google.maps.Map(containerRef.current, {
+          const mapOptions: google.maps.MapOptions = {
             center: latest ? { lat: latest.latitude, lng: latest.longitude } : { lat: 20, lng: 0 },
             zoom: latest ? 15 : 2,
             mapTypeControl: false,
             streetViewControl: false,
             fullscreenControl: false,
-            mapId: GOOGLE_MAPS_MAP_ID,
-          });
+          };
+          if (GOOGLE_MAPS_MAP_ID && GOOGLE_MAPS_MAP_ID !== "DEMO_MAP_ID") {
+            (mapOptions as any).mapId = GOOGLE_MAPS_MAP_ID;
+          }
+          mapRef.current = new google.maps.Map(containerRef.current, mapOptions);
           setReady(true);
         } catch (e) {
-          console.warn("[LiveMap] Google Maps init failed, falling back to OSM", e);
+          console.warn("[LiveMap] init failed, falling back to OSM", e);
           setFailed(true);
         }
       })
       .catch((e) => {
-        console.warn("[LiveMap] Google Maps load failed, falling back to OSM", e);
+        console.warn("[LiveMap] load failed, falling back to OSM", e);
         setFailed(true);
       });
 
-    // If Google never reports an auth failure but the script silently breaks,
-    // surface a referrer/auth error via the global hook the API calls.
     (window as any).gm_authFailure = () => {
       console.warn("[LiveMap] gm_authFailure — falling back to OSM");
       setFailed(true);
@@ -48,7 +55,10 @@ export const LiveMap = ({ points, height = 360 }: { points: Point[]; height?: nu
 
     return () => {
       cancelled = true;
-      if (markerRef.current) markerRef.current.map = null;
+      if (markerRef.current) {
+        if ("map" in markerRef.current) (markerRef.current as any).map = null;
+        else (markerRef.current as google.maps.Marker).setMap(null);
+      }
       markerRef.current = null;
       mapRef.current = null;
     };
@@ -60,13 +70,18 @@ export const LiveMap = ({ points, height = 360 }: { points: Point[]; height?: nu
     const map = mapRef.current;
     if (!map || !latest) return;
     const pos = { lat: latest.latitude, lng: latest.longitude };
+    const hasMapId = !!(map as any).get?.("mapId");
     if (!markerRef.current) {
-      const dot = document.createElement("div");
-      dot.style.cssText =
-        "width:18px;height:18px;border-radius:50%;background:hsl(354,84%,54%);border:3px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.3)";
-      markerRef.current = new google.maps.marker.AdvancedMarkerElement({ position: pos, map, content: dot });
-    } else {
-      markerRef.current.position = pos;
+      if (hasMapId && google.maps.marker?.AdvancedMarkerElement) {
+        const dot = document.createElement("div");
+        dot.style.cssText =
+          "width:18px;height:18px;border-radius:50%;background:hsl(354,84%,54%);border:3px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.3)";
+        markerRef.current = new google.maps.marker.AdvancedMarkerElement({ position: pos, map, content: dot });
+      } else {
+        markerRef.current = new google.maps.Marker({ position: pos, map });
+      }
+    } else if ("position" in markerRef.current) {
+      (markerRef.current as any).position = pos;
     }
     map.panTo(pos);
     if (map.getZoom()! < 14) map.setZoom(14);
@@ -84,7 +99,7 @@ export const LiveMap = ({ points, height = 360 }: { points: Point[]; height?: nu
   }
 
   // OpenStreetMap fallback — no API key required, works on every domain.
-  if (failed || !GOOGLE_MAPS_API_KEY) {
+  if (failed || !USE_GOOGLE) {
     const d = 0.005;
     const bbox = `${latest.longitude - d},${latest.latitude - d},${latest.longitude + d},${latest.latitude + d}`;
     const src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${latest.latitude},${latest.longitude}`;
