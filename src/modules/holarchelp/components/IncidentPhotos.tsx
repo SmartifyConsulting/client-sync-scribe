@@ -63,7 +63,7 @@ export function IncidentPhotos({
       setLoading(false);
       return;
     }
-    const list = (data ?? []) as Photo[];
+    const list = ((data ?? []) as unknown) as Photo[];
     // sign URLs in batch
     const signed = await Promise.all(
       list.map(async (p) => {
