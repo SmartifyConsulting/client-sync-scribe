@@ -1,78 +1,47 @@
-# SOS Revamp + Incident Photos
+## Goal
 
-## 1. Visual revamp — `HolarcHelpHome.tsx` (idle state)
+Make the Admin → Users screen actually editable, and re-frame each user as one of three categories:
 
-Keep the existing brand colours (red `#E01837` SOS, teal primary, cream warning). Tighten the screen so the SOS button is unmistakably the hero element on mobile and looks more polished:
+1. **Patient**
+2. **Healthcare Provider** (doctor)
+3. **Emergency Service** (hospital_staff / ambulance_staff / blood_bank) — with the linked **company name** shown.
 
-- **Header band**: keep the existing top bar; no change.
-- **Emergency Contact warning card**: replace the plain amber card with a softer rounded `2xl` cream card (`bg-secondary/40` + `border-amber-300/60`), warning icon in a circular badge, slightly tighter copy, and the CTA button styled `bg-primary` (teal) with full width on mobile.
-- **"Tap to send / SOS" label**: smaller, more refined — uppercase tracked label in muted-foreground, then `SOS` in bold display weight.
-- **Hero SOS button**:
-  - Bigger circular button with a layered look: outer pulsing ring (animate-ping at low opacity, red), a soft red glow shadow, and the solid red gradient core.
-  - Inside: stacked "SOS" wordmark with a tiny "Hold or tap to send" hint.
-  - Active/triggering state: spinner + "Sending…".
-  - Subtle hover/active scale.
-- **Quick actions row** below the button: two equal pill cards (Find nearby provider / Incident history) using `Card` with icon-in-circle on the left, title + one-line description, chevron on the right. Touch target ≥ 56px.
-- **Active emergency banner** (when there's an existing incident): keep but restyle to match — red rounded card with pulsing dot, and a primary "View live status" button.
-- **"Help is on the way" full-screen state**: keep functionality, restyle the green button into a card with checkmark badge, status text, and a teal "View live tracking" button.
+## Why the current screen feels "uneditable"
 
-All restyling uses existing semantic tokens (`bg-card`, `border`, `text-muted-foreground`, `bg-primary`, etc.) — no new colours, no new fonts.
+- The role `<Select>` only lists `doctor`, `patient`, `admin`, `none`. Users that already hold an emergency role (`hospital_staff`, `ambulance_staff`, `blood_bank`) render with an empty select value, so the row visually looks read-only / saving silently no-ops.
+- There is no surfaced error when the role enum value isn't one of the four hard-coded options, so admins perceive "edit doesn't work".
+- Emergency providers also have a company name (`holarchelp_hospitals.name`, `holarchelp_ambulance_providers.company_name`, `blood_bank_providers.name`) that is never shown, so admins can't tell who they're editing.
 
-## 2. SOS-active provider list — same screen
+## Changes (frontend only — no schema changes needed)
 
-Tighten the list: each provider row becomes a `Card` with rounded-2xl, larger icon tile, name + meta on two lines, and a teal `Request` button. "Full capacity" badge becomes a small red pill chip rather than greyed-out text.
+### 1. New "Category" column replacing the raw role badge
+Map roles → categories:
+- `patient` → **Patient** (teal badge)
+- `doctor` → **Healthcare Provider** (blue badge)
+- `hospital_staff` | `ambulance_staff` | `blood_bank` → **Emergency Service** (red badge) + sub-label of provider type (Hospital / Ambulance / Blood Bank)
+- `admin` → **Admin** (existing red)
+- `none` → **None**
 
-## 3. Photo capture & upload on an incident
+### 2. New "Company / Practice" column
+- For doctors: pull `profiles.practice_name` (or fall back to "—").
+- For emergency staff: look up the owned/member row in `holarchelp_hospitals`, `holarchelp_ambulance_providers`, or `blood_bank_providers` and display the company name.
+- Fetched in a single batched query on load and joined client-side by `user_id`.
 
-### Database (migration)
+### 3. Editable role select — full enum
+Replace the role dropdown with a two-step picker:
+- **Category** select: Patient / Healthcare Provider / Emergency Service / Admin / None
+- If "Emergency Service" → show a **second select** for sub-type: Hospital Staff / Ambulance Staff / Blood Bank
+- On save, write the resolved enum value into `user_roles` (delete-then-insert as today, but now supports the emergency enums).
 
-New table `public.holarchelp_incident_photos`:
-- `id uuid PK`
-- `incident_id uuid not null references holarchelp_incidents(id) on delete cascade`
-- `uploaded_by uuid not null` (the user who uploaded)
-- `storage_path text not null`
-- `caption text`
-- `created_at timestamptz default now()`
-- Index on `incident_id`.
+### 4. Make save errors visible
+- Surface any RLS / enum errors via the existing toast (already wired) and disable the save button only while `saving` is true. Add a console.error so admins reporting "nothing happens" can be diagnosed.
 
-RLS:
-- Patient who owns the incident: full insert/select/delete on their incident's photos.
-- Assigned provider staff (via `is_ambulance_staff` / `is_hospital_staff`) and admins: select only.
-- Triggering user (`triggered_by_user_id`, e.g. doctor who started SOS for a patient): select + insert.
+### 5. Compact layout for new columns
+- Add Category and Company columns; keep the table within `max-w-6xl` and allow horizontal scroll on mobile.
 
-### Storage bucket
+## Files to edit
+- `src/features/admin/pages/UserManagement.tsx` — add Category + Company columns, expand role editor with emergency sub-types, batched fetch of practice/company names from `profiles`, `holarchelp_hospitals`, `holarchelp_ambulance_providers`, `blood_bank_providers`.
 
-New private bucket `holarchelp-incident-photos`. Policies on `storage.objects`:
-- Path convention: `{incident_id}/{uuid}.{ext}`
-- Insert allowed if user can insert into `holarchelp_incident_photos` for that incident (same access rules above).
-- Select allowed if user is patient owner / assigned provider staff / admin.
-- Files served via signed URL (1 hour) since bucket is private (medical context).
-
-### UI — `HolarcHelpIncidentDetail.tsx`
-
-Add an **"Incident photos"** section between the voice note and the timeline:
-- Reusable `IncidentPhotoCapture` component.
-- Capture button that uses a hidden `<input type="file" accept="image/*" capture="environment" multiple>` so mobile browsers open the camera by default; desktop falls back to file picker.
-- Optional caption per upload.
-- Thumbnail grid (3 columns on mobile) with click-to-enlarge dialog.
-- 5MB-per-image cap (project-wide upload constraint), client-side validation with toast.
-- Compress / resize down to max 1600px on the long edge before upload (browser canvas) to keep things fast.
-- Upload via `supabase.storage.from('holarchelp-incident-photos').upload(...)`, then insert row into `holarchelp_incident_photos`. List re-fetched on success.
-- Provider portal `ProviderIncidentDetail.tsx` gets the same gallery in **read-only** mode (no upload control).
-
-### Out of scope
-
-- AI analysis of photos.
-- Annotation / drawing on photos.
-- Sharing photos in the timeline events feed (they already appear in the dedicated section).
-- Changes to the SOS dispatch / severity / voice-note flows.
-- Provider-side photo upload (read-only for now).
-
-## Files touched
-
-- `src/modules/holarchelp/pages/HolarcHelpHome.tsx` — visual revamp
-- `src/modules/holarchelp/pages/HolarcHelpIncidentDetail.tsx` — embed photo gallery
-- `src/modules/holarchelp/pages/provider/ProviderIncidentDetail.tsx` — embed read-only gallery
-- `src/modules/holarchelp/components/IncidentPhotoCapture.tsx` — new
-- `src/modules/holarchelp/components/IncidentPhotoGallery.tsx` — new (shared, supports `readOnly`)
-- `supabase/migrations/<new>.sql` — table + RLS + bucket + storage policies
+## Out of scope
+- No DB migration. The `user_role` enum already contains all needed values.
+- No changes to signup or routing — purely the Admin Users screen.
