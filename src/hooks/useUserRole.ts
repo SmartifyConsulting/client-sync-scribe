@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-export type UserRole = 'doctor' | 'patient' | 'admin' | null;
+export type UserRole = 'doctor' | 'patient' | 'admin' | 'emergency' | null;
 type ResolvedRole = Exclude<UserRole, null>;
+type RawRole = 'doctor' | 'patient' | 'admin' | 'hospital_staff' | 'ambulance_staff' | 'blood_bank';
+const EMERGENCY_RAW: RawRole[] = ['hospital_staff', 'ambulance_staff', 'blood_bank'];
 
 export function useUserRole() {
   const { user } = useAuth();
@@ -43,26 +45,32 @@ export function useUserRole() {
           console.error('Error fetching user roles:', rolesError);
         }
 
-        const roles = Array.from(
-          new Set(
-            [
-              profileData?.role,
-              ...((roleRows ?? []).map((row) => row.role)),
-            ].filter(Boolean)
-          )
-        ) as ResolvedRole[];
+        const rawRoles = (roleRows ?? []).map((row) => row.role as RawRole);
+        const hasEmergencyRaw = rawRoles.some((r) => EMERGENCY_RAW.includes(r));
+
+        const normalized: ResolvedRole[] = [];
+        const profileRole = profileData?.role as ResolvedRole | undefined;
+        if (profileRole) normalized.push(profileRole);
+        for (const r of rawRoles) {
+          if (r === 'doctor' || r === 'patient' || r === 'admin') {
+            if (!normalized.includes(r)) normalized.push(r);
+          }
+        }
+        if (hasEmergencyRaw && !normalized.includes('emergency')) normalized.push('emergency');
 
         const effectiveRole: UserRole =
-          (profileData?.role as UserRole) ??
-          (roles.includes('doctor')
+          profileRole ??
+          (normalized.includes('doctor')
             ? 'doctor'
-            : roles.includes('patient')
+            : normalized.includes('patient')
               ? 'patient'
-              : roles.includes('admin')
-                ? 'admin'
-                : null);
+              : normalized.includes('emergency')
+                ? 'emergency'
+                : normalized.includes('admin')
+                  ? 'admin'
+                  : null);
 
-        setAvailableRoles(roles);
+        setAvailableRoles(normalized);
         setRole(effectiveRole);
       } catch (error) {
         console.error('Error fetching user role:', error);
@@ -81,9 +89,11 @@ export function useUserRole() {
     loading,
     isDoctor: role === 'doctor',
     isPatient: role === 'patient',
+    isEmergency: role === 'emergency',
     isAdmin: availableRoles.includes('admin'),
     hasDoctorRole: availableRoles.includes('doctor'),
     hasPatientRole: availableRoles.includes('patient'),
+    hasEmergencyRole: availableRoles.includes('emergency'),
     hasAdminRole: availableRoles.includes('admin'),
   };
 }
