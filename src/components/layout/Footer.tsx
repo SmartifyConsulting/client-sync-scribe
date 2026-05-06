@@ -7,7 +7,7 @@ export function Footer() {
     { to: "/terms-and-conditions", label: "Terms & Conditions" },
     { to: "/patient-consent", label: "HIPAA Patient Consent & Authorization" },
     { to: "/business-associate-agreement", label: "HIPAA Business Associate Agreement" },
-    { to: "/intellectual-property", label: "Intellectual Property" },
+    { to: "/legal", label: "All Legal Terms" },
   ];
 
   return (
