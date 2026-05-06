@@ -29,9 +29,11 @@ const distanceKm = (a: Coords, b: Coords) => {
 
 export default function HolarcHelpHome() {
   const { user } = useAuth();
+  const { role } = useUserRole();
   const navigate = useNavigate();
   const [activeIncidentId, setActiveIncidentId] = useState<string | null>(null);
   const [triggering, setTriggering] = useState(false);
+  const [chooserOpen, setChooserOpen] = useState(false);
   const [permDenied, setPermDenied] = useState(false);
   const [coords, setCoords] = useState<Coords | null>(null);
   const [providers, setProviders] = useState<(ProviderMarker & { _d: number; accepting: boolean; tier?: string; distanceKm?: number })[]>([]);
