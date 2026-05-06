@@ -346,9 +346,14 @@ export default function UsersTab() {
                       </Button>
                     </div>
                   ) : (
-                    <Button size="icon" variant="ghost" onClick={() => startEditing(u)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button size="icon" variant="ghost" onClick={() => startEditing(u)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => setPendingDelete(u)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   )}
                 </TableCell>
               </TableRow>
@@ -356,7 +361,7 @@ export default function UsersTab() {
           })}
           {rows.length === 0 && (
             <TableRow>
-              <TableCell colSpan={9} className="text-center text-muted-foreground py-8">No users found</TableCell>
+              <TableCell colSpan={8} className="text-center text-muted-foreground py-8">No users found</TableCell>
             </TableRow>
           )}
         </TableBody>
