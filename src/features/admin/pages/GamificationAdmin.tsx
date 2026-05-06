@@ -494,8 +494,12 @@ export default function GamificationAdmin() {
                     <div className="space-y-2">
                       <Label>Visit Category Name</Label>
                       <Input
-                        placeholder="e.g., Dental Checkup"
+                        placeholder="e.g., dental_checkup"
                         value={newConfig.visit_category}
+                        onChange={(e) => setNewConfig({ ...newConfig, visit_category: e.target.value })}
+                      />
+                      <p className="text-xs text-muted-foreground">Must be unique. Spaces become underscores.</p>
+                    </div>
                         onChange={(e) => setNewConfig({ ...newConfig, visit_category: e.target.value })}
                       />
                     </div>
