@@ -236,15 +236,21 @@ export default function HolarcHelpHome() {
 
   if (helpOnTheWay && incidentId) {
     return (
-      <div className="mx-auto max-w-md py-12 text-center">
-        <button
-          onClick={() => navigate(`/patient/holarchelp/incident/${incidentId}`)}
-          className="inline-flex flex-col items-center justify-center gap-3 rounded-3xl bg-emerald-500 hover:bg-emerald-600 transition-colors px-10 py-10 text-white shadow-2xl active:scale-95"
-        >
-          <Shield className="h-16 w-16" />
-          <p className="text-2xl font-extrabold tracking-tight">Help is on the way.</p>
-          <p className="text-xs opacity-90">Tap to view live status</p>
-        </button>
+      <div className="mx-auto max-w-md py-10 px-2">
+        <div className="rounded-3xl border border-emerald-200 bg-gradient-to-b from-emerald-50 to-white p-8 text-center shadow-[var(--shadow-card)]">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30">
+            <Shield className="h-10 w-10 text-white" />
+          </div>
+          <p className="mt-5 text-2xl font-extrabold tracking-tight text-emerald-900">Help is on the way</p>
+          <p className="mt-1 text-sm text-emerald-800/70">Your live location is being shared with the responder.</p>
+          <Button
+            size="lg"
+            className="mt-6 w-full rounded-2xl"
+            onClick={() => navigate(`/patient/holarchelp/incident/${incidentId}`)}
+          >
+            View live tracking
+          </Button>
+        </div>
       </div>
     );
   }
