@@ -49,11 +49,17 @@ export default function HolarcHelpHome() {
         const hasNok = !!(data?.next_of_kin_name && data?.next_of_kin_phone);
         setHasEmergency(hasEC || hasNok);
       });
-    supabase.from("holarchelp_incidents" as any).select("id, assigned_provider_id, accepted_at")
+    supabase.from("holarchelp_incidents" as any).select("id, assigned_provider_id, accepted_at, created_at")
       .eq("user_id", user.id).in("status", ["open", "assigned", "en_route", "arrived", "patient_collected", "at_hospital", "reopened"])
       .order("created_at", { ascending: false }).limit(1).maybeSingle()
       .then(({ data }: any) => {
         if (data?.id) {
+          // Stale rehydrated incident → send straight to live tracking, never trap user on confirmation screen
+          const ageMs = Date.now() - new Date(data.created_at).getTime();
+          if (ageMs > 30_000) {
+            navigate(`/patient/holarchelp/incident/${data.id}`, { replace: true });
+            return;
+          }
           setIncidentId(data.id);
           setActiveIncidentId(data.id);
           if (data.assigned_provider_id || data.accepted_at) {
@@ -62,7 +68,23 @@ export default function HolarcHelpHome() {
           }
         }
       });
-  }, [user]);
+  }, [user, navigate]);
+
+  // Safety timeouts so confirmation spinners can never hang
+  useEffect(() => {
+    if (!incidentId) return;
+    const t1 = setTimeout(() => setContactsNotified(true), 8000);
+    const t2 = setTimeout(() => setProviderAssigned((v) => v || false) /* noop */, 0);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [incidentId]);
+
+  const [searchTimedOut, setSearchTimedOut] = useState(false);
+  useEffect(() => {
+    if (!incidentId || providerAssigned) return;
+    setSearchTimedOut(false);
+    const t = setTimeout(() => setSearchTimedOut(true), 30000);
+    return () => clearTimeout(t);
+  }, [incidentId, providerAssigned]);
 
   // Realtime subscription for the active incident
   useEffect(() => {
@@ -223,7 +245,15 @@ export default function HolarcHelpHome() {
     const steps = [
       { label: "Location shared", done: !!coords },
       { label: "Contacts notified", done: contactsNotified },
-      { label: providerAssigned ? "Responder assigned" : "Searching for nearby providers", done: providerAssigned },
+      {
+        label: providerAssigned
+          ? "Responder assigned"
+          : searchTimedOut
+            ? "Still searching — open live tracking"
+            : "Searching for nearby providers",
+        done: providerAssigned,
+        stopSpin: searchTimedOut && !providerAssigned,
+      },
     ];
     return (
       <div className="mx-auto max-w-md px-5 py-10">
@@ -251,7 +281,7 @@ export default function HolarcHelpHome() {
                 </span>
               ) : (
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
-                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  <Loader2 className={`h-4 w-4 text-muted-foreground ${s.stopSpin ? "" : "animate-spin"}`} />
                 </span>
               )}
               <span className={`text-sm font-semibold ${s.done ? "text-foreground" : "text-muted-foreground"}`}>{s.label}</span>
@@ -260,17 +290,17 @@ export default function HolarcHelpHome() {
         </ul>
 
         <div className="mt-8 space-y-3">
+          <Button
+            className="w-full h-12 rounded-2xl"
+            onClick={() => navigate(`/patient/holarchelp/incident/${incidentId}`)}
+          >
+            View live tracking →
+          </Button>
           {cancelSecondsLeft > 0 && !helpOnTheWay && (
             <Button variant="outline" className="w-full h-12 rounded-2xl" onClick={cancelAlert}>
               Cancel alert ({cancelSecondsLeft}s)
             </Button>
           )}
-          <button
-            onClick={() => navigate(`/patient/holarchelp/incident/${incidentId}`)}
-            className="block w-full text-center text-sm font-semibold text-primary underline-offset-4 hover:underline"
-          >
-            View live tracking →
-          </button>
         </div>
       </div>
     );
