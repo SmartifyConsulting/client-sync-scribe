@@ -211,17 +211,20 @@ export default function UsersTab() {
   const categoryBadge = (role: string) => {
     const cat = roleToCategory(role);
     switch (cat) {
-      case "admin": return <Badge variant="destructive">Admin</Badge>;
-      case "provider": return <Badge className="bg-blue-600 text-white hover:bg-blue-700">Healthcare Provider</Badge>;
-      case "patient": return <Badge className="bg-teal-600 text-white hover:bg-teal-700">Patient</Badge>;
-      case "emergency":
+      case "admin": return <Badge variant="destructive" className="text-sm">Admin</Badge>;
+      case "provider": return <Badge className="bg-blue-600 text-white hover:bg-blue-700 text-sm">Healthcare Provider</Badge>;
+      case "patient": return <Badge className="bg-teal-600 text-white hover:bg-teal-700 text-sm">Patient</Badge>;
+      case "emergency": {
+        const ei = emergencyIcon(role);
+        if (!ei) return <Badge variant="outline" className="text-sm">None</Badge>;
+        const { Icon, label } = ei;
         return (
-          <div className="flex flex-col gap-0.5">
-            <Badge className="bg-primary text-primary-foreground hover:bg-primary/90 w-fit">Emergency Service</Badge>
-            <span className="text-[11px] text-muted-foreground">{emergencyKindLabel(role)}</span>
-          </div>
+          <Badge className="bg-primary text-primary-foreground hover:bg-primary/90 w-fit p-1.5" title={label} aria-label={label}>
+            <Icon className="h-4 w-4" />
+          </Badge>
         );
-      default: return <Badge variant="outline">None</Badge>;
+      }
+      default: return <Badge variant="outline" className="text-sm">None</Badge>;
     }
   };
 
