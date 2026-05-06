@@ -486,17 +486,27 @@ export default function Auth() {
             .eq("user_id", userId),
         ]);
 
+        const rawRoles = (roleRows ?? []).map((r) => r.role);
+        const isEmergency = rawRoles.some((r) => r === "hospital_staff" || r === "ambulance_staff" || r === "blood_bank");
         const resolvedRole =
           profileData?.role ??
-          ((roleRows ?? []).some((row) => row.role === "patient")
+          (rawRoles.includes("patient")
             ? "patient"
-            : (roleRows ?? []).some((row) => row.role === "doctor")
+            : rawRoles.includes("doctor")
               ? "doctor"
-              : (roleRows ?? []).some((row) => row.role === "admin")
-                ? "admin"
-                : null);
+              : isEmergency
+                ? "emergency"
+                : rawRoles.includes("admin")
+                  ? "admin"
+                  : null);
 
-        navigate(resolvedRole === "patient" ? "/patient/details" : "/dashboard");
+        navigate(
+          resolvedRole === "patient"
+            ? "/patient/details"
+            : resolvedRole === "emergency"
+              ? "/provider"
+              : "/dashboard"
+        );
       } else {
         navigate("/dashboard");
       }
