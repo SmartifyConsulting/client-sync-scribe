@@ -133,7 +133,25 @@ export default function HolarcHelpIncidentDetail() {
     : [];
 
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md pb-6">
+      {/* Sticky quick-action bar */}
+      <div className="sticky top-0 z-30 -mx-4 mb-3 border-b bg-background/95 px-4 py-2 backdrop-blur md:mx-0 md:rounded-b-xl">
+        <div className="flex items-center gap-1.5 overflow-x-auto">
+          <Button size="sm" variant="ghost" className="shrink-0 gap-1" onClick={goHome}>
+            <ArrowLeft className="h-4 w-4" /> SOS Home
+          </Button>
+          <Button size="sm" variant="destructive" className="shrink-0 gap-1" onClick={callEmergency}>
+            <Phone className="h-4 w-4" /> Call 10177
+          </Button>
+          <Button size="sm" variant="outline" className="shrink-0 gap-1" onClick={shareLink}>
+            <Share2 className="h-4 w-4" /> Share
+          </Button>
+          <Button size="sm" variant="outline" className="shrink-0 gap-1" onClick={() => navigate("/patient/holarchelp/incidents")}>
+            <History className="h-4 w-4" /> History
+          </Button>
+        </div>
+      </div>
+
       <div className="mb-3 flex items-center justify-between">
         <h1 className="text-xl font-bold">{isLive ? "Active emergency" : "Incident closed"}</h1>
         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${isLive ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>
@@ -142,7 +160,20 @@ export default function HolarcHelpIncidentDetail() {
       </div>
       <p className="mb-3 text-xs text-muted-foreground">Started {new Date(incident.created_at).toLocaleString()}</p>
 
-      {incident.status === "open" && !incident.assigned_provider_id && (
+      {showNoResponders && (
+        <div className="mb-3 flex items-start gap-3 rounded-2xl border-2 border-red-500/50 bg-red-50 p-3 text-sm dark:bg-red-950/20">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+          <div className="flex-1">
+            <p className="font-semibold text-red-700">No ambulance has accepted yet.</p>
+            <p className="text-xs text-red-700/80">We're still searching. Please consider calling an emergency line directly.</p>
+            <Button size="sm" variant="destructive" className="mt-2 gap-1" onClick={callEmergency}>
+              <Phone className="h-4 w-4" /> Call 10177 now
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {incident.status === "open" && !incident.assigned_provider_id && !showNoResponders && (
         <div className="mb-3 flex items-center gap-3 rounded-2xl border-2 border-amber-500/40 bg-amber-50 p-3 dark:bg-amber-950/20">
           <Loader2 className="h-5 w-5 animate-spin text-amber-700" />
           <div className="text-sm">
