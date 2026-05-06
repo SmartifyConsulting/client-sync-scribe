@@ -4,10 +4,10 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   const links = [
-    { to: "/terms-and-conditions", label: "Terms & Conditions" },
-    { to: "/patient-consent", label: "HIPAA Patient Consent & Authorization" },
-    { to: "/business-associate-agreement", label: "HIPAA Business Associate Agreement" },
-    { to: "/legal", label: "All Legal Terms" },
+    { to: "/terms-and-conditions", label: "Terms and Conditions" },
+    { to: "/patient-consent", label: "Privacy & Consent" },
+    { to: "/business-associate-agreement", label: "Compliance" },
+    { to: "/legal", label: "Legal Center" },
   ];
 
   return (
