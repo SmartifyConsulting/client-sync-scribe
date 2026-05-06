@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Send, Loader2, Trophy, Target, Flame, Gift, Star, ArrowRightLeft, Calendar as CalendarIcon, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
