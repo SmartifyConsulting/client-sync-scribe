@@ -355,10 +355,10 @@ export default function HolarcHelpHome() {
           <span aria-hidden className="absolute inset-0 -m-1 animate-ping rounded-full bg-red-500/25" style={{ animationDuration: "2.6s" }} />
 
           {/* Progress ring */}
-          <svg className="absolute -rotate-90" width={300} height={300} aria-hidden>
-            <circle cx={150} cy={150} r={ringR} stroke="hsl(0 0% 100% / 0.4)" strokeWidth={6} fill="none" />
+          <svg className="absolute -rotate-90" width={260} height={260} aria-hidden>
+            <circle cx={130} cy={130} r={ringR} stroke="hsl(0 0% 100% / 0.4)" strokeWidth={6} fill="none" />
             <circle
-              cx={150} cy={150} r={ringR}
+              cx={130} cy={130} r={ringR}
               stroke="white" strokeWidth={6} fill="none" strokeLinecap="round"
               strokeDasharray={ringC}
               strokeDashoffset={ringC * (1 - holdProgress)}
