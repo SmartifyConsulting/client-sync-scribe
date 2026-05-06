@@ -122,10 +122,24 @@ export default function HolarcHelpIncidentDetail() {
 
   const copy = async () => { await navigator.clipboard.writeText(trackingUrl); toast.success("Tracking link copied"); };
 
+  const [closeOpen, setCloseOpen] = useState(false);
+  const [closureNote, setClosureNote] = useState("");
+  const [closing, setClosing] = useState(false);
   const resolve = async () => {
     if (!id) return;
+    if (closureNote.trim().length < 10) {
+      toast.error("Please add a brief write-up (at least 10 characters).");
+      return;
+    }
+    setClosing(true);
     const { error } = await supabase.from("holarchelp_incidents" as any)
-      .update({ status: "completed", resolved_at: new Date().toISOString(), completed_at: new Date().toISOString() } as any).eq("id", id);
+      .update({
+        status: "completed",
+        resolved_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+        notes: closureNote.trim(),
+      } as any).eq("id", id);
+    setClosing(false);
     if (error) return toast.error(error.message);
     toast.success("Incident closed");
     navigate("/patient/holarchelp");
