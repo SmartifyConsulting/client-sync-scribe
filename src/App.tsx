@@ -25,9 +25,9 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import TermsAndConditions from "./pages/TermsAndConditions";
-import IntellectualProperty from "./pages/IntellectualProperty";
 import PatientConsent from "./pages/PatientConsent";
 import BusinessAssociateAgreement from "./pages/BusinessAssociateAgreement";
+import Legal from "./pages/Legal";
 
 // Patient pages
 import PatientDashboard from "./pages/patient/PatientDashboard";
