@@ -824,27 +824,27 @@ export type Database = {
           description: string | null
           doctor_id: string
           id: string
-          moolas_count: number
           reference_id: string | null
           reward_type: string
+          vulas_count: number
         }
         Insert: {
           awarded_at?: string | null
           description?: string | null
           doctor_id: string
           id?: string
-          moolas_count?: number
           reference_id?: string | null
           reward_type: string
+          vulas_count?: number
         }
         Update: {
           awarded_at?: string | null
           description?: string | null
           doctor_id?: string
           id?: string
-          moolas_count?: number
           reference_id?: string | null
           reward_type?: string
+          vulas_count?: number
         }
         Relationships: []
       }
@@ -929,33 +929,33 @@ export type Database = {
           emoticon: string
           id: string
           is_ai_flagged: boolean | null
-          moolas_awarded: number | null
           patient_id: string
           profile_viewed: boolean | null
           recipient_id: string
           sender_id: string
+          vulas_awarded: number | null
         }
         Insert: {
           created_at?: string | null
           emoticon: string
           id?: string
           is_ai_flagged?: boolean | null
-          moolas_awarded?: number | null
           patient_id: string
           profile_viewed?: boolean | null
           recipient_id: string
           sender_id: string
+          vulas_awarded?: number | null
         }
         Update: {
           created_at?: string | null
           emoticon?: string
           id?: string
           is_ai_flagged?: boolean | null
-          moolas_awarded?: number | null
           patient_id?: string
           profile_viewed?: boolean | null
           recipient_id?: string
           sender_id?: string
+          vulas_awarded?: number | null
         }
         Relationships: [
           {
@@ -2055,113 +2055,6 @@ export type Database = {
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      moola_adherence_configs: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          is_active: boolean
-          lollipops_awarded: number
-          medication_category: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_active?: boolean
-          lollipops_awarded?: number
-          medication_category: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_active?: boolean
-          lollipops_awarded?: number
-          medication_category?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      moola_partner_apps: {
-        Row: {
-          app_store_url: string | null
-          category: string | null
-          created_at: string
-          creator: string | null
-          google_play_url: string | null
-          id: string
-          is_active: boolean
-          last_synced_at: string | null
-          logo_url: string | null
-          name: string
-          partner_code: string | null
-          signup_url: string | null
-        }
-        Insert: {
-          app_store_url?: string | null
-          category?: string | null
-          created_at?: string
-          creator?: string | null
-          google_play_url?: string | null
-          id?: string
-          is_active?: boolean
-          last_synced_at?: string | null
-          logo_url?: string | null
-          name: string
-          partner_code?: string | null
-          signup_url?: string | null
-        }
-        Update: {
-          app_store_url?: string | null
-          category?: string | null
-          created_at?: string
-          creator?: string | null
-          google_play_url?: string | null
-          id?: string
-          is_active?: boolean
-          last_synced_at?: string | null
-          logo_url?: string | null
-          name?: string
-          partner_code?: string | null
-          signup_url?: string | null
-        }
-        Relationships: []
-      }
-      moola_transfers: {
-        Row: {
-          amount: number
-          created_at: string
-          id: string
-          partner_app_id: string
-          user_id: string
-        }
-        Insert: {
-          amount: number
-          created_at?: string
-          id?: string
-          partner_app_id: string
-          user_id: string
-        }
-        Update: {
-          amount?: number
-          created_at?: string
-          id?: string
-          partner_app_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "moola_transfers_partner_app_id_fkey"
-            columns: ["partner_app_id"]
-            isOneToOne: false
-            referencedRelation: "moola_partner_apps"
             referencedColumns: ["id"]
           },
         ]
@@ -3579,7 +3472,6 @@ export type Database = {
           due_date: string | null
           id: string
           is_auto_executed: boolean | null
-          moolas_reward: number
           patient_id: string | null
           priority: string
           proof_url: string | null
@@ -3589,6 +3481,7 @@ export type Database = {
           title: string
           updated_at: string
           user_id: string
+          vulas_reward: number
         }
         Insert: {
           completed_at?: string | null
@@ -3598,7 +3491,6 @@ export type Database = {
           due_date?: string | null
           id?: string
           is_auto_executed?: boolean | null
-          moolas_reward?: number
           patient_id?: string | null
           priority?: string
           proof_url?: string | null
@@ -3608,6 +3500,7 @@ export type Database = {
           title: string
           updated_at?: string
           user_id: string
+          vulas_reward?: number
         }
         Update: {
           completed_at?: string | null
@@ -3617,7 +3510,6 @@ export type Database = {
           due_date?: string | null
           id?: string
           is_auto_executed?: boolean | null
-          moolas_reward?: number
           patient_id?: string | null
           priority?: string
           proof_url?: string | null
@@ -3627,6 +3519,7 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+          vulas_reward?: number
         }
         Relationships: [
           {
@@ -3745,6 +3638,113 @@ export type Database = {
             columns: ["session_id"]
             isOneToOne: false
             referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vula_adherence_configs: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          lollipops_awarded: number
+          medication_category: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          lollipops_awarded?: number
+          medication_category: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          lollipops_awarded?: number
+          medication_category?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      vula_partner_apps: {
+        Row: {
+          app_store_url: string | null
+          category: string | null
+          created_at: string
+          creator: string | null
+          google_play_url: string | null
+          id: string
+          is_active: boolean
+          last_synced_at: string | null
+          logo_url: string | null
+          name: string
+          partner_code: string | null
+          signup_url: string | null
+        }
+        Insert: {
+          app_store_url?: string | null
+          category?: string | null
+          created_at?: string
+          creator?: string | null
+          google_play_url?: string | null
+          id?: string
+          is_active?: boolean
+          last_synced_at?: string | null
+          logo_url?: string | null
+          name: string
+          partner_code?: string | null
+          signup_url?: string | null
+        }
+        Update: {
+          app_store_url?: string | null
+          category?: string | null
+          created_at?: string
+          creator?: string | null
+          google_play_url?: string | null
+          id?: string
+          is_active?: boolean
+          last_synced_at?: string | null
+          logo_url?: string | null
+          name?: string
+          partner_code?: string | null
+          signup_url?: string | null
+        }
+        Relationships: []
+      }
+      vula_transfers: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          partner_app_id: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          partner_app_id: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          partner_app_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vula_transfers_partner_app_id_fkey"
+            columns: ["partner_app_id"]
+            isOneToOne: false
+            referencedRelation: "vula_partner_apps"
             referencedColumns: ["id"]
           },
         ]
