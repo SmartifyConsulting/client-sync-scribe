@@ -1,7 +1,8 @@
 import { ReactNode, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Printer, FileText } from "lucide-react";
+import { ArrowLeft, Printer, FileText, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LegalDocLayoutProps {
   title: string;
@@ -12,6 +13,15 @@ interface LegalDocLayoutProps {
   owner?: string;
   children: ReactNode;
 }
+
+const FUTURE_TO_PRESENT: [RegExp, string][] = [
+  [/\byou will be bound\b/gi, "you are bound"],
+  [/\byou will be required\b/gi, "you are required"],
+  [/\byou will agree\b/gi, "you have agreed"],
+  [/\byou will accept\b/gi, "you have accepted"],
+  [/\bby signing up,?\s+you agree\b/gi, "You have agreed"],
+  [/\bby creating an account,?\s+you agree\b/gi, "You have agreed"],
+];
 
 export function LegalDocLayout({
   title,
@@ -24,18 +34,44 @@ export function LegalDocLayout({
 }: LegalDocLayoutProps) {
   const navigate = useNavigate();
   const [toc, setToc] = useState<{ id: string; text: string }[]>([]);
+  const [signedSince, setSignedSince] = useState<string | null>(null);
   const updated = lastUpdated || new Date().toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric" });
 
   useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user?.created_at) {
+        setSignedSince(new Date(data.user.created_at).toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric" }));
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     // Build TOC from rendered h2 elements and assign ids
-    const headers = Array.from(document.querySelectorAll("article.legal-body h2")) as HTMLHeadingElement[];
+    const article = document.querySelector("article.legal-body");
+    if (!article) return;
+
+    // Apply present-tense rewrites for signed-in users (text nodes only)
+    if (signedSince) {
+      const walker = document.createTreeWalker(article, NodeFilter.SHOW_TEXT);
+      const nodes: Text[] = [];
+      let n: Node | null;
+      while ((n = walker.nextNode())) nodes.push(n as Text);
+      for (const node of nodes) {
+        let txt = node.nodeValue ?? "";
+        for (const [re, rep] of FUTURE_TO_PRESENT) txt = txt.replace(re, rep);
+        if (txt !== node.nodeValue) node.nodeValue = txt;
+      }
+    }
+
+    const headers = Array.from(article.querySelectorAll("h2")) as HTMLHeadingElement[];
     const items = headers.map((h, i) => {
-      const id = `sec-${i + 1}`;
+      const id = h.id || `sec-${i + 1}`;
       h.id = id;
       return { id, text: h.textContent || `Section ${i + 1}` };
     });
     setToc(items);
-  }, [children]);
+  }, [children, signedSince]);
+
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -123,17 +159,25 @@ export function LegalDocLayout({
           </div>
 
           <div className="px-6 md:px-10 py-8">
+            {signedSince && (
+              <div className="mb-6 flex items-start gap-2 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm">
+                <ShieldCheck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <p className="!m-0 text-foreground">
+                  You have agreed to and are bound by these terms since <strong>{signedSince}</strong>.
+                </p>
+              </div>
+            )}
             {/* TOC */}
             {toc.length > 1 && (
               <nav className="no-print mb-8 rounded-md border border-border bg-muted/30 p-4">
                 <p className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-2">Contents</p>
-                <ol className="list-decimal list-inside space-y-1 text-sm">
+                <ul className="list-none space-y-1 text-sm">
                   {toc.map((t) => (
                     <li key={t.id}>
                       <a href={`#${t.id}`} className="text-foreground hover:text-primary hover:underline">{t.text}</a>
                     </li>
                   ))}
-                </ol>
+                </ul>
               </nav>
             )}
 

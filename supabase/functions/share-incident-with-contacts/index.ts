@@ -51,7 +51,10 @@ Deno.serve(async (req) => {
     const passes = (minSev?: string | null) => incidentRank >= sevRank(minSev ?? "low");
 
     const token = tracking_token ?? incident.tracking_token;
-    const trackUrl = `${Deno.env.get("SUPABASE_URL")!.replace("supabase.co", "lovable.app")}/track/${token}`;
+    const publicBase = Deno.env.get("PUBLIC_APP_URL")
+      ?? req.headers.get("origin")
+      ?? "https://holarchealth.com";
+    const trackUrl = `${publicBase.replace(/\/$/, "")}/track/${token}`;
 
     // Gather recipients: emergency contacts (default) + NOK with explicit flag + profile shares with live-tracking flag
     const { data: patient } = await supabase

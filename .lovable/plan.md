@@ -1,89 +1,102 @@
-# Uber-Style SOS Dispatch System
+# Plan — 7 fixes
 
-Transforms the existing HolarcHelp SOS into a first-accept dispatch with locking, live tracking, ETA countdown, voice audit logging, and a real-time emergency responders (hospital and ambulance) view.
+## 1. AI auto-determine credential stars
 
-## What changes
+Today `search_providers` computes `stars` with a hard-coded heuristic (3 + specialty + practice/doctor numbers). Replace with an AI-derived score:
 
-### 1. Database (migration)
+- Add `credential_score` (numeric, 1–5) and `credential_score_updated_at` to `profiles`, `holarchelp_hospitals`, `holarchelp_ambulance_providers` via migration.
+- New edge function `score-credentials` calls Lovable AI (`google/gemini-2.5-flash`) with a structured-output prompt evaluating: license fields present/valid format, specialty, about_me richness, address completeness, accreditation/registration. Returns 1–5.
+- Triggered on profile update (debounced via `pg_notify` or simple "stale if older than 30 days") and via a "Recalculate" button in the admin Provider tab.
+- Update `search_providers` to read `coalesce(credential_score, 3)` instead of the heuristic. `MyDoctors` keeps rendering `stars`.
 
-Extend `holarchelp_incidents` status lifecycle and lock semantics:
+## 2. Legal contracts — duplicated numbering
 
-- Drop the `status` CHECK constraint and re-add allowing: `open, assigned, en_route, arrived, patient_collected, at_hospital, completed, reopened, cancelled`.
-- Add columns: `patient_collected_at`, `at_hospital_at`, `completed_at`, `destination_hospital_id uuid`, `provider_latitude`, `provider_longitude`, `provider_location_updated_at`.
-- Migrate existing rows: `active → open`, `resolved → completed`.
-- **First-accept lock** — Postgres function `holarchelp_accept_incident(_incident_id, _provider_id)` (SECURITY DEFINER) that:
-  - Verifies caller owns/staffs `_provider_id`.
-  - `UPDATE holarchelp_incidents SET assigned_provider_id=_provider_id, status='assigned', accepted_at=now() WHERE id=_incident_id AND assigned_provider_id IS NULL RETURNING id`.
-  - If no row returned → raise `'Incident already taken'`.
-  - On success: mark this offer `accepted`, mark all other pending offers `superseded`, insert `holarchelp_incident_events` row `event_type='accepted'`.
-- Function `holarchelp_release_incident(_incident_id, _reason)` to set status back to `reopened`, clear assignment, log cancellation + event, re-broadcast (re-create pending offers for nearby providers).
-- New table `holarchelp_voice_notes` (id, incident_id, user_id, provider_id, audio_url, duration_seconds, transcript, created_at) with RLS: patient/assigned-provider/admin/hospital-of-destination can read; provider staff and patient can insert for their own incidents.
-- Add `assigned_provider_id`, `destination_hospital_id`, `provider_latitude/longitude` to `supabase_realtime` publication (already includes incidents table).
-- Trigger on every status change → insert into `holarchelp_incident_events` with event_type and actor.
-- RLS: hospital staff of `destination_hospital_id` can `SELECT` incident, locations, voice notes, events.
+`LegalDocLayout` renders the TOC with `<ol class="list-decimal list-inside">` while every `<h2>` already begins with "1.", "2."… → user sees "1. 1. Acceptance…".
 
-### 2. Patient SOS flow (`HolarcHelpHome.tsx`, `HolarcHelpIncidentDetail.tsx`)
+Fix: change the TOC list to `list-none` (no auto numbering) and rely on the heading's own number. Apply to all six legal pages — no per-page edits required.
 
-- Insert incident with `status='open'` (not `active`).
-- After insert, edge function `dispatch-sos` finds nearby ambulance providers (Haversine on lat/lng, `status='approved'`, `subscription_status='active'`, `accepting_patients=true`, within 25 km) and inserts `holarchelp_incident_offers` rows (`response='pending'`, `distance_km` populated).
-- Patient detail screen subscribes to incident updates and shows:
-  - **Pre-assignment**: "Finding nearest ambulance…" with spinner + count of pending offers.
-  - **Post-assignment**: assigned provider name, ETA countdown (from `eta_minutes` + `last_eta_update`), distance, live ambulance marker on map (driven by `provider_latitude/longitude` updates), status pill.
-  - **On `reopened**`: red banner "Your responder is unable to continue. Finding the next available ambulance."
-- Map gets a second moving marker for the ambulance.
+## 3. Live tracking link opens in old HolarcHelp app
 
-### 3. Provider dispatch (`ProviderDashboard.tsx`, `ProviderIncidentDetail.tsx`)
+Root cause in `share-incident-with-contacts/index.ts`:
+```
+const trackUrl = `${SUPABASE_URL.replace("supabase.co","lovable.app")}/track/${token}`;
+```
+This produces `https://<project-ref>.lovable.app/track/...` — a stale Supabase preview host that resolves to the legacy HolarcHelp deployment.
 
-- Replace direct `update assigned_provider_id` with `supabase.rpc('holarchelp_accept_incident', ...)`. On error "already taken", toast and refresh.
-- Filter incidents by `status='open'` AND offer exists for this provider; show distance + ETA estimate.
-- Once any incident is `assigned`, queue card shows responder banner ("Responded to by X · Accepted 14:32 · ETA 4 min") and removes Accept/Decline buttons for non-assigned providers.
-- New "Unable To Continue" button on provider detail → calls `holarchelp_release_incident`.
-- Status-update buttons mapped to new lifecycle: `Mark en route` → `en_route`, `Arrived on scene` → `arrived`, `Patient collected` → `patient_collected`, `At hospital` → `at_hospital`, `Complete` → `completed`. Each writes an event row.
-- Provider broadcasts its location while assigned: extend `useLocationTracking` (or new hook `useProviderLocationTracking`) to update incident `provider_latitude/longitude/provider_location_updated_at` every 4 s.
-- Hospital selector for destination on the detail page (lists approved+subscribed hospitals).
+Fix:
+- Add a `PUBLIC_APP_URL` env var (default `https://holarchealth.com`).
+- Build `trackUrl` from that constant (fallback to request `Origin` header if unset).
+- Audit all edge functions for the same `replace("supabase.co","lovable.app")` pattern and replace.
+- Confirm `/track/:token` route still loads `PublicTrack` on the new domain (it does — already in `App.tsx`). Remove stale `holarchelp.app` references from `README.md`.
+- Verify nothing else still points at the old app: grep `holarchelp.app`, `holarc-help`, deep links — none found in app code, but README references to be cleaned.
 
-### 4. Voice notes (new component `IncidentVoiceNoteRecorder.tsx`)
+## 4. Notify connected doctors of patient incidents
 
-- Reusable for ambulance/hospital/admin staff on the incident detail page.
-- Records via MediaRecorder, uploads to existing `session-audio` bucket under `holarchelp/<incident_id>/<uuid>.webm`, kicks off `transcribe-audio`, inserts `holarchelp_voice_notes` row (user_id, provider_id, duration).
-- Display list of voice notes with attribution: "🎤 John Smith — ERA Ambulance · 14:42 PM 12 Jul 2026". Patient sees them on their detail page too.
+Augment `dispatch-sos` edge function (called when SOS is created):
+- After fanning offers to ambulance providers, query `doctor_patient_access` where `patient_user_id = incident.user_id AND is_active = true`.
+- For each doctor, insert into `notifications` (service-role bypasses RLS):
+  ```
+  type='patient_incident', title='Patient SOS', description='<patient name> triggered an SOS', reference_id=incident.id, user_id=doctor_id
+  ```
+- Existing realtime notifications subscription will surface a toast/badge in the doctor app immediately.
+- Clicking the notification routes to `/patient/<patient_user_id>/holarchelp/incident/<id>` (read-only doctor view) — add this route mapping to `App.tsx`.
 
-### 5. Hospital view (new page `HospitalDashboard.tsx` under provider routes)
+## 5. "Legal Terms" menu item in avatar popover
 
-When provider is a hospital, show inbound incidents where `destination_hospital_id = providerId`:
+In `TopBarIcons.tsx`, insert a new menu item directly above Share App:
+```
+<Link to="/legal"> <Scale className="h-3.5 w-3.5"/> Legal Terms </Link>
+```
+Create new page `src/pages/Legal.tsx` listing the agreements with short descriptions:
+- Terms and Conditions
+- Privacy Policy
+- Healthcare Provider Agreement (BAA)
+- Patient Consent and Authorization
+- Cookie Policy
 
-- Patient name (if shared), assigned ambulance, ETA countdown, live map of ambulance, severity, voice notes, incident events.
-- Capacity controls already exist.
+Use the existing `LegalDocLayout`-style card grid. Add `/legal` route to `App.tsx`.
 
-### 6. Timeline panel
+## 6. Present-tense legal copy for signed-in users
 
-On both patient and provider detail pages: render `holarchelp_incident_events` chronologically with humanised labels (`SOS triggered · Accepted by ERA · En route · Voice note added · Arrived · Patient collected · At hospital · Completed`).
+`LegalDocLayout` accepts a `tense` already implicitly via raw children. Approach:
+- Add a hook `useLegalTense()` returning `"signed"` when `supabase.auth.getUser()` resolves with a user.
+- Pass that into `LegalDocLayout`; layout exposes a `<LegalTenseProvider>` context.
+- Wrap key acceptance phrases in a small helper `<T future="you will be bound" present="you are bound" />` across the six legal pages. Specific replacements:
+  - "By creating an account … you agree to be bound" → "you are bound"
+  - "you will be required to" → "you are required to"
+  - Acceptance banner at top swaps "By signing up you agree" → "You have agreed to these terms" with the user's signup date when available.
+- No content rewrite — only the verb forms in acceptance/binding clauses.
 
-### 7. Edge functions
+## 7. Merge Intellectual Property into Terms & Conditions
 
-- New `dispatch-sos`: input `{ incident_id }`, fetches incident location, scans approved + subscribed ambulance providers, inserts pending offers; respects `accepting_patients=true`.
-- New `rebroadcast-sos`: invoked by `holarchelp_release_incident`; same logic but excludes prior providers.
+- Append the full IP content as a new top-level section "Intellectual Property" inside `TermsAndConditions.tsx` (renumbered to fit existing flow, becomes section 12).
+- Delete `src/pages/IntellectualProperty.tsx`.
+- In `App.tsx`, redirect `/intellectual-property` → `/terms-and-conditions#intellectual-property`.
+- Update every `<Link to="/intellectual-property">` to use the new anchor (footer, signup, settings, etc.).
+- Remove the IP entry from the new `/legal` index page (step 5).
 
-### 8. Map markers (`LiveMap.tsx`)
+## Files
 
-- Existing red dot = patient (rename in code).
-- Add ambulance marker (yellow when assigned/en_route, green when arrived) driven by incident's `provider_latitude/longitude`.
-- Hospital markers honour `subscription_status='active'` AND `status='approved'` (already enforced).
+**Migration**
+- `supabase/migrations/<ts>_credential_scores.sql`
 
-## Key files
+**Edge functions**
+- new `supabase/functions/score-credentials/index.ts`
+- edited `supabase/functions/share-incident-with-contacts/index.ts`
+- edited `supabase/functions/dispatch-sos/index.ts`
 
-**Migration**: `supabase/migrations/<timestamp>_sos_dispatch_uber.sql`
-
-**Edge functions**: `supabase/functions/dispatch-sos/index.ts`, `supabase/functions/rebroadcast-sos/index.ts`
-
-**Patient**: `HolarcHelpHome.tsx`, `HolarcHelpIncidentDetail.tsx`, `LiveMap.tsx`
-
-**Provider**: `ProviderDashboard.tsx`, `ProviderIncidentDetail.tsx`, new `HospitalDashboard.tsx`, new `useProviderLocationTracking.ts`
-
-**Shared**: new `IncidentTimeline.tsx`, `IncidentVoiceNoteRecorder.tsx`, `EtaCountdown.tsx`
+**Frontend**
+- `src/components/legal/LegalDocLayout.tsx` (TOC fix + tense context)
+- `src/pages/TermsAndConditions.tsx` (merge IP, present tense)
+- `src/pages/PrivacyPolicy.tsx`, `BusinessAssociateAgreement.tsx`, `PatientConsent.tsx`, `CookiePolicy.tsx` (present tense)
+- delete `src/pages/IntellectualProperty.tsx`
+- new `src/pages/Legal.tsx`
+- `src/components/layout/TopBarIcons.tsx` (Legal Terms menu item)
+- `src/App.tsx` (add `/legal`, redirect `/intellectual-property`, doctor incident route)
+- `src/pages/patient/MyDoctors.tsx` — no change (consumes `stars` field)
+- `src/modules/holarchelp/README.md` (cleanup stale URLs)
 
 ## Out of scope
-
-- Real Mapbox routing polylines (we use straight-line distance + provider-reported ETA; can be added later).
-- SMS/push notifications to providers (relies on realtime + in-app; existing notifications system can be wired in a follow-up).
-- Subscription enforcement UI for ambulances (already in DB, surfaced via filtering).
+- Visual redesign of legal pages
+- Per-jurisdiction localisation of legal copy
+- Doctor mobile push notifications (SMS/email) — only in-app notifications

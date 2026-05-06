@@ -25,9 +25,9 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import TermsAndConditions from "./pages/TermsAndConditions";
-import IntellectualProperty from "./pages/IntellectualProperty";
 import PatientConsent from "./pages/PatientConsent";
 import BusinessAssociateAgreement from "./pages/BusinessAssociateAgreement";
+import Legal from "./pages/Legal";
 
 // Patient pages
 import PatientDashboard from "./pages/patient/PatientDashboard";
@@ -137,9 +137,10 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/provider-signup" element={<ProviderSignup />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-          <Route path="/intellectual-property" element={<IntellectualProperty />} />
+          <Route path="/intellectual-property" element={<Navigate to="/terms-and-conditions#intellectual-property" replace />} />
           <Route path="/patient-consent" element={<PatientConsent />} />
           <Route path="/business-associate-agreement" element={<BusinessAssociateAgreement />} />
+          <Route path="/legal" element={<Legal />} />
           <Route path="/track/:token" element={<PublicTrack />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />

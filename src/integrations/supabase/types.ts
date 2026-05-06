@@ -1127,6 +1127,8 @@ export type Database = {
           contact_phone: string | null
           country: string | null
           created_at: string
+          credential_score: number | null
+          credential_score_updated_at: string | null
           dispatch_priority: number
           fleet_size: number | null
           id: string
@@ -1153,6 +1155,8 @@ export type Database = {
           contact_phone?: string | null
           country?: string | null
           created_at?: string
+          credential_score?: number | null
+          credential_score_updated_at?: string | null
           dispatch_priority?: number
           fleet_size?: number | null
           id?: string
@@ -1179,6 +1183,8 @@ export type Database = {
           contact_phone?: string | null
           country?: string | null
           created_at?: string
+          credential_score?: number | null
+          credential_score_updated_at?: string | null
           dispatch_priority?: number
           fleet_size?: number | null
           id?: string
@@ -1274,6 +1280,8 @@ export type Database = {
           contact_phone: string | null
           country: string | null
           created_at: string
+          credential_score: number | null
+          credential_score_updated_at: string | null
           dispatch_priority: number
           icu_available: number | null
           icu_capacity: number | null
@@ -1303,6 +1311,8 @@ export type Database = {
           contact_phone?: string | null
           country?: string | null
           created_at?: string
+          credential_score?: number | null
+          credential_score_updated_at?: string | null
           dispatch_priority?: number
           icu_available?: number | null
           icu_capacity?: number | null
@@ -1332,6 +1342,8 @@ export type Database = {
           contact_phone?: string | null
           country?: string | null
           created_at?: string
+          credential_score?: number | null
+          credential_score_updated_at?: string | null
           dispatch_priority?: number
           icu_available?: number | null
           icu_capacity?: number | null
@@ -2965,6 +2977,8 @@ export type Database = {
           chronic_med_notification_frequency: string | null
           country: string | null
           created_at: string
+          credential_score: number | null
+          credential_score_updated_at: string | null
           doctor_number: string | null
           full_name: string | null
           holarchelp_enabled: boolean
@@ -3000,6 +3014,8 @@ export type Database = {
           chronic_med_notification_frequency?: string | null
           country?: string | null
           created_at?: string
+          credential_score?: number | null
+          credential_score_updated_at?: string | null
           doctor_number?: string | null
           full_name?: string | null
           holarchelp_enabled?: boolean
@@ -3035,6 +3051,8 @@ export type Database = {
           chronic_med_notification_frequency?: string | null
           country?: string | null
           created_at?: string
+          credential_score?: number | null
+          credential_score_updated_at?: string | null
           doctor_number?: string | null
           full_name?: string | null
           holarchelp_enabled?: boolean
