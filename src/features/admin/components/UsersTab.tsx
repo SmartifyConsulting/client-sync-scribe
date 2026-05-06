@@ -223,30 +223,49 @@ export default function UsersTab() {
     }
   };
 
+  const deleteUser = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-delete-user", {
+        body: { userId: pendingDelete.user_id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setUsers(prev => prev.filter(u => u.user_id !== pendingDelete.user_id));
+      toast({ title: "User deleted" });
+      setPendingDelete(null);
+    } catch (e: any) {
+      toast({ title: "Failed to delete user", description: e.message, variant: "destructive" });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const categoryBadge = (role: string) => {
     const cat = roleToCategory(role);
     switch (cat) {
-      case "admin": return <Badge variant="destructive" className="text-sm">Admin</Badge>;
-      case "provider": return <Badge className="bg-blue-600 text-white hover:bg-blue-700 text-sm">Healthcare Provider</Badge>;
-      case "patient": return <Badge className="bg-teal-600 text-white hover:bg-teal-700 text-sm">Patient</Badge>;
+      case "admin": return <Badge variant="destructive">Admin</Badge>;
+      case "provider": return <Badge className="bg-blue-600 text-white hover:bg-blue-700">Provider</Badge>;
+      case "patient": return <Badge className="bg-teal-600 text-white hover:bg-teal-700">Patient</Badge>;
       case "emergency": {
         const ei = emergencyIcon(role);
-        if (!ei) return <Badge variant="outline" className="text-sm">None</Badge>;
+        if (!ei) return <Badge variant="outline">None</Badge>;
         const { Icon, label } = ei;
         return (
-          <Badge className="bg-primary text-primary-foreground hover:bg-primary/90 w-fit p-1.5" title={label} aria-label={label}>
-            <Icon className="h-4 w-4" />
+          <Badge className="bg-primary text-primary-foreground hover:bg-primary/90 gap-1" title={label}>
+            <Icon className="h-3 w-3" />{label}
           </Badge>
         );
       }
-      default: return <Badge variant="outline" className="text-sm">None</Badge>;
+      default: return <Badge variant="outline">None</Badge>;
     }
   };
 
   const statusBadge = (status: string) =>
     status === "pending"
-      ? <Badge variant="outline" className="border-amber-500 text-amber-600 text-sm">Pending</Badge>
-      : <Badge variant="outline" className="border-green-500 text-green-600 text-sm">Active</Badge>;
+      ? <Badge variant="outline" className="border-amber-500 text-amber-600">Pending</Badge>
+      : <Badge variant="outline" className="border-green-500 text-green-600">Active</Badge>;
 
   const patients = useMemo(
     () => users.filter(u => u.role === "patient" || u.role === "admin" || u.role === "none"),
