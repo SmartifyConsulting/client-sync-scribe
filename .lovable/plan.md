@@ -1,75 +1,89 @@
-# Fixes — Incidents, Pricing, Gamification, SOS Voice Note
+# Uber-Style SOS Dispatch System
 
-## 1. Incidents screen 404
+Transforms the existing HolarcHelp SOS into a first-accept dispatch with locking, live tracking, ETA countdown, voice audit logging, and a real-time emergency responders (hospital and ambulance) view.
 
-The incidents history page lives at `/patient/holarchelp/incidents` but there is no menu entry pointing there, so any link/button users hit is going to a wrong path (e.g. `/patient/incidents`) and falling through to the React Router catch-all `NotFound`.
+## What changes
 
-Action:
-- Add a redirect route in `App.tsx` from `/patient/incidents` and `/doctor/incidents` → `/patient/holarchelp/incidents` (and doctor equivalent).
-- Add an explicit "Incident History" link to the SOS home page (`HolarcHelpHome.tsx`) under the "Find nearby provider" button so users can reach it.
-- Verify `HolarcHelpIncidents.tsx` filters by `user_id` (currently it relies on RLS; add `.eq("user_id", user.id)` defensively).
+### 1. Database (migration)
 
-## 2. Pricing Admin heading not following standard
+Extend `holarchelp_incidents` status lifecycle and lock semantics:
 
-Other admin pages use `PageHeader` (text-2xl font-semibold) or the in-line `text-2xl font-bold text-foreground` pattern. PricingAdmin uses `text-3xl md:text-4xl font-medium`.
+- Drop the `status` CHECK constraint and re-add allowing: `open, assigned, en_route, arrived, patient_collected, at_hospital, completed, reopened, cancelled`.
+- Add columns: `patient_collected_at`, `at_hospital_at`, `completed_at`, `destination_hospital_id uuid`, `provider_latitude`, `provider_longitude`, `provider_location_updated_at`.
+- Migrate existing rows: `active → open`, `resolved → completed`.
+- **First-accept lock** — Postgres function `holarchelp_accept_incident(_incident_id, _provider_id)` (SECURITY DEFINER) that:
+  - Verifies caller owns/staffs `_provider_id`.
+  - `UPDATE holarchelp_incidents SET assigned_provider_id=_provider_id, status='assigned', accepted_at=now() WHERE id=_incident_id AND assigned_provider_id IS NULL RETURNING id`.
+  - If no row returned → raise `'Incident already taken'`.
+  - On success: mark this offer `accepted`, mark all other pending offers `superseded`, insert `holarchelp_incident_events` row `event_type='accepted'`.
+- Function `holarchelp_release_incident(_incident_id, _reason)` to set status back to `reopened`, clear assignment, log cancellation + event, re-broadcast (re-create pending offers for nearby providers).
+- New table `holarchelp_voice_notes` (id, incident_id, user_id, provider_id, audio_url, duration_seconds, transcript, created_at) with RLS: patient/assigned-provider/admin/hospital-of-destination can read; provider staff and patient can insert for their own incidents.
+- Add `assigned_provider_id`, `destination_hospital_id`, `provider_latitude/longitude` to `supabase_realtime` publication (already includes incidents table).
+- Trigger on every status change → insert into `holarchelp_incident_events` with event_type and actor.
+- RLS: hospital staff of `destination_hospital_id` can `SELECT` incident, locations, voice notes, events.
 
-Action:
-- Replace the custom header in `src/features/admin/pages/PricingAdmin.tsx` with the shared `PageHeader` component (title "Subscription Pricing", subtitle as-is) and move the `Publish Changes` button into the `actions` slot.
+### 2. Patient SOS flow (`HolarcHelpHome.tsx`, `HolarcHelpIncidentDetail.tsx`)
 
-## 3. Error creating Reward under Gamification
+- Insert incident with `status='open'` (not `active`).
+- After insert, edge function `dispatch-sos` finds nearby ambulance providers (Haversine on lat/lng, `status='approved'`, `subscription_status='active'`, `accepting_patients=true`, within 25 km) and inserts `holarchelp_incident_offers` rows (`response='pending'`, `distance_km` populated).
+- Patient detail screen subscribes to incident updates and shows:
+  - **Pre-assignment**: "Finding nearest ambulance…" with spinner + count of pending offers.
+  - **Post-assignment**: assigned provider name, ETA countdown (from `eta_minutes` + `last_eta_update`), distance, live ambulance marker on map (driven by `provider_latitude/longitude` updates), status pill.
+  - **On `reopened**`: red banner "Your responder is unable to continue. Finding the next available ambulance."
+- Map gets a second moving marker for the ambulance.
 
-`createConfig` swallows the actual Postgres error and shows generic "Failed to create config". Two likely causes:
-- New visit_category collides with the `visit_category_key` unique constraint.
-- Caller is not an admin (RLS denies INSERT).
+### 3. Provider dispatch (`ProviderDashboard.tsx`, `ProviderIncidentDetail.tsx`)
 
-Action:
-- In `usePatientRewards.ts → createConfig`, surface the real `error.message` in the toast description so the user sees the cause.
-- In `GamificationAdmin.tsx`'s "Add Reward" dialog, trim+lowercase `visit_category`, validate it's non-empty, and pre-check for duplicates client-side before insert.
-- Add a small note/help text on the dialog ("Category must be unique").
+- Replace direct `update assigned_provider_id` with `supabase.rpc('holarchelp_accept_incident', ...)`. On error "already taken", toast and refresh.
+- Filter incidents by `status='open'` AND offer exists for this provider; show distance + ETA estimate.
+- Once any incident is `assigned`, queue card shows responder banner ("Responded to by X · Accepted 14:32 · ETA 4 min") and removes Accept/Decline buttons for non-assigned providers.
+- New "Unable To Continue" button on provider detail → calls `holarchelp_release_incident`.
+- Status-update buttons mapped to new lifecycle: `Mark en route` → `en_route`, `Arrived on scene` → `arrived`, `Patient collected` → `patient_collected`, `At hospital` → `at_hospital`, `Complete` → `completed`. Each writes an event row.
+- Provider broadcasts its location while assigned: extend `useLocationTracking` (or new hook `useProviderLocationTracking`) to update incident `provider_latitude/longitude/provider_location_updated_at` every 4 s.
+- Hospital selector for destination on the detail page (lists approved+subscribed hospitals).
 
-## 4. Voice recording UX — auto-start, auto-stop on 4s silence
+### 4. Voice notes (new component `IncidentVoiceNoteRecorder.tsx`)
 
-Current `SosVoiceNoteDialog` requires tapping "Start Recording" and "Stop & Send" manually.
+- Reusable for ambulance/hospital/admin staff on the incident detail page.
+- Records via MediaRecorder, uploads to existing `session-audio` bucket under `holarchelp/<incident_id>/<uuid>.webm`, kicks off `transcribe-audio`, inserts `holarchelp_voice_notes` row (user_id, provider_id, duration).
+- Display list of voice notes with attribution: "🎤 John Smith — ERA Ambulance · 14:42 PM 12 Jul 2026". Patient sees them on their detail page too.
 
-Action (rewrite `SosVoiceNoteDialog.tsx`):
-- On dialog open, immediately request microphone and start `MediaRecorder` (skip the "prompt" phase entirely).
-- Attach an `AnalyserNode` (Web Audio) to the mic stream; sample RMS volume every 100 ms.
-- Track `lastVoiceAt`. When `Date.now() - lastVoiceAt > 4000` AND at least 2 s of recording has elapsed, automatically call `stopRecording()` which uploads + transcribes.
-- Keep the visible 60 s hard cap.
-- Replace the "Stop & Send" button with a "Send now" button (manual override) and "Cancel".
-- Show a live waveform/RMS meter so the user knows it's listening.
+### 5. Hospital view (new page `HospitalDashboard.tsx` under provider routes)
 
-## 5. Default severity = critical when no voice note placed
+When provider is a hospital, show inbound incidents where `destination_hospital_id = providerId`:
 
-Currently SOS creates an incident before the voice note dialog opens; severity is set later via the `SeverityPicker`. If the user skips/cancels the voice note, severity may remain unset.
+- Patient name (if shared), assigned ambulance, ETA countdown, live map of ambulance, severity, voice notes, incident events.
+- Capacity controls already exist.
 
-Action (in `HolarcHelpHome.tsx` and `SosVoiceNoteDialog.tsx`):
-- When the SOS incident is created, default `severity = 'critical'` server-side payload.
-- If the user cancels or skips the voice note (or no audio chunks captured), the existing `critical` default stays — no downgrade.
-- Only downgrade severity if the user explicitly picks one in `SeverityPicker` after recording.
+### 6. Timeline panel
 
-## 6. Transcription/recording not visible on incident detail
+On both patient and provider detail pages: render `holarchelp_incident_events` chronologically with humanised labels (`SOS triggered · Accepted by ERA · En route · Voice note added · Arrived · Patient collected · At hospital · Completed`).
 
-`HolarcHelpIncidentDetail.tsx` already renders `voice_note_transcript` and `<VoiceNoteAudio path={voice_note_audio_url}>`. Two real issues:
+### 7. Edge functions
 
-- `transcribe-audio` edge function expects `{ audio, patientName, doctorName }` and returns `text`. The dialog only updates the incident **after** transcription completes — if upload succeeds but transcribe fails, the path is never written. Fix: write the audio path **first**, then update the transcript when it returns.
-- The detail page subscribes to realtime UPDATEs but the initial fetch may run before the dialog finishes writing, so the transcript appears only after refresh. The realtime UPDATE listener should already pick this up — verify the `holarchelp_incidents` table is in the `supabase_realtime` publication. If not, add a migration: `ALTER PUBLICATION supabase_realtime ADD TABLE public.holarchelp_incidents;` and `ALTER TABLE public.holarchelp_incidents REPLICA IDENTITY FULL;`.
+- New `dispatch-sos`: input `{ incident_id }`, fetches incident location, scans approved + subscribed ambulance providers, inserts pending offers; respects `accepting_patients=true`.
+- New `rebroadcast-sos`: invoked by `holarchelp_release_incident`; same logic but excludes prior providers.
 
-Action:
-- Split the upload + transcribe steps in `SosVoiceNoteDialog.tsx`:
-  1. Upload audio → immediately UPDATE `voice_note_audio_url`.
-  2. Call transcribe → UPDATE `voice_note_transcript` when done (don't block the dialog close on transcription).
-- Add the realtime publication migration if not already present.
-- On `HolarcHelpIncidentDetail.tsx`, also re-fetch the incident on tab focus so the transcript shows up if the realtime event was missed.
+### 8. Map markers (`LiveMap.tsx`)
 
-## Files Touched
+- Existing red dot = patient (rename in code).
+- Add ambulance marker (yellow when assigned/en_route, green when arrived) driven by incident's `provider_latitude/longitude`.
+- Hospital markers honour `subscription_status='active'` AND `status='approved'` (already enforced).
 
-- `src/App.tsx` — redirect routes for `/patient/incidents`.
-- `src/features/admin/pages/PricingAdmin.tsx` — use `PageHeader`.
-- `src/features/rewards/hooks/usePatientRewards.ts` — surface real error in `createConfig`.
-- `src/features/admin/pages/GamificationAdmin.tsx` — input validation/help text.
-- `src/modules/holarchelp/components/SosVoiceNoteDialog.tsx` — auto-start, silence-detect auto-stop, split upload+transcribe.
-- `src/modules/holarchelp/pages/HolarcHelpHome.tsx` — default severity `critical`, add Incidents link.
-- `src/modules/holarchelp/pages/HolarcHelpIncidents.tsx` — defensive `user_id` filter.
-- `src/modules/holarchelp/pages/HolarcHelpIncidentDetail.tsx` — re-fetch on focus.
-- New migration — add `holarchelp_incidents` to `supabase_realtime` publication (idempotent).
+## Key files
+
+**Migration**: `supabase/migrations/<timestamp>_sos_dispatch_uber.sql`
+
+**Edge functions**: `supabase/functions/dispatch-sos/index.ts`, `supabase/functions/rebroadcast-sos/index.ts`
+
+**Patient**: `HolarcHelpHome.tsx`, `HolarcHelpIncidentDetail.tsx`, `LiveMap.tsx`
+
+**Provider**: `ProviderDashboard.tsx`, `ProviderIncidentDetail.tsx`, new `HospitalDashboard.tsx`, new `useProviderLocationTracking.ts`
+
+**Shared**: new `IncidentTimeline.tsx`, `IncidentVoiceNoteRecorder.tsx`, `EtaCountdown.tsx`
+
+## Out of scope
+
+- Real Mapbox routing polylines (we use straight-line distance + provider-reported ETA; can be added later).
+- SMS/push notifications to providers (relies on realtime + in-app; existing notifications system can be wired in a follow-up).
+- Subscription enforcement UI for ambulances (already in DB, surfaced via filtering).
