@@ -41,12 +41,12 @@ export default function VulaWallet() {
           <img src={vulaSymbol} alt="Vula" className="h-20 w-20 mx-auto object-contain" />
 
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold text-foreground">Vula Wallet</h1>
+            <h1 className="text-3xl font-bold text-foreground">Vula Vault</h1>
             <p className="text-xs text-muted-foreground">Powered by 6Dot50</p>
           </div>
 
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Sign in to your Vula Wallet to redeem your Vulas at participating retailers
+            Sign in to your Vula Vault to redeem your Vulas at participating retailers
             and partner apps in our rewards network.
           </p>
 

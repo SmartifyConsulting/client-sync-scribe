@@ -1,14 +1,18 @@
-# Simplify Redeem tab
+# Replace "Vula Wallet" with "Vula Vault" + direct 6Dot50 launch
 
-In `src/pages/patient/MyRewards.tsx`, the Redeem tab currently shows two cards:
-1. **Vula Wallet** card (link to `/vula/wallet`)
-2. **Approved Vula Partner Apps** card (grid of partner retailers + transfer buttons)
+## Changes
 
-## Change
+### 1. Redeem tab card (`src/pages/patient/MyRewards.tsx` and `src/pages/doctor/DoctorRewards.tsx`)
+- Rename the card title "Vula Wallet" → "Vula Vault".
+- Update copy: "Sign in to your Vula Vault to redeem your Vulas at participating retailers."
+- Change the button from `<Link to="/vula/wallet">` to a direct opener of `https://secure.6dot50.com/lite/default` in a new tab (`window.open(..., "_blank", "noopener,noreferrer")`).
+- Button label: "Redeem at Vula Vault".
+- Update the Transfer dialog `SelectItem` "My Vula Wallet" → "My Vula Vault" (both files).
 
-Keep only the **Vula Wallet** card. Remove the entire "Approved Vula Partner Apps" `<Card>` block (~lines 758–817) so the Redeem tab contains a single, focused CTA to open the Vula Wallet.
+### 2. `src/pages/VulaWallet.tsx` (the launcher page)
+- Rename the page heading and references "Vula Wallet" → "Vula Vault".
+- Component / route remain unchanged (still `/vula/wallet`) so deep links and the demo-overlay download UI keep working — only the visible label changes.
 
 ## Out of scope
-
-- Partner-apps data fetching (`useQuery(["vula-partner-apps"])`) and transfer logic stay intact — they're still used by the Transfer dialog and aren't worth removing.
+- The route path itself, the Chrome extension package, and database labels stay.
 - No backend changes.

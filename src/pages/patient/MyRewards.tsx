@@ -340,7 +340,7 @@ export default function MyRewards() {
                   <SelectValue placeholder="Select source app" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="wallet">My Vula Wallet</SelectItem>
+                  <SelectItem value="wallet">My Vula Vault</SelectItem>
                   {partnerApps.map((app) => (
                     <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
                   ))}
@@ -742,20 +742,23 @@ export default function MyRewards() {
         </TabsContent>
 
         <TabsContent value="transfers" className="space-y-6">
-          {/* Vula Wallet */}
+          {/* Vula Vault */}
           <Card className="border-primary/30">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Gift className="h-5 w-5 text-primary" />
-                Vula Wallet
+                <Vault className="h-5 w-5 text-primary" />
+                Vula Vault
               </CardTitle>
               <CardDescription>
-                Sign in to your Vula Wallet to redeem your Vulas at participating retailers.
+                Sign in to your Vula Vault to redeem your Vulas at participating retailers.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button asChild className="gap-2">
-                <Link to="/vula/wallet"><Gift className="h-4 w-4" /> Open Vula Wallet</Link>
+              <Button
+                onClick={() => window.open("https://secure.6dot50.com/lite/default", "_blank", "noopener,noreferrer")}
+                className="gap-2"
+              >
+                <Vault className="h-4 w-4" /> Redeem at Vula Vault
               </Button>
             </CardContent>
           </Card>
