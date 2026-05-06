@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-export type UserRole = 'doctor' | 'patient' | 'admin' | null;
+export type UserRole = 'doctor' | 'patient' | 'admin' | 'emergency' | null;
 type ResolvedRole = Exclude<UserRole, null>;
+type RawRole = 'doctor' | 'patient' | 'admin' | 'hospital_staff' | 'ambulance_staff' | 'blood_bank';
+const EMERGENCY_RAW: RawRole[] = ['hospital_staff', 'ambulance_staff', 'blood_bank'];
 
 export function useUserRole() {
   const { user } = useAuth();
