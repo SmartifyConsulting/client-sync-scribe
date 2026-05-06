@@ -324,34 +324,6 @@ export default function UsersTab() {
                   )}
                 </TableCell>
                 <TableCell>
-                  {isEditing ? (
-                    <div className="flex flex-col gap-1">
-                      <Select value={editState.category} onValueChange={(v) => setEditState(s => ({ ...s, category: v as Category }))}>
-                        <SelectTrigger className="h-8 w-44"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="patient">Patient</SelectItem>
-                          <SelectItem value="provider">Healthcare Provider</SelectItem>
-                          <SelectItem value="emergency">Emergency Service</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="none">None</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {editState.category === "emergency" && (
-                        <Select value={editState.emergency_kind} onValueChange={(v) => setEditState(s => ({ ...s, emergency_kind: v as EmergencyKind }))}>
-                          <SelectTrigger className="h-8 w-44"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="hospital_staff">Hospital</SelectItem>
-                            <SelectItem value="ambulance_staff">Ambulance</SelectItem>
-                            <SelectItem value="blood_bank">Blood Bank</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )}
-                    </div>
-                  ) : (
-                    categoryBadge(u.role)
-                  )}
-                </TableCell>
-                <TableCell>
                   <span className="text-sm">{u.company || "—"}</span>
                 </TableCell>
                 <TableCell>
