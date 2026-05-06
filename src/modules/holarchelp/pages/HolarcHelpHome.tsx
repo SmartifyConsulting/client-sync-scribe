@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -9,6 +10,7 @@ import { AlertCircle, AlertTriangle, Crosshair, Loader2, Shield, Siren } from "l
 import { SeverityPicker, type SeverityResult } from "../components/SeverityPicker";
 import { ProviderMap, type ProviderMarker } from "../components/ProviderMap";
 import { SosVoiceNoteDialog } from "../components/SosVoiceNoteDialog";
+import { DoctorSosChooser } from "../components/DoctorSosChooser";
 import hospitalIcon from "@/assets/marker-hospital.png";
 import ambulanceIcon from "@/assets/marker-ambulance.png";
 import { cn } from "@/lib/utils";
@@ -27,9 +29,11 @@ const distanceKm = (a: Coords, b: Coords) => {
 
 export default function HolarcHelpHome() {
   const { user } = useAuth();
+  const { role } = useUserRole();
   const navigate = useNavigate();
   const [activeIncidentId, setActiveIncidentId] = useState<string | null>(null);
   const [triggering, setTriggering] = useState(false);
+  const [chooserOpen, setChooserOpen] = useState(false);
   const [permDenied, setPermDenied] = useState(false);
   const [coords, setCoords] = useState<Coords | null>(null);
   const [providers, setProviders] = useState<(ProviderMarker & { _d: number; accepting: boolean; tier?: string; distanceKm?: number })[]>([]);
@@ -253,6 +257,15 @@ export default function HolarcHelpHome() {
         incidentId={incidentId}
         onClose={() => { setVoiceNoteOpen(false); setSeverityOpen(true); }}
       />
+      <DoctorSosChooser
+        open={chooserOpen}
+        onClose={() => setChooserOpen(false)}
+        onSelectSelf={() => triggerSOS()}
+        onPatientIncidentCreated={(id) => {
+          setChooserOpen(false);
+          navigate(`/patient/holarchelp/incident/${id}`);
+        }}
+      />
 
       {hasEmergency === false && (
         <Card className="mb-4 border-amber-500/40 bg-amber-50">
@@ -350,7 +363,13 @@ export default function HolarcHelpHome() {
 
           <div className="mt-8 flex justify-center">
             <button
-              onClick={triggerSOS}
+              onClick={() => {
+                if (role === "doctor" && !activeIncidentId) {
+                  setChooserOpen(true);
+                } else {
+                  triggerSOS();
+                }
+              }}
               disabled={triggering}
               className="relative flex h-60 w-60 items-center justify-center rounded-full text-3xl font-extrabold tracking-[0.2em] text-white transition active:scale-95 shadow-2xl"
               style={{ background: "linear-gradient(135deg, hsl(354,84%,54%), hsl(0,75%,42%))" }}

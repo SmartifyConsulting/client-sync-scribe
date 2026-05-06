@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, ArrowLeft, ShieldCheck } from "lucide-react";
 import vulaSymbol from "@/assets/vula-symbol.png";
 
-const PARTNER_URL = "https://portal.6dot50.com/";
+const PARTNER_URL = "https://secure.6dot50.com/lite/default";
 
 export default function VulaWallet() {
   const navigate = useNavigate();
