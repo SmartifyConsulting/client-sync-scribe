@@ -1758,6 +1758,72 @@ export type Database = {
         }
         Relationships: []
       }
+      holarchelp_pharmacies: {
+        Row: {
+          accepting_patients: boolean
+          address: string | null
+          approved_at: string | null
+          city: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          country: string | null
+          created_at: string
+          credential_score: number | null
+          dispatch_priority: number
+          id: string
+          latitude: number | null
+          longitude: number | null
+          name: string
+          owner_id: string
+          registration_number: string | null
+          status: Database["public"]["Enums"]["holarchelp_provider_status"]
+          tier: Database["public"]["Enums"]["holarchelp_hospital_tier"]
+          updated_at: string
+        }
+        Insert: {
+          accepting_patients?: boolean
+          address?: string | null
+          approved_at?: string | null
+          city?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          credential_score?: number | null
+          dispatch_priority?: number
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          owner_id: string
+          registration_number?: string | null
+          status?: Database["public"]["Enums"]["holarchelp_provider_status"]
+          tier?: Database["public"]["Enums"]["holarchelp_hospital_tier"]
+          updated_at?: string
+        }
+        Update: {
+          accepting_patients?: boolean
+          address?: string | null
+          approved_at?: string | null
+          city?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          credential_score?: number | null
+          dispatch_priority?: number
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          owner_id?: string
+          registration_number?: string | null
+          status?: Database["public"]["Enums"]["holarchelp_provider_status"]
+          tier?: Database["public"]["Enums"]["holarchelp_hospital_tier"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       holarchelp_voice_clip_settings: {
         Row: {
           default_clip_path: string | null
@@ -3876,6 +3942,10 @@ export type Database = {
         Args: { _hospital_id: string }
         Returns: undefined
       }
+      holarchelp_approve_pharmacy: {
+        Args: { _provider_id: string }
+        Returns: undefined
+      }
       holarchelp_get_tracking_incident: {
         Args: { _token: string }
         Returns: {
@@ -4006,6 +4076,7 @@ export type Database = {
         | "hospital_staff"
         | "ambulance_staff"
         | "blood_bank"
+        | "pharmacy_staff"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -4161,6 +4232,7 @@ export const Constants = {
         "hospital_staff",
         "ambulance_staff",
         "blood_bank",
+        "pharmacy_staff",
       ],
     },
   },
