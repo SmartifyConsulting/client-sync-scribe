@@ -282,10 +282,40 @@ export default function HolarcHelpIncidentDetail() {
       </div>
 
       {isLive && (
-        <Button onClick={resolve} className="mt-6 h-14 w-full gap-2 rounded-2xl bg-primary text-base font-semibold">
+        <Button onClick={() => setCloseOpen(true)} className="mt-6 h-14 w-full gap-2 rounded-2xl bg-primary text-base font-semibold">
           <CheckCircle2 className="h-5 w-5" /> Close incident
         </Button>
       )}
+
+      <Dialog open={closeOpen} onOpenChange={(o) => !closing && setCloseOpen(o)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Close incident</DialogTitle>
+            <DialogDescription>
+              Add a brief write-up of the last activity or interaction with the patient before closing.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            <Label htmlFor="closure-note">Last activity / interaction</Label>
+            <Textarea
+              id="closure-note"
+              value={closureNote}
+              onChange={(e) => setClosureNote(e.target.value)}
+              placeholder="e.g. Patient handed over to ER team at 14:52, conscious and stable."
+              rows={5}
+              className="resize-none"
+            />
+            <p className="text-[11px] text-muted-foreground">{closureNote.trim().length}/10 minimum characters</p>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" onClick={() => setCloseOpen(false)} disabled={closing}>Cancel</Button>
+            <Button onClick={resolve} disabled={closing || closureNote.trim().length < 10} className="gap-2">
+              {closing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              Close incident
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
