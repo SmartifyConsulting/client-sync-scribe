@@ -22,14 +22,17 @@ export const LiveMap = ({ points, height = 360 }: { points: Point[]; height?: nu
         console.log("[LiveMap] loadGoogleMaps resolved");
         if (cancelled || !containerRef.current) return;
         try {
-          mapRef.current = new google.maps.Map(containerRef.current, {
+          const mapOptions: google.maps.MapOptions = {
             center: latest ? { lat: latest.latitude, lng: latest.longitude } : { lat: 20, lng: 0 },
             zoom: latest ? 15 : 2,
             mapTypeControl: false,
             streetViewControl: false,
             fullscreenControl: false,
-            mapId: GOOGLE_MAPS_MAP_ID,
-          });
+          };
+          if (GOOGLE_MAPS_MAP_ID && GOOGLE_MAPS_MAP_ID !== "DEMO_MAP_ID") {
+            (mapOptions as any).mapId = GOOGLE_MAPS_MAP_ID;
+          }
+          mapRef.current = new google.maps.Map(containerRef.current, mapOptions);
           setReady(true);
           console.log("[LiveMap] map created");
         } catch (e) {
