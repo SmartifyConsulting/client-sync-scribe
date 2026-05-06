@@ -68,6 +68,10 @@ serve(async (req) => {
     });
     if (signErr || !created?.user) {
       console.error("createUser error", signErr);
+      const code = (signErr as any)?.code;
+      if (code === "email_exists" || /already been registered/i.test(signErr?.message ?? "")) {
+        return bad("An account with this email already exists. Please sign in instead, or use a different contact email.", 409);
+      }
       return bad(signErr?.message ?? "signup failed", 400);
     }
     const userId = created.user.id;
