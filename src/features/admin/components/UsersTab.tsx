@@ -1,5 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
-import { Loader2, Pencil, Save, X, Shield, Hospital, Ambulance, Droplet, Users, Stethoscope } from "lucide-react";
+import { Loader2, Pencil, Save, X, Shield, Hospital, Ambulance, Droplet, Users, Stethoscope, Trash2 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InviteUserDialog } from "@/components/InviteUserDialog";
 import { useUserRole } from "@/hooks/useUserRole";
