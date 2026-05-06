@@ -97,12 +97,14 @@ export default function HolarcHelpProviders() {
 
   const load = async () => {
     setLoading(true);
-    const [{ data: h }, { data: a }] = await Promise.all([
+    const [{ data: h }, { data: a }, { data: p }] = await Promise.all([
       supabase.from("holarchelp_hospitals" as any).select("*").order("created_at", { ascending: false }),
       supabase.from("holarchelp_ambulance_providers" as any).select("*").order("created_at", { ascending: false }),
+      supabase.from("holarchelp_pharmacies" as any).select("*").order("created_at", { ascending: false }),
     ]);
     setHospitals(filterByStatus((h as any) ?? []));
     setAmbulances(filterByStatus((a as any) ?? []));
+    setPharmacies(filterByStatus((p as any) ?? []));
     setLoading(false);
   };
 
