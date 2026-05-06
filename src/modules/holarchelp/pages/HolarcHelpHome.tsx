@@ -354,7 +354,13 @@ export default function HolarcHelpHome() {
 
           <div className="mt-8 flex justify-center">
             <button
-              onClick={triggerSOS}
+              onClick={() => {
+                if (role === "doctor" && !activeIncidentId) {
+                  setChooserOpen(true);
+                } else {
+                  triggerSOS();
+                }
+              }}
               disabled={triggering}
               className="relative flex h-60 w-60 items-center justify-center rounded-full text-3xl font-extrabold tracking-[0.2em] text-white transition active:scale-95 shadow-2xl"
               style={{ background: "linear-gradient(135deg, hsl(354,84%,54%), hsl(0,75%,42%))" }}
