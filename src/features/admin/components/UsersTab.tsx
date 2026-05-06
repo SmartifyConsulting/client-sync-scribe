@@ -119,8 +119,16 @@ export default function UsersTab() {
         holarchelp_enabled: helpMap.get(u.user_id) || false,
         company: companyMap.get(u.user_id) || (u.role === "doctor" ? docCompanyMap.get(u.user_id) || null : null),
       }));
+      // Dedupe by user_id, preferring highest-priority role
+      const priority = (r: string) => ({ admin: 4, doctor: 3, patient: 2, none: 1 } as any)[r] ?? 0;
+      const byId = new Map<string, UserRecord>();
+      for (const u of merged) {
+        const existing = byId.get(u.user_id);
+        if (!existing || priority(u.role) > priority(existing.role)) byId.set(u.user_id, u);
+      }
+      const deduped = Array.from(byId.values());
       // Emergency provider accounts live on the Providers tab
-      setUsers(merged.filter(u => !EMERGENCY_ROLES.includes(u.role as RoleEnum)));
+      setUsers(deduped.filter(u => !EMERGENCY_ROLES.includes(u.role as RoleEnum)));
     } else {
       setUsers(baseUsers);
     }
