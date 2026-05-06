@@ -1,44 +1,52 @@
-## Problem
+# Fix: Emergency provider lands on doctor dashboard
 
-Emergency Service Providers (hospitals, ambulance services, blood banks) already have their own dedicated portal at `/provider/*` (`ProviderLayout`, `ProviderDashboard`, `ProviderProfile`, `ProviderIncidentDetail`) — but after sign-in they land on `/doctor-dashboard` and see the doctor sidebar, because the routing logic only knows about `doctor`, `patient`, and `admin`.
+## Root cause
 
-Root cause is in two places:
+`nonastasia@gmail.com` (user `7d6c9029…`) **owns an ambulance provider record** (`Charlotte Maxeke…`, status `pending`) but has **no row in `user_roles`** and `profiles.role` is `null`.
 
-1. `src/hooks/useUserRole.ts` — `UserRole` type is `'doctor' | 'patient' | 'admin' | null`. It ignores `hospital_staff`, `ambulance_staff`, and `blood_bank` rows in `user_roles`.
-2. `src/App.tsx` → `RoleBasedRedirect` — falls through to `<Navigate to="/doctor-dashboard" />` for anyone who is not a patient.
+So in `RoleBasedRedirect`:
+- `isPatient` = false
+- `isEmergency` = false (no `hospital_staff` / `ambulance_staff` / `blood_bank` role row exists)
+- → falls through to `/doctor-dashboard`
 
-The provider portal itself is already built and gated by `ProviderGate`, so this is purely a routing/role-resolution fix plus a small UX polish.
+The previous fix only worked for users who already had an emergency role row. The `register-emergency-provider` edge function never inserts that role row, so brand-new providers always look like "doctors" to the redirect.
+
+`/provider` itself uses `ProviderGate`, which checks `holarchelp_hospitals.owner_id` / `holarchelp_ambulance_providers.owner_id` — that's the source of truth for "is this account an emergency provider".
 
 ## Plan
 
-### 1. Extend role resolution (`src/hooks/useUserRole.ts`)
-- Add `'emergency'` to `UserRole` (a derived umbrella role for `hospital_staff | ambulance_staff | blood_bank`).
-- When fetching `user_roles`, treat any of those three rows as `isEmergency = true`.
-- Resolution priority becomes: explicit `profiles.role` → `doctor` → `patient` → `emergency` → `admin`.
-- Export `isEmergency` and `hasEmergencyRole` from the hook.
+### 1. Grant the staff role on provider signup
 
-### 2. Fix post-login redirect (`src/App.tsx` → `RoleBasedRedirect`)
-- If `isEmergency` and not also a doctor/patient → `<Navigate to="/provider" replace />`.
-- Keep existing patient and doctor branches unchanged.
+`supabase/functions/register-emergency-provider/index.ts` — after the hospital/ambulance row is inserted, also insert into `user_roles`:
+- hospital → `hospital_staff`
+- ambulance → `ambulance_staff`
 
-### 3. Auth page polish (`src/pages/Auth.tsx`)
-- After successful sign-in, if the user has only an emergency role, route to `/provider` instead of `/doctor-dashboard`.
-- (The "Sign in" handler currently hard-codes `/doctor-dashboard` in some paths — switch those to `/dashboard` so `RoleBasedRedirect` decides.)
+Use upsert / `on conflict do nothing` against `(user_id, role)` so re-runs are safe.
 
-### 4. Provider signup confirmation (`src/pages/ProviderSignup.tsx`)
-- After successful signup, redirect to `/auth?mode=login&verify=1` with a clear "Check your email to verify, then sign in — your account also needs admin activation" message. (Already partly there; just ensure copy mentions both verification + admin approval.)
+### 2. Backfill the existing user
 
-### 5. Profile switcher safety (`src/components/layout/ProfileSwitcher` if present)
-- Hide the "Switch to Doctor / Patient" toggle for emergency-only users so they cannot accidentally land on the doctor UI. (Read-only check — only edit if the component exists.)
+One-off migration: insert `('7d6c9029-…','ambulance_staff')` into `user_roles` (idempotent), so Claire is routed to `/provider` on her next sign-in.
 
-### Out of scope
-- No changes to the `/provider/*` portal UI itself (already built).
-- No changes to admin approval flow at `/admin/holarchelp-providers`.
-- No DB migrations — `hospital_staff`, `ambulance_staff`, `blood_bank` already exist in the `app_role` enum and are written by the admin "Activate" action.
+### 3. Make `RoleBasedRedirect` robust to missing role rows
 
-### Files touched
-- `src/hooks/useUserRole.ts` (extend types + flags)
-- `src/App.tsx` (redirect branch)
-- `src/pages/Auth.tsx` (post-login route)
-- `src/pages/ProviderSignup.tsx` (success copy)
-- `src/components/layout/ProfileSwitcher.tsx` *(only if it exists and exposes role switching)*
+`src/App.tsx` `RoleBasedRedirect` — in addition to checking `isEmergency`, also check provider ownership directly via the same query `ProviderGate` uses (or extract `useProviderAccess`). If `providerType` is set and user is not a doctor/patient → `<Navigate to="/provider" replace />`.
+
+This guarantees that even if a provider's role row is somehow missing, ownership of a hospital/ambulance record alone is enough to route them correctly.
+
+### 4. Verify
+
+- Sign in as `nonastasia@gmail.com` → expect to land on `/provider` (will see "pending approval" gate content if status is still `pending`, which is correct).
+- Doctor accounts unaffected (no provider row, no emergency role).
+- Patient accounts unaffected.
+
+## Out of scope
+
+- Admin approval UI for `status: 'pending'` providers (already lives at `/admin/holarchelp-providers`).
+- Any change to `ProviderGate` itself or the provider portal pages.
+- No schema changes (uses existing `user_roles` + `app_role` enum values).
+
+## Files to touch
+
+- `supabase/functions/register-emergency-provider/index.ts` (insert role)
+- `supabase/migrations/<new>.sql` (backfill Claire's role)
+- `src/App.tsx` (`RoleBasedRedirect` ownership check)
