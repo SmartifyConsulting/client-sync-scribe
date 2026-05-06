@@ -166,6 +166,9 @@ const App = () => (
             <Route path="/sessions/:id" element={<SessionDetail />} />
             <Route path="/patient/holarchelp/*" element={<HolarcHelpRoutes />} />
             <Route path="/doctor/holarchelp/*" element={<HolarcHelpRoutes />} />
+            <Route path="/patient/incidents" element={<Navigate to="/patient/holarchelp/incidents" replace />} />
+            <Route path="/doctor/incidents" element={<Navigate to="/doctor/holarchelp/incidents" replace />} />
+            <Route path="/incidents" element={<Navigate to="/patient/holarchelp/incidents" replace />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
 
