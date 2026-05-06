@@ -55,7 +55,7 @@ export default function HolarcHelpHome() {
         setHasEmergency(hasEC || hasNok);
       });
     supabase.from("holarchelp_incidents" as any).select("id, assigned_provider_id, accepted_at")
-      .eq("user_id", user.id).eq("status", "active")
+      .eq("user_id", user.id).in("status", ["open", "assigned", "en_route", "arrived", "patient_collected", "at_hospital", "reopened"])
       .order("created_at", { ascending: false }).limit(1).maybeSingle()
       .then(({ data }: any) => {
         if (data?.id) {
