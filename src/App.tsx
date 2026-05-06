@@ -109,7 +109,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function RoleBasedRedirect() {
-  const { isPatient, loading } = useUserRole();
+  const { isPatient, isEmergency, hasDoctorRole, hasPatientRole, loading } = useUserRole();
   
   if (loading) {
     return (
@@ -121,6 +121,10 @@ function RoleBasedRedirect() {
 
   if (isPatient) {
     return <Navigate to="/patient/details" replace />;
+  }
+
+  if (isEmergency && !hasDoctorRole && !hasPatientRole) {
+    return <Navigate to="/provider" replace />;
   }
 
   return <Navigate to="/doctor-dashboard" replace />;
