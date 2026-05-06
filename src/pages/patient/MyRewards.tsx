@@ -768,7 +768,7 @@ export default function MyRewards() {
               {partnerApps.length === 0 ? (
                 <div className="text-center py-6 space-y-3">
                   <p className="text-sm text-muted-foreground">
-                    No retailers connected yet. Sync the 6dot50 partner network to see all the retailers where you can spend your Vulas.
+                    No retailers connected yet. Sync the Vula partner network to see all the retailers where you can spend your Vulas.
                   </p>
                   <Button
                     onClick={async () => {
@@ -781,12 +781,12 @@ export default function MyRewards() {
                         });
                         return;
                       }
-                      toast({ title: "Retailers synced", description: `${(data as any)?.synced ?? 0} partners loaded from 6dot50.` });
+                      toast({ title: "Retailers synced", description: `${(data as any)?.synced ?? 0} partners loaded from the Vula network.` });
                       queryClient.invalidateQueries({ queryKey: ["vula-partner-apps"] });
                     }}
                     className="gap-2"
                   >
-                    <Gift className="h-4 w-4" /> Sync 6dot50 retailers
+                    <Gift className="h-4 w-4" /> Sync Vula retailers
                   </Button>
                 </div>
               ) : (
