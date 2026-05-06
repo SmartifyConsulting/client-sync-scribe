@@ -238,6 +238,15 @@ export default function HolarcHelpIncidentDetail() {
         </div>
       )}
 
+      {!isLive && incident.notes && (
+        <div className="mt-4 rounded-2xl border-2 border-emerald-500/40 bg-emerald-50 p-4 dark:bg-emerald-950/20">
+          <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+            <FileText className="h-3.5 w-3.5" /> Closure summary
+          </p>
+          <p className="mt-2 whitespace-pre-wrap text-sm text-emerald-900 dark:text-emerald-100">{incident.notes}</p>
+        </div>
+      )}
+
       <div className="mt-4"><IncidentVoiceNoteRecorder incidentId={id!} providerId={null} /></div>
       <div className="mt-4"><IncidentPhotos incidentId={id!} /></div>
       <div className="mt-4"><IncidentTimeline incidentId={id!} /></div>
