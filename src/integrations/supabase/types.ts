@@ -1558,6 +1558,8 @@ export type Database = {
           severity: string
           status: string
           tracking_token: string
+          triggered_by_role: string | null
+          triggered_by_user_id: string | null
           user_id: string
           voice_note_audio_url: string | null
           voice_note_transcript: string | null
@@ -1589,6 +1591,8 @@ export type Database = {
           severity?: string
           status?: string
           tracking_token?: string
+          triggered_by_role?: string | null
+          triggered_by_user_id?: string | null
           user_id: string
           voice_note_audio_url?: string | null
           voice_note_transcript?: string | null
@@ -1620,6 +1624,8 @@ export type Database = {
           severity?: string
           status?: string
           tracking_token?: string
+          triggered_by_role?: string | null
+          triggered_by_user_id?: string | null
           user_id?: string
           voice_note_audio_url?: string | null
           voice_note_transcript?: string | null
