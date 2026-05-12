@@ -23,10 +23,15 @@ import { useState } from "react";
 
 export default function Dashboard() {
   const { profile, loading: profileLoading } = useProfile();
-  const { isDoctor, loading: roleLoading } = useUserRole();
+  const { isDoctor, isPatient, loading: roleLoading } = useUserRole();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [rtSearch, setRtSearch] = useState("");
+
+  // Patients should never land on the doctor dashboard.
+  if (!roleLoading && isPatient) {
+    return <Navigate to="/patient/details" replace />;
+  }
 
   // Query for unread notifications count (invitations + document receipts only)
   const { data: unreadNotifCount = 0 } = useQuery({
