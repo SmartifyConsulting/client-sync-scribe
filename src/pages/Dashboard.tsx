@@ -1,7 +1,7 @@
 import { Users, Calendar, TrendingUp, Award, Star, MessageSquare, Search } from "lucide-react";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v3.png";
 import { CompactTodoList } from "@/components/dashboard/CompactTodoList";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { TodaysBriefing } from "@/components/dashboard/TodaysBriefing";
@@ -23,10 +23,12 @@ import { useState } from "react";
 
 export default function Dashboard() {
   const { profile, loading: profileLoading } = useProfile();
-  const { isDoctor, loading: roleLoading } = useUserRole();
+  const { isDoctor, isPatient, loading: roleLoading } = useUserRole();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [rtSearch, setRtSearch] = useState("");
+
+  const shouldRedirectPatient = !roleLoading && isPatient;
 
   // Query for unread notifications count (invitations + document receipts only)
   const { data: unreadNotifCount = 0 } = useQuery({
@@ -264,6 +266,10 @@ export default function Dashboard() {
     month: 'long', 
     year: 'numeric' 
   });
+
+  if (shouldRedirectPatient) {
+    return <Navigate to="/patient/details" replace />;
+  }
 
   return (
     <div className="space-y-4 md:space-y-8 animate-fade-in">

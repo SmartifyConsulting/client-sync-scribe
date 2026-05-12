@@ -264,11 +264,12 @@ export default function Auth() {
     }
     setLoading(true);
     try {
-      const { data, error } = await signUp(email, password);
+      const { data, error } = await signUp(email, password, { full_name: fullName, role: userRole });
       if (error) throw error;
       if (data?.user) {
         setCreatedUserId(data.user.id);
         setAccountCreated(true);
+        // Best-effort: trigger handles definitive role assignment, this is a fallback if a session exists.
         await supabase.from("user_roles").insert({ user_id: data.user.id, role: userRole });
         return true;
       }
@@ -449,7 +450,7 @@ export default function Auth() {
 
       clearDraft();
       toast({ title: "Account created!", description: "Welcome to Holarc! You have 30 days of free access." });
-      navigate("/dashboard");
+      await routeAfterLogin(userId);
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } finally {
@@ -592,14 +593,14 @@ export default function Auth() {
               <RadioGroup value={userRole} onValueChange={(v) => setUserRole(v as UserRole)} className="grid grid-cols-3 gap-2">
                 <div className="relative">
                   <RadioGroupItem value="doctor" id="doctor" className="peer sr-only" />
-                  <Label htmlFor="doctor" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center">
+                  <Label htmlFor="doctor" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:bg-accent peer-data-[state=checked]:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center">
                     <Stethoscope className="mb-1 h-5 w-5" />
                     <span className="text-[11px] font-medium leading-tight">Healthcare Provider</span>
                   </Label>
                 </div>
                 <div className="relative">
                   <RadioGroupItem value="patient" id="patient" className="peer sr-only" />
-                  <Label htmlFor="patient" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center">
+                  <Label htmlFor="patient" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:bg-accent peer-data-[state=checked]:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center">
                     <UserCircle className="mb-1 h-5 w-5" />
                     <span className="text-[11px] font-medium leading-tight">Patient</span>
                   </Label>
@@ -778,20 +779,30 @@ export default function Auth() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>I am a...</Label>
-              <RadioGroup value={userRole} onValueChange={(v) => setUserRole(v as UserRole)} className="grid grid-cols-2 gap-3" disabled={!!inviteToken}>
+              <RadioGroup value={userRole} onValueChange={(v) => setUserRole(v as UserRole)} className="grid grid-cols-3 gap-2" disabled={!!inviteToken}>
                 <div className="relative">
                   <RadioGroupItem value="doctor" id="doctor" className="peer sr-only" />
-                  <Label htmlFor="doctor" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer">
-                    <Stethoscope className="mb-2 h-6 w-6" />
-                    <span className="text-sm font-medium">Healthcare Provider</span>
+                  <Label htmlFor="doctor" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:bg-accent peer-data-[state=checked]:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center">
+                    <Stethoscope className="mb-1 h-5 w-5" />
+                    <span className="text-[11px] font-medium leading-tight">Healthcare Provider</span>
                   </Label>
                 </div>
                 <div className="relative">
                   <RadioGroupItem value="patient" id="patient" className="peer sr-only" />
-                  <Label htmlFor="patient" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer">
-                    <UserCircle className="mb-2 h-6 w-6" />
-                    <span className="text-sm font-medium">Patient</span>
+                  <Label htmlFor="patient" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:bg-accent peer-data-[state=checked]:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center">
+                    <UserCircle className="mb-1 h-5 w-5" />
+                    <span className="text-[11px] font-medium leading-tight">Patient</span>
                   </Label>
+                </div>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => navigate("/provider-signup")}
+                    className="w-full flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground hover:border-primary cursor-pointer text-center"
+                  >
+                    <Building2 className="mb-1 h-5 w-5" />
+                    <span className="text-[11px] font-medium leading-tight">Emergency Service Provider</span>
+                  </button>
                 </div>
               </RadioGroup>
               {inviteToken && <p className="text-xs text-muted-foreground mt-2">You're registering via a doctor's invitation</p>}

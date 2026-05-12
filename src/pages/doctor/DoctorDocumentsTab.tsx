@@ -45,7 +45,7 @@ export default function DoctorDocumentsTab() {
           No documents yet.
         </div>
       ) : (
-        <ul className="grid gap-2 sm:grid-cols-2">
+        <ul className="divide-y rounded-lg border bg-card">
           {filtered.map((doc) => {
             const target = doc.patient_id
               ? `/patients/${doc.patient_id}?tab=documents&doc=${doc.id}`
@@ -54,22 +54,24 @@ export default function DoctorDocumentsTab() {
               <li key={doc.id}>
                 <Link
                   to={target}
-                  className="flex items-start gap-3 rounded-lg border-2 border-primary/30 bg-card p-3 transition-colors hover:bg-accent/40"
+                  className="flex items-center gap-3 px-3 py-2 transition-colors hover:bg-accent"
                 >
-                  <FileText className="h-5 w-5 mt-0.5 text-primary shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-foreground">{doc.name}</p>
-                    <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-                      {doc.patient_name && (
-                        <span className="inline-flex items-center gap-1">
-                          <User className="h-3 w-3" />
-                          {doc.patient_name}
-                        </span>
-                      )}
-                      {doc.template_name && <span>{doc.template_name}</span>}
-                      <span>{format(new Date(doc.updated_at || doc.created_at), "d MMM yyyy")}</span>
-                    </div>
-                  </div>
+                  <FileText className="h-4 w-4 text-primary shrink-0" />
+                  <span className="flex-1 truncate text-sm font-medium text-foreground">{doc.name}</span>
+                  {doc.patient_name && (
+                    <span className="hidden sm:inline-flex items-center gap-1 text-xs text-muted-foreground min-w-0 truncate max-w-[180px]">
+                      <User className="h-3 w-3" />
+                      {doc.patient_name}
+                    </span>
+                  )}
+                  {doc.template_name && (
+                    <span className="hidden md:inline text-xs text-muted-foreground truncate max-w-[160px]">
+                      {doc.template_name}
+                    </span>
+                  )}
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {format(new Date(doc.updated_at || doc.created_at), "d MMM yyyy")}
+                  </span>
                 </Link>
               </li>
             );
