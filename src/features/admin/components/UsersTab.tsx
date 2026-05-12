@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Loader2, Pencil, Save, X, Shield, Trash2 } from "lucide-react";
+import { Loader2, Pencil, Save, X, Shield, Trash2, Users } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -16,6 +16,11 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { groupByCountry, sortedCountries, countryFlag } from "@/pages/admin/_shared/grouping";
+import { AdminPanel } from "@/pages/admin/_shared/AdminPanel";
+import { StatusDot, statusToTone } from "@/pages/admin/_shared/StatusDot";
+import { EmptyState } from "@/pages/admin/_shared/EmptyState";
+import { RowSkeleton } from "@/pages/admin/_shared/RowSkeleton";
+import { Toolbar } from "@/pages/admin/_shared/Toolbar";
 
 type RoleEnum = "doctor" | "patient" | "admin" | "hospital_staff" | "ambulance_staff" | "blood_bank" | "pharmacy_staff" | "none";
 type UsersKind = "patient" | "doctor" | "admin";
