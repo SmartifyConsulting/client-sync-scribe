@@ -138,35 +138,12 @@ async function capturePayPalOrder(accessToken: string, orderId: string): Promise
 }
 
 async function sendSubscriptionEmail(email: string, subject: string, htmlContent: string): Promise<void> {
-  const resendApiKey = Deno.env.get("RESEND_API_KEY");
-  if (!resendApiKey) {
-    console.log("RESEND_API_KEY not configured, skipping email notification");
-    return;
-  }
-
-  try {
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${resendApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "Holarc Health <onboarding@resend.dev>",
-        to: [email],
-        subject,
-        html: htmlContent,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      console.error("Error sending email:", error);
-    } else {
-      console.log("Email sent successfully to:", email);
-    }
-  } catch (error) {
-    console.error("Failed to send email:", error);
+  const { sendMailgunEmail } = await import("../_shared/mailgun.ts");
+  const result = await sendMailgunEmail({ to: email, subject, html: htmlContent });
+  if (!result.ok) {
+    console.error("Error sending email:", result.error);
+  } else {
+    console.log("Email sent successfully to:", email);
   }
 }
 
