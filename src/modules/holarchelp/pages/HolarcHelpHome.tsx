@@ -387,19 +387,28 @@ export default function HolarcHelpHome() {
 
       <div className="mt-10 flex flex-1 flex-col items-center justify-center">
         <div className="relative flex items-center justify-center">
-          {/* Ambient glow */}
-          <span aria-hidden className="absolute inset-0 -m-6 rounded-full bg-red-500/15 blur-2xl" />
-          <span aria-hidden className="absolute inset-0 -m-1 animate-ping rounded-full bg-red-500/25" style={{ animationDuration: "2.6s" }} />
+          {/* Ambient glow — intensifies during hold */}
+          <span
+            aria-hidden
+            className="absolute inset-0 -m-6 rounded-full bg-red-500/20 blur-2xl transition-opacity"
+            style={{ opacity: 0.6 + holdProgress * 0.4 }}
+          />
+          {holdProgress === 0 && (
+            <span aria-hidden className="absolute inset-0 -m-1 animate-ping rounded-full bg-red-500/25" style={{ animationDuration: "2.6s" }} />
+          )}
 
-          {/* Progress ring */}
-          <svg className="absolute -rotate-90" width={260} height={260} aria-hidden>
-            <circle cx={130} cy={130} r={ringR} stroke="hsl(0 0% 100% / 0.4)" strokeWidth={6} fill="none" />
+          {/* Progress ring — thicker, glowing white */}
+          <svg className="absolute -rotate-90" width={280} height={280} aria-hidden>
+            <circle cx={140} cy={140} r={ringR} stroke="hsl(0 0% 100% / 0.25)" strokeWidth={14} fill="none" />
             <circle
-              cx={130} cy={130} r={ringR}
-              stroke="white" strokeWidth={6} fill="none" strokeLinecap="round"
+              cx={140} cy={140} r={ringR}
+              stroke="white" strokeWidth={14} fill="none" strokeLinecap="round"
               strokeDasharray={ringC}
               strokeDashoffset={ringC * (1 - holdProgress)}
-              style={{ transition: holdProgress === 0 ? "stroke-dashoffset .25s ease-out" : "none" }}
+              style={{
+                transition: holdProgress === 0 ? "stroke-dashoffset .25s ease-out" : "none",
+                filter: "drop-shadow(0 0 10px rgba(255,255,255,0.95)) drop-shadow(0 0 4px rgba(255,255,255,0.6))",
+              }}
             />
           </svg>
 
@@ -422,6 +431,13 @@ export default function HolarcHelpHome() {
           >
             {triggering ? (
               <Loader2 className="h-10 w-10 animate-spin" />
+            ) : holdProgress > 0 ? (
+              <>
+                <span className="text-3xl tracking-[0.18em]">HOLD</span>
+                <span className="mt-1 text-[11px] font-bold uppercase tracking-[0.28em] opacity-95">
+                  Activating… {Math.round(holdProgress * 100)}%
+                </span>
+              </>
             ) : (
               <>
                 <span className="text-3xl tracking-[0.18em]">HOLD</span>
@@ -433,8 +449,28 @@ export default function HolarcHelpHome() {
 
         {/* Hint */}
         <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-          Press &amp; hold for 2 seconds
+          Press &amp; hold for 1 second
         </p>
+
+        {/* Active SOS — surfaced directly under the hint */}
+        {activeIncidentId && !incidentId && (
+          <button
+            onClick={() => navigate(`/patient/holarchelp/incident/${activeIncidentId}`)}
+            className="mt-4 flex w-full items-center justify-between gap-3 rounded-2xl border-2 border-red-500/60 bg-red-50 px-4 py-3 text-left shadow-sm transition hover:bg-red-100 dark:bg-red-950/20"
+          >
+            <div className="flex items-center gap-3">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-600" />
+              </span>
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-red-700">Active SOS in progress</p>
+                <p className="text-sm font-semibold text-red-900">Tap to resume live tracking</p>
+              </div>
+            </div>
+            <span className="text-red-700">→</span>
+          </button>
+        )}
 
         {/* Inline alert pills */}
         {permDenied && (
