@@ -25,6 +25,11 @@ import { toast } from "sonner";
 import { Hospital, Ambulance, ShieldAlert, Loader2, Upload, BarChart3, Mic2, Plus, Pencil, Trash2, Users, Pill, Stethoscope } from "lucide-react";
 import { AccountabilityPanel } from "./HolarcHelpAccountability";
 import UsersTab from "@/features/admin/components/UsersTab";
+import { AdminPage } from "./_shared/AdminPage";
+import { AdminPanel } from "./_shared/AdminPanel";
+import { adminTabsListClass, adminTabsTriggerClass } from "./_shared/AdminTabs";
+import { EmptyState } from "./_shared/EmptyState";
+import { RowSkeleton } from "./_shared/RowSkeleton";
 
 type Status = "all" | "active" | "inactive";
 type Kind = "hospital" | "ambulance" | "pharmacy";
@@ -273,45 +278,43 @@ export default function HolarcHelpProviders() {
   const providerKindNeedsAdd = (k: string) => k === "hospital" || k === "ambulance" || k === "pharmacy";
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 space-y-4 max-w-[1400px]">
-      <div>
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Admin</p>
-        <h1 className="text-xl font-semibold tracking-tight">User Management</h1>
-        <p className="text-[13px] text-muted-foreground">Manage users, accountability, and the SOS voice clip.</p>
-      </div>
-
+    <AdminPage
+      eyebrow="Admin"
+      title="User Management"
+      description="Manage users, accountability, and the SOS voice clip."
+    >
       <Tabs defaultValue="users">
-        <TabsList className={flatTabsList}>
-          <TabsTrigger value="users" className={`${topTrigger} gap-1.5`}>
+        <TabsList className={adminTabsListClass}>
+          <TabsTrigger value="users" className={`${adminTabsTriggerClass} gap-1.5`}>
             <Users className="h-3.5 w-3.5" />Users
           </TabsTrigger>
-          <TabsTrigger value="accountability" className={`${topTrigger} gap-1.5`}>
+          <TabsTrigger value="accountability" className={`${adminTabsTriggerClass} gap-1.5`}>
             <BarChart3 className="h-3.5 w-3.5" />Accountability
           </TabsTrigger>
-          <TabsTrigger value="voice-clip" className={`${topTrigger} gap-1.5`}>
+          <TabsTrigger value="voice-clip" className={`${adminTabsTriggerClass} gap-1.5`}>
             <Mic2 className="h-3.5 w-3.5" />SOS Voice Clip
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="mt-4 space-y-3">
           <Tabs defaultValue="patients" value={undefined}>
-            <TabsList className={flatTabsList}>
-              <TabsTrigger value="patients" className={`${subTrigger} gap-1.5`}>
+            <TabsList className={adminTabsListClass}>
+              <TabsTrigger value="patients" className={`${adminTabsTriggerClass} gap-1.5`}>
                 <Users className="h-3.5 w-3.5" />Patients
               </TabsTrigger>
-              <TabsTrigger value="providers" className={`${subTrigger} gap-1.5`}>
+              <TabsTrigger value="providers" className={`${adminTabsTriggerClass} gap-1.5`}>
                 <Stethoscope className="h-3.5 w-3.5" />Healthcare Providers
               </TabsTrigger>
-              <TabsTrigger value="hospital" className={`${subTrigger} gap-1.5`}>
+              <TabsTrigger value="hospital" className={`${adminTabsTriggerClass} gap-1.5`}>
                 <Hospital className="h-3.5 w-3.5" />Hospitals
               </TabsTrigger>
-              <TabsTrigger value="ambulance" className={`${subTrigger} gap-1.5`}>
+              <TabsTrigger value="ambulance" className={`${adminTabsTriggerClass} gap-1.5`}>
                 <Ambulance className="h-3.5 w-3.5" />Ambulance
               </TabsTrigger>
-              <TabsTrigger value="pharmacy" className={`${subTrigger} gap-1.5`}>
+              <TabsTrigger value="pharmacy" className={`${adminTabsTriggerClass} gap-1.5`}>
                 <Pill className="h-3.5 w-3.5" />Pharmacies
               </TabsTrigger>
-              <TabsTrigger value="admin" className={`${subTrigger} gap-1.5`}>
+              <TabsTrigger value="admin" className={`${adminTabsTriggerClass} gap-1.5`}>
                 <ShieldAlert className="h-3.5 w-3.5" />Admin
               </TabsTrigger>
             </TabsList>
@@ -326,38 +329,51 @@ export default function HolarcHelpProviders() {
               <UsersTab kind="admin" />
             </TabsContent>
 
-            {(["hospital", "ambulance", "pharmacy"] as Kind[]).map((k) => (
-              <TabsContent key={k} value={k} className="mt-4 space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="inline-flex rounded-md border border-border bg-card p-0.5">
-                    {(["active", "inactive", "all"] as Status[]).map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => setStatus(s)}
-                        className={`px-3 py-1 text-[11px] font-medium capitalize rounded-sm transition-colors ${
-                          status === s
-                            ? "bg-primary text-primary-foreground"
-                            : "text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                  {providerKindNeedsAdd(k) && (
-                    <Button size="sm" onClick={() => { setTab(k); setChooserOpen(true); }}>
-                      <Plus className="mr-1.5 h-3.5 w-3.5" />Add
-                    </Button>
-                  )}
-                </div>
-                {loading
-                  ? <Loader />
-                  : renderGroupedTable(
-                      k === "hospital" ? hospitals : k === "ambulance" ? ambulances : pharmacies,
-                      k,
+            {(["hospital", "ambulance", "pharmacy"] as Kind[]).map((k) => {
+              const list = k === "hospital" ? hospitals : k === "ambulance" ? ambulances : pharmacies;
+              const noun = nounFor(k);
+              return (
+                <TabsContent key={k} value={k} className="mt-4">
+                  <AdminPanel
+                    title={`${list.length} ${noun}`}
+                    description="Grouped by country, then tier."
+                    bodyClassName="p-0"
+                    actions={
+                      <div className="flex items-center gap-2">
+                        <div className="inline-flex rounded-md border border-[hsl(var(--admin-border-strong))] bg-[hsl(var(--admin-surface))] p-0.5">
+                          {(["active", "inactive", "all"] as Status[]).map((s) => (
+                            <button
+                              key={s}
+                              onClick={() => setStatus(s)}
+                              className={`px-2.5 py-1 text-[11px] font-medium capitalize rounded-sm transition-colors ${
+                                status === s
+                                  ? "bg-[hsl(var(--admin-accent))] text-white"
+                                  : "text-[hsl(var(--admin-text-secondary))] hover:text-[hsl(var(--admin-text-primary))]"
+                              }`}
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                        {providerKindNeedsAdd(k) && (
+                          <Button size="sm" className="h-8 px-3 text-[12px]" onClick={() => { setTab(k); setChooserOpen(true); }}>
+                            <Plus className="mr-1 h-3.5 w-3.5" />Add
+                          </Button>
+                        )}
+                      </div>
+                    }
+                  >
+                    {loading ? (
+                      <RowSkeleton rows={6} cols={6} />
+                    ) : list.length === 0 ? (
+                      <EmptyState title={`No ${status === "all" ? "" : status + " "}${noun}`} />
+                    ) : (
+                      <div className="p-3">{renderGroupedTable(list, k)}</div>
                     )}
-              </TabsContent>
-            ))}
+                  </AdminPanel>
+                </TabsContent>
+              );
+            })}
           </Tabs>
         </TabsContent>
 
@@ -366,36 +382,35 @@ export default function HolarcHelpProviders() {
         </TabsContent>
 
         <TabsContent value="voice-clip" className="mt-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">SOS voice clip</CardTitle>
-              <CardDescription>The MP3 played to emergency contacts when an SOS call connects.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="rounded-xl border p-3 bg-muted/30">
-                <p className="text-xs font-semibold">Current default clip</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
+          <AdminPanel
+            title="SOS voice clip"
+            description="The MP3 played to emergency contacts when an SOS call connects."
+          >
+            <div className="space-y-3">
+              <div className="rounded-md border border-[hsl(var(--admin-border-subtle))] p-3 bg-[hsl(var(--admin-surface-muted))]">
+                <p className="text-[11.5px] font-semibold text-[hsl(var(--admin-text-primary))]">Current default clip</p>
+                <p className="text-[11.5px] text-[hsl(var(--admin-text-tertiary))] mt-0.5">
                   {voiceClipPath ? voiceClipPath : "None — calls will use a fallback text-to-speech message."}
                 </p>
               </div>
-              <div className="rounded-xl border p-3 space-y-2">
-                <p className="text-xs font-semibold">Upload new MP3</p>
+              <div className="rounded-md border border-[hsl(var(--admin-border-subtle))] p-3 space-y-2">
+                <p className="text-[11.5px] font-semibold text-[hsl(var(--admin-text-primary))]">Upload new MP3</p>
                 <input
                   type="file"
                   accept="audio/mpeg,.mp3"
                   onChange={(e) => setClipFile(e.target.files?.[0] ?? null)}
                   className="block w-full text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-muted file:text-foreground"
                 />
-                <Button onClick={uploadClip} disabled={!clipFile || uploadingClip} className="w-full sm:w-auto">
+                <Button size="sm" onClick={uploadClip} disabled={!clipFile || uploadingClip} className="h-8 px-3 text-[12px]">
                   {uploadingClip ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Upload className="mr-1.5 h-4 w-4" />}
                   Upload &amp; set as default
                 </Button>
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-[11px] text-[hsl(var(--admin-text-tertiary))]">
                   Tip: keep clips under ~30 seconds. Africa's Talking sandbox only delivers to numbers registered in their Simulator.
                 </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </AdminPanel>
         </TabsContent>
       </Tabs>
 
