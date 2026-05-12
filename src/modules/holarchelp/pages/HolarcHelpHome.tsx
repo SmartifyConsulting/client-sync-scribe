@@ -229,6 +229,10 @@ export default function HolarcHelpHome() {
   // ============ HOLD-TO-TRIGGER ============
   const startHold = () => {
     if (triggering) return;
+    if (!activeIncidentId && !allAck) {
+      toast.error("Please acknowledge all three statements above to enable SOS.");
+      return;
+    }
     if ("vibrate" in navigator) navigator.vibrate?.(30);
     holdStartRef.current = performance.now();
     const tick = () => {
