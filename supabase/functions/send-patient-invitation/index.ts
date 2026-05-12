@@ -193,17 +193,10 @@ const handler = async (req: Request): Promise<Response> => {
     const appUrl = Deno.env.get("APP_URL") || "https://lovable.dev";
     const registrationLink = `${appUrl}/auth?invite=${invitation.token}`;
 
-    const emailResponse = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "Holarc Health <noreply@smartify.co.za>",
-        to: [patientEmail],
-        subject: `${doctorName} has invited you to join Holarc`,
-        html: `
+    const emailResponse = await sendMailgunEmail({
+      to: patientEmail,
+      subject: `${doctorName} has invited you to join Holarc`,
+      html: `
           <!DOCTYPE html>
           <html>
           <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -235,13 +228,11 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
           </body>
           </html>
-        `,
-      }),
+      `,
     });
 
     if (!emailResponse.ok) {
-      const errorData = await emailResponse.json();
-      console.error("Resend API error:", errorData);
+      console.error("Mailgun error:", emailResponse.error);
       throw new Error("Failed to send email");
     }
 
