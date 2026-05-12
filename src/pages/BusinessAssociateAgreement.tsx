@@ -318,7 +318,28 @@ const BusinessAssociateAgreement = () => {
             <li>Provide summary security assessment reports to Covered Entity upon request (subject to confidentiality)</li>
           </ul>
 
-          <h2>10. Acknowledgment and Acceptance</h2>
+          <h2>10. SOS and Emergency Functionality – Disclaimer and Limitation of Liability</h2>
+          <p>The SOS functionality provided within this application is intended to assist users in contacting designated emergency contacts and, where available, emergency response services.</p>
+          <p>The Company makes reasonable efforts to ensure the reliability and availability of the SOS feature; however, the Company does not warrant or guarantee:</p>
+          <ul>
+            <li>successful transmission or receipt of SOS alerts, calls, messages, or location information;</li>
+            <li>uninterrupted or error-free operation of the SOS functionality; or</li>
+            <li>the availability, response, or actions of emergency contacts, emergency responders, telecommunications providers, or other third parties.</li>
+          </ul>
+          <p>The effectiveness of the SOS feature may be impacted by factors beyond the Company's reasonable control, including but not limited to:</p>
+          <ul>
+            <li>network or internet availability;</li>
+            <li>device functionality or battery level;</li>
+            <li>GPS or location accuracy;</li>
+            <li>user permissions or device settings;</li>
+            <li>third-party system outages or failures; and</li>
+            <li>environmental or technical conditions.</li>
+          </ul>
+          <p>The application is not a substitute for direct access to emergency services or professional medical, security, or emergency assistance. Users should contact the relevant emergency services directly where possible.</p>
+          <p><strong>To the fullest extent permitted by applicable law, the Company shall not be liable for any loss, injury, damage, delay, failed communication, inability to obtain assistance, or other claim arising from or related to the use of, or inability to use, the SOS functionality.</strong></p>
+          <p>By using the application, users acknowledge and accept these limitations.</p>
+
+          <h2>11. Acknowledgment and Acceptance</h2>
           <div className="bg-muted/50 border border-border rounded-lg p-4 my-6">
             <p><strong>IF YOU ARE A HEALTHCARE PROVIDER WHO IS A HIPAA COVERED ENTITY, BY CREATING A PROVIDER ACCOUNT OR USING THE PLATFORM TO ACCESS PROTECTED HEALTH INFORMATION, YOU ACKNOWLEDGE AND ACCEPT THAT:</strong></p>
             <ul>

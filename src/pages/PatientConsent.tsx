@@ -37,28 +37,25 @@ export default function PatientConsent() {
           </ul>
 
           <h2>3. EMERGENCY DISCLAIMER - MANDATORY ACKNOWLEDGMENT</h2>
-          <p>
-            <strong>BY USING THE PLATFORM, YOU ACKNOWLEDGE AND ACCEPT THAT THE PLATFORM IS NOT FOR MEDICAL EMERGENCIES.</strong>
-          </p>
-          <p>By creating an account, you agree that if you are experiencing a medical emergency, you will:</p>
+          <p>The SOS functionality provided within this application is intended to assist users in contacting designated emergency contacts and, where available, emergency response services.</p>
+          <p>The Company makes reasonable efforts to ensure the reliability and availability of the SOS feature; however, the Company does not warrant or guarantee:</p>
           <ul>
-            <li>Call emergency services immediately, or</li>
-            <li>Go to the nearest emergency room</li>
-            <li>NOT use the Platform to request emergency help</li>
+            <li>successful transmission or receipt of SOS alerts, calls, messages, or location information;</li>
+            <li>uninterrupted or error-free operation of the SOS functionality; or</li>
+            <li>the availability, response, or actions of emergency contacts, emergency responders, telecommunications providers, or other third parties.</li>
           </ul>
-          <p>You understand and accept that your healthcare providers may not see your messages immediately.</p>
-          <p><strong>Emergency situations include:</strong></p>
+          <p>The effectiveness of the SOS feature may be impacted by factors beyond the Company's reasonable control, including but not limited to:</p>
           <ul>
-            <li>Chest pain or pressure</li>
-            <li>Difficulty breathing</li>
-            <li>Severe bleeding</li>
-            <li>Loss of consciousness</li>
-            <li>Sudden severe headache</li>
-            <li>Signs of stroke (facial drooping, arm weakness, speech difficulty)</li>
-            <li>Severe allergic reaction</li>
-            <li>Suicidal thoughts or intent to harm yourself or others</li>
-            <li>Any life-threatening condition</li>
+            <li>network or internet availability;</li>
+            <li>device functionality or battery level;</li>
+            <li>GPS or location accuracy;</li>
+            <li>user permissions or device settings;</li>
+            <li>third-party system outages or failures; and</li>
+            <li>environmental or technical conditions.</li>
           </ul>
+          <p>The application is not a substitute for direct access to emergency services or professional medical, security, or emergency assistance. Users should contact the relevant emergency services directly where possible.</p>
+          <p><strong>To the fullest extent permitted by applicable law, the Company shall not be liable for any loss, injury, damage, delay, failed communication, inability to obtain assistance, or other claim arising from or related to the use of, or inability to use, the SOS functionality.</strong></p>
+          <p>By using the application, users acknowledge and accept these limitations.</p>
 
           <h2>4. Your Responsibilities - Automatic Agreement</h2>
           <p>By using the Platform, you automatically agree to:</p>
