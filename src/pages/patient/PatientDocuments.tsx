@@ -825,109 +825,102 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-3">
+        <ul className="divide-y rounded-lg border bg-card">
           {filteredDocs.map((doc) => {
             const config = DOC_TYPE_CONFIG[doc.type];
             const IconComponent = config.icon;
             const isAnalyzing = analyzingDocId === doc.id;
             const isImageDoc = doc.type === "image" && doc.mediaUrl;
             return (
-              <Card key={`${doc.source}-${doc.id}`} className={`hover:shadow-sm transition-shadow border-l-4 ${config.borderColor}`}>
-                <CardContent className="flex items-center gap-3 py-2.5">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    {isImageDoc ? (
-                      <img
-                        src={doc.mediaUrl}
-                        alt={doc.name}
-                        className="h-8 w-8 rounded-lg object-cover"
-                      />
-                    ) : (
-                      <IconComponent className="h-4 w-4 text-primary" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">
-                      {doc.name}
-                    </p>
-                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                      <span className={`inline-flex items-center justify-center h-4 w-4 rounded-full ${config.color}`} title={config.label}>
-                        <IconComponent className="h-2.5 w-2.5" />
-                      </span>
-                      {doc.aiAnalysis && (
-                        <Badge variant="secondary" className="text-[10px] h-4 border-0 bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400 gap-0.5 px-1">
-                          <Sparkles className="h-2.5 w-2.5" />
-                          AI
-                        </Badge>
+              <li
+                key={`${doc.source}-${doc.id}`}
+                className={`flex items-center gap-3 px-3 py-2 border-l-4 ${config.borderColor} hover:bg-accent/40 transition-colors`}
+              >
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10">
+                  {isImageDoc ? (
+                    <img src={doc.mediaUrl} alt={doc.name} className="h-7 w-7 rounded-md object-cover" />
+                  ) : (
+                    <IconComponent className="h-3.5 w-3.5 text-primary" />
+                  )}
+                </div>
+                <span className="flex-1 min-w-0 truncate text-sm font-medium text-foreground">
+                  {doc.name}
+                </span>
+                <span className={`hidden sm:inline-flex items-center justify-center h-4 w-4 rounded-full ${config.color}`} title={config.label}>
+                  <IconComponent className="h-2.5 w-2.5" />
+                </span>
+                {doc.aiAnalysis && (
+                  <Badge variant="secondary" className="text-[10px] h-4 border-0 bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400 gap-0.5 px-1">
+                    <Sparkles className="h-2.5 w-2.5" />
+                    AI
+                  </Badge>
+                )}
+                <span className="hidden sm:inline text-[11px] text-muted-foreground whitespace-nowrap">
+                  {format(new Date(doc.date), "dd MMM yyyy")}
+                </span>
+                <div className="flex items-center gap-1 shrink-0">
+                  {doc.source === "documents" && doc.content && !doc.mediaUrl && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-primary hover:text-primary/80"
+                      onClick={() => setPreviewDoc(doc)}
+                      title="Preview document"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                  {doc.source === "documents" && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={cn("h-7 w-7", doc.emailSentAt ? "text-muted-foreground cursor-not-allowed" : "text-green-600 hover:text-green-700")}
+                      onClick={() => handleSendDocument(doc)}
+                      disabled={!!doc.emailSentAt || sendingDocId === doc.id}
+                      title={doc.emailSentAt ? "Already sent" : "Send document"}
+                    >
+                      {sendingDocId === doc.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Send className="h-3.5 w-3.5" />
                       )}
-                      <span className="text-[10px] text-muted-foreground">
-                        {format(new Date(doc.date), "dd MMM yyyy")}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    {doc.source === "documents" && doc.content && !doc.mediaUrl && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-primary hover:text-primary/80"
-                        onClick={() => setPreviewDoc(doc)}
-                        title="Preview document"
-                      >
-                        <Eye className="h-3.5 w-3.5" />
-                      </Button>
-                    )}
-                    {doc.source === "documents" && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className={cn("h-7 w-7", doc.emailSentAt ? "text-muted-foreground cursor-not-allowed" : "text-green-600 hover:text-green-700")}
-                        onClick={() => handleSendDocument(doc)}
-                        disabled={!!doc.emailSentAt || sendingDocId === doc.id}
-                        title={doc.emailSentAt ? "Already sent" : "Send document"}
-                      >
-                        {sendingDocId === doc.id ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          <Send className="h-3.5 w-3.5" />
-                        )}
-                      </Button>
-                    )}
-                    {isImageDoc && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-1.5 text-xs"
-                        onClick={() => handleAIAnalysis(doc)}
-                        disabled={isAnalyzing}
-                      >
-                        {isAnalyzing ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          <Sparkles className="h-3.5 w-3.5" />
-                        )}
-                        {doc.aiAnalysis ? "View" : "AI"}
-                      </Button>
-                    )}
-                    {doc.source === "documents" && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => setDocToDelete(doc)}
-                        title="Delete document"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    )}
-                    <span className="text-[10px] text-muted-foreground">
-                      {(doc.sizeBytes / 1024).toFixed(1)} KB
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
+                    </Button>
+                  )}
+                  {isImageDoc && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5 text-xs h-7"
+                      onClick={() => handleAIAnalysis(doc)}
+                      disabled={isAnalyzing}
+                    >
+                      {isAnalyzing ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Sparkles className="h-3.5 w-3.5" />
+                      )}
+                      {doc.aiAnalysis ? "View" : "AI"}
+                    </Button>
+                  )}
+                  {doc.source === "documents" && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => setDocToDelete(doc)}
+                      title="Delete document"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                  <span className="hidden md:inline text-[10px] text-muted-foreground whitespace-nowrap">
+                    {(doc.sizeBytes / 1024).toFixed(1)} KB
+                  </span>
+                </div>
+              </li>
             );
           })}
-        </div>
+        </ul>
       )}
 
       {/* AI Analysis Dialog */}
