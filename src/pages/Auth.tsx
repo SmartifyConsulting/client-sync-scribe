@@ -521,6 +521,46 @@ export default function Auth() {
     }
   };
 
+  const handleSendOtp = async () => {
+    if (!email) {
+      toast({ title: "Email required", description: "Enter your email to receive a code", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await signInWithOtp(email);
+      if (error) throw error;
+      setOtpSent(true);
+      setOtpCooldown(30);
+      toast({ title: "Code sent", description: "Check your email for a 6-digit code or magic link." });
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otpCode.length !== 6) {
+      toast({ title: "Invalid code", description: "Enter the 6-digit code from your email", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data, error } = await verifyOtp(email, otpCode);
+      if (error) throw error;
+      toast({ title: "Welcome!", description: "Signed in successfully" });
+      const userId = data?.user?.id;
+      if (userId) await routeAfterLogin(userId);
+      else navigate("/dashboard");
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Country selector component
   const CountrySelector = () => (
     <Select value={countryCode} onValueChange={setCountryCode}>
