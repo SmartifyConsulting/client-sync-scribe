@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+import { sendMailgunEmail } from "../_shared/mailgun.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,10 +13,6 @@ serve(async (req) => {
   }
 
   try {
-    if (!RESEND_API_KEY) {
-      throw new Error("RESEND_API_KEY is not configured");
-    }
-
     // Authenticate the caller
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
@@ -120,29 +115,18 @@ serve(async (req) => {
       `;
     }
 
-    const resendPayload: Record<string, unknown> = {
-      from: "Holarc Health <noreply@smartify.co.za>",
-      to: [to],
-      subject: subject,
+    const result = await sendMailgunEmail({
+      to,
+      subject,
       html: htmlContent,
-    };
-    if (replyTo) resendPayload.reply_to = replyTo;
-
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify(resendPayload),
+      replyTo,
     });
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      console.error("Resend API error:", data);
-      throw new Error(data.message || "Failed to send email");
+    if (!result.ok) {
+      console.error("Mailgun error:", result.error);
+      throw new Error(result.error || "Failed to send email");
     }
+    const data = result.data;
 
     return new Response(JSON.stringify({ success: true, data }), {
       status: 200,

@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+import { sendMailgunEmail } from "../_shared/mailgun.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -207,27 +206,18 @@ const handler = async (req: Request): Promise<Response> => {
       </body></html>
     `;
 
-    if (RESEND_API_KEY && (finalRecipientEmail || recipientEmail)) {
-      try {
-        const emailResponse = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            from: "Holarc Health <noreply@smartify.co.za>",
-            to: [finalRecipientEmail || recipientEmail],
-            subject: isPracticePartner
-               ? `${senderName} added you as a practice partner on Holarc`
-               : finalRecipientId
-                 ? `${senderName} wants to connect with you on Holarc`
-                 : `${senderName} has invited you to join Holarc`,
-            html: emailHtml,
-          }),
-        });
-        if (!emailResponse.ok) console.error("Resend API error:", await emailResponse.json());
-        else console.log("Email sent successfully");
-      } catch (emailError) {
-        console.error("Failed to send email:", emailError);
-      }
+    if (finalRecipientEmail || recipientEmail) {
+      const emailResponse = await sendMailgunEmail({
+        to: (finalRecipientEmail || recipientEmail) as string,
+        subject: isPracticePartner
+          ? `${senderName} added you as a practice partner on Holarc`
+          : finalRecipientId
+            ? `${senderName} wants to connect with you on Holarc`
+            : `${senderName} has invited you to join Holarc`,
+        html: emailHtml,
+      });
+      if (!emailResponse.ok) console.error("Mailgun error:", emailResponse.error);
+      else console.log("Email sent successfully");
     }
 
     return new Response(JSON.stringify({ success: true, invitation, sentToExistingUser: !!finalRecipientId }), {

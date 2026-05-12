@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+import { sendMailgunEmail } from "../_shared/mailgun.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -73,18 +72,8 @@ const handler = async (req: Request): Promise<Response> => {
       currency: "ZAR",
     }).format(amount);
 
-    // Send the claim email using Resend REST API
-    const emailResponse = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "mIRI Claims <onboarding@resend.dev>",
-        to: [claimsEmail],
-        subject: `Medical Insurance Claim - ${invoiceNumber}`,
-        html: `
+    // Send the claim email via Mailgun
+    const html = `
           <!DOCTYPE html>
           <html>
           <head>
@@ -108,51 +97,21 @@ const handler = async (req: Request): Promise<Response> => {
               <div class="content">
                 <p>Dear Claims Department,</p>
                 <p>Please find below the details for a medical insurance claim submission:</p>
-                
                 <div class="details">
                   <h3>Patient Information</h3>
-                  <div class="detail-row">
-                    <span class="detail-label">Patient Name:</span>
-                    <span>${patientName}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Patient Email:</span>
-                    <span>${patientEmail || "Not provided"}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Insurance Provider:</span>
-                    <span>${medicalInsurance || "Not specified"}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Membership Number:</span>
-                    <span>${medicalInsuranceNumber || "Not provided"}</span>
-                  </div>
+                  <div class="detail-row"><span class="detail-label">Patient Name:</span> <span>${patientName}</span></div>
+                  <div class="detail-row"><span class="detail-label">Patient Email:</span> <span>${patientEmail || "Not provided"}</span></div>
+                  <div class="detail-row"><span class="detail-label">Insurance Provider:</span> <span>${medicalInsurance || "Not specified"}</span></div>
+                  <div class="detail-row"><span class="detail-label">Membership Number:</span> <span>${medicalInsuranceNumber || "Not provided"}</span></div>
                 </div>
-                
                 <div class="details">
                   <h3>Invoice Details</h3>
-                  <div class="detail-row">
-                    <span class="detail-label">Invoice Number:</span>
-                    <span>${invoiceNumber}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Service Description:</span>
-                    <span>${description}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Attending Doctor:</span>
-                    <span>${doctorName}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Due Date:</span>
-                    <span>${dueDate}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Amount Claimed:</span>
-                    <span class="amount">${formattedAmount}</span>
-                  </div>
+                  <div class="detail-row"><span class="detail-label">Invoice Number:</span> <span>${invoiceNumber}</span></div>
+                  <div class="detail-row"><span class="detail-label">Service Description:</span> <span>${description}</span></div>
+                  <div class="detail-row"><span class="detail-label">Attending Doctor:</span> <span>${doctorName}</span></div>
+                  <div class="detail-row"><span class="detail-label">Due Date:</span> <span>${dueDate}</span></div>
+                  <div class="detail-row"><span class="detail-label">Amount Claimed:</span> <span class="amount">${formattedAmount}</span></div>
                 </div>
-                
                 <p>Please process this claim at your earliest convenience.</p>
                 <p>Thank you for your assistance.</p>
               </div>
@@ -162,18 +121,21 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
           </body>
           </html>
-        `,
-      }),
+        `;
+
+    const emailResult = await sendMailgunEmail({
+      from: `mIRI Claims <noreply@holarchealth.com>`,
+      to: claimsEmail,
+      subject: `Medical Insurance Claim - ${invoiceNumber}`,
+      html,
+      replyTo: patientEmail || undefined,
     });
 
-    if (!emailResponse.ok) {
-      const errorData = await emailResponse.json();
-      console.error("Resend API error:", errorData);
-      throw new Error("Failed to send claim email");
+    if (!emailResult.ok) {
+      console.error("Mailgun error:", emailResult.error);
+      throw new Error(emailResult.error || "Failed to send claim email");
     }
-
-    const emailResult = await emailResponse.json();
-    console.log("Claim email sent successfully:", emailResult);
+    console.log("Claim email sent successfully");
 
     return new Response(JSON.stringify({ success: true, emailResult }), {
       status: 200,

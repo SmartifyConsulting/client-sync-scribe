@@ -1,7 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@4.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+import { sendMailgunEmail } from "../_shared/mailgun.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -130,12 +128,14 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
-    const emailResponse = await resend.emails.send({
-      from: "Holarc Health <noreply@smartify.co.za>",
-      to: [email],
+    const emailResponse = await sendMailgunEmail({
+      to: email,
       subject: `Invoice Report: ${dateFrom} to ${dateTo}`,
       html,
     });
+    if (!emailResponse.ok) {
+      throw new Error(emailResponse.error || "Failed to send invoice report");
+    }
 
     console.log("Email sent successfully:", emailResponse);
 
