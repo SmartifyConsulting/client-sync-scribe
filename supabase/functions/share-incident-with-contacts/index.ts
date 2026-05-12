@@ -143,8 +143,7 @@ Deno.serve(async (req) => {
       return true;
     });
 
-    // Send: prefer Resend for email; SMS provider not wired here — just log.
-    const RESEND = Deno.env.get("RESEND_API_KEY");
+    // Send: Mailgun for email; SMS provider not wired here — just log.
     const sent: any[] = [];
     const patientName = patient?.name ?? "Your contact";
     const subject = `🚨 ${patientName} has triggered an SOS`;
@@ -156,22 +155,16 @@ Deno.serve(async (req) => {
     `;
 
     for (const r of filtered) {
-      if (r.email && RESEND) {
-        try {
-          const resp = await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${RESEND}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-              from: "HolarcHealth SOS <sos@holarchealth.com>",
-              to: [r.email],
-              subject,
-              html,
-            }),
-          });
-          sent.push({ to: r.email, ok: resp.ok, via: r.via });
-        } catch (e) {
-          sent.push({ to: r.email, ok: false, error: String(e), via: r.via });
-        }
+      let emailOk = false;
+      if (r.email) {
+        const result = await sendMailgunEmail({
+          from: "HolarcHealth SOS <sos@holarchealth.com>",
+          to: r.email,
+          subject,
+          html,
+        });
+        emailOk = result.ok;
+        sent.push({ to: r.email, ok: result.ok, via: r.via, error: result.ok ? undefined : result.error });
       }
       // log message for SMS/whatsapp delivery to be implemented
       await supabase.from("holarchelp_messaging_log").insert({
@@ -181,7 +174,7 @@ Deno.serve(async (req) => {
         recipient_phone: r.phone ?? null,
         recipient_email: r.email ?? null,
         channel: r.email ? "email" : "pending",
-        status: r.email && RESEND ? "sent" : "queued",
+        status: emailOk ? "sent" : "queued",
         metadata: { tracking_url: trackUrl, via: r.via, severity: incident.severity, min_severity: r.min_severity },
       } as any).then(() => {}, () => {});
     }
