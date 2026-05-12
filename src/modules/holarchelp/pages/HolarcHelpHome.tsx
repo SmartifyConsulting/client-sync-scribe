@@ -371,6 +371,30 @@ export default function HolarcHelpHome() {
       </div>
 
       {/* CTA */}
+      {/* SOS acknowledgements */}
+      {!activeIncidentId && (
+        <div className="mt-6 rounded-2xl border border-border bg-card p-4 space-y-3">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            Before using SOS, please acknowledge:
+          </p>
+          {[
+            { k: "a" as const, label: "I understand that the SOS feature is a best-effort assistance tool and does not guarantee emergency response." },
+            { k: "b" as const, label: "SOS assistance depends on network availability, device status, and third-party responders." },
+            { k: "c" as const, label: "I understand that SOS is only functional with location permissions enabled, sufficient battery and connectivity, and that emergency response availability differs by region." },
+          ].map((item) => (
+            <label key={item.k} htmlFor={`sos-ack-${item.k}`} className="flex items-start gap-3 cursor-pointer">
+              <Checkbox
+                id={`sos-ack-${item.k}`}
+                checked={ack[item.k]}
+                onCheckedChange={(v) => setAckField(item.k, v === true)}
+                className="mt-0.5"
+              />
+              <span className="text-xs leading-relaxed text-foreground">{item.label}</span>
+            </label>
+          ))}
+        </div>
+      )}
+
       <div className="mt-10 flex flex-1 flex-col items-center justify-center">
         <div className="relative flex items-center justify-center">
           {/* Ambient glow */}
