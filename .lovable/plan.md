@@ -1,28 +1,35 @@
-## Replace Section 3 of Patient Consent + add Emergency/SOS Disclaimer to HIPAA BAA
+# Add status workflow to Report Fix cards
 
-### 1. `src/pages/PatientConsent.tsx` — replace Section 3 body (lines 39–61)
+## Statuses
+`Logged` (default) → `In Process` → `Review` → `Closed`
 
-Keep heading `<h2>3. EMERGENCY DISCLAIMER - MANDATORY ACKNOWLEDGMENT</h2>` exactly as-is. Replace all paragraphs and lists currently under it with the new SOS disclaimer copy below.
+New reports default to `Logged` (replacing today's `open`). The existing `done` value is migrated to `Closed`.
 
-### 2. `src/pages/BusinessAssociateAgreement.tsx` — add new SOS / Emergency Disclaimer section
+## Who can change status
+Only admins (resolved via `has_role(auth.uid(), 'admin')`) can change status. Georgia Adams holds admin role, so this gates it to her (and any future admin). The current update RLS policy already supports admin-only edits for non-owners; we'll tighten the UI accordingly.
 
-Insert a new `<h2>SOS and Emergency Functionality – Disclaimer and Limitation of Liability</h2>` section in the BAA, placed immediately before the existing closing/contact section so it falls at the end of the substantive clauses. Same body content as Patient Consent.
+## UI changes — `src/components/feedback/ReportFixSheet.tsx`
 
-### Shared body content (rendered as JSX inside `LegalDocLayout`)
+On each card (Bug / Fix / Nice-to-have):
+- Show a small **status pill/button** next to the type chip, color-coded:
+  - Logged = neutral, In Process = amber, Review = blue, Closed = green
+- Underneath the pill, show a **timestamp** ("Logged 2h ago", "Moved to In Process 5m ago", etc.) using the most recent status change time.
+- Replace the current green check button with:
+  - **Admin view (Georgia / any admin):** clicking the status pill opens a dropdown to pick the next status. Saves to DB.
+  - **Non-admin view:** status pill is read-only (no dropdown, no hover).
+- Update the outstanding-list filter: show all reports where `status != 'Closed'` (instead of `status = 'open'`). Add a small "Show closed" toggle so admins can review history.
+- Use `useUserRole()` to detect admin (`hasAdminRole`).
 
-- `<p>` — The SOS functionality provided within this application is intended to assist users in contacting designated emergency contacts and, where available, emergency response services.
-- `<p>` — The Company makes reasonable efforts to ensure the reliability and availability of the SOS feature; however, the Company does not warrant or guarantee:
-- `<ul>`:
-  - successful transmission or receipt of SOS alerts, calls, messages, or location information;
-  - uninterrupted or error-free operation of the SOS functionality; or
-  - the availability, response, or actions of emergency contacts, emergency responders, telecommunications providers, or other third parties.
-- `<p>` — The effectiveness of the SOS feature may be impacted by factors beyond the Company's reasonable control, including but not limited to:
-- `<ul>`: network or internet availability; device functionality or battery level; GPS or location accuracy; user permissions or device settings; third-party system outages or failures; environmental or technical conditions.
-- `<p>` — The application is not a substitute for direct access to emergency services or professional medical, security, or emergency assistance. Users should contact the relevant emergency services directly where possible.
-- `<p><strong>` — To the fullest extent permitted by applicable law, the Company shall not be liable for any loss, injury, damage, delay, failed communication, inability to obtain assistance, or other claim arising from or related to the use of, or inability to use, the SOS functionality.
-- `<p>` — By using the application, users acknowledge and accept these limitations.
+## Database — `bug_reports` table
 
-### Out of scope
+Migration:
+1. Add column `status_changed_at timestamptz NOT NULL DEFAULT now()`.
+2. Backfill: set existing `open` rows → `Logged`, existing `done` rows → `Closed`. Set `status_changed_at = updated_at`.
+3. Change `status` default to `'Logged'`.
+4. Add a trigger `bug_reports_touch_status_changed_at`: on UPDATE, if `NEW.status IS DISTINCT FROM OLD.status` then `NEW.status_changed_at = now()`.
+5. Tighten UPDATE RLS so non-admin owners cannot change `status` (they can only edit their own title/description). Keep admin able to update all fields.
 
-- No changes to Terms & Conditions, routing, DB, or other clauses.
-- No styling changes — both files already use `LegalDocLayout` which auto-builds the TOC from `<h2>` headings, so the new BAA section will appear in its TOC automatically.
+## Out of scope
+- No status history table (only the latest change timestamp is shown, per request).
+- No notifications / emails on status change.
+- No edits to non-admin permissions for creating reports.
