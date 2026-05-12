@@ -53,6 +53,8 @@ import GamificationAdmin from "./pages/admin/GamificationAdmin";
 import ReferralDoctors from "./pages/ReferralDoctors";
 import ExpiringRecordings from "./pages/ExpiringRecordings";
 import Admin from "./pages/Admin";
+import DoctorDocumentsPage from "./pages/doctor/DoctorDocumentsPage";
+import DoctorRoundTablesPage from "./pages/doctor/DoctorRoundTablesPage";
 import ProviderSignup from "./pages/ProviderSignup";
 
 // HolarcHelp module
@@ -199,7 +201,8 @@ const App = () => (
             <Route path="/todos" element={<TodoList />} />
             <Route path="/sessions" element={<Sessions />} />
             <Route path="/sessions/:id" element={<SessionDetail />} />
-            <Route path="/documents" element={<Documents />} />
+            <Route path="/documents" element={<DoctorDocumentsPage />} />
+            <Route path="/doctor/round-tables" element={<DoctorRoundTablesPage />} />
             <Route path="/invoices" element={<DoctorInvoices />} />
             <Route path="/practice" element={<MyPractice />} />
             <Route path="/doctor/rewards" element={<DoctorRewards />} />
