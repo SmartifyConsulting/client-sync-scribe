@@ -593,14 +593,14 @@ export default function Auth() {
               <RadioGroup value={userRole} onValueChange={(v) => setUserRole(v as UserRole)} className="grid grid-cols-3 gap-2">
                 <div className="relative">
                   <RadioGroupItem value="doctor" id="doctor" className="peer sr-only" />
-                  <Label htmlFor="doctor" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center">
+                  <Label htmlFor="doctor" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:bg-accent peer-data-[state=checked]:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center">
                     <Stethoscope className="mb-1 h-5 w-5" />
                     <span className="text-[11px] font-medium leading-tight">Healthcare Provider</span>
                   </Label>
                 </div>
                 <div className="relative">
                   <RadioGroupItem value="patient" id="patient" className="peer sr-only" />
-                  <Label htmlFor="patient" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center">
+                  <Label htmlFor="patient" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:bg-accent peer-data-[state=checked]:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center">
                     <UserCircle className="mb-1 h-5 w-5" />
                     <span className="text-[11px] font-medium leading-tight">Patient</span>
                   </Label>
