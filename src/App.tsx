@@ -15,7 +15,7 @@ import PatientProfile from "./pages/PatientProfile";
 import CalendarView from "./pages/CalendarView";
 import Sessions from "./pages/Sessions";
 import SessionDetail from "./pages/SessionDetail";
-import Documents from "./pages/Documents";
+// Documents page is now wrapped inside DoctorDocumentsPage
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import TodoList from "./pages/TodoList";
