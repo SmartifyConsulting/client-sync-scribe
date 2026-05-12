@@ -1,64 +1,58 @@
-# Sidebar nav restructure (desktop + tablet only)
 
-Mobile `BottomNav` is left untouched. All changes are in `src/components/layout/Sidebar.tsx` plus a new doctor Documents page.
+## Goals
+1. Patient signup wizard step 0 should keep all 3 role options (Healthcare Provider, Patient, Emergency Service Provider). Currently it only renders 2.
+2. The selected role tile should be shaded with the existing light-green hover colour (`bg-accent`) so the selection is visible — not just a border.
+3. After a patient verifies their email and lands in the app, they must be routed to the patient view (`/patient/details`) — not the doctor dashboard. Today the avatar shows "U" and the doctor "Good afternoon" greeting because the role isn't set yet.
+4. Document pages for both patient and doctor should render as a compact **list** (rows), not cards.
 
-## 1. Patient sidebar (`patientNavItems`)
+## Why the patient lands in the doctor view
+- `Auth.handleCreateAccount` calls `signUp(...)` then immediately `supabase.from("user_roles").insert(...)`. With email-confirmation on, there is no session yet, so RLS silently rejects the insert → no `user_roles` row is created.
+- The user clicks the verification link, lands on `/`, `Landing` redirects to `/dashboard`, `RoleBasedRedirect` reads no role → falls through to `/doctor-dashboard`.
+- `profiles.full_name` is also still empty (only set in the final wizard step), so `Dashboard` shows initial "U" and an empty greeting.
 
-Remove `My Desk`. Replace with three entries inserted in the same position, before `My Rewards`:
+## Changes
 
-```text
-My Profile
-My Holarchy
-My Calendar     -> /patient/calendar       (icon: Calendar)
-My Tasks        -> /patient/tasks          (icon: ListChecks)
-My Documents    -> /patient/documents      (icon: FolderOpen)
-My Rewards
-SOS
-```
+### 1. `src/pages/Auth.tsx` — role picker (patient step 0)
+- Replace the 2-column `RadioGroup` with the same 3-tile grid used in the doctor step (Healthcare Provider, Patient, Emergency Service Provider — last one navigates to `/provider-signup`).
+- For the doctor step's existing 3-tile grid and the new patient step's grid, add the selected-shading class:
+  - On the inner `Label`, add `peer-data-[state=checked]:bg-accent peer-data-[state=checked]:text-accent-foreground` so the picked option is filled with the light-green hover colour.
+  - Keep `peer-data-[state=checked]:border-primary`.
+- Keep `disabled={!!inviteToken}` semantics on the patient step.
 
-All three target routes already exist in `App.tsx` (`PatientCalendar`, `PatientTasks`, `PatientDocuments`).
+### 2. `src/pages/Auth.tsx` — robust role assignment + naming at signup
+- Pass user metadata to `signUp` so a DB trigger / fallback can recover even if the wizard is abandoned:
+  - Update `useAuth.signUp` (and the call site) to accept an `options` arg with `data: { full_name, role }` and `emailRedirectTo: window.location.origin + "/dashboard"`.
+- In `handleCreateAccount`:
+  - Pass `{ full_name: fullName, role: userRole }` into signUp metadata.
+  - Immediately `upsert` the `profiles` row with `full_name` and `role` (this works because the auto-created profile row belongs to the new user; if RLS blocks the unauthenticated update we fall back to step 3 below).
+- Add a Supabase migration:
+  - Update the existing `handle_new_user` trigger (or add one) so on `auth.users` insert it (a) inserts a `profiles` row with `full_name` and `role` from `raw_user_meta_data`, and (b) inserts the matching `user_roles` row (`patient` or `doctor`). This guarantees the role exists even before the wizard finishes and regardless of RLS, because triggers run as definer.
+- After the final wizard `handleFinalSubmit`, replace the hard-coded `navigate("/dashboard")` with `await routeAfterLogin(userId)` so role-based routing is applied consistently.
 
-## 2. Doctor sidebar (`doctorNavItems`)
+### 3. `src/pages/Dashboard.tsx` — guard against patients
+- At the top of the component, if `!roleLoading && isPatient`, `return <Navigate to="/patient/details" replace />`. This prevents a patient ever seeing the doctor "Good afternoon, Doctor" screen even if they navigate to `/doctor-dashboard` directly.
 
-Remove `My Admin`. Unpack into three top-level entries, and add `My Round Tables` directly under Documents:
+### 4. Document list views (cards → list rows)
+- **Doctor** `src/pages/doctor/DoctorDocumentsTab.tsx`: replace the 2-column `ul` of bordered tiles with a single-column divided list:
+  - `<ul className="divide-y rounded-lg border">`
+  - Each row: `<li><Link className="flex items-center gap-3 px-3 py-2 hover:bg-accent">…</Link></li>`
+  - Columns: icon · name · patient · template · date (right-aligned, muted).
+- **Patient** `src/pages/patient/PatientDocuments.tsx` (lines ~828–927): replace the `grid gap-3` of `Card` items with the same compact divided list (icon + name + meta + actions), keeping existing actions/handlers intact. Drop the per-row `Card`/`CardContent` chrome and the left coloured border accent (or keep a thin left bar via `border-l-4` on the row itself if the colour-by-type cue should remain — confirm during build).
 
-```text
-Home
-My Patients
-My Practice
-My Calendar         -> /calendar              (icon: Calendar)
-My Tasks            -> /todos                 (icon: ListChecks)
-My Documents        -> /documents             (icon: FolderOpen)
-My Round Tables  -> /doctor/round-tables   (icon: Users2)
-My Rewards
-SOS
-```
-
-## 3. Doctor `/documents` page — house Documents + Templates
-
-The current `/documents` route renders `src/pages/Documents.tsx`, which is actually a Templates manager. To honour "Documents will house Documents and Templates", convert that page to a tabbed wrapper:
-
-- New tabs (teal `bg-primary` TabsList per project standard): `Documents` (default) and `Templates`.
-- `Templates` tab renders the existing Templates body extracted from current `Documents.tsx` into `DocumentsTemplatesTab`.
-- `Documents` tab renders a new `DoctorDocumentsTab` that lists clinical documents the doctor has access to, reusing the existing document query/components already used inside patient profiles (read-only list with filters, no per-patient scoping). No schema or edge-function changes.
-
-The `/admin` page's `Templates` tab keeps working because it still imports `Documents` (now the tabbed wrapper) with `hideHeader`; we keep an optional `defaultTab` prop so Admin can continue defaulting to Templates if desired. Out of scope: removing the Admin page itself (route remains for admins via the conditional admin entry).
-
-## 4. New doctor route
-
-Add `/doctor/round-tables` in `App.tsx` rendering a new `DoctorRoundTablesPage` that wraps the existing `DoctorRoundTables` component (already used in dashboards). No new data layer.
-
-## Files
-
-- `src/components/layout/Sidebar.tsx` — update `patientNavItems` and `doctorNavItems`, add `ListChecks`/`Users2` icon imports, drop `UserCog` if unused.
-- `src/pages/Documents.tsx` — convert to tabbed wrapper (Documents | Templates) with optional `defaultTab` prop.
-- `src/pages/doctor/DoctorDocumentsTab.tsx` (new) — clinical documents list for the doctor.
-- `src/pages/doctor/DoctorRoundTablesPage.tsx` (new) — wraps `DoctorRoundTables`.
-- `src/App.tsx` — add `/doctor/round-tables` route.
-
-## Out of scope
-
+### Out of scope
 - Mobile `BottomNav`.
-- Admin page restructure (remains reachable for admins).
-- Backend, schema, edge functions, RLS.
-- Visual redesign beyond adding the new tabs in standardized teal styling.
+- Any change to the actual role/permission model beyond ensuring `user_roles` + `profiles.role` are populated at signup time.
+- Restyling the documents tab on the patient profile (`/patients/:id?tab=documents`).
+
+## Technical notes
+- The `handle_new_user` trigger must read `NEW.raw_user_meta_data->>'role'` and `->>'full_name'`. Default role to `doctor` if missing for backward compatibility with existing flows.
+- `useAuth.signUp` signature change is additive (`options?` param) so existing call sites keep working.
+- `routeAfterLogin` already resolves emergency vs patient vs doctor correctly; reusing it in `handleFinalSubmit` is enough.
+
+## Files touched
+- `src/pages/Auth.tsx`
+- `src/hooks/useAuth.ts`
+- `src/pages/Dashboard.tsx`
+- `src/pages/doctor/DoctorDocumentsTab.tsx`
+- `src/pages/patient/PatientDocuments.tsx`
+- New migration: `supabase/migrations/<ts>_handle_new_user_role.sql`
