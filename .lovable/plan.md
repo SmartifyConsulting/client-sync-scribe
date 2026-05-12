@@ -1,35 +1,47 @@
-# Add status workflow to Report Fix cards
+# Add Email OTP / Magic Link to Holarc Health
 
-## Statuses
-`Logged` (default) → `In Process` → `Review` → `Closed`
+Based on your answers, this is a **non-destructive** change. Existing email/password, Google sign-in, roles, RLS, dashboards, and SOS stay exactly as they are. We're just adding a new way to sign in.
 
-New reports default to `Logged` (replacing today's `open`). The existing `done` value is migrated to `Closed`.
+## What changes
 
-## Who can change status
-Only admins (resolved via `has_role(auth.uid(), 'admin')`) can change status. Georgia Adams holds admin role, so this gates it to her (and any future admin). The current update RLS policy already supports admin-only edits for non-owners; we'll tighten the UI accordingly.
+### 1. `src/hooks/useAuth.ts`
+Add two helpers:
+- `signInWithOtp(email)` — calls `supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: \`${window.location.origin}/\` } })`. Sends a magic link + 6-digit OTP.
+- `verifyOtp(email, token)` — calls `supabase.auth.verifyOtp({ email, token, type: 'email' })` for users who prefer to paste the code instead of clicking the link.
 
-## UI changes — `src/components/feedback/ReportFixSheet.tsx`
+Existing `signUp`, `signIn`, `signOut`, session listener — untouched.
 
-On each card (Bug / Fix / Nice-to-have):
-- Show a small **status pill/button** next to the type chip, color-coded:
-  - Logged = neutral, In Process = amber, Review = blue, Closed = green
-- Underneath the pill, show a **timestamp** ("Logged 2h ago", "Moved to In Process 5m ago", etc.) using the most recent status change time.
-- Replace the current green check button with:
-  - **Admin view (Georgia / any admin):** clicking the status pill opens a dropdown to pick the next status. Saves to DB.
-  - **Non-admin view:** status pill is read-only (no dropdown, no hover).
-- Update the outstanding-list filter: show all reports where `status != 'Closed'` (instead of `status = 'open'`). Add a small "Show closed" toggle so admins can review history.
-- Use `useUserRole()` to detect admin (`hasAdminRole`).
+### 2. `src/pages/Auth.tsx`
+Add a third tab next to the current Sign In / Sign Up tabs: **"Email code"**.
+- Step 1: email input → "Send code" button → calls `signInWithOtp`.
+- Step 2: 6-digit `InputOTP` (already in the project) + "Verify" button → calls `verifyOtp`. Also shows "Or click the link we emailed you".
+- Resend cooldown (30s).
+- Loading + error toasts, matching the existing Auth page styling.
 
-## Database — `bug_reports` table
+No "forgot password" / show-password rules apply here (no password field on this tab). Existing password tabs keep their eye-toggle and forgot-password link as required by the project's auth UX rules.
 
-Migration:
-1. Add column `status_changed_at timestamptz NOT NULL DEFAULT now()`.
-2. Backfill: set existing `open` rows → `Logged`, existing `done` rows → `Closed`. Set `status_changed_at = updated_at`.
-3. Change `status` default to `'Logged'`.
-4. Add a trigger `bug_reports_touch_status_changed_at`: on UPDATE, if `NEW.status IS DISTINCT FROM OLD.status` then `NEW.status_changed_at = now()`.
-5. Tighten UPDATE RLS so non-admin owners cannot change `status` (they can only edit their own title/description). Keep admin able to update all fields.
+### 3. Existing-user migration
+Nothing to do. Existing users (with passwords + Google) can immediately use OTP on the same email — Supabase links it to the same `auth.users` row. Their `profiles`, `user_roles`, patient records, subscriptions, etc. all continue to work because they're keyed off `auth.users.id`, which doesn't change.
 
-## Out of scope
-- No status history table (only the latest change timestamp is shown, per request).
-- No notifications / emails on status change.
-- No edits to non-admin permissions for creating reports.
+First-OTP-login users still hit the existing `handle_new_user` trigger → profile created → existing role-resolution logic in `useUserRole` routes them to the right dashboard. The current onboarding flow (subscription gate, role assignment via admin / signup metadata) remains the source of truth.
+
+### 4. Email delivery
+Supabase will send the OTP email using the project's existing auth email setup. No new edge function, no new template scaffold required for MVP. We can brand the magic-link / OTP email later via `scaffold_auth_email_templates` if you want custom styling — out of scope for this task.
+
+## What is explicitly NOT changing
+- No DB migration (no new `profiles` columns, no role enum changes).
+- No RLS changes.
+- No removal of password auth or Google OAuth.
+- No new role categories — `useUserRole` continues to map existing roles (doctor, patient, admin, hospital_staff, ambulance_staff, blood_bank) to dashboards as today.
+- No changes to dashboards, SOS flow, HolarcHelp module, or edge functions.
+- No removal of Resend (still used for transactional emails like invoices, invitations, reminders).
+
+## Files touched
+- `src/hooks/useAuth.ts` — add two methods
+- `src/pages/Auth.tsx` — add "Email code" tab UI
+
+## Out of scope (can be follow-ups)
+- Custom-branded auth email templates
+- Phone/SMS OTP
+- Removing password auth
+- Refactoring roles to the 3-category model
