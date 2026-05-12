@@ -131,8 +131,16 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Apply severity threshold filter
-    const filtered = recipients.filter((r) => passes(r.min_severity));
+    // Apply severity threshold filter, then dedupe by phone/email so personal-info + manual SOS rows don't double-notify
+    const filteredRaw = recipients.filter((r) => passes(r.min_severity));
+    const seen = new Set<string>();
+    const filtered = filteredRaw.filter((r) => {
+      const key = (r.email || "").trim().toLowerCase() + "|" + (r.phone || "").trim();
+      if (key === "|") return true;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 
     // Send: prefer Resend for email; SMS provider not wired here — just log.
     const RESEND = Deno.env.get("RESEND_API_KEY");
