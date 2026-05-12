@@ -6,6 +6,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Check, Loader2, MapPin } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { SeverityPicker, type SeverityResult } from "../components/SeverityPicker";
 import { SosVoiceNoteDialog } from "../components/SosVoiceNoteDialog";
 import { DoctorSosChooser } from "../components/DoctorSosChooser";
