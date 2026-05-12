@@ -124,19 +124,12 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
       // Send a "connected" email (not "Create Account")
-      if (RESEND_API_KEY) {
+      {
         const appUrl = Deno.env.get("APP_URL") || "https://lovable.dev";
-        await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${RESEND_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            from: "Holarc Health <noreply@smartify.co.za>",
-            to: [patientEmail],
-            subject: `${doctorName} has connected with you on Holarc`,
-            html: `
+        await sendMailgunEmail({
+          to: patientEmail,
+          subject: `${doctorName} has connected with you on Holarc`,
+          html: `
               <!DOCTYPE html>
               <html>
               <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -165,8 +158,7 @@ const handler = async (req: Request): Promise<Response> => {
                 </div>
               </body>
               </html>
-            `,
-          }),
+          `,
         });
       }
 
