@@ -267,6 +267,10 @@ export default function Dashboard() {
     year: 'numeric' 
   });
 
+  if (shouldRedirectPatient) {
+    return <Navigate to="/patient/details" replace />;
+  }
+
   return (
     <div className="space-y-4 md:space-y-8 animate-fade-in">
       {/* Header with Profile */}
