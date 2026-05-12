@@ -263,74 +263,100 @@ export default function HolarcHelpProviders() {
     );
   };
 
+  // Premium underline tab styling shared across this page
+  const topTrigger =
+    "relative h-9 rounded-none border-0 bg-transparent px-3 text-[13px] font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:inset-x-0 data-[state=active]:after:-bottom-px data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary";
+  const subTrigger = topTrigger;
+  const flatTabsList = "h-auto w-full justify-start rounded-none border-b border-border bg-transparent p-0 gap-1";
+
+  const providerKindNeedsAdd = (k: string) => k === "hospital" || k === "ambulance" || k === "pharmacy";
+
   return (
-    <div className="container mx-auto p-4 sm:p-6 space-y-5">
+    <div className="container mx-auto p-4 sm:p-6 space-y-4 max-w-[1400px]">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Admin</p>
-        <h1 className="text-2xl font-extrabold">User Management</h1>
-        <p className="text-sm text-muted-foreground">Manage users, HolarcHelp providers, accountability, and the SOS voice clip.</p>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Admin</p>
+        <h1 className="text-xl font-semibold tracking-tight">User Management</h1>
+        <p className="text-[13px] text-muted-foreground">Manage users, accountability, and the SOS voice clip.</p>
       </div>
 
       <Tabs defaultValue="users">
-        <TabsList className="bg-primary w-full sm:w-auto">
-          <TabsTrigger value="users" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white gap-1.5">
-            <Users className="h-4 w-4" />Users
+        <TabsList className={flatTabsList}>
+          <TabsTrigger value="users" className={`${topTrigger} gap-1.5`}>
+            <Users className="h-3.5 w-3.5" />Users
           </TabsTrigger>
-          <TabsTrigger value="providers" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white gap-1.5">
-            <Building2 className="h-4 w-4" />Providers
+          <TabsTrigger value="accountability" className={`${topTrigger} gap-1.5`}>
+            <BarChart3 className="h-3.5 w-3.5" />Accountability
           </TabsTrigger>
-          <TabsTrigger value="accountability" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white gap-1.5">
-            <BarChart3 className="h-4 w-4" />Accountability
-          </TabsTrigger>
-          <TabsTrigger value="voice-clip" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white gap-1.5">
-            <Mic2 className="h-4 w-4" />SOS Voice Clip
+          <TabsTrigger value="voice-clip" className={`${topTrigger} gap-1.5`}>
+            <Mic2 className="h-3.5 w-3.5" />SOS Voice Clip
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="users" className="mt-4">
-          <UsersTab />
-        </TabsContent>
+        <TabsContent value="users" className="mt-4 space-y-3">
+          <Tabs defaultValue="patients" value={undefined}>
+            <TabsList className={flatTabsList}>
+              <TabsTrigger value="patients" className={`${subTrigger} gap-1.5`}>
+                <Users className="h-3.5 w-3.5" />Patients
+              </TabsTrigger>
+              <TabsTrigger value="providers" className={`${subTrigger} gap-1.5`}>
+                <Stethoscope className="h-3.5 w-3.5" />Healthcare Providers
+              </TabsTrigger>
+              <TabsTrigger value="hospital" className={`${subTrigger} gap-1.5`}>
+                <Hospital className="h-3.5 w-3.5" />Hospitals
+              </TabsTrigger>
+              <TabsTrigger value="ambulance" className={`${subTrigger} gap-1.5`}>
+                <Ambulance className="h-3.5 w-3.5" />Ambulance
+              </TabsTrigger>
+              <TabsTrigger value="pharmacy" className={`${subTrigger} gap-1.5`}>
+                <Pill className="h-3.5 w-3.5" />Pharmacies
+              </TabsTrigger>
+              <TabsTrigger value="admin" className={`${subTrigger} gap-1.5`}>
+                <ShieldAlert className="h-3.5 w-3.5" />Admin
+              </TabsTrigger>
+            </TabsList>
 
+            <TabsContent value="patients" className="mt-4">
+              <UsersTab kind="patient" />
+            </TabsContent>
+            <TabsContent value="providers" className="mt-4">
+              <UsersTab kind="doctor" />
+            </TabsContent>
+            <TabsContent value="admin" className="mt-4">
+              <UsersTab kind="admin" />
+            </TabsContent>
 
-        <TabsContent value="providers" className="mt-4 space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            {(["active", "inactive", "all"] as Status[]).map((s) => (
-              <Button key={s} size="sm" variant={status === s ? "default" : "outline"} onClick={() => setStatus(s)} className="rounded-full capitalize">
-                {s}
-              </Button>
+            {(["hospital", "ambulance", "pharmacy"] as Kind[]).map((k) => (
+              <TabsContent key={k} value={k} className="mt-4 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="inline-flex rounded-md border border-border bg-card p-0.5">
+                    {(["active", "inactive", "all"] as Status[]).map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => setStatus(s)}
+                        className={`px-3 py-1 text-[11px] font-medium capitalize rounded-sm transition-colors ${
+                          status === s
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                  {providerKindNeedsAdd(k) && (
+                    <Button size="sm" onClick={() => { setTab(k); setChooserOpen(true); }}>
+                      <Plus className="mr-1.5 h-3.5 w-3.5" />Add
+                    </Button>
+                  )}
+                </div>
+                {loading
+                  ? <Loader />
+                  : renderGroupedTable(
+                      k === "hospital" ? hospitals : k === "ambulance" ? ambulances : pharmacies,
+                      k,
+                    )}
+              </TabsContent>
             ))}
-          </div>
-
-          <Tabs value={tab} onValueChange={(v) => setTab(v as Kind)}>
-            <div className="flex items-center justify-between gap-2">
-              <TabsList className="bg-primary">
-                <TabsTrigger value="hospital" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
-                  <Hospital className="mr-1.5 h-4 w-4" />Hospitals
-                </TabsTrigger>
-                <TabsTrigger value="ambulance" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
-                  <Ambulance className="mr-1.5 h-4 w-4" />Ambulance
-                </TabsTrigger>
-                <TabsTrigger value="pharmacy" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">
-                  <Pill className="mr-1.5 h-4 w-4" />Pharmacies
-                </TabsTrigger>
-              </TabsList>
-              <Button size="sm" onClick={() => setChooserOpen(true)}>
-                <Plus className="mr-1.5 h-4 w-4" />
-                Add
-              </Button>
-            </div>
-
-            <TabsContent value="hospital" className="mt-4">
-              {loading ? <Loader /> : renderGroupedTable(hospitals, "hospital")}
-            </TabsContent>
-
-            <TabsContent value="ambulance" className="mt-4">
-              {loading ? <Loader /> : renderGroupedTable(ambulances, "ambulance")}
-            </TabsContent>
-
-            <TabsContent value="pharmacy" className="mt-4">
-              {loading ? <Loader /> : renderGroupedTable(pharmacies, "pharmacy")}
-            </TabsContent>
           </Tabs>
         </TabsContent>
 
