@@ -264,11 +264,12 @@ export default function Auth() {
     }
     setLoading(true);
     try {
-      const { data, error } = await signUp(email, password);
+      const { data, error } = await signUp(email, password, { full_name: fullName, role: userRole });
       if (error) throw error;
       if (data?.user) {
         setCreatedUserId(data.user.id);
         setAccountCreated(true);
+        // Best-effort: trigger handles definitive role assignment, this is a fallback if a session exists.
         await supabase.from("user_roles").insert({ user_id: data.user.id, role: userRole });
         return true;
       }
