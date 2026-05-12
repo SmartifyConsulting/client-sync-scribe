@@ -956,32 +956,98 @@ export default function Auth() {
               <p className="text-muted-foreground mt-2">Sign In</p>
             </div>
             <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required />
+              {!useOtp ? (
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required />
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Password</Label>
-                    <button type="button" tabIndex={-1} onClick={() => navigate("/forgot-password")} className="text-xs text-muted-foreground hover:text-primary hover:underline">Forgot your password?</button>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password">Password</Label>
+                      <button type="button" tabIndex={-1} onClick={() => navigate("/forgot-password")} className="text-xs text-muted-foreground hover:text-primary hover:underline">Forgot your password?</button>
+                    </div>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" required minLength={6} />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
-                <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" required minLength={6} />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Sign In
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={handleVerifyOtp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="otp-email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        id="otp-email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => { setEmail(e.target.value); setOtpSent(false); }}
+                        className="pl-10"
+                        required
+                        disabled={otpSent && loading}
+                      />
+                    </div>
                   </div>
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Sign In
-                </Button>
-              </form>
+
+                  {!otpSent ? (
+                    <Button type="button" onClick={handleSendOtp} className="w-full" disabled={loading}>
+                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Send code
+                    </Button>
+                  ) : (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="otp">Enter 6-digit code</Label>
+                        <div className="flex justify-center">
+                          <InputOTP maxLength={6} value={otpCode} onChange={setOtpCode}>
+                            <InputOTPGroup>
+                              <InputOTPSlot index={0} />
+                              <InputOTPSlot index={1} />
+                              <InputOTPSlot index={2} />
+                              <InputOTPSlot index={3} />
+                              <InputOTPSlot index={4} />
+                              <InputOTPSlot index={5} />
+                            </InputOTPGroup>
+                          </InputOTP>
+                        </div>
+                        <p className="text-xs text-muted-foreground text-center">
+                          Or click the magic link we emailed you.
+                        </p>
+                      </div>
+                      <Button type="submit" className="w-full" disabled={loading || otpCode.length !== 6}>
+                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Verify & sign in
+                      </Button>
+                      <button
+                        type="button"
+                        onClick={handleSendOtp}
+                        disabled={loading || otpCooldown > 0}
+                        className="block w-full text-xs text-muted-foreground hover:text-primary hover:underline disabled:opacity-50"
+                      >
+                        {otpCooldown > 0 ? `Resend code in ${otpCooldown}s` : "Resend code"}
+                      </button>
+                    </>
+                  )}
+                </form>
+              )}
               <div className="mt-4 text-center space-y-2">
+                <button
+                  type="button"
+                  onClick={() => { setUseOtp(!useOtp); setOtpSent(false); setOtpCode(""); setPassword(""); }}
+                  className="block w-full text-sm text-primary hover:underline"
+                >
+                  {useOtp ? "Sign in with password instead" : "Email me a sign-in code instead"}
+                </button>
                 <button type="button" onClick={() => { setIsLogin(false); setCurrentStep(0); }} className="block w-full text-sm text-primary hover:underline">Don't have an account? Sign up</button>
                 <a href="/provider-signup" className="block text-xs text-muted-foreground hover:text-primary hover:underline">Are you a hospital or ambulance provider? Sign up here</a>
               </div>
