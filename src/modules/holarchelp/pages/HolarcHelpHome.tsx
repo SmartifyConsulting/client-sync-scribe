@@ -38,16 +38,16 @@ export default function HolarcHelpHome() {
   const holdStartRef = useRef<number>(0);
   const channelRef = useRef<any>(null);
 
-  const ACK_KEY = "holarchelp.sos.ack.v2";
-  type AckKey = "a" | "b" | "c" | "d";
+  const ACK_KEY = "holarchelp.sos.ack.v3";
+  type AckKey = "a" | "b" | "c";
   const [ack, setAck] = useState<Record<AckKey, boolean>>(() => {
-    if (typeof window === "undefined") return { a: false, b: false, c: false, d: false };
+    if (typeof window === "undefined") return { a: false, b: false, c: false };
     try {
       const raw = localStorage.getItem(ACK_KEY);
-      return raw ? { a: false, b: false, c: false, d: false, ...JSON.parse(raw) } : { a: false, b: false, c: false, d: false };
-    } catch { return { a: false, b: false, c: false, d: false }; }
+      return raw ? { a: false, b: false, c: false, ...JSON.parse(raw) } : { a: false, b: false, c: false };
+    } catch { return { a: false, b: false, c: false }; }
   });
-  const allAck = ack.a && ack.b && ack.c && ack.d;
+  const allAck = ack.a && ack.b && ack.c;
   const setAckField = (k: AckKey, v: boolean) => {
     setAck((prev) => {
       const next = { ...prev, [k]: v };
@@ -367,10 +367,9 @@ export default function HolarcHelpHome() {
             Before using SOS, please acknowledge:
           </p>
           {[
-            { k: "a" as const, label: "SOS support is provided on a best-effort basis and cannot guarantee emergency response." },
+          { k: "a" as const, label: "SOS support is provided on a best-effort basis and cannot guarantee emergency response." },
             { k: "b" as const, label: "SOS depends on network, device status, location access, and third-party responders." },
             { k: "c" as const, label: "SOS requires location permissions, battery power, and internet or cellular connectivity." },
-            { k: "d" as const, label: "Emergency response availability and response times may vary by location." },
           ].map((item) => (
             <label key={item.k} htmlFor={`sos-ack-${item.k}`} className="flex items-start gap-3 cursor-pointer">
               <Checkbox
