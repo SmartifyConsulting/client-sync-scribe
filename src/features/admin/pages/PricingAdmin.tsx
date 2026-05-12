@@ -226,44 +226,22 @@ export default function PricingAdmin() {
   const emergencyAnnual = pricing.find((p) => p.role === "emergency" && p.billing_cycle === "annual");
 
   return (
-    <div className="animate-fade-in max-w-6xl mx-auto">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3 pb-4 mb-6">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold text-foreground">Subscription Pricing</h1>
-          <p className="text-muted-foreground text-[12px]">
-            Define the financial structure for healthcare providers, patients, and emergency services. Adjust prices to see the annual discount calculate in real time.
-          </p>
-        </div>
-        <Button onClick={handleSave} disabled={saving} className="rounded-xl">
-          {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-          Publish Changes
+    <AdminPage
+      eyebrow="Admin"
+      title="Subscription Pricing"
+      description="Define monthly and annual rates for providers, patients, and emergency services."
+      actions={
+        <Button size="sm" onClick={handleSave} disabled={saving} className="h-8 px-3 text-[12px]">
+          {saving ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : null}
+          Publish changes
         </Button>
+      }
+    >
+      <div className="space-y-3">
+        <RoleSection title="Tier 01 — Healthcare Providers" badgeLabel="Doctor"     monthly={doctorMonthly}    annual={doctorAnnual}    onChange={handleChange} />
+        <RoleSection title="Tier 02 — Patient"              badgeLabel="Patient"    monthly={patientMonthly}   annual={patientAnnual}   onChange={handleChange} />
+        <RoleSection title="Tier 03 — Emergency Services"   badgeLabel="Emergency"  monthly={emergencyMonthly} annual={emergencyAnnual} onChange={handleChange} />
       </div>
-
-      <div className="space-y-12 md:space-y-16">
-        <RoleSection
-          title="Tier 01: Healthcare Providers"
-          badgeLabel="Doctor"
-          monthly={doctorMonthly}
-          annual={doctorAnnual}
-          onChange={handleChange}
-        />
-        <RoleSection
-          title="Tier 02: Patient"
-          badgeLabel="Patient"
-          monthly={patientMonthly}
-          annual={patientAnnual}
-          onChange={handleChange}
-        />
-        <RoleSection
-          title="Tier 03: Emergency Services"
-          badgeLabel="Emergency"
-          monthly={emergencyMonthly}
-          annual={emergencyAnnual}
-          onChange={handleChange}
-        />
-      </div>
-    </div>
+    </AdminPage>
   );
 }
