@@ -38,6 +38,23 @@ export default function HolarcHelpHome() {
   const holdStartRef = useRef<number>(0);
   const channelRef = useRef<any>(null);
 
+  const ACK_KEY = "holarchelp.sos.ack.v1";
+  const [ack, setAck] = useState<{ a: boolean; b: boolean; c: boolean }>(() => {
+    if (typeof window === "undefined") return { a: false, b: false, c: false };
+    try {
+      const raw = localStorage.getItem(ACK_KEY);
+      return raw ? { a: false, b: false, c: false, ...JSON.parse(raw) } : { a: false, b: false, c: false };
+    } catch { return { a: false, b: false, c: false }; }
+  });
+  const allAck = ack.a && ack.b && ack.c;
+  const setAckField = (k: "a" | "b" | "c", v: boolean) => {
+    setAck((prev) => {
+      const next = { ...prev, [k]: v };
+      try { localStorage.setItem(ACK_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
+
   useEffect(() => {
     if (!user) return;
     supabase.from("patients" as any)
