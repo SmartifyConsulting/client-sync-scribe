@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Loader2, Pencil, Save, X, Shield, Trash2 } from "lucide-react";
+import { Loader2, Pencil, Save, X, Shield, Trash2, Users } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -16,6 +16,11 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { groupByCountry, sortedCountries, countryFlag } from "@/pages/admin/_shared/grouping";
+import { AdminPanel } from "@/pages/admin/_shared/AdminPanel";
+import { StatusDot, statusToTone } from "@/pages/admin/_shared/StatusDot";
+import { EmptyState } from "@/pages/admin/_shared/EmptyState";
+import { RowSkeleton } from "@/pages/admin/_shared/RowSkeleton";
+import { Toolbar } from "@/pages/admin/_shared/Toolbar";
 
 type RoleEnum = "doctor" | "patient" | "admin" | "hospital_staff" | "ambulance_staff" | "blood_bank" | "pharmacy_staff" | "none";
 type UsersKind = "patient" | "doctor" | "admin";
@@ -114,14 +119,24 @@ export default function UsersTab({ kind }: UsersTabProps) {
     setLoading(false);
   };
 
+  const [search, setSearch] = useState("");
+
   const filtered = useMemo(() => {
+    let list: UserRecord[];
     if (kind === "patient") {
-      // Patients sub-tab: people who are patients, plus accounts with no role yet
-      return users.filter((u) => u.role === "patient" || u.role === "none");
+      list = users.filter((u) => u.role === "patient" || u.role === "none");
+    } else if (kind === "doctor") {
+      list = users.filter((u) => u.role === "doctor");
+    } else {
+      list = users.filter((u) => u.role === "admin");
     }
-    if (kind === "doctor") return users.filter((u) => u.role === "doctor");
-    return users.filter((u) => u.role === "admin");
-  }, [users, kind]);
+    const q = search.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((u) =>
+      (u.full_name || "").toLowerCase().includes(q) ||
+      (u.email || "").toLowerCase().includes(q),
+    );
+  }, [users, kind, search]);
 
   const grouped = useMemo(() => groupByCountry(filtered, (u) => u.country), [filtered]);
   const countries = useMemo(() => sortedCountries(grouped), [grouped]);
@@ -202,149 +217,143 @@ export default function UsersTab({ kind }: UsersTabProps) {
     }
   };
 
-  const statusDot = (status: string) => {
-    const map: Record<string, { color: string; label: string }> = {
-      pending: { color: "bg-amber-500", label: "Pending" },
-      suspended: { color: "bg-slate-400", label: "Suspended" },
-      active: { color: "bg-emerald-500", label: "Active" },
-    };
-    const s = map[status] ?? map.active;
-    return (
-      <span className="inline-flex items-center gap-1.5 text-[11px] text-foreground">
-        <span className={`h-1.5 w-1.5 rounded-full ${s.color}`} />
-        {s.label}
-      </span>
-    );
-  };
-
-  if (loading) {
-    return (
-      <div className="flex h-40 items-center justify-center">
-        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (filtered.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed border-border/70 bg-card p-10 text-center text-sm text-muted-foreground">
-        No {kind === "doctor" ? "healthcare providers" : kind === "admin" ? "administrators" : "patients"} yet.
-      </div>
-    );
-  }
-
   const showCompany = kind === "doctor";
+  const noun = kind === "doctor" ? "healthcare providers" : kind === "admin" ? "administrators" : "patients";
 
   const renderRows = (rows: UserRecord[]) => (
-    <Table>
-      <TableHeader>
-        <TableRow className="hover:bg-transparent">
-          <TableHead className="h-9 text-[11px] uppercase tracking-wide">First Name</TableHead>
-          <TableHead className="h-9 text-[11px] uppercase tracking-wide">Last Name</TableHead>
-          <TableHead className="h-9 text-[11px] uppercase tracking-wide">Email</TableHead>
-          {showCompany && (
-            <TableHead className="h-9 text-[11px] uppercase tracking-wide">Practice</TableHead>
-          )}
-          <TableHead className="h-9 text-[11px] uppercase tracking-wide">
-            <span className="inline-flex items-center gap-1.5"><Shield className="h-3.5 w-3.5" />HolarcHelp</span>
-          </TableHead>
-          <TableHead className="h-9 text-[11px] uppercase tracking-wide">Status</TableHead>
-          <TableHead className="h-9 text-[11px] uppercase tracking-wide">Joined</TableHead>
-          <TableHead className="h-9 w-[96px] text-right text-[11px] uppercase tracking-wide">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody className="divide-y divide-border/50">
-        {rows.map((u) => {
-          const { first, last } = splitName(u.full_name);
-          const isEditing = editingId === u.user_id;
-          return (
-            <TableRow key={u.user_id} className="hover:bg-muted/40">
-              <TableCell className="py-2 text-[12px]">
-                {isEditing ? (
-                  <Input value={editState.first_name} onChange={(e) => setEditState((s) => ({ ...s, first_name: e.target.value }))} className="h-8 w-32" />
-                ) : (
-                  <span className="font-medium">{first || "—"}</span>
+    <div className="admin-table-wrap">
+      <Table>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent border-0">
+            <TableHead>First Name</TableHead>
+            <TableHead>Last Name</TableHead>
+            <TableHead>Email</TableHead>
+            {showCompany && <TableHead>Practice</TableHead>}
+            <TableHead>
+              <span className="inline-flex items-center gap-1.5"><Shield className="h-3 w-3" />HolarcHelp</span>
+            </TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Joined</TableHead>
+            <TableHead className="w-[88px] text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((u) => {
+            const { first, last } = splitName(u.full_name);
+            const isEditing = editingId === u.user_id;
+            return (
+              <TableRow key={u.user_id} className={isEditing ? "bg-[hsl(var(--admin-accent-soft))]" : ""}>
+                <TableCell>
+                  {isEditing ? (
+                    <Input value={editState.first_name} onChange={(e) => setEditState((s) => ({ ...s, first_name: e.target.value }))} className="h-7 w-32 text-[12.5px]" />
+                  ) : (
+                    <span className="font-medium text-[hsl(var(--admin-text-primary))]">{first || "—"}</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {isEditing ? (
+                    <Input value={editState.last_name} onChange={(e) => setEditState((s) => ({ ...s, last_name: e.target.value }))} className="h-7 w-32 text-[12.5px]" />
+                  ) : (
+                    <span>{last || "—"}</span>
+                  )}
+                </TableCell>
+                <TableCell className="text-[hsl(var(--admin-text-secondary))]">
+                  {isEditing ? (
+                    <Input value={editState.email} onChange={(e) => setEditState((s) => ({ ...s, email: e.target.value }))} className="h-7 w-52 text-[12.5px]" />
+                  ) : (
+                    u.email
+                  )}
+                </TableCell>
+                {showCompany && (
+                  <TableCell>{u.company || "—"}</TableCell>
                 )}
-              </TableCell>
-              <TableCell className="py-2 text-[12px]">
-                {isEditing ? (
-                  <Input value={editState.last_name} onChange={(e) => setEditState((s) => ({ ...s, last_name: e.target.value }))} className="h-8 w-32" />
-                ) : (
-                  <span>{last || "—"}</span>
-                )}
-              </TableCell>
-              <TableCell className="py-2 text-[12px] text-muted-foreground">
-                {isEditing ? (
-                  <Input value={editState.email} onChange={(e) => setEditState((s) => ({ ...s, email: e.target.value }))} className="h-8 w-48" />
-                ) : (
-                  u.email
-                )}
-              </TableCell>
-              {showCompany && (
-                <TableCell className="py-2 text-[12px]">{u.company || "—"}</TableCell>
-              )}
-              <TableCell className="py-2">
-                <Switch
-                  checked={!!u.holarchelp_enabled}
-                  onCheckedChange={() => toggleHolarcHelp(u.user_id, !!u.holarchelp_enabled)}
-                  aria-label="Toggle HolarcHelp module"
-                />
-              </TableCell>
-              <TableCell className="py-2">{statusDot(u.status)}</TableCell>
-              <TableCell className="py-2 text-[12px] text-muted-foreground">{format(new Date(u.created_at), "dd MMM yyyy")}</TableCell>
-              <TableCell className="py-2 text-right">
-                {isEditing ? (
-                  <div className="flex justify-end gap-0.5">
-                    <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => saveUser(u.user_id)} disabled={saving}>
-                      {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-                    </Button>
-                    <Button size="icon" variant="ghost" className="h-7 w-7" onClick={cancelEditing} disabled={saving}>
-                      <X className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex justify-end gap-0.5">
-                    <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={() => startEditing(u)}>
-                      <Pencil className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => setPendingDelete(u)}>
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                )}
-              </TableCell>
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
+                <TableCell>
+                  <Switch
+                    checked={!!u.holarchelp_enabled}
+                    onCheckedChange={() => toggleHolarcHelp(u.user_id, !!u.holarchelp_enabled)}
+                    aria-label="Toggle HolarcHelp module"
+                    className="scale-90"
+                  />
+                </TableCell>
+                <TableCell><StatusDot tone={statusToTone(u.status)} /></TableCell>
+                <TableCell className="text-[hsl(var(--admin-text-tertiary))]">{format(new Date(u.created_at), "dd MMM yyyy")}</TableCell>
+                <TableCell className="text-right">
+                  {isEditing ? (
+                    <div className="flex justify-end gap-0.5">
+                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => saveUser(u.user_id)} disabled={saving}>
+                        {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                      </Button>
+                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={cancelEditing} disabled={saving}>
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex justify-end gap-0.5">
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-[hsl(var(--admin-text-tertiary))] hover:text-[hsl(var(--admin-text-primary))]" onClick={() => startEditing(u)}>
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-[hsl(var(--admin-text-tertiary))] hover:text-destructive" onClick={() => setPendingDelete(u)}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </div>
   );
 
   return (
     <>
-      <Accordion type="multiple" defaultValue={countries.slice(0, 2)} className="space-y-2">
-        {countries.map((country) => {
-          const rows = grouped[country];
-          return (
-            <AccordionItem
-              key={country}
-              value={country}
-              className="border border-border/70 rounded-xl bg-card overflow-hidden shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
-            >
-              <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/40">
-                <div className="flex items-center gap-3">
-                  <span className="text-base">{countryFlag(country)}</span>
-                  <span className="text-[13px] font-semibold">{country}</span>
-                  <span className="text-[11px] text-muted-foreground">{rows.length} {rows.length === 1 ? "user" : "users"}</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="p-0 border-t border-border/50">
-                <div className="overflow-x-auto">{renderRows(rows)}</div>
-              </AccordionContent>
-            </AccordionItem>
-          );
-        })}
-      </Accordion>
+      <AdminPanel
+        title={`${filtered.length} ${noun}`}
+        description="Grouped by country. Expand to view, edit, or remove."
+        bodyClassName="p-0"
+        actions={
+          <Toolbar
+            searchValue={search}
+            onSearchChange={setSearch}
+            searchPlaceholder={`Search ${noun}…`}
+          />
+        }
+      >
+        {loading ? (
+          <RowSkeleton rows={6} cols={showCompany ? 8 : 7} />
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            icon={Users}
+            title={`No ${noun} ${search ? "match your search" : "yet"}`}
+            description={search ? "Try a different name or email." : undefined}
+          />
+        ) : (
+          <Accordion type="multiple" className="divide-y divide-[hsl(var(--admin-border-subtle))]">
+            {countries.map((country) => {
+              const rows = grouped[country];
+              return (
+                <AccordionItem
+                  key={country}
+                  value={country}
+                  className="border-0"
+                >
+                  <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-[hsl(var(--admin-accent-soft))]">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-[14px] leading-none">{countryFlag(country)}</span>
+                      <span className="text-[12.5px] font-semibold text-[hsl(var(--admin-text-primary))]">{country}</span>
+                      <span className="text-[11px] text-[hsl(var(--admin-text-tertiary))]">{rows.length}</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="p-0 border-t border-[hsl(var(--admin-border-subtle))]">
+                    {renderRows(rows)}
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
+        )}
+      </AdminPanel>
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !deleting && !o && setPendingDelete(null)}>
         <AlertDialogContent>

@@ -6,8 +6,9 @@ export const COUNTRY_FLAGS: Record<string, string> = {
 export const COUNTRY_PINS = ["South Africa", "Nigeria"];
 
 export function normalizeCountry(c: string | null | undefined) {
-  if (!c) return "Unknown";
+  if (!c || !c.trim()) return "South Africa";
   const t = c.trim();
+  if (/^(unknown|n\/a|none)$/i.test(t)) return "South Africa";
   if (/^(za|rsa|south africa)$/i.test(t)) return "South Africa";
   if (/^(ng|nigeria)$/i.test(t)) return "Nigeria";
   return t;

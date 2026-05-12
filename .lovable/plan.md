@@ -1,98 +1,114 @@
-## Goal
+## 1. Account change: georgia.adams@smartify.co.za → patient
 
-Restructure the `/admin/users` screen so it functions as a single **Users** hub with sub-tabs by actor type, group every list by **Country**, and re-skin Admin pages to feel like a premium healthcare ops platform (Linear / Stripe / Notion density).
+Two data changes (no schema):
 
-No data model changes. No workflow changes. Visual + structural reorganisation only.
+- Insert `('patient')` into `user_roles` for user `7c12a364-61f1-471e-8cc2-1c3a762794e3`.
+- Delete the existing `('admin')` row for the same user.
 
----
+**Heads-up:** Georgia is the currently signed-in admin. The moment admin is revoked she will lose access to `/admin/*` and the user-management RPC (`get_users_admin` raises "Access denied"). Confirm she should keep access via a different admin account before this is applied, or we should promote another user (e.g. `sme@smartify.co.za`) to admin in the same step. **I'll wait for your confirmation on who else should be admin before running this.**
 
-## 1. Restructure the top-level Admin tabs
+## 2. Carry-over fixes from previous plan
 
-In `src/pages/admin/HolarcHelpProviders.tsx`:
-
-- **Merge** the current top tabs `Users` + `Providers` → a single **Users** tab.
-- New top-tab set:
-  ```text
-  Users  |  Accountability  |  SOS Voice Clip
+- **Edits silently dropped (Dean Allie, etc.):** add a SELECT policy on `public.profiles` so admins can see all rows, otherwise the existing admin UPDATE policy matches 0 rows. Migration:
+  ```sql
+  CREATE POLICY "Admins can view all profiles"
+    ON public.profiles FOR SELECT
+    USING (public.has_role(auth.uid(), 'admin'::public.user_role));
   ```
-- The merged **Users** tab gets sub-tabs (Admin is the last one):
-  ```text
-  Patients | Healthcare Providers | Hospitals | Ambulance | Pharmacies | Admin
-  ```
-  Each sub-tab carries a count chip and an icon. The **Admin** sub-tab lists users whose role is `admin` (e.g. Georgia Adams), grouped by country like every other sub-tab.
+- **Accordions collapsed by default:** remove `defaultValue` from country and Approved/Unapproved accordions in `UsersTab.tsx` and `HolarcHelpAccountability.tsx`.
+- **Unknown → South Africa:** in `src/pages/admin/_shared/grouping.ts`, `normalizeCountry` returns `"South Africa"` when country is null/empty.
 
-The "Add provider" button moves into Hospitals / Ambulance / Pharmacies sub-tabs (contextual).
-The Active / Inactive / All filter pills are kept but restyled as a segmented control on the right of each sub-tab header.
+## 3. Admin UI overhaul — premium healthcare operations feel
 
-## 2. Group every list by Country (no Role column)
+Visual-only. No workflow, data-model, or RPC changes.
 
-- **Patients / Healthcare Providers / Admin** sub-tabs (`UsersTab.tsx`):
-  - Do **not** add a Role column — the active sub-tab already conveys the role.
-  - Wrap rows in a country accordion using the same `groupByCountryTier` pattern. Country source: `profiles.country` (fallback `"Unknown"`), reused via the existing `normalizeCountry()` helper extracted to `src/pages/admin/_shared/grouping.ts`.
-  - Pinned countries (South Africa, Nigeria) appear first; flag emoji + total count in the header.
-- **Hospitals / Ambulance / Pharmacies** already group by country → keep, but harmonise styling with the new patient/provider grouping.
+### 3.1 Design tokens (`src/index.css`, `tailwind.config.ts`)
 
-## 3. Accountability sub-tabs
+Introduce a calm clinical palette layered on top of existing tokens:
 
-In `HolarcHelpAccountability.tsx`:
+- `--surface`: pure white panels.
+- `--surface-muted`: very faint cool grey (`hsl(210 20% 98%)`) for page background.
+- `--border-subtle`: `hsl(215 16% 90%)` for hairline dividers.
+- `--border-strong`: `hsl(215 16% 82%)` for panel edges.
+- `--accent-clinical`: deep teal `hsl(180 45% 28%)` (replaces bright turquoise for active states, links, focus rings).
+- `--accent-clinical-soft`: `hsl(180 45% 28% / 0.08)` for selected rows / active tab underline halo.
+- `--text-primary`, `--text-secondary`, `--text-tertiary` for a 3-step type hierarchy.
+- Status dots: `--status-active` (emerald 600), `--status-pending` (amber 600), `--status-suspended` (rose 600), `--status-inactive` (slate 400).
+- Spacing rhythm tightened: panel padding `16px`, table cell padding `8px 12px`, row height `36px`.
+- Type ramp: page title `text-[15px] font-semibold`, section title `text-[13px] font-semibold uppercase tracking-wide`, table header `text-[11px] font-medium uppercase tracking-wide text-text-tertiary`, table body `text-[13px]`.
 
-- Existing `Ambulance | Hospitals` tabs stay.
-- Inside each, replace the flat table with a **Country accordion → Approved / Unapproved sub-accordion → table**. Approved = `status = 'approved'`, Unapproved = everything else.
-- Reuse the same shared grouping helper + accordion styling so all three Admin screens look identical.
+### 3.2 Shared shell components (new in `src/pages/admin/_shared/`)
 
-## 4. Premium visual redesign (Admin scope only)
+- `AdminPage.tsx` — page wrapper: max-width container, top bar with title + count + primary action, sticky page header with bottom hairline border.
+- `AdminPanel.tsx` — `rounded-lg border border-border-strong bg-surface shadow-[0_1px_0_rgba(15,23,42,0.04)]` card that contains tables/forms. Replaces the large floating sections currently used.
+- `AdminTabs.tsx` — flat underline tabs (no pill background, no teal fill); active tab gets a 2px deep-teal underline and `text-text-primary font-semibold`. Used for both top tabs (Users / Accountability / SOS Voice Clip) and Users sub-tabs.
+- `AdminTable.tsx` + `AdminTableRow.tsx` — sticky header (`position: sticky; top: 0; bg-surface; border-b border-border-strong`), `divide-y divide-border-subtle`, hover `bg-accent-clinical-soft/40`, selected `bg-accent-clinical-soft border-l-2 border-l-accent-clinical`, 36px row height, right-aligned action column with `h-7 w-7` ghost icon buttons.
+- `StatusDot.tsx` — `● Active` / `● Pending` / `● Suspended` / `● Inactive` with `text-[12px]` and the matching status colour. Replaces filled pill badges everywhere.
+- `EmptyState.tsx` — centred icon + one-line message + optional CTA.
+- `RowSkeleton.tsx` — skeleton rows for loading.
+- `Toolbar.tsx` — search input + segmented filter + primary action, all `size="sm"`, aligned in a single 40px-tall row above the table.
 
-A small, shared design pass — applied to `HolarcHelpProviders.tsx`, `UsersTab.tsx`, `HolarcHelpAccountability.tsx`, `PricingAdmin.tsx`, `GamificationAdmin.tsx`.
+### 3.3 Pages refactored to use the shell
 
-**Layout**
-- New shared `AdminShell` wrapper (`src/pages/admin/_shared/AdminShell.tsx`): max-width container, consistent 24px page padding, kicker label + H1 + subtitle pattern (matches existing top of `HolarcHelpProviders`).
-- New shared `AdminPanel` card: `rounded-xl border border-border/70 bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)]` — replaces the heavier `rounded-2xl` cards and the bright teal `border-primary` frames currently used.
-- Remove the bright `bg-primary` (teal) `TabsList` background. Replace with a flat segmented control:
-  ```text
-  border-b border-border, triggers are text-muted-foreground with
-  data-[state=active]:text-foreground + bottom 2px primary underline
-  ```
-- Tighten vertical rhythm: page `space-y-5` → `space-y-4`; card padding `p-6` → `p-4`; section gaps standardised to 12 / 16 / 24 px.
+Visual-only refactor — keep current logic, just swap layout primitives:
 
-**Tables**
-- Sticky header row (`sticky top-0 bg-card/95 backdrop-blur z-10`).
-- Row height ~40 px (currently ~56 px), `text-[12px]` body, `text-[11px] uppercase tracking-wide` headers.
-- Softer row dividers: `divide-y divide-border/50` instead of full borders.
-- Hover: `hover:bg-muted/40`. Selected row: `bg-primary/5 border-l-2 border-l-primary`.
-- Action icons: `h-7 w-7` ghost buttons, `text-muted-foreground hover:text-foreground`, destructive on hover only.
-- Status pills replaced with quieter dot+label: `● Active` (emerald-600), `● Pending` (amber-600), `● Suspended` (slate-400).
+- `src/pages/admin/HolarcHelpProviders.tsx` (top tabs container)
+- `src/features/admin/components/UsersTab.tsx` (Patients / Healthcare Providers / Hospitals / Ambulance / Pharmacies / Admin)
+- `src/pages/admin/HolarcHelpAccountability.tsx`
+- `src/pages/admin/PricingAdmin.tsx`
+- `src/pages/admin/GamificationAdmin.tsx`
 
-**Typography & colour**
-- Headings: `font-semibold` (drop `font-extrabold`).
-- Use existing semantic tokens only (`bg-card`, `bg-muted`, `text-foreground`, `text-muted-foreground`, `border-border`, `text-primary`). Add two utility tokens to `index.css` (`--surface-muted`, `--admin-row-hover`).
-- Tier chips kept but restyled to neutral (slate / muted) with a small coloured dot.
+Each gets:
+- `AdminPage` shell with sticky title bar.
+- `AdminTabs` for top tabs and sub-tabs (no bright `bg-primary`, no rounded pills).
+- `AdminPanel` wrapping every table/form section so panels feel contained, not floating.
+- `Toolbar` row with search + filter + primary action above the table.
+- `AdminTable` for all lists with sticky header, tighter rows, status dots, ghost-icon actions.
+- `EmptyState` and `RowSkeleton` wired up where data loads.
 
-**Buttons**
-- "Invite user" / "Add" become `size="sm"` with leading icon, neutral border, primary fill only on the primary action per screen.
+### 3.4 Buttons & toggles
 
-**Responsiveness**
-- Tables wrap in `overflow-x-auto`; on `<sm` collapse to a stacked card list (name + sub-tab implies role + actions).
+- Standardise on `size="sm"` for "Invite user", "Add", "Save", "Cancel" — `h-8 px-3 text-[12px]`.
+- Edit/Delete become `h-7 w-7` ghost icon buttons in the row's action column; appear on row hover only on desktop, always visible on touch widths.
+- HolarcHelp / accepting-patients toggles use shadcn `Switch` at `scale-75` with a small inline label, replacing the larger pill toggles.
 
-## 5. States
+### 3.5 Responsiveness
 
-- Empty: centred icon + one-line message + optional CTA (promote existing `Empty` helper to `_shared/EmptyState.tsx`).
-- Loading: skeleton rows (`Skeleton` from shadcn) instead of the centred spinner.
-- Error toast retained.
+- ≥1280px: full table view as above.
+- 768–1279px: same table, horizontally scrollable inside `AdminPanel`; sticky first column for name.
+- <768px: each row collapses into a stacked card inside `AdminPanel` (name + role/country line, status dot, action menu in a `…` popover). No data hidden — only re-flowed.
 
-## 6. Out of scope
+### 3.6 Out of scope (explicit)
 
-- No DB / RLS / edge function changes.
-- No workflow, role logic, RPC, or data shape changes.
-- No redesign of patient or doctor dashboards — Admin screens only.
-- Profile `country` field is assumed to already exist; null falls under "Unknown".
-
----
+- No DB schema, RLS, RPC, or edge-function changes beyond the one admin SELECT policy in §2.
+- No changes to patient or doctor dashboards.
+- No new fields, no workflow changes, no role logic changes.
+- No animation libraries; transitions limited to `transition-colors`/`transition-shadow` already in Tailwind.
 
 ## Files touched
 
-- `src/pages/admin/HolarcHelpProviders.tsx` — top-tab restructure (Users / Accountability / SOS), AdminShell, segmented tabs.
-- `src/features/admin/components/UsersTab.tsx` — sub-tabs `Patients | Healthcare Providers | Hospitals | Ambulance | Pharmacies | Admin`, country grouping, no role column, premium table styling.
-- `src/pages/admin/HolarcHelpAccountability.tsx` — country + approved/unapproved grouping, restyled tabs.
-- `src/pages/admin/PricingAdmin.tsx`, `src/pages/admin/GamificationAdmin.tsx` — wrap in `AdminShell`, apply panel + tab restyle.
-- New: `src/pages/admin/_shared/AdminShell.tsx`, `AdminPanel.tsx`, `SegmentedTabs.tsx`, `CountryAccordion.tsx`, `EmptyState.tsx`, `grouping.ts`.
-- `src/index.css` — two semantic token additions.
+**Migration**
+- `Admins can view all profiles` SELECT policy on `public.profiles`.
+
+**Data change (after your confirmation on a replacement admin)**
+- `user_roles`: insert `(georgia, patient)`, delete `(georgia, admin)`, optionally insert `(<chosen user>, admin)`.
+
+**New shared files**
+- `src/pages/admin/_shared/AdminPage.tsx`
+- `src/pages/admin/_shared/AdminPanel.tsx`
+- `src/pages/admin/_shared/AdminTabs.tsx`
+- `src/pages/admin/_shared/AdminTable.tsx`
+- `src/pages/admin/_shared/AdminTableRow.tsx`
+- `src/pages/admin/_shared/StatusDot.tsx`
+- `src/pages/admin/_shared/EmptyState.tsx`
+- `src/pages/admin/_shared/RowSkeleton.tsx`
+- `src/pages/admin/_shared/Toolbar.tsx`
+
+**Edited**
+- `src/index.css`, `tailwind.config.ts` (token additions)
+- `src/pages/admin/_shared/grouping.ts` (Unknown → South Africa)
+- `src/pages/admin/HolarcHelpProviders.tsx`
+- `src/features/admin/components/UsersTab.tsx`
+- `src/pages/admin/HolarcHelpAccountability.tsx`
+- `src/pages/admin/PricingAdmin.tsx`
+- `src/pages/admin/GamificationAdmin.tsx`
