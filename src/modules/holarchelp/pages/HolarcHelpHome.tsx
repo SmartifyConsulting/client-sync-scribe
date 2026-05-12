@@ -367,9 +367,10 @@ export default function HolarcHelpHome() {
             Before using SOS, please acknowledge:
           </p>
           {[
-            { k: "a" as const, label: "I understand that the SOS feature is a best-effort assistance tool and does not guarantee emergency response." },
-            { k: "b" as const, label: "SOS assistance depends on network availability, device status, and third-party responders." },
-            { k: "c" as const, label: "I understand that SOS is only functional with location permissions enabled, sufficient battery and connectivity, and that emergency response availability differs by region." },
+            { k: "a" as const, label: "SOS support is provided on a best-effort basis and cannot guarantee emergency response." },
+            { k: "b" as const, label: "SOS depends on network, device status, location access, and third-party responders." },
+            { k: "c" as const, label: "SOS requires location permissions, battery power, and internet or cellular connectivity." },
+            { k: "d" as const, label: "Emergency response availability and response times may vary by location." },
           ].map((item) => (
             <label key={item.k} htmlFor={`sos-ack-${item.k}`} className="flex items-start gap-3 cursor-pointer">
               <Checkbox
