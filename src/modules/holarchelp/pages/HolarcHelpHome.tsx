@@ -14,7 +14,7 @@ import logo from "@/assets/holarc-help-logo.png";
 
 type Coords = { lat: number; lng: number };
 
-const HOLD_MS = 2500;
+const HOLD_MS = 1000;
 
 export default function HolarcHelpHome() {
   const { user } = useAuth();
@@ -38,16 +38,17 @@ export default function HolarcHelpHome() {
   const holdStartRef = useRef<number>(0);
   const channelRef = useRef<any>(null);
 
-  const ACK_KEY = "holarchelp.sos.ack.v1";
-  const [ack, setAck] = useState<{ a: boolean; b: boolean; c: boolean }>(() => {
-    if (typeof window === "undefined") return { a: false, b: false, c: false };
+  const ACK_KEY = "holarchelp.sos.ack.v2";
+  type AckKey = "a" | "b" | "c" | "d";
+  const [ack, setAck] = useState<Record<AckKey, boolean>>(() => {
+    if (typeof window === "undefined") return { a: false, b: false, c: false, d: false };
     try {
       const raw = localStorage.getItem(ACK_KEY);
-      return raw ? { a: false, b: false, c: false, ...JSON.parse(raw) } : { a: false, b: false, c: false };
-    } catch { return { a: false, b: false, c: false }; }
+      return raw ? { a: false, b: false, c: false, d: false, ...JSON.parse(raw) } : { a: false, b: false, c: false, d: false };
+    } catch { return { a: false, b: false, c: false, d: false }; }
   });
-  const allAck = ack.a && ack.b && ack.c;
-  const setAckField = (k: "a" | "b" | "c", v: boolean) => {
+  const allAck = ack.a && ack.b && ack.c && ack.d;
+  const setAckField = (k: AckKey, v: boolean) => {
     setAck((prev) => {
       const next = { ...prev, [k]: v };
       try { localStorage.setItem(ACK_KEY, JSON.stringify(next)); } catch {}
@@ -345,19 +346,7 @@ export default function HolarcHelpHome() {
         }}
       />
 
-      {/* Resume active SOS banner */}
-      {activeIncidentId && !incidentId && (
-        <button
-          onClick={() => navigate(`/patient/holarchelp/incident/${activeIncidentId}`)}
-          className="mt-4 flex w-full items-center justify-between gap-3 rounded-2xl border-2 border-red-500/50 bg-red-50 px-4 py-3 text-left dark:bg-red-950/20"
-        >
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-red-700">Active SOS in progress</p>
-            <p className="text-sm font-semibold text-red-900">Tap to resume live tracking</p>
-          </div>
-          <span className="text-red-700">→</span>
-        </button>
-      )}
+      {/* Active SOS resume banner moved below the hold button */}
 
       {/* Header */}
       <div className="flex justify-center pt-6">
@@ -378,9 +367,10 @@ export default function HolarcHelpHome() {
             Before using SOS, please acknowledge:
           </p>
           {[
-            { k: "a" as const, label: "I understand that the SOS feature is a best-effort assistance tool and does not guarantee emergency response." },
-            { k: "b" as const, label: "SOS assistance depends on network availability, device status, and third-party responders." },
-            { k: "c" as const, label: "I understand that SOS is only functional with location permissions enabled, sufficient battery and connectivity, and that emergency response availability differs by region." },
+            { k: "a" as const, label: "SOS support is provided on a best-effort basis and cannot guarantee emergency response." },
+            { k: "b" as const, label: "SOS depends on network, device status, location access, and third-party responders." },
+            { k: "c" as const, label: "SOS requires location permissions, battery power, and internet or cellular connectivity." },
+            { k: "d" as const, label: "Emergency response availability and response times may vary by location." },
           ].map((item) => (
             <label key={item.k} htmlFor={`sos-ack-${item.k}`} className="flex items-start gap-3 cursor-pointer">
               <Checkbox
@@ -397,19 +387,28 @@ export default function HolarcHelpHome() {
 
       <div className="mt-10 flex flex-1 flex-col items-center justify-center">
         <div className="relative flex items-center justify-center">
-          {/* Ambient glow */}
-          <span aria-hidden className="absolute inset-0 -m-6 rounded-full bg-red-500/15 blur-2xl" />
-          <span aria-hidden className="absolute inset-0 -m-1 animate-ping rounded-full bg-red-500/25" style={{ animationDuration: "2.6s" }} />
+          {/* Ambient glow — intensifies during hold */}
+          <span
+            aria-hidden
+            className="absolute inset-0 -m-6 rounded-full bg-red-500/20 blur-2xl transition-opacity"
+            style={{ opacity: 0.6 + holdProgress * 0.4 }}
+          />
+          {holdProgress === 0 && (
+            <span aria-hidden className="absolute inset-0 -m-1 animate-ping rounded-full bg-red-500/25" style={{ animationDuration: "2.6s" }} />
+          )}
 
-          {/* Progress ring */}
-          <svg className="absolute -rotate-90" width={260} height={260} aria-hidden>
-            <circle cx={130} cy={130} r={ringR} stroke="hsl(0 0% 100% / 0.4)" strokeWidth={6} fill="none" />
+          {/* Progress ring — thicker, glowing white */}
+          <svg className="absolute -rotate-90" width={280} height={280} aria-hidden>
+            <circle cx={140} cy={140} r={ringR} stroke="hsl(0 0% 100% / 0.25)" strokeWidth={14} fill="none" />
             <circle
-              cx={130} cy={130} r={ringR}
-              stroke="white" strokeWidth={6} fill="none" strokeLinecap="round"
+              cx={140} cy={140} r={ringR}
+              stroke="white" strokeWidth={14} fill="none" strokeLinecap="round"
               strokeDasharray={ringC}
               strokeDashoffset={ringC * (1 - holdProgress)}
-              style={{ transition: holdProgress === 0 ? "stroke-dashoffset .25s ease-out" : "none" }}
+              style={{
+                transition: holdProgress === 0 ? "stroke-dashoffset .25s ease-out" : "none",
+                filter: "drop-shadow(0 0 10px rgba(255,255,255,0.95)) drop-shadow(0 0 4px rgba(255,255,255,0.6))",
+              }}
             />
           </svg>
 
@@ -432,6 +431,13 @@ export default function HolarcHelpHome() {
           >
             {triggering ? (
               <Loader2 className="h-10 w-10 animate-spin" />
+            ) : holdProgress > 0 ? (
+              <>
+                <span className="text-3xl tracking-[0.18em]">HOLD</span>
+                <span className="mt-1 text-[11px] font-bold uppercase tracking-[0.28em] opacity-95">
+                  Activating… {Math.round(holdProgress * 100)}%
+                </span>
+              </>
             ) : (
               <>
                 <span className="text-3xl tracking-[0.18em]">HOLD</span>
@@ -443,8 +449,28 @@ export default function HolarcHelpHome() {
 
         {/* Hint */}
         <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-          Press &amp; hold for 2 seconds
+          Press &amp; hold for 1 second
         </p>
+
+        {/* Active SOS — surfaced directly under the hint */}
+        {activeIncidentId && !incidentId && (
+          <button
+            onClick={() => navigate(`/patient/holarchelp/incident/${activeIncidentId}`)}
+            className="mt-4 flex w-full items-center justify-between gap-3 rounded-2xl border-2 border-red-500/60 bg-red-50 px-4 py-3 text-left shadow-sm transition hover:bg-red-100 dark:bg-red-950/20"
+          >
+            <div className="flex items-center gap-3">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-600" />
+              </span>
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-red-700">Active SOS in progress</p>
+                <p className="text-sm font-semibold text-red-900">Tap to resume live tracking</p>
+              </div>
+            </div>
+            <span className="text-red-700">→</span>
+          </button>
+        )}
 
         {/* Inline alert pills */}
         {permDenied && (
