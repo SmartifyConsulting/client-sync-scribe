@@ -22,7 +22,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Hospital, Ambulance, ShieldAlert, Loader2, Upload, BarChart3, Mic2, Building2, Plus, Pencil, Trash2, Users, Pill } from "lucide-react";
+import { Hospital, Ambulance, ShieldAlert, Loader2, Upload, BarChart3, Mic2, Plus, Pencil, Trash2, Users, Pill, Stethoscope } from "lucide-react";
 import { AccountabilityPanel } from "./HolarcHelpAccountability";
 import UsersTab from "@/features/admin/components/UsersTab";
 
