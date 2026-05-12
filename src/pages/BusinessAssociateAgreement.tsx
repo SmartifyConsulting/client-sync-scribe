@@ -13,11 +13,6 @@ const BusinessAssociateAgreement = () => {
             <p className="mb-0"><strong>IF YOU ARE A HEALTHCARE PROVIDER WHO IS A HIPAA COVERED ENTITY, BY CREATING A PROVIDER ACCOUNT OR USING THE PLATFORM TO ACCESS PROTECTED HEALTH INFORMATION, YOU AUTOMATICALLY ACCEPT AND AGREE TO THIS BUSINESS ASSOCIATE AGREEMENT.</strong></p>
           </div>
 
-          <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-8">
-            <h2 className="text-lg font-semibold text-primary mt-0">AUTOMATIC ACCEPTANCE BY USE</h2>
-            <p className="mb-0"><strong>IF YOU ARE A HEALTHCARE PROVIDER WHO IS A HIPAA COVERED ENTITY, BY CREATING A PROVIDER ACCOUNT OR USING THE PLATFORM TO ACCESS PROTECTED HEALTH INFORMATION, YOU AUTOMATICALLY ACCEPT AND AGREE TO THIS BUSINESS ASSOCIATE AGREEMENT.</strong></p>
-          </div>
-
           <p>This Business Associate Agreement ("BAA") is automatically formed between Smartify Solutions ("Business Associate") and any healthcare provider who is a HIPAA Covered Entity ("Covered Entity") when such Covered Entity creates an account or uses the Platform.</p>
 
           <h2>Recitals and Background</h2>
