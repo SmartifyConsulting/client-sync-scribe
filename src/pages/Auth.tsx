@@ -450,7 +450,7 @@ export default function Auth() {
 
       clearDraft();
       toast({ title: "Account created!", description: "Welcome to Holarc! You have 30 days of free access." });
-      navigate("/dashboard");
+      await routeAfterLogin(userId);
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } finally {
