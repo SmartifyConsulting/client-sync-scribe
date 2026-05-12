@@ -6,6 +6,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Check, Loader2, MapPin } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { SeverityPicker, type SeverityResult } from "../components/SeverityPicker";
 import { SosVoiceNoteDialog } from "../components/SosVoiceNoteDialog";
 import { DoctorSosChooser } from "../components/DoctorSosChooser";
@@ -36,6 +37,23 @@ export default function HolarcHelpHome() {
   const holdTimerRef = useRef<number | null>(null);
   const holdStartRef = useRef<number>(0);
   const channelRef = useRef<any>(null);
+
+  const ACK_KEY = "holarchelp.sos.ack.v1";
+  const [ack, setAck] = useState<{ a: boolean; b: boolean; c: boolean }>(() => {
+    if (typeof window === "undefined") return { a: false, b: false, c: false };
+    try {
+      const raw = localStorage.getItem(ACK_KEY);
+      return raw ? { a: false, b: false, c: false, ...JSON.parse(raw) } : { a: false, b: false, c: false };
+    } catch { return { a: false, b: false, c: false }; }
+  });
+  const allAck = ack.a && ack.b && ack.c;
+  const setAckField = (k: "a" | "b" | "c", v: boolean) => {
+    setAck((prev) => {
+      const next = { ...prev, [k]: v };
+      try { localStorage.setItem(ACK_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -211,6 +229,10 @@ export default function HolarcHelpHome() {
   // ============ HOLD-TO-TRIGGER ============
   const startHold = () => {
     if (triggering) return;
+    if (!activeIncidentId && !allAck) {
+      toast.error("Please acknowledge all three statements above to enable SOS.");
+      return;
+    }
     if ("vibrate" in navigator) navigator.vibrate?.(30);
     holdStartRef.current = performance.now();
     const tick = () => {
@@ -349,6 +371,30 @@ export default function HolarcHelpHome() {
       </div>
 
       {/* CTA */}
+      {/* SOS acknowledgements */}
+      {!activeIncidentId && (
+        <div className="mt-6 rounded-2xl border border-border bg-card p-4 space-y-3">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            Before using SOS, please acknowledge:
+          </p>
+          {[
+            { k: "a" as const, label: "I understand that the SOS feature is a best-effort assistance tool and does not guarantee emergency response." },
+            { k: "b" as const, label: "SOS assistance depends on network availability, device status, and third-party responders." },
+            { k: "c" as const, label: "I understand that SOS is only functional with location permissions enabled, sufficient battery and connectivity, and that emergency response availability differs by region." },
+          ].map((item) => (
+            <label key={item.k} htmlFor={`sos-ack-${item.k}`} className="flex items-start gap-3 cursor-pointer">
+              <Checkbox
+                id={`sos-ack-${item.k}`}
+                checked={ack[item.k]}
+                onCheckedChange={(v) => setAckField(item.k, v === true)}
+                className="mt-0.5"
+              />
+              <span className="text-xs leading-relaxed text-foreground">{item.label}</span>
+            </label>
+          ))}
+        </div>
+      )}
+
       <div className="mt-10 flex flex-1 flex-col items-center justify-center">
         <div className="relative flex items-center justify-center">
           {/* Ambient glow */}
@@ -376,9 +422,9 @@ export default function HolarcHelpHome() {
             onPointerUp={cancelHold}
             onPointerCancel={cancelHold}
             onContextMenu={(e) => e.preventDefault()}
-            disabled={triggering}
+            disabled={triggering || (!activeIncidentId && !allAck)}
             aria-label="Hold for help"
-            className="relative z-10 flex h-52 w-52 select-none flex-col items-center justify-center rounded-full font-black text-white transition active:scale-[.98] touch-none"
+            className={`relative z-10 flex h-52 w-52 select-none flex-col items-center justify-center rounded-full font-black text-white transition active:scale-[.98] touch-none ${(!activeIncidentId && !allAck) ? "opacity-50 cursor-not-allowed" : ""}`}
             style={{
               background: "radial-gradient(circle at 30% 25%, hsl(354,90%,62%) 0%, hsl(354,84%,52%) 45%, hsl(0,80%,38%) 100%)",
               boxShadow: "0 24px 60px -14px hsl(0 80% 40% / 0.55), inset 0 -10px 30px hsl(0 80% 25% / 0.35), inset 0 6px 14px hsl(0 100% 80% / 0.3)",
