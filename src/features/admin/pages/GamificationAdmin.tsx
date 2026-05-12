@@ -1123,6 +1123,6 @@ export default function GamificationAdmin() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </AdminPage>
   );
 }
