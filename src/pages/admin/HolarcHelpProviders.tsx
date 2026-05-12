@@ -458,7 +458,7 @@ export default function HolarcHelpProviders() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </AdminPage>
   );
 }
 
