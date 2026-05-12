@@ -38,16 +38,17 @@ export default function HolarcHelpHome() {
   const holdStartRef = useRef<number>(0);
   const channelRef = useRef<any>(null);
 
-  const ACK_KEY = "holarchelp.sos.ack.v1";
-  const [ack, setAck] = useState<{ a: boolean; b: boolean; c: boolean }>(() => {
-    if (typeof window === "undefined") return { a: false, b: false, c: false };
+  const ACK_KEY = "holarchelp.sos.ack.v2";
+  type AckKey = "a" | "b" | "c" | "d";
+  const [ack, setAck] = useState<Record<AckKey, boolean>>(() => {
+    if (typeof window === "undefined") return { a: false, b: false, c: false, d: false };
     try {
       const raw = localStorage.getItem(ACK_KEY);
-      return raw ? { a: false, b: false, c: false, ...JSON.parse(raw) } : { a: false, b: false, c: false };
-    } catch { return { a: false, b: false, c: false }; }
+      return raw ? { a: false, b: false, c: false, d: false, ...JSON.parse(raw) } : { a: false, b: false, c: false, d: false };
+    } catch { return { a: false, b: false, c: false, d: false }; }
   });
-  const allAck = ack.a && ack.b && ack.c;
-  const setAckField = (k: "a" | "b" | "c", v: boolean) => {
+  const allAck = ack.a && ack.b && ack.c && ack.d;
+  const setAckField = (k: AckKey, v: boolean) => {
     setAck((prev) => {
       const next = { ...prev, [k]: v };
       try { localStorage.setItem(ACK_KEY, JSON.stringify(next)); } catch {}
