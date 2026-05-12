@@ -82,14 +82,6 @@ serve(async (req) => {
       }
     }
 
-    const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-    if (!RESEND_API_KEY) {
-      return new Response(
-        JSON.stringify({ error: 'Email service not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     const subject = `${patientName} has added you as a Next of Kin on Holarc`;
     const html = `
       <!doctype html>
@@ -107,25 +99,11 @@ serve(async (req) => {
       </body></html>
     `;
 
-    const resp = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'Holarc Health <onboarding@resend.dev>',
-        to: [nokEmail],
-        subject,
-        html,
-      }),
-    });
-
-    if (!resp.ok) {
-      const errText = await resp.text().catch(() => '');
-      console.error('Resend failed:', resp.status, errText);
+    const result = await sendMailgunEmail({ to: nokEmail, subject, html });
+    if (!result.ok) {
+      console.error('Mailgun failed:', result.status, result.error);
       return new Response(
-        JSON.stringify({ error: 'Failed to send email', detail: errText }),
+        JSON.stringify({ error: 'Failed to send email', detail: result.error }),
         { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
