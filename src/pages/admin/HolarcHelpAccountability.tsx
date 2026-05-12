@@ -57,50 +57,46 @@ export function AccountabilityPanel() {
     toast.success("Provider suspended"); load();
   };
 
-  const renderTable = (kind: "hospital" | "ambulance") => {
-    const filtered = rows.filter((r) => r.provider_type === kind);
+  const renderRowsTable = (subset: Row[], kind: "hospital" | "ambulance") => {
     const table = kind === "hospital" ? "holarchelp_hospitals" : "holarchelp_ambulance_providers";
     return (
-      <div className="rounded-2xl border bg-card overflow-x-auto">
+      <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Provider</TableHead>
-              <TableHead>Accepts</TableHead>
-              <TableHead>Avg Arr (min)</TableHead>
-              <TableHead>Cancels</TableHead>
-              <TableHead>Critical Cancels</TableHead>
-              <TableHead>Stalled</TableHead>
-              <TableHead>Avg Rating</TableHead>
-              <TableHead><AlertTriangle className="inline h-4 w-4 text-amber-500" /> Flags</TableHead>
-              <TableHead>Priority</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="h-9 text-[11px] uppercase tracking-wide">Provider</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wide">Accepts</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wide">Avg Arr (min)</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wide">Cancels</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wide">Critical</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wide">Stalled</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wide">Avg Rating</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wide"><AlertTriangle className="inline h-3.5 w-3.5 text-amber-500" /> Flags</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wide">Priority</TableHead>
+              <TableHead className="h-9 text-right text-[11px] uppercase tracking-wide">Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
-            {filtered.length === 0 && (
-              <TableRow><TableCell colSpan={10} className="text-center text-sm text-muted-foreground py-8">No providers yet.</TableCell></TableRow>
-            )}
-            {filtered.map((r) => (
-              <TableRow key={r.provider_id}>
-                <TableCell>
-                  <div className="font-medium">{r.name}</div>
+          <TableBody className="divide-y divide-border/50">
+            {subset.map((r) => (
+              <TableRow key={r.provider_id} className="hover:bg-muted/40">
+                <TableCell className="py-2">
+                  <div className="font-medium text-[12px]">{r.name}</div>
                   <div className="text-[11px] text-muted-foreground capitalize">{r.status}</div>
                 </TableCell>
-                <TableCell>{r.accepts}</TableCell>
-                <TableCell>{r.avg_arr_min == null ? "—" : Number(r.avg_arr_min).toFixed(1)}</TableCell>
-                <TableCell>{r.cancels}</TableCell>
-                <TableCell>{r.critical_cancels}</TableCell>
-                <TableCell>{r.stalled}</TableCell>
-                <TableCell>{r.avg_rating == null ? "—" : Number(r.avg_rating).toFixed(1)}</TableCell>
-                <TableCell>{r.flags}</TableCell>
-                <TableCell className="font-semibold">{r.dispatch_priority}</TableCell>
-                <TableCell className="text-right space-x-1">
+                <TableCell className="py-2 text-[12px]">{r.accepts}</TableCell>
+                <TableCell className="py-2 text-[12px]">{r.avg_arr_min == null ? "—" : Number(r.avg_arr_min).toFixed(1)}</TableCell>
+                <TableCell className="py-2 text-[12px]">{r.cancels}</TableCell>
+                <TableCell className="py-2 text-[12px]">{r.critical_cancels}</TableCell>
+                <TableCell className="py-2 text-[12px]">{r.stalled}</TableCell>
+                <TableCell className="py-2 text-[12px]">{r.avg_rating == null ? "—" : Number(r.avg_rating).toFixed(1)}</TableCell>
+                <TableCell className="py-2 text-[12px]">{r.flags}</TableCell>
+                <TableCell className="py-2 text-[12px] font-semibold">{r.dispatch_priority}</TableCell>
+                <TableCell className="py-2 text-right space-x-1">
                   <Link to={`/admin/holarchelp-providers/${kind}/${r.provider_id}/incidents`}>
-                    <Button size="sm" variant="outline" className="gap-1"><History className="h-4 w-4" />Incidents</Button>
+                    <Button size="sm" variant="outline" className="h-7 gap-1 px-2 text-[11px]"><History className="h-3.5 w-3.5" />Incidents</Button>
                   </Link>
-                  <Button size="sm" variant="outline" onClick={() => lower(table, r.provider_id, r.dispatch_priority)}>Lower</Button>
-                  <Button size="sm" variant="outline" className="text-destructive border-destructive/30" onClick={() => suspend(table, r.provider_id)}>Suspend</Button>
+                  <Button size="sm" variant="outline" className="h-7 px-2 text-[11px]" onClick={() => lower(table, r.provider_id, r.dispatch_priority)}>Lower</Button>
+                  <Button size="sm" variant="outline" className="h-7 px-2 text-[11px] text-destructive border-destructive/30" onClick={() => suspend(table, r.provider_id)}>Suspend</Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -110,13 +106,79 @@ export function AccountabilityPanel() {
     );
   };
 
+  const renderTable = (kind: "hospital" | "ambulance") => {
+    const filtered = rows.filter((r) => r.provider_type === kind);
+    if (filtered.length === 0) {
+      return (
+        <div className="rounded-xl border border-dashed border-border/70 bg-card p-10 text-center text-sm text-muted-foreground">
+          No providers yet.
+        </div>
+      );
+    }
+    const grouped = groupByCountry(filtered, (r) => r.country);
+    const countries = sortedCountries(grouped);
+    return (
+      <Accordion type="multiple" defaultValue={countries.slice(0, 2)} className="space-y-2">
+        {countries.map((country) => {
+          const countryRows = grouped[country];
+          const approved = countryRows.filter((r) => r.status === "approved");
+          const unapproved = countryRows.filter((r) => r.status !== "approved");
+          return (
+            <AccordionItem
+              key={country}
+              value={country}
+              className="border border-border/70 rounded-xl bg-card overflow-hidden shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
+            >
+              <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/40">
+                <div className="flex items-center gap-3">
+                  <span className="text-base">{countryFlag(country)}</span>
+                  <span className="text-[13px] font-semibold">{country}</span>
+                  <span className="text-[11px] text-muted-foreground">
+                    {approved.length} approved · {unapproved.length} unapproved
+                  </span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="p-0 border-t border-border/50">
+                <Accordion type="multiple" defaultValue={["approved"]} className="divide-y divide-border/50">
+                  {[
+                    { key: "approved", label: "Approved", items: approved, dot: "bg-emerald-500" },
+                    { key: "unapproved", label: "Unapproved", items: unapproved, dot: "bg-amber-500" },
+                  ].map(({ key, label, items, dot }) => (
+                    <AccordionItem key={key} value={key} className="border-0">
+                      <AccordionTrigger className="px-4 py-2 hover:no-underline hover:bg-muted/30">
+                        <div className="flex items-center gap-2">
+                          <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
+                          <span className="text-[12px] font-medium">{label}</span>
+                          <span className="text-[11px] text-muted-foreground">{items.length}</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="p-0">
+                        {items.length === 0
+                          ? <div className="px-4 py-3 text-[12px] text-muted-foreground">None.</div>
+                          : renderRowsTable(items, kind)}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
+    );
+  };
+
   if (loading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin h-5 w-5" /></div>;
+
+  const flatTabsList = "h-auto w-full justify-start rounded-none border-b border-border bg-transparent p-0 gap-1";
+  const flatTrigger =
+    "relative h-9 rounded-none border-0 bg-transparent px-3 text-[13px] font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:inset-x-0 data-[state=active]:after:-bottom-px data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary";
 
   return (
     <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
-      <TabsList className="bg-primary">
-        <TabsTrigger value="ambulances" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">Ambulance</TabsTrigger>
-        <TabsTrigger value="hospitals" className="data-[state=active]:bg-white data-[state=active]:text-foreground text-white">Hospitals</TabsTrigger>
+      <TabsList className={flatTabsList}>
+        <TabsTrigger value="ambulances" className={flatTrigger}>Ambulance</TabsTrigger>
+        <TabsTrigger value="hospitals" className={flatTrigger}>Hospitals</TabsTrigger>
       </TabsList>
       <TabsContent value="ambulances" className="mt-4">{renderTable("ambulance")}</TabsContent>
       <TabsContent value="hospitals" className="mt-4">{renderTable("hospital")}</TabsContent>
