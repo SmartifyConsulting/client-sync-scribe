@@ -322,7 +322,7 @@ export default function UsersTab({ kind }: UsersTabProps) {
 
   return (
     <>
-      <Accordion type="multiple" defaultValue={countries.slice(0, 2)} className="space-y-2">
+      <Accordion type="multiple" className="space-y-2">
         {countries.map((country) => {
           const rows = grouped[country];
           return (

@@ -43,8 +43,9 @@ const TIER_CHIP: Record<string, string> = {
 };
 
 function normalizeCountry(c: string | null | undefined) {
-  if (!c) return "Unknown";
+  if (!c || !c.trim()) return "South Africa";
   const t = c.trim();
+  if (/^(unknown|n\/a|none)$/i.test(t)) return "South Africa";
   if (/^(za|rsa|south africa)$/i.test(t)) return "South Africa";
   if (/^(ng|nigeria)$/i.test(t)) return "Nigeria";
   return t;
@@ -212,7 +213,7 @@ export default function HolarcHelpProviders() {
     const grouped = groupByCountryTier(rows);
     const countries = sortedCountries(grouped);
     return (
-      <Accordion type="multiple" defaultValue={countries.slice(0, 2)} className="space-y-2">
+      <Accordion type="multiple" className="space-y-2">
         {countries.map((country) => {
           const tiers = grouped[country];
           const total = Object.values(tiers).reduce((s, arr) => s + arr.length, 0);

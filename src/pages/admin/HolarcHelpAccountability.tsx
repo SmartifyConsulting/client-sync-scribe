@@ -118,7 +118,7 @@ export function AccountabilityPanel() {
     const grouped = groupByCountry(filtered, (r) => r.country);
     const countries = sortedCountries(grouped);
     return (
-      <Accordion type="multiple" defaultValue={countries.slice(0, 2)} className="space-y-2">
+      <Accordion type="multiple" className="space-y-2">
         {countries.map((country) => {
           const countryRows = grouped[country];
           const approved = countryRows.filter((r) => r.status === "approved");
@@ -139,7 +139,7 @@ export function AccountabilityPanel() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="p-0 border-t border-border/50">
-                <Accordion type="multiple" defaultValue={["approved"]} className="divide-y divide-border/50">
+                <Accordion type="multiple" className="divide-y divide-border/50">
                   {[
                     { key: "approved", label: "Approved", items: approved, dot: "bg-emerald-500" },
                     { key: "unapproved", label: "Unapproved", items: unapproved, dot: "bg-amber-500" },
