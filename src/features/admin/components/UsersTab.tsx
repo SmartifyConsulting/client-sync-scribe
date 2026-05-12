@@ -119,14 +119,24 @@ export default function UsersTab({ kind }: UsersTabProps) {
     setLoading(false);
   };
 
+  const [search, setSearch] = useState("");
+
   const filtered = useMemo(() => {
+    let list: UserRecord[];
     if (kind === "patient") {
-      // Patients sub-tab: people who are patients, plus accounts with no role yet
-      return users.filter((u) => u.role === "patient" || u.role === "none");
+      list = users.filter((u) => u.role === "patient" || u.role === "none");
+    } else if (kind === "doctor") {
+      list = users.filter((u) => u.role === "doctor");
+    } else {
+      list = users.filter((u) => u.role === "admin");
     }
-    if (kind === "doctor") return users.filter((u) => u.role === "doctor");
-    return users.filter((u) => u.role === "admin");
-  }, [users, kind]);
+    const q = search.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((u) =>
+      (u.full_name || "").toLowerCase().includes(q) ||
+      (u.email || "").toLowerCase().includes(q),
+    );
+  }, [users, kind, search]);
 
   const grouped = useMemo(() => groupByCountry(filtered, (u) => u.country), [filtered]);
   const countries = useMemo(() => sortedCountries(grouped), [grouped]);
