@@ -92,6 +92,16 @@ export default function Auth() {
   const [accountCreated, setAccountCreated] = useState(false);
   const [createdUserId, setCreatedUserId] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [useOtp, setUseOtp] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpCooldown, setOtpCooldown] = useState(0);
+
+  useEffect(() => {
+    if (otpCooldown <= 0) return;
+    const t = setTimeout(() => setOtpCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [otpCooldown]);
 
   const [userRole, setUserRole] = useState<UserRole>(roleParam || "doctor");
   const [countryCode, setCountryCode] = useState("+27");
