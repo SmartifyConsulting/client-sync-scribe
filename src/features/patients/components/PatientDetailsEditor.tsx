@@ -139,6 +139,40 @@ const COUNTRY_CODES = [
 
 const sectionFrame = "rounded-xl border border-primary bg-card p-4 shadow-sm";
 
+// Inline autosave indicator shown in section headers
+const AutosaveStatus = ({
+  saving,
+  hasChanges,
+  lastSavedAt,
+}: {
+  saving: boolean;
+  hasChanges: boolean;
+  lastSavedAt: number | null;
+}) => {
+  if (saving) {
+    return (
+      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving…
+      </span>
+    );
+  }
+  if (hasChanges) {
+    return (
+      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Unsaved changes
+      </span>
+    );
+  }
+  if (lastSavedAt) {
+    return (
+      <span className="flex items-center gap-1.5 text-xs text-emerald-600">
+        <Save className="h-3.5 w-3.5" /> Saved
+      </span>
+    );
+  }
+  return null;
+};
+
 // Reusable collapsible section header with optional inline edit pencil
 const SectionHeader = ({
   icon: Icon,
