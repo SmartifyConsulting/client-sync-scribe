@@ -29,6 +29,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import vulaSymbol from "@/assets/vula-symbol.png";
+import { AdminPage } from "@/pages/admin/_shared/AdminPage";
+import { adminTabsListClass, adminTabsTriggerClass } from "@/pages/admin/_shared/AdminTabs";
 
 interface PartnerApp {
   id: string;
@@ -393,73 +395,42 @@ export default function GamificationAdmin() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Reward Admin</h1>
-        <p className="mt-1 text-muted-foreground text-[12px]">
-          Configure Vula rewards and streak bonuses
-        </p>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Visit Categories</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{configs.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active Categories</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {configs.filter(c => c.is_active).length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Streak Programs</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">
-              {streakConfigs.length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Max Vulas/Visit</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-emerald-600 flex items-center gap-1">
-              {Math.max(...configs.map(c => c.lollipops_awarded), 0)} <img src={vulaSymbol} alt="Vula" className="h-5 w-5 inline object-contain" />
-            </div>
-          </CardContent>
-        </Card>
+    <AdminPage
+      eyebrow="Admin"
+      title="Reward Admin"
+      description="Configure Vula rewards, adherence bonuses, streak programs, and partner apps."
+    >
+      {/* Stats */}
+      <div className="grid gap-2 sm:gap-3 grid-cols-2 md:grid-cols-4">
+        {[
+          { label: "Visit categories", value: configs.length, tone: "text-[hsl(var(--admin-text-primary))]" },
+          { label: "Active categories", value: configs.filter(c => c.is_active).length, tone: "text-[hsl(var(--admin-status-active))]" },
+          { label: "Streak programs", value: streakConfigs.length, tone: "text-[hsl(var(--admin-status-pending))]" },
+          { label: "Max Vulas / visit", value: Math.max(...configs.map(c => c.lollipops_awarded), 0), tone: "text-[hsl(var(--admin-accent))]", showVula: true },
+        ].map((s) => (
+          <div key={s.label} className="admin-panel px-4 py-3">
+            <p className="text-[10.5px] font-medium uppercase tracking-wide text-[hsl(var(--admin-text-tertiary))]">{s.label}</p>
+            <p className={`mt-1 text-[20px] font-semibold tabular-nums flex items-center gap-1.5 ${s.tone}`}>
+              {s.value}
+              {s.showVula && <img src={vulaSymbol} alt="Vula" className="h-4 w-4 object-contain" />}
+            </p>
+          </div>
+        ))}
       </div>
 
       <Tabs defaultValue="rewards">
-        <TabsList className="bg-primary">
-          <TabsTrigger value="rewards" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-            <Gift className="h-4 w-4 mr-2" />
-            Visit Rewards
+        <TabsList className={adminTabsListClass}>
+          <TabsTrigger value="rewards" className={`${adminTabsTriggerClass} gap-1.5`}>
+            <Gift className="h-3.5 w-3.5" />Visit Rewards
           </TabsTrigger>
-          <TabsTrigger value="adherence" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-            <Pill className="h-4 w-4 mr-2" />
-            Adherence Rewards
+          <TabsTrigger value="adherence" className={`${adminTabsTriggerClass} gap-1.5`}>
+            <Pill className="h-3.5 w-3.5" />Adherence Rewards
           </TabsTrigger>
-          <TabsTrigger value="streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-            <Flame className="h-4 w-4 mr-2" />
-            Streak Programs
+          <TabsTrigger value="streaks" className={`${adminTabsTriggerClass} gap-1.5`}>
+            <Flame className="h-3.5 w-3.5" />Streak Programs
           </TabsTrigger>
-          <TabsTrigger value="partner-apps" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-            <Globe className="h-4 w-4 mr-2" />
-            Partner Apps
+          <TabsTrigger value="partner-apps" className={`${adminTabsTriggerClass} gap-1.5`}>
+            <Globe className="h-3.5 w-3.5" />Partner Apps
           </TabsTrigger>
         </TabsList>
 
@@ -1152,6 +1123,6 @@ export default function GamificationAdmin() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </AdminPage>
   );
 }
