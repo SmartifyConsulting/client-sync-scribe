@@ -589,6 +589,7 @@ export type Database = {
           display_name: string | null
           id: string
           status: string
+          status_changed_at: string
           title: string
           type: string
           updated_at: string
@@ -601,6 +602,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           status?: string
+          status_changed_at?: string
           title: string
           type?: string
           updated_at?: string
@@ -613,6 +615,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           status?: string
+          status_changed_at?: string
           title?: string
           type?: string
           updated_at?: string

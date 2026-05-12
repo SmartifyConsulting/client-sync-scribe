@@ -1,19 +1,36 @@
 import { useState } from "react";
-import { Bug, Wrench, Sparkles, Send, Check, Search, Loader2 } from "lucide-react";
+import { Bug, Wrench, Sparkles, Send, Search, Loader2 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 
 type ReportType = "bug" | "fix" | "nice_to_have";
+type ReportStatus = "Logged" | "In Process" | "Review" | "Closed";
+
+const STATUSES: ReportStatus[] = ["Logged", "In Process", "Review", "Closed"];
+
+const STATUS_META: Record<ReportStatus, { className: string }> = {
+  "Logged": { className: "bg-muted text-muted-foreground border-border" },
+  "In Process": { className: "bg-amber-500/15 text-amber-700 border-amber-500/30" },
+  "Review": { className: "bg-blue-500/15 text-blue-700 border-blue-500/30" },
+  "Closed": { className: "bg-green-500/15 text-green-700 border-green-500/30" },
+};
 
 interface ReportFixSheetProps {
   open: boolean;
@@ -29,21 +46,21 @@ const TYPE_META: Record<ReportType, { label: string; icon: typeof Bug; border: s
 export function ReportFixSheet({ open, onOpenChange }: ReportFixSheetProps) {
   const { user } = useAuth();
   const { profile } = useProfile();
+  const { hasAdminRole } = useUserRole();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [type, setType] = useState<ReportType>("bug");
   const [title, setTitle] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState("");
+  const [showClosed, setShowClosed] = useState(false);
 
   const { data: reports = [], isLoading } = useQuery({
-    queryKey: ["bug-reports-open"],
+    queryKey: ["bug-reports-open", showClosed],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("bug_reports")
-        .select("*")
-        .eq("status", "open")
-        .order("created_at", { ascending: false });
+      let query = supabase.from("bug_reports").select("*").order("created_at", { ascending: false });
+      if (!showClosed) query = query.neq("status", "Closed");
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
@@ -59,6 +76,7 @@ export function ReportFixSheet({ open, onOpenChange }: ReportFixSheetProps) {
       type,
       title: title.trim().slice(0, 300),
       created_via: "typed",
+      status: "Logged",
     });
     setSubmitting(false);
     if (error) {
@@ -70,8 +88,8 @@ export function ReportFixSheet({ open, onOpenChange }: ReportFixSheetProps) {
     queryClient.invalidateQueries({ queryKey: ["bug-reports-open"] });
   };
 
-  const markDone = async (id: string) => {
-    const { error } = await supabase.from("bug_reports").update({ status: "done" }).eq("id", id);
+  const changeStatus = async (id: string, next: ReportStatus) => {
+    const { error } = await supabase.from("bug_reports").update({ status: next }).eq("id", id);
     if (error) {
       toast({ title: "Could not update", description: error.message, variant: "destructive" });
       return;
@@ -149,8 +167,8 @@ export function ReportFixSheet({ open, onOpenChange }: ReportFixSheetProps) {
         </div>
 
         {/* Outstanding list */}
-        <div className="px-4 py-2 border-b border-border">
-          <div className="relative">
+        <div className="px-4 py-2 border-b border-border flex items-center gap-2">
+          <div className="relative flex-1">
             <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               value={search}
@@ -159,6 +177,15 @@ export function ReportFixSheet({ open, onOpenChange }: ReportFixSheetProps) {
               className="pl-7 h-8 text-xs"
             />
           </div>
+          <label className="flex items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showClosed}
+              onChange={(e) => setShowClosed(e.target.checked)}
+              className="h-3 w-3"
+            />
+            Show closed
+          </label>
         </div>
 
         <ScrollArea className="flex-1">
@@ -173,13 +200,16 @@ export function ReportFixSheet({ open, onOpenChange }: ReportFixSheetProps) {
               filtered.map((r: any) => {
                 const meta = TYPE_META[(r.type as ReportType)] || TYPE_META.bug;
                 const Icon = meta.icon;
+                const status = (STATUSES.includes(r.status) ? r.status : "Logged") as ReportStatus;
+                const statusMeta = STATUS_META[status];
+                const changedAt = r.status_changed_at || r.updated_at || r.created_at;
                 return (
                   <div
                     key={r.id}
                     className={cn("border border-border rounded-md border-l-4 p-3 bg-card flex items-start gap-2", meta.border)}
                   >
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <Icon className="h-3.5 w-3.5 shrink-0" />
                         <span className={cn("text-[10px] px-1.5 py-0.5 rounded", meta.chip)}>{meta.label}</span>
                       </div>
@@ -189,15 +219,46 @@ export function ReportFixSheet({ open, onOpenChange }: ReportFixSheetProps) {
                         {r.display_name || "Anonymous"} · {formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}
                       </p>
                     </div>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-7 w-7 text-green-600 hover:text-green-700 hover:bg-green-50 shrink-0"
-                      onClick={() => markDone(r.id)}
-                      title="Mark as done"
-                    >
-                      <Check className="h-4 w-4" />
-                    </Button>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      {hasAdminRole ? (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              className={cn(
+                                "text-[10px] font-semibold px-2 py-1 rounded border transition-opacity hover:opacity-80",
+                                statusMeta.className
+                              )}
+                            >
+                              {status}
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="min-w-[120px]">
+                            {STATUSES.map((s) => (
+                              <DropdownMenuItem
+                                key={s}
+                                disabled={s === status}
+                                onClick={() => changeStatus(r.id, s)}
+                                className="text-xs"
+                              >
+                                {s}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      ) : (
+                        <span
+                          className={cn(
+                            "text-[10px] font-semibold px-2 py-1 rounded border",
+                            statusMeta.className
+                          )}
+                        >
+                          {status}
+                        </span>
+                      )}
+                      <span className="text-[9px] text-muted-foreground">
+                        {formatDistanceToNow(new Date(changedAt), { addSuffix: true })}
+                      </span>
+                    </div>
                   </div>
                 );
               })
