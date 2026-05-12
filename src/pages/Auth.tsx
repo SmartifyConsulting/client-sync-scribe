@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { TrialSignupSection } from "@/components/auth/TrialSignupSection";
 import { Footer } from "@/components/layout/Footer";
 import { Progress } from "@/components/ui/progress";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const DOCTOR_SPECIALTIES = [
   "General Practitioner", "Cardiologist", "Dermatologist", "Endocrinologist",
@@ -79,7 +80,7 @@ export default function Auth() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithOtp, verifyOtp } = useAuth();
   
   const modeParam = searchParams.get("mode");
   const roleParam = searchParams.get("role") as UserRole | null;
@@ -92,6 +93,16 @@ export default function Auth() {
   const [accountCreated, setAccountCreated] = useState(false);
   const [createdUserId, setCreatedUserId] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [useOtp, setUseOtp] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpCooldown, setOtpCooldown] = useState(0);
+
+  useEffect(() => {
+    if (otpCooldown <= 0) return;
+    const t = setTimeout(() => setOtpCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [otpCooldown]);
 
   const [userRole, setUserRole] = useState<UserRole>(roleParam || "doctor");
   const [countryCode, setCountryCode] = useState("+27");
@@ -464,6 +475,33 @@ export default function Auth() {
     if (currentStep > 0) setCurrentStep(currentStep - 1);
   };
 
+  const routeAfterLogin = async (userId: string) => {
+    const [{ data: profileData }, { data: roleRows }] = await Promise.all([
+      supabase.from("profiles").select("role").eq("id", userId).maybeSingle(),
+      supabase.from("user_roles").select("role").eq("user_id", userId),
+    ]);
+    const rawRoles = (roleRows ?? []).map((r) => r.role);
+    const isEmergency = rawRoles.some((r) => r === "hospital_staff" || r === "ambulance_staff" || r === "blood_bank");
+    const resolvedRole =
+      profileData?.role ??
+      (rawRoles.includes("patient")
+        ? "patient"
+        : rawRoles.includes("doctor")
+          ? "doctor"
+          : isEmergency
+            ? "emergency"
+            : rawRoles.includes("admin")
+              ? "admin"
+              : null);
+    navigate(
+      resolvedRole === "patient"
+        ? "/patient/details"
+        : resolvedRole === "emergency"
+          ? "/provider"
+          : "/dashboard"
+    );
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -471,45 +509,52 @@ export default function Auth() {
       const { data, error } = await signIn(email, password);
       if (error) throw error;
       toast({ title: "Welcome back!", description: "Successfully signed in" });
-      
       const userId = data?.user?.id;
       if (userId) {
-        const [{ data: profileData }, { data: roleRows }] = await Promise.all([
-          supabase
-            .from("profiles")
-            .select("role")
-            .eq("id", userId)
-            .maybeSingle(),
-          supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", userId),
-        ]);
-
-        const rawRoles = (roleRows ?? []).map((r) => r.role);
-        const isEmergency = rawRoles.some((r) => r === "hospital_staff" || r === "ambulance_staff" || r === "blood_bank");
-        const resolvedRole =
-          profileData?.role ??
-          (rawRoles.includes("patient")
-            ? "patient"
-            : rawRoles.includes("doctor")
-              ? "doctor"
-              : isEmergency
-                ? "emergency"
-                : rawRoles.includes("admin")
-                  ? "admin"
-                  : null);
-
-        navigate(
-          resolvedRole === "patient"
-            ? "/patient/details"
-            : resolvedRole === "emergency"
-              ? "/provider"
-              : "/dashboard"
-        );
+        await routeAfterLogin(userId);
       } else {
         navigate("/dashboard");
       }
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendOtp = async () => {
+    if (!email) {
+      toast({ title: "Email required", description: "Enter your email to receive a code", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await signInWithOtp(email);
+      if (error) throw error;
+      setOtpSent(true);
+      setOtpCooldown(30);
+      toast({ title: "Code sent", description: "Check your email for a 6-digit code or magic link." });
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otpCode.length !== 6) {
+      toast({ title: "Invalid code", description: "Enter the 6-digit code from your email", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data, error } = await verifyOtp(email, otpCode);
+      if (error) throw error;
+      toast({ title: "Welcome!", description: "Signed in successfully" });
+      const userId = data?.user?.id;
+      if (userId) await routeAfterLogin(userId);
+      else navigate("/dashboard");
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } finally {
@@ -911,32 +956,98 @@ export default function Auth() {
               <p className="text-muted-foreground mt-2">Sign In</p>
             </div>
             <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required />
+              {!useOtp ? (
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required />
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Password</Label>
-                    <button type="button" tabIndex={-1} onClick={() => navigate("/forgot-password")} className="text-xs text-muted-foreground hover:text-primary hover:underline">Forgot your password?</button>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password">Password</Label>
+                      <button type="button" tabIndex={-1} onClick={() => navigate("/forgot-password")} className="text-xs text-muted-foreground hover:text-primary hover:underline">Forgot your password?</button>
+                    </div>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" required minLength={6} />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
-                <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" required minLength={6} />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Sign In
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={handleVerifyOtp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="otp-email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        id="otp-email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => { setEmail(e.target.value); setOtpSent(false); }}
+                        className="pl-10"
+                        required
+                        disabled={otpSent && loading}
+                      />
+                    </div>
                   </div>
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Sign In
-                </Button>
-              </form>
+
+                  {!otpSent ? (
+                    <Button type="button" onClick={handleSendOtp} className="w-full" disabled={loading}>
+                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Send code
+                    </Button>
+                  ) : (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="otp">Enter 6-digit code</Label>
+                        <div className="flex justify-center">
+                          <InputOTP maxLength={6} value={otpCode} onChange={setOtpCode}>
+                            <InputOTPGroup>
+                              <InputOTPSlot index={0} />
+                              <InputOTPSlot index={1} />
+                              <InputOTPSlot index={2} />
+                              <InputOTPSlot index={3} />
+                              <InputOTPSlot index={4} />
+                              <InputOTPSlot index={5} />
+                            </InputOTPGroup>
+                          </InputOTP>
+                        </div>
+                        <p className="text-xs text-muted-foreground text-center">
+                          Or click the magic link we emailed you.
+                        </p>
+                      </div>
+                      <Button type="submit" className="w-full" disabled={loading || otpCode.length !== 6}>
+                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Verify & sign in
+                      </Button>
+                      <button
+                        type="button"
+                        onClick={handleSendOtp}
+                        disabled={loading || otpCooldown > 0}
+                        className="block w-full text-xs text-muted-foreground hover:text-primary hover:underline disabled:opacity-50"
+                      >
+                        {otpCooldown > 0 ? `Resend code in ${otpCooldown}s` : "Resend code"}
+                      </button>
+                    </>
+                  )}
+                </form>
+              )}
               <div className="mt-4 text-center space-y-2">
+                <button
+                  type="button"
+                  onClick={() => { setUseOtp(!useOtp); setOtpSent(false); setOtpCode(""); setPassword(""); }}
+                  className="block w-full text-sm text-primary hover:underline"
+                >
+                  {useOtp ? "Sign in with password instead" : "Email me a sign-in code instead"}
+                </button>
                 <button type="button" onClick={() => { setIsLogin(false); setCurrentStep(0); }} className="block w-full text-sm text-primary hover:underline">Don't have an account? Sign up</button>
                 <a href="/provider-signup" className="block text-xs text-muted-foreground hover:text-primary hover:underline">Are you a hospital or ambulance provider? Sign up here</a>
               </div>
