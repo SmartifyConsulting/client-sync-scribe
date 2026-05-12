@@ -139,6 +139,40 @@ const COUNTRY_CODES = [
 
 const sectionFrame = "rounded-xl border border-primary bg-card p-4 shadow-sm";
 
+// Inline autosave indicator shown in section headers
+const AutosaveStatus = ({
+  saving,
+  hasChanges,
+  lastSavedAt,
+}: {
+  saving: boolean;
+  hasChanges: boolean;
+  lastSavedAt: number | null;
+}) => {
+  if (saving) {
+    return (
+      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving…
+      </span>
+    );
+  }
+  if (hasChanges) {
+    return (
+      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Unsaved changes
+      </span>
+    );
+  }
+  if (lastSavedAt) {
+    return (
+      <span className="flex items-center gap-1.5 text-xs text-emerald-600">
+        <Save className="h-3.5 w-3.5" /> Saved
+      </span>
+    );
+  }
+  return null;
+};
+
 // Reusable collapsible section header with optional inline edit pencil
 const SectionHeader = ({
   icon: Icon,
@@ -365,7 +399,8 @@ export function PatientDetailsEditor({
   const navigate = useNavigate();
   const { isDoctor } = useUserRole();
   const queryClient = useQueryClient();
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const [activeParentTab, setActiveParentTab] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -756,6 +791,7 @@ export function PatientDetailsEditor({
       await syncChronicMedsToPrescriptions(currentMedications);
       setSaving(false);
       setHasChanges(false);
+      setLastSavedAt(Date.now());
     },
     [onSave, pharmacies, familyHistory, organDonorOrgans, nokMembers, currentMedications, conditionsDiagnoses, syncChronicMedsToPrescriptions, patient?.id, toast],
   );
@@ -765,7 +801,7 @@ export function PatientDetailsEditor({
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(() => {
       performSave(formData, surgeries);
-    }, 1500);
+    }, 600);
     return () => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     };
@@ -2085,22 +2121,7 @@ export function PatientDetailsEditor({
                 <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
                 <p className="text-xs text-muted-foreground">View and manage personal details</p>
               </div>
-              <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={handleCancel}>
-                  <X className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-green-600"
-                  onClick={() => {
-                    performSave(formData, surgeries);
-                    setIsEditing(false);
-                  }}
-                >
-                  <Save className="h-4 w-4" />
-                </Button>
-              </div>
+              <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
             </div>
 
             <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
@@ -2524,22 +2545,7 @@ export function PatientDetailsEditor({
                 <h2 className="text-lg font-semibold text-foreground">Medical Information</h2>
                 <p className="text-xs text-muted-foreground">View and manage medical records</p>
               </div>
-              <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={handleCancel}>
-                  <X className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-green-600"
-                  onClick={() => {
-                    performSave(formData, surgeries);
-                    setIsEditing(false);
-                  }}
-                >
-                  <Save className="h-4 w-4" />
-                </Button>
-              </div>
+              <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="space-y-3">

@@ -1212,8 +1212,11 @@ export type Database = {
           id: string
           name: string
           notify_min_severity: string
+          personal_info_ref: string | null
           phone: string | null
           relationship: string | null
+          source: string
+          updated_at: string
           user_id: string
         }
         Insert: {
@@ -1222,8 +1225,11 @@ export type Database = {
           id?: string
           name: string
           notify_min_severity?: string
+          personal_info_ref?: string | null
           phone?: string | null
           relationship?: string | null
+          source?: string
+          updated_at?: string
           user_id: string
         }
         Update: {
@@ -1232,8 +1238,11 @@ export type Database = {
           id?: string
           name?: string
           notify_min_severity?: string
+          personal_info_ref?: string | null
           phone?: string | null
           relationship?: string | null
+          source?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
