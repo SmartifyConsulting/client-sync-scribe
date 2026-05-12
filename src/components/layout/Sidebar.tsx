@@ -16,6 +16,8 @@ import {
   UserCog,
   FolderOpen,
   Siren,
+  ListChecks,
+  Users2,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
@@ -34,7 +36,10 @@ const doctorNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Home", to: "/doctor-dashboard" },
   { icon: Users, label: "My Patients", to: "/patients" },
   { icon: Settings2, label: "My Practice", to: "/practice" },
-  { icon: UserCog, label: "My Admin", to: "/admin" },
+  { icon: Calendar, label: "My Calendar", to: "/calendar" },
+  { icon: ListChecks, label: "My Tasks", to: "/todos" },
+  { icon: FolderOpen, label: "My Documents", to: "/documents" },
+  { icon: Users2, label: "My Round Tables", to: "/doctor/round-tables" },
   { icon: Gift, label: "My Rewards", to: "/doctor/rewards" },
   { icon: Siren, label: "SOS", to: "/doctor/holarchelp", danger: true },
 ];
@@ -42,7 +47,9 @@ const doctorNavItems: NavItem[] = [
 const patientNavItems: NavItem[] = [
   { icon: User, label: "My Profile", to: "/patient/details?section=health" },
   { icon: Users, label: "My Holarchy", to: "/patient/details?section=care" },
-  { icon: FolderOpen, label: "My Desk", to: "/patient/details?section=admin" },
+  { icon: Calendar, label: "My Calendar", to: "/patient/calendar" },
+  { icon: ListChecks, label: "My Tasks", to: "/patient/tasks" },
+  { icon: FolderOpen, label: "My Documents", to: "/patient/documents" },
   { icon: Gift, label: "My Rewards", to: "/patient/rewards" },
   { icon: Siren, label: "SOS", to: "/patient/holarchelp", danger: true },
 ];

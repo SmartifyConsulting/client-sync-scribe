@@ -15,7 +15,7 @@ import PatientProfile from "./pages/PatientProfile";
 import CalendarView from "./pages/CalendarView";
 import Sessions from "./pages/Sessions";
 import SessionDetail from "./pages/SessionDetail";
-import Documents from "./pages/Documents";
+// Documents page is now wrapped inside DoctorDocumentsPage
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import TodoList from "./pages/TodoList";
@@ -53,6 +53,8 @@ import GamificationAdmin from "./pages/admin/GamificationAdmin";
 import ReferralDoctors from "./pages/ReferralDoctors";
 import ExpiringRecordings from "./pages/ExpiringRecordings";
 import Admin from "./pages/Admin";
+import DoctorDocumentsPage from "./pages/doctor/DoctorDocumentsPage";
+import DoctorRoundTablesPage from "./pages/doctor/DoctorRoundTablesPage";
 import ProviderSignup from "./pages/ProviderSignup";
 
 // HolarcHelp module
@@ -199,7 +201,8 @@ const App = () => (
             <Route path="/todos" element={<TodoList />} />
             <Route path="/sessions" element={<Sessions />} />
             <Route path="/sessions/:id" element={<SessionDetail />} />
-            <Route path="/documents" element={<Documents />} />
+            <Route path="/documents" element={<DoctorDocumentsPage />} />
+            <Route path="/doctor/round-tables" element={<DoctorRoundTablesPage />} />
             <Route path="/invoices" element={<DoctorInvoices />} />
             <Route path="/practice" element={<MyPractice />} />
             <Route path="/doctor/rewards" element={<DoctorRewards />} />
