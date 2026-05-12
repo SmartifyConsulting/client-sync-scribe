@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { TrialSignupSection } from "@/components/auth/TrialSignupSection";
 import { Footer } from "@/components/layout/Footer";
 import { Progress } from "@/components/ui/progress";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const DOCTOR_SPECIALTIES = [
   "General Practitioner", "Cardiologist", "Dermatologist", "Endocrinologist",
