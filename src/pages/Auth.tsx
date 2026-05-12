@@ -474,6 +474,33 @@ export default function Auth() {
     if (currentStep > 0) setCurrentStep(currentStep - 1);
   };
 
+  const routeAfterLogin = async (userId: string) => {
+    const [{ data: profileData }, { data: roleRows }] = await Promise.all([
+      supabase.from("profiles").select("role").eq("id", userId).maybeSingle(),
+      supabase.from("user_roles").select("role").eq("user_id", userId),
+    ]);
+    const rawRoles = (roleRows ?? []).map((r) => r.role);
+    const isEmergency = rawRoles.some((r) => r === "hospital_staff" || r === "ambulance_staff" || r === "blood_bank");
+    const resolvedRole =
+      profileData?.role ??
+      (rawRoles.includes("patient")
+        ? "patient"
+        : rawRoles.includes("doctor")
+          ? "doctor"
+          : isEmergency
+            ? "emergency"
+            : rawRoles.includes("admin")
+              ? "admin"
+              : null);
+    navigate(
+      resolvedRole === "patient"
+        ? "/patient/details"
+        : resolvedRole === "emergency"
+          ? "/provider"
+          : "/dashboard"
+    );
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -481,42 +508,9 @@ export default function Auth() {
       const { data, error } = await signIn(email, password);
       if (error) throw error;
       toast({ title: "Welcome back!", description: "Successfully signed in" });
-      
       const userId = data?.user?.id;
       if (userId) {
-        const [{ data: profileData }, { data: roleRows }] = await Promise.all([
-          supabase
-            .from("profiles")
-            .select("role")
-            .eq("id", userId)
-            .maybeSingle(),
-          supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", userId),
-        ]);
-
-        const rawRoles = (roleRows ?? []).map((r) => r.role);
-        const isEmergency = rawRoles.some((r) => r === "hospital_staff" || r === "ambulance_staff" || r === "blood_bank");
-        const resolvedRole =
-          profileData?.role ??
-          (rawRoles.includes("patient")
-            ? "patient"
-            : rawRoles.includes("doctor")
-              ? "doctor"
-              : isEmergency
-                ? "emergency"
-                : rawRoles.includes("admin")
-                  ? "admin"
-                  : null);
-
-        navigate(
-          resolvedRole === "patient"
-            ? "/patient/details"
-            : resolvedRole === "emergency"
-              ? "/provider"
-              : "/dashboard"
-        );
+        await routeAfterLogin(userId);
       } else {
         navigate("/dashboard");
       }
