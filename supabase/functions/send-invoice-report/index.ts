@@ -128,12 +128,14 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
-    const emailResponse = await resend.emails.send({
-      from: "Holarc Health <noreply@smartify.co.za>",
-      to: [email],
+    const emailResponse = await sendMailgunEmail({
+      to: email,
       subject: `Invoice Report: ${dateFrom} to ${dateTo}`,
       html,
     });
+    if (!emailResponse.ok) {
+      throw new Error(emailResponse.error || "Failed to send invoice report");
+    }
 
     console.log("Email sent successfully:", emailResponse);
 
