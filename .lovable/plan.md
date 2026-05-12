@@ -1,60 +1,28 @@
-## Goal
+## Replace Section 3 of Patient Consent + add Emergency/SOS Disclaimer to HIPAA BAA
 
-On the **Active Emergency** page, replace the current OSM iframe map (LiveMap) with the same Google Maps implementation used on the "Search nearby" provider screen (`ProviderMap`), so it renders Google tiles with proper ambulance/hospital marker icons.
+### 1. `src/pages/PatientConsent.tsx` — replace Section 3 body (lines 39–61)
 
-## Why the current map looks different
+Keep heading `<h2>3. EMERGENCY DISCLAIMER - MANDATORY ACKNOWLEDGMENT</h2>` exactly as-is. Replace all paragraphs and lists currently under it with the new SOS disclaimer copy below.
 
-`ProviderMap` (used on `/patient/holarchelp/nearby`) loads Google Maps via `@googlemaps/js-api-loader` using the shared/public key in `config/google-maps.ts`, with `AdvancedMarkerElement` for hospitals (`marker-hospital.png`) and ambulances (`marker-ambulance.png`).
+### 2. `src/pages/BusinessAssociateAgreement.tsx` — add new SOS / Emergency Disclaimer section
 
-`LiveMap` (used on the active incident page) was previously gated behind `VITE_GOOGLE_MAPS_API_KEY` and silently fell back to an OSM iframe when no env key was set — that's why the active emergency map looks different and shows no ambulance/hospital icons.
+Insert a new `<h2>SOS and Emergency Functionality – Disclaimer and Limitation of Liability</h2>` section in the BAA, placed immediately before the existing closing/contact section so it falls at the end of the substantive clauses. Same body content as Patient Consent.
 
-## Plan
+### Shared body content (rendered as JSX inside `LegalDocLayout`)
 
-### 1. Rewrite `LiveMap` to render Google Maps (matching ProviderMap)
+- `<p>` — The SOS functionality provided within this application is intended to assist users in contacting designated emergency contacts and, where available, emergency response services.
+- `<p>` — The Company makes reasonable efforts to ensure the reliability and availability of the SOS feature; however, the Company does not warrant or guarantee:
+- `<ul>`:
+  - successful transmission or receipt of SOS alerts, calls, messages, or location information;
+  - uninterrupted or error-free operation of the SOS functionality; or
+  - the availability, response, or actions of emergency contacts, emergency responders, telecommunications providers, or other third parties.
+- `<p>` — The effectiveness of the SOS feature may be impacted by factors beyond the Company's reasonable control, including but not limited to:
+- `<ul>`: network or internet availability; device functionality or battery level; GPS or location accuracy; user permissions or device settings; third-party system outages or failures; environmental or technical conditions.
+- `<p>` — The application is not a substitute for direct access to emergency services or professional medical, security, or emergency assistance. Users should contact the relevant emergency services directly where possible.
+- `<p><strong>` — To the fullest extent permitted by applicable law, the Company shall not be liable for any loss, injury, damage, delay, failed communication, inability to obtain assistance, or other claim arising from or related to the use of, or inability to use, the SOS functionality.
+- `<p>` — By using the application, users acknowledge and accept these limitations.
 
-- Always use Google Maps via `loadGoogleMaps()` — no OSM fallback path.
-- Centre on the patient's most recent location, zoom 15.
-- Render typed markers using the same icons as `ProviderMap`:
-  - **Patient** — blue dot (HTML `div`, same style as ProviderMap user marker)
-  - **Ambulance** — `marker-ambulance.png` AdvancedMarker
-  - **Hospital** — `marker-hospital.png` AdvancedMarker
-- Use classic `google.maps.Marker` as fallback when no real `mapId` is configured (so `AdvancedMarkerElement` requirements are still met with `DEMO_MAP_ID`).
-- Keep proper cleanup of markers/map on unmount (already in place, just retain it).
-- Handle `gm_authFailure` by showing a small inline "Map unavailable" tile instead of swapping to OSM, so the UI stays consistent.
+### Out of scope
 
-### 2. Update `LiveMap` props to accept typed points
-
-```ts
-type Point = {
-  kind: "patient" | "ambulance" | "hospital";
-  latitude: number;
-  longitude: number;
-  label?: string;
-};
-```
-
-Auto-fit bounds when 2+ points exist; otherwise centre on the single point at zoom 15.
-
-### 3. Update `HolarcHelpIncidentDetail.tsx` to pass typed points
-
-Replace:
-```tsx
-<LiveMap points={[...locations.slice(0, 1), ...ambulancePoint]} />
-```
-with a typed array:
-- Patient: latest entry from `locations`
-- Ambulance: `{ provider_latitude, provider_longitude }` when present, labelled with `responder?.name`
-- Hospital: skipped for now (no destination hospital is currently stored on the incident)
-
-### 4. No DB / dependency changes
-- Reuses existing `config/google-maps.ts`, marker PNGs, and the loader package already in the project.
-
-## Files
-
-- `src/modules/holarchelp/components/LiveMap.tsx` — full rewrite to mirror `ProviderMap` patterns with typed markers.
-- `src/modules/holarchelp/pages/HolarcHelpIncidentDetail.tsx` — build typed `points` array and pass it to `LiveMap`.
-
-## Notes
-
-- Hospitals were part of an earlier discussion but the active incident has no destination hospital field today, so they're left out of this change. Easy to add later by querying `holarchelp_hospitals` and pushing `kind: "hospital"` markers.
-- The inline icon row (Call / Share / Nearby / History) and other page content are untouched.
+- No changes to Terms & Conditions, routing, DB, or other clauses.
+- No styling changes — both files already use `LegalDocLayout` which auto-builds the TOC from `<h2>` headings, so the new BAA section will appear in its TOC automatically.
