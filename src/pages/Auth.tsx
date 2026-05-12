@@ -79,7 +79,7 @@ export default function Auth() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithOtp, verifyOtp } = useAuth();
   
   const modeParam = searchParams.get("mode");
   const roleParam = searchParams.get("role") as UserRole | null;
