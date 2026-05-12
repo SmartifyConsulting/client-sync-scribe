@@ -28,10 +28,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [rtSearch, setRtSearch] = useState("");
 
-  // Patients should never land on the doctor dashboard.
-  if (!roleLoading && isPatient) {
-    return <Navigate to="/patient/details" replace />;
-  }
+  const shouldRedirectPatient = !roleLoading && isPatient;
 
   // Query for unread notifications count (invitations + document receipts only)
   const { data: unreadNotifCount = 0 } = useQuery({
