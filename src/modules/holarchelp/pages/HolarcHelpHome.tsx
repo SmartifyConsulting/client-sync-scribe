@@ -14,7 +14,7 @@ import logo from "@/assets/holarc-help-logo.png";
 
 type Coords = { lat: number; lng: number };
 
-const HOLD_MS = 2500;
+const HOLD_MS = 1000;
 
 export default function HolarcHelpHome() {
   const { user } = useAuth();
