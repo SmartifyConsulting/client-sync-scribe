@@ -22,7 +22,7 @@ export default function HolarcHelpHome() {
   const navigate = useNavigate();
   const [activeIncidentId, setActiveIncidentId] = useState<string | null>(null);
   const [triggering, setTriggering] = useState(false);
-  const [chooserOpen, setChooserOpen] = useState(false);
+  
   const [permDenied, setPermDenied] = useState(false);
   const [coords, setCoords] = useState<Coords | null>(null);
   const [incidentId, setIncidentId] = useState<string | null>(null);
