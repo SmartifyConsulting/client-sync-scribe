@@ -669,112 +669,17 @@ export default function Auth() {
                 </button>
               </div>
             </div>
-          </div>
-        );
-      case 1: // Personal Info
-        return (
-          <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Phone Number</Label>
+              <Label>Mobile Number</Label>
               <div className="flex gap-2">
                 <CountrySelector />
                 <Input placeholder="82 123 4567" value={phone} onChange={(e) => setPhone(e.target.value)} className="flex-1" />
               </div>
               <p className="text-xs text-muted-foreground">Language will be set to: {selectedCountry.lang}</p>
             </div>
-            <div className="space-y-2">
-              <Label>Date of Birth</Label>
-              <Input type="date" value={dob} onChange={(e) => setDob(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Physical Address</Label>
-              <Textarea placeholder="123 Main Street, Suburb, City, 1234" value={physicalAddress} onChange={(e) => setPhysicalAddress(e.target.value)} rows={2} />
-            </div>
-            <div className="flex items-center space-x-2">
-              <input type="checkbox" id="sameAsPhysical" checked={sameAsPhysical} onChange={(e) => setSameAsPhysical(e.target.checked)} className="h-4 w-4 rounded border-border" />
-              <Label htmlFor="sameAsPhysical" className="text-sm">Postal address same as physical</Label>
-            </div>
-            {!sameAsPhysical && (
-              <div className="space-y-2">
-                <Label>Postal Address</Label>
-                <Textarea placeholder="PO Box 123, Suburb, City, 1234" value={postalAddress} onChange={(e) => setPostalAddress(e.target.value)} rows={2} />
-              </div>
-            )}
           </div>
         );
-      case 2: // Employment
-        return (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Employer</Label>
-                <Input placeholder="Company name" value={employer} onChange={(e) => setEmployer(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Occupation</Label>
-                <Input placeholder="Your job title" value={occupation} onChange={(e) => setOccupation(e.target.value)} />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Referred By</Label>
-              <Input placeholder="Doctor or person who referred you" value={referredBy} onChange={(e) => setReferredBy(e.target.value)} />
-            </div>
-          </div>
-        );
-      case 3: // Insurance
-        return (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Medical Insurance Provider</Label>
-                <Input placeholder="e.g., Discovery Health" value={medicalInsurance} onChange={(e) => setMedicalInsurance(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Insurance Product</Label>
-                <Input placeholder="e.g., Executive Plan" value={medicalInsuranceProduct} onChange={(e) => setMedicalInsuranceProduct(e.target.value)} />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Membership Number</Label>
-              <Input placeholder="Membership number" value={medicalInsuranceNumber} onChange={(e) => setMedicalInsuranceNumber(e.target.value)} />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Primary Member</Label>
-                <Input placeholder="Main member name" value={primaryMember} onChange={(e) => setPrimaryMember(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>General Practitioner</Label>
-                <Input placeholder="Your GP's name" value={generalPractitioner} onChange={(e) => setGeneralPractitioner(e.target.value)} />
-              </div>
-            </div>
-          </div>
-        );
-      case 4: // Next of Kin
-        return (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Allergies</Label>
-              <Textarea placeholder="List any allergies (medications, food, etc.)" value={allergies} onChange={(e) => setAllergies(e.target.value)} rows={2} />
-            </div>
-            <h3 className="text-sm font-medium text-foreground pt-2 border-t border-border">Next of Kin</h3>
-            <div className="space-y-2">
-              <Label>Full Name</Label>
-              <Input placeholder="Emergency contact name" value={nextOfKinName} onChange={(e) => setNextOfKinName(e.target.value)} />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Phone</Label>
-                <Input placeholder="082 123 4567" value={nextOfKinPhone} onChange={(e) => setNextOfKinPhone(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Email</Label>
-                <Input type="email" placeholder="email@example.com" value={nextOfKinEmail} onChange={(e) => setNextOfKinEmail(e.target.value)} />
-              </div>
-            </div>
-          </div>
-        );
-      case 5: // Terms
+      case 1: // Terms
         return (
           <div className="space-y-4">
             <TrialSignupSection userRole={userRole} acceptedTerms={acceptedTerms} onAcceptedTermsChange={setAcceptedTerms} />
