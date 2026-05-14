@@ -335,15 +335,7 @@ export default function HolarcHelpHome() {
 
   return (
     <div className="mx-auto flex min-h-[calc(100vh-9rem)] max-w-md flex-col px-5">
-      <DoctorSosChooser
-        open={chooserOpen}
-        onClose={() => setChooserOpen(false)}
-        onSelectSelf={() => triggerSOS()}
-        onPatientIncidentCreated={(id) => {
-          setChooserOpen(false);
-          navigate(`/patient/holarchelp/incident/${id}`);
-        }}
-      />
+      {/* Patient SOS is self-only; chooser removed */}
 
       {/* Active SOS resume banner moved below the hold button */}
 
