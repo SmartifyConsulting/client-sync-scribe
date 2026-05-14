@@ -29,7 +29,7 @@ export default function HolarcHelpIncidentDetail() {
   const [locations, setLocations] = useState<Loc[]>([]);
   const [contacts, setContacts] = useState<{ id: string; name: string; phone: string | null }[]>([]);
   const [profileName, setProfileName] = useState("Your contact");
-  const [responder, setResponder] = useState<{ name: string; kind: "ambulance" | "hospital" } | null>(null);
+  const [responder, setResponder] = useState<{ name: string; kind: "ambulance" | "hospital"; latitude: number | null; longitude: number | null } | null>(null);
   const [autoAssigned, setAutoAssigned] = useState(false);
   const [pendingOffers, setPendingOffers] = useState<number>(0);
 
@@ -72,16 +72,20 @@ export default function HolarcHelpIncidentDetail() {
     const pid = incident.assigned_provider_id;
     (async () => {
       const [{ data: amb }, { data: hosp }, { data: ev }] = await Promise.all([
-        supabase.from("holarchelp_ambulance_providers" as any).select("company_name").eq("id", pid).maybeSingle(),
-        supabase.from("holarchelp_hospitals" as any).select("name").eq("id", pid).maybeSingle(),
+        supabase.from("holarchelp_ambulance_providers" as any).select("company_name, latitude, longitude").eq("id", pid).maybeSingle(),
+        supabase.from("holarchelp_hospitals" as any).select("name, latitude, longitude").eq("id", pid).maybeSingle(),
         supabase.from("holarchelp_incident_events" as any)
           .select("event_type").eq("incident_id", id)
           .in("event_type", ["auto_assigned", "patient_picked", "accepted"])
           .order("created_at", { ascending: false }).limit(1).maybeSingle(),
       ]);
-      if ((amb as any)?.company_name) setResponder({ name: (amb as any).company_name, kind: "ambulance" });
-      else if ((hosp as any)?.name) setResponder({ name: (hosp as any).name, kind: "hospital" });
-      else setResponder(null);
+      if ((amb as any)?.company_name) {
+        const a: any = amb;
+        setResponder({ name: a.company_name, kind: "ambulance", latitude: a.latitude ?? null, longitude: a.longitude ?? null });
+      } else if ((hosp as any)?.name) {
+        const h: any = hosp;
+        setResponder({ name: h.name, kind: "hospital", latitude: h.latitude ?? null, longitude: h.longitude ?? null });
+      } else setResponder(null);
       setAutoAssigned((ev as any)?.event_type === "auto_assigned");
     })();
   }, [incident?.assigned_provider_id, id]);
