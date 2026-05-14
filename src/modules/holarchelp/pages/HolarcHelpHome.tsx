@@ -296,15 +296,8 @@ export default function HolarcHelpHome() {
   }
 
   // Landing state
-  const ringR = 114;
-  const ringC = 2 * Math.PI * ringR;
-
   return (
     <div className="mx-auto flex min-h-[calc(100vh-9rem)] max-w-md flex-col px-5">
-      {/* Patient SOS is self-only; chooser removed */}
-
-      {/* Active SOS resume banner moved below the hold button */}
-
       {/* Header */}
       <div className="flex justify-center pt-6">
         <img src={logo} alt="Holarc Help" className="h-24 w-auto" />
@@ -316,7 +309,6 @@ export default function HolarcHelpHome() {
         <p className="mt-1.5 text-sm text-muted-foreground">Help will be alerted instantly</p>
       </div>
 
-      {/* CTA */}
       {/* SOS acknowledgements */}
       {!activeIncidentId && (
         <div className="mt-6 rounded-2xl border border-border bg-card p-4 space-y-3">
@@ -343,42 +335,19 @@ export default function HolarcHelpHome() {
 
       <div className="mt-10 flex flex-1 flex-col items-center justify-center">
         <div className="relative flex items-center justify-center">
-          {/* Ambient glow — intensifies during hold */}
+          {/* Ambient glow */}
           <span
             aria-hidden
-            className="absolute inset-0 -m-6 rounded-full bg-red-500/20 blur-2xl transition-opacity"
-            style={{ opacity: 0.6 + holdProgress * 0.4 }}
+            className="absolute inset-0 -m-6 rounded-full bg-red-500/20 blur-2xl"
           />
-          {holdProgress === 0 && (
-            <span aria-hidden className="absolute inset-0 -m-1 animate-ping rounded-full bg-red-500/25" style={{ animationDuration: "2.6s" }} />
-          )}
-
-          {/* Progress ring — thicker, glowing white */}
-          <svg className="absolute -rotate-90" width={280} height={280} aria-hidden>
-            <circle cx={140} cy={140} r={ringR} stroke="hsl(0 0% 100% / 0.25)" strokeWidth={14} fill="none" />
-            <circle
-              cx={140} cy={140} r={ringR}
-              stroke="white" strokeWidth={14} fill="none" strokeLinecap="round"
-              strokeDasharray={ringC}
-              strokeDashoffset={ringC * (1 - holdProgress)}
-              style={{
-                transition: holdProgress === 0 ? "stroke-dashoffset .25s ease-out" : "none",
-                filter: "drop-shadow(0 0 10px rgba(255,255,255,0.95)) drop-shadow(0 0 4px rgba(255,255,255,0.6))",
-              }}
-            />
-          </svg>
+          <span aria-hidden className="absolute inset-0 -m-1 animate-ping rounded-full bg-red-500/25" style={{ animationDuration: "2.6s" }} />
 
           <button
-            onPointerDown={(e) => {
-              e.preventDefault();
-              try { (e.currentTarget as HTMLButtonElement).setPointerCapture(e.pointerId); } catch {}
-              startHold();
-            }}
-            onPointerUp={cancelHold}
-            onPointerCancel={cancelHold}
+            type="button"
+            onClick={handleSosClick}
             onContextMenu={(e) => e.preventDefault()}
             disabled={triggering || (!activeIncidentId && !allAck)}
-            aria-label="Hold for help"
+            aria-label="Tap for help"
             className={`relative z-10 flex h-52 w-52 select-none flex-col items-center justify-center rounded-full font-black text-white transition active:scale-[.98] touch-none ${(!activeIncidentId && !allAck) ? "opacity-50 cursor-not-allowed" : ""}`}
             style={{
               background: "radial-gradient(circle at 30% 25%, hsl(354,90%,62%) 0%, hsl(354,84%,52%) 45%, hsl(0,80%,38%) 100%)",
@@ -387,17 +356,10 @@ export default function HolarcHelpHome() {
           >
             {triggering ? (
               <Loader2 className="h-10 w-10 animate-spin" />
-            ) : holdProgress > 0 ? (
-              <>
-                <span className="text-3xl tracking-[0.18em]">HOLD</span>
-                <span className="mt-1 text-[11px] font-bold uppercase tracking-[0.28em] opacity-95">
-                  Activating… {Math.round(holdProgress * 100)}%
-                </span>
-              </>
             ) : (
               <>
-                <span className="text-3xl tracking-[0.18em]">HOLD</span>
-                <span className="mt-1 text-xs font-bold uppercase tracking-[0.32em] opacity-90">For Help</span>
+                <span className="text-3xl tracking-[0.18em]">SOS</span>
+                <span className="mt-1 text-xs font-bold uppercase tracking-[0.32em] opacity-90">Tap For Help</span>
               </>
             )}
           </button>
@@ -405,7 +367,7 @@ export default function HolarcHelpHome() {
 
         {/* Hint */}
         <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-          Press &amp; hold for 1 second
+          Tap once to send SOS
         </p>
 
         {/* Active SOS — surfaced directly under the hint */}
