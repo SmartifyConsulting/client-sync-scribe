@@ -61,8 +61,8 @@ interface PartnerInput {
 
 type UserRole = "doctor" | "patient";
 
-const DOCTOR_STEPS = ["Account", "Profile", "Practice Info", "Partners", "Terms & Payment"];
-const PATIENT_STEPS = ["Account", "Personal Info", "Employment", "Insurance", "Next of Kin", "Terms & Payment"];
+const DOCTOR_STEPS = ["Account", "Terms & Payment"];
+const PATIENT_STEPS = ["Account", "Terms & Payment"];
 
 const STORAGE_KEY = "holarc_signup_draft";
 
@@ -269,8 +269,7 @@ export default function Auth() {
       if (data?.user) {
         setCreatedUserId(data.user.id);
         setAccountCreated(true);
-        // Best-effort: trigger handles definitive role assignment, this is a fallback if a session exists.
-        await supabase.from("user_roles").insert({ user_id: data.user.id, role: userRole });
+        // Role and profile are created server-side by handle_new_user trigger.
         return true;
       }
       return false;
@@ -294,60 +293,24 @@ export default function Auth() {
       if (!userId) throw new Error("No user account found");
 
       const preferredLanguage = selectedCountry.lang;
-      const fullPhone = `${countryCode} ${userRole === "doctor" ? mobileNumber : phone}`;
+      const phoneDigits = userRole === "doctor" ? mobileNumber : phone;
+      const fullPhone = phoneDigits ? `${countryCode} ${phoneDigits}` : null;
 
-      if (userRole === "doctor") {
-        const avatarUrl = await uploadAvatar(userId);
-        const signatureUrl = await uploadSignature(userId);
+      const nameParts = fullName.trim().toLowerCase().split(/\s+/);
+      const firstPart = nameParts[0] || "user";
+      const lastPart = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
+      const baseAlias = (lastPart ? `${firstPart}-${lastPart}` : firstPart).replace(/[^a-z0-9-]/g, '');
 
-        const nameParts = fullName.trim().toLowerCase().split(/\s+/);
-        const firstName = nameParts[0] || "user";
-        const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
-        const mailboxAlias = lastName
-          ? `${firstName}-${lastName}`.replace(/[^a-z0-9-]/g, '')
-          : `${firstName}`.replace(/[^a-z0-9-]/g, '');
+      // Update profile with the few fields we collect at signup
+      await supabase.from("profiles").update({
+        full_name: fullName,
+        role: userRole,
+        mailbox_alias: baseAlias,
+        mobile_number: fullPhone,
+        preferred_language: preferredLanguage,
+      }).eq("id", userId);
 
-        await supabase.from("profiles").update({
-          full_name: fullName,
-          practice_number: practiceNumber,
-          doctor_number: doctorNumber,
-          practice_address: practiceAddress,
-          specialty: specialty || null,
-          avatar_url: avatarUrl,
-          signature_url: signatureUrl,
-          role: userRole,
-          mailbox_alias: mailboxAlias,
-          mobile_number: fullPhone,
-          preferred_language: preferredLanguage,
-        }).eq("id", userId);
-
-        if (partners.length > 0) {
-          await supabase.from("practice_partners").insert(
-            partners.map((p) => ({
-              user_id: userId,
-              full_name: p.full_name,
-              registration_number: p.registration_number,
-              mobile_number: p.mobile_number || null,
-            }))
-          );
-        }
-      } else {
-        const patientNameParts = fullName.trim().toLowerCase().split(/\s+/);
-        const patientFirst = patientNameParts[0] || "user";
-        const patientLast = patientNameParts.length > 1 ? patientNameParts[patientNameParts.length - 1] : "";
-        const birthYear = dob ? new Date(dob).getFullYear().toString() : "";
-        let patientAlias = patientLast ? `${patientFirst}-${patientLast}` : patientFirst;
-        if (birthYear) patientAlias += `-${birthYear}`;
-        patientAlias = patientAlias.replace(/[^a-z0-9-]/g, '');
-
-        await supabase.from("profiles").update({
-          full_name: fullName,
-          role: userRole,
-          mailbox_alias: patientAlias,
-          mobile_number: fullPhone,
-          preferred_language: preferredLanguage,
-        }).eq("id", userId);
-
+      if (userRole === "patient") {
         if (inviteToken) {
           const { data: invitation } = await supabase
             .from("patient_invitations")
@@ -361,15 +324,8 @@ export default function Auth() {
             if (invitation.patient_id) {
               await supabase.from("patients").update({
                 patient_user_id: userId,
-                email, phone: fullPhone, dob: dob || null,
-                physical_address: physicalAddress,
-                postal_address: sameAsPhysical ? physicalAddress : postalAddress,
-                same_as_physical: sameAsPhysical, employer, occupation,
-                medical_aid: medicalInsurance, medical_aid_number: medicalInsuranceNumber,
-                medical_insurance_product: medicalInsuranceProduct, primary_member: primaryMember,
-                next_of_kin_name: nextOfKinName, next_of_kin_phone: nextOfKinPhone,
-                next_of_kin_email: nextOfKinEmail, general_practitioner: generalPractitioner,
-                allergies, referred_by: referredBy,
+                email,
+                phone: fullPhone,
               }).eq("id", invitation.patient_id);
             }
             await supabase.from("doctor_patient_access").insert({
@@ -403,33 +359,14 @@ export default function Auth() {
               });
             }
           }
-        }
-
-        if (!inviteToken) {
-          // Non-invited patient: auto-create a blank patient record
-          const fullPhone = `${countryCode} ${phone}`;
+        } else {
+          // Non-invited patient: minimal patient record so MyDetails has something to edit
           await supabase.from("patients").insert({
             user_id: userId,
             patient_user_id: userId,
             name: fullName,
             email,
             phone: fullPhone,
-            dob: dob || null,
-            physical_address: physicalAddress || null,
-            postal_address: sameAsPhysical ? physicalAddress : (postalAddress || null),
-            same_as_physical: sameAsPhysical,
-            employer: employer || null,
-            occupation: occupation || null,
-            medical_aid: medicalInsurance || null,
-            medical_aid_number: medicalInsuranceNumber || null,
-            medical_insurance_product: medicalInsuranceProduct || null,
-            primary_member: primaryMember || null,
-            next_of_kin_name: nextOfKinName || null,
-            next_of_kin_phone: nextOfKinPhone || null,
-            next_of_kin_email: nextOfKinEmail || null,
-            general_practitioner: generalPractitioner || null,
-            allergies: allergies || null,
-            referred_by: referredBy || null,
           });
         }
       }
@@ -449,7 +386,7 @@ export default function Auth() {
       }, { onConflict: "user_id" });
 
       clearDraft();
-      toast({ title: "Account created!", description: "Welcome to Holarc! You have 30 days of free access." });
+      toast({ title: "Account created!", description: "Welcome to Holarc! You have 30 days of free access. Please complete your profile next." });
       await routeAfterLogin(userId);
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -657,112 +594,7 @@ export default function Auth() {
             </div>
           </div>
         );
-      case 1: // Profile
-        return (
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium text-foreground">Profile Photo</h3>
-            <div className="flex items-center gap-4">
-              <Avatar className="h-20 w-20 border-2 border-[hsl(351,81%,49%)]">
-                <AvatarImage src={avatarPreview || undefined} />
-                <AvatarFallback className="text-lg bg-muted">
-                  {fullName ? fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'DR'}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <input type="file" ref={avatarInputRef} accept="image/*" onChange={handleAvatarChange} className="hidden" />
-                <Button type="button" variant="outline" size="sm" onClick={() => avatarInputRef.current?.click()} className="gap-2">
-                  <Camera className="h-4 w-4" />{avatarPreview ? 'Change Photo' : 'Upload Photo'}
-                </Button>
-                <p className="text-xs text-muted-foreground mt-1">JPG, PNG or GIF (max 2MB)</p>
-              </div>
-            </div>
-
-            <h3 className="text-sm font-medium text-foreground pt-4 border-t border-border">Electronic Signature</h3>
-            <div className="flex items-center gap-4">
-              <div className="h-20 w-40 border-2 border-dashed border-border rounded-lg flex items-center justify-center bg-muted/30 overflow-hidden">
-                {signaturePreview ? <img src={signaturePreview} alt="Signature" className="max-h-full max-w-full object-contain" /> : <PenTool className="h-8 w-8 text-muted-foreground" />}
-              </div>
-              <div>
-                <input type="file" ref={signatureInputRef} accept="image/*" onChange={handleSignatureChange} className="hidden" />
-                <Button type="button" variant="outline" size="sm" onClick={() => signatureInputRef.current?.click()} className="gap-2">
-                  <PenTool className="h-4 w-4" />{signaturePreview ? 'Change' : 'Upload Signature'}
-                </Button>
-                <p className="text-xs text-muted-foreground mt-1">PNG with transparent background</p>
-              </div>
-            </div>
-          </div>
-        );
-      case 2: // Practice Info
-        return (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Specialty</Label>
-              <Select value={specialty} onValueChange={setSpecialty}>
-                <SelectTrigger><SelectValue placeholder="Select your specialty" /></SelectTrigger>
-                <SelectContent>
-                  {DOCTOR_SPECIALTIES.map((spec) => <SelectItem key={spec} value={spec}>{spec}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Practice Number</Label>
-                <Input placeholder="e.g., PR123456" value={practiceNumber} onChange={(e) => setPracticeNumber(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Registration Number</Label>
-                <Input placeholder="e.g., MP123456" value={doctorNumber} onChange={(e) => setDoctorNumber(e.target.value)} />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Address of Doctor's Rooms</Label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Textarea placeholder="123 Medical Centre, Suite 4, Cape Town, 8001" value={practiceAddress} onChange={(e) => setPracticeAddress(e.target.value)} className="pl-10 min-h-[60px]" rows={2} />
-              </div>
-            </div>
-          </div>
-        );
-      case 3: // Partners
-        return (
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-sm font-medium text-foreground mb-1">Practice Partners (Optional)</h3>
-              <p className="text-xs text-muted-foreground mb-4">Add partners of the same practice</p>
-            </div>
-            {partners.length > 0 && (
-              <div className="space-y-2">
-                {partners.map((partner, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg border border-border text-sm">
-                    <div>
-                      <p className="font-medium text-foreground">{partner.full_name}</p>
-                      <p className="text-xs text-muted-foreground">Reg: {partner.registration_number}{partner.mobile_number && ` · ${partner.mobile_number}`}</p>
-                    </div>
-                    <Button type="button" variant="ghost" size="icon" onClick={() => removePartner(index)} className="h-7 w-7 text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
-              <div className="space-y-2">
-                <Label className="text-xs">Partner Full Name</Label>
-                <Input value={newPartner.full_name} onChange={(e) => setNewPartner({ ...newPartner, full_name: e.target.value })} placeholder="Dr. Jane Doe" className="h-9" />
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-2">
-                  <Label className="text-xs">Registration Number</Label>
-                  <Input value={newPartner.registration_number} onChange={(e) => setNewPartner({ ...newPartner, registration_number: e.target.value })} placeholder="e.g., MP654321" className="h-9" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">Mobile (Optional)</Label>
-                  <Input value={newPartner.mobile_number} onChange={(e) => setNewPartner({ ...newPartner, mobile_number: e.target.value })} placeholder="082 123 4567" className="h-9" />
-                </div>
-              </div>
-              <Button type="button" variant="outline" size="sm" onClick={addPartner} className="w-full gap-1"><Plus className="h-4 w-4" />Add Partner</Button>
-            </div>
-          </div>
-        );
-      case 4: // Terms
+      case 1: // Terms
         return (
           <div className="space-y-4">
             <TrialSignupSection userRole={userRole} acceptedTerms={acceptedTerms} onAcceptedTermsChange={setAcceptedTerms} />
@@ -837,112 +669,17 @@ export default function Auth() {
                 </button>
               </div>
             </div>
-          </div>
-        );
-      case 1: // Personal Info
-        return (
-          <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Phone Number</Label>
+              <Label>Mobile Number</Label>
               <div className="flex gap-2">
                 <CountrySelector />
                 <Input placeholder="82 123 4567" value={phone} onChange={(e) => setPhone(e.target.value)} className="flex-1" />
               </div>
               <p className="text-xs text-muted-foreground">Language will be set to: {selectedCountry.lang}</p>
             </div>
-            <div className="space-y-2">
-              <Label>Date of Birth</Label>
-              <Input type="date" value={dob} onChange={(e) => setDob(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Physical Address</Label>
-              <Textarea placeholder="123 Main Street, Suburb, City, 1234" value={physicalAddress} onChange={(e) => setPhysicalAddress(e.target.value)} rows={2} />
-            </div>
-            <div className="flex items-center space-x-2">
-              <input type="checkbox" id="sameAsPhysical" checked={sameAsPhysical} onChange={(e) => setSameAsPhysical(e.target.checked)} className="h-4 w-4 rounded border-border" />
-              <Label htmlFor="sameAsPhysical" className="text-sm">Postal address same as physical</Label>
-            </div>
-            {!sameAsPhysical && (
-              <div className="space-y-2">
-                <Label>Postal Address</Label>
-                <Textarea placeholder="PO Box 123, Suburb, City, 1234" value={postalAddress} onChange={(e) => setPostalAddress(e.target.value)} rows={2} />
-              </div>
-            )}
           </div>
         );
-      case 2: // Employment
-        return (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Employer</Label>
-                <Input placeholder="Company name" value={employer} onChange={(e) => setEmployer(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Occupation</Label>
-                <Input placeholder="Your job title" value={occupation} onChange={(e) => setOccupation(e.target.value)} />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Referred By</Label>
-              <Input placeholder="Doctor or person who referred you" value={referredBy} onChange={(e) => setReferredBy(e.target.value)} />
-            </div>
-          </div>
-        );
-      case 3: // Insurance
-        return (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Medical Insurance Provider</Label>
-                <Input placeholder="e.g., Discovery Health" value={medicalInsurance} onChange={(e) => setMedicalInsurance(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Insurance Product</Label>
-                <Input placeholder="e.g., Executive Plan" value={medicalInsuranceProduct} onChange={(e) => setMedicalInsuranceProduct(e.target.value)} />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Membership Number</Label>
-              <Input placeholder="Membership number" value={medicalInsuranceNumber} onChange={(e) => setMedicalInsuranceNumber(e.target.value)} />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Primary Member</Label>
-                <Input placeholder="Main member name" value={primaryMember} onChange={(e) => setPrimaryMember(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>General Practitioner</Label>
-                <Input placeholder="Your GP's name" value={generalPractitioner} onChange={(e) => setGeneralPractitioner(e.target.value)} />
-              </div>
-            </div>
-          </div>
-        );
-      case 4: // Next of Kin
-        return (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Allergies</Label>
-              <Textarea placeholder="List any allergies (medications, food, etc.)" value={allergies} onChange={(e) => setAllergies(e.target.value)} rows={2} />
-            </div>
-            <h3 className="text-sm font-medium text-foreground pt-2 border-t border-border">Next of Kin</h3>
-            <div className="space-y-2">
-              <Label>Full Name</Label>
-              <Input placeholder="Emergency contact name" value={nextOfKinName} onChange={(e) => setNextOfKinName(e.target.value)} />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Phone</Label>
-                <Input placeholder="082 123 4567" value={nextOfKinPhone} onChange={(e) => setNextOfKinPhone(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Email</Label>
-                <Input type="email" placeholder="email@example.com" value={nextOfKinEmail} onChange={(e) => setNextOfKinEmail(e.target.value)} />
-              </div>
-            </div>
-          </div>
-        );
-      case 5: // Terms
+      case 1: // Terms
         return (
           <div className="space-y-4">
             <TrialSignupSection userRole={userRole} acceptedTerms={acceptedTerms} onAcceptedTermsChange={setAcceptedTerms} />

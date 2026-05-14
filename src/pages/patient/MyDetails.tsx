@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, Navigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +7,7 @@ import { Patient } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
 import { useMyRewards } from "@/hooks/usePatientRewards";
 import { EmergencyContact } from "@/features/patients/components/EmergencyContactsSection";
+import { ProfileCompletionBanner } from "@/components/profile/ProfileCompletionBanner";
 
 
 
@@ -87,13 +88,17 @@ export default function MyDetails() {
     );
   }
 
-  if (!patient) {
+  const isIncomplete = useMemo(() => {
+    if (!patient) return true;
+    const p: any = patient;
     return (
-      <div className="p-6 text-center text-muted-foreground">
-        <p>No patient record found. Please ask your doctor to create your profile.</p>
-      </div>
+      !p.dob ||
+      !p.physical_address ||
+      !p.phone ||
+      !(emergencyContacts && emergencyContacts.length > 0) &&
+        !p.next_of_kin_name
     );
-  }
+  }, [patient, emergencyContacts]);
 
   if (rawSection === "home") {
     return <Navigate to="/patient/details?section=health" replace />;
@@ -114,18 +119,26 @@ export default function MyDetails() {
         <p className="text-muted-foreground text-[12px]">{heading.subtitle}</p>
       </div>
 
-      <PatientDetailsEditor
-        patient={patient}
-        onSave={handleSave}
-        isSelfService
-        userEmail={userEmail}
-        userId={userId}
-        emergencyContacts={emergencyContacts}
-        onEmergencyContactsChange={setEmergencyContacts}
-        lollipopCount={lollipopCount}
-        rewardsLoading={rewardsLoading}
-        section={section}
-      />
+      {isIncomplete && section === "health" && <ProfileCompletionBanner />}
+
+      {patient ? (
+        <PatientDetailsEditor
+          patient={patient}
+          onSave={handleSave}
+          isSelfService
+          userEmail={userEmail}
+          userId={userId}
+          emergencyContacts={emergencyContacts}
+          onEmergencyContactsChange={setEmergencyContacts}
+          lollipopCount={lollipopCount}
+          rewardsLoading={rewardsLoading}
+          section={section}
+        />
+      ) : (
+        <div className="p-6 text-center text-muted-foreground border border-dashed border-border rounded-lg">
+          <p>Your medical record is being set up. Please refresh in a moment.</p>
+        </div>
+      )}
 
     </div>
   );
