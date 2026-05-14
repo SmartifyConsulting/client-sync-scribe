@@ -1,53 +1,57 @@
-## 1. Set passwords to `Password123` for 5 accounts
+## Add Johannesburg hospitals & emergency responders to the database
 
-Create a one-shot admin edge function `admin-set-test-passwords` that, when invoked by an admin, calls `auth.admin.updateUserById` for each:
+Seed the `holarchelp_hospitals` and `holarchelp_ambulance_providers` tables with the listed Johannesburg providers, pre-approved and active so they show up immediately in HolarcHelp dispatch and the public providers map.
 
-| Display | Email |
-|---|---|
-| Paraskevi Soldatos | `paraskevoulasoldatos@gmail.com` |
-| Zano | `zano@smartify.co.za` |
-| Xtina | `xtina@smartify.co.za` |
-| Renken | `renken@smartify.co.za` |
-| Nonastasia | `nonastasia@gmail.com` |
+### Hospitals (10 private + 6 public = 16 rows into `holarchelp_hospitals`)
 
-For any email that has no auth user yet (likely `nonastasia@gmail.com`), the function will `createUser` first with `email_confirm: true, password: 'Password123'`, then proceed.
+For each row: `status='approved'`, `subscription_status='active'`, `accepting_patients=true`, `country='South Africa'`, `state='Gauteng'`, `city='Johannesburg'`, `owner_id` set to the existing admin user (`9ceb1207-…`) as a placeholder until each hospital claims its account, `contact_email` = a placeholder routing alias (e.g. `morningside@hospitals.holarchealth.com`) so the NOT NULL constraint is satisfied without leaking a real inbox.
 
-I'll invoke the function once from my side after deploy and report which were updated vs created. The function stays in the project so you can rerun it later.
+| Name | Ownership | Tier | Address | Phone | Lat / Lng |
+|---|---|---|---|---|---|
+| Mediclinic Morningside | private | tier_1 | Cnr Rivonia Rd & Hill Rd, Morningside, Sandton | +27 11 282 5000 | -26.0760, 28.0560 |
+| Netcare Milpark Hospital | private | tier_1 | 9 Guild Rd, Parktown West | +27 11 480 5600 | -26.1790, 28.0150 |
+| Netcare Park Lane Hospital | private | tier_2 | 14 Junction Ave, Parktown | +27 11 480 4500 | -26.1840, 28.0440 |
+| Netcare Rosebank Hospital | private | tier_2 | 14 Sturdee Ave, Rosebank | +27 11 328 0500 | -26.1450, 28.0420 |
+| Netcare Olivedale Hospital | private | tier_2 | Cnr Pres Fouche & Windsor Way, Olivedale | +27 11 777 2000 | -26.0560, 27.9620 |
+| Wits Donald Gordon Medical Centre | private | tier_1 | 21 Eton Rd, Parktown | +27 11 356 6000 | -26.1820, 28.0410 |
+| Life Bedford Gardens Hospital | private | tier_2 | 4 Leicester Rd, Bedfordview | +27 11 677 8000 | -26.1810, 28.1390 |
+| Life Brenthurst Hospital | private | tier_2 | 1 Eton Rd, Parktown | +27 11 484 0500 | -26.1810, 28.0410 |
+| Life Wilgeheuwel Hospital | private | tier_2 | Cnr Amsterdam & Hendrik Potgieter, Wilgeheuwel | +27 11 207 9000 | -26.1170, 27.9120 |
+| Netcare Linkwood Hospital | private | tier_2 | 24 12th Ave, Linksfield West | +27 11 647 3400 | -26.1660, 28.1110 |
+| Charlotte Maxeke Johannesburg Academic Hospital | public | tier_1 | 17 Jubilee Rd, Parktown | +27 11 488 4911 | -26.1790, 28.0440 |
+| Helen Joseph Hospital | public | tier_2 | Perth Rd, Auckland Park | +27 11 489 1011 | -26.1810, 27.9990 |
+| Rahima Moosa Mother and Child Hospital | public | tier_2 | Fuel Rd, Coronationville | +27 11 470 9000 | -26.1820, 27.9760 |
+| Chris Hani Baragwanath Academic Hospital | public | tier_1 | Chris Hani Rd, Diepkloof, Soweto | +27 11 933 8000 | -26.2620, 27.9390 |
+| Edenvale Hospital | public | tier_2 | Modderfontein Rd, Edenvale | +27 11 321 6000 | -26.1430, 28.1530 |
+| Bertha Gxowa Hospital | public | tier_2 | Angus St, Germiston | +27 11 089 8000 | -26.2160, 28.1690 |
 
-> Note: `Password123` fails Have-I-Been-Pwned checks. If HIBP is enabled on your project the update will be rejected — I'll temporarily disable it for the run and re-enable it after, or leave it off if you prefer (let me know).
+### Emergency responders (10 rows into `holarchelp_ambulance_providers`)
 
-## 2. Brand auth emails on `notify.holarchealth.com`
+`status='approved'`, `subscription_status='active'`, `accepting_patients=true`, `state='Gauteng'`, `city='Johannesburg'`, `country='South Africa'`, placeholder `owner_id` (admin) and placeholder `contact_email`.
 
-**Step 1 — Open the email setup dialog.** You'll click "Set up email domain", enter `notify.holarchealth.com`, and Lovable provisions DNS, DKIM/SPF, and the `auth-email-hook` automatically.
+| Company | Tier | Base | Phone |
+|---|---|---|---|
+| ER24 Joburg Central | tier_1 | Johannesburg Central | 084 124 |
+| ER24 Joburg South | tier_1 | Johannesburg South | 084 124 |
+| Emer-G-Med EMS | tier_1 | Sandton | 011 555 1066 |
+| Medi Response | tier_1 | Morningside | 081 924 |
+| Rescue 786 Emergency Medical Services | tier_2 | Lenasia | 011 854 7867 |
+| Ralmed | tier_2 | Johannesburg | 011 974 7777 |
+| St John EMS — Jhb Base | tier_2 | 25 Erlswold Way, Saxonwold | 011 403 4227 |
+| Inter City Ambulance Service | tier_3 | Johannesburg | 011 873 4023 |
+| National Emergency Medical Services | tier_2 | Johannesburg | 011 444 0440 |
+| High Care EMS (Pty) Ltd | tier_3 | Johannesburg | 010 003 0150 |
 
-```
-<presentation-actions>
-<presentation-open-email-setup>Set up email domain</presentation-open-email-setup>
-</presentation-actions>
-```
+### How the seed runs
 
-**Step 2 — Once the dialog closes, I scaffold + brand the templates.**
-- Run `scaffold_auth_email_templates` → creates 6 React Email templates (signup, magic-link, recovery, invite, email-change, reauthentication).
-- Apply Holarc Health brand: **#E01837 red** primary, teal accents, white body bg, your logo from `public/` or `src/assets/`, and the friendly tone used elsewhere in the app.
-- Sender: `Holarc Health <no-reply@notify.holarchealth.com>`.
-- Deploy `auth-email-hook`.
+A single `INSERT … ON CONFLICT DO NOTHING` (matched on `name` for hospitals / `company_name` for ambulances) — safe to re-run; existing manually-added rows are not overwritten. Run via the data-insert tool (no schema change needed).
 
-**Step 3 — Activation.** Auth emails route through the hook the moment DNS verification finishes (Lovable polls automatically — no work from you). Until then, default Lovable templates continue to send so signups never break. You can monitor in Cloud → Emails.
+### Caveats / things to confirm
 
-## DNS prerequisite — important
+- **`owner_id` placeholder.** Each row needs a non-null owner. Default is the admin user id `9ceb1207-…`. When a real hospital/EMS group signs up they take over via the existing approval flow. OK?
+- **Phone numbers** are the publicly published switchboard / national dispatch numbers; some EMS operators (ER24 = 084124, Medi Response = 081924) only publish a national number — used as-is.
+- **Lat/Lng** are best-effort approximations from public sources, accurate to ~100 m. Good enough for nearest-provider dispatch sorting; not surveyed coordinates.
+- **No addresses found for some EMS** (e.g. Inter City, National EMS, High Care) — `base_address` left blank, only city/state populated.
+- **Contact emails** are routing placeholders on `hospitals.holarchealth.com` / `ems.holarchealth.com` so the NOT NULL constraint passes without inventing fake real-looking emails. Real emails can be set later.
 
-Adding `notify.holarchealth.com` delegates **only that subdomain** to Lovable's nameservers (`ns3.lovable.cloud`, `ns4.lovable.cloud`). It does not affect:
-- Root `holarchealth.com` (your website on `www.holarchealth.com` is untouched).
-- Any Mailgun domain (e.g. `mg.holarchealth.com` or root) — they keep working in parallel.
-
-If your Mailgun is currently set up on `notify.holarchealth.com` specifically, tell me first and we'll pick a different subdomain (e.g. `mail.holarchealth.com`).
-
-## Files / changes
-
-- **new** `supabase/functions/admin-set-test-passwords/index.ts` — admin-only batch password setter (with auto-create fallback).
-- **scaffolded** `supabase/functions/auth-email-hook/index.ts` + `supabase/functions/_shared/email-templates/*.tsx` — branded with Holarc Health palette and logo.
-
-## What I need from you to start
-
-1. Confirm I should temporarily turn HIBP off so `Password123` can be set (I'll re-enable it after if you say so).
-2. Confirm `notify.holarchealth.com` is OK as the email subdomain (or pick a different one).
+Confirm and I'll execute the inserts.
