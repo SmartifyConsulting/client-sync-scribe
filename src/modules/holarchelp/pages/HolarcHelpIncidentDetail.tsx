@@ -29,7 +29,8 @@ export default function HolarcHelpIncidentDetail() {
   const [locations, setLocations] = useState<Loc[]>([]);
   const [contacts, setContacts] = useState<{ id: string; name: string; phone: string | null }[]>([]);
   const [profileName, setProfileName] = useState("Your contact");
-  const [responder, setResponder] = useState<{ name: string } | null>(null);
+  const [responder, setResponder] = useState<{ name: string; kind: "ambulance" | "hospital" } | null>(null);
+  const [autoAssigned, setAutoAssigned] = useState(false);
   const [pendingOffers, setPendingOffers] = useState<number>(0);
 
   useEffect(() => {
