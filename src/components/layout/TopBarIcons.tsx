@@ -38,7 +38,7 @@ export function TopBarIcons() {
     { email: "zano@smartify.co.za", name: "Zano", role: "Hospital", icon: Building2 },
     { email: "renken@smartify.co.za", name: "Renken", role: "Ambulance", icon: Ambulance },
   ];
-  const currentEmail = (profile as any)?.email || "";
+  const currentEmail = ((profile as any)?.email as string | undefined) || "";
 
   useEffect(() => {
     if (!isAdmin || seeded) return;
