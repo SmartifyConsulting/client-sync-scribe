@@ -60,6 +60,43 @@ export default function ProviderDashboard() {
     return () => { supabase.removeChannel(ch); };
   }, []);
 
+  // Profile completion check for hospital / ambulance providers
+  useEffect(() => {
+    if (!providerId || !providerType) return;
+    (async () => {
+      if (providerType === "hospital") {
+        const { data } = await supabase
+          .from("holarchelp_hospitals" as any)
+          .select("registration_number, address, contact_phone, services")
+          .eq("id", providerId)
+          .maybeSingle();
+        const r: any = data;
+        setProfileIncomplete(
+          !r ||
+          !r.registration_number ||
+          !r.address ||
+          !r.contact_phone ||
+          !(Array.isArray(r.services) ? r.services.length > 0 : !!r.services)
+        );
+      } else if (providerType === "ambulance") {
+        const { data } = await supabase
+          .from("holarchelp_ambulance_providers" as any)
+          .select("registration_number, base_address, contact_phone, fleet_size")
+          .eq("id", providerId)
+          .maybeSingle();
+        const r: any = data;
+        setProfileIncomplete(
+          !r ||
+          !r.registration_number ||
+          !r.base_address ||
+          !r.contact_phone ||
+          !r.fleet_size
+        );
+      }
+    })();
+  }, [providerId, providerType]);
+
+
   const accept = async (incidentId: string) => {
     if (!providerId || !user) return;
     const { error } = await supabase.rpc("holarchelp_accept_incident" as any, {
