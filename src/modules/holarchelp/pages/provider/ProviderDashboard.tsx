@@ -37,8 +37,10 @@ const ago = (iso: string) => {
 export default function ProviderDashboard() {
   const { user } = useAuth();
   const { providerId, providerType } = useProviderAccess();
+  const navigate = useNavigate();
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
+  const [profileIncomplete, setProfileIncomplete] = useState(false);
 
   const load = async () => {
     setLoading(true);
