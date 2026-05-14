@@ -1,25 +1,21 @@
-## Changes
+## Root cause
 
-### 1. Provider auto-assign window: 30s → 60s
-**File:** `src/modules/holarchelp/components/AvailableResponders.tsx`
-- Change `AUTO_ASSIGN_MS = 30 * 1000` → `60 * 1000`.
-- Countdown UI text already uses the constant, so it will display the new 60s window automatically.
+`LiveMap` only initializes the Leaflet map *after* a patient location arrives (the `if (!patient) return placeholder` early-return). When `locations` is empty on first render, the placeholder mounts and the container ref is never attached. When `locations` later populates, the container div mounts but the init `useEffect` already ran on the placeholder render — so the map is never created. On re-entry, the same happens because state starts empty again until the location query resolves.
 
-### 2. Map not rendering immediately on the active emergency view
-**File:** `src/modules/holarchelp/components/LiveMap.tsx`
+There may also be a second case where the map *is* initialized but a stale React effect prevents `invalidateSize` from firing on subsequent navigations.
 
-Cause: Leaflet calculates tile layout from the container size at init. When the incident detail page mounts, the map container is briefly 0×0 (inside flex/grid + dialog/scroll containers), so tiles never paint until something forces a resize. Today there's only a single `setTimeout(invalidateSize, 100)` inside the markers effect.
+## Fix
 
-Fix:
-- Use a `ResizeObserver` on the map container — call `map.invalidateSize()` whenever the container's size changes (handles the 0×0 → real-size transition on initial mount).
-- Also call `invalidateSize()` immediately after init via `requestAnimationFrame` and again after 250ms as a safety net for slow layout passes.
-- Keep the existing post-marker `invalidateSize()`.
+Rewrite `LiveMap` so the **container always mounts** and the Leaflet map initializes immediately, even with no points yet:
 
-### Out of scope
-- No backend / RPC / countdown-logic changes (the server-side picker is independent of the UI countdown text).
-- No marker icon changes (red cross + ambulance icons stay as set).
-- No changes to `AvailableResponders` countdown rendering beyond the constant.
+1. **Always render the map container.** Remove the `if (!patient) return placeholder` early-return. Instead, render the map div unconditionally and overlay a small "Waiting for first GPS fix…" badge when there are no points yet.
+2. **Init with sensible default center** (Johannesburg fallback) when no patient is present, then re-center via the existing markers/bounds effect once points arrive.
+3. **Keep ResizeObserver + rAF + delayed `invalidateSize`** (already in place) for layout-timing resilience.
+4. **Whenever `points` change** (including empty → first point), call `map.invalidateSize()` *before* `setView` / `fitBounds`. This handles the case where the container becomes visible after a layout shift.
 
 ## Files touched
-- `src/modules/holarchelp/components/AvailableResponders.tsx` (1-line constant)
-- `src/modules/holarchelp/components/LiveMap.tsx` (add ResizeObserver + early invalidateSize)
+- `src/modules/holarchelp/components/LiveMap.tsx` — restructure so container always mounts; overlay placeholder; ensure invalidateSize before view changes.
+
+## Out of scope
+- No changes to `HolarcHelpIncidentDetail.tsx` (parent already always renders `<LiveMap>`).
+- No marker icon, countdown, or backend changes.
