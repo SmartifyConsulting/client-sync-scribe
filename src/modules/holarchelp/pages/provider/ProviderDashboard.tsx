@@ -138,6 +138,19 @@ export default function ProviderDashboard() {
         <h1 className="text-2xl font-extrabold">Live SOS feed</h1>
       </div>
 
+      {profileIncomplete && (
+        <ProfileCompletionBanner
+          title={providerType === "hospital" ? "Complete your hospital profile" : "Complete your service profile"}
+          message={
+            providerType === "hospital"
+              ? "Add your registration number, physical address, primary contact phone and the services you offer so dispatch can route incidents to you correctly. All credentials are encrypted in transit and at rest. Holarc Health is HIPAA- and POPIA-aligned and never sells or shares your data."
+              : "Add your registration number, base address, dispatch phone and fleet size so we can route SOS calls to you correctly. All credentials are encrypted in transit and at rest. Holarc Health is HIPAA- and POPIA-aligned and never sells or shares your data."
+          }
+          onComplete={() => navigate("/provider/profile")}
+          storageKey={`holarc_provider_${providerType}_banner_dismissed`}
+        />
+      )}
+
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <SummaryCard icon={AlertCircle} label="Open SOS" value={open.length} tone="text-sos" />
         <SummaryCard icon={Activity} label="Accepted by us" value={myActive.length} tone="text-primary" />
