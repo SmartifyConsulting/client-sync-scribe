@@ -29,7 +29,8 @@ export default function HolarcHelpIncidentDetail() {
   const [locations, setLocations] = useState<Loc[]>([]);
   const [contacts, setContacts] = useState<{ id: string; name: string; phone: string | null }[]>([]);
   const [profileName, setProfileName] = useState("Your contact");
-  const [responder, setResponder] = useState<{ name: string } | null>(null);
+  const [responder, setResponder] = useState<{ name: string; kind: "ambulance" | "hospital" } | null>(null);
+  const [autoAssigned, setAutoAssigned] = useState(false);
   const [pendingOffers, setPendingOffers] = useState<number>(0);
 
   useEffect(() => {
@@ -65,13 +66,25 @@ export default function HolarcHelpIncidentDetail() {
     };
   }, [id, user]);
 
-  // Fetch responder name when assigned
+  // Fetch responder name (ambulance OR hospital) when assigned, plus detect auto-assignment
   useEffect(() => {
-    if (!incident?.assigned_provider_id) { setResponder(null); return; }
-    supabase.from("holarchelp_ambulance_providers" as any)
-      .select("company_name").eq("id", incident.assigned_provider_id).maybeSingle()
-      .then(({ data }: any) => setResponder(data ? { name: data.company_name } : null));
-  }, [incident?.assigned_provider_id]);
+    if (!incident?.assigned_provider_id || !id) { setResponder(null); setAutoAssigned(false); return; }
+    const pid = incident.assigned_provider_id;
+    (async () => {
+      const [{ data: amb }, { data: hosp }, { data: ev }] = await Promise.all([
+        supabase.from("holarchelp_ambulance_providers" as any).select("company_name").eq("id", pid).maybeSingle(),
+        supabase.from("holarchelp_hospitals" as any).select("name").eq("id", pid).maybeSingle(),
+        supabase.from("holarchelp_incident_events" as any)
+          .select("event_type").eq("incident_id", id)
+          .in("event_type", ["auto_assigned", "patient_picked", "accepted"])
+          .order("created_at", { ascending: false }).limit(1).maybeSingle(),
+      ]);
+      if ((amb as any)?.company_name) setResponder({ name: (amb as any).company_name, kind: "ambulance" });
+      else if ((hosp as any)?.name) setResponder({ name: (hosp as any).name, kind: "hospital" });
+      else setResponder(null);
+      setAutoAssigned((ev as any)?.event_type === "auto_assigned");
+    })();
+  }, [incident?.assigned_provider_id, id]);
 
   // Track pending offers count while open
   useEffect(() => {
@@ -227,10 +240,15 @@ export default function HolarcHelpIncidentDetail() {
 
       {responder && incident.assigned_provider_id && (
         <div className="mb-3 rounded-2xl border-2 border-emerald-500/40 bg-emerald-50 p-4 dark:bg-emerald-950/20">
-          <p className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">🚑 Responding</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+            {responder.kind === "hospital" ? "🏥 Receiving hospital" : "🚑 Responding"}
+            {autoAssigned && <span className="ml-2 rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-semibold text-emerald-900">AUTO-ASSIGNED</span>}
+          </p>
           <p className="mt-0.5 text-base font-extrabold text-emerald-900 dark:text-emerald-100">{responder.name}</p>
           <div className="mt-1 flex items-center gap-4 text-sm text-emerald-900/80 dark:text-emerald-200/80">
-            <span>ETA: <EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} /></span>
+            {responder.kind === "ambulance" && (
+              <span>ETA: <EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} /></span>
+            )}
             {incident.accepted_at && (
               <span className="text-xs">Accepted {new Date(incident.accepted_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
             )}

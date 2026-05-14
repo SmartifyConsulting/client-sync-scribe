@@ -51,7 +51,9 @@ export default function PatientIncidentHistory({ userId, title = "Emergency inci
 
     const list = (incidents as any[]) ?? [];
     const providerIds = Array.from(new Set(list.map((i) => i.assigned_provider_id).filter(Boolean)));
+    const incidentIds = list.map((i) => i.id);
     let providerNames: Record<string, string> = {};
+    const autoSet = new Set<string>();
     if (providerIds.length) {
       const [{ data: hs }, { data: as_ }] = await Promise.all([
         supabase.from("holarchelp_hospitals" as any).select("id, name").in("id", providerIds),
@@ -60,7 +62,19 @@ export default function PatientIncidentHistory({ userId, title = "Emergency inci
       for (const h of (hs as any[]) ?? []) providerNames[h.id] = h.name;
       for (const a of (as_ as any[]) ?? []) providerNames[a.id] = a.company_name;
     }
-    setRows(list.map((i) => ({ ...i, provider_name: providerNames[i.assigned_provider_id] ?? (i.manually_logged ? "Manually logged" : "Unassigned") })));
+    if (incidentIds.length) {
+      const { data: ev } = await supabase
+        .from("holarchelp_incident_events" as any)
+        .select("incident_id, event_type")
+        .in("incident_id", incidentIds)
+        .eq("event_type", "auto_assigned");
+      for (const e of (ev as any[]) ?? []) autoSet.add(e.incident_id);
+    }
+    setRows(list.map((i) => ({
+      ...i,
+      provider_name: providerNames[i.assigned_provider_id] ?? (i.manually_logged ? "Manually logged" : "Unassigned"),
+      auto_assigned: autoSet.has(i.id),
+    })));
     setLoading(false);
   };
 
@@ -127,6 +141,7 @@ export default function PatientIncidentHistory({ userId, title = "Emergency inci
                 </div>
                 <div className="text-muted-foreground">
                   Provider: <span className="text-foreground font-medium">{i.provider_name}</span>
+                  {i.auto_assigned && <span className="ml-1.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-800">AUTO</span>}
                 </div>
                 {i.notes && <div className="text-[11px]">{i.notes}</div>}
                 <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">

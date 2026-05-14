@@ -3984,6 +3984,10 @@ export type Database = {
           recorded_at: string
         }[]
       }
+      holarchelp_patient_pick_provider: {
+        Args: { _incident_id: string; _kind: string; _provider_id: string }
+        Returns: Json
+      }
       holarchelp_provider_accountability: {
         Args: never
         Returns: {

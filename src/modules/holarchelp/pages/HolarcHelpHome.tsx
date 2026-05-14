@@ -2,14 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useUserRole } from "@/hooks/useUserRole";
+
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Check, Loader2, MapPin } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SeverityPicker, type SeverityResult } from "../components/SeverityPicker";
 import { SosVoiceNoteDialog } from "../components/SosVoiceNoteDialog";
-import { DoctorSosChooser } from "../components/DoctorSosChooser";
+// DoctorSosChooser removed — patient SOS is always self.
 import logo from "@/assets/holarc-help-logo.png";
 
 type Coords = { lat: number; lng: number };
@@ -18,11 +18,11 @@ const HOLD_MS = 1000;
 
 export default function HolarcHelpHome() {
   const { user } = useAuth();
-  const { role } = useUserRole();
+  
   const navigate = useNavigate();
   const [activeIncidentId, setActiveIncidentId] = useState<string | null>(null);
   const [triggering, setTriggering] = useState(false);
-  const [chooserOpen, setChooserOpen] = useState(false);
+  
   const [permDenied, setPermDenied] = useState(false);
   const [coords, setCoords] = useState<Coords | null>(null);
   const [incidentId, setIncidentId] = useState<string | null>(null);
@@ -244,9 +244,8 @@ export default function HolarcHelpHome() {
         cancelHold();
         if (activeIncidentId) {
           navigate(`/patient/holarchelp/incident/${activeIncidentId}`);
-        } else if (role === "doctor") {
-          setChooserOpen(true);
         } else {
+          // Patient SOS is always for self — no chooser prompt.
           triggerSOS();
         }
         return;
@@ -336,15 +335,7 @@ export default function HolarcHelpHome() {
 
   return (
     <div className="mx-auto flex min-h-[calc(100vh-9rem)] max-w-md flex-col px-5">
-      <DoctorSosChooser
-        open={chooserOpen}
-        onClose={() => setChooserOpen(false)}
-        onSelectSelf={() => triggerSOS()}
-        onPatientIncidentCreated={(id) => {
-          setChooserOpen(false);
-          navigate(`/patient/holarchelp/incident/${id}`);
-        }}
-      />
+      {/* Patient SOS is self-only; chooser removed */}
 
       {/* Active SOS resume banner moved below the hold button */}
 
