@@ -1,5 +1,7 @@
-import { Bell, Mic, User, Settings, LogOut, Award, Share2, Stethoscope, HeartPulse, Calendar as CalendarIcon, Gift, Bug, Scale } from "lucide-react";
-import { useState } from "react";
+import { Bell, Mic, User, Settings, LogOut, Award, Share2, Stethoscope, HeartPulse, Calendar as CalendarIcon, Gift, Bug, Scale, UserCog, Ambulance, Building2, ShieldCheck, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { toast } from "sonner";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
