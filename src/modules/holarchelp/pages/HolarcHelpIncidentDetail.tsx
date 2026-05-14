@@ -265,14 +265,25 @@ export default function HolarcHelpIncidentDetail() {
             {autoAssigned && <span className="ml-2 rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-semibold text-emerald-900">AUTO-ASSIGNED</span>}
           </p>
           <p className="mt-0.5 text-base font-extrabold text-emerald-900 dark:text-emerald-100">{responder.name}</p>
-          <div className="mt-1 flex items-center gap-4 text-sm text-emerald-900/80 dark:text-emerald-200/80">
-            {responder.kind === "ambulance" && (
+          <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-emerald-900/80 dark:text-emerald-200/80">
+            {responder.kind === "ambulance" && incident.eta_minutes != null && (
               <span>ETA: <EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} /></span>
+            )}
+            {distanceKm != null && (
+              <span className="font-semibold">
+                {distanceKm.toFixed(1)} km away
+                {etaEstimateMin != null && <> · ~{etaEstimateMin} min by car</>}
+              </span>
             )}
             {incident.accepted_at && (
               <span className="text-xs">Accepted {new Date(incident.accepted_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
             )}
           </div>
+          {distanceKm != null && incident.provider_latitude == null && (
+            <p className="mt-1 text-[11px] text-emerald-800/70 dark:text-emerald-200/60">
+              Estimate based on responder's registered location. Updates live once they start moving.
+            </p>
+          )}
         </div>
       )}
 
