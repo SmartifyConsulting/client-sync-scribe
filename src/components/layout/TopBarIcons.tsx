@@ -24,6 +24,44 @@ export function TopBarIcons() {
   const location = useLocation();
   const navigate = useNavigate();
   const isOnPatientRoute = location.pathname.startsWith("/patient/");
+  const { isAdmin } = useIsAdmin();
+  const [switching, setSwitching] = useState<string | null>(null);
+  const [seeded, setSeeded] = useState(false);
+
+  const TEST_PROFILES: Array<{ email: string; name: string; role: string; icon: any }> = [
+    { email: "info@georgiaadams.co.za", name: "Georgia Adams", role: "Admin", icon: ShieldCheck },
+    { email: "sme@smartify.co.za", name: "Dean Allie", role: "Doctor", icon: Stethoscope },
+    { email: "dean.allie@gmail.com", name: "Dean Allie", role: "Patient", icon: HeartPulse },
+    { email: "projectmanager@smartify.co.za", name: "Shannon Kennedy", role: "Patient", icon: HeartPulse },
+    { email: "paraskevoulasoldatos@gmail.com", name: "Paraskevi Soldatos", role: "Patient", icon: HeartPulse },
+    { email: "xtina@smartify.co.za", name: "Xtina", role: "Doctor", icon: Stethoscope },
+    { email: "zano@smartify.co.za", name: "Zano", role: "Hospital", icon: Building2 },
+    { email: "renken@smartify.co.za", name: "Renken", role: "Ambulance", icon: Ambulance },
+  ];
+  const currentEmail = (profile as any)?.email || "";
+
+  useEffect(() => {
+    if (!isAdmin || seeded) return;
+    setSeeded(true);
+    supabase.functions.invoke("admin-seed-test-users").catch(() => {});
+  }, [isAdmin, seeded]);
+
+  async function impersonate(email: string) {
+    if (switching) return;
+    setSwitching(email);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-impersonate", { body: { email } });
+      if (error || !data?.token_hash) throw new Error(error?.message || data?.error || "Failed");
+      await supabase.auth.signOut();
+      const { error: vErr } = await supabase.auth.verifyOtp({ email, token_hash: data.token_hash, type: "magiclink" });
+      if (vErr) throw vErr;
+      toast.success(`Signed in as ${email}`);
+      window.location.href = "/";
+    } catch (e: any) {
+      toast.error(`Switch failed: ${e.message}`);
+      setSwitching(null);
+    }
+  }
 
   const { data: unreadNotifCount = 0 } = useQuery({
     queryKey: ["unread-notifications-topbar"],
