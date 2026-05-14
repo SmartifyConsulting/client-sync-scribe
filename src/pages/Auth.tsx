@@ -293,60 +293,24 @@ export default function Auth() {
       if (!userId) throw new Error("No user account found");
 
       const preferredLanguage = selectedCountry.lang;
-      const fullPhone = `${countryCode} ${userRole === "doctor" ? mobileNumber : phone}`;
+      const phoneDigits = userRole === "doctor" ? mobileNumber : phone;
+      const fullPhone = phoneDigits ? `${countryCode} ${phoneDigits}` : null;
 
-      if (userRole === "doctor") {
-        const avatarUrl = await uploadAvatar(userId);
-        const signatureUrl = await uploadSignature(userId);
+      const nameParts = fullName.trim().toLowerCase().split(/\s+/);
+      const firstPart = nameParts[0] || "user";
+      const lastPart = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
+      const baseAlias = (lastPart ? `${firstPart}-${lastPart}` : firstPart).replace(/[^a-z0-9-]/g, '');
 
-        const nameParts = fullName.trim().toLowerCase().split(/\s+/);
-        const firstName = nameParts[0] || "user";
-        const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
-        const mailboxAlias = lastName
-          ? `${firstName}-${lastName}`.replace(/[^a-z0-9-]/g, '')
-          : `${firstName}`.replace(/[^a-z0-9-]/g, '');
+      // Update profile with the few fields we collect at signup
+      await supabase.from("profiles").update({
+        full_name: fullName,
+        role: userRole,
+        mailbox_alias: baseAlias,
+        mobile_number: fullPhone,
+        preferred_language: preferredLanguage,
+      }).eq("id", userId);
 
-        await supabase.from("profiles").update({
-          full_name: fullName,
-          practice_number: practiceNumber,
-          doctor_number: doctorNumber,
-          practice_address: practiceAddress,
-          specialty: specialty || null,
-          avatar_url: avatarUrl,
-          signature_url: signatureUrl,
-          role: userRole,
-          mailbox_alias: mailboxAlias,
-          mobile_number: fullPhone,
-          preferred_language: preferredLanguage,
-        }).eq("id", userId);
-
-        if (partners.length > 0) {
-          await supabase.from("practice_partners").insert(
-            partners.map((p) => ({
-              user_id: userId,
-              full_name: p.full_name,
-              registration_number: p.registration_number,
-              mobile_number: p.mobile_number || null,
-            }))
-          );
-        }
-      } else {
-        const patientNameParts = fullName.trim().toLowerCase().split(/\s+/);
-        const patientFirst = patientNameParts[0] || "user";
-        const patientLast = patientNameParts.length > 1 ? patientNameParts[patientNameParts.length - 1] : "";
-        const birthYear = dob ? new Date(dob).getFullYear().toString() : "";
-        let patientAlias = patientLast ? `${patientFirst}-${patientLast}` : patientFirst;
-        if (birthYear) patientAlias += `-${birthYear}`;
-        patientAlias = patientAlias.replace(/[^a-z0-9-]/g, '');
-
-        await supabase.from("profiles").update({
-          full_name: fullName,
-          role: userRole,
-          mailbox_alias: patientAlias,
-          mobile_number: fullPhone,
-          preferred_language: preferredLanguage,
-        }).eq("id", userId);
-
+      if (userRole === "patient") {
         if (inviteToken) {
           const { data: invitation } = await supabase
             .from("patient_invitations")
@@ -360,15 +324,8 @@ export default function Auth() {
             if (invitation.patient_id) {
               await supabase.from("patients").update({
                 patient_user_id: userId,
-                email, phone: fullPhone, dob: dob || null,
-                physical_address: physicalAddress,
-                postal_address: sameAsPhysical ? physicalAddress : postalAddress,
-                same_as_physical: sameAsPhysical, employer, occupation,
-                medical_aid: medicalInsurance, medical_aid_number: medicalInsuranceNumber,
-                medical_insurance_product: medicalInsuranceProduct, primary_member: primaryMember,
-                next_of_kin_name: nextOfKinName, next_of_kin_phone: nextOfKinPhone,
-                next_of_kin_email: nextOfKinEmail, general_practitioner: generalPractitioner,
-                allergies, referred_by: referredBy,
+                email,
+                phone: fullPhone,
               }).eq("id", invitation.patient_id);
             }
             await supabase.from("doctor_patient_access").insert({
@@ -402,33 +359,14 @@ export default function Auth() {
               });
             }
           }
-        }
-
-        if (!inviteToken) {
-          // Non-invited patient: auto-create a blank patient record
-          const fullPhone = `${countryCode} ${phone}`;
+        } else {
+          // Non-invited patient: minimal patient record so MyDetails has something to edit
           await supabase.from("patients").insert({
             user_id: userId,
             patient_user_id: userId,
             name: fullName,
             email,
             phone: fullPhone,
-            dob: dob || null,
-            physical_address: physicalAddress || null,
-            postal_address: sameAsPhysical ? physicalAddress : (postalAddress || null),
-            same_as_physical: sameAsPhysical,
-            employer: employer || null,
-            occupation: occupation || null,
-            medical_aid: medicalInsurance || null,
-            medical_aid_number: medicalInsuranceNumber || null,
-            medical_insurance_product: medicalInsuranceProduct || null,
-            primary_member: primaryMember || null,
-            next_of_kin_name: nextOfKinName || null,
-            next_of_kin_phone: nextOfKinPhone || null,
-            next_of_kin_email: nextOfKinEmail || null,
-            general_practitioner: generalPractitioner || null,
-            allergies: allergies || null,
-            referred_by: referredBy || null,
           });
         }
       }
@@ -448,7 +386,7 @@ export default function Auth() {
       }, { onConflict: "user_id" });
 
       clearDraft();
-      toast({ title: "Account created!", description: "Welcome to Holarc! You have 30 days of free access." });
+      toast({ title: "Account created!", description: "Welcome to Holarc! You have 30 days of free access. Please complete your profile next." });
       await routeAfterLogin(userId);
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
