@@ -18,7 +18,7 @@ const HOLD_MS = 1000;
 
 export default function HolarcHelpHome() {
   const { user } = useAuth();
-  const { role } = useUserRole();
+  
   const navigate = useNavigate();
   const [activeIncidentId, setActiveIncidentId] = useState<string | null>(null);
   const [triggering, setTriggering] = useState(false);
