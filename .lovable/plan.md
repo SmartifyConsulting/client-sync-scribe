@@ -1,52 +1,102 @@
-# End-to-End Signup & Auth Test Plan
+# Streamlined Signup + Post-Login Profile Nudge (All Roles)
 
-I'll run this as a live browser test against the preview, one user at a time, pausing for you to confirm email verification before proceeding to login.
+## Goal
 
-## Per-user flow (repeated 5x)
+Every new user — patient, doctor, hospital, ambulance, or other emergency/service provider — should only have to enter the bare minimum to create an account, accept Terms & Conditions, and start their trial. All other profile/credential information becomes optional and lives inside their own profile screen, where they're nudged to complete it on every login until done.
 
-For each user (Paraskevi → Anastasia → Xtina → Zano → Renken):
+---
 
-1. **Open signup** — navigate browser to `/auth` (signup tab)
-2. **Fill form** — name, email, role selector, generated 16-char password (saved in summary so you have it)
-3. **Submit** — capture network response, console errors, success toast
-4. **Backend verification** (via DB queries):
-   - `auth.users` row created with correct email + metadata
-   - `profiles` row exists with correct `role`
-   - `user_roles` row(s) match expected role
-   - `auth_emails` queue / `email_send_log` shows verification email enqueued + sent
-5. **PAUSE** — I report status and wait for you to reply "verified" after clicking the link in the inbox
-6. **Login test** — navigate to `/auth`, sign in, verify:
-   - Auth succeeds (200 from `/token`)
-   - Correct redirect (patient → `/patient/details`, doctor → `/doctor-dashboard`, hospital/ambulance → `/provider`)
-   - Session persists on refresh
-   - Protected route access works
-   - Logout clears session
-7. **Report** — PASS/FAIL table + screenshot + any errors
+## Current vs. New signup steps
 
-## Role mapping in this codebase
+### Patients (`/auth` → role = Patient)
+Today: `[Account, Personal Info, Employment, Insurance, Next of Kin, Terms & Payment]`
+New: `[Account, Terms & Payment]`
 
-- Patient → `profiles.role = 'patient'` + `user_roles.role = 'patient'`
-- Doctor → `profiles.role = 'doctor'` + `user_roles.role = 'doctor'`
-- Hospital → `user_roles.role = 'hospital_staff'` (emergency provider, routes to `/provider`)
-- Ambulance → `user_roles.role = 'ambulance_staff'` (emergency provider, routes to `/provider`)
+### Doctors / Healthcare Providers (`/auth` → role = Healthcare Provider)
+Today: `[Account, Profile, Practice Info, Partners, Terms & Payment]`
+New: `[Account, Terms & Payment]`
 
-I'll verify the signup form actually exposes Hospital/Ambulance role options before testing users 4 & 5 — if it doesn't, those two go through `/provider-signup` instead.
+### Hospitals, Ambulance & other Service Providers (`/provider-signup`)
+Today: multi-step form collecting org name, registration number, address, contact, services, etc., then T&Cs.
+New: `[Account (org name + email + password + provider type), Terms & Payment]`
 
-## What I need from you
+The four provider types follow the same rule: only auth + T&Cs at signup.
 
-- **Confirm I should use real emails** (the ones listed) — verification emails will actually land in those inboxes.
-- **After each signup**, reply with "verified" (or "verify failed") once you've clicked the link, so I can proceed to login.
-- **Don't switch tabs in the preview** while I'm testing — the browser session is shared with your preview iframe.
+---
 
-## Stop conditions
+## What stays at signup (minimum data captured)
 
-If any user fails at signup or backend validation, I stop, surface root cause (auth logs, edge function logs, network response), and wait for your direction before continuing to the next user.
+For every role:
+- First / last name (or organisation name for hospitals/ambulance)
+- Email
+- Password
+- Mobile number (already collected on Step 1 today)
+- Role / provider type selector
+- Acceptance of Terms & Conditions
+- Trial / payment selection
 
-## Deliverable
+Everything else (practice number, HPCSA number, partners, address, insurance, NOK, registration number, dispatch zones, etc.) is **deferred** to the in-app profile screen.
 
-A running summary table after each user:
+---
 
-```
-User      | Signup | Email Sent | Verified | Login | Redirect | Session | Result
-Paraskevi | PASS   | PASS       | ...      | ...   | ...      | ...     | ...
-```
+## Minimal record creation at signup
+
+Each role's "home" record is still created at signup so the profile screen has something to edit:
+
+- **Patient** → minimal `patients` row (`patient_user_id`, `full_name`, `email`)
+- **Doctor** → existing `profiles` row already populated by the `handle_new_user` trigger; nothing extra needed
+- **Hospital** → minimal `holarchelp_hospitals` row (owner_id, name, status='pending')
+- **Ambulance** → minimal `holarchelp_ambulance_providers` row (owner_id, company_name, status='pending')
+
+Status remains `pending` until the org completes credentials and an admin approves — same as today.
+
+---
+
+## Post-login behaviour
+
+`RoleBasedRedirect` already routes:
+- Patient → `/patient/details`
+- Doctor → `/doctor-dashboard`
+- Provider (hospital/ambulance/emergency) → `/provider`
+
+No routing change. We add a **"Complete your profile" banner** at the top of each landing screen, shown whenever required-but-deferred fields are missing.
+
+### Banner trigger fields per role
+
+| Role | Considered "incomplete" if any of these are blank |
+|---|---|
+| Patient | DOB, physical address, mobile, ≥1 emergency contact |
+| Doctor | Specialty, practice number, HPCSA/doctor number, practice address |
+| Hospital | Registration number, physical address, contact phone, services list |
+| Ambulance | Registration number, base address, contact phone, fleet/dispatch zones |
+
+### Banner copy (same wording across roles, lightly adapted)
+
+> **Help us serve you better.** Please complete your profile so the Holarc Health network has what it needs to deliver care safely and quickly. All information is encrypted in transit and at rest, accessible only to you and the parties you explicitly connect with. Holarc Health is HIPAA- and POPIA-aligned and never sells or shares your data.
+>
+> [Complete my profile →]
+
+CTA scrolls to / opens the relevant section in each role's profile editor. Banner stays visible on every login until all required fields are filled, then disappears automatically. Dismissible per session.
+
+---
+
+## Files touched
+
+- `src/pages/Auth.tsx` — shorten both `PATIENT_STEPS` and `DOCTOR_STEPS` to `[Account, Terms & Payment]`; drop the case 1–4 render branches and their state/draft persistence; ensure the minimal patient row is created on first signup.
+- `src/pages/ProviderSignup.tsx` — collapse to `[Account, Terms & Payment]`; create the minimal hospital/ambulance row at signup.
+- `src/pages/patient/MyDetails.tsx` — add `<ProfileCompletionBanner />` above `PatientDetailsEditor`; remove "ask your doctor" fallback for self-service.
+- `src/pages/DoctorDashboard.tsx` (or wherever the doctor lands) — mount `<ProfileCompletionBanner role="doctor" />`.
+- `src/pages/Provider*.tsx` (hospital + ambulance landing) — mount `<ProfileCompletionBanner role="hospital" | "ambulance" />`.
+- `src/components/profile/ProfileCompletionBanner.tsx` (new) — single shared component, takes a `role` prop, computes incompleteness with one simple hook per role.
+- Cleanup: remove the orphan client-side `INSERT into user_roles` in `Auth.tsx` that's been throwing 401 RLS errors — the `handle_new_user` trigger already handles role insertion server-side.
+
+## Out of scope
+
+- No DB schema changes (existing tables already allow nullable fields for everything we're deferring).
+- Admin approval logic for hospitals/ambulance is unchanged.
+- No change to login, password reset, email verification, or role assignment.
+
+## Open questions
+
+1. Should profile-incomplete users be **blocked** from any actions (e.g., a doctor can't be discovered in search until credentials are filled, or a hospital can't accept incidents)? Default = banner only, nothing blocked.
+2. Banner placement on doctor dashboard — top of page above the briefing widget, or inline as a card in the activity feed?
