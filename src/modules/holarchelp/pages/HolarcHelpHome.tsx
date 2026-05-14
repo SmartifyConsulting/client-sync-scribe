@@ -136,11 +136,6 @@ export default function HolarcHelpHome() {
       navigate(`/patient/holarchelp/incident/${activeIncidentId}`);
       return;
     }
-    if (hasEmergency === false) {
-      toast.error("Add someone we can notify first.");
-      navigate("/patient/details?section=health");
-      return;
-    }
     setTriggering(true);
     try {
       const pos = await new Promise<GeolocationPosition>((res, rej) => {
@@ -179,6 +174,10 @@ export default function HolarcHelpHome() {
       if ("vibrate" in navigator) navigator.vibrate?.([200, 100, 200]);
       setIncidentId((incident as any).id);
       setActiveIncidentId((incident as any).id);
+      // Don't block on missing contacts — just inform the user.
+      if (hasEmergency === false) {
+        toast.message("SOS sent. Add an emergency contact later so we can also notify someone you trust.");
+      }
       supabase.functions.invoke("dispatch-sos", { body: { incident_id: (incident as any).id } })
         .catch((e) => console.warn("dispatch-sos failed", e));
       supabase.functions.invoke("share-incident-with-contacts", {
@@ -212,39 +211,21 @@ export default function HolarcHelpHome() {
     toast.success("Alert cancelled");
   };
 
-  // ============ HOLD-TO-TRIGGER ============
-  const startHold = () => {
+  // ============ TAP-TO-TRIGGER ============
+  const handleSosClick = () => {
     if (triggering) return;
     if (!activeIncidentId && !allAck) {
       toast.error("Please acknowledge all three statements above to enable SOS.");
       return;
     }
-    if ("vibrate" in navigator) navigator.vibrate?.(30);
-    holdStartRef.current = performance.now();
-    const tick = () => {
-      const p = Math.min(1, (performance.now() - holdStartRef.current) / HOLD_MS);
-      setHoldProgress(p);
-      if (p >= 1) {
-        if ("vibrate" in navigator) navigator.vibrate?.([80, 60, 120]);
-        cancelHold();
-        if (activeIncidentId) {
-          navigate(`/patient/holarchelp/incident/${activeIncidentId}`);
-        } else {
-          // Patient SOS is always for self — no chooser prompt.
-          triggerSOS();
-        }
-        return;
-      }
-      holdTimerRef.current = requestAnimationFrame(tick);
-    };
-    holdTimerRef.current = requestAnimationFrame(tick);
+    if ("vibrate" in navigator) navigator.vibrate?.([80, 60, 120]);
+    if (activeIncidentId) {
+      navigate(`/patient/holarchelp/incident/${activeIncidentId}`);
+    } else {
+      triggerSOS();
+    }
   };
 
-  const cancelHold = () => {
-    if (holdTimerRef.current) cancelAnimationFrame(holdTimerRef.current);
-    holdTimerRef.current = null;
-    setHoldProgress(0);
-  };
 
   // ============ RENDER ============
 
