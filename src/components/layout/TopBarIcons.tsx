@@ -234,7 +234,7 @@ export function TopBarIcons() {
             )}
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-48 p-1.5" align="end">
+        <PopoverContent className={cn("p-1.5", isAdmin ? "w-72" : "w-48")} align="end">
           {/* Profile switcher */}
           {isDoctor && (
             <div className="border-b border-border mb-1">
