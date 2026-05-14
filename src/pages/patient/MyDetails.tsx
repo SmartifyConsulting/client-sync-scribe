@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, Navigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +7,7 @@ import { Patient } from "@/hooks/usePatients";
 import { useToast } from "@/hooks/use-toast";
 import { useMyRewards } from "@/hooks/usePatientRewards";
 import { EmergencyContact } from "@/features/patients/components/EmergencyContactsSection";
+import { ProfileCompletionBanner } from "@/components/profile/ProfileCompletionBanner";
 
 
 
