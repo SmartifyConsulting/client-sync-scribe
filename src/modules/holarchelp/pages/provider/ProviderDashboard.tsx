@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProviderAccess } from "../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { AlertCircle, Activity, CheckCircle2, Clock } from "lucide-react";
+import { ProfileCompletionBanner } from "@/components/profile/ProfileCompletionBanner";
 
 type Incident = {
   id: string;
