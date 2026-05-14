@@ -116,6 +116,17 @@ export default function MyDetails() {
     toast({ title: "Saved", description: "Your details have been updated." });
   };
 
+  const isIncomplete = useMemo(() => {
+    if (!patient) return true;
+    const p: any = patient;
+    return (
+      !p.dob ||
+      !p.physical_address ||
+      !p.phone ||
+      (!(emergencyContacts && emergencyContacts.length > 0) && !p.next_of_kin_name)
+    );
+  }, [patient, emergencyContacts]);
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -124,21 +135,10 @@ export default function MyDetails() {
     );
   }
 
-  const isIncomplete = useMemo(() => {
-    if (!patient) return true;
-    const p: any = patient;
-    return (
-      !p.dob ||
-      !p.physical_address ||
-      !p.phone ||
-      !(emergencyContacts && emergencyContacts.length > 0) &&
-        !p.next_of_kin_name
-    );
-  }, [patient, emergencyContacts]);
-
   if (rawSection === "home") {
     return <Navigate to="/patient/details?section=health" replace />;
   }
+
 
   const sectionHeading: Record<string, { title: string; subtitle: string }> = {
     health: { title: "My Holarchive", subtitle: "View and update your personal and medical information" },
