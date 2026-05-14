@@ -61,8 +61,8 @@ interface PartnerInput {
 
 type UserRole = "doctor" | "patient";
 
-const DOCTOR_STEPS = ["Account", "Profile", "Practice Info", "Partners", "Terms & Payment"];
-const PATIENT_STEPS = ["Account", "Personal Info", "Employment", "Insurance", "Next of Kin", "Terms & Payment"];
+const DOCTOR_STEPS = ["Account", "Terms & Payment"];
+const PATIENT_STEPS = ["Account", "Terms & Payment"];
 
 const STORAGE_KEY = "holarc_signup_draft";
 
