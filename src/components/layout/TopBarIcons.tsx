@@ -60,7 +60,7 @@ export function TopBarIcons() {
       const { data, error } = await supabase.functions.invoke("admin-impersonate", { body: { email } });
       if (error || !data?.token_hash) throw new Error(error?.message || data?.error || "Failed");
       await supabase.auth.signOut();
-      const { error: vErr } = await supabase.auth.verifyOtp({ email, token_hash: data.token_hash, type: "magiclink" });
+      const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "email" });
       if (vErr) throw vErr;
       toast.success(`Signed in as ${email}`);
       window.location.href = "/";
