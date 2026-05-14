@@ -36,7 +36,7 @@ export default function MyDetails() {
       setUserEmail(user.email || "");
       setUserId(user.id);
 
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from("patients")
         .select("*")
         .eq("patient_user_id", user.id)
@@ -45,6 +45,42 @@ export default function MyDetails() {
         .maybeSingle();
 
       if (error) throw error;
+
+      // Self-heal: if no patient row exists for this user, create a minimal one
+      if (!data) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name, mobile_number")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        const fallbackName =
+          profile?.full_name ||
+          (user.email ? user.email.split("@")[0] : "New Patient");
+
+        const { data: created, error: insertErr } = await supabase
+          .from("patients")
+          .insert({
+            user_id: user.id,
+            patient_user_id: user.id,
+            name: fallbackName,
+            email: user.email || null,
+            phone: profile?.mobile_number || null,
+          })
+          .select("*")
+          .single();
+
+        if (insertErr) {
+          toast({
+            title: "Could not initialize your record",
+            description: insertErr.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        data = created;
+      }
+
       if (data) {
         setPatient({
           ...data,
