@@ -9,7 +9,7 @@ import { Check, Loader2, MapPin } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SeverityPicker, type SeverityResult } from "../components/SeverityPicker";
 import { SosVoiceNoteDialog } from "../components/SosVoiceNoteDialog";
-import { DoctorSosChooser } from "../components/DoctorSosChooser";
+// DoctorSosChooser removed — patient SOS is always self.
 import logo from "@/assets/holarc-help-logo.png";
 
 type Coords = { lat: number; lng: number };
