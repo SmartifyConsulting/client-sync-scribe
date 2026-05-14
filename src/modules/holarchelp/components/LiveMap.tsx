@@ -47,6 +47,16 @@ function classicIcon(kind: LiveMapPoint["kind"]): google.maps.Icon | google.maps
   } as google.maps.Icon;
 }
 
+const ERROR_HINTS: Record<string, string> = {
+  RefererNotAllowedMapError: "This domain isn't authorised on the Google Maps API key. Add the current URL pattern to the key's HTTP referrer restrictions.",
+  ApiNotActivatedMapError: "The Maps JavaScript API isn't enabled on the Google Cloud project.",
+  BillingNotEnabledMapError: "Billing isn't enabled on the Google Cloud project.",
+  InvalidKeyMapError: "The Google Maps API key is invalid.",
+  MissingKeyMapError: "No Google Maps API key was supplied.",
+  ExpiredKeyMapError: "The Google Maps API key has expired.",
+  RequestDeniedMapError: "Google denied the request — check API restrictions on the key.",
+};
+
 export const LiveMap = ({
   points,
   height = 360,
@@ -59,6 +69,8 @@ export const LiveMap = ({
   const markersRef = useRef<AnyMarker[]>([]);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
 
   const patient = points.find((p) => p.kind === "patient") ?? points[0];
 
@@ -66,6 +78,32 @@ export const LiveMap = ({
   useEffect(() => {
     if (failed || !GOOGLE_MAPS_API_KEY || !containerRef.current || mapRef.current) return;
     let cancelled = false;
+
+    // Register auth-failure hook BEFORE loading
+    (window as any).gm_authFailure = () => {
+      console.warn("[LiveMap] gm_authFailure");
+      setErrorCode((prev) => prev ?? "RefererNotAllowedMapError");
+      setFailed(true);
+    };
+
+    // Patch console.error briefly to capture Google's error codes
+    const origError = console.error;
+    const errorRegex = /Google Maps JavaScript API (?:error|warning):\s*([A-Za-z]+)/;
+    console.error = (...args: any[]) => {
+      try {
+        for (const a of args) {
+          const s = typeof a === "string" ? a : a?.message ?? "";
+          const m = typeof s === "string" ? s.match(errorRegex) : null;
+          if (m) {
+            setErrorCode(m[1]);
+            setFailed(true);
+            break;
+          }
+        }
+      } catch { /* ignore */ }
+      origError.apply(console, args);
+    };
+
     loadGoogleMaps()
       .then(() => {
         if (cancelled || !containerRef.current) return;
@@ -92,13 +130,22 @@ export const LiveMap = ({
         setFailed(true);
       });
 
-    (window as any).gm_authFailure = () => {
-      console.warn("[LiveMap] gm_authFailure");
-      setFailed(true);
-    };
+    // Watchdog: if no tiles render after 6s, surface the diagnostic card
+    const watchdog = window.setTimeout(() => {
+      if (cancelled) return;
+      const el = containerRef.current;
+      if (!el) return;
+      const hasTiles = !!el.querySelector('img[src*="googleapis.com"], img[src*="ggpht.com"], img[src*="gstatic.com"]');
+      if (!hasTiles) {
+        console.warn("[LiveMap] watchdog: no tiles rendered after 6s");
+        setFailed(true);
+      }
+    }, 6000);
 
     return () => {
       cancelled = true;
+      console.error = origError;
+      window.clearTimeout(watchdog);
       markersRef.current.forEach((m) => {
         if ("setMap" in m) (m as google.maps.Marker).setMap(null);
         else (m as any).map = null;
@@ -107,7 +154,7 @@ export const LiveMap = ({
       mapRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [failed]);
+  }, [failed, retryKey]);
 
   // Render markers + fit bounds
   useEffect(() => {
@@ -171,15 +218,27 @@ export const LiveMap = ({
   }
 
   if (failed) {
+    const hint = errorCode ? ERROR_HINTS[errorCode] : null;
     return (
       <div
         style={{ height }}
-        className="flex flex-col items-center justify-center rounded-2xl border border-dashed bg-muted/40 p-6 text-center text-sm text-muted-foreground"
+        className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-amber-300 bg-amber-50 p-6 text-center text-sm dark:bg-amber-950/20"
       >
-        <p className="font-medium text-foreground">Map unavailable</p>
-        <p className="mt-1 text-xs">
+        <p className="font-semibold text-amber-900 dark:text-amber-200">Map couldn't load</p>
+        {errorCode && (
+          <p className="font-mono text-xs text-amber-800 dark:text-amber-300">{errorCode}</p>
+        )}
+        {hint && <p className="max-w-xs text-xs text-amber-800/90 dark:text-amber-200/90">{hint}</p>}
+        <p className="mt-1 text-xs text-muted-foreground">
           Lat {patient.latitude.toFixed(4)}, Lng {patient.longitude.toFixed(4)}
         </p>
+        <button
+          type="button"
+          onClick={() => { setErrorCode(null); setFailed(false); setReady(false); setRetryKey((k) => k + 1); }}
+          className="mt-2 rounded-full border border-amber-400 bg-white px-3 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-100"
+        >
+          Retry
+        </button>
       </div>
     );
   }
