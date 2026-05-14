@@ -174,13 +174,29 @@ export default function HolarcHelpIncidentDetail() {
       label: profileName,
     });
   }
-  if (incident.provider_latitude && incident.provider_longitude) {
+  // Prefer live provider GPS, otherwise fall back to provider's registered location
+  const responderLat = incident.provider_latitude ?? responder?.latitude ?? null;
+  const responderLng = incident.provider_longitude ?? responder?.longitude ?? null;
+  if (responderLat != null && responderLng != null && responder) {
     mapPoints.push({
-      kind: "ambulance",
-      latitude: incident.provider_latitude,
-      longitude: incident.provider_longitude,
-      label: responder?.name ?? "Ambulance",
+      kind: responder.kind,
+      latitude: responderLat,
+      longitude: responderLng,
+      label: responder.name,
     });
+  }
+
+  // Straight-line distance + drive-time estimate (~40 km/h average urban)
+  let distanceKm: number | null = null;
+  let etaEstimateMin: number | null = null;
+  if (locations[0] && responderLat != null && responderLng != null) {
+    const R = 6371, toRad = (d: number) => (d * Math.PI) / 180;
+    const a = { lat: locations[0].latitude, lng: locations[0].longitude };
+    const b = { lat: responderLat, lng: responderLng };
+    const dLat = toRad(b.lat - a.lat), dLng = toRad(b.lng - a.lng);
+    const x = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+    distanceKm = 2 * R * Math.asin(Math.sqrt(x));
+    etaEstimateMin = Math.max(1, Math.round((distanceKm / 40) * 60));
   }
 
   return (
