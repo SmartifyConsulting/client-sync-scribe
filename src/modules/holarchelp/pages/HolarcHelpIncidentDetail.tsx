@@ -29,7 +29,7 @@ export default function HolarcHelpIncidentDetail() {
   const [locations, setLocations] = useState<Loc[]>([]);
   const [contacts, setContacts] = useState<{ id: string; name: string; phone: string | null }[]>([]);
   const [profileName, setProfileName] = useState("Your contact");
-  const [responder, setResponder] = useState<{ name: string; kind: "ambulance" | "hospital" } | null>(null);
+  const [responder, setResponder] = useState<{ name: string; kind: "ambulance" | "hospital"; latitude: number | null; longitude: number | null } | null>(null);
   const [autoAssigned, setAutoAssigned] = useState(false);
   const [pendingOffers, setPendingOffers] = useState<number>(0);
 
@@ -72,16 +72,20 @@ export default function HolarcHelpIncidentDetail() {
     const pid = incident.assigned_provider_id;
     (async () => {
       const [{ data: amb }, { data: hosp }, { data: ev }] = await Promise.all([
-        supabase.from("holarchelp_ambulance_providers" as any).select("company_name").eq("id", pid).maybeSingle(),
-        supabase.from("holarchelp_hospitals" as any).select("name").eq("id", pid).maybeSingle(),
+        supabase.from("holarchelp_ambulance_providers" as any).select("company_name, latitude, longitude").eq("id", pid).maybeSingle(),
+        supabase.from("holarchelp_hospitals" as any).select("name, latitude, longitude").eq("id", pid).maybeSingle(),
         supabase.from("holarchelp_incident_events" as any)
           .select("event_type").eq("incident_id", id)
           .in("event_type", ["auto_assigned", "patient_picked", "accepted"])
           .order("created_at", { ascending: false }).limit(1).maybeSingle(),
       ]);
-      if ((amb as any)?.company_name) setResponder({ name: (amb as any).company_name, kind: "ambulance" });
-      else if ((hosp as any)?.name) setResponder({ name: (hosp as any).name, kind: "hospital" });
-      else setResponder(null);
+      if ((amb as any)?.company_name) {
+        const a: any = amb;
+        setResponder({ name: a.company_name, kind: "ambulance", latitude: a.latitude ?? null, longitude: a.longitude ?? null });
+      } else if ((hosp as any)?.name) {
+        const h: any = hosp;
+        setResponder({ name: h.name, kind: "hospital", latitude: h.latitude ?? null, longitude: h.longitude ?? null });
+      } else setResponder(null);
       setAutoAssigned((ev as any)?.event_type === "auto_assigned");
     })();
   }, [incident?.assigned_provider_id, id]);
@@ -170,13 +174,29 @@ export default function HolarcHelpIncidentDetail() {
       label: profileName,
     });
   }
-  if (incident.provider_latitude && incident.provider_longitude) {
+  // Prefer live provider GPS, otherwise fall back to provider's registered location
+  const responderLat = incident.provider_latitude ?? responder?.latitude ?? null;
+  const responderLng = incident.provider_longitude ?? responder?.longitude ?? null;
+  if (responderLat != null && responderLng != null && responder) {
     mapPoints.push({
-      kind: "ambulance",
-      latitude: incident.provider_latitude,
-      longitude: incident.provider_longitude,
-      label: responder?.name ?? "Ambulance",
+      kind: responder.kind,
+      latitude: responderLat,
+      longitude: responderLng,
+      label: responder.name,
     });
+  }
+
+  // Straight-line distance + drive-time estimate (~40 km/h average urban)
+  let distanceKm: number | null = null;
+  let etaEstimateMin: number | null = null;
+  if (locations[0] && responderLat != null && responderLng != null) {
+    const R = 6371, toRad = (d: number) => (d * Math.PI) / 180;
+    const a = { lat: locations[0].latitude, lng: locations[0].longitude };
+    const b = { lat: responderLat, lng: responderLng };
+    const dLat = toRad(b.lat - a.lat), dLng = toRad(b.lng - a.lng);
+    const x = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+    distanceKm = 2 * R * Math.asin(Math.sqrt(x));
+    etaEstimateMin = Math.max(1, Math.round((distanceKm / 40) * 60));
   }
 
   return (
@@ -245,14 +265,25 @@ export default function HolarcHelpIncidentDetail() {
             {autoAssigned && <span className="ml-2 rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-semibold text-emerald-900">AUTO-ASSIGNED</span>}
           </p>
           <p className="mt-0.5 text-base font-extrabold text-emerald-900 dark:text-emerald-100">{responder.name}</p>
-          <div className="mt-1 flex items-center gap-4 text-sm text-emerald-900/80 dark:text-emerald-200/80">
-            {responder.kind === "ambulance" && (
+          <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-emerald-900/80 dark:text-emerald-200/80">
+            {responder.kind === "ambulance" && incident.eta_minutes != null && (
               <span>ETA: <EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} /></span>
+            )}
+            {distanceKm != null && (
+              <span className="font-semibold">
+                {distanceKm.toFixed(1)} km away
+                {etaEstimateMin != null && <> · ~{etaEstimateMin} min by car</>}
+              </span>
             )}
             {incident.accepted_at && (
               <span className="text-xs">Accepted {new Date(incident.accepted_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
             )}
           </div>
+          {distanceKm != null && incident.provider_latitude == null && (
+            <p className="mt-1 text-[11px] text-emerald-800/70 dark:text-emerald-200/60">
+              Estimate based on responder's registered location. Updates live once they start moving.
+            </p>
+          )}
         </div>
       )}
 
