@@ -19,6 +19,15 @@ const SEEDS: Seed[] = [
   { email: "renken@smartify.co.za", full_name: "Renken", role: "ambulance_staff", ambulance_company: "Renken Ambulance Service" },
 ];
 
+const FIXED_PASSWORD = "Password123";
+const PASSWORD_TARGETS: Array<{ email: string; full_name: string }> = [
+  { email: "paraskevoulasoldatos@gmail.com", full_name: "Paraskevi Soldatos" },
+  { email: "zano@smartify.co.za", full_name: "Zano" },
+  { email: "xtina@smartify.co.za", full_name: "Xtina" },
+  { email: "renken@smartify.co.za", full_name: "Renken" },
+  { email: "nonastasia@gmail.com", full_name: "Nonastasia" },
+];
+
 function randomPassword() {
   return crypto.randomUUID() + "Aa1!";
 }
@@ -106,7 +115,33 @@ Deno.serve(async (req) => {
       results.push({ email: seed.email, status: existing ? "updated" : "created", user_id: userId });
     }
 
-    return new Response(JSON.stringify({ ok: true, results }), {
+    // Set fixed password for test accounts (idempotent)
+    const { data: list2 } = await sb.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    const byEmail = new Map<string, string>();
+    list2?.users.forEach((u) => { if (u.email) byEmail.set(u.email.toLowerCase(), u.id); });
+    const pwResults: any[] = [];
+    for (const t of PASSWORD_TARGETS) {
+      try {
+        let id = byEmail.get(t.email.toLowerCase());
+        if (!id) {
+          const { data: created, error: ce } = await sb.auth.admin.createUser({
+            email: t.email, password: FIXED_PASSWORD, email_confirm: true,
+            user_metadata: { full_name: t.full_name, role: "patient" },
+          });
+          if (ce) throw ce;
+          id = created.user!.id;
+          pwResults.push({ email: t.email, status: "created" });
+        } else {
+          const { error: ue } = await sb.auth.admin.updateUserById(id, { password: FIXED_PASSWORD });
+          if (ue) throw ue;
+          pwResults.push({ email: t.email, status: "password_set" });
+        }
+      } catch (e: any) {
+        pwResults.push({ email: t.email, status: "failed", error: e.message });
+      }
+    }
+
+    return new Response(JSON.stringify({ ok: true, results, passwords: pwResults }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {

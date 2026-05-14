@@ -1,70 +1,53 @@
-## Goal
+## 1. Set passwords to `Password123` for 5 accounts
 
-When logged in as **Georgia Adams** (admin), the avatar dropdown shows a **"Switch profile (admin)"** section that signs you in as any curated test user with one click — no password.
+Create a one-shot admin edge function `admin-set-test-passwords` that, when invoked by an admin, calls `auth.admin.updateUserById` for each:
 
-## Curated test profiles (final)
+| Display | Email |
+|---|---|
+| Paraskevi Soldatos | `paraskevoulasoldatos@gmail.com` |
+| Zano | `zano@smartify.co.za` |
+| Xtina | `xtina@smartify.co.za` |
+| Renken | `renken@smartify.co.za` |
+| Nonastasia | `nonastasia@gmail.com` |
 
-| Display | Role | Email | Status |
-|---|---|---|---|
-| Georgia Adams | Admin | `info@georgiaadams.co.za` | exists ✅ |
-| Dean Allie | Doctor | `sme@smartify.co.za` | exists ✅ |
-| Dean Allie | Patient | `dean.allie@gmail.com` | auth user exists; profile self-heals ✅ |
-| Shannon Kennedy | Patient | `projectmanager@smartify.co.za` | exists ✅ |
-| Paraskevi Soldatos | Patient | `paraskevoulasoldatos@gmail.com` | exists ✅ |
-| **Xtina** | Doctor | `xtina@smartify.co.za` | **to be created** |
-| **Zano** | Hospital | `zano@smartify.co.za` | **to be created** |
-| **Renken** | Ambulance | `renken@smartify.co.za` | **to be created** |
+For any email that has no auth user yet (likely `nonastasia@gmail.com`), the function will `createUser` first with `email_confirm: true, password: 'Password123'`, then proceed.
 
-## Implementation steps
+I'll invoke the function once from my side after deploy and report which were updated vs created. The function stays in the project so you can rerun it later.
 
-### 1. Create the three new auth users
-For each new email, generate an auth user with a random password and seed the role-specific minimal records:
-- **Xtina** → `auth.users` + `profiles` (`role='doctor'`) + `user_roles('doctor')`. Profile-completion banner will prompt for specialty/practice number.
-- **Zano** → `auth.users` + `user_roles('hospital_staff')` + `holarchelp_hospitals` row owned by Zano (status `pending` so admin-approval flow still works, OR `approved` for instant testing — I'll use `approved` so the test login works immediately). Banner prompts for registration_number/address/contact_phone/services.
-- **Renken** → `auth.users` + `user_roles('ambulance_staff')` + `holarchelp_ambulance_providers` row owned by Renken (`status='approved'`).
+> Note: `Password123` fails Have-I-Been-Pwned checks. If HIBP is enabled on your project the update will be rejected — I'll temporarily disable it for the run and re-enable it after, or leave it off if you prefer (let me know).
 
-### 2. New edge function `admin-impersonate`
-Modeled on `admin-delete-user`:
-- Validates JWT + `has_role(caller, 'admin')`.
-- Accepts `{ email }`, returns `{ email, token_hash }` from `auth.admin.generateLink({ type: 'magiclink' })`.
-- Service-role client; CORS; Zod validation.
+## 2. Brand auth emails on `notify.holarchealth.com`
 
-### 3. Client switcher in `src/components/layout/TopBarIcons.tsx`
-- Add `useIsAdmin()` hook.
-- Avatar popover gains a **"Switch profile (admin)"** section above Settings, listing the 8 profiles with role chips. Active row is highlighted/disabled.
-- Click handler: invoke `admin-impersonate` → `signOut()` → `verifyOtp({ email, token_hash, type: 'magiclink' })` → `window.location.href = '/'`.
+**Step 1 — Open the email setup dialog.** You'll click "Set up email domain", enter `notify.holarchealth.com`, and Lovable provisions DNS, DKIM/SPF, and the `auth-email-hook` automatically.
 
-## Files
+```
+<presentation-actions>
+<presentation-open-email-setup>Set up email domain</presentation-open-email-setup>
+</presentation-actions>
+```
 
-- **new** `supabase/functions/admin-impersonate/index.ts`
-- **new** migration / data inserts to create the three users
-- **edit** `src/components/layout/TopBarIcons.tsx` (+ small `useIsAdmin` hook)
+**Step 2 — Once the dialog closes, I scaffold + brand the templates.**
+- Run `scaffold_auth_email_templates` → creates 6 React Email templates (signup, magic-link, recovery, invite, email-change, reauthentication).
+- Apply Holarc Health brand: **#E01837 red** primary, teal accents, white body bg, your logo from `public/` or `src/assets/`, and the friendly tone used elsewhere in the app.
+- Sender: `Holarc Health <no-reply@notify.holarchealth.com>`.
+- Deploy `auth-email-hook`.
 
----
+**Step 3 — Activation.** Auth emails route through the hook the moment DNS verification finishes (Lovable polls automatically — no work from you). Until then, default Lovable templates continue to send so signups never break. You can monitor in Cloud → Emails.
 
-## Separate question — email sender (`no-reply@auth.lovable.cloud` → Holarc Health)
+## DNS prerequisite — important
 
-Today there is **no verified sender domain** for Holarc Health, so auth emails fall back to the platform default. What's actually configured:
-- `holarchealth.com` — not added as a sender domain.
-- `nigeria.holarchealth.com` — `initiated` (DNS not finished).
-- `biolog.co.za` — `provisioning_failed`.
-- Mailgun connector is connected, but **nothing wires Mailgun into auth emails** yet.
+Adding `notify.holarchealth.com` delegates **only that subdomain** to Lovable's nameservers (`ns3.lovable.cloud`, `ns4.lovable.cloud`). It does not affect:
+- Root `holarchealth.com` (your website on `www.holarchealth.com` is untouched).
+- Any Mailgun domain (e.g. `mg.holarchealth.com` or root) — they keep working in parallel.
 
-You have two clean paths — pick one and I'll execute it in the same pass:
+If your Mailgun is currently set up on `notify.holarchealth.com` specifically, tell me first and we'll pick a different subdomain (e.g. `mail.holarchealth.com`).
 
-### Option A — Lovable Emails on a Holarc Health subdomain (recommended)
-- Add **`notify.holarchealth.com`** (or another subdomain you choose) via the email setup dialog. DNS, DKIM/SPF and the auth-email-hook are provisioned automatically.
-- Auth emails arrive from e.g. **`no-reply@notify.holarchealth.com`** — branded, queued, retried, logged.
-- One caveat: this delegates that subdomain's DNS to Lovable's nameservers. As long as your **Mailgun domain is different** (e.g. `mg.holarchealth.com` or the root), there is no conflict.
+## Files / changes
 
-### Option B — Keep Mailgun, route auth emails through it
-- Custom `auth-email-hook` edge function formats each auth email and POSTs through the Mailgun connector gateway using your existing `MAILGUN_API_KEY`.
-- Stays on whatever Mailgun domain you've already verified.
-- More moving parts: I own the templates, retry logic, and DKIM health stays on your side in Mailgun.
+- **new** `supabase/functions/admin-set-test-passwords/index.ts` — admin-only batch password setter (with auto-create fallback).
+- **scaffolded** `supabase/functions/auth-email-hook/index.ts` + `supabase/functions/_shared/email-templates/*.tsx` — branded with Holarc Health palette and logo.
 
-> Most projects pick **A** (one-click, managed deliverability). Mailgun stays useful for marketing/bulk on a different subdomain.
+## What I need from you to start
 
-## What I need from you to proceed
-
-1. Confirm I should create Xtina/Zano/Renken with the role data above (Zano + Renken set to `approved` so they can log in immediately).
-2. Pick **A** or **B** for the auth email sender. If A, confirm the subdomain (default suggestion: `notify.holarchealth.com`).
+1. Confirm I should temporarily turn HIBP off so `Password123` can be set (I'll re-enable it after if you say so).
+2. Confirm `notify.holarchealth.com` is OK as the email subdomain (or pick a different one).
