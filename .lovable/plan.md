@@ -1,43 +1,54 @@
-# SOS fixes (combined plan)
+# Fix five SOS issues
 
-## 1. Pick hospital → "function not found"
-`AvailableResponders.tsx` calls RPC `holarchelp_patient_pick_provider(_incident_id, _provider_id, _kind)` which doesn't exist. Only `holarchelp_accept_incident` exists (ambulance staff path).
+## 1. SOS acknowledgement checkboxes stay checked between logins
 
-**Migration** — create `holarchelp_patient_pick_provider(_incident_id uuid, _provider_id uuid, _kind text)` SECURITY DEFINER:
-- Verify caller owns the incident (`user_id = auth.uid()`).
-- Atomically lock: update only when `assigned_provider_id IS NULL` and status in (`open`,`reopened`); set `assigned_provider_id`, `status='assigned'`, `accepted_at=now()`.
-- Upsert chosen offer to `accepted` (insert with `provider_kind=_kind` if missing).
-- Mark other pending offers `superseded`.
-- Insert `patient_picked` event with `{provider_id, kind}`.
-- Raise on race so toast surfaces "Incident already taken".
+**Cause:** `HolarcHelpHome.tsx` persists the three ack checkboxes to `localStorage` under `holarchelp.sos.ack.v3`. The key is global (not user-scoped), so once anyone on the device ticks them, every subsequent login (including Sharron) sees them pre-checked.
 
-## 2. Google Maps "This page can't load Google Maps correctly"
-`src/modules/holarchelp/config/google-maps.ts` falls back to a hardcoded public key when `VITE_GOOGLE_MAPS_API_KEY` is missing. The existing `GOOGLE_MAPS_API_KEY` is a server-side secret — Vite can't read it.
+**Fix:** Remove the localStorage persistence. Always initialise `ack` to `{ a: false, b: false, c: false }` and drop the `setItem` / `getItem` calls. Re-acknowledging each session is the safer default for a life-critical action.
 
-**Fix:**
-- Prompt user to add `VITE_GOOGLE_MAPS_API_KEY` secret (same value as `GOOGLE_MAPS_API_KEY`).
-- Remove hardcoded fallback in `google-maps.ts`; warn loudly if missing.
-- Ask user to confirm Google Cloud key HTTP-referrer restrictions include `*.lovable.app/*`, `*.lovableproject.com/*`, `holarchealth.com/*`, `medpad.lovable.app/*`.
+## 2. SOS blocked when patient has no emergency contact
 
-## 3. Show auto-assigned provider name in incident history
-Currently the incident history (e.g. `PatientIncidentHistory.tsx`, `HolarcHelpIncidents.tsx`, `HolarcHelpIncidentDetail.tsx`) shows status but doesn't display *which* hospital/ambulance was assigned.
+**Cause:** `triggerSOS` in `HolarcHelpHome.tsx` (lines 154–158) hard-blocks and redirects to the profile page when `hasEmergency === false`.
 
-**Fix:**
-- After loading incidents with `assigned_provider_id`, fetch the matching name from either `holarchelp_ambulance_providers` (company_name) or `holarchelp_hospitals` (name) based on a `provider_kind` lookup (use the accepted offer's `provider_kind`).
-- Add a helper `useAssignedProviderNames(incidents[])` that batches the two lookups by id.
-- Render a line like "Assigned: Netcare Milpark Hospital (auto)" — the "(auto)" suffix appears when the most recent event for that incident is `auto_assigned` (vs `patient_picked` or `accepted`).
-- Apply in: list view (`HolarcHelpIncidents.tsx`, `PatientIncidentHistory.tsx`) and detail view (`HolarcHelpIncidentDetail.tsx`).
+**Fix:** Remove the block. Always proceed with the SOS dispatch. If `hasEmergency` is false, still fire the alert and show a non-blocking toast: "SOS sent. Add an emergency contact later so we can also notify someone you trust." The "Notify contacts on WhatsApp" section already renders nothing when there are no contacts.
 
-## 4. Patient SOS shouldn't ask "for you or a patient?"
-Currently the SOS trigger goes through `DoctorSosChooser.tsx` which prompts whether the SOS is for self or a patient. For users whose primary role is patient, this prompt should be skipped — fire SOS for self immediately.
+## 3. SOS button: replace hold-to-trigger with single click
+
+**Cause:** `HolarcHelpHome.tsx` requires a 1 s pointer-hold (`startHold` / `cancelHold` / `HOLD_MS = 1000`) plus a progress ring before firing.
+
+**Fix:** Replace with a plain `onClick` handler that calls `triggerSOS` (or navigates to the active incident). Remove `holdProgress`, `holdTimerRef`, `holdStartRef`, the `<svg>` progress ring and the pointer-down/up/cancel handlers. Keep the three acknowledgements as the gate: button stays `disabled` until `allAck` is true. Update the button label/aria from "Hold for help" to "Tap for help". Keep the haptic vibration on press.
+
+## 4. Show the picked / auto-assigned responder in the timeline history
+
+**Cause:** `IncidentTimeline.tsx` renders generic event rows like "auto_assigned" or "patient_picked" but never names the hospital or ambulance that was chosen. The detail header now shows it (with the AUTO badge), but the historical timeline does not — so once you scroll past or the incident is closed, you can't see which provider was actually engaged at each step.
 
 **Fix:**
-- In the SOS entry point (`HolarcHelpHome.tsx` / wherever the SOS button lives), branch on role: if user role is `patient` (not `doctor`), bypass `DoctorSosChooser` and go straight to the self-SOS flow.
-- Keep `DoctorSosChooser` only for doctor-role users.
+- In `IncidentTimeline.tsx`, when an event row is one of `auto_assigned`, `patient_picked`, `accepted`, `declined`, `reassigned`, look up the responder name (ambulance `company_name` or hospital `name`) for the `provider_id` referenced on that event row (events table already stores it; if not, join on `incident.assigned_provider_id` at that point in time using `event.metadata.provider_id`).
+- Render the responder name + kind icon (🚑 / 🏥) inline on that timeline row, e.g. *"Auto-assigned · 🏥 Netcare Rosebank Hospital"* or *"You picked · 🚑 ER24 Sandton"*.
+- Apply the same enrichment in `PatientIncidentHistory.tsx` so the closed-incident list also shows the responder name under each entry (not just the status badge), with an "AUTO" pill when the assignment came from `auto_assigned`.
+- Batch the provider lookups: collect all distinct provider IDs across the timeline, fetch ambulances + hospitals in two parallel `.in('id', [...])` queries, then map names back onto rows.
 
-## Order of operations
-1. Migration: create `holarchelp_patient_pick_provider`.
-2. Patch frontend: skip `DoctorSosChooser` for patient role.
-3. Patch frontend: render assigned provider name (+ auto badge) in history list and detail.
-4. Add `VITE_GOOGLE_MAPS_API_KEY` secret + remove hardcoded fallback in `google-maps.ts`.
-5. Ask user to verify Google Cloud key referrer restrictions.
+## 5. Google Map shows a blank white box
+
+**Cause:** Map container renders but no tiles appear and no "Map unavailable" fallback is shown — Google rejected the request at tile-load time (likely `RefererNotAllowedMapError`, `ApiNotActivatedMapError`, or `BillingNotEnabledMapError`) without reliably triggering `gm_authFailure`, so our `failed` state never flips.
+
+**Fix in code (so the user always sees a useful diagnostic instead of white):**
+- In `LiveMap.tsx`, register `window.gm_authFailure` **before** calling `loadGoogleMaps()`.
+- Briefly patch `console.error` during init to capture Google's `"Google Maps JavaScript API error: <CODE>"` messages into state.
+- Replace the generic "Map unavailable" fallback with the captured error code plus a one-line human hint and a "Retry" button.
+- Add a 6 s watchdog: if no tiles render after init, flip to `failed` so the diagnostic card always appears.
+
+**Outside code (still required — Google Cloud Console settings):**
+- Maps JavaScript API enabled
+- Billing enabled on the project
+- HTTP referrer restrictions include `https://id-preview--*.lovable.app/*` in addition to the existing patterns
+- API key not over-restricted to exclude Maps JS
+
+The diagnostic card from the code fix will tell us exactly which one to address.
+
+## Files touched
+
+- `src/modules/holarchelp/pages/HolarcHelpHome.tsx` — drop localStorage acks; remove emergency-contact block; replace hold-to-trigger with single click.
+- `src/modules/holarchelp/components/IncidentTimeline.tsx` — enrich assignment events with responder name + kind.
+- `src/components/holarchelp/PatientIncidentHistory.tsx` — show responder name + AUTO pill on each closed incident row.
+- `src/modules/holarchelp/components/LiveMap.tsx` — earlier `gm_authFailure` hook, error-code capture, watchdog, improved fallback UI.
