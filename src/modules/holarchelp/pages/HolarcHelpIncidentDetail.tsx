@@ -66,13 +66,25 @@ export default function HolarcHelpIncidentDetail() {
     };
   }, [id, user]);
 
-  // Fetch responder name when assigned
+  // Fetch responder name (ambulance OR hospital) when assigned, plus detect auto-assignment
   useEffect(() => {
-    if (!incident?.assigned_provider_id) { setResponder(null); return; }
-    supabase.from("holarchelp_ambulance_providers" as any)
-      .select("company_name").eq("id", incident.assigned_provider_id).maybeSingle()
-      .then(({ data }: any) => setResponder(data ? { name: data.company_name } : null));
-  }, [incident?.assigned_provider_id]);
+    if (!incident?.assigned_provider_id || !id) { setResponder(null); setAutoAssigned(false); return; }
+    const pid = incident.assigned_provider_id;
+    (async () => {
+      const [{ data: amb }, { data: hosp }, { data: ev }] = await Promise.all([
+        supabase.from("holarchelp_ambulance_providers" as any).select("company_name").eq("id", pid).maybeSingle(),
+        supabase.from("holarchelp_hospitals" as any).select("name").eq("id", pid).maybeSingle(),
+        supabase.from("holarchelp_incident_events" as any)
+          .select("event_type").eq("incident_id", id)
+          .in("event_type", ["auto_assigned", "patient_picked", "accepted"])
+          .order("created_at", { ascending: false }).limit(1).maybeSingle(),
+      ]);
+      if ((amb as any)?.company_name) setResponder({ name: (amb as any).company_name, kind: "ambulance" });
+      else if ((hosp as any)?.name) setResponder({ name: (hosp as any).name, kind: "hospital" });
+      else setResponder(null);
+      setAutoAssigned((ev as any)?.event_type === "auto_assigned");
+    })();
+  }, [incident?.assigned_provider_id, id]);
 
   // Track pending offers count while open
   useEffect(() => {
