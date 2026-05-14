@@ -57,7 +57,23 @@ export const LiveMap = ({
       attribution: "&copy; OpenStreetMap contributors",
     }).addTo(map);
     mapRef.current = map;
+
+    // Force layout recalculation as soon as the container has a real size.
+    requestAnimationFrame(() => map.invalidateSize());
+    const t1 = setTimeout(() => map.invalidateSize(), 250);
+    const t2 = setTimeout(() => map.invalidateSize(), 800);
+
+    // Watch container resize (handles 0x0 -> real size on initial mount inside flex/grid)
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined" && containerRef.current) {
+      ro = new ResizeObserver(() => map.invalidateSize());
+      ro.observe(containerRef.current);
+    }
+
     return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      ro?.disconnect();
       map.remove();
       mapRef.current = null;
       markersRef.current = [];

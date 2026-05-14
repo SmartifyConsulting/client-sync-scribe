@@ -12,7 +12,7 @@ type Offer = {
   ownership: string | null;
 };
 
-const AUTO_ASSIGN_MS = 30 * 1000;
+const AUTO_ASSIGN_MS = 60 * 1000;
 
 function fmt(secs: number) {
   const m = Math.floor(secs / 60).toString().padStart(2, "0");

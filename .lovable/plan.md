@@ -1,30 +1,25 @@
-## Plan
+## Changes
 
-1. **Change responder auto-assign to 30 seconds**
-   - Update the patient responder list countdown from 3 minutes to 30 seconds.
-   - Ensure the auto-assign RPC still picks the closest pending responder when the countdown reaches zero.
+### 1. Provider auto-assign window: 30s → 60s
+**File:** `src/modules/holarchelp/components/AvailableResponders.tsx`
+- Change `AUTO_ASSIGN_MS = 30 * 1000` → `60 * 1000`.
+- Countdown UI text already uses the constant, so it will display the new 60s window automatically.
 
-2. **Fix the map not showing**
-   - The current map failure is Google’s `BillingNotEnabledMapError`, so the app cannot make Google render correctly with the current key.
-   - Replace the SOS live map display with a dependable OpenStreetMap-based embedded map fallback for incident tracking, so the map still shows without Google billing.
-   - Keep patient and responder markers visible and clearly labelled.
+### 2. Map not rendering immediately on the active emergency view
+**File:** `src/modules/holarchelp/components/LiveMap.tsx`
 
-3. **Show where the responder is on the map**
-   - Fetch the assigned ambulance or hospital coordinates from the provider record when live provider GPS has not been written yet.
-   - Show the patient location plus assigned responder/hospital location on the same map.
-   - Continue using live provider GPS (`provider_latitude/provider_longitude`) when the responder app is actively sharing location.
+Cause: Leaflet calculates tile layout from the container size at init. When the incident detail page mounts, the map container is briefly 0×0 (inside flex/grid + dialog/scroll containers), so tiles never paint until something forces a resize. Today there's only a single `setTimeout(invalidateSize, 100)` inside the markers effect.
 
-4. **Show distance and travel-time estimate**
-   - Calculate straight-line distance between the latest patient location and responder/hospital location.
-   - Display distance in km and an estimated travel time using the app’s existing emergency-response estimate style.
-   - Show this both in the responder card and on the map marker label/summary.
+Fix:
+- Use a `ResizeObserver` on the map container — call `map.invalidateSize()` whenever the container's size changes (handles the 0×0 → real-size transition on initial mount).
+- Also call `invalidateSize()` immediately after init via `requestAnimationFrame` and again after 250ms as a safety net for slow layout passes.
+- Keep the existing post-marker `invalidateSize()`.
 
-5. **Keep timeline context intact**
-   - Preserve the existing timeline provider-name display for patient-picked and auto-assigned responders.
-   - No extra database tables are needed for this change unless later we choose to store route estimates historically.
+### Out of scope
+- No backend / RPC / countdown-logic changes (the server-side picker is independent of the UI countdown text).
+- No marker icon changes (red cross + ambulance icons stay as set).
+- No changes to `AvailableResponders` countdown rendering beyond the constant.
 
-## Technical notes
-
-- Files to update: `AvailableResponders.tsx`, `HolarcHelpIncidentDetail.tsx`, and `LiveMap.tsx`.
-- The Google Maps issue is not a React rendering bug; it is caused by the Google key/project configuration. The code change will avoid blocking patient tracking on Google billing.
-- Distance/ETA will be an estimate, not live traffic routing, because live routing would require a working paid maps/directions API.
+## Files touched
+- `src/modules/holarchelp/components/AvailableResponders.tsx` (1-line constant)
+- `src/modules/holarchelp/components/LiveMap.tsx` (add ResizeObserver + early invalidateSize)
