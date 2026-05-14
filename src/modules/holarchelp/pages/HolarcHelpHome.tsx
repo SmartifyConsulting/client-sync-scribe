@@ -14,8 +14,6 @@ import logo from "@/assets/holarc-help-logo.png";
 
 type Coords = { lat: number; lng: number };
 
-const HOLD_MS = 1000;
-
 export default function HolarcHelpHome() {
   const { user } = useAuth();
   
@@ -33,27 +31,14 @@ export default function HolarcHelpHome() {
   const [contactsNotified, setContactsNotified] = useState(false);
   const [providerAssigned, setProviderAssigned] = useState(false);
   const [cancelSecondsLeft, setCancelSecondsLeft] = useState(10);
-  const [holdProgress, setHoldProgress] = useState(0); // 0..1
-  const holdTimerRef = useRef<number | null>(null);
-  const holdStartRef = useRef<number>(0);
   const channelRef = useRef<any>(null);
 
-  const ACK_KEY = "holarchelp.sos.ack.v3";
   type AckKey = "a" | "b" | "c";
-  const [ack, setAck] = useState<Record<AckKey, boolean>>(() => {
-    if (typeof window === "undefined") return { a: false, b: false, c: false };
-    try {
-      const raw = localStorage.getItem(ACK_KEY);
-      return raw ? { a: false, b: false, c: false, ...JSON.parse(raw) } : { a: false, b: false, c: false };
-    } catch { return { a: false, b: false, c: false }; }
-  });
+  // Always require fresh acknowledgement each session — never persisted.
+  const [ack, setAck] = useState<Record<AckKey, boolean>>({ a: false, b: false, c: false });
   const allAck = ack.a && ack.b && ack.c;
   const setAckField = (k: AckKey, v: boolean) => {
-    setAck((prev) => {
-      const next = { ...prev, [k]: v };
-      try { localStorage.setItem(ACK_KEY, JSON.stringify(next)); } catch {}
-      return next;
-    });
+    setAck((prev) => ({ ...prev, [k]: v }));
   };
 
   useEffect(() => {
@@ -151,11 +136,6 @@ export default function HolarcHelpHome() {
       navigate(`/patient/holarchelp/incident/${activeIncidentId}`);
       return;
     }
-    if (hasEmergency === false) {
-      toast.error("Add someone we can notify first.");
-      navigate("/patient/details?section=health");
-      return;
-    }
     setTriggering(true);
     try {
       const pos = await new Promise<GeolocationPosition>((res, rej) => {
@@ -194,6 +174,10 @@ export default function HolarcHelpHome() {
       if ("vibrate" in navigator) navigator.vibrate?.([200, 100, 200]);
       setIncidentId((incident as any).id);
       setActiveIncidentId((incident as any).id);
+      // Don't block on missing contacts — just inform the user.
+      if (hasEmergency === false) {
+        toast.message("SOS sent. Add an emergency contact later so we can also notify someone you trust.");
+      }
       supabase.functions.invoke("dispatch-sos", { body: { incident_id: (incident as any).id } })
         .catch((e) => console.warn("dispatch-sos failed", e));
       supabase.functions.invoke("share-incident-with-contacts", {
@@ -227,39 +211,21 @@ export default function HolarcHelpHome() {
     toast.success("Alert cancelled");
   };
 
-  // ============ HOLD-TO-TRIGGER ============
-  const startHold = () => {
+  // ============ TAP-TO-TRIGGER ============
+  const handleSosClick = () => {
     if (triggering) return;
     if (!activeIncidentId && !allAck) {
       toast.error("Please acknowledge all three statements above to enable SOS.");
       return;
     }
-    if ("vibrate" in navigator) navigator.vibrate?.(30);
-    holdStartRef.current = performance.now();
-    const tick = () => {
-      const p = Math.min(1, (performance.now() - holdStartRef.current) / HOLD_MS);
-      setHoldProgress(p);
-      if (p >= 1) {
-        if ("vibrate" in navigator) navigator.vibrate?.([80, 60, 120]);
-        cancelHold();
-        if (activeIncidentId) {
-          navigate(`/patient/holarchelp/incident/${activeIncidentId}`);
-        } else {
-          // Patient SOS is always for self — no chooser prompt.
-          triggerSOS();
-        }
-        return;
-      }
-      holdTimerRef.current = requestAnimationFrame(tick);
-    };
-    holdTimerRef.current = requestAnimationFrame(tick);
+    if ("vibrate" in navigator) navigator.vibrate?.([80, 60, 120]);
+    if (activeIncidentId) {
+      navigate(`/patient/holarchelp/incident/${activeIncidentId}`);
+    } else {
+      triggerSOS();
+    }
   };
 
-  const cancelHold = () => {
-    if (holdTimerRef.current) cancelAnimationFrame(holdTimerRef.current);
-    holdTimerRef.current = null;
-    setHoldProgress(0);
-  };
 
   // ============ RENDER ============
 
@@ -330,15 +296,8 @@ export default function HolarcHelpHome() {
   }
 
   // Landing state
-  const ringR = 114;
-  const ringC = 2 * Math.PI * ringR;
-
   return (
     <div className="mx-auto flex min-h-[calc(100vh-9rem)] max-w-md flex-col px-5">
-      {/* Patient SOS is self-only; chooser removed */}
-
-      {/* Active SOS resume banner moved below the hold button */}
-
       {/* Header */}
       <div className="flex justify-center pt-6">
         <img src={logo} alt="Holarc Help" className="h-24 w-auto" />
@@ -350,7 +309,6 @@ export default function HolarcHelpHome() {
         <p className="mt-1.5 text-sm text-muted-foreground">Help will be alerted instantly</p>
       </div>
 
-      {/* CTA */}
       {/* SOS acknowledgements */}
       {!activeIncidentId && (
         <div className="mt-6 rounded-2xl border border-border bg-card p-4 space-y-3">
@@ -377,42 +335,19 @@ export default function HolarcHelpHome() {
 
       <div className="mt-10 flex flex-1 flex-col items-center justify-center">
         <div className="relative flex items-center justify-center">
-          {/* Ambient glow — intensifies during hold */}
+          {/* Ambient glow */}
           <span
             aria-hidden
-            className="absolute inset-0 -m-6 rounded-full bg-red-500/20 blur-2xl transition-opacity"
-            style={{ opacity: 0.6 + holdProgress * 0.4 }}
+            className="absolute inset-0 -m-6 rounded-full bg-red-500/20 blur-2xl"
           />
-          {holdProgress === 0 && (
-            <span aria-hidden className="absolute inset-0 -m-1 animate-ping rounded-full bg-red-500/25" style={{ animationDuration: "2.6s" }} />
-          )}
-
-          {/* Progress ring — thicker, glowing white */}
-          <svg className="absolute -rotate-90" width={280} height={280} aria-hidden>
-            <circle cx={140} cy={140} r={ringR} stroke="hsl(0 0% 100% / 0.25)" strokeWidth={14} fill="none" />
-            <circle
-              cx={140} cy={140} r={ringR}
-              stroke="white" strokeWidth={14} fill="none" strokeLinecap="round"
-              strokeDasharray={ringC}
-              strokeDashoffset={ringC * (1 - holdProgress)}
-              style={{
-                transition: holdProgress === 0 ? "stroke-dashoffset .25s ease-out" : "none",
-                filter: "drop-shadow(0 0 10px rgba(255,255,255,0.95)) drop-shadow(0 0 4px rgba(255,255,255,0.6))",
-              }}
-            />
-          </svg>
+          <span aria-hidden className="absolute inset-0 -m-1 animate-ping rounded-full bg-red-500/25" style={{ animationDuration: "2.6s" }} />
 
           <button
-            onPointerDown={(e) => {
-              e.preventDefault();
-              try { (e.currentTarget as HTMLButtonElement).setPointerCapture(e.pointerId); } catch {}
-              startHold();
-            }}
-            onPointerUp={cancelHold}
-            onPointerCancel={cancelHold}
+            type="button"
+            onClick={handleSosClick}
             onContextMenu={(e) => e.preventDefault()}
             disabled={triggering || (!activeIncidentId && !allAck)}
-            aria-label="Hold for help"
+            aria-label="Tap for help"
             className={`relative z-10 flex h-52 w-52 select-none flex-col items-center justify-center rounded-full font-black text-white transition active:scale-[.98] touch-none ${(!activeIncidentId && !allAck) ? "opacity-50 cursor-not-allowed" : ""}`}
             style={{
               background: "radial-gradient(circle at 30% 25%, hsl(354,90%,62%) 0%, hsl(354,84%,52%) 45%, hsl(0,80%,38%) 100%)",
@@ -421,17 +356,10 @@ export default function HolarcHelpHome() {
           >
             {triggering ? (
               <Loader2 className="h-10 w-10 animate-spin" />
-            ) : holdProgress > 0 ? (
-              <>
-                <span className="text-3xl tracking-[0.18em]">HOLD</span>
-                <span className="mt-1 text-[11px] font-bold uppercase tracking-[0.28em] opacity-95">
-                  Activating… {Math.round(holdProgress * 100)}%
-                </span>
-              </>
             ) : (
               <>
-                <span className="text-3xl tracking-[0.18em]">HOLD</span>
-                <span className="mt-1 text-xs font-bold uppercase tracking-[0.32em] opacity-90">For Help</span>
+                <span className="text-3xl tracking-[0.18em]">SOS</span>
+                <span className="mt-1 text-xs font-bold uppercase tracking-[0.32em] opacity-90">Tap For Help</span>
               </>
             )}
           </button>
@@ -439,7 +367,7 @@ export default function HolarcHelpHome() {
 
         {/* Hint */}
         <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-          Press &amp; hold for 1 second
+          Tap once to send SOS
         </p>
 
         {/* Active SOS — surfaced directly under the hint */}
