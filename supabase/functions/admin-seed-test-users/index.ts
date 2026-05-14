@@ -19,6 +19,15 @@ const SEEDS: Seed[] = [
   { email: "renken@smartify.co.za", full_name: "Renken", role: "ambulance_staff", ambulance_company: "Renken Ambulance Service" },
 ];
 
+const FIXED_PASSWORD = "Password123";
+const PASSWORD_TARGETS: Array<{ email: string; full_name: string }> = [
+  { email: "paraskevoulasoldatos@gmail.com", full_name: "Paraskevi Soldatos" },
+  { email: "zano@smartify.co.za", full_name: "Zano" },
+  { email: "xtina@smartify.co.za", full_name: "Xtina" },
+  { email: "renken@smartify.co.za", full_name: "Renken" },
+  { email: "nonastasia@gmail.com", full_name: "Nonastasia" },
+];
+
 function randomPassword() {
   return crypto.randomUUID() + "Aa1!";
 }
