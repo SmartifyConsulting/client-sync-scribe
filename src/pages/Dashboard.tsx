@@ -9,6 +9,7 @@ import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { DoctorAccessRequests } from "@/components/doctor/DoctorAccessRequests";
 import { DoctorRoundTables } from "@/components/doctor/DoctorRoundTables";
 import { useProfile } from "@/hooks/useProfile";
+import { ProfileCompletionBanner } from "@/components/profile/ProfileCompletionBanner";
 
 
 import { useUserRole } from "@/hooks/useUserRole";
