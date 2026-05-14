@@ -38,7 +38,14 @@ export function TopBarIcons() {
     { email: "zano@smartify.co.za", name: "Zano", role: "Hospital", icon: Building2 },
     { email: "renken@smartify.co.za", name: "Renken", role: "Ambulance", icon: Ambulance },
   ];
-  const currentEmail = ((profile as any)?.email as string | undefined) || "";
+  const { data: currentEmail = "" } = useQuery({
+    queryKey: ["auth-email-topbar"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      return (user?.email || "").toLowerCase();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
   useEffect(() => {
     if (!isAdmin || seeded) return;
