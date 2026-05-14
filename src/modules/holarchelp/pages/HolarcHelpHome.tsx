@@ -244,9 +244,8 @@ export default function HolarcHelpHome() {
         cancelHold();
         if (activeIncidentId) {
           navigate(`/patient/holarchelp/incident/${activeIncidentId}`);
-        } else if (role === "doctor") {
-          setChooserOpen(true);
         } else {
+          // Patient SOS is always for self — no chooser prompt.
           triggerSOS();
         }
         return;
