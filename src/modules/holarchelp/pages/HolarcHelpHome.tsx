@@ -14,8 +14,6 @@ import logo from "@/assets/holarc-help-logo.png";
 
 type Coords = { lat: number; lng: number };
 
-const HOLD_MS = 1000;
-
 export default function HolarcHelpHome() {
   const { user } = useAuth();
   
@@ -33,27 +31,14 @@ export default function HolarcHelpHome() {
   const [contactsNotified, setContactsNotified] = useState(false);
   const [providerAssigned, setProviderAssigned] = useState(false);
   const [cancelSecondsLeft, setCancelSecondsLeft] = useState(10);
-  const [holdProgress, setHoldProgress] = useState(0); // 0..1
-  const holdTimerRef = useRef<number | null>(null);
-  const holdStartRef = useRef<number>(0);
   const channelRef = useRef<any>(null);
 
-  const ACK_KEY = "holarchelp.sos.ack.v3";
   type AckKey = "a" | "b" | "c";
-  const [ack, setAck] = useState<Record<AckKey, boolean>>(() => {
-    if (typeof window === "undefined") return { a: false, b: false, c: false };
-    try {
-      const raw = localStorage.getItem(ACK_KEY);
-      return raw ? { a: false, b: false, c: false, ...JSON.parse(raw) } : { a: false, b: false, c: false };
-    } catch { return { a: false, b: false, c: false }; }
-  });
+  // Always require fresh acknowledgement each session — never persisted.
+  const [ack, setAck] = useState<Record<AckKey, boolean>>({ a: false, b: false, c: false });
   const allAck = ack.a && ack.b && ack.c;
   const setAckField = (k: AckKey, v: boolean) => {
-    setAck((prev) => {
-      const next = { ...prev, [k]: v };
-      try { localStorage.setItem(ACK_KEY, JSON.stringify(next)); } catch {}
-      return next;
-    });
+    setAck((prev) => ({ ...prev, [k]: v }));
   };
 
   useEffect(() => {
