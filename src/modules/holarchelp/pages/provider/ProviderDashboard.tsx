@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProviderAccess } from "../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { AlertCircle, Activity, CheckCircle2, Clock } from "lucide-react";
+import { ProfileCompletionBanner } from "@/components/profile/ProfileCompletionBanner";
 
 type Incident = {
   id: string;
@@ -36,8 +37,10 @@ const ago = (iso: string) => {
 export default function ProviderDashboard() {
   const { user } = useAuth();
   const { providerId, providerType } = useProviderAccess();
+  const navigate = useNavigate();
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
+  const [profileIncomplete, setProfileIncomplete] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -56,6 +59,43 @@ export default function ProviderDashboard() {
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
+
+  // Profile completion check for hospital / ambulance providers
+  useEffect(() => {
+    if (!providerId || !providerType) return;
+    (async () => {
+      if (providerType === "hospital") {
+        const { data } = await supabase
+          .from("holarchelp_hospitals" as any)
+          .select("registration_number, address, contact_phone, services")
+          .eq("id", providerId)
+          .maybeSingle();
+        const r: any = data;
+        setProfileIncomplete(
+          !r ||
+          !r.registration_number ||
+          !r.address ||
+          !r.contact_phone ||
+          !(Array.isArray(r.services) ? r.services.length > 0 : !!r.services)
+        );
+      } else if (providerType === "ambulance") {
+        const { data } = await supabase
+          .from("holarchelp_ambulance_providers" as any)
+          .select("registration_number, base_address, contact_phone, fleet_size")
+          .eq("id", providerId)
+          .maybeSingle();
+        const r: any = data;
+        setProfileIncomplete(
+          !r ||
+          !r.registration_number ||
+          !r.base_address ||
+          !r.contact_phone ||
+          !r.fleet_size
+        );
+      }
+    })();
+  }, [providerId, providerType]);
+
 
   const accept = async (incidentId: string) => {
     if (!providerId || !user) return;
@@ -97,6 +137,19 @@ export default function ProviderDashboard() {
         </p>
         <h1 className="text-2xl font-extrabold">Live SOS feed</h1>
       </div>
+
+      {profileIncomplete && (
+        <ProfileCompletionBanner
+          title={providerType === "hospital" ? "Complete your hospital profile" : "Complete your service profile"}
+          message={
+            providerType === "hospital"
+              ? "Add your registration number, physical address, primary contact phone and the services you offer so dispatch can route incidents to you correctly. All credentials are encrypted in transit and at rest. Holarc Health is HIPAA- and POPIA-aligned and never sells or shares your data."
+              : "Add your registration number, base address, dispatch phone and fleet size so we can route SOS calls to you correctly. All credentials are encrypted in transit and at rest. Holarc Health is HIPAA- and POPIA-aligned and never sells or shares your data."
+          }
+          onComplete={() => navigate("/provider/profile")}
+          storageKey={`holarc_provider_${providerType}_banner_dismissed`}
+        />
+      )}
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <SummaryCard icon={AlertCircle} label="Open SOS" value={open.length} tone="text-sos" />
