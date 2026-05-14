@@ -269,8 +269,7 @@ export default function Auth() {
       if (data?.user) {
         setCreatedUserId(data.user.id);
         setAccountCreated(true);
-        // Best-effort: trigger handles definitive role assignment, this is a fallback if a session exists.
-        await supabase.from("user_roles").insert({ user_id: data.user.id, role: userRole });
+        // Role and profile are created server-side by handle_new_user trigger.
         return true;
       }
       return false;
