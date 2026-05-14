@@ -271,6 +271,13 @@ export default function Dashboard() {
     return <Navigate to="/patient/details" replace />;
   }
 
+  const doctorIncomplete = isDoctor && profile && (
+    !(profile as any).specialty ||
+    !(profile as any).practice_number ||
+    !(profile as any).doctor_number ||
+    !(profile as any).practice_address
+  );
+
   return (
     <div className="space-y-4 md:space-y-8 animate-fade-in">
       {/* Header with Profile */}
@@ -285,6 +292,15 @@ export default function Dashboard() {
           </p>
         </div>
       </div>
+
+      {doctorIncomplete && (
+        <ProfileCompletionBanner
+          title="Complete your practitioner profile"
+          message="Add your specialty, practice number, HPCSA/registration number and practice address so patients can find you and your documents render correctly. All credentials are encrypted in transit and at rest, visible only to you and patients you connect with. Holarc Health is HIPAA- and POPIA-aligned and never sells or shares your data."
+          onComplete={() => navigate("/profile")}
+          storageKey="holarc_doctor_profile_banner_dismissed"
+        />
+      )}
 
       {/* Patient Access Requests */}
       <DoctorAccessRequests />
