@@ -38,17 +38,22 @@ export const LiveMap = ({
   const markersRef = useRef<L.Marker[]>([]);
   const lineRef = useRef<L.Polyline | null>(null);
 
-  const patient = points.find((p) => p.kind === "patient") ?? points[0];
+  const hasAnyPoint = points.some(
+    (p) => typeof p.latitude === "number" && typeof p.longitude === "number",
+  );
 
-  // Init map once
+  // Init map once — runs on mount, regardless of whether we have points yet.
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
-    const center: [number, number] = patient
-      ? [patient.latitude, patient.longitude]
-      : [-26.1, 28.05];
+    const first = points.find(
+      (p) => typeof p.latitude === "number" && typeof p.longitude === "number",
+    );
+    const center: [number, number] = first
+      ? [first.latitude, first.longitude]
+      : [-26.2041, 28.0473]; // Johannesburg fallback
     const map = L.map(containerRef.current, {
       center,
-      zoom: patient ? 14 : 5,
+      zoom: first ? 14 : 11,
       zoomControl: true,
       attributionControl: true,
     });
@@ -58,12 +63,10 @@ export const LiveMap = ({
     }).addTo(map);
     mapRef.current = map;
 
-    // Force layout recalculation as soon as the container has a real size.
     requestAnimationFrame(() => map.invalidateSize());
     const t1 = setTimeout(() => map.invalidateSize(), 250);
     const t2 = setTimeout(() => map.invalidateSize(), 800);
 
-    // Watch container resize (handles 0x0 -> real size on initial mount inside flex/grid)
     let ro: ResizeObserver | null = null;
     if (typeof ResizeObserver !== "undefined" && containerRef.current) {
       ro = new ResizeObserver(() => map.invalidateSize());
@@ -82,7 +85,7 @@ export const LiveMap = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Update markers + bounds
+  // Update markers + bounds whenever points change.
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -97,6 +100,10 @@ export const LiveMap = ({
     const valid = points.filter(
       (p) => typeof p.latitude === "number" && typeof p.longitude === "number",
     );
+
+    // Always invalidate size before changing the view — handles container resize on re-entry.
+    map.invalidateSize();
+
     if (valid.length === 0) return;
 
     for (const p of valid) {
@@ -108,7 +115,6 @@ export const LiveMap = ({
       markersRef.current.push(marker);
     }
 
-    // Draw a line between patient and responder when both present
     const pt = valid.find((p) => p.kind === "patient");
     const rsp = valid.find((p) => p.kind === "ambulance" || p.kind === "hospital");
     if (pt && rsp) {
@@ -127,20 +133,17 @@ export const LiveMap = ({
       const bounds = L.latLngBounds(valid.map((p) => [p.latitude, p.longitude] as [number, number]));
       map.fitBounds(bounds, { padding: [48, 48] });
     }
-    // Fix initial sizing inside flex/grid containers
     setTimeout(() => map.invalidateSize(), 100);
   }, [points]);
 
-  if (!patient) {
-    return (
-      <div
-        style={{ height }}
-        className="flex flex-col items-center justify-center rounded-2xl border border-dashed bg-muted/40 p-6 text-center text-sm text-muted-foreground"
-      >
-        <p className="font-medium text-foreground">Waiting for first GPS fix…</p>
-      </div>
-    );
-  }
-
-  return <div ref={containerRef} style={{ height }} className="overflow-hidden rounded-2xl border z-0" />;
+  return (
+    <div className="relative" style={{ height }}>
+      <div ref={containerRef} style={{ height }} className="overflow-hidden rounded-2xl border z-0" />
+      {!hasAnyPoint && (
+        <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-background/90 px-3 py-1 text-xs font-medium text-muted-foreground shadow">
+          Waiting for first GPS fix…
+        </div>
+      )}
+    </div>
+  );
 };
