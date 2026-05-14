@@ -141,7 +141,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ ok: true, results }), {
+    return new Response(JSON.stringify({ ok: true, results, passwords: pwResults }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
