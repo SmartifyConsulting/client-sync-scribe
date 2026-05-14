@@ -1,5 +1,7 @@
-import { Bell, Mic, User, Settings, LogOut, Award, Share2, Stethoscope, HeartPulse, Calendar as CalendarIcon, Gift, Bug, Scale } from "lucide-react";
-import { useState } from "react";
+import { Bell, Mic, User, Settings, LogOut, Award, Share2, Stethoscope, HeartPulse, Calendar as CalendarIcon, Gift, Bug, Scale, UserCog, Ambulance, Building2, ShieldCheck, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { toast } from "sonner";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +24,51 @@ export function TopBarIcons() {
   const location = useLocation();
   const navigate = useNavigate();
   const isOnPatientRoute = location.pathname.startsWith("/patient/");
+  const { isAdmin } = useIsAdmin();
+  const [switching, setSwitching] = useState<string | null>(null);
+  const [seeded, setSeeded] = useState(false);
+
+  const TEST_PROFILES: Array<{ email: string; name: string; role: string; icon: any }> = [
+    { email: "info@georgiaadams.co.za", name: "Georgia Adams", role: "Admin", icon: ShieldCheck },
+    { email: "sme@smartify.co.za", name: "Dean Allie", role: "Doctor", icon: Stethoscope },
+    { email: "dean.allie@gmail.com", name: "Dean Allie", role: "Patient", icon: HeartPulse },
+    { email: "projectmanager@smartify.co.za", name: "Shannon Kennedy", role: "Patient", icon: HeartPulse },
+    { email: "paraskevoulasoldatos@gmail.com", name: "Paraskevi Soldatos", role: "Patient", icon: HeartPulse },
+    { email: "xtina@smartify.co.za", name: "Xtina", role: "Doctor", icon: Stethoscope },
+    { email: "zano@smartify.co.za", name: "Zano", role: "Hospital", icon: Building2 },
+    { email: "renken@smartify.co.za", name: "Renken", role: "Ambulance", icon: Ambulance },
+  ];
+  const { data: currentEmail = "" } = useQuery({
+    queryKey: ["auth-email-topbar"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      return (user?.email || "").toLowerCase();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  useEffect(() => {
+    if (!isAdmin || seeded) return;
+    setSeeded(true);
+    supabase.functions.invoke("admin-seed-test-users").catch(() => {});
+  }, [isAdmin, seeded]);
+
+  async function impersonate(email: string) {
+    if (switching) return;
+    setSwitching(email);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-impersonate", { body: { email } });
+      if (error || !data?.token_hash) throw new Error(error?.message || data?.error || "Failed");
+      await supabase.auth.signOut();
+      const { error: vErr } = await supabase.auth.verifyOtp({ email, token_hash: data.token_hash, type: "magiclink" });
+      if (vErr) throw vErr;
+      toast.success(`Signed in as ${email}`);
+      window.location.href = "/";
+    } catch (e: any) {
+      toast.error(`Switch failed: ${e.message}`);
+      setSwitching(null);
+    }
+  }
 
   const { data: unreadNotifCount = 0 } = useQuery({
     queryKey: ["unread-notifications-topbar"],
@@ -194,7 +241,7 @@ export function TopBarIcons() {
             )}
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-48 p-1.5" align="end">
+        <PopoverContent className={cn("p-1.5", isAdmin ? "w-72" : "w-48")} align="end">
           {/* Profile switcher */}
           {isDoctor && (
             <div className="border-b border-border mb-1">
@@ -236,6 +283,38 @@ export function TopBarIcons() {
             <Link to="/doctor/rewards" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
               <Gift className="h-3.5 w-3.5" /> My Rewards
             </Link>
+          )}
+          {isAdmin && (
+            <div className="border-t border-border mt-1 pt-1">
+              <div className="flex items-center gap-1.5 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                <UserCog className="h-3 w-3" /> Switch profile (admin)
+              </div>
+              <div className="max-h-64 overflow-y-auto">
+                {TEST_PROFILES.map((p) => {
+                  const Icon = p.icon;
+                  const isCurrent = currentEmail.toLowerCase() === p.email;
+                  const isLoading = switching === p.email;
+                  return (
+                    <button
+                      key={p.email}
+                      onClick={() => !isCurrent && impersonate(p.email)}
+                      disabled={isCurrent || !!switching}
+                      className={cn(
+                        "flex items-center gap-2 px-2 py-1.5 w-full rounded-md transition-colors text-left",
+                        isCurrent ? "bg-primary/10 cursor-default" : "hover:bg-accent",
+                        switching && !isLoading && "opacity-50",
+                      )}
+                    >
+                      {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" /> : <Icon className="h-3.5 w-3.5 text-primary shrink-0" />}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-foreground truncate">{p.name}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{p.role} · {p.email}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           )}
           <Link to="/settings" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
             <Settings className="h-3.5 w-3.5" /> Settings
