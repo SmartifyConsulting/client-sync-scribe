@@ -1,63 +1,84 @@
-## Browser-driven test run — 15 scenarios
+Revised plan — 7 items. SOS notification flow switches to **in-app notifications only** (no email/SMS/WhatsApp), and the confirmation UI is replaced by routing straight to the responder list.
 
-### Pre-flight findings from the DB
+## 1. Vula counter animates twice
 
-- **Georgia Adams** already exists twice: one patient (`7c12a3…`) and one doctor-shaped profile with no role (`9ceb12…`, specialty "Obstetrician/Gynecologist"). I'll **not** create a third — I'll use the existing patient profile and verify/repair.
-- **Sharon Elise Kennedy** exists (`cf9b1d…`); avatar upload will use a generated headshot.
-- **Paraskevi Soldatos** exists (`2490a2…`). Allergy + chronic display checks run against her record.
-- **Dr Dean Allie** (Orthopaedic) and **Dr Jean Prodromos** (Dentist) exist. **Dr Christina Papadopoulos (cardiologist) is missing** — she will be created through the UI as part of Block 0 below.
-- **ZA Private Clinic** (hospital) and **Renken ER Services** (ambulance) both exist and are approved.
+**Cause:** `AnimatedCounter` in `src/features/patients/components/PatientDetailsEditor.tsx` (line 353) resets to 0 every time `target` changes. `lollipopCount` arrives in two passes (initial render with 0 → real value once query resolves), so the count visibly animates 0→N twice.
 
-### What I need from you before starting
+**Fix:** In `AnimatedCounter`, animate from the *previous* `count` to the new `target` instead of restarting from 0, and skip the animation when `target` is unchanged. One pass only.
 
-1. **Confirm or create the test login.** Browser uses the preview's current session:
-   - A **doctor** account for doctor-side flows.
-   - A **patient** account for patient-side flows.
-   - You log in once in the preview, then I take over.
-2. **Switch the preview to desktop (1280×800).** Doctor flows render the sidebar and calendar properly there; you're currently at 390×844.
-3. **Confirm I may use Playwright `setInputFiles` for binary uploads** (avatar, ECG, X-ray).
+## 2. Seed login email for every hospital and emergency provider
 
-### Execution sequence
+**State (verified in DB):** All 38 ambulances and 84 hospitals already have `contact_email`, `owner_id`, and names. What's missing is a guaranteed `auth.users` row for each `contact_email` so the provider can actually sign in.
 
-**Block 0 — Seed Dr Christina Papadopoulos via the UI** (new)
-1. Sign up a new **doctor** account for "Dr Christina Papadopoulos", specialty **Cardiologist**, through the normal signup form (not via DB). Complete her doctor profile (practice number, doctor number, practice address, mobile, preferred language).
-2. From the same flow, also sign her up / create her **patient** profile through the patient signup or "Add as patient" UI so she exists both as a practitioner and as a patient record. Verify the multi-role resolution shows the profile switcher.
+**Plan:** Add an admin-only edge function `seed-provider-logins` that, per provider row:
+- looks up `auth.users` by `contact_email`
+- if missing, calls `admin.createUser` with that email + a temporary password (email_confirm = true)
+- updates `owner_id` to point at that auth user
+- inserts the matching role into `user_roles` (`ambulance_staff` / `hospital_staff`)
+- returns a summary list (created vs already-existed)
 
-**Block A — Patient registration (logged in as doctor)**
-1. Open Georgia Adams' existing patient record; complete any missing required fields instead of duplicating. Flag duplicate doctor-shaped Georgia profile.
-2. Generate a portrait placeholder → upload as Sharon Kennedy's avatar.
-3. Open Paraskevi → add **Shellfish** to allergies → trigger prescription/med-add flow that surfaces allergy warning; capture warning UI.
-4. Open Paraskevi's chronic medications list → confirm rendering, sort, line-through for deactivated meds.
+Run once from admin Cloud. No app-wide email blast — credentials returned in the response for you to share manually, since the user has asked for no automated email.
 
-**Block B — Doctor assignment**
-1. Assign Dean + Jean + **Christina** to Paraskevi via the patient access flow.
-2. From each doctor's roster, verify Paraskevi appears.
-3. Confirm shared-practice behaviour between Christina and Jean (or Dean + Jean if Christina/Jean don't share one).
+## 3. Why "Unknown ambulance / hospital" shows in nearby SOS responders
 
-**Block C — Emergency flow (logged in as patient with HolarcHelp enabled)**
-1. SOS → pick **Renken ER Services** as ambulance; confirm incident locks to that provider.
-2. SOS → pick **ZA Private Clinic** as destination hospital; confirm assignment + event log.
-3. Verify ambulance-dispatch event timeline (`sos_triggered` → `patient_picked` → `assigned`).
+**Diagnosis (DB + code verified):**
+- `AvailableResponders.tsx` reads provider rows from the **patient session**.
+- RLS policy `Public can view approved active *` only exposes rows where `status='approved' AND subscription_status='active'`.
+- 4 ambulances (3 approved/inactive + 1 pending) and 3 hospitals (approved/inactive) fail that filter.
+- `dispatch-sos` (service role) still creates offers for those providers because it doesn't filter on `subscription_status`. Patient receives the offer but can't read the provider row, so the name falls back to "Unknown ambulance/hospital".
 
-**Block D — Appointments (doctor side)**
-1. Book a cardiology appointment for Georgia **with Dr Christina Papadopoulos** (now possible thanks to Block 0).
-2. Book a dental cleaning for Paraskevi with Dr Jean Prodromos.
-3. Attempt overlapping appointment for the same doctor at the same time; expect constraint trigger / UI guard to block it.
+**Recommendation (report only, not auto-fixed unless confirmed):** tighten `dispatch-sos` to filter `subscription_status='active'`, **or** expose a SECURITY DEFINER RPC `get_provider_summary(ids[])` that returns name/ownership for any offered provider so the UI never shows "Unknown".
 
-**Block E — Medical records**
-1. Generate ECG-strip placeholder → upload to Georgia's documents tagged "ECG report".
-2. Add depression-screening notes to Sharon (text-only).
-3. Add cholesterol lab result to Paraskevi via Add Lab Result.
-4. Generate dental-X-ray placeholder → upload to Paraskevi's documents tagged "Dental X-ray".
+## 4. Rewards "Categories" list font size
 
-### Deliverable
+Bring the Recent Rewards list rows in `src/pages/patient/MyRewards.tsx` (~line 524) into line with other list views (MyDoctors, PatientDocuments): `text-sm font-medium` for the label, `text-xs text-muted-foreground` for the date, and `h-5 w-5` icons across breakpoints (drop the mobile-only `h-9 w-9` upscaling). Same treatment for the badge image inside the Vula count.
 
-Test report at `/mnt/documents/test-run-2026-05-16.md` with per-scenario pass/fail, screenshot references, and data-hygiene findings (duplicate Georgia, etc.). All records remain in the live DB as real seed data.
+## 5. SOS confirmation view: remove the searching spinner row, route to responder list
 
-### Honest limitations to expect
+In `src/modules/holarchelp/pages/HolarcHelpHome.tsx` (lines 230–296):
 
-- File-picker uploads may fail on some inputs; if `setInputFiles` is rejected I'll log and continue.
-- "Overlapping schedule" detection depends on whether UI surfaces the DB constraint — may show as toast only.
-- Dr Christina's doctor signup may require email verification; if so I'll pause for you to confirm her email.
+- **Delete the entire 3-step confirmation block** (Location shared / Contacts notified / Searching for nearby providers).
+- After a successful `triggerSOS()`, navigate the patient **directly to** `/patient/holarchelp/incident/{incidentId}` (which already renders `AvailableResponders` — the list of nearby ambulances + hospitals to pick from) instead of showing the in-page confirmation. Keep the 10-second "Cancel alert" affordance, but render it as a sticky banner inside the incident page (small follow-up change in `HolarcHelpIncidentDetail.tsx`) rather than blocking the responder list behind a separate screen.
+- **Move the reassurance copy** to a small static notice rendered *under* the big SOS button on the landing screen (always visible, no spinners):
+  > "Tapping SOS shares your location and notifies your emergency contacts."
 
-Reply with login creds (or "I've logged in"), confirm desktop switch + `setInputFiles` use — then I'll execute starting with Block 0.
+## 6. SOS acknowledgement checkboxes ticked by default
+
+In the same file, change the initial state (line 38) from `{ a: false, b: false, c: false }` to `{ a: true, b: true, c: true }` so users can hit SOS immediately. Still un-tickable, still session-only (not persisted).
+
+## 7. Notify Paraskevoula's emergency contact — **in-app only**
+
+**Switch from email/SMS to a high-priority in-app notification.** No Mailgun, no AT (SMS), no WhatsApp.
+
+**Implementation:**
+
+1. **Edit `share-incident-with-contacts` edge function** (the existing dispatcher) so it does the following instead of sending email:
+   - Resolve each emergency contact to a HolarcHealth `auth.users` row by matching `emergency_contact_email` (and the `emergency_contacts[].email` / `next_of_kin*.email` lists) against `profiles.email`/`auth.users.email`.
+   - Insert one row per matched contact into `notifications`:
+     ```
+     user_id        = contact's auth user id
+     type           = 'sos_alert'
+     priority       = 'critical'
+     title          = '🚨 {Patient name} triggered an SOS'
+     description    = 'Tap to view live location and current status.'
+     reference_id   = incident_id
+     link           = /track/{tracking_token}
+     ```
+   - Also insert a row into `patient_profile_shares` (or the equivalent share table) for that contact with `can_view_live_tracking = true` and `can_view_profile = true`, scoped to this incident — so the SOS record is **automatically shared** with the contact and they can open it from the notification without an extra step.
+   - Insert an audit row into `holarchelp_messaging_log` with `channel='in_app'`, `status='sent'`.
+   - Stop calling Mailgun entirely. Remove the email HTML template.
+
+2. **Frontend — large emergency notification UI:**
+   - In the notifications dropdown / centre, render notifications with `type='sos_alert'` as a full-width red banner with siren icon, pulsing border, and a primary "Open live tracking →" CTA. (Existing `src/pages/Notifications.tsx` + `BottomNav` indicator already have a notification list — add a special case for this type.)
+   - Add an in-app **modal toast** that auto-pops the moment a `type='sos_alert'` row arrives via the existing realtime `notifications` subscription, so a contact who has the app open sees the SOS the instant it's raised.
+   - On tap → navigate to `/track/{tracking_token}` (the public live tracking page already exists).
+
+3. **For Paraskevoula's contact specifically:**
+   - DB check just run: her EC is `Andreas Soldatos`, phone only, no email and no linked auth user. So today, even after the in-app dispatch is wired, **Andreas would not receive anything** unless he installs HolarcHealth and his contact record stores his app email.
+   - I'll add Andreas's email + link his test auth account to her record so the next SOS test can verify the in-app notification arrives end-to-end.
+
+4. **Verify** by triggering an SOS as Paraskev, then reading the `notifications` and `patient_profile_shares` tables to confirm a `sos_alert` row was inserted for Andreas and the incident was auto-shared. Take a screenshot of the banner on Andreas's logged-in session.
+
+---
+
+Approve and I'll execute items 1, 4, 5, 6 (frontend), strip email/SMS from `share-incident-with-contacts` and switch it to in-app notifications + auto-share (item 7), deploy the `seed-provider-logins` edge function (item 2), and report back on item 3 with the chosen mitigation.
