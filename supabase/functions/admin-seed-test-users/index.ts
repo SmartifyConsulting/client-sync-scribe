@@ -17,15 +17,19 @@ const SEEDS: Seed[] = [
   { email: "xtina@smartify.co.za", full_name: "Xtina", role: "doctor" },
   { email: "zano@smartify.co.za", full_name: "Zano", role: "hospital_staff", hospital_name: "Zano Hospital" },
   { email: "renken@smartify.co.za", full_name: "Renken", role: "ambulance_staff", ambulance_company: "Renken Ambulance Service" },
+  { email: "hospital.test@holarchealth.com", full_name: "Holarc General Hospital Admin", role: "hospital_staff", hospital_name: "Holarc General Hospital" },
+  { email: "er.test@holarchealth.com", full_name: "Holarc General ER Staff", role: "hospital_staff", hospital_name: "Holarc General Hospital" },
 ];
 
 const FIXED_PASSWORD = "Password123";
-const PASSWORD_TARGETS: Array<{ email: string; full_name: string }> = [
+const PASSWORD_TARGETS: Array<{ email: string; full_name: string; password?: string }> = [
   { email: "paraskevoulasoldatos@gmail.com", full_name: "Paraskevi Soldatos" },
   { email: "zano@smartify.co.za", full_name: "Zano" },
   { email: "xtina@smartify.co.za", full_name: "Xtina" },
   { email: "renken@smartify.co.za", full_name: "Renken" },
   { email: "nonastasia@gmail.com", full_name: "Nonastasia" },
+  { email: "hospital.test@holarchealth.com", full_name: "Holarc General Hospital Admin", password: "Hospital@2026" },
+  { email: "er.test@holarchealth.com", full_name: "Holarc General ER Staff", password: "ER@2026" },
 ];
 
 function randomPassword() {
