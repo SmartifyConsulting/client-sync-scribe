@@ -64,6 +64,7 @@ import PublicTrack from "./modules/holarchelp/pages/PublicTrack";
 import HolarcHelpProviders from "./pages/admin/HolarcHelpProviders";
 import HolarcHelpAccountability from "./pages/admin/HolarcHelpAccountability";
 import HolarcHelpProviderIncidents from "./pages/admin/HolarcHelpProviderIncidents";
+import SosAlertListener from "@/components/SosAlertListener";
 
 const queryClient = new QueryClient();
 
