@@ -1,93 +1,131 @@
-## Scope
 
-Three focused changes — UI/data-display plus shared map integration. No DB schema changes beyond a tiny live-location table.
+# Two dedicated operational interfaces
 
-### 1. Polish ambulance / ER / hospital operational consoles
+Today every approved provider lands on the same generic `ProviderLayout` (single top bar, "Dispatch / Profile" links, max-w-4xl content). Hospitals and ambulances both fall through to it, which is why the hospital view feels like a patient page. We will split the `/provider/*` portal into two role-specific portals that share branding/tokens but have their own layout, navigation and screens.
 
-Files exist as scaffolds (`AmbulanceDashboard`, `AmbulanceIncidentConsole`, `HospitalDashboard`, `HospitalIncidentConsole`). Build them out to feel operational and mission-critical:
+No design system changes. Re-uses existing tokens (`sos`, `primary`, `muted`, semantic colors), existing data (`holarchelp_incidents`, offers, locations, `SosLiveMap`, `EmergencyPatientContext`, `HospitalPicker`, `TriageControls`). No DB migrations.
 
-- **AmbulanceDashboard** — sticky active-mission strip (red when active), open SOS queue (sortable by severity → distance, Accept/Decline), live board with status chips and last-event timestamps.
-- **AmbulanceIncidentConsole** — status stepper (Acknowledged → En route → On scene → Patient collected → En route to hospital → At hospital → Closed), `HospitalPicker` (capacity + distance), pre-arrival notes, `EmergencyPatientContext` panel, voice-clip player, **shared live map** showing patient pin + own vehicle pin + selected hospital pin with ETA.
-- **HospitalDashboard** — incoming inbound queue (ETA countdown, triage badge), in-ER admissions board, ER capacity widget (`er_capacity_status` green/amber/red + beds-available stepper).
-- **HospitalIncidentConsole** — inbound patient header (ambulance ID, ETA), `TriageControls` (ESI 1–5, bay assignment), pre-arrival notes (read-only), `EmergencyPatientContext` with allergies + meds highlighted, admission status stepper, "Open admission" CTA → existing hospital editor, **shared live map** showing inbound ambulance position + patient origin + own hospital pin.
-- Reuse existing tokens / tabs / accordions / teal-border standards.
+## Routing
 
-### 2. Shared Google Maps integration (ecosystem-wide)
+Replace the single `ProviderRoutes` switch with role-aware routing.
 
-Every role in the SOS ecosystem (patient, ambulance, hospital, admin) views the **same** map component with the **same** data — only the camera focus and interaction surface differs by role.
+```text
+/provider/*  →  detect providerType  →  redirect to /provider/hospital  or  /provider/ambulance
+/provider/hospital/*      HospitalOpsLayout
+  index                   HospitalOpsDashboard (Emergency Queue)
+  incoming                IncomingAmbulancesScreen
+  triage                  TriageScreen
+  admissions              AdmissionsScreen
+  capacity                ErCapacityScreen
+  timeline                IncidentTimelineScreen
+  incident/:id            HospitalIncidentConsole (existing)
+  profile                 ProviderProfile (existing)
+/provider/ambulance/*     AmbulanceOpsLayout
+  index                   AmbulanceOpsDashboard (Live SOS feed)
+  incoming                IncomingSosScreen
+  navigation              NavigationScreen (full-screen SosLiveMap)
+  hospitals               HospitalsDirectoryScreen
+  history                 IncidentHistoryScreen
+  team                    TeamStatusScreen
+  incident/:id            AmbulanceIncidentConsole (existing)
+  profile                 ProviderProfile (existing)
+```
 
-- **New component** `src/modules/holarchelp/components/SosLiveMap.tsx`
-  - Uses `@vis.gl/react-google-maps` (`<APIProvider>` + `<Map>` + `<AdvancedMarker>`).
-  - Loads the JS API via shared key (see secret below).
-  - Props: `incidentId`, `mode: "patient" | "ambulance" | "hospital" | "admin"`, optional `height`.
-  - Renders pins: patient origin (red pulse), assigned ambulance (live, blue), selected/destination hospital (green building), plus other listed responders in admin mode.
-  - Draws driving-route polyline ambulance→patient (pre-collection) then ambulance→hospital (post-collection) using the Google **Routes API** via an edge proxy (avoids exposing the key client-side for billing-heavy calls and lets us cache ETAs).
-  - Shows ETA chip (`X min, Y km`) refreshed every 30 s while incident is active.
-  - Auto-fits bounds to relevant pins; recentre button per role.
+`ProviderDashboard.tsx` becomes a small redirector. `ProviderLayout.tsx` is retained only as the gate wrapper (`ProviderGate` + `HospitalInboundListener`) that renders the right sub-layout based on `providerType`.
 
-- **Live location pipeline**
-  - New tiny table `holarchelp_provider_locations` (one row per `incident_id` × `provider_id` × `provider_kind`, columns: `lat`, `lng`, `heading`, `speed`, `recorded_at`).
-  - RLS: writable only by the ambulance user assigned to the incident; readable by the patient on the incident, the assigned hospital, and admins. (Uses the existing `get_emergency_patient_context` access checks pattern.)
-  - **AmbulanceIncidentConsole** runs `navigator.geolocation.watchPosition` while incident is active and upserts to the table every ~10 s.
-  - **SosLiveMap** subscribes via `supabase.channel('postgres_changes')` on that table filtered by `incident_id` to move the ambulance pin in real time.
+## Hospital Emergency Operations Interface
 
-- **Routes / ETA**
-  - New edge function `routes-eta` (`supabase/functions/routes-eta/index.ts`) — POST `{ origin, destination }` → returns `{ duration_seconds, distance_meters, polyline }` via Google Routes API `computeRoutes` (server-side key).
-  - Verifies caller JWT and that caller participates in the incident before computing.
-  - Called by `SosLiveMap` whenever ambulance position or destination changes (debounced 20 s).
+New files under `src/modules/holarchelp/pages/provider/hospital/`:
 
-- **Map placement** — `SosLiveMap` is dropped into:
-  - Patient SOS detail view (existing `HolarcHelpIncidentDetail`) — replaces current placeholder map.
-  - `AmbulanceIncidentConsole` (full-width hero block).
-  - `HospitalIncidentConsole` (full-width hero block).
-  - Admin `HolarcHelpProviderIncidents` detail (shows full constellation).
+- `HospitalOpsLayout.tsx` — app shell with:
+  - **Left sidebar** (shadcn `Sidebar`, `collapsible="icon"`): Emergency Queue, Incoming Ambulances, Triage, Admissions, ER Capacity, Incident Timeline. Brand block at top ("HolarcHelp · Hospital Ops") in `sos` accent. Profile + Sign out pinned to footer.
+  - **Top bar**: live counters fed by a single `useHospitalOpsStats` hook — Active emergencies, Incoming ambulances, ICU capacity (from `holarchelp_hospitals.icu_beds_available`), Emergency alerts (unread `notifications` of type `hospital_inbound_patient`). Connectivity dot + clock on the right.
+  - Main `<Outlet />` is full-width (no max-w-4xl), grid-friendly.
+- `HospitalOpsDashboard.tsx` — Live Emergency Queue table: Patient · ETA · Severity (color chip) · Ambulance · Incident type · Status. Row click → `incident/:id`. Realtime via `postgres_changes` on `holarchelp_incidents` filtered by `destination_hospital_id`.
+- `IncomingAmbulancesScreen.tsx` — card list of ambulances en route. Uses `useLiveProviderLocation` + `SosLiveMap` in `hospital` mode per row to show route + ETA chip. Confirm/decline destination buttons.
+- `TriageScreen.tsx` — Kanban columns: Incoming · Awaiting arrival · Arrived · In triage · Admitted. Drag/click to advance using existing `holarchelp_set_incident_status` RPC and `TriageControls`.
+- `AdmissionsScreen.tsx` — list of patients with `at_hospital` / `completed` status, link to existing `hospital_admissions` workflow.
+- `ErCapacityScreen.tsx` — editable ICU beds, trauma bays, ER load (writes to `holarchelp_hospitals` capacity fields the owner already has access to).
+- `IncidentTimelineScreen.tsx` — chronological feed from `holarchelp_incident_events` for this hospital.
+- Pre-arrival panel + `EmergencyPatientContext` + SOS voice clip continue to live inside `HospitalIncidentConsole` (already built); we just deep-link to it from the queue.
 
-- **Secret required** — `GOOGLE_MAPS_API_KEY` (server-side, used by `routes-eta`) and `VITE_GOOGLE_MAPS_BROWSER_KEY` (HTTP-referrer-restricted browser key for JS API). Plan flags this; secrets will be requested only after user approves the plan.
+## Ambulance / ER Dispatch Interface
 
-### 3. Admin → Providers tables: show linked user email
+New files under `src/modules/holarchelp/pages/provider/ambulance/`:
 
-In `src/pages/admin/HolarcHelpProviders.tsx` the "Contact" cell currently shows `contact_email` (org email). For **Hospitals, Ambulances, Pharmacies**, replace the displayed email with the **login email of the linked user** (`user_id`).
+- `AmbulanceOpsLayout.tsx` — dispatch shell:
+  - **Left sidebar**: Active Incidents, Incoming SOS, Navigation, Hospitals, Incident History, Team Status.
+  - **Top bar**: Current active incident chip (click → console), Team status (on shift / off), Vehicle status (available / dispatched / out of service — local state persisted per user), Connectivity dot.
+  - Main area is full-width, dark-tinted operational surface (uses existing `bg-muted/30` + `border` tokens, no new colors).
+- `AmbulanceOpsDashboard.tsx` — Live SOS feed table: Incident type · Priority · Patient · Distance · ETA · Response status. Realtime on `holarchelp_incidents` where `status in ('open','reopened','assigned')`.
+- `IncomingSosScreen.tsx` — large priority-sorted cards for `open`/`reopened` only, with a single big **Accept Incident** button calling `holarchelp_accept_incident`.
+- `NavigationScreen.tsx` — full-bleed `SosLiveMap` in `ambulance` mode for the current assigned incident, with the Incident Action Panel docked to the right (Accept · En Route · Arrived · Patient Loaded · Select Hospital · Arrived at Hospital · Resolve). Buttons call `holarchelp_set_incident_status` and `HospitalPicker` for destination.
+- `HospitalsDirectoryScreen.tsx` — searchable list of approved hospitals with capacity, distance (from current GPS), and "Send ETA" action. Selecting a hospital sets `destination_hospital_id`, which already triggers `notify_hospital_inbound`.
+- `IncidentHistoryScreen.tsx` — completed incidents for this provider.
+- `TeamStatusScreen.tsx` — `holarchelp_ambulance_members` list with shift toggles (local-first; persisted later).
+- `AmbulanceIncidentConsole.tsx` (existing) is reused for `incident/:id` and gets the Incident Action Panel + Patient Emergency Profile (`EmergencyPatientContext`) + SOS voice clip already wired in.
 
-- New admin-only edge function `admin-get-user-emails` → takes `user_ids[]`, returns `{ user_id → email }` via service role (verifies admin via `has_role`). Avoids exposing `auth.users` to the client.
-- Render: user email (primary, bold) with small "Org: {contact_email}" beneath when different. Phone stays. Falls back to `contact_email` if no `user_id`.
+## Shared ecosystem behaviour
 
-### 4. Mobile profile avatar — admin entry + tester list updates
+The two interfaces operate on the same rows, so the existing workflow already chains end-to-end:
 
-In `src/components/layout/TopBarIcons.tsx`:
+```text
+Patient SOS  →  appears in Ambulance Live Feed (open)
+Accept       →  status=assigned, hides from other ambulances
+Select Hospital → destination_hospital_id set → notify_hospital_inbound trigger
+                → hospital top-bar counter ticks + queue row appears + toast
+En Route / Arrived / Patient Loaded / At Hospital / Resolve
+                → mirrored in Hospital Triage Kanban via realtime
+```
 
-- Add an **"Admin"** link in the avatar popover (visible only when `isAdmin === true`), routing to `/admin`. Placed above "Settings". Same item shown on the mobile breakpoint (the avatar popover is the mobile profile surface).
-- **Update `TEST_PROFILES`**:
-  - Remove `xtina@smartify.co.za` / "Xtina".
-  - Add `christina@smartify.co.za` / "Christina" as a Doctor (confirm address if different).
+No new RPCs needed. We rely on the existing `holarchelp_accept_incident`, `holarchelp_set_incident_status`, `holarchelp_patient_pick_provider`, `notify_hospital_inbound` trigger, and `holarchelp_provider_locations` stream.
 
-### Technical notes
+## Technical notes
 
-- New edge functions: `admin-get-user-emails`, `routes-eta`.
-- New table: `holarchelp_provider_locations` (only schema change in this plan).
-- New shared component: `SosLiveMap` (used by all four roles — single source of truth for the map UX).
-- Library to add: `@vis.gl/react-google-maps`.
-- No design tokens added; reuse existing teal/red operational palette.
+- Use shadcn `Sidebar` with `SidebarProvider`, `collapsible="icon"`, active route via `NavLink`. Sidebar trigger pinned in each top bar so collapse works on tablets.
+- Stats hooks (`useHospitalOpsStats`, `useAmbulanceOpsStats`) wrap React Query + a single realtime channel each; subscribed once at layout level.
+- All status colors come from existing tokens: `sos`, `destructive`, `primary`, `accent`, `muted`. Severity chip uses the existing severity color map already used in `HolarcHelpIncidentDetail`.
+- `ProviderRoutes` becomes:
+  ```tsx
+  <Routes>
+    <Route element={<ProviderGate><HospitalInboundListener/><Outlet/></ProviderGate>}>
+      <Route index element={<ProviderRedirect/>}/>
+      <Route path="hospital/*" element={<HospitalOpsLayout/>}>…</Route>
+      <Route path="ambulance/*" element={<AmbulanceOpsLayout/>}>…</Route>
+    </Route>
+  </Routes>
+  ```
+- Old `ProviderDashboard.tsx` + `ProviderIncidentDetail.tsx` are deleted (replaced by role-specific consoles already in tree).
 
-### Out of scope
+## Files
 
-- Turn-by-turn navigation, traffic-aware re-routing UI, voice guidance.
-- Offline map tiles.
-- Patient-side SOS flow changes beyond swapping the placeholder for `SosLiveMap`.
+Create (12):
+- `routes-provider.tsx` (rewrite)
+- `pages/provider/ProviderRedirect.tsx`
+- `pages/provider/hospital/HospitalOpsLayout.tsx`
+- `pages/provider/hospital/HospitalOpsDashboard.tsx`
+- `pages/provider/hospital/IncomingAmbulancesScreen.tsx`
+- `pages/provider/hospital/TriageScreen.tsx`
+- `pages/provider/hospital/AdmissionsScreen.tsx`
+- `pages/provider/hospital/ErCapacityScreen.tsx`
+- `pages/provider/hospital/IncidentTimelineScreen.tsx`
+- `pages/provider/ambulance/AmbulanceOpsLayout.tsx`
+- `pages/provider/ambulance/AmbulanceOpsDashboard.tsx`
+- `pages/provider/ambulance/IncomingSosScreen.tsx`
+- `pages/provider/ambulance/NavigationScreen.tsx`
+- `pages/provider/ambulance/HospitalsDirectoryScreen.tsx`
+- `pages/provider/ambulance/IncidentHistoryScreen.tsx`
+- `pages/provider/ambulance/TeamStatusScreen.tsx`
+- `hooks/useHospitalOpsStats.ts`
+- `hooks/useAmbulanceOpsStats.ts`
 
-### Files
+Edit (2):
+- `pages/provider/HospitalIncidentConsole.tsx` — render inside `HospitalOpsLayout` outlet (remove its own chrome).
+- `pages/provider/AmbulanceIncidentConsole.tsx` — same, render inside `AmbulanceOpsLayout` outlet.
 
-**Edit**
-- `src/modules/holarchelp/pages/provider/AmbulanceDashboard.tsx`
-- `src/modules/holarchelp/pages/provider/AmbulanceIncidentConsole.tsx`
-- `src/modules/holarchelp/pages/provider/HospitalDashboard.tsx`
-- `src/modules/holarchelp/pages/provider/HospitalIncidentConsole.tsx`
-- `src/modules/holarchelp/pages/HolarcHelpIncidentDetail.tsx` (drop in `SosLiveMap`)
-- `src/pages/admin/HolarcHelpProviderIncidents.tsx` (drop in `SosLiveMap`, admin mode)
-- `src/pages/admin/HolarcHelpProviders.tsx`
-- `src/components/layout/TopBarIcons.tsx`
+Delete (2):
+- `pages/provider/ProviderLayout.tsx`
+- `pages/provider/ProviderDashboard.tsx`
+- `pages/provider/ProviderIncidentDetail.tsx`
 
-**Create**
-- `src/modules/holarchelp/components/SosLiveMap.tsx`
-- `supabase/functions/routes-eta/index.ts`
-- `supabase/functions/admin-get-user-emails/index.ts`
-- Migration for `holarchelp_provider_locations` + RLS policies.
+No DB migrations, no new edge functions, no new design tokens.
