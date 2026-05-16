@@ -101,7 +101,7 @@ export default function AmbulanceIncidentConsole() {
     if (error) return toast.error(error.message);
     supabase.functions.invoke("dispatch-sos", { body: { incident_id: id, exclude_provider_ids: [providerId] } });
     toast.success("Released — incident reopened");
-    navigate("/provider");
+    navigate("/provider/ambulance");
   };
 
   if (!incident) return <div className="text-muted-foreground">Loading…</div>;
@@ -116,7 +116,7 @@ export default function AmbulanceIncidentConsole() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <button onClick={() => navigate("/provider")} className="text-xs text-muted-foreground hover:text-foreground">← Back to dispatch</button>
+          <button onClick={() => navigate("/provider/ambulance")} className="text-xs text-muted-foreground hover:text-foreground">← Back to dispatch</button>
           <h1 className="mt-1 text-xl font-extrabold">Ambulance console</h1>
         </div>
         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${isLive ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>

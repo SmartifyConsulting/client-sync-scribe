@@ -77,7 +77,7 @@ export default function HospitalIncidentConsole() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <button onClick={() => navigate("/provider")} className="text-xs text-muted-foreground hover:text-foreground">← Back to ER board</button>
+          <button onClick={() => navigate("/provider/hospital")} className="text-xs text-muted-foreground hover:text-foreground">← Back to Emergency Queue</button>
           <h1 className="mt-1 text-xl font-extrabold">Inbound patient console</h1>
         </div>
         <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
