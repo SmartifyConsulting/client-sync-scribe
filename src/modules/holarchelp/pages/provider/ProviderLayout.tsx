@@ -2,6 +2,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Building2, LogOut, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProviderGate } from "../../components/ProviderGate";
+import { HospitalInboundListener } from "../../components/HospitalInboundListener";
 import { supabase } from "@/integrations/supabase/client";
 
 const items = [
@@ -18,6 +19,7 @@ export default function ProviderLayout() {
 
   return (
     <ProviderGate>
+      <HospitalInboundListener />
       <div className="min-h-dvh bg-background">
         <header className="sticky top-0 z-30 flex items-center justify-between border-b bg-background/95 px-5 py-3 backdrop-blur">
           <div className="flex items-center gap-2">

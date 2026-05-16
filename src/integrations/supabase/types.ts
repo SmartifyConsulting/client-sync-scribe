@@ -1371,6 +1371,8 @@ export type Database = {
           credential_score: number | null
           credential_score_updated_at: string | null
           dispatch_priority: number
+          er_beds_available: number | null
+          er_capacity_status: string
           icu_available: number | null
           icu_capacity: number | null
           id: string
@@ -1402,6 +1404,8 @@ export type Database = {
           credential_score?: number | null
           credential_score_updated_at?: string | null
           dispatch_priority?: number
+          er_beds_available?: number | null
+          er_capacity_status?: string
           icu_available?: number | null
           icu_capacity?: number | null
           id?: string
@@ -1433,6 +1437,8 @@ export type Database = {
           credential_score?: number | null
           credential_score_updated_at?: string | null
           dispatch_priority?: number
+          er_beds_available?: number | null
+          er_capacity_status?: string
           icu_available?: number | null
           icu_capacity?: number | null
           id?: string
@@ -1659,6 +1665,8 @@ export type Database = {
       holarchelp_incidents: {
         Row: {
           accepted_at: string | null
+          admitted_at: string | null
+          ai_emergency_summary: string | null
           arrived_at: string | null
           assigned_provider_id: string | null
           at_hospital_at: string | null
@@ -1670,12 +1678,15 @@ export type Database = {
           created_at: string
           destination_hospital_id: string | null
           en_route_at: string | null
+          escalated_at: string | null
           eta_minutes: number | null
+          hospital_admission_status: string | null
           id: string
           last_eta_update: string | null
           manually_logged: boolean
           notes: string | null
           patient_collected_at: string | null
+          pre_arrival_notes: string | null
           priority_boost: boolean
           provider_latitude: number | null
           provider_location_updated_at: string | null
@@ -1684,6 +1695,10 @@ export type Database = {
           severity: string
           status: string
           tracking_token: string
+          triage_assigned_at: string | null
+          triage_bay: string | null
+          triage_nurse: string | null
+          triage_priority: string | null
           triggered_by_role: string | null
           triggered_by_user_id: string | null
           user_id: string
@@ -1692,6 +1707,8 @@ export type Database = {
         }
         Insert: {
           accepted_at?: string | null
+          admitted_at?: string | null
+          ai_emergency_summary?: string | null
           arrived_at?: string | null
           assigned_provider_id?: string | null
           at_hospital_at?: string | null
@@ -1703,12 +1720,15 @@ export type Database = {
           created_at?: string
           destination_hospital_id?: string | null
           en_route_at?: string | null
+          escalated_at?: string | null
           eta_minutes?: number | null
+          hospital_admission_status?: string | null
           id?: string
           last_eta_update?: string | null
           manually_logged?: boolean
           notes?: string | null
           patient_collected_at?: string | null
+          pre_arrival_notes?: string | null
           priority_boost?: boolean
           provider_latitude?: number | null
           provider_location_updated_at?: string | null
@@ -1717,6 +1737,10 @@ export type Database = {
           severity?: string
           status?: string
           tracking_token?: string
+          triage_assigned_at?: string | null
+          triage_bay?: string | null
+          triage_nurse?: string | null
+          triage_priority?: string | null
           triggered_by_role?: string | null
           triggered_by_user_id?: string | null
           user_id: string
@@ -1725,6 +1749,8 @@ export type Database = {
         }
         Update: {
           accepted_at?: string | null
+          admitted_at?: string | null
+          ai_emergency_summary?: string | null
           arrived_at?: string | null
           assigned_provider_id?: string | null
           at_hospital_at?: string | null
@@ -1736,12 +1762,15 @@ export type Database = {
           created_at?: string
           destination_hospital_id?: string | null
           en_route_at?: string | null
+          escalated_at?: string | null
           eta_minutes?: number | null
+          hospital_admission_status?: string | null
           id?: string
           last_eta_update?: string | null
           manually_logged?: boolean
           notes?: string | null
           patient_collected_at?: string | null
+          pre_arrival_notes?: string | null
           priority_boost?: boolean
           provider_latitude?: number | null
           provider_location_updated_at?: string | null
@@ -1750,6 +1779,10 @@ export type Database = {
           severity?: string
           status?: string
           tracking_token?: string
+          triage_assigned_at?: string | null
+          triage_bay?: string | null
+          triage_nurse?: string | null
+          triage_priority?: string | null
           triggered_by_role?: string | null
           triggered_by_user_id?: string | null
           user_id?: string
@@ -4038,6 +4071,10 @@ export type Database = {
       doctor_has_access_request_from: {
         Args: { patient_id: string }
         Returns: boolean
+      }
+      get_emergency_patient_context: {
+        Args: { _incident_id: string }
+        Returns: Json
       }
       get_user_role: {
         Args: { _user_id: string }
