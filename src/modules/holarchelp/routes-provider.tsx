@@ -46,6 +46,7 @@ export default function ProviderRoutes() {
         <Route path="admissions" element={<AdmissionsScreen />} />
         <Route path="capacity" element={<ErCapacityScreen />} />
         <Route path="timeline" element={<IncidentTimelineScreen />} />
+        <Route path="doctors" element={<AffiliatedDoctorsScreen />} />
         <Route path="incident/:id" element={<HospitalIncidentConsole />} />
         <Route path="profile" element={<ProviderProfile />} />
         <Route path="*" element={<Navigate to="" replace />} />
