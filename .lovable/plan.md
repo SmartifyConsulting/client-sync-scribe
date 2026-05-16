@@ -1,37 +1,24 @@
-## Findings
+## Plan additions
 
-- Password reset requests reach the auth email hook successfully, but the email is still being delivered through the default Lovable Cloud sender path, not Mailgun.
-- The custom Mailgun auth-email-hook function exists in the codebase and is configured to send from `HolarcHealth <noreply@holarchealth.com>`, but it shows no recent invocation logs — Supabase Auth is not routing to it.
-- The previously configured sender subdomain `notify.nigeria.holarchealth.com` is **no longer in use** and should be ignored / removed. The intended sender domain going forward is `holarchealth.com` (the root domain already verified in Mailgun).
+### 7. Seed test connections (Jean ↔ Georgia)
+- Look up the user IDs for **Georgia Adams** and **Jean Prodromos** (and the email `info@georgiaadams.co.za`) in `profiles` / `auth.users`.
+- Insert a row in `doctor_patient_access` (or the equivalent connection table used by Patient List Mgmt) linking **Jean Prodromos** into **Georgia Adams**' patient list (active = true).
+- Add **info@georgiaadams.co.za** to **Jean Prodromos**' linked-account / profile-switcher entries so testing can hop back to Georgia in one click. Exact table will be confirmed during exploration (likely `patient_profile_shares` or the profile-switcher table).
 
-## Plan
+### 8. Vula counter top-aligned with "Vula" wordmark (all views)
+- Wherever the Vula logo + count appear together (`PatientDetailsEditor`, doctor briefing widget, rewards/Holarchive headers), change the flex row from default/center alignment to `items-start`.
+- Match the count's `line-height` and top padding to the cap-height of the "Vula" text in the logo so the digit's top edge lines up with the top of the word "Vula" (not the icon).
+- Applies to mobile, tablet, and desktop.
 
-1. **Remove the stale `notify.nigeria.holarchealth.com` configuration**
-   - Disable Lovable Emails for the project so the managed sender stops competing with the Mailgun hook.
-   - Surface the NS records that need to be removed from the domain registrar (delegation will not clear on its own).
+### 9. Tablet — Vula logo + count placement
+- On `md` breakpoint only, move the Vula logo + counter **below** the "What's happening" text block and **center-align** it (`flex-col items-center` wrapper with the Vula pair as the last child on tablet).
+- Desktop layout (right-aligned in header) and mobile layout (centered, already shipped) remain unchanged.
 
-2. **Activate the custom Mailgun hook**
-   - Redeploy `auth-email-hook`.
-   - Register it as the Supabase Auth Send Email hook, signed with `SEND_EMAIL_HOOK_SECRET`, so all auth emails (recovery, signup, magic link, invite, email-change, reauthentication) are sent via Mailgun from `noreply@holarchealth.com`.
-
-3. **Validate**
-   - Trigger a `/forgot-password` reset.
-   - Confirm: auth log shows the hook URL pointing at the custom function, function logs show a Mailgun send, and the email arrives from `HolarcHealth <noreply@holarchealth.com>` — not Lovable Cloud.
+### 10. Accordion frame thickness parity (Personal & Medical Info)
+- Inspect the **Emergency Contacts** accordion in `PatientDetailsEditor` to capture its exact border utility (likely `border-2 border-primary/teal`).
+- Apply the same border width + color tokens to the **Personal Information** and **Medical Information** accordion frames so all three sections look identical in frame thickness.
+- No content / spacing changes — only the border utility on the outer accordion wrappers.
 
 ## Technical notes
-
-- Sender domain is `holarchealth.com` (root), already verified in Mailgun — no DNS work needed.
-- Do NOT scaffold Lovable auth email templates; that would re-route through the managed Lovable email pipeline.
-- The `nigeria.holarchealth.com` subdomain is abandoned and any references to it in email configuration should be cleared.
-
-## Additional testing + UI tasks
-
-4. **Seed test connections (for easy role switching during MVP testing)**
-   - Add **Jean Prodromos** to **Georgia Adams**' patient list.
-   - Add **info@georgiaadams.co.za** to **Jean**'s profile (linked account / switcher entry) so testing can hop back to Georgia in one click.
-
-5. **Vula counter alignment (all views)**
-   - Top-align the Vula count number with the word "Vula" in the logo (use `items-start` on the flex row + matching line-height) — applies everywhere the logo+counter pair renders (`PatientDetailsEditor`, dashboard briefing, any rewards widget).
-
-6. **Tablet view — Vula placement**
-   - On tablet (md breakpoint), move the Vula logo + counter to sit **below** the "What's happening" text block and **center-align** the pair. Desktop and mobile layouts unchanged from current spec.
+- Seeding (item 7) will use the `supabase--insert` tool after a `supabase--read_query` confirms the correct user IDs and the right connection table — no migration required.
+- Items 8–10 are pure presentation changes scoped to `src/features/patients/components/PatientDetailsEditor.tsx` and any shared Vula widget component; no business logic touched.
