@@ -1,0 +1,144 @@
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { LiveMap } from "../../components/LiveMap";
+import { IncidentTimeline } from "../../components/IncidentTimeline";
+import { IncidentPhotos } from "../../components/IncidentPhotos";
+import { EtaCountdown } from "../../components/EtaCountdown";
+import { EmergencyPatientContext } from "../../components/EmergencyPatientContext";
+import { TriageControls } from "../../components/TriageControls";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+
+const ADMISSION_STEPS = [
+  { v: "incoming", label: "Incoming" },
+  { v: "awaiting_arrival", label: "Awaiting arrival" },
+  { v: "arrived", label: "Arrived" },
+  { v: "in_triage", label: "In triage" },
+  { v: "admitted", label: "Admitted" },
+  { v: "escalated", label: "Escalated" },
+];
+
+export default function HospitalIncidentConsole() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [incident, setIncident] = useState<any | null>(null);
+  const [locations, setLocations] = useState<any[]>([]);
+  const [crew, setCrew] = useState<string>("");
+
+  useEffect(() => {
+    if (!id) return;
+    supabase.from("holarchelp_incidents" as any).select("*").eq("id", id).maybeSingle()
+      .then(async ({ data }) => {
+        setIncident(data);
+        const ambId = (data as any)?.assigned_provider_id;
+        if (ambId) {
+          const { data: amb } = await supabase.from("holarchelp_ambulance_providers" as any)
+            .select("company_name, contact_phone").eq("id", ambId).maybeSingle();
+          setCrew([(amb as any)?.company_name, (amb as any)?.contact_phone].filter(Boolean).join(" · "));
+        }
+      });
+    supabase.from("holarchelp_locations" as any).select("latitude, longitude, recorded_at")
+      .eq("incident_id", id).order("recorded_at", { ascending: false }).limit(200)
+      .then(({ data }) => setLocations((data as any) ?? []));
+
+    const ch = supabase.channel(`hosp-inc-${id}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "holarchelp_locations", filter: `incident_id=eq.${id}` },
+        (p) => setLocations((prev) => [p.new as any, ...prev].slice(0, 200)))
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "holarchelp_incidents", filter: `id=eq.${id}` },
+        (p) => setIncident((prev: any) => ({ ...(prev ?? {}), ...(p.new as any) })))
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [id]);
+
+  const setAdmissionStatus = async (next: string) => {
+    if (!id) return;
+    const patch: any = { hospital_admission_status: next };
+    if (next === "admitted") patch.admitted_at = new Date().toISOString();
+    if (next === "escalated") patch.escalated_at = new Date().toISOString();
+    if (next === "in_triage" && !incident?.triage_assigned_at) patch.triage_assigned_at = new Date().toISOString();
+    const { error } = await supabase.from("holarchelp_incidents" as any).update(patch).eq("id", id);
+    if (error) return toast.error(error.message);
+    await supabase.from("holarchelp_incident_events" as any).insert({
+      incident_id: id, event_type: `admission_${next}`, payload: {},
+    } as any);
+    toast.success(`Admission status: ${next.replace(/_/g," ")}`);
+  };
+
+  if (!incident) return <div className="text-muted-foreground">Loading…</div>;
+
+  const mapPoints: import("../../components/LiveMap").LiveMapPoint[] = [];
+  if (locations[0]) mapPoints.push({ kind: "patient", latitude: locations[0].latitude, longitude: locations[0].longitude });
+  if (incident.provider_latitude && incident.provider_longitude) {
+    mapPoints.push({ kind: "ambulance", latitude: incident.provider_latitude, longitude: incident.provider_longitude });
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <button onClick={() => navigate("/provider")} className="text-xs text-muted-foreground hover:text-foreground">← Back to ER board</button>
+          <h1 className="mt-1 text-xl font-extrabold">Inbound patient console</h1>
+        </div>
+        <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+          {(incident.status ?? "").toUpperCase().replace(/_/g, " ")}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Stat label="Ambulance ETA" value={<EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} />} />
+        <Stat label="Transport" value={(incident.status ?? "").replace(/_/g," ")} />
+        <Stat label="Admission" value={incident.hospital_admission_status ?? "incoming"} />
+        <Stat label="Triage" value={incident.triage_priority ?? "—"} />
+      </div>
+
+      {crew && (
+        <div className="rounded-xl border bg-muted/30 p-2.5 text-xs">
+          <span className="font-semibold">Crew:</span> {crew}
+        </div>
+      )}
+
+      {incident.pre_arrival_notes && (
+        <div className="rounded-2xl border-2 border-orange-500/30 bg-orange-50 p-3 dark:bg-orange-950/20">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-orange-700 dark:text-orange-300">Pre-arrival notes from crew</p>
+          <p className="mt-1 whitespace-pre-wrap text-sm">{incident.pre_arrival_notes}</p>
+        </div>
+      )}
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="space-y-3">
+          <LiveMap points={mapPoints} height={280} />
+          <div className="rounded-2xl border bg-card p-3 space-y-2">
+            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Admission stepper</p>
+            <div className="flex flex-wrap gap-1.5">
+              {ADMISSION_STEPS.map((s) => (
+                <Button key={s.v} size="sm"
+                        variant={incident.hospital_admission_status === s.v ? "default" : "outline"}
+                        onClick={() => setAdmissionStatus(s.v)}>
+                  {s.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+          <TriageControls incidentId={id!} current={{
+            triage_priority: incident.triage_priority,
+            triage_bay: incident.triage_bay,
+            triage_nurse: incident.triage_nurse,
+          }} />
+        </div>
+        <div className="space-y-3">
+          <EmergencyPatientContext incidentId={id!} />
+          <IncidentPhotos incidentId={id!} readOnly />
+          <IncidentTimeline incidentId={id!} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const Stat = ({ label, value }: { label: string; value: React.ReactNode }) => (
+  <div className="rounded-2xl border bg-card p-2.5">
+    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+    <p className="mt-0.5 text-base font-extrabold">{value}</p>
+  </div>
+);
