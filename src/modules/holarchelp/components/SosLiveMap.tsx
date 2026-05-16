@@ -128,7 +128,7 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
   }
 
   return (
-    <APIProvider apiKey={apiKey}>
+    <APIProvider apiKey={apiKey} libraries={["geometry"]}>
       <MapBody
         mode={mode}
         patient={patient}
