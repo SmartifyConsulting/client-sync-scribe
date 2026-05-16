@@ -95,7 +95,7 @@ export function EmergencyPatientContext({ incidentId }: { incidentId: string }) 
       {(ctx.voice_note_url || ctx.voice_note_transcript) && (
         <div className="rounded-xl border bg-muted/40 p-2.5">
           <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">SOS voice clip</p>
-          {ctx.voice_note_url && <VoiceNoteAudio url={ctx.voice_note_url} />}
+          {ctx.voice_note_url && <VoiceNoteAudio path={ctx.voice_note_url} />}
           {ctx.voice_note_transcript && <p className="mt-1 text-xs italic text-muted-foreground">"{ctx.voice_note_transcript}"</p>}
         </div>
       )}
