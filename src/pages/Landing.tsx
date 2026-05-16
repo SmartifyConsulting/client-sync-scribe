@@ -22,6 +22,12 @@ import {
   Sparkles,
   Activity,
   Hospital,
+  Siren,
+  Ambulance,
+  Building2,
+  Smartphone,
+  Apple,
+  Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -76,6 +82,18 @@ const providerBenefits = [
     description:
       "Access complete patient history across all their providers—make informed decisions with the full picture.",
   },
+  {
+    icon: Ambulance,
+    title: "Emergency Service Providers",
+    description:
+      "Ambulance crews onboard in minutes, accept SOS incidents with one tap, share live ETA, and arrive with the patient's full medical context.",
+  },
+  {
+    icon: Hospital,
+    title: "Hospital Partners",
+    description:
+      "Hospitals receive inbound emergencies with prefilled patient summaries, manage admissions, and coordinate with referring doctors in real time.",
+  },
 ];
 
 const ecosystemFeatures = [
@@ -114,13 +132,14 @@ export default function Landing() {
             <div className="flex items-center gap-3" />
             <div className="flex items-center gap-2 sm:gap-3">
               <Button
+                size="lg"
                 variant="ghost"
                 onClick={() => navigate("/auth?mode=login")}
-                className="text-muted-foreground hover:text-foreground"
+                className="btn-pill text-base text-muted-foreground hover:text-foreground"
               >
                 Login
               </Button>
-              <Button onClick={() => setShowRoleDialog(true)} className="btn-pill">
+              <Button size="lg" onClick={() => setShowRoleDialog(true)} className="btn-pill text-base">
                 Get Started
               </Button>
             </div>
@@ -178,6 +197,9 @@ export default function Landing() {
                 { icon: Hospital, label: "Hospital Admissions" },
                 { icon: ClipboardList, label: "Auto-Tasks" },
                 { icon: Calendar, label: "Unified Calendar" },
+                { icon: Siren, label: "Emergency SOS" },
+                { icon: Ambulance, label: "Ambulance Dispatch" },
+                { icon: Building2, label: "Hospital Network" },
               ].map((p) => (
                 <span
                   key={p.label}
@@ -219,6 +241,40 @@ export default function Landing() {
                 </Button>
               </div>
             </div>
+
+            {/* Mobile app download — prominent */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="mt-6 rounded-2xl border-2 border-primary/40 bg-gradient-to-r from-primary/10 via-primary/5 to-[#E01837]/10 p-4 sm:p-5 shadow-lg"
+            >
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shrink-0">
+                  <Smartphone className="h-6 w-6" />
+                </div>
+                <div className="flex-1 text-center sm:text-left">
+                  <p className="text-base font-bold text-foreground">Get Holarc on your phone</p>
+                  <p className="text-xs text-muted-foreground">
+                    Available on iOS and Android — your full health story in your pocket.
+                  </p>
+                </div>
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <Button asChild size="sm" variant="outline" className="btn-pill flex-1 sm:flex-initial border-primary/40">
+                    <a href="#" aria-label="Download on the App Store">
+                      <Apple className="mr-1.5 h-4 w-4" />
+                      App Store
+                    </a>
+                  </Button>
+                  <Button asChild size="sm" variant="outline" className="btn-pill flex-1 sm:flex-initial border-primary/40">
+                    <a href="#" aria-label="Get it on Google Play">
+                      <Play className="mr-1.5 h-4 w-4" />
+                      Google Play
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
 
             {/* Trust strip */}
             <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-2 text-xs text-muted-foreground">
@@ -279,7 +335,7 @@ export default function Landing() {
                 </p>
                 <div className="mt-3 flex items-center gap-1.5">
                   <Gift className="h-3.5 w-3.5 text-primary" />
-                  <span className="text-[11px] font-semibold text-primary">+5 Vulas earned</span>
+                  <span className="text-[11px] font-semibold text-primary">+5 Rewards earned</span>
                 </div>
               </div>
 
@@ -311,6 +367,32 @@ export default function Landing() {
                       Patient history summaries · medication conflict alerts · imaging analysis · auto-generated
                       documents.
                     </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* HolarcHelp SOS — Emergency Services */}
+              <div className="col-span-2 card-modern p-4 border border-[#E01837]/30 bg-gradient-to-br from-[#E01837]/5 to-[#E01837]/10">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E01837] text-white shrink-0">
+                    <Siren className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-foreground text-sm">HolarcHelp SOS</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      One-tap dispatch to nearby ambulances and hospitals with live location, ETA tracking, and full
+                      medical context shared on arrival.
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {["Ambulance providers", "Hospitals", "Blood banks"].map((b) => (
+                        <span
+                          key={b}
+                          className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2 py-0.5 text-[10px] text-foreground/80"
+                        >
+                          {b}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>

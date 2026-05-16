@@ -1,21 +1,49 @@
-## Root cause
+## Landing page + admin + calendar updates (MVP polish)
 
-`LiveMap` only initializes the Leaflet map *after* a patient location arrives (the `if (!patient) return placeholder` early-return). When `locations` is empty on first render, the placeholder mounts and the container ref is never attached. When `locations` later populates, the container div mounts but the init `useEffect` already ran on the placeholder render — so the map is never created. On re-entry, the same happens because state starts empty again until the location query resolves.
+### 1. Disable trial / subscription gate (MVP phase)
+- `src/components/layout/AppLayout.tsx`: stop rendering `<SubscriptionGateModal />` and the amber "free access ends in N days" banner. Keep the `useSubscriptionGate` hook untouched so it can be re-enabled later.
+- `src/pages/Auth.tsx`: replace the `TrialSignupSection` usage in both signup paths with a minimal Terms & Conditions checkbox (re-using the existing consent links from `TrialSignupSection`, but stripped of the 30-day messaging and pricing block). Keep `acceptedTerms` gating.
+- Keep DB writes that create the `free_period` subscription row (harmless; nothing reads it now).
+- No deletes to `SubscriptionGateModal.tsx` / `TrialSignupSection.tsx` — leave files in place for future restoration.
 
-There may also be a second case where the map *is* initialized but a stale React effect prevents `invalidateSize` from firing on subsequent navigations.
+### 2. Prominent "Download the mobile app" message on landing
+- `src/pages/Landing.tsx`: add a new highlighted strip directly under the hero CTA row (above the trust strip) that promotes the mobile app.
+- Visual: full-width pill on mobile / inline card on desktop with a phone/QR icon, headline "Get Holarc on your phone", subline "Available on iOS and Android — your full health story in your pocket.", and two outline buttons "App Store" + "Google Play" (linking to `#` placeholders for now).
+- Style: gradient background `from-primary/10 to-[#E01837]/10`, primary border, slight shadow, animated fade-in. Render on all viewports, sticky-ish prominence (not actually sticky).
 
-## Fix
+### 3. Hero button typography parity
+- `src/pages/Landing.tsx` (nav at line 116–125): give the "Login" and "Get Started" nav buttons the same `text-base` (matches the `size="lg"` Doctors / Patients outline buttons in the hero). Add `size="lg"` and matching `btn-pill` styling to "Login", keep "Get Started" with `size="lg"` and `text-base`.
 
-Rewrite `LiveMap` so the **container always mounts** and the Leaflet map initializes immediately, even with no points yet:
+### 4. Rename "+5 Vulas earned" → "+5 Rewards earned"
+- `src/pages/Landing.tsx` line 282: change the span text from `+5 Vulas earned` to `+5 Rewards earned`. No other copy on the landing references Vulas.
 
-1. **Always render the map container.** Remove the `if (!patient) return placeholder` early-return. Instead, render the map div unconditionally and overlay a small "Waiting for first GPS fix…" badge when there are no points yet.
-2. **Init with sensible default center** (Johannesburg fallback) when no patient is present, then re-center via the existing markers/bounds effect once points arrive.
-3. **Keep ResizeObserver + rAF + delayed `invalidateSize`** (already in place) for layout-timing resilience.
-4. **Whenever `points` change** (including empty → first point), call `map.invalidateSize()` *before* `setView` / `fitBounds`. This handles the case where the container becomes visible after a layout shift.
+### 5. Hero ecosystem coverage for Emergency Services & Hospitals
+- `src/pages/Landing.tsx`:
+  - **Capability pills** (line 171 array): append three pills — `{ icon: Siren, label: "Emergency SOS" }`, `{ icon: Ambulance, label: "Ambulance Dispatch" }`, `{ icon: Building2, label: "Hospital Network" }` (icons from `lucide-react`).
+  - **Feature mosaic** (the 2-column grid at line 244): add one new card spanning both columns describing Emergency Services — title "HolarcHelp SOS", subline "One-tap dispatch to nearby ambulances and hospitals with live location, ETA tracking, and full medical context shared on arrival." Include three mini-badges: "Ambulance providers", "Hospitals", "Blood banks".
+  - **Provider Benefits section** (`providerBenefits` data — referenced at line 388): add 2 entries — "Emergency Service Providers" and "Hospital Partners" — describing how ambulance/hospital staff onboard, accept incidents, and view patient context.
 
-## Files touched
-- `src/modules/holarchelp/components/LiveMap.tsx` — restructure so container always mounts; overlay placeholder; ensure invalidateSize before view changes.
+### 6. Shared practice calendar → per-doctor dropdown filter
+- `src/pages/CalendarView.tsx`:
+  - When `scope === 'practice'`, add a `<Select>` doctor filter ("All doctors in practice" + one row per `members[].doctor_id` showing `full_name` and color swatch).
+  - Persist selection in local state `selectedDoctorId: string | 'all'`. Default `'all'`.
+  - Modify the `fetchAppointments` query (line 184): when a specific doctor is selected, swap `practice_id` filter for `.eq('user_id', selectedDoctorId)` (still inside the practice scope branch). When `'all'`, keep current behaviour.
+  - Add `selectedDoctorId` to the effect dependency array (line 222).
+  - UI placement: next to the existing scope tabs (line 400).
 
-## Out of scope
-- No changes to `HolarcHelpIncidentDetail.tsx` (parent already always renders `<LiveMap>`).
-- No marker icon, countdown, or backend changes.
+### 7. Reverse-impersonation entry for admin-seeded test users
+- `src/components/layout/TopBarIcons.tsx`:
+  - The hardcoded `TEST_PROFILES` list (line 31–40) is the canonical "added by Georgia" group. For any signed-in user whose email matches one of these (excluding `info@georgiaadams.co.za` itself), render a single "Switch to Admin (Georgia Adams)" entry in the profile-switcher popover — same UI affordance as the admin-only switcher, but visible to non-admins.
+  - Reuse the existing `impersonate()` helper. It calls `admin-impersonate` edge function.
+- `supabase/functions/admin-impersonate/index.ts`: relax authorization so that when the **target** email is `info@georgiaadams.co.za` AND the **caller** is one of the seeded test emails (whitelist), the function issues the magic link. All other impersonation paths remain admin-gated.
+
+### Out of scope
+- No data model changes, no payments work, no removal of the trial subscription DB rows, no changes to mobile bottom-nav, no real App Store / Play Store links (placeholders only).
+
+### Files touched
+- `src/components/layout/AppLayout.tsx`
+- `src/pages/Auth.tsx`
+- `src/pages/Landing.tsx`
+- `src/pages/CalendarView.tsx`
+- `src/components/layout/TopBarIcons.tsx`
+- `supabase/functions/admin-impersonate/index.ts`

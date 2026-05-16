@@ -19,13 +19,30 @@ Deno.serve(async (req) => {
     const { data: userData, error: userErr } = await sb.auth.getUser(token);
     if (userErr || !userData?.user) throw new Error("Invalid auth");
     const callerId = userData.user.id;
-
-    const { data: isAdmin } = await sb.rpc("has_role", { _user_id: callerId, _role: "admin" });
-    if (!isAdmin) throw new Error("Admin role required");
+    const callerEmail = (userData.user.email || "").toLowerCase();
 
     const body = await req.json().catch(() => ({}));
     const email = String(body.email || "").trim().toLowerCase();
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) throw new Error("Valid email required");
+
+    // Seeded test users may switch back to the Georgia Adams admin profile
+    // without being admins themselves. Any other target requires admin role.
+    const REVERSE_ADMIN_EMAIL = "info@georgiaadams.co.za";
+    const SEEDED_EMAILS = new Set([
+      "sme@smartify.co.za",
+      "dean.allie@gmail.com",
+      "projectmanager@smartify.co.za",
+      "paraskevoulasoldatos@gmail.com",
+      "xtina@smartify.co.za",
+      "zano@smartify.co.za",
+      "renken@smartify.co.za",
+    ]);
+    const isReverseToAdmin = email === REVERSE_ADMIN_EMAIL && SEEDED_EMAILS.has(callerEmail);
+
+    if (!isReverseToAdmin) {
+      const { data: isAdmin } = await sb.rpc("has_role", { _user_id: callerId, _role: "admin" });
+      if (!isAdmin) throw new Error("Admin role required");
+    }
 
     const { data, error } = await sb.auth.admin.generateLink({ type: "magiclink", email });
     if (error) throw error;
