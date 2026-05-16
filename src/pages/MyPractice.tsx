@@ -1292,6 +1292,8 @@ export default function MyPractice() {
               />
             </div>
 
+            <HospitalAffiliations />
+
             {/* Calendar color (used on shared practice calendar) */}
             <div className="space-y-1.5">
               <Label className="flex items-center gap-1.5">
