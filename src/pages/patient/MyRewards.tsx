@@ -751,19 +751,9 @@ export default function MyRewards() {
             const progressPct = Math.min(100, (lollipopCount / VAULT_UNLOCK_THRESHOLD) * 100);
             return (
               <>
-                {/* What are Vulas — inline explainer */}
-                <Card className="border-0 p-0 overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/10 to-teal-500/10 ring-1 ring-blue-500/20">
-                  <VulaExplainerContent hideCta />
-                </Card>
-
                 {/* Vula Vault brand card */}
                 <Card className="border-0 overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/5 via-background to-teal-500/5 ring-1 ring-blue-500/30">
                   <CardHeader className="items-center text-center pb-2">
-                    <img
-                      src={vulaVaultLogo}
-                      alt="Vula Vault"
-                      className="h-36 md:h-44 w-auto object-contain mx-auto"
-                    />
                     <CardDescription className="text-base text-foreground/80 max-w-md mx-auto pt-2">
                       Redeem your Vulas at participating retailers through your Vula Vault.
                     </CardDescription>
