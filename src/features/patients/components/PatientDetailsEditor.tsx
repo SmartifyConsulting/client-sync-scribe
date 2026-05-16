@@ -1274,9 +1274,9 @@ export function PatientDetailsEditor({
           </div>
           {/* Vula Vouchers inline on web */}
           {!rewardsLoading && lollipopCount !== undefined && (
-            <div className="hidden md:flex shrink-0 items-end gap-2 pb-1 ml-auto">
-              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-10 w-auto object-contain" />
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
+            <div className="hidden md:flex shrink-0 items-end gap-3 pb-1 ml-auto">
+              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-[60px] w-auto object-contain" />
+              <span className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
                 <AnimatedCounter target={lollipopCount} />
               </span>
             </div>
@@ -1324,7 +1324,7 @@ export function PatientDetailsEditor({
         {/* Row 3: Vula Vouchers - mobile only (shown inline on web) */}
         {!rewardsLoading && lollipopCount !== undefined && (
           <div className="mt-3 border-t border-border pt-3 md:hidden">
-            <div className="flex items-center justify-end gap-2">
+            <div className="flex items-center justify-center gap-2">
               <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-[44px] w-auto object-contain" />
               <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
                 <AnimatedCounter target={lollipopCount} />
@@ -1701,7 +1701,7 @@ export function PatientDetailsEditor({
                   <Pencil className="h-4 w-4" />
                 </Button>
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="space-y-3">
                 <div className="space-y-3">
                   {/* General Information */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
