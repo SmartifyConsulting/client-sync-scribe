@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { LiveMap } from "../../components/LiveMap";
+import { SosLiveMap } from "../../components/SosLiveMap";
 import { IncidentTimeline } from "../../components/IncidentTimeline";
 import { IncidentVoiceNoteRecorder } from "../../components/IncidentVoiceNoteRecorder";
 import { EtaCountdown } from "../../components/EtaCountdown";
@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useProviderAccess } from "../../components/ProviderGate";
-import { useProviderLocationTracking } from "../../hooks/useProviderLocationTracking";
+import { useLiveProviderLocation } from "../../hooks/useLiveProviderLocation";
 import { AlertTriangle } from "lucide-react";
 
 type Loc = { latitude: number; longitude: number; recorded_at: string };
@@ -41,7 +41,7 @@ export default function AmbulanceIncidentConsole() {
   const isAssigned = incident?.assigned_provider_id === providerId;
   const isLive = incident && !["completed","cancelled"].includes(incident.status);
 
-  useProviderLocationTracking(id ?? null, !!isAssigned && !!isLive);
+  useLiveProviderLocation(id ?? null, providerId, !!isAssigned && !!isLive);
 
   useEffect(() => {
     if (!id) return;
@@ -132,7 +132,8 @@ export default function AmbulanceIncidentConsole() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-3">
-          <LiveMap points={mapPoints} height={280} />
+          <SosLiveMap incidentId={id!} mode="ambulance" height={320} />
+
 
           {isAssigned && (
             <>

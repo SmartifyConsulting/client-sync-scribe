@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { LiveMap } from "../../components/LiveMap";
+import { SosLiveMap } from "../../components/SosLiveMap";
 import { IncidentTimeline } from "../../components/IncidentTimeline";
 import { IncidentPhotos } from "../../components/IncidentPhotos";
 import { EtaCountdown } from "../../components/EtaCountdown";
@@ -107,7 +107,7 @@ export default function HospitalIncidentConsole() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-3">
-          <LiveMap points={mapPoints} height={280} />
+          <SosLiveMap incidentId={id!} mode="hospital" height={320} />
           <div className="rounded-2xl border bg-card p-3 space-y-2">
             <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Admission stepper</p>
             <div className="flex flex-wrap gap-1.5">
