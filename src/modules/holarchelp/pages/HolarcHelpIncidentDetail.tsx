@@ -234,6 +234,24 @@ export default function HolarcHelpIncidentDetail() {
 
   return (
     <div className="mx-auto max-w-md pb-6">
+      <SosVoiceNoteDialog
+        open={voiceNoteOpen}
+        incidentId={id ?? null}
+        onClose={() => { setVoiceNoteOpen(false); setSeverityOpen(true); }}
+      />
+      <SeverityPicker open={severityOpen} onSubmit={finishSeverity} onSkip={() => finishSeverity(null)} />
+
+      {isFresh && cancelSecondsLeft > 0 && isLive && (
+        <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border-2 border-amber-400 bg-amber-50 p-3 text-amber-900 dark:bg-amber-950/20 dark:text-amber-100">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider">False alarm?</p>
+            <p className="text-sm">You can still cancel for the next {cancelSecondsLeft}s.</p>
+          </div>
+          <Button size="sm" variant="outline" className="shrink-0" onClick={cancelAlert}>
+            Cancel alert
+          </Button>
+        </div>
+      )}
       {/* Sticky quick-action bar */}
       <div className="sticky top-0 z-30 -mx-4 mb-3 border-b bg-background/95 px-4 py-2 backdrop-blur md:mx-0 md:rounded-b-xl">
         <div className="flex items-center gap-1.5">
