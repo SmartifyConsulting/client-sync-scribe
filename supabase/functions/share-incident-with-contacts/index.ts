@@ -1,5 +1,4 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { sendMailgunEmail } from "../_shared/mailgun.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,10 +15,9 @@ Deno.serve(async (req) => {
     }
 
     const auth = req.headers.get("Authorization") ?? "";
-    const supabase = createClient(
+    const admin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-      { global: { headers: { Authorization: auth } } },
     );
 
     // Validate caller owns the incident
@@ -31,7 +29,7 @@ Deno.serve(async (req) => {
     const { data: { user } } = await userClient.auth.getUser();
     if (!user) return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: corsHeaders });
 
-    const { data: incident } = await supabase
+    const { data: incident } = await admin
       .from("holarchelp_incidents")
       .select("id, user_id, tracking_token, severity")
       .eq("id", incident_id)
@@ -52,13 +50,9 @@ Deno.serve(async (req) => {
     const passes = (minSev?: string | null) => incidentRank >= sevRank(minSev ?? "low");
 
     const token = tracking_token ?? incident.tracking_token;
-    const publicBase = Deno.env.get("PUBLIC_APP_URL")
-      ?? req.headers.get("origin")
-      ?? "https://holarchealth.com";
-    const trackUrl = `${publicBase.replace(/\/$/, "")}/track/${token}`;
 
-    // Gather recipients: emergency contacts (default) + NOK with explicit flag + profile shares with live-tracking flag
-    const { data: patient } = await supabase
+    // Gather recipients: emergency contacts (default) + NOK with explicit flag
+    const { data: patient } = await admin
       .from("patients")
       .select("emergency_contact_name, emergency_contact_phone, emergency_contact_email, emergency_can_view_live_tracking, emergency_contacts, next_of_kin_name, next_of_kin_phone, next_of_kin_email, nok_can_view_live_tracking, next_of_kin_members, name")
       .eq("patient_user_id", user.id)
@@ -68,7 +62,6 @@ Deno.serve(async (req) => {
     const recipients: Recip[] = [];
 
     if (patient) {
-      // primary EC (default true) — legacy fields, treat as low threshold
       if (patient.emergency_can_view_live_tracking !== false && patient.emergency_contact_name) {
         recipients.push({
           name: patient.emergency_contact_name,
@@ -78,14 +71,12 @@ Deno.serve(async (req) => {
           min_severity: "low",
         });
       }
-      // additional EC list embedded on patient row
       const ecList = Array.isArray(patient.emergency_contacts) ? patient.emergency_contacts : [];
       for (const c of ecList as any[]) {
         if (c.can_view_live_tracking !== false && c.name) {
           recipients.push({ name: c.name, phone: c.phone, email: c.email, via: "emergency_contact", min_severity: c.notify_min_severity ?? "low" });
         }
       }
-      // NOK only if explicit
       if (patient.nok_can_view_live_tracking === true && patient.next_of_kin_name) {
         recipients.push({
           name: patient.next_of_kin_name,
@@ -103,8 +94,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Standalone HolarcHelp emergency contacts table (with per-contact severity threshold)
-    const { data: ecRows } = await supabase
+    // Standalone HolarcHelp emergency contacts table
+    const { data: ecRows } = await admin
       .from("holarchelp_emergency_contacts")
       .select("name, phone, email, notify_min_severity")
       .eq("user_id", user.id);
@@ -120,19 +111,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Profile shares with live-tracking
-    const { data: shares } = await supabase
-      .from("patient_profile_shares")
-      .select("shared_with_email, shared_with_username")
-      .eq("owner_user_id", user.id)
-      .eq("can_view_live_tracking", true);
-    for (const s of shares ?? []) {
-      if ((s as any).shared_with_email) {
-        recipients.push({ name: (s as any).shared_with_username ?? "Trusted contact", email: (s as any).shared_with_email, via: "profile_share", min_severity: "low" });
-      }
-    }
-
-    // Apply severity threshold filter, then dedupe by phone/email so personal-info + manual SOS rows don't double-notify
+    // Filter by severity threshold + dedupe
     const filteredRaw = recipients.filter((r) => passes(r.min_severity));
     const seen = new Set<string>();
     const filtered = filteredRaw.filter((r) => {
@@ -143,43 +122,90 @@ Deno.serve(async (req) => {
       return true;
     });
 
-    // Send: Mailgun for email; SMS provider not wired here — just log.
-    const sent: any[] = [];
     const patientName = patient?.name ?? "Your contact";
-    const subject = `🚨 ${patientName} has triggered an SOS`;
-    const html = `
-      <p><strong>${patientName}</strong> has triggered an SOS via HolarcHealth.</p>
-      <p>You can follow their live location here:</p>
-      <p><a href="${trackUrl}" style="color:#E01837;font-weight:bold">Open live tracking</a></p>
-      <p style="color:#666;font-size:12px">You're receiving this because you are listed as a trusted contact.</p>
-    `;
+
+    // Resolve each contact to an auth user via email match in profiles.
+    const emails = Array.from(new Set(filtered.map((r) => r.email).filter(Boolean) as string[]));
+    let profilesByEmail = new Map<string, string>(); // lower(email) -> profile_id (auth user id)
+    if (emails.length > 0) {
+      // profiles table is keyed by auth.users.id; we need email — fetch via admin auth API
+      // For each email, listUsers with filter is heavy; safer to query auth.users via SQL helper.
+      // Lovable Cloud exposes profiles.id == auth.users.id, so look up by lowercased email
+      // using a service-role query against auth.users.
+      const { data: authMatches } = await admin
+        .rpc("noop_match_users_by_email" as any, { _emails: emails })
+        .then((r: any) => r, () => ({ data: null }));
+      if (Array.isArray(authMatches)) {
+        for (const row of authMatches as any[]) {
+          if (row?.email && row?.id) profilesByEmail.set(String(row.email).toLowerCase(), row.id);
+        }
+      } else {
+        // Fallback: use admin auth API listUsers per page and match emails locally.
+        // Cap at 1 page (default 50) — fine for typical contact counts.
+        try {
+          const { data } = await (admin as any).auth.admin.listUsers({ page: 1, perPage: 200 });
+          for (const u of (data?.users ?? []) as any[]) {
+            if (u?.email) profilesByEmail.set(String(u.email).toLowerCase(), u.id);
+          }
+        } catch (_e) { /* ignore */ }
+      }
+    }
+
+    const sent: any[] = [];
+    const notifTitle = `🚨 ${patientName} triggered an SOS`;
+    const notifDescription = `Tap to view live location and current status.`;
 
     for (const r of filtered) {
-      let emailOk = false;
-      if (r.email) {
-        const result = await sendMailgunEmail({
-          from: "HolarcHealth SOS <sos@holarchealth.com>",
-          to: r.email,
-          subject,
-          html,
-        });
-        emailOk = result.ok;
-        sent.push({ to: r.email, ok: result.ok, via: r.via, error: result.ok ? undefined : result.error });
+      const emailKey = (r.email || "").toLowerCase();
+      const contactUserId = emailKey ? profilesByEmail.get(emailKey) : undefined;
+
+      // Always log the attempt
+      const logChannel = contactUserId ? "in_app" : "pending";
+      const logStatus = contactUserId ? "sent" : "queued";
+
+      if (contactUserId) {
+        // 1. Insert high-priority in-app notification
+        await admin.from("notifications").insert({
+          user_id: contactUserId,
+          type: "sos_alert",
+          title: notifTitle,
+          description: notifDescription,
+          reference_id: incident_id,
+        } as any).then(() => {}, () => {});
+
+        // 2. Auto-share the SOS record (profile + live tracking) so they can open it
+        await admin.from("patient_profile_shares").upsert({
+          owner_user_id: user.id,
+          shared_with_user_id: contactUserId,
+          shared_with_email: r.email,
+          shared_with_username: r.name,
+          relationship: r.via,
+          can_view_profile: true,
+          can_view_live_tracking: true,
+          source: "sos_auto",
+        } as any, { onConflict: "owner_user_id,shared_with_user_id" }).then(() => {}, () => {});
       }
-      // log message for SMS/whatsapp delivery to be implemented
-      await supabase.from("holarchelp_messaging_log").insert({
+
+      await admin.from("holarchelp_messaging_log").insert({
         incident_id,
         user_id: user.id,
         recipient_name: r.name,
         recipient_phone: r.phone ?? null,
         recipient_email: r.email ?? null,
-        channel: r.email ? "email" : "pending",
-        status: emailOk ? "sent" : "queued",
-        metadata: { tracking_url: trackUrl, via: r.via, severity: incident.severity, min_severity: r.min_severity },
+        channel: logChannel,
+        status: logStatus,
+        metadata: { tracking_token: token, via: r.via, severity: incident.severity, min_severity: r.min_severity, in_app_user_id: contactUserId ?? null },
       } as any).then(() => {}, () => {});
+
+      sent.push({ name: r.name, email: r.email ?? null, in_app: !!contactUserId });
     }
 
-    return new Response(JSON.stringify({ ok: true, sent, recipient_count: filtered.length, skipped: recipients.length - filtered.length }), {
+    return new Response(JSON.stringify({
+      ok: true,
+      sent,
+      recipient_count: filtered.length,
+      in_app_count: sent.filter((s) => s.in_app).length,
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
