@@ -166,7 +166,7 @@ export default function HospitalAffiliations() {
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   {a.role_at_hospital && <span>{a.role_at_hospital}</span>}
                   {a.hospital?.status && a.hospital.status !== "approved" && (
-                    <Badge variant="secondary" className="text-[10px]">pending activation</Badge>
+                    <Badge variant="secondary" className="text-[10px]">pending admin review</Badge>
                   )}
                 </div>
               </div>
