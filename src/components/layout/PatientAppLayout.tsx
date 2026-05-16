@@ -9,6 +9,7 @@ import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { SubscriptionGateModal } from "@/components/auth/SubscriptionGateModal";
 import holarcLogo from "@/assets/holarc-logo-clear-2.png";
 import { TopBarIcons } from "./TopBarIcons";
+import { InstallMobileStrip } from "./InstallMobileStrip";
 
 
 export function PatientAppLayout() {
@@ -24,14 +25,11 @@ export function PatientAppLayout() {
       <div className="hidden md:block">
         <Sidebar />
       </div>
-      {!loading && isBlocked && !isSettingsPage && <SubscriptionGateModal />}
+      {/* Subscription gate disabled during MVP phase */}
 
-      {!loading && !isBlocked && daysRemaining !== null && daysRemaining <= 7 && (
-        <div className="bg-amber-500/15 border-b border-amber-500/30 px-4 py-2 text-center text-xs text-amber-700 flex items-center justify-center gap-2">
-          <AlertCircle className="h-3.5 w-3.5" />
-          Your free access ends in {daysRemaining} day{daysRemaining !== 1 ? 's' : ''}. Subscribe in Settings to continue using the app.
-        </div>
-      )}
+      {/* Mobile install strip */}
+      <InstallMobileStrip />
+
 
       {/* Top Bar - only on mobile */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border md:hidden">
