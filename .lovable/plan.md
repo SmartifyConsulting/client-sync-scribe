@@ -23,3 +23,15 @@
 - Sender domain is `holarchealth.com` (root), already verified in Mailgun — no DNS work needed.
 - Do NOT scaffold Lovable auth email templates; that would re-route through the managed Lovable email pipeline.
 - The `nigeria.holarchealth.com` subdomain is abandoned and any references to it in email configuration should be cleared.
+
+## Additional testing + UI tasks
+
+4. **Seed test connections (for easy role switching during MVP testing)**
+   - Add **Jean Prodromos** to **Georgia Adams**' patient list.
+   - Add **info@georgiaadams.co.za** to **Jean**'s profile (linked account / switcher entry) so testing can hop back to Georgia in one click.
+
+5. **Vula counter alignment (all views)**
+   - Top-align the Vula count number with the word "Vula" in the logo (use `items-start` on the flex row + matching line-height) — applies everywhere the logo+counter pair renders (`PatientDetailsEditor`, dashboard briefing, any rewards widget).
+
+6. **Tablet view — Vula placement**
+   - On tablet (md breakpoint), move the Vula logo + counter to sit **below** the "What's happening" text block and **center-align** the pair. Desktop and mobile layouts unchanged from current spec.
