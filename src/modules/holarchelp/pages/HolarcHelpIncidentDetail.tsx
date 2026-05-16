@@ -142,7 +142,36 @@ export default function HolarcHelpIncidentDetail() {
   const trackingUrl = incident ? getPublicTrackUrl(incident.tracking_token) : "";
   const message = buildSosMessage(profileName, trackingUrl);
 
-  
+  // Fresh-trigger flow: voice note → severity picker, plus 10s cancel window
+  const [voiceNoteOpen, setVoiceNoteOpen] = useState(isFresh);
+  const [severityOpen, setSeverityOpen] = useState(false);
+  const [cancelSecondsLeft, setCancelSecondsLeft] = useState(isFresh ? 10 : 0);
+
+  useEffect(() => {
+    if (!isFresh) return;
+    if (cancelSecondsLeft <= 0) return;
+    const t = setTimeout(() => setCancelSecondsLeft((s) => Math.max(0, s - 1)), 1000);
+    return () => clearTimeout(t);
+  }, [isFresh, cancelSecondsLeft]);
+
+  const finishSeverity = async (severity: SeverityResult | null) => {
+    setSeverityOpen(false);
+    if (!id || !severity) return;
+    await supabase.from("holarchelp_incidents" as any).update({
+      severity: severity.severity,
+      conscious: severity.conscious,
+      breathing: severity.breathing,
+    } as any).eq("id", id);
+  };
+
+  const cancelAlert = async () => {
+    if (!id) return;
+    await supabase.from("holarchelp_incidents" as any)
+      .update({ status: "cancelled", resolved_at: new Date().toISOString() } as any).eq("id", id);
+    toast.success("Alert cancelled");
+    navigate("/patient/holarchelp");
+  };
+
 
   const [closeOpen, setCloseOpen] = useState(false);
   const [closureNote, setClosureNote] = useState("");
