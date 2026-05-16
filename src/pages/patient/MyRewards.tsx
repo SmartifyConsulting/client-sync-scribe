@@ -751,7 +751,7 @@ export default function MyRewards() {
             const remaining = Math.max(0, VAULT_UNLOCK_THRESHOLD - lollipopCount);
             const progressPct = Math.min(100, (lollipopCount / VAULT_UNLOCK_THRESHOLD) * 100);
             return (
-              <>
+              <div className="grid gap-6 md:grid-cols-2 items-start">
                 {/* What are Vulas — inline explainer */}
                 <Card className="border-0 p-0 overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/10 to-teal-500/10 ring-1 ring-blue-500/20">
                   <VulaExplainerContent hideCta />
@@ -812,7 +812,7 @@ export default function MyRewards() {
                     </div>
                   </CardContent>
                 </Card>
-              </>
+              </div>
             );
           })()}
         </TabsContent>
