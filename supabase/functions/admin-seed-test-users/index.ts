@@ -20,7 +20,7 @@ const SEEDS: Seed[] = [
   { email: "zano@smartify.co.za", full_name: "Zano", role: "hospital_staff", hospital_name: "Zano Hospital" },
   { email: "renken@smartify.co.za", full_name: "Renken", role: "ambulance_staff", ambulance_company: "Renken Ambulance Service" },
   { email: "hospital.test@holarchealth.com", full_name: "Holarc General Hospital Admin", role: "hospital_staff", hospital_name: "Holarc General Hospital" },
-  { email: "er.test@holarchealth.com", full_name: "Holarc General ER Staff", role: "hospital_staff", hospital_name: "Holarc General Hospital" },
+  { email: "er.test@holarchealth.com", full_name: "Holarc General ER Staff", role: "hospital_staff", hospital_name: "Holarc General Hospital", as_member: true, member_role: "er_staff" },
 ];
 
 const FIXED_PASSWORD = "Password123";
