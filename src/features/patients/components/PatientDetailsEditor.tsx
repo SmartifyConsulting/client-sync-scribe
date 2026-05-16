@@ -185,7 +185,7 @@ const SectionHeader = ({
   extra?: React.ReactNode;
   onEdit?: () => void;
 }) => (
-  <CollapsibleTrigger className="flex w-full items-center justify-between rounded-xl border border-primary bg-card shadow-sm px-4 py-3 group">
+  <CollapsibleTrigger className="flex w-full items-center justify-between border-b border-border hover:bg-muted/40 transition-colors px-4 py-3 group">
     <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-2 text-left">
       <Icon className="h-4 w-4 text-primary" /> {label}
     </h3>
