@@ -55,7 +55,6 @@ export default function ForgotPassword() {
             >
               <img src={holarcLogo} alt="Holarc Health" className="h-[81px] w-auto" />
             </button>
-            '' <h1 className="text-2xl font-bold text-foreground">Holarc Health</h1>
             <p className="text-muted-foreground mt-2">Reset your password</p>
           </div>
 
