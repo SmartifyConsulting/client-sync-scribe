@@ -1497,13 +1497,11 @@ export function PatientDetailsEditor({
             <AvatarFallback className="bg-primary/10 text-primary text-base font-semibold">{initials}</AvatarFallback>
           </Avatar>
           {/* Vula counter + logo */}
-          <div className="flex-1 min-w-0 flex items-center gap-2">
-            <div className="flex flex-col">
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
-                <AnimatedCounter target={lollipopCount} />
-              </span>
-            </div>
+          <div className="flex-1 min-w-0 flex items-start gap-2">
             <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-6 w-auto object-contain" />
+            <span className="text-xl font-bold leading-none pt-0.5 bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
+              <AnimatedCounter target={lollipopCount} />
+            </span>
           </div>
         </div>
         {/* Bottom row: calendar/mic + appointments */}
