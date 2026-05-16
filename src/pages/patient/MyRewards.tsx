@@ -49,7 +49,6 @@ import { useToast } from "@/hooks/use-toast";
 import { VulaExplainerDialog } from "@/features/rewards/components/VulaExplainerDialog";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v2.png";
 import vulaVaultVendors from "@/assets/vula-vault-vendors.png";
-import vulaVaultVendors from "@/assets/vula-vault-vendors.png";
 
 const VAULT_UNLOCK_THRESHOLD = 2000;
 
