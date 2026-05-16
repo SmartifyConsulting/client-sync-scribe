@@ -89,6 +89,7 @@ export default function HolarcHelpProviders() {
   const [hospitals, setHospitals] = useState<any[]>([]);
   const [ambulances, setAmbulances] = useState<any[]>([]);
   const [pharmacies, setPharmacies] = useState<any[]>([]);
+  const [userEmails, setUserEmails] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [edit, setEdit] = useState<EditState>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ kind: Kind; id: string; name: string } | null>(null);
@@ -108,10 +109,22 @@ export default function HolarcHelpProviders() {
       supabase.from("holarchelp_ambulance_providers" as any).select("*").order("created_at", { ascending: false }),
       supabase.from("holarchelp_pharmacies" as any).select("*").order("created_at", { ascending: false }),
     ]);
-    setHospitals(filterByStatus((h as any) ?? []));
-    setAmbulances(filterByStatus((a as any) ?? []));
-    setPharmacies(filterByStatus((p as any) ?? []));
+    const hRows = filterByStatus((h as any) ?? []);
+    const aRows = filterByStatus((a as any) ?? []);
+    const pRows = filterByStatus((p as any) ?? []);
+    setHospitals(hRows);
+    setAmbulances(aRows);
+    setPharmacies(pRows);
     setLoading(false);
+
+    // Fetch linked user login emails (admin only)
+    const userIds = Array.from(new Set(
+      [...hRows, ...aRows, ...pRows].map((r: any) => r.owner_id ?? r.user_id).filter(Boolean),
+    )) as string[];
+    if (userIds.length) {
+      const { data: emailRes } = await supabase.functions.invoke("admin-get-user-emails", { body: { user_ids: userIds } });
+      if ((emailRes as any)?.emails) setUserEmails((emailRes as any).emails);
+    }
   };
 
   const loadVoiceClip = async () => {
@@ -176,10 +189,20 @@ export default function HolarcHelpProviders() {
 
   const renderRow = (kind: Kind, r: any) => {
     const active = isActive(r.status);
+    const userEmail = userEmails[r.owner_id ?? r.user_id] ?? null;
     return (
       <TableRow key={r.id}>
         <TableCell className="font-medium">{r[nameField(kind)]}</TableCell>
-        <TableCell className="text-xs">{r.contact_email}<br /><span className="text-muted-foreground">{r.contact_phone}</span></TableCell>
+        <TableCell className="text-xs">
+          {userEmail
+            ? <><span className="font-semibold">{userEmail}</span>
+                {r.contact_email && r.contact_email.toLowerCase() !== userEmail.toLowerCase() && (
+                  <><br /><span className="text-muted-foreground">Org: {r.contact_email}</span></>
+                )}
+              </>
+            : <span>{r.contact_email ?? "—"}</span>}
+          {r.contact_phone && <><br /><span className="text-muted-foreground">{r.contact_phone}</span></>}
+        </TableCell>
         <TableCell className="text-xs">{r.city ?? "—"}</TableCell>
         <TableCell>
           <Select value={r.tier ?? "tier_3"} onValueChange={(v) => setTier(kind, r.id, v)}>

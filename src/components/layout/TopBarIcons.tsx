@@ -34,7 +34,7 @@ export function TopBarIcons() {
     { email: "dean.allie@gmail.com", name: "Dean Allie", role: "Patient", icon: HeartPulse },
     { email: "projectmanager@smartify.co.za", name: "Shannon Kennedy", role: "Patient", icon: HeartPulse },
     { email: "paraskevoulasoldatos@gmail.com", name: "Paraskevi Soldatos", role: "Patient", icon: HeartPulse },
-    { email: "xtina@smartify.co.za", name: "Xtina", role: "Doctor", icon: Stethoscope },
+    { email: "christina@smartify.co.za", name: "Christina", role: "Doctor", icon: Stethoscope },
     { email: "zano@smartify.co.za", name: "Zano", role: "Hospital", icon: Building2 },
     { email: "renken@smartify.co.za", name: "Renken", role: "Ambulance", icon: Ambulance },
     { email: "jeanprodromos@smartify.co.za", name: "Jean Prodromos", role: "Doctor", icon: Stethoscope },
@@ -339,6 +339,11 @@ export function TopBarIcons() {
                 </div>
               </button>
             </div>
+          )}
+          {isAdmin && (
+            <Link to="/admin" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
+              <ShieldCheck className="h-3.5 w-3.5" /> Admin
+            </Link>
           )}
           <Link to="/settings" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
             <Settings className="h-3.5 w-3.5" /> Settings
