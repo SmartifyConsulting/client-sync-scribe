@@ -38,6 +38,8 @@ export function TopBarIcons() {
     { email: "zano@smartify.co.za", name: "Zano", role: "Hospital", icon: Building2 },
     { email: "renken@smartify.co.za", name: "Renken", role: "Ambulance", icon: Ambulance },
     { email: "jeanprodromos@smartify.co.za", name: "Jean Prodromos", role: "Doctor", icon: Stethoscope },
+    { email: "hospital.test@holarchealth.com", name: "Hospital Admin (Test)", role: "Hospital", icon: Building2 },
+    { email: "er.test@holarchealth.com", name: "ER Staff (Test)", role: "Hospital", icon: Building2 },
   ];
   const { data: currentEmail = "" } = useQuery({
     queryKey: ["auth-email-topbar"],
