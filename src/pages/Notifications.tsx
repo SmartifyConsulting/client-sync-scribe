@@ -684,10 +684,14 @@ function NotificationList({
             if (!notification.is_read && notification.type !== 'invitation_received') {
               onMarkAsRead(notification.id);
             }
+            if (notification.type === 'sos_alert' && notification.reference_id) {
+              window.location.href = `/patient/holarchelp/incident/${notification.reference_id}`;
+            }
           }}
           className={cn(
             "flex items-start gap-4 p-4 transition-colors",
             !notification.is_read && "bg-primary/5",
+            notification.type === 'sos_alert' && "border-l-4 border-red-600 bg-red-50 dark:bg-red-950/30",
             notification.type !== 'invitation_received' && "cursor-pointer hover:bg-accent/50"
           )}
         >
