@@ -1,0 +1,149 @@
+import { useEffect, useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useProviderAccess } from "../../../components/ProviderGate";
+import { useLiveProviderLocation } from "../../../hooks/useLiveProviderLocation";
+import { SosLiveMap } from "../../../components/SosLiveMap";
+import { HospitalPicker } from "../../../components/HospitalPicker";
+import { EtaCountdown } from "../../../components/EtaCountdown";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Siren, Navigation as NavIcon } from "lucide-react";
+
+type Inc = any;
+
+const STEPS = [
+  { v: "en_route", label: "En Route" },
+  { v: "arrived", label: "Arrived" },
+  { v: "patient_collected", label: "Patient Loaded" },
+  { v: "en_route_to_hospital", label: "→ Hospital" },
+  { v: "at_hospital", label: "Arrived At Hospital" },
+  { v: "completed", label: "Resolve Incident" },
+];
+
+export default function NavigationScreen() {
+  const { id: paramId } = useParams<{ id: string }>();
+  const { providerId } = useProviderAccess();
+  const navigate = useNavigate();
+  const [activeId, setActiveId] = useState<string | null>(paramId ?? null);
+  const [incident, setIncident] = useState<Inc | null>(null);
+  const [crewLoc, setCrewLoc] = useState<{ lat: number; lng: number } | null>(null);
+
+  // Auto-select current active mission if not in URL
+  useEffect(() => {
+    if (paramId) { setActiveId(paramId); return; }
+    if (!providerId) return;
+    supabase.from("holarchelp_incidents" as any)
+      .select("id").eq("assigned_provider_id", providerId)
+      .in("status", ["assigned","en_route","arrived","patient_collected","en_route_to_hospital","at_hospital"])
+      .order("accepted_at", { ascending: false }).limit(1).maybeSingle()
+      .then(({ data }) => setActiveId(((data as any)?.id) ?? null));
+  }, [paramId, providerId]);
+
+  const isAssigned = incident?.assigned_provider_id === providerId;
+  const isLive = incident && !["completed","cancelled"].includes(incident.status);
+  useLiveProviderLocation(activeId, providerId, !!isAssigned && !!isLive);
+
+  useEffect(() => {
+    if (!activeId) { setIncident(null); return; }
+    supabase.from("holarchelp_incidents" as any).select("*").eq("id", activeId).maybeSingle()
+      .then(({ data }) => setIncident(data));
+    const ch = supabase.channel(`amb-nav-${activeId}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "holarchelp_incidents", filter: `id=eq.${activeId}` },
+        (p) => setIncident((prev: any) => ({ ...(prev ?? {}), ...(p.new as any) })))
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [activeId]);
+
+  // Track crew GPS for hospital picker origin
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    const id = navigator.geolocation.watchPosition(
+      (pos) => setCrewLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      undefined, { enableHighAccuracy: true, maximumAge: 5000 }
+    );
+    return () => navigator.geolocation.clearWatch(id);
+  }, []);
+
+  const setStatus = async (status: string) => {
+    if (!activeId) return;
+    const { error } = await supabase.rpc("holarchelp_set_incident_status" as any, {
+      _incident_id: activeId, _status: status, _payload: {},
+    });
+    if (error) return toast.error(error.message);
+    toast.success(`Status: ${status.replace(/_/g," ")}`);
+    if (status === "completed") navigate("/provider/ambulance");
+  };
+
+  if (!activeId) {
+    return (
+      <div className="rounded-2xl border border-dashed p-10 text-center">
+        <NavIcon className="mx-auto h-8 w-8 text-muted-foreground" />
+        <p className="mt-3 text-sm font-semibold">No active mission</p>
+        <p className="mt-1 text-xs text-muted-foreground">Accept an incident from Incoming SOS to start navigation.</p>
+        <Button asChild className="mt-4"><Link to="/provider/ambulance/incoming">Open Incoming SOS</Link></Button>
+      </div>
+    );
+  }
+
+  if (!incident) return <div className="text-sm text-muted-foreground">Loading mission…</div>;
+
+  return (
+    <div className="space-y-3">
+      <header className="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Ambulance Dispatch · Navigation</p>
+          <h1 className="text-xl font-extrabold">Mission #{activeId.slice(0,8)}</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full border border-sos/40 bg-sos/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-sos">
+            <Siren className="mr-1 inline h-3 w-3" /> {(incident.status ?? "").replace(/_/g," ")}
+          </span>
+          {incident.eta_minutes != null && (
+            <span className="rounded-full border bg-card px-2 py-1 text-[10px] font-bold uppercase tracking-wider">
+              ETA <EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} />
+            </span>
+          )}
+        </div>
+      </header>
+
+      <div className="grid gap-3 xl:grid-cols-[1fr_360px]">
+        <div className="overflow-hidden rounded-2xl border bg-card">
+          <SosLiveMap incidentId={activeId} mode="ambulance" height={520} />
+        </div>
+
+        <aside className="space-y-3">
+          <div className="rounded-2xl border bg-card p-3">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Incident Action Panel</p>
+            <div className="mt-2 grid grid-cols-2 gap-1.5">
+              {STEPS.map((s) => (
+                <Button
+                  key={s.v}
+                  size="sm"
+                  variant={incident.status === s.v ? "default" : "outline"}
+                  className="h-11 text-xs font-bold"
+                  onClick={() => setStatus(s.v)}
+                  disabled={!isAssigned}
+                >
+                  {s.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <HospitalPicker
+            incidentId={activeId}
+            selectedId={incident.destination_hospital_id ?? null}
+            originLat={crewLoc?.lat ?? incident.provider_latitude ?? incident.latitude}
+            originLng={crewLoc?.lng ?? incident.provider_longitude ?? incident.longitude}
+          />
+
+          <Link to={`/provider/ambulance/incident/${activeId}`}
+                className="block rounded-2xl border bg-card p-3 text-center text-xs font-semibold hover:bg-muted">
+            Open full incident console →
+          </Link>
+        </aside>
+      </div>
+    </div>
+  );
+}
