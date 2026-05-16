@@ -46,7 +46,7 @@ import { MedicationAdherenceTab } from "@/components/rewards/MedicationAdherence
 import { MonthlyAdherenceSummary } from "@/components/rewards/MonthlyAdherenceSummary";
 import { TodaysMedicationsCard } from "@/components/rewards/TodaysMedicationsCard";
 import { useToast } from "@/hooks/use-toast";
-import { VulaExplainerDialog, VulaExplainerContent } from "@/features/rewards/components/VulaExplainerDialog";
+import { VulaExplainerDialog } from "@/features/rewards/components/VulaExplainerDialog";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v2.png";
 import vulaVaultLogo from "@/assets/vula-vault-logo.png";
 import vulaVaultVendors from "@/assets/vula-vault-vendors.png";
