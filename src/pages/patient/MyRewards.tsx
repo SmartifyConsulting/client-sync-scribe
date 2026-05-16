@@ -745,7 +745,7 @@ export default function MyRewards() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="transfers" className="space-y-6">
+        <TabsContent value="transfers" className="space-y-6 [&>div]:grid [&>div]:gap-6 md:[&>div]:grid-cols-2 [&>div]:items-start">
           {(() => {
             const isUnlocked = lollipopCount >= VAULT_UNLOCK_THRESHOLD;
             const remaining = Math.max(0, VAULT_UNLOCK_THRESHOLD - lollipopCount);
