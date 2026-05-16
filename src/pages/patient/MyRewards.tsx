@@ -520,20 +520,20 @@ export default function MyRewards() {
                   <p className="text-muted-foreground">No rewards yet. Start your health journey!</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {rewards.slice(0, 5).map((reward) => (
-                    <div key={reward.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                      <div className="flex items-center gap-3">
-                        <img src={vulaVouchersLogo} alt="Vula" className="h-9 w-9 md:h-5 md:w-5 object-contain" />
-                        <div>
-                          <p className="font-medium">{reward.visit_category}</p>
-                          <p className="text-sm text-muted-foreground">
+                    <div key={reward.id} className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <img src={vulaVouchersLogo} alt="Vula" className="h-5 w-5 object-contain shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">{reward.visit_category}</p>
+                          <p className="text-xs text-muted-foreground">
                             {format(parseISO(reward.awarded_at), "MMM d, yyyy")}
                           </p>
                         </div>
                       </div>
-                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-                        +{reward.lollipops_count} <img src={vulaVouchersLogo} alt="Vula" className="h-6 md:h-3 w-auto object-contain inline-block ml-1" />
+                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 text-xs">
+                        +{reward.lollipops_count} <img src={vulaVouchersLogo} alt="Vula" className="h-3 w-auto object-contain inline-block ml-1" />
                       </Badge>
                     </div>
                   ))}
